@@ -5,12 +5,13 @@ int yylex(void);
 int yyerror(char *err);
 %}
 
-%union { char *str; }
-%token ALPHA
+%union { char *str; int num; }
+%token<num> INT HEX BIN
+%token<str> SYM STR
+%type<str> var
 
 %%
-s:      '(' ALPHA ')'         { printf("not empty\n"); } |
-        '(' ')'               { printf("empty\n");     } 
+s:      '(' SYM ')'         { printf("P:%s\n", $2); } 
         ;
 %%
 
