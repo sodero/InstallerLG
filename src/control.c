@@ -1,3 +1,4 @@
+/*
 if
 select
 while
@@ -7,4 +8,4 @@ abort
 exit
 trap
 onerror
-
+*/

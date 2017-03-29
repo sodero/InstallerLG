@@ -1,26 +1,28 @@
 %{
 #include "parser.h"
 
-#ifdef DEBUG
-# define PUT(X) printf("L:%s|%s|\n", #X, yytext)
+#if 0
+# define P(X) printf("L:%s|%s|\n", #X, yytext)
 #else
-# define PUT(X)
+# define P(X)
 #endif
-#define RET(X) PUT(X); return X
-#define NOT(X) PUT(X)
+#define R(X) P(X); return X
+#define N(X) P(X)
 %}
 
 %option noyywrap
 
 %%
--?[0-9]+            { RET(INT); }
-\$[0-9a-fA-F]+      { RET(HEX); }
-%[01]+              { RET(BIN); }
-\"[^\"]*\"          { RET(STR); }
-[^" \n\t\(\)]+      { yylval.str = yytext ; RET(SYM); }
-\(                  { RET('('); }
-\)                  { RET(')'); }
-[\n\t ]+            { NOT(' '); }
-;.*$                { NOT(';'); }
+-?[0-9]+            { yylval.n = atoi(yytext) ; R(INT); }
+\$[0-9a-fA-F]+      { R(HEX); }
+%[01]+              { R(BIN); }
+\"[^\"]*\"          { R(STR); }
+[^" \n\t\(\)\+]+    { R(SYM); }
+"("                 { R('('); }
+")"                 { R(')'); }
+"+"                 { R('+'); }
+[\n\t ]+            { N(' '); }
+;.*$                { N(';'); }
+
 %%
 

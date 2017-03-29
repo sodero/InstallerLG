@@ -4,7 +4,7 @@
 VPATH := ../src
 CFLAGS += -I . -I $(VPATH) 
 LFLAGS += -DDEBUG
-OBJ := $(subst .c,.o,$(wildcard $(VPATH)/*.c))
+OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 
 #---------------------------------------------------------------------------------#
 # Pattern rules
@@ -19,6 +19,9 @@ OBJ := $(subst .c,.o,$(wildcard $(VPATH)/*.c))
 # Build targets
 #---------------------------------------------------------------------------------#
 parser: $(OBJ) parser.o lexer.o
+	@echo ----- 
+	@echo $(OBJ)
+	@echo ----- 
 	$(CC) $^ -o $@ 
 
 parser.c: parser.y

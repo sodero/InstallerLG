@@ -1,17 +1,25 @@
 %{
 #include <stdio.h>
+#include "builtin.h"
 
 int yylex(void);
 int yyerror(char *err);
 %}
 
-%union { char *str; int num; }
-%token<num> INT HEX BIN
-%token<str> SYM STR
-%type<str> var
+%union { char *s; int n; }
+
+%token<s> SYM STR 
+%token<n> INT HEX BIN 
+%type<n> num plus
 
 %%
-s:      '(' SYM ')'         { printf("P:%s\n", $2); } 
+s:      plus                    { printf("%d\n", $1); }
+        ;
+
+num:    INT                     { $$ = $1; } 
+        ;
+
+plus:   '(' '+' num num ')'     { $$ = plus($3, $4); }
         ;
 %%
 
@@ -22,7 +30,7 @@ int main(int argc, char **argv)
 
 int yyerror(char *err)
 {
-    fprintf(stderr, "err:%s\n", err);
+    fprintf(stderr, "%s\n", err);
     return 0;
 }
 

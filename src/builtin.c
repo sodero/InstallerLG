@@ -1,3 +1,12 @@
+#include "builtin.h"
+
+/* + */
+int plus(int a, int b)
+{
+    return a + b; 
+}
+
+/*
 message
 =  
 >  
@@ -5,7 +14,6 @@ message
 <  
 <= 
 <> 
-+  
 -  
 * 
 / 
@@ -71,4 +79,4 @@ database
 select
 patmatch
 symbolval
-
+*/

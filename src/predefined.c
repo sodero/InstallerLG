@@ -1,3 +1,4 @@
+/*
 @default-dest
 @each-name
 @each-type
@@ -9,4 +10,4 @@
 @pretend
 @special-msg
 @user-level
-
+*/
