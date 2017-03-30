@@ -36,11 +36,13 @@ do
     do
        p=`echo "$l" | sed -e 's/;.*$//'`
        r=`echo "$l" | sed -e 's/.*;//'`
-       evl "$p" "$r" 
-       if [ $? = 1 ]; then
-           echo "OK -> $p" 
-       else 
-           echo "FAIL -> $p"
+       if [ ! -z "$p" ]; then 
+           evl "$p" "$r" 
+           if [ $? = 1 ]; then
+               echo "OK -> $p" 
+           else 
+               echo "FAIL -> $p"
+           fi
        fi
     done < $f
 done
