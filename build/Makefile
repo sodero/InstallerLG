@@ -31,6 +31,10 @@ lexer.c: lexer.l parser.c
 #---------------------------------------------------------------------------------#
 # Misc
 #---------------------------------------------------------------------------------#
+.PHONY: test
+test: parser
+	sh ../test/run.sh $(PWD)/parser ../test
+
 .PHONY: clean
 clean: 
 	$(RM) *.c *.h *.o parser lexer 
