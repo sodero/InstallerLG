@@ -19,9 +19,6 @@ OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 # Build targets
 #---------------------------------------------------------------------------------#
 parser: $(OBJ) parser.o lexer.o
-	@echo ----- 
-	@echo $(OBJ)
-	@echo ----- 
 	$(CC) $^ -o $@ 
 
 parser.c: parser.y
@@ -33,7 +30,7 @@ lexer.c: lexer.l parser.c
 #---------------------------------------------------------------------------------#
 .PHONY: test
 test: parser
-	sh ../test/run.sh $(PWD)/parser ../test
+	@sh ../test/run.sh $(PWD)/parser ../test
 
 .PHONY: clean
 clean: 
