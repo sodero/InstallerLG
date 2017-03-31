@@ -10,10 +10,13 @@ int yyerror(char *err);
 
 %token<s> SYM STR 
 %token<n> INT HEX BIN 
-%type<n> num plus
+%type<n> num add sub mul div
 
 %%
-s:      plus                    { printf("%d\n", $1); }
+s:      add                     { printf("%d\n", $1); } |
+        sub                     { printf("%d\n", $1); } |
+        mul                     { printf("%d\n", $1); } |
+        div                     { printf("%d\n", $1); } 
         ;
 
 num:    INT                     { $$ = $1; } |
@@ -21,7 +24,16 @@ num:    INT                     { $$ = $1; } |
         BIN                     { $$ = $1; } 
         ;
 
-plus:   '(' '+' num num ')'     { $$ = plus($3, $4); }
+add:    '(' '+' num num ')'     { $$ = add($3, $4); }
+        ;
+
+sub:    '(' '-' num num ')'     { $$ = sub($3, $4); }
+        ;
+
+mul:    '(' '*' num num ')'     { $$ = mul($3, $4); }
+        ;
+
+div:    '(' '/' num num ')'     { $$ = div($3, $4); }
         ;
 %%
 

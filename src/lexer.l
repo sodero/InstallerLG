@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "parser.h"
 
-#if 0
+#ifdef _DEBUG
 # define P(X) printf("L:%s|%s|\n", #X, yytext)
 #else
 # define P(X)
@@ -15,19 +15,22 @@
 %option noyywrap
 
 %%
--?[0-9]+            { yylval.n = strtol(yytext, NULL, 10);      return INT; }
-\$[0-9a-fA-F]+      { yylval.n = strtol(yytext + 1, NULL, 16);  return HEX; }
-%[01]+              { yylval.n = strtol(yytext + 1, NULL, 2);   return BIN; }
+-?[0-9]+                { yylval.n = strtol(yytext, NULL, 10);      R(INT); }
+\$[0-9a-fA-F]+          { yylval.n = strtol(yytext + 1, NULL, 16);  R(HEX); }
+%[01]+                  { yylval.n = strtol(yytext + 1, NULL, 2);   R(BIN); }
 
-\"[^\"]*\"          { return STR; }
-[^" \n\t\(\)\+]+    { return SYM; }
+\"[^\"]*\"              { R(STR); }
+[^" \n\t\(\)\+\*/-]+    { R(SYM); }
 
-"("                 { return '('; }
-")"                 { return ')'; }
-"+"                 { return '+'; }
+"("                     { R('('); }
+")"                     { R(')'); }
+"+"                     { R('+'); }
+"-"                     { R('-'); }
+"*"                     { R('*'); }
+"/"                     { R('/'); }
 
-[\n\t ]+            ; 
-;.*$                ; 
+[\n\t ]+                { N(' '); }
+;.*$                    { N(';'); }
 
 %%
 
