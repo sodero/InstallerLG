@@ -16,7 +16,9 @@ int yyerror(char *err);
 s:      plus                    { printf("%d\n", $1); }
         ;
 
-num:    INT                     { $$ = $1; } 
+num:    INT                     { $$ = $1; } |
+        HEX                     { $$ = $1; } |
+        BIN                     { $$ = $1; } 
         ;
 
 plus:   '(' '+' num num ')'     { $$ = plus($3, $4); }
