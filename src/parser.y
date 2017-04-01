@@ -1,16 +1,15 @@
 %{
 #include <stdio.h>
+#include "types.h"
 #include "builtin.h"
 
 int yylex(void);
 int yyerror(char *err);
 %}
 
-%union { char *s; int n; }
-
-%token<s> SYM STR 
-%token<n> INT HEX BIN AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT IN
-%type<n> num bit bits add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
+%token<val.str> SYM STR 
+%token<val.num> INT HEX BIN AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT IN
+%type<val.num> num bit bits add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
 
 %%
 s:          add                         { printf("%d\n", $1);       } |
@@ -27,64 +26,31 @@ s:          add                         { printf("%d\n", $1);       } |
             bitnot                      { printf("%d\n", $1);       } |
             shiftleft                   { printf("%d\n", $1);       } |
             shiftright                  { printf("%d\n", $1);       } |
-            in                          { printf("%d\n", $1);       } 
-            ;
+            in                          { printf("%d\n", $1);       } ;
 
 num:        INT                         { $$ = $1;                  } |
             HEX                         { $$ = $1;                  } |
-            BIN                         { $$ = $1;                  } 
-            ;
+            BIN                         { $$ = $1;                  } ;
 
-bit:        INT                         { $$ = 1 << $1;             } 
-
+bit:        INT                         { $$ = 1 << $1;             } ;
 bits:       bit                         { $$ = $1;                  } |
-            bit bits                    { $$ = $1 + $2;             } 
-            ;
+            bit bits                    { $$ = $1 + $2;             } ;
 
-add:        '(' '+' num num ')'         { $$ = add($3, $4);         }
-            ;
-
-sub:        '(' '-' num num ')'         { $$ = sub($3, $4);         }
-            ;
-
-mul:        '(' '*' num num ')'         { $$ = mul($3, $4);         }
-            ;
-
-div:        '(' '/' num num ')'         { $$ = div($3, $4);         }
-            ;
-
-and:        '(' AND num num ')'         { $$ = and($3, $4);         }
-            ;
-
-or:         '(' OR num num ')'          { $$ = or($3, $4);          }
-            ;
-
-xor:        '(' XOR num num ')'         { $$ = xor($3, $4);         }
-            ;
-
-not:        '(' NOT num ')'             { $$ = not($3);             }
-            ;
-
-bitand:     '(' BITAND num num ')'      { $$ = bitand($3, $4);      }
-            ;
-
-bitor:      '(' BITOR num num ')'       { $$ = bitor($3, $4);       }
-            ;
-
-bitxor:     '(' BITXOR num num ')'      { $$ = bitxor($3, $4);      }
-            ;
-
-bitnot:     '(' BITNOT num ')'          { $$ = bitnot($3);          }
-            ;
-
-shiftleft: '(' SHIFTLEFT num num ')'    { $$ = shiftleft($3, $4);   }
-            ;
-
-shiftright: '(' SHIFTRIGHT num num ')'  { $$ = shiftright($3, $4);  }
-            ;
-
-in:         '(' IN num bits ')'         { $$ = bitand($3, $4);      }
-            ;
+add:        '(' '+' num num ')'         { $$ = add($3, $4);         } ;
+sub:        '(' '-' num num ')'         { $$ = sub($3, $4);         } ;
+mul:        '(' '*' num num ')'         { $$ = mul($3, $4);         } ;
+div:        '(' '/' num num ')'         { $$ = div($3, $4);         } ;
+and:        '(' AND num num ')'         { $$ = and($3, $4);         } ;
+or:         '(' OR num num ')'          { $$ = or($3, $4);          } ;
+xor:        '(' XOR num num ')'         { $$ = xor($3, $4);         } ;
+not:        '(' NOT num ')'             { $$ = not($3);             } ;
+bitand:     '(' BITAND num num ')'      { $$ = bitand($3, $4);      } ;
+bitor:      '(' BITOR num num ')'       { $$ = bitor($3, $4);       } ;
+bitxor:     '(' BITXOR num num ')'      { $$ = bitxor($3, $4);      } ;
+bitnot:     '(' BITNOT num ')'          { $$ = bitnot($3);          } ;
+shiftleft:  '(' SHIFTLEFT num num ')'   { $$ = shiftleft($3, $4);   } ;
+shiftright: '(' SHIFTRIGHT num num ')'  { $$ = shiftright($3, $4);  } ;
+in:         '(' IN num bits ')'         { $$ = bitand($3, $4);      } ;
 %%
 
 int main(int argc, char **argv)
