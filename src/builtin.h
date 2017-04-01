@@ -13,5 +13,7 @@ int bitand(int a, int b);
 int bitor(int a, int b);
 int bitxor(int a, int b);
 int bitnot(int a);
+int shiftleft(int a, int n);
+int shiftright(int a, int n);
 
 #endif

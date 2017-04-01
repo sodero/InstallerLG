@@ -108,6 +108,35 @@ int bitnot(int a)
     return ~a; 
 }
 
+/* 
+`(shiftleft <number> <amount to shift>)'
+     logical shift left
+*/
+int shiftleft(int a, int n)
+{
+    return a << n; 
+}
+
+/* 
+`(shiftright <number> <amount to shift>)'
+     logical shift right
+*/
+int shiftright(int a, int n)
+{
+    return a >> n; 
+}
+
+/* 
+`(IN <expr> <bit-number> <bitnumber>...)'
+     returns `<expr>' `AND' bits
+
+Returns 0 if none of the given bit numbers (starting at 0 for the
+LSB) is set in the result of expression, else returns a mask of the
+bits that were set.
+
+*/
+
+
 
 /*
 message
@@ -117,17 +146,6 @@ message
 <  
 <= 
 <> 
-AND 
-OR  
-XOR 
-NOT 
-BITAND 
-BITOR  
-BITXOR 
-BITNOT
-shiftleft 
-shiftright
-IN 
 set
 symbolset
 cat

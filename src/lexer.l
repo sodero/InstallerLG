@@ -19,26 +19,29 @@
 \$[0-9a-fA-F]+          { yylval.n = strtol(yytext + 1, NULL, 16);  R(HEX); }
 %[01]+                  { yylval.n = strtol(yytext + 1, NULL, 2);   R(BIN); }
 
-"("                     { R('(');    }
-")"                     { R(')');    }
-"+"                     { R('+');    }
-"-"                     { R('-');    }
-"*"                     { R('*');    }
-"/"                     { R('/');    }
-"AND"                   { R(AND);    }
-"OR"                    { R(OR);     }
-"XOR"                   { R(XOR);    }
-"NOT"                   { R(NOT);    }
-"BITAND"                { R(BITAND); }
-"BITOR"                 { R(BITOR);  }
-"BITXOR"                { R(BITXOR); }
-"BITNOT"                { R(BITNOT); }
+"("                     { R('(');        }
+")"                     { R(')');        }
+"+"                     { R('+');        }
+"-"                     { R('-');        }
+"*"                     { R('*');        }
+"/"                     { R('/');        }
 
-\"[^\"]*\"              { R(STR); }
-[^" \n\t\(\)\+\*/-]+    { R(SYM); }
+"AND"                   { R(AND);        }
+"OR"                    { R(OR);         }
+"XOR"                   { R(XOR);        }
+"NOT"                   { R(NOT);        }
+"BITAND"                { R(BITAND);     }
+"BITOR"                 { R(BITOR);      }
+"BITXOR"                { R(BITXOR);     }
+"BITNOT"                { R(BITNOT);     }
+"shiftleft"             { R(SHIFTLEFT);  }
+"shiftright"            { R(SHIFTRIGHT); }
 
-[\n\t ]+                { N(' '); }
-;.*$                    { N(';'); }
+\"[^\"]*\"              { R(STR);        }    
+[^" \n\t\(\)\+\*/-]+    { R(SYM);        }
+
+[\n\t ]+                { N(' ');        }
+;.*$                    { N(';');        }
 
 %%
 
