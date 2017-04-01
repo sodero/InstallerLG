@@ -9,7 +9,7 @@ int yyerror(char *err);
 %union { char *s; int n; }
 
 %token<s> SYM STR 
-%token<n> INT HEX BIN 
+%token<n> INT HEX BIN AND OR XOR NOT BITAND BITOR BITXOR BITNOT  
 %type<n> num add sub mul div
 
 %%
