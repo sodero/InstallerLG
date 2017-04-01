@@ -1,0 +1,7 @@
+(BITAND %00 %00) ; out="0"
+(BITAND %00 %01) ; out="0"
+(BITAND %01 %00) ; out="0"
+(BITAND %01 %01) ; out="1"
+(BITAND %10 %01) ; out="0"
+(BITAND %10 %11) ; out="2"
+(BITAND %11 %11) ; out="3"
