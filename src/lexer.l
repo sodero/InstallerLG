@@ -19,9 +19,6 @@
 \$[0-9a-fA-F]+          { yylval.n = strtol(yytext + 1, NULL, 16);  R(HEX); }
 %[01]+                  { yylval.n = strtol(yytext + 1, NULL, 2);   R(BIN); }
 
-\"[^\"]*\"              { R(STR); }
-[^" \n\t\(\)\+\*/-]+    { R(SYM); }
-
 "("                     { R('(');    }
 ")"                     { R(')');    }
 "+"                     { R('+');    }
@@ -36,6 +33,9 @@
 "BITOR"                 { R(BITOR);  }
 "BITXOR"                { R(BITXOR); }
 "BITNOT"                { R(BITNOT); }
+
+\"[^\"]*\"              { R(STR); }
+[^" \n\t\(\)\+\*/-]+    { R(SYM); }
 
 [\n\t ]+                { N(' '); }
 ;.*$                    { N(';'); }
