@@ -130,10 +130,9 @@ int shiftright(int a, int n)
 `(IN <expr> <bit-number> <bitnumber>...)'
      returns `<expr>' `AND' bits
 
-Returns 0 if none of the given bit numbers (starting at 0 for the
-LSB) is set in the result of expression, else returns a mask of the
-bits that were set.
-
+ --------------------------------------
+ Implemented in the parser using BITAND
+ --------------------------------------
 */
 
 

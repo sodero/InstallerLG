@@ -36,6 +36,7 @@
 "BITNOT"                { R(BITNOT);     }
 "shiftleft"             { R(SHIFTLEFT);  }
 "shiftright"            { R(SHIFTRIGHT); }
+"IN"                    { R(IN);         }
 
 \"[^\"]*\"              { R(STR);        }    
 [^" \n\t\(\)\+\*/-]+    { R(SYM);        }
