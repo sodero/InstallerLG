@@ -15,10 +15,36 @@
 %option noyywrap
 
 %%
--?[0-9]+                { yylval.val.num = strtol(yytext, NULL, 10);      R(INT); }
-\$[0-9a-fA-F]+          { yylval.val.num = strtol(yytext + 1, NULL, 16);  R(HEX); }
-%[01]+                  { yylval.val.num = strtol(yytext + 1, NULL, 2);   R(BIN); }
+    /*
+    Decimal numbers
+    */
+-?[0-9]+                { 
+    yylval.val.num = strtol(yytext, NULL, 10);      
+    yylval.type = NUMBER; 
+    R(INT); 
+}
 
+    /*
+    Hexadecimal numbers
+    */
+\$[0-9a-fA-F]+          { 
+    yylval.val.num = strtol(yytext + 1, NULL, 16);  
+    yylval.type = NUMBER; 
+    R(HEX); 
+}
+
+    /*
+    Binary numbers
+    */
+%[01]+                  { 
+    yylval.val.num = strtol(yytext + 1, NULL, 2);   
+    yylval.type = NUMBER; 
+    R(BIN); 
+}
+
+    /*
+    Operators
+    */
 "("                     { R('(');        }
 ")"                     { R(')');        }
 "+"                     { R('+');        }
@@ -26,6 +52,9 @@
 "*"                     { R('*');        }
 "/"                     { R('/');        }
 
+    /*
+    Builtin functions
+    */
 "AND"                   { R(AND);        }
 "OR"                    { R(OR);         }
 "XOR"                   { R(XOR);        }
@@ -38,9 +67,27 @@
 "shiftright"            { R(SHIFTRIGHT); }
 "IN"                    { R(IN);         }
 
-\"[^\"]*\"              { R(STR);        }    
-[^" \n\t\(\)\+\*/-]+    { R(SYM);        }
+    /*
+    Strings
+    */
+\"[^\"]*\"              { 
+    yylval.val.str = yytext; // Who's copying?
+    yylval.type = STRING; 
+    R(STR);        
+}    
 
+    /*
+    Symbols
+    */
+[^" \n\t\(\)\+\*/-]+    { 
+    yylval.val.str = yytext; // Who's copying?
+    yylval.type = SYMBOL; 
+    R(SYM);        
+}
+
+    /*
+    The bottom feeders
+    */
 [\n\t ]+                { N(' ');        }
 ;.*$                    { N(';');        }
 %%
