@@ -9,7 +9,7 @@ int yyerror(char *err);
 
 %token<val.str> SYM STR 
 %token<val.num> INT HEX BIN AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT
-%type<val.num> num add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright
+%type<val.num> n np add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright
 
 %%
 s:          vp
@@ -28,26 +28,58 @@ vp:         add                         { printf("%d\n", $1);       } |
             bitxor                      { printf("%d\n", $1);       } |
             bitnot                      { printf("%d\n", $1);       } |
             shiftleft                   { printf("%d\n", $1);       } |
-            shiftright                  { printf("%d\n", $1);       } ;
+            shiftright                  { printf("%d\n", $1);       } 
+            ;
 
-num:        INT                         { $$ = $1;                  } |
+np:         n                           { $$ = $1;                  } 
+            ;
+
+n:          INT                         { $$ = $1;                  } |
             HEX                         { $$ = $1;                  } |
-            BIN                         { $$ = $1;                  } ;
+            BIN                         { $$ = $1;                  } 
+            ;
 
-add:        '(' '+' num num ')'         { $$ = add($3, $4);         } ;
-sub:        '(' '-' num num ')'         { $$ = sub($3, $4);         } ;
-mul:        '(' '*' num num ')'         { $$ = mul($3, $4);         } ;
-div:        '(' '/' num num ')'         { $$ = div($3, $4);         } ;
-and:        '(' AND num num ')'         { $$ = and($3, $4);         } ;
-or:         '(' OR num num ')'          { $$ = or($3, $4);          } ;
-xor:        '(' XOR num num ')'         { $$ = xor($3, $4);         } ;
-not:        '(' NOT num ')'             { $$ = not($3);             } ;
-bitand:     '(' BITAND num num ')'      { $$ = bitand($3, $4);      } ;
-bitor:      '(' BITOR num num ')'       { $$ = bitor($3, $4);       } ;
-bitxor:     '(' BITXOR num num ')'      { $$ = bitxor($3, $4);      } ;
-bitnot:     '(' BITNOT num ')'          { $$ = bitnot($3);          } ;
-shiftleft:  '(' SHIFTLEFT num num ')'   { $$ = shiftleft($3, $4);   } ;
-shiftright: '(' SHIFTRIGHT num num ')'  { $$ = shiftright($3, $4);  } ;
+add:        '(' '+' np np ')'           { $$ = add($3, $4);         } 
+            ;
+
+sub:        '(' '-' np np ')'           { $$ = sub($3, $4);         } 
+            ;
+
+mul:        '(' '*' np np ')'           { $$ = mul($3, $4);         } 
+            ;
+
+div:        '(' '/' np np ')'           { $$ = div($3, $4);         } 
+            ;
+
+and:        '(' AND np np ')'           { $$ = and($3, $4);         } 
+            ;
+
+or:         '(' OR np np ')'            { $$ = or($3, $4);          } 
+            ;
+
+xor:        '(' XOR np np ')'           { $$ = xor($3, $4);         } 
+            ;
+
+not:        '(' NOT np ')'              { $$ = not($3);             } 
+            ;
+
+bitand:     '(' BITAND np np ')'        { $$ = bitand($3, $4);      } 
+            ;
+
+bitor:      '(' BITOR np np ')'         { $$ = bitor($3, $4);       } 
+            ;
+
+bitxor:     '(' BITXOR np np ')'        { $$ = bitxor($3, $4);      } 
+            ;
+
+bitnot:     '(' BITNOT np ')'           { $$ = bitnot($3);          } 
+            ;
+
+shiftleft:  '(' SHIFTLEFT np np ')'     { $$ = shiftleft($3, $4);   } 
+            ;
+
+shiftright: '(' SHIFTRIGHT np np ')'    { $$ = shiftright($3, $4);  } 
+            ;
 %%
 
 int main(int argc, char **argv)
