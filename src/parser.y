@@ -9,26 +9,27 @@ int yyerror(char *err);
 
 %token<val.str> SYM STR 
 %token<val.num> INT HEX BIN AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT
-%type<val.num> n np add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright
+%type<val.num> n np vp add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright
 
 %%
-s:          vp
+s:          s vp                        { printf("%d\n", $2);       } |
+            vp                          { printf("%d\n", $1);       }
             ;
 
-vp:         add                         { printf("%d\n", $1);       } |
-            sub                         { printf("%d\n", $1);       } |
-            mul                         { printf("%d\n", $1);       } |
-            div                         { printf("%d\n", $1);       } |
-            and                         { printf("%d\n", $1);       } |
-            or                          { printf("%d\n", $1);       } |
-            xor                         { printf("%d\n", $1);       } |
-            not                         { printf("%d\n", $1);       } |
-            bitand                      { printf("%d\n", $1);       } |
-            bitor                       { printf("%d\n", $1);       } |
-            bitxor                      { printf("%d\n", $1);       } |
-            bitnot                      { printf("%d\n", $1);       } |
-            shiftleft                   { printf("%d\n", $1);       } |
-            shiftright                  { printf("%d\n", $1);       } 
+vp:         add                         { $$ = $1;                  } |
+            sub                         { $$ = $1;                  } |
+            mul                         { $$ = $1;                  } |
+            div                         { $$ = $1;                  } |
+            and                         { $$ = $1;                  } |
+            or                          { $$ = $1;                  } |
+            xor                         { $$ = $1;                  } |
+            not                         { $$ = $1;                  } |
+            bitand                      { $$ = $1;                  } |
+            bitor                       { $$ = $1;                  } |
+            bitxor                      { $$ = $1;                  } |
+            bitnot                      { $$ = $1;                  } |
+            shiftleft                   { $$ = $1;                  } |
+            shiftright                  { $$ = $1;                  } 
             ;
 
 np:         n                           { $$ = $1;                  } 
