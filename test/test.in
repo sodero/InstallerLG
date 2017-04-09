@@ -1,3 +1,0 @@
-(IN $ff 0) ; out="1"
-(IN $ff 0 1) ; out="3"
-(IN $f0 0 1) ; out="0"

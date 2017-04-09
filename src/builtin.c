@@ -126,15 +126,28 @@ int shiftright(int a, int n)
     return a >> n; 
 }
 
-/* 
-`(IN <expr> <bit-number> <bitnumber>...)'
-     returns `<expr>' `AND' bits
+/*
 
- --------------------------------------
- Implemented in the parser using BITAND
- --------------------------------------
+- varje funktion tar samma argument, en struct
+  som innehaller:
+    - int antalet argument (in) n
+    - symboltabellindex till forsta argument (in)
+       - de foljer pa varandra i tabellen
+       - returvardet ligger i nastkommande index 
+
+- returnerar pekare till nasta funktion
+  som ska anropas? nej, det behovs inte. alla
+  funktioner (inkl. toppnoden, se nedan) har koll
+  pa sina argument.  
+
+- symboltabellen innehaller ung. samma saker
+  som node_t. den maste ha minst en typ till; 
+  funktion. 
+
+- toppnoden, programmet, ar ocksa en funktion som 
+  tar n antal argument
+
 */
-
 
 
 /*

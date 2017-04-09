@@ -10,15 +10,13 @@ typedef enum
     NUMBER
 } data_t;
 
-typedef union
-{
-    int num; 
-    char *str; 
-} value_t; 
-
 typedef struct
 {
-    value_t val; 
+    union
+    {
+        int num; 
+        char *str; 
+    } val; 
     data_t type; 
 } node_t; 
 

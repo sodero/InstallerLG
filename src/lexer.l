@@ -65,13 +65,12 @@
 "BITNOT"                { R(BITNOT);     }
 "shiftleft"             { R(SHIFTLEFT);  }
 "shiftright"            { R(SHIFTRIGHT); }
-"IN"                    { R(IN);         }
 
     /*
     Strings
     */
 \"[^\"]*\"              { 
-    yylval.val.str = yytext; // Who's copying?
+    yylval.val.str = yytext; 
     yylval.type = STRING; 
     R(STR);        
 }    
@@ -80,7 +79,7 @@
     Symbols
     */
 [^" \n\t\(\)\+\*/-]+    { 
-    yylval.val.str = yytext; // Who's copying?
+    yylval.val.str = yytext; 
     yylval.type = SYMBOL; 
     R(SYM);        
 }

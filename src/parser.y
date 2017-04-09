@@ -8,11 +8,14 @@ int yyerror(char *err);
 %}
 
 %token<val.str> SYM STR 
-%token<val.num> INT HEX BIN AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT IN
-%type<val.num> num bit bits add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
+%token<val.num> INT HEX BIN AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT
+%type<val.num> num add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright
 
 %%
-s:          add                         { printf("%d\n", $1);       } |
+s:          vp
+            ;
+
+vp:         add                         { printf("%d\n", $1);       } |
             sub                         { printf("%d\n", $1);       } |
             mul                         { printf("%d\n", $1);       } |
             div                         { printf("%d\n", $1);       } |
@@ -25,16 +28,11 @@ s:          add                         { printf("%d\n", $1);       } |
             bitxor                      { printf("%d\n", $1);       } |
             bitnot                      { printf("%d\n", $1);       } |
             shiftleft                   { printf("%d\n", $1);       } |
-            shiftright                  { printf("%d\n", $1);       } |
-            in                          { printf("%d\n", $1);       } ;
+            shiftright                  { printf("%d\n", $1);       } ;
 
 num:        INT                         { $$ = $1;                  } |
             HEX                         { $$ = $1;                  } |
             BIN                         { $$ = $1;                  } ;
-
-bit:        INT                         { $$ = 1 << $1;             } ;
-bits:       bit                         { $$ = $1;                  } |
-            bit bits                    { $$ = $1 + $2;             } ;
 
 add:        '(' '+' num num ')'         { $$ = add($3, $4);         } ;
 sub:        '(' '-' num num ')'         { $$ = sub($3, $4);         } ;
@@ -50,7 +48,6 @@ bitxor:     '(' BITXOR num num ')'      { $$ = bitxor($3, $4);      } ;
 bitnot:     '(' BITNOT num ')'          { $$ = bitnot($3);          } ;
 shiftleft:  '(' SHIFTLEFT num num ')'   { $$ = shiftleft($3, $4);   } ;
 shiftright: '(' SHIFTRIGHT num num ')'  { $$ = shiftright($3, $4);  } ;
-in:         '(' IN num bits ')'         { $$ = bitand($3, $4);      } ;
 %%
 
 int main(int argc, char **argv)
