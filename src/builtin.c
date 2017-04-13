@@ -1,4 +1,14 @@
+#include <stdio.h>
 #include "builtin.h"
+
+/*
+top level S
+*/
+entry_p s(entry_p args)
+{
+    printf("hej! %d\n", (int) args);
+    return 0;
+}
 
 /*
 `(+ <expr1> <expr2> ...)'

@@ -1,23 +1,43 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-#define YYSTYPE node_t
+#define YYSTYPE entry_t
+typedef struct entry_s * entry_p;
 
-typedef enum 
+struct entry_s
 {
-    STRING, 
-    SYMBOL, 
-    NUMBER
-} data_t;
+    enum 
+    {
+        NUMBER,
+        STRING, 
+        SYMBOL 
+    } type;
 
-typedef struct
-{
     union
     {
         int num; 
         char *str; 
-    } val; 
-    data_t type; 
-} node_t; 
+        struct 
+        {
+            char *name; 
+            entry_p data; 
+        } variable; 
+        struct 
+        {
+            entry_p args; 
+            entry_p (*call) (entry_p);
+        } builtin; 
+        struct 
+        {
+            char *name; 
+            entry_p args; 
+            entry_p (*call) (entry_p);
+        } procedure; 
+    } value; 
+}; 
+
+typedef struct entry_s entry_t; 
+
+
 
 #endif

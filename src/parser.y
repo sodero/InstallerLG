@@ -3,83 +3,43 @@
 #include "types.h"
 #include "builtin.h"
 
+static size_t i = 0;
+static entry_t stack[255];
+
 int yylex(void);
 int yyerror(char *err);
 %}
 
-%token<val.str> SYM STR 
-%token<val.num> INT HEX BIN AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT
-%type<val.num> n np vp add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright
+%token<value.str> SYM STR 
+%token<value.num> INT HEX BIN AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT
+
+/*
+%type<value.num> np vp add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright
+%type<> n
+*/
+
+%type<value> vp np 
+%type<value.num> add n 
 
 %%
-s:          s vp                        { printf("%d\n", $2);       } |
-            vp                          { printf("%d\n", $1);       }
+evaluate:   s { s(2); /*eval s w. n arg*/} 
+
+s:          s { s(1); /*1 more arg*/ } vp |
+            { s(0); /*new s + 1 arg*/ } vp 
             ;
 
-vp:         add                         { $$ = $1;                  } |
-            sub                         { $$ = $1;                  } |
-            mul                         { $$ = $1;                  } |
-            div                         { $$ = $1;                  } |
-            and                         { $$ = $1;                  } |
-            or                          { $$ = $1;                  } |
-            xor                         { $$ = $1;                  } |
-            not                         { $$ = $1;                  } |
-            bitand                      { $$ = $1;                  } |
-            bitor                       { $$ = $1;                  } |
-            bitxor                      { $$ = $1;                  } |
-            bitnot                      { $$ = $1;                  } |
-            shiftleft                   { $$ = $1;                  } |
-            shiftright                  { $$ = $1;                  } 
+vp:         add  { $$.num = $1; printf("%d\n", $$.num); } 
             ;
 
-np:         n                           { $$ = $1;                  } 
+np:         n    { $$.num = $1; } 
             ;
 
-n:          INT                         { $$ = $1;                  } |
-            HEX                         { $$ = $1;                  } |
-            BIN                         { $$ = $1;                  } 
+n:          INT |
+            HEX |
+            BIN                          
             ;
 
-add:        '(' '+' np np ')'           { $$ = add($3, $4);         } 
-            ;
-
-sub:        '(' '-' np np ')'           { $$ = sub($3, $4);         } 
-            ;
-
-mul:        '(' '*' np np ')'           { $$ = mul($3, $4);         } 
-            ;
-
-div:        '(' '/' np np ')'           { $$ = div($3, $4);         } 
-            ;
-
-and:        '(' AND np np ')'           { $$ = and($3, $4);         } 
-            ;
-
-or:         '(' OR np np ')'            { $$ = or($3, $4);          } 
-            ;
-
-xor:        '(' XOR np np ')'           { $$ = xor($3, $4);         } 
-            ;
-
-not:        '(' NOT np ')'              { $$ = not($3);             } 
-            ;
-
-bitand:     '(' BITAND np np ')'        { $$ = bitand($3, $4);      } 
-            ;
-
-bitor:      '(' BITOR np np ')'         { $$ = bitor($3, $4);       } 
-            ;
-
-bitxor:     '(' BITXOR np np ')'        { $$ = bitxor($3, $4);      } 
-            ;
-
-bitnot:     '(' BITNOT np ')'           { $$ = bitnot($3);          } 
-            ;
-
-shiftleft:  '(' SHIFTLEFT np np ')'     { $$ = shiftleft($3, $4);   } 
-            ;
-
-shiftright: '(' SHIFTRIGHT np np ')'    { $$ = shiftright($3, $4);  } 
+add:        '(' '+' np np ')' { $$ = add($3.num, $4.num); } 
             ;
 %%
 

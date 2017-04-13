@@ -1,6 +1,10 @@
 #ifndef BUILTIN_H_
 #define BUILTIN_H_
 
+#include "types.h"
+
+entry_p s(entry_p args);
+
 int add(int a, int b);
 int sub(int a, int b);
 int mul(int a, int b);

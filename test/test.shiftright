@@ -1,4 +1,0 @@
-(shiftright %0100 1) ; out="2"
-(shiftright %0100 2) ; out="1"
-(shiftright %0100 3) ; out="0"
-(shiftright %0000 3) ; out="0"

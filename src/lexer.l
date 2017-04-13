@@ -19,7 +19,7 @@
     Decimal numbers
     */
 -?[0-9]+                { 
-    yylval.val.num = strtol(yytext, NULL, 10);      
+    yylval.value.num = strtol(yytext, NULL, 10);      
     yylval.type = NUMBER; 
     R(INT); 
 }
@@ -28,7 +28,7 @@
     Hexadecimal numbers
     */
 \$[0-9a-fA-F]+          { 
-    yylval.val.num = strtol(yytext + 1, NULL, 16);  
+    yylval.value.num = strtol(yytext + 1, NULL, 16);  
     yylval.type = NUMBER; 
     R(HEX); 
 }
@@ -37,7 +37,7 @@
     Binary numbers
     */
 %[01]+                  { 
-    yylval.val.num = strtol(yytext + 1, NULL, 2);   
+    yylval.value.num = strtol(yytext + 1, NULL, 2);   
     yylval.type = NUMBER; 
     R(BIN); 
 }
@@ -70,7 +70,7 @@
     Strings
     */
 \"[^\"]*\"              { 
-    yylval.val.str = yytext; 
+    yylval.value.str = yytext; 
     yylval.type = STRING; 
     R(STR);        
 }    
@@ -79,7 +79,7 @@
     Symbols
     */
 [^" \n\t\(\)\+\*/-]+    { 
-    yylval.val.str = yytext; 
+    yylval.value.str = yytext; 
     yylval.type = SYMBOL; 
     R(SYM);        
 }
