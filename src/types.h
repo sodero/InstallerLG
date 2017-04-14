@@ -1,7 +1,7 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-#define YYSTYPE entry_t
+//#define YYSTYPE entry_t
 typedef struct entry_s * entry_p;
 
 struct entry_s
@@ -10,8 +10,9 @@ struct entry_s
     {
         NUMBER,
         STRING, 
-        SYMBOL, // Hmm
-        BUILTIN, 
+        NATIVE, 
+        CUSTOM, 
+        SYMBOL
     } type;
 
     union

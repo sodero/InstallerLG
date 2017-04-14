@@ -4,7 +4,7 @@
 #include "alloc.h"
 #include "types.h"
 
-entry_p m_s(entry_p args);
+entry_p eval(entry_p args);
 
 int m_add(int a, int b);
 int m_sub(int a, int b);

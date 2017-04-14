@@ -2,8 +2,9 @@
 #include "builtin.h"
 
 /*
+hidden top level function 
 */
-entry_p m_s(entry_p e)
+entry_p eval(entry_p e)
 { 
     printf ("nused:%d\n", n_used (e)); 
     printf ("nfree:%d\n", n_free (e)); 

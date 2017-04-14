@@ -16,8 +16,8 @@ entry_p create_b (int nargs)
         entry->value.builtin.args = calloc (nargs + 1, sizeof (entry_p));
         if (entry->value.builtin.args)
         {
-            entry->type = BUILTIN;
-            entry->value.builtin.call = m_s;
+            entry->type = NATIVE;
+            entry->value.builtin.call = eval;
             entry->value.builtin.args[nargs] = entry; 
             return entry;
         }
@@ -26,7 +26,22 @@ entry_p create_b (int nargs)
     return 0;
 }
 
-void destroy (entry_p entry)
+entry_p create_num (int n)
+{
+    entry_p entry = malloc (sizeof (entry_t)); 
+    if (entry)
+    {
+        entry->type = NUMBER;
+        entry->value.num = n;
+    }
+    return entry;
+}
+
+void push (entry_p dst, entry_p src)
+{
+}
+
+void kill (entry_p entry)
 {
     if (entry)
     {
@@ -36,7 +51,7 @@ void destroy (entry_p entry)
 int n_used (entry_p entry)
 {
     int n = 0; 
-    if (entry->type == BUILTIN)
+    if (entry->type == NATIVE)
     {
         while (entry->value.builtin.args[n] != entry)
         {
@@ -49,7 +64,7 @@ int n_used (entry_p entry)
 int n_free (entry_p entry)
 {
     int n = 0; 
-    if (entry->type == BUILTIN)
+    if (entry->type == NATIVE)
     {
     }
     return n;
