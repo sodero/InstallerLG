@@ -4,10 +4,25 @@
 /*
 hidden top level function 
 */
-entry_p eval(entry_p e)
+entry_p eval(entry_p entry)
 { 
-    printf ("->used:%d\n", n_used (e)); 
-    printf ("->free:%d\n", n_free (e)); 
+    int used = n_used (entry);
+    if (used)
+    {
+        int i = 0; 
+        while (i < used)
+        {
+            entry_p e = entry->value.native.args[i]; 
+            if (e->type == NATIVE)
+            {
+              //  e.value.native.call
+            }
+        }
+    }
+
+    printf ("->used:%d\n", n_used (entry)); 
+    printf ("->free:%d\n", n_free (entry)); 
+
     return 0;
 }
 

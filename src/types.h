@@ -1,8 +1,8 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-//#define YYSTYPE entry_t
 typedef struct entry_s * entry_p;
+typedef entry_p (*call_t) (entry_p *);
 
 struct entry_s
 {
@@ -10,9 +10,9 @@ struct entry_s
     {
         NUMBER,
         STRING, 
+        SYMBOL,
         NATIVE, 
         CUSTOM, 
-        SYMBOL
     } type;
 
     union
@@ -23,18 +23,18 @@ struct entry_s
         {
             char *name; 
             entry_p data; 
-        } variable; 
+        } symbol; 
         struct 
         {
+            call_t call; 
             entry_p *args; 
-            entry_p (*call) (entry_p);
-        } builtin; 
+        } native; 
         struct 
         {
             char *name; 
+            call_t call; 
             entry_p *args; 
-            entry_p (*call) (entry_p);
-        } procedure; 
+        } custom; 
     } value; 
 }; 
 

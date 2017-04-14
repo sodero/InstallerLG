@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "alloc.h"
 #include "builtin.h"
 
@@ -13,12 +15,12 @@ entry_p create_b (int nargs)
     entry_p entry = malloc (sizeof (entry_t)); 
     if (entry)
     {
-        entry->value.builtin.args = calloc (nargs + 1, sizeof (entry_p));
-        if (entry->value.builtin.args)
+        entry->value.native.args = calloc (nargs + 1, sizeof (entry_p));
+        if (entry->value.native.args)
         {
             entry->type = NATIVE;
-            entry->value.builtin.call = eval;
-            entry->value.builtin.args[nargs] = entry; 
+            entry->value.native.call = 0; //eval;
+            entry->value.native.args[nargs] = entry; 
             return entry;
         }
     }
@@ -34,25 +36,33 @@ entry_p create_num (int n)
         entry->type = NUMBER;
         entry->value.num = n;
     }
+    printf("create_num:%p (%d)\n", entry, n);
     return entry;
 }
 
 void push (entry_p dst, entry_p src)
 {
-    int free = n_free (dst);
+    int left = n_free (dst);
     int used = n_used (dst);
 
-   // printf ("free:%d\n", free); 
-   // printf ("used:%d\n", used); 
-
-    if (free)
+    if (!left)
     {
+        int new_size = 1 + (used << 1); 
+        entry_p *new_args = calloc (new_size, sizeof (entry_p));
+        if (new_args) 
+        {
+            memmove (new_args, dst->value.native.args, used * sizeof (entry_p)); 
+            free (*dst->value.native.args); 
+            new_args[new_size - 1] = dst; 
+            dst->value.native.args = new_args; 
+        }
+        else
+        {
+            // panic
+            return; 
+        }
     }
-    else
-    {
-        /* grow */
-    }
-    dst->value.builtin.args[used] = 1; 
+    dst->value.native.args[used] = src; 
 }
 
 void kill (entry_p entry)
@@ -70,9 +80,9 @@ int n_true (entry_p entry, int t)
     if (entry->type == NATIVE)
     {
         int i = 0; 
-        while (entry->value.builtin.args[i] != entry)
+        while (entry->value.native.args[i] != entry)
         {
-            n += entry->value.builtin.args[i] ? t : f; 
+            n += entry->value.native.args[i] ? t : f; 
             i++;
         }
     }
