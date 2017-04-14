@@ -10,7 +10,8 @@ struct entry_s
     {
         NUMBER,
         STRING, 
-        SYMBOL 
+        SYMBOL, // Hmm
+        BUILTIN, 
     } type;
 
     union

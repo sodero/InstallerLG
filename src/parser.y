@@ -3,8 +3,7 @@
 #include "types.h"
 #include "builtin.h"
 
-static size_t i = 0;
-static entry_t stack[255];
+entry_p start; 
 
 int yylex(void);
 int yyerror(char *err);
@@ -22,10 +21,10 @@ int yyerror(char *err);
 %type<value.num> add n 
 
 %%
-evaluate:   s { s(2); /*eval s w. n arg*/} 
+evaluate:   s { m_s(2); /*eval s w. n arg*/} 
 
-s:          s { s(1); /*1 more arg*/ } vp |
-            { s(0); /*new s + 1 arg*/ } vp 
+s:          s { m_s(1); /*1 more arg*/ } vp |
+            { m_s(0); /*new s + 1 arg*/ } vp 
             ;
 
 vp:         add  { $$.num = $1; printf("%d\n", $$.num); } 
@@ -39,13 +38,17 @@ n:          INT |
             BIN                          
             ;
 
-add:        '(' '+' np np ')' { $$ = add($3.num, $4.num); } 
+add:        '(' '+' np np ')' { $$ = m_add($3.num, $4.num); } 
             ;
 %%
 
 int main(int argc, char **argv)
 {
+    start = create();
+
     yyparse();
+
+    destroy(start);
 }
 
 int yyerror(char *err)

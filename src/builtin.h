@@ -3,21 +3,21 @@
 
 #include "types.h"
 
-entry_p s(entry_p args);
+entry_p m_s(entry_p args);
 
-int add(int a, int b);
-int sub(int a, int b);
-int mul(int a, int b);
-int div(int a, int b);
-int and(int a, int b);
-int or(int a, int b);
-int xor(int a, int b);
-int not(int a);
-int bitand(int a, int b);
-int bitor(int a, int b);
-int bitxor(int a, int b);
-int bitnot(int a);
-int shiftleft(int a, int n);
-int shiftright(int a, int n);
+int m_add(int a, int b);
+int m_sub(int a, int b);
+int m_mul(int a, int b);
+int m_div(int a, int b);
+int m_and(int a, int b);
+int m_or(int a, int b);
+int m_xor(int a, int b);
+int m_not(int a);
+int m_bitand(int a, int b);
+int m_bitor(int a, int b);
+int m_bitxor(int a, int b);
+int m_bitnot(int a);
+int m_shiftleft(int a, int n);
+int m_shiftright(int a, int n);
 
 #endif

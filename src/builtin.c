@@ -2,9 +2,8 @@
 #include "builtin.h"
 
 /*
-top level S
 */
-entry_p s(entry_p args)
+entry_p m_s(entry_p args)
 {
     printf("hej! %d\n", (int) args);
     return 0;
@@ -14,7 +13,7 @@ entry_p s(entry_p args)
 `(+ <expr1> <expr2> ...)'
      returns sum of expressions
 */
-int add(int a, int b)
+int m_add(int a, int b)
 {
     return a + b; 
 }
@@ -23,7 +22,7 @@ int add(int a, int b)
 `(- <expr1> <expr2>)'
      returns `<expr1>' minus `<expr2>'
 */
-int sub(int a, int b)
+int m_sub(int a, int b)
 {
     return a - b; 
 }
@@ -32,7 +31,7 @@ int sub(int a, int b)
 `(* <expr1> <expr2> ...)'
      returns product of expressions
 */
-int mul(int a, int b)
+int m_mul(int a, int b)
 {
     return a * b; 
 }
@@ -41,7 +40,7 @@ int mul(int a, int b)
 `(/ <expr1> <expr2>)'
      returns `<expr1>' divided by `<expr2>'
 */
-int div(int a, int b)
+int m_div(int a, int b)
 {
     return a / (b ? b : 1); 
 }
@@ -50,7 +49,7 @@ int div(int a, int b)
 `(AND <expr1> <expr2>)'
      returns logical `AND' of `<expr1>' and `<expr2>'
 */
-int and(int a, int b)
+int m_and(int a, int b)
 {
     return a && b; 
 }
@@ -59,7 +58,7 @@ int and(int a, int b)
 `(OR <expr1> <expr2>)'
      returns logical `OR' of `<expr1>' and `<expr2>'
 */
-int or(int a, int b)
+int m_or(int a, int b)
 {
     return a || b; 
 }
@@ -68,7 +67,7 @@ int or(int a, int b)
 `(XOR <expr1> <expr2>)'
      returns logical `XOR' of `<expr1>' and `<expr2>'
 */
-int xor(int a, int b)
+int m_xor(int a, int b)
 {
     return (a && !b) || (!a && b); 
 }
@@ -77,7 +76,7 @@ int xor(int a, int b)
 `(NOT <expr>)'
      returns logical `NOT' of `<expr>'
 */
-int not(int a)
+int m_not(int a)
 {
     return !a; 
 }
@@ -86,7 +85,7 @@ int not(int a)
 `(BITAND <expr1> <expr2>)'
      returns bitwise `AND' of `<expr1>' and `<expr2>'
 */
-int bitand(int a, int b)
+int m_bitand(int a, int b)
 {
     return a & b; 
 }
@@ -95,7 +94,7 @@ int bitand(int a, int b)
 `(BITOR <expr1> <expr2>)'
      returns bitwise `OR' of `<expr1>' and `<expr2>'
 */
-int bitor(int a, int b)
+int m_bitor(int a, int b)
 {
     return a | b; 
 }
@@ -104,7 +103,7 @@ int bitor(int a, int b)
 `(BITXOR <expr1> <expr2>)'
      returns bitwise `XOR' of `<expr1>' and `<expr2>'
 */
-int bitxor(int a, int b)
+int m_bitxor(int a, int b)
 {
     return a ^ b; 
 }
@@ -113,7 +112,7 @@ int bitxor(int a, int b)
 `(BITNOT <expr>)'
      returns bitwise `NOT' of `<expr>'
 */
-int bitnot(int a)
+int m_bitnot(int a)
 {
     return ~a; 
 }
@@ -122,7 +121,7 @@ int bitnot(int a)
 `(shiftleft <number> <amount to shift>)'
      logical shift left
 */
-int shiftleft(int a, int n)
+int m_shiftleft(int a, int n)
 {
     return a << n; 
 }
@@ -131,7 +130,7 @@ int shiftleft(int a, int n)
 `(shiftright <number> <amount to shift>)'
      logical shift right
 */
-int shiftright(int a, int n)
+int m_shiftright(int a, int n)
 {
     return a >> n; 
 }
