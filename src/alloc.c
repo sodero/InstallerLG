@@ -36,13 +36,15 @@ entry_p new_number (int n)
         entry->type = NUMBER;
         entry->value.number = n;
     }
-    printf("new_num:%p (%d)\n", entry, n);
+    else
+    {
+        // panic
+    }
     return entry;
 }
 
 void push (entry_p dst, entry_p src)
 {
-//    int f = n_free (dst);
     int u = used (dst);
     if (!left (dst))
     {

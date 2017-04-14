@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include "native.h"
 
-entry_p q; 
-
 int yylex(void);
 int yyerror(char *err);
 %}
@@ -19,32 +17,59 @@ int yyerror(char *err);
 %token<n> INT HEX BIN 
 %token AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT
 
-/*
-%type<value.num> np vp add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright
-%type<> n
-*/
-
-%type<e> s vp np n add
+%type<e> s p vp np v n 
+%type<e> add
 
 %%
-entry:      s    { eval ($1); kill ($1);           } 
+entry:      s    
+            { 
+                eval ($1); 
+                kill ($1);           
+            } 
 
-s:          s vp { push ($$, $2);                  } |
-            vp   { $$ = new_s(); push ($$, $1); } 
+s:          s vp 
+            { 
+                push ($$, $2);                  
+            } 
+            |
+            vp   
+            { 
+                $$ = new_s();   
+                push ($$, $1);    
+            } 
             ;
 
-vp:         add   
+p:          vp 
+            |
+            np
+            ;
+
+vp:         v  
             ;
 
 np:         n     
             ;
 
-n:          INT  { $$ = new_number ($1); } |
-            HEX  { $$ = new_number ($1); } |
-            BIN  { $$ = new_number ($1); }                        
+v:          add
             ;
 
-add:        '(' '+' np np ')' 
+n:          INT  
+            { 
+                $$ = new_number ($1); 
+            } 
+            |
+            HEX  
+            { 
+                $$ = new_number ($1); 
+            } 
+            |
+            BIN  
+            { 
+                $$ = new_number ($1); 
+            }                        
+            ;
+
+add:        '(' '+' p p ')' 
             { 
                 $$ = new_native (m_add, 2); 
                 push ($$, $3);  

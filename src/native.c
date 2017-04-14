@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "native.h"
+#include "util.h"
 
 /*
 hidden top level function 
@@ -39,8 +40,8 @@ entry_p m_add (entry_p *argv)
         b = argv[1]->value.number; 
     entry_p entry = new_number (a + b); 
 
-    printf("a:%d (%p)\n", a, argv[0]);
-    printf("b:%d (%p)\n", b, argv[1]);
+    pretty_print (argv[0]);
+    pretty_print (argv[1]);
 
     return entry;  
 }
