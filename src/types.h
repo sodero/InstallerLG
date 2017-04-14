@@ -25,13 +25,13 @@ struct entry_s
         } variable; 
         struct 
         {
-            entry_p args; 
+            entry_p *args; 
             entry_p (*call) (entry_p);
         } builtin; 
         struct 
         {
             char *name; 
-            entry_p args; 
+            entry_p *args; 
             entry_p (*call) (entry_p);
         } procedure; 
     } value; 

@@ -13,7 +13,7 @@ entry_p create ()
         {
             entry->type = BUILTIN;
             entry->value.builtin.call = m_s;
-            entry->value.builtin.args = entry; 
+            entry->value.builtin.args[nargs] = entry; 
             return entry;
         }
     }
@@ -33,10 +33,8 @@ int nused (entry_p entry)
     int n = 0; 
     if (entry->type == BUILTIN)
     {
-        entry_p e = entry; 
-        while (e->value.builtin.args != entry)
+        while (entry->value.builtin.args[n] != entry)
         {
-            e->value.builtin.args++; 
             n++;
         }
     }
@@ -45,12 +43,10 @@ int nused (entry_p entry)
 
 int nfree (entry_p entry)
 {
+    int n = 0; 
     if (entry->type == BUILTIN)
     {
     }
-    else
-    { 
-        return 0;
-    }
+    return n;
 }
 
