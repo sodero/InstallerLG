@@ -30,7 +30,7 @@ int yyerror(char *err);
 entry:      s    { eval ($1); kill ($1);           } 
 
 s:          s vp { push ($$, $2);                  } |
-            vp   { $$ = create_s(); push ($$, $1); } 
+            vp   { $$ = new_s(); push ($$, $1); } 
             ;
 
 vp:         add   
@@ -39,12 +39,17 @@ vp:         add
 np:         n     
             ;
 
-n:          INT  { $$ = create_num ($1); } |
-            HEX  { $$ = create_num ($1); } |
-            BIN  { $$ = create_num ($1); }                        
+n:          INT  { $$ = new_number ($1); } |
+            HEX  { $$ = new_number ($1); } |
+            BIN  { $$ = new_number ($1); }                        
             ;
 
-add:        '(' '+' np np ')' { $$ = $3;  m_add($3->value.num, $4->value.num); } 
+add:        '(' '+' np np ')' 
+            { 
+                $$ = new_native (m_add, 2); 
+                push ($$, $3);  
+                push ($$, $4);  
+            } 
             ;
 %%
 

@@ -4,9 +4,10 @@
 #include "alloc.h"
 #include "types.h"
 
-entry_p eval(entry_p args);
+entry_p eval(entry_p entry);
 
-int m_add(int a, int b);
+entry_p m_add(entry_p *argv);
+
 int m_sub(int a, int b);
 int m_mul(int a, int b);
 int m_div(int a, int b);

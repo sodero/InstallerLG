@@ -3,12 +3,14 @@
 
 #include "types.h"
 
-entry_p create_s(); 
-entry_p create_b(int nargs); 
-entry_p create_num(int n); 
+entry_p new_s (); 
+entry_p new_native (call_t call, int nargs); 
+entry_p new_number (int n); 
+
 void kill (entry_p entry);
 void push (entry_p dst, entry_p src);
-int n_used (entry_p entry);
-int n_free (entry_p entry);
+
+int used (entry_p entry);
+int left (entry_p entry);
 
 #endif

@@ -4,13 +4,13 @@
 #include "alloc.h"
 #include "native.h"
 
-entry_p create_s ()
+entry_p new_s ()
 {
     int default_size = 64; 
-    return create_b (default_size); 
+    return new_native (0, default_size); 
 }
 
-entry_p create_b (int nargs)
+entry_p new_native (call_t call, int nargs)
 {
     entry_p entry = malloc (sizeof (entry_t)); 
     if (entry)
@@ -19,7 +19,7 @@ entry_p create_b (int nargs)
         if (entry->value.native.args)
         {
             entry->type = NATIVE;
-            entry->value.native.call = 0; //eval;
+            entry->value.native.call = call;
             entry->value.native.args[nargs] = entry; 
             return entry;
         }
@@ -28,30 +28,29 @@ entry_p create_b (int nargs)
     return 0;
 }
 
-entry_p create_num (int n)
+entry_p new_number (int n)
 {
     entry_p entry = malloc (sizeof (entry_t)); 
     if (entry)
     {
         entry->type = NUMBER;
-        entry->value.num = n;
+        entry->value.number = n;
     }
-    printf("create_num:%p (%d)\n", entry, n);
+    printf("new_num:%p (%d)\n", entry, n);
     return entry;
 }
 
 void push (entry_p dst, entry_p src)
 {
-    int left = n_free (dst);
-    int used = n_used (dst);
-
-    if (!left)
+//    int f = n_free (dst);
+    int u = used (dst);
+    if (!left (dst))
     {
-        int new_size = 1 + (used << 1); 
+        int new_size = 1 + (u << 1); 
         entry_p *new_args = calloc (new_size, sizeof (entry_p));
         if (new_args) 
         {
-            memmove (new_args, dst->value.native.args, used * sizeof (entry_p)); 
+            memmove (new_args, dst->value.native.args, u * sizeof (entry_p)); 
             free (*dst->value.native.args); 
             new_args[new_size - 1] = dst; 
             dst->value.native.args = new_args; 
@@ -62,7 +61,7 @@ void push (entry_p dst, entry_p src)
             return; 
         }
     }
-    dst->value.native.args[used] = src; 
+    dst->value.native.args[u] = src; 
 }
 
 void kill (entry_p entry)
@@ -72,7 +71,7 @@ void kill (entry_p entry)
     }
 }
 
-int n_true (entry_p entry, int t)
+static int n_true (entry_p entry, int t)
 {
     int n = 0; 
     int f = t ? 0 : 1; 
@@ -89,12 +88,12 @@ int n_true (entry_p entry, int t)
     return n;
 }
 
-int n_used (entry_p entry)
+int used (entry_p entry)
 {
     return n_true (entry, 1); 
 }
 
-int n_free (entry_p entry)
+int left (entry_p entry)
 {
     return n_true (entry, 0); 
 }

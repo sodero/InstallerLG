@@ -17,8 +17,8 @@ struct entry_s
 
     union
     {
-        int num; 
-        char *str; 
+        int number; 
+        char *string; 
         struct 
         {
             char *name; 

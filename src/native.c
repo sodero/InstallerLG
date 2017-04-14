@@ -6,23 +6,25 @@ hidden top level function
 */
 entry_p eval(entry_p entry)
 { 
-    int used = n_used (entry);
-    if (used)
+    int u = used (entry);
+    if (u)
     {
         int i = 0; 
-        while (i < used)
+        while (i < u)
         {
-            entry_p e = entry->value.native.args[i]; 
-            if (e->type == NATIVE)
+            entry_p stmt = entry->value.native.args[i]; 
+            if (stmt->type == NATIVE)
             {
-              //  e.value.native.call
+                call_t call = stmt->value.native.call;
+                entry_p *args = stmt->value.native.args; 
+                if (call && args)
+                {
+                    call (args); 
+                }
             }
+            i++; 
         }
     }
-
-    printf ("->used:%d\n", n_used (entry)); 
-    printf ("->free:%d\n", n_free (entry)); 
-
     return 0;
 }
 
@@ -30,9 +32,16 @@ entry_p eval(entry_p entry)
 `(+ <expr1> <expr2> ...)'
      returns sum of expressions
 */
-int m_add(int a, int b)
+entry_p m_add (entry_p *argv)
 {
-    return a + b; 
+    int a = argv[0]->value.number, 
+        b = argv[1]->value.number; 
+    entry_p entry = new_number (a + b); 
+
+    printf("a:%d\n", a);
+    printf("b:%d\n", b);
+
+    return entry;  
 }
 
 /* 
