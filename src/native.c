@@ -19,7 +19,8 @@ entry_p eval(entry_p entry)
                 entry_p *args = stmt->value.native.args; 
                 if (call && args)
                 {
-                    call (args); 
+                    entry_p result = call (args); 
+                    pretty_print (result);
                 }
             }
             i++; 
@@ -38,8 +39,8 @@ entry_p m_add (entry_p *argv)
         b = argv[1]->value.number; 
     entry_p entry = new_number (a + b); 
 
-    printf("a:%d\n", a);
-    printf("b:%d\n", b);
+    printf("a:%d (%p)\n", a, argv[0]);
+    printf("b:%d (%p)\n", b, argv[1]);
 
     return entry;  
 }
