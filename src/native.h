@@ -1,5 +1,5 @@
-#ifndef BUILTIN_H_
-#define BUILTIN_H_
+#ifndef NATIVE_H_
+#define NATIVE_H_
 
 #include "alloc.h"
 #include "types.h"

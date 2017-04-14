@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "alloc.h"
-#include "builtin.h"
+#include "native.h"
 
 entry_p create_s ()
 {

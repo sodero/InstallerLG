@@ -1,6 +1,6 @@
 %{
 #include <stdio.h>
-#include "builtin.h"
+#include "native.h"
 
 entry_p q; 
 
