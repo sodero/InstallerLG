@@ -6,8 +6,8 @@ hidden top level function
 */
 entry_p eval(entry_p e)
 { 
-    printf ("nused:%d\n", n_used (e)); 
-    printf ("nfree:%d\n", n_free (e)); 
+    printf ("->used:%d\n", n_used (e)); 
+    printf ("->free:%d\n", n_free (e)); 
     return 0;
 }
 

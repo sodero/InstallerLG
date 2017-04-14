@@ -39,6 +39,20 @@ entry_p create_num (int n)
 
 void push (entry_p dst, entry_p src)
 {
+    int free = n_free (dst);
+    int used = n_used (dst);
+
+   // printf ("free:%d\n", free); 
+   // printf ("used:%d\n", used); 
+
+    if (free)
+    {
+    }
+    else
+    {
+        /* grow */
+    }
+    dst->value.builtin.args[used] = 1; 
 }
 
 void kill (entry_p entry)
@@ -48,25 +62,30 @@ void kill (entry_p entry)
     }
 }
 
-int n_used (entry_p entry)
+int n_true (entry_p entry, int t)
 {
     int n = 0; 
+    int f = t ? 0 : 1; 
+
     if (entry->type == NATIVE)
     {
-        while (entry->value.builtin.args[n] != entry)
+        int i = 0; 
+        while (entry->value.builtin.args[i] != entry)
         {
-            n++;
+            n += entry->value.builtin.args[i] ? t : f; 
+            i++;
         }
     }
     return n;
 }
 
+int n_used (entry_p entry)
+{
+    return n_true (entry, 1); 
+}
+
 int n_free (entry_p entry)
 {
-    int n = 0; 
-    if (entry->type == NATIVE)
-    {
-    }
-    return n;
+    return n_true (entry, 0); 
 }
 

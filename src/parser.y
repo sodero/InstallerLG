@@ -27,12 +27,10 @@ int yyerror(char *err);
 %type<e> s vp np n add
 
 %%
-evaluate:   { q = create_s (); } 
-            s 
-            { eval (q); kill (q); } 
+entry:      s { eval ($1); kill ($1); } 
 
 s:          s { /*1 more arg*/ } vp |
-            vp { $$ = create_s(); /*new s + 1 arg*/ } 
+            vp { $$ = create_s(); push ($$, $1); } 
             ;
 
 vp:         add   
