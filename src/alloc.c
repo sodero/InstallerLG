@@ -2,9 +2,14 @@
 #include "alloc.h"
 #include "builtin.h"
 
-entry_p create ()
+entry_p create_s ()
 {
-    int nargs = 16; 
+    int default_size = 64; 
+    return create_b (default_size); 
+}
+
+entry_p create_b (int nargs)
+{
     entry_p entry = malloc (sizeof (entry_t)); 
     if (entry)
     {
@@ -28,7 +33,7 @@ void destroy (entry_p entry)
     }
 }
 
-int nused (entry_p entry)
+int n_used (entry_p entry)
 {
     int n = 0; 
     if (entry->type == BUILTIN)
@@ -41,7 +46,7 @@ int nused (entry_p entry)
     return n;
 }
 
-int nfree (entry_p entry)
+int n_free (entry_p entry)
 {
     int n = 0; 
     if (entry->type == BUILTIN)

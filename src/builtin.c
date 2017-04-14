@@ -3,9 +3,10 @@
 
 /*
 */
-entry_p m_s(entry_p args)
-{
-    printf("hej! %d\n", (int) args);
+entry_p m_s(entry_p e)
+{ 
+    printf ("nused:%d\n", n_used (e)); 
+    printf ("nfree:%d\n", n_free (e)); 
     return 0;
 }
 

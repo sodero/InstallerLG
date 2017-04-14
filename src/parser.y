@@ -1,6 +1,5 @@
 %{
 #include <stdio.h>
-#include "types.h"
 #include "builtin.h"
 
 entry_p start; 
@@ -21,10 +20,13 @@ int yyerror(char *err);
 %type<value.num> add n 
 
 %%
-evaluate:   s { m_s(2); /*eval s w. n arg*/} 
+evaluate:   s { start = create_s (); 
+                m_s (start); 
+                destroy (start); 
+              } 
 
-s:          s { m_s(1); /*1 more arg*/ } vp |
-            { m_s(0); /*new s + 1 arg*/ } vp 
+s:          s { /*1 more arg*/ } vp |
+            { /*new s + 1 arg*/ } vp 
             ;
 
 vp:         add  { $$.num = $1; printf("%d\n", $$.num); } 
@@ -44,11 +46,7 @@ add:        '(' '+' np np ')' { $$ = m_add($3.num, $4.num); }
 
 int main(int argc, char **argv)
 {
-    start = create();
-
     yyparse();
-
-    destroy(start);
 }
 
 int yyerror(char *err)

@@ -1,6 +1,7 @@
 #ifndef BUILTIN_H_
 #define BUILTIN_H_
 
+#include "alloc.h"
 #include "types.h"
 
 entry_p m_s(entry_p args);
