@@ -30,7 +30,7 @@ int yyerror(char *err);
 entry:      s { eval ($1); kill ($1); } 
 
 s:          s { /*1 more arg*/ } vp |
-            vp { $$ = create_s(); push ($$, $1); } 
+            vp { $$ = create_s(); push ($$, $1); push ($$, $1); } 
             ;
 
 vp:         add   
