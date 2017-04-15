@@ -7,27 +7,25 @@ hidden top level function
 */
 entry_p eval(entry_p entry)
 { 
-    int u = used (entry);
-    if (u)
+    int i = 0; 
+    entry_p stmt = entry; 
+    while (entry->value.native.args[i] && 
+           entry->value.native.args[i] != entry)
     {
-        int i = 0; 
-        while (i < u)
+        stmt = entry->value.native.args[i]; 
+        if (stmt->type == NATIVE)
         {
-            entry_p stmt = entry->value.native.args[i]; 
-            if (stmt->type == NATIVE)
+            call_t call = stmt->value.native.call;
+            entry_p *args = stmt->value.native.args; 
+            if (call && args)
             {
-                call_t call = stmt->value.native.call;
-                entry_p *args = stmt->value.native.args; 
-                if (call && args)
-                {
-                    entry_p result = call (args); 
-                    pretty_print (result);
-                }
+                entry_p result = call (args); 
+                pretty_print (result);
             }
-            i++; 
         }
+        i++; 
     }
-    return 0;
+    return stmt;
 }
 
 /*

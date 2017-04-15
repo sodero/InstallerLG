@@ -38,31 +38,46 @@ entry_p new_number (int n)
     }
     else
     {
-        // panic
+        // Panic
     }
     return entry;
 }
 
+
 void push (entry_p dst, entry_p src)
 {
-    int u = used (dst);
-    if (!left (dst))
+    int u = 0; 
+    entry_p *new; 
+
+    // Free space? 
+    while (dst->value.native.args[u] != dst)
     {
-        int new_size = 1 + (u << 1); 
-        entry_p *new_args = calloc (new_size, sizeof (entry_p));
-        if (new_args) 
+        if (!dst->value.native.args[u])
         {
-            memmove (new_args, dst->value.native.args, u * sizeof (entry_p)); 
-            free (*dst->value.native.args); 
-            new_args[new_size - 1] = dst; 
-            dst->value.native.args = new_args; 
-        }
-        else
-        {
-            // panic
+            // If true, push and return
+            dst->value.native.args[u] = src; 
             return; 
         }
+        u++;
     }
+
+    // Make the new array twice as big (+sentinel)
+    new = calloc (1 + (u << 1), sizeof (entry_p));
+    if (!new)
+    {
+        // Panic!
+        return; 
+    }
+
+    // Put the sentinel in place
+    new[u << 1] = dst; 
+
+    // Make the swap and release the old array
+    memmove (new, dst->value.native.args, u * sizeof (entry_p)); 
+    free (dst->value.native.args); 
+    dst->value.native.args = new; 
+
+    // Finally, do the push
     dst->value.native.args[u] = src; 
 }
 
@@ -71,32 +86,5 @@ void kill (entry_p entry)
     if (entry)
     {
     }
-}
-
-static int n_true (entry_p entry, int t)
-{
-    int n = 0; 
-    int f = t ? 0 : 1; 
-
-    if (entry->type == NATIVE)
-    {
-        int i = 0; 
-        while (entry->value.native.args[i] != entry)
-        {
-            n += entry->value.native.args[i] ? t : f; 
-            i++;
-        }
-    }
-    return n;
-}
-
-int used (entry_p entry)
-{
-    return n_true (entry, 1); 
-}
-
-int left (entry_p entry)
-{
-    return n_true (entry, 0); 
 }
 
