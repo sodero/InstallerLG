@@ -1,6 +1,7 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
+#define ENTRIES 1
 #define BUFSIZE 256
 
 typedef struct entry_s * entry_p;
@@ -15,8 +16,8 @@ struct entry_s
         SYMBOL,
         NATIVE, 
         CUSTOM, 
+        CONTXT,
     } type;
-
     union
     {
         int number; 
@@ -37,7 +38,13 @@ struct entry_s
             call_t call; 
             entry_p *args; 
         } custom; 
+        struct 
+        {
+            entry_p *syms; 
+            entry_p *args; 
+        } contxt; 
     } value; 
+    entry_p parent; 
 }; 
 
 typedef struct entry_s entry_t; 

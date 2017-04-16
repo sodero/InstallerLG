@@ -24,6 +24,10 @@ void plain_print (entry_p entry)
         case CUSTOM:
             printf ("%s\n", entry->value.custom.name);
             break;
+
+        case CONTXT:
+            printf ("CONTXT\n"); 
+            break;
     }
 }
 
@@ -56,6 +60,10 @@ void pretty_print (entry_p entry)
             printf ("\tCUSTOM\n");
             printf ("Name:\t%s\n", entry->value.custom.name);
             printf ("Call:\t%p\n", entry->value.custom.call);
+            break;
+
+        case CONTXT:
+            printf ("\tCONTXT\n"); 
             break;
     }
 }

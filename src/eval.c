@@ -57,27 +57,26 @@ entry_p eval_as_string(entry_p entry)
     return &num; 
 }
 
-entry_p eval_as_stdout(entry_p entry)
+entry_p eval_as_contxt(entry_p entry)
 { 
     int i = 0; 
-    entry_p stmt = entry; 
-    while (entry->value.native.args[i] && 
-           entry->value.native.args[i] != entry)
+    while (entry->value.contxt.args[i] && 
+           entry->value.contxt.args[i] != entry)
     {
-        stmt = entry->value.native.args[i]; 
-        if (stmt->type == NATIVE)
+        entry_p curr = entry->value.contxt.args[i]; 
+        if (curr->type == NATIVE)
         {
-            call_t call = stmt->value.native.call;
-            entry_p *args = stmt->value.native.args; 
+            call_t call = curr->value.native.call;
+            entry_p *args = curr->value.native.args; 
             if (call && args)
             {
-                entry_p result = call (args); 
-                plain_print (result);
-                kill (result); 
+                entry_p ret = call (args); 
+                plain_print (ret);
+                kill (ret); 
             }
         }
         i++; 
     }
-    return stmt;
+    return entry;
 }
 

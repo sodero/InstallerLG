@@ -24,7 +24,7 @@ int yyerror(char *err);
 %%
 entry:      s    
             { 
-                eval_as_stdout ($1); 
+                eval_as_contxt ($1); 
                 kill ($1);           
             } 
 
@@ -35,7 +35,7 @@ s:          s vp
             |
             vp   
             { 
-                $$ = new_s();   
+                $$ = new_contxt();   
                 push ($$, $1);    
             } 
             ;
