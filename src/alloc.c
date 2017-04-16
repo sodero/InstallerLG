@@ -24,7 +24,7 @@ entry_p new_contxt ()
         free (syms); 
         free (args); 
     }
-    // Panic
+    // OOM panic
     free (entry);
     return 0;
 }
@@ -80,117 +80,53 @@ void push (entry_p dst, entry_p src)
     entry_p *new; 
     entry_p **args_p; 
 
-    if (dst->type == NATIVE)
+    switch (dst->type)
     {
-        args_p = &dst->value.native.args; 
-printf("native %p == %p\n", *args_p, dst->value.native.args);
-    }
-    else if (dst->type == CONTXT)
-    {
-        args_p = &dst->value.contxt.args; 
-printf("contxt %p == %p\n", *args_p, dst->value.contxt.args);
-    }
-    else 
-    {
-        // Invalid push!
-printf("sumfnels\n");
-        return; 
+        case NATIVE: 
+            args_p = &dst->value.native.args; 
+            break; 
+
+        case CONTXT: 
+            args_p = &dst->value.contxt.args; 
+            break; 
+
+        default: 
+            // Invalid push
+            return; 
     }
 
-    // du kan inte bara hantera native har!
-    // du borde kanske ersatta args med barn?
     // Free space? 
-    //while (dst->value.native.args[u] != dst)
     while ((*args_p)[u] != dst)
     {
-        //if (!dst->value.native.args[u])
         if (!(*args_p)[u])
         {
             // If true, push and return
-            //dst->value.native.args[u] = src; 
             (*args_p)[u] = src; 
             src->parent = dst; 
             return; 
         }
         u++;
-printf("3b u:%d\n", u);
     }
-
-printf("4 u:%d\n", u);
 
     // Make the new array twice as big (+sentinel)
     new = calloc (1 + (u << 1), sizeof (entry_p));
-printf("5 new size:%d\n", 1 + (u << 1));
     if (new)
     {
         // Put the sentinel in place
         new[u << 1] = dst; 
-
         // Make the swap and release the old array
-printf("6\n");
-        //memmove (new, dst->value.native.args, u * sizeof (entry_p)); 
         memmove (new, *args_p, u * sizeof (entry_p)); 
-printf("7\n");
-      //  free (dst->value.native.args); 
         free (*args_p); 
-printf("8\n");
-        //dst->value.native.args = new; 
         *args_p = new; 
-
         // Finally, do the push
-        //dst->value.native.args[u] = src; 
         (*args_p)[u] = src; 
         src->parent = dst; 
     }
     else
     {
-        // Panic!
+        // OOM panic!
     }
 }
-/*
-void push (entry_p dst, entry_p src)
-{
-    int u = 0; 
-    entry_p *new; 
-
-    // du kan inte bara hantera native har!
-    // du borde kanske ersatta args med barn?
-
-    // Free space? 
-    while (dst->value.native.args[u] != dst)
-    {
-        if (!dst->value.native.args[u])
-        {
-            // If true, push and return
-            dst->value.native.args[u] = src; 
-            src->parent = dst; 
-            return; 
-        }
-        u++;
-    }
-
-    // Make the new array twice as big (+sentinel)
-    new = calloc (1 + (u << 1), sizeof (entry_p));
-    if (new)
-    {
-        // Put the sentinel in place
-        new[u << 1] = dst; 
-
-        // Make the swap and release the old array
-        memmove (new, dst->value.native.args, u * sizeof (entry_p)); 
-        free (dst->value.native.args); 
-        dst->value.native.args = new; 
-
-        // Finally, do the push
-        dst->value.native.args[u] = src; 
-        src->parent = dst; 
-    }
-    else
-    {
-        // Panic!
-    }
-}
-*/
 
 void kill (entry_p entry)
 {

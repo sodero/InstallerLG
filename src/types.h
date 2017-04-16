@@ -1,7 +1,7 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-#define ENTRIES 1
+#define ENTRIES 64 
 #define BUFSIZE 256
 
 typedef struct entry_s * entry_p;
