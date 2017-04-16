@@ -1,6 +1,32 @@
 #include <stdio.h>
 #include "util.h"
 
+void plain_print (entry_p entry)
+{
+    switch (entry->type)
+    {
+        case NUMBER:
+            printf ("%d\n", entry->value.number);
+            break;
+
+        case STRING:
+            printf ("%s\n", entry->value.string);
+            break;
+
+        case SYMBOL:
+            printf ("%s\n", entry->value.symbol.name);
+            break;
+
+        case NATIVE:
+            printf ("NATIVE\n"); 
+            break;
+
+        case CUSTOM:
+            printf ("%s\n", entry->value.custom.name);
+            break;
+    }
+}
+
 void pretty_print (entry_p entry)
 {
     printf("\nType:"); 

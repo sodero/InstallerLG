@@ -44,10 +44,7 @@ entry_p eval_as_number(entry_p entry)
     return &num; 
 }
 
-/*
-hidden top level function 
-*/
-entry_p eval(entry_p entry)
+entry_p eval_as_stdout(entry_p entry)
 { 
     int i = 0; 
     entry_p stmt = entry; 
@@ -62,7 +59,8 @@ entry_p eval(entry_p entry)
             if (call && args)
             {
                 entry_p result = call (args); 
-                pretty_print (result);
+                plain_print (result);
+                kill (result); 
             }
         }
         i++; 

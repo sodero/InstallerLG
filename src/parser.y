@@ -24,7 +24,7 @@ int yyerror(char *err);
 %%
 entry:      s    
             { 
-                eval ($1); 
+                eval_as_stdout ($1); 
                 kill ($1);           
             } 
 

@@ -11,11 +11,7 @@ entry_p m_add (entry_p *argv)
 {
     int a = eval_as_number(argv[0])->value.number, 
         b = eval_as_number(argv[1])->value.number; 
-
     entry_p entry = new_number (a + b); 
-
-    pretty_print (argv[0]);
-    pretty_print (argv[1]);
 
     return entry;  
 }
