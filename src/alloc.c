@@ -24,6 +24,8 @@ entry_p new_native (call_t call, int nargs)
             return entry;
         }
     }
+
+    // Panic
     free (entry);
     return 0;
 }
@@ -63,22 +65,23 @@ void push (entry_p dst, entry_p src)
 
     // Make the new array twice as big (+sentinel)
     new = calloc (1 + (u << 1), sizeof (entry_p));
-    if (!new)
+    if (new)
+    {
+        // Put the sentinel in place
+        new[u << 1] = dst; 
+
+        // Make the swap and release the old array
+        memmove (new, dst->value.native.args, u * sizeof (entry_p)); 
+        free (dst->value.native.args); 
+        dst->value.native.args = new; 
+
+        // Finally, do the push
+        dst->value.native.args[u] = src; 
+    }
+    else
     {
         // Panic!
-        return; 
     }
-
-    // Put the sentinel in place
-    new[u << 1] = dst; 
-
-    // Make the swap and release the old array
-    memmove (new, dst->value.native.args, u * sizeof (entry_p)); 
-    free (dst->value.native.args); 
-    dst->value.native.args = new; 
-
-    // Finally, do the push
-    dst->value.native.args[u] = src; 
 }
 
 void kill (entry_p entry)

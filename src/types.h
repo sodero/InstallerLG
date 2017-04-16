@@ -1,6 +1,8 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
+#define BUFSIZE 256
+
 typedef struct entry_s * entry_p;
 typedef entry_p (*call_t) (entry_p *);
 

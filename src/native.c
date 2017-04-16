@@ -9,9 +9,11 @@
 */
 entry_p m_add (entry_p *argv)
 {
+    entry_p entry; 
     int a = eval_as_number(argv[0])->value.number, 
         b = eval_as_number(argv[1])->value.number; 
-    entry_p entry = new_number (a + b); 
+
+    entry = new_number (a + b); 
 
     return entry;  
 }
