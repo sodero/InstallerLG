@@ -1,32 +1,7 @@
 #include <stdio.h>
+#include "eval.h"
 #include "native.h"
 #include "util.h"
-
-/*
-hidden top level function 
-*/
-entry_p eval(entry_p entry)
-{ 
-    int i = 0; 
-    entry_p stmt = entry; 
-    while (entry->value.native.args[i] && 
-           entry->value.native.args[i] != entry)
-    {
-        stmt = entry->value.native.args[i]; 
-        if (stmt->type == NATIVE)
-        {
-            call_t call = stmt->value.native.call;
-            entry_p *args = stmt->value.native.args; 
-            if (call && args)
-            {
-                entry_p result = call (args); 
-                pretty_print (result);
-            }
-        }
-        i++; 
-    }
-    return stmt;
-}
 
 /*
 `(+ <expr1> <expr2> ...)'
@@ -34,8 +9,9 @@ entry_p eval(entry_p entry)
 */
 entry_p m_add (entry_p *argv)
 {
-    int a = argv[0]->value.number, 
-        b = argv[1]->value.number; 
+    int a = eval_as_number(argv[0])->value.number, 
+        b = eval_as_number(argv[1])->value.number; 
+
     entry_p entry = new_number (a + b); 
 
     pretty_print (argv[0]);

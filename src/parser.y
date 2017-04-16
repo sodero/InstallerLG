@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include "native.h"
+#include "eval.h"
 
 int yylex(void);
 int yyerror(char *err);
