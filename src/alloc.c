@@ -51,6 +51,15 @@ entry_p new_string (char *s)
 
 entry_p new_symbol (char *s) 
 {
+    entry_p entry = malloc (sizeof (entry_t)); 
+    if (entry)
+    {
+        entry->type = SYMBOL; 
+        entry->value.symbol.name = "my_name";
+        return entry; 
+    }
+    // Panic
+    free (entry);  
     return 0; 
 }
 

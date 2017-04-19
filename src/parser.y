@@ -18,7 +18,7 @@ int yyerror(char *err);
 %token<n> INT HEX BIN 
 %token SET AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT
 
-%type<e> s p vp np v n 
+%type<e> s p vp np ap v n a
 %type<e> add set
 
 %%
@@ -33,7 +33,18 @@ s:          s vp
                 push ($$, $2);                  
             } 
             |
+            s ap 
+            { 
+                push ($$, $2);                  
+            } 
+            |
             vp   
+            { 
+                $$ = new_contxt();   
+                push ($$, $1);    
+            } 
+            |
+            ap   
             { 
                 $$ = new_contxt();   
                 push ($$, $1);    
@@ -51,9 +62,10 @@ vp:         v
 np:         n     
             ;
 
+ap:         a
+            ;
+
 v:          add
-            |
-            set
             ;
 
 n:          INT  
@@ -72,6 +84,9 @@ n:          INT
             }                        
             ;
 
+a:          set
+            ;
+
 add:        '(' '+' p p ')' 
             { 
                 $$ = new_native (m_add, 2); 
@@ -82,9 +97,7 @@ add:        '(' '+' p p ')'
 
 set:        '(' SET p p ')' 
             { 
-                $$ = new_native (m_add, 2); 
-                push ($$, $3);  
-                push ($$, $4);  
+                $$ = new_symbol (0); 
             } 
             ;
 
