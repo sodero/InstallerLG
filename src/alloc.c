@@ -78,30 +78,41 @@ void push (entry_p dst, entry_p src)
 {
     int u = 0; 
     entry_p *new; 
-    entry_p **args_p; 
+    entry_p **dst_p; 
 
     switch (dst->type)
     {
-        case NATIVE: 
-            args_p = &dst->value.native.args; 
+        case CONTXT:
+            switch (src->type)
+            {
+                case SYMBOL:
+                    dst_p = &dst->value.contxt.syms; 
+                    break; 
+                
+                default: 
+                    dst_p = &dst->value.contxt.args; 
+            }
             break; 
 
-        case CONTXT: 
-            args_p = &dst->value.contxt.args; 
+        case NATIVE:
+            dst_p = &dst->value.native.args; 
+            break; 
+
+        case CUSTOM:
+            dst_p = &dst->value.custom.args; 
             break; 
 
         default: 
-            // Invalid push
             return; 
     }
 
     // Free space? 
-    while ((*args_p)[u] != dst)
+    while ((*dst_p)[u] != dst)
     {
-        if (!(*args_p)[u])
+        if (!(*dst_p)[u])
         {
             // If true, push and return
-            (*args_p)[u] = src; 
+            (*dst_p)[u] = src; 
             src->parent = dst; 
             return; 
         }
@@ -115,16 +126,16 @@ void push (entry_p dst, entry_p src)
         // Put the sentinel in place
         new[u << 1] = dst; 
         // Make the swap and release the old array
-        memmove (new, *args_p, u * sizeof (entry_p)); 
-        free (*args_p); 
-        *args_p = new; 
+        memmove (new, *dst_p, u * sizeof (entry_p)); 
+        free (*dst_p); 
+        *dst_p = new; 
         // Finally, do the push
-        (*args_p)[u] = src; 
+        (*dst_p)[u] = src; 
         src->parent = dst; 
     }
     else
     {
-        // OOM panic!
+        // Panic!
     }
 }
 

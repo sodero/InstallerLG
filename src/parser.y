@@ -16,10 +16,10 @@ int yyerror(char *err);
 
 %token<s> SYM STR 
 %token<n> INT HEX BIN 
-%token AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT
+%token SET AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT
 
 %type<e> s p vp np v n 
-%type<e> add
+%type<e> add set
 
 %%
 entry:      s    
@@ -52,6 +52,8 @@ np:         n
             ;
 
 v:          add
+            |
+            set
             ;
 
 n:          INT  
@@ -77,6 +79,15 @@ add:        '(' '+' p p ')'
                 push ($$, $4);  
             } 
             ;
+
+set:        '(' SET p p ')' 
+            { 
+                $$ = new_native (m_add, 2); 
+                push ($$, $3);  
+                push ($$, $4);  
+            } 
+            ;
+
 %%
 
 int main(int argc, char **argv)

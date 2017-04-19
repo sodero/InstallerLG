@@ -3,7 +3,7 @@
 #include "types.h"
 #include "parser.h"
 
-#ifdef _DEBUG
+#ifdef DEBUG
 # define P(X) printf("L:%s|%s|\n", #X, yytext)
 #else
 # define P(X)
@@ -62,6 +62,7 @@
 "BITNOT"                { R(BITNOT);     }
 "shiftleft"             { R(SHIFTLEFT);  }
 "shiftright"            { R(SHIFTRIGHT); }
+"set"                   { R(SET);        }
 
     /*
     Strings
