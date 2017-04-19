@@ -33,21 +33,26 @@ s:          s vp
                 push ($$, $2);                  
             } 
             |
+
             s ap 
             { 
+                printf("push symbol\n");
                 push ($$, $2);                  
             } 
             |
+
             vp   
             { 
                 $$ = new_contxt();   
                 push ($$, $1);    
             } 
             |
+
             ap   
             { 
                 $$ = new_contxt();   
                 push ($$, $1);    
+                printf("push symbol\n");
             } 
             ;
 
@@ -73,11 +78,13 @@ n:          INT
                 $$ = new_number ($1); 
             } 
             |
+
             HEX  
             { 
                 $$ = new_number ($1); 
             } 
             |
+
             BIN  
             { 
                 $$ = new_number ($1); 

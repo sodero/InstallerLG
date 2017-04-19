@@ -77,6 +77,16 @@ entry_p eval_as_contxt(entry_p entry)
         }
         i++; 
     }
+
+    i = 0; 
+    while (entry->value.contxt.syms[i] && 
+           entry->value.contxt.syms[i] != entry)
+    {
+        entry_p curr = entry->value.contxt.syms[i]; 
+        plain_print (curr);
+        i++; 
+    }
+
     return entry;
 }
 
