@@ -87,6 +87,12 @@ n:          INT
             { 
                 $$ = new_number ($1); 
             }                        
+            |
+
+            STR  
+            { 
+                $$ = new_string ($1); 
+            }                        
             ;
 
 a:          set

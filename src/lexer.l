@@ -68,7 +68,8 @@
     Strings
     */
 \"[^\"]*\"              { 
-    yylval.s = strdup(yytext); 
+    yylval.s = strdup(yytext + 1); 
+    yylval.s[yyleng - 2] = 0; 
     R(STR);        
 }    
 
@@ -77,6 +78,7 @@
     */
 [^" \n\t\(\)\+\*/-]+    { 
     yylval.s = strdup(yytext); 
+    printf ("sym |%s|\n", yylval.s);
     R(SYM);        
 }
 

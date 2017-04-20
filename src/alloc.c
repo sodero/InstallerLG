@@ -46,7 +46,17 @@ entry_p new_number (int n)
 
 entry_p new_string (char *s) 
 {
-    return 0; 
+    entry_p entry = malloc (sizeof (entry_t)); 
+    if (entry)
+    {
+        entry->type = STRING;
+        entry->value.string = s;
+    }
+    else
+    {
+        // Panic
+    }
+    return entry;
 }
 
 entry_p new_symbol (char *s, entry_p e) 
