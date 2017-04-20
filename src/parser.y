@@ -36,7 +36,6 @@ s:          s vp
 
             s ap 
             { 
-                printf("push symbol\n");
                 push ($$, $2);                  
             } 
             |
@@ -52,7 +51,6 @@ s:          s vp
             { 
                 $$ = new_contxt();   
                 push ($$, $1);    
-                printf("push symbol\n");
             } 
             ;
 
@@ -102,9 +100,9 @@ add:        '(' '+' p p ')'
             } 
             ;
 
-set:        '(' SET p p ')' 
+set:        '(' SET SYM p ')' 
             { 
-                $$ = new_symbol (0); 
+                $$ = new_symbol ($3); 
             } 
             ;
 

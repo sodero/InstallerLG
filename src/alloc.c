@@ -55,7 +55,7 @@ entry_p new_symbol (char *s)
     if (entry)
     {
         entry->type = SYMBOL; 
-        entry->value.symbol.name = "my_name";
+        entry->value.symbol.name = s;
         return entry; 
     }
     // Panic

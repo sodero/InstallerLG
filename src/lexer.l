@@ -3,7 +3,7 @@
 #include "types.h"
 #include "parser.h"
 
-#ifdef DEBUG
+#ifdef _DEBUG
 # define P(X) printf("L:%s|%s|\n", #X, yytext)
 #else
 # define P(X)
@@ -68,7 +68,7 @@
     Strings
     */
 \"[^\"]*\"              { 
-    yylval.s = yytext; 
+    yylval.s = strdup(yytext); 
     R(STR);        
 }    
 
@@ -76,7 +76,7 @@
     Symbols
     */
 [^" \n\t\(\)\+\*/-]+    { 
-    yylval.s = yytext; 
+    yylval.s = strdup(yytext); 
     R(SYM);        
 }
 
