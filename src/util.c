@@ -14,7 +14,8 @@ void plain_print (entry_p entry)
             break;
 
         case SYMBOL:
-            printf ("%s\n", entry->value.symbol.name);
+            printf ("%s\n\t", entry->value.symbol.name);
+            plain_print (entry->value.symbol.data);
             break;
 
         case NATIVE:

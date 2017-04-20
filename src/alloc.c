@@ -49,13 +49,14 @@ entry_p new_string (char *s)
     return 0; 
 }
 
-entry_p new_symbol (char *s) 
+entry_p new_symbol (char *s, entry_p e) 
 {
     entry_p entry = malloc (sizeof (entry_t)); 
     if (entry)
     {
         entry->type = SYMBOL; 
         entry->value.symbol.name = s;
+        entry->value.symbol.data = e;
         return entry; 
     }
     // Panic

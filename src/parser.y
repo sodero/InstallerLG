@@ -102,7 +102,7 @@ add:        '(' '+' p p ')'
 
 set:        '(' SET SYM p ')' 
             { 
-                $$ = new_symbol ($3); 
+                $$ = new_symbol ($3, $4); 
             } 
             ;
 
