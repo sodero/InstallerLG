@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "eval.h"
 #include "alloc.h"
@@ -16,7 +18,8 @@ entry_p eval_as_number(entry_p entry)
     }
     else if (entry->type == SYMBOL)
     {
-        // Todo
+        entry_p r = entry->value.symbol.data; 
+        num.value.number = eval_as_number(r)->value.number; 
     }
     else if (entry->type == SYMREF)
     {
@@ -45,17 +48,18 @@ entry_p eval_as_number(entry_p entry)
             if (*s == 0 || *s == e)
             {
                 // Symbol not found 
-                printf ("symbol not found\n");
+                printf ("Unknown symbol\n");
             }
         }
         else
         {
             // Panic
+            printf ("No context\n");
         }
     }
     else if (entry->type == STRING)
     {
-        // Todo
+        num.value.number = atoi (entry->value.string); 
     }
     else if (entry->type == NATIVE)
     {
@@ -71,6 +75,10 @@ entry_p eval_as_number(entry_p entry)
         {
             // Panic
         }
+    }
+    else if (entry->type == CUSTOM)
+    {
+        // Todo 
     }
     else
     {
@@ -112,16 +120,6 @@ entry_p eval_as_contxt(entry_p entry)
         }
         i++; 
     }
-
-    i = 0; 
-    while (entry->value.contxt.syms[i] && 
-           entry->value.contxt.syms[i] != entry)
-    {
-        entry_p curr = entry->value.contxt.syms[i]; 
-        plain_print (curr);
-        i++; 
-    }
-
     return entry;
 }
 

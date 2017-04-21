@@ -78,7 +78,6 @@
     */
 [^" \n\t\(\)\+\*/-]+    { 
     yylval.s = strdup(yytext); 
-    printf ("sym |%s|\n", yylval.s);
     R(SYM);        
 }
 
