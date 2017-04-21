@@ -93,6 +93,12 @@ n:          INT
             { 
                 $$ = new_string ($1); 
             }                        
+            |
+
+            SYM  
+            { 
+                $$ = new_symref ($1); 
+            }    
             ;
 
 a:          set

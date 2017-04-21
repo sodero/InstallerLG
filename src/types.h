@@ -14,6 +14,7 @@ struct entry_s
         NUMBER,
         STRING, 
         SYMBOL,
+        SYMREF,
         NATIVE, 
         CUSTOM, 
         CONTXT,
@@ -27,6 +28,10 @@ struct entry_s
             char *name; 
             entry_p data; 
         } symbol; 
+        struct 
+        {
+            char *name; 
+        } symref; 
         struct 
         {
             call_t call; 

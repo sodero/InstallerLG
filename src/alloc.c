@@ -62,7 +62,7 @@ entry_p new_string (char *s)
 entry_p new_symbol (char *s, entry_p e) 
 {
     entry_p entry = malloc (sizeof (entry_t)); 
-    if (entry)
+    if (entry && s && e)
     {
         entry->type = SYMBOL; 
         entry->value.symbol.name = s;
@@ -74,10 +74,25 @@ entry_p new_symbol (char *s, entry_p e)
     return 0; 
 }
 
+entry_p new_symref (char *s) 
+{
+    entry_p entry = malloc (sizeof (entry_t)); 
+    if (entry && s)
+    {
+        entry->type = SYMREF; 
+        entry->value.symref.name = s;
+        return entry; 
+    }
+    // Panic
+    free (entry);  
+    return 0; 
+}
+
+
 entry_p new_native (call_t call, int nargs)
 {
     entry_p entry = malloc (sizeof (entry_t)); 
-    if (entry)
+    if (entry && call)
     {
         entry->value.native.args = calloc (nargs + 1, sizeof (entry_p));
         if (entry->value.native.args)
@@ -88,7 +103,6 @@ entry_p new_native (call_t call, int nargs)
             return entry;
         }
     }
-
     // Panic
     free (entry);
     return 0;
@@ -99,6 +113,12 @@ void push (entry_p dst, entry_p src)
     int u = 0; 
     entry_p *new; 
     entry_p **dst_p; 
+
+    if (!dst || !src)
+    {
+        // Panic
+        return;
+    }
 
     switch (dst->type)
     {

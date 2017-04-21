@@ -14,8 +14,11 @@ void plain_print (entry_p entry)
             break;
 
         case SYMBOL:
-            printf ("%s:", entry->value.symbol.name);
             plain_print (entry->value.symbol.data);
+            break;
+
+        case SYMREF:
+            printf ("%s", entry->value.symbol.name);
             break;
 
         case NATIVE:
@@ -49,6 +52,12 @@ void pretty_print (entry_p entry)
 
         case SYMBOL:
             printf ("\tSYMBOL\n");
+            printf ("Name:\t%s", entry->value.symbol.name);
+            pretty_print (entry->value.symbol.data);
+            break;
+
+        case SYMREF:
+            printf ("\tSYMREF\n");
             printf ("Name:\t%s\n", entry->value.symbol.name);
             break;
 

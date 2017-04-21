@@ -18,6 +18,12 @@ entry_p eval_as_number(entry_p entry)
     {
         // Todo
     }
+    else if (entry->type == SYMREF)
+    {
+        printf("trying to evaluate symref as number\n");
+        pretty_print (entry);
+        // Todo
+    }
     else if (entry->type == STRING)
     {
         // Todo
