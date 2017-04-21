@@ -20,9 +20,38 @@ entry_p eval_as_number(entry_p entry)
     }
     else if (entry->type == SYMREF)
     {
-        printf("trying to evaluate symref as number\n");
-        pretty_print (entry);
-        // Todo
+        entry_p e = entry->parent; 
+        while (e && e->type != CONTXT)
+        {
+            e = e->parent; 
+        }
+        if (e->type == CONTXT)
+        {
+            char *sym_name, *ref_name; 
+            entry_p *s = e->value.contxt.syms; 
+            while (*s && *s != e)
+            {
+                sym_name = (*s)->value.symbol.name; 
+                ref_name = entry->value.symref.name; 
+                if (strcmp (sym_name, ref_name) == 0)
+                {
+                    entry_p r = (*s)->value.symbol.data; 
+                    num.value.number = eval_as_number(r)->value.number; 
+                    break;
+                }
+                s++; 
+            }
+
+            if (*s == 0 || *s == e)
+            {
+                // Symbol not found 
+                printf ("symbol not found\n");
+            }
+        }
+        else
+        {
+            // Panic
+        }
     }
     else if (entry->type == STRING)
     {
