@@ -1,5 +1,7 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "native.h"
 #include "eval.h"
 
@@ -122,7 +124,15 @@ set:        '(' SET SYM p ')'
 
 int main(int argc, char **argv)
 {
+
+#ifdef __APPLE__
+    char leaks[256]; 
+    snprintf(leaks, sizeof (leaks), "leaks %u", getpid()); 
+#endif
     yyparse();
+#ifdef __APPLE__
+    system(leaks);
+#endif
 }
 
 int yyerror(char *err)

@@ -181,8 +181,63 @@ void push (entry_p dst, entry_p src)
 
 void kill (entry_p entry)
 {
-    if (entry)
+    if (!entry)
     {
+        return; 
     }
+    else if (entry->type == NUMBER)
+    {
+        printf("Freeing NUMBER (%d)\n", entry->value.number);
+    }
+    else if (entry->type == STRING)
+    {
+        printf("Freeing STRING (%s)\n", entry->value.string);
+        free (entry->value.string); 
+    }
+    else if (entry->type == SYMBOL)
+    {
+        kill (entry->value.symbol.data);
+        free (entry->value.symbol.name); 
+        printf("Freeing SYMBOL\n");
+    }
+    else if (entry->type == SYMREF)
+    {
+        free (entry->value.symref.name); 
+        printf("Freeing SYMREF\n");
+    }
+    else if (entry->type == NATIVE)
+    {
+        entry_p *e = entry->value.native.args; 
+        while (*e && *e != entry)
+        {
+            kill (*e);
+            e++; 
+        }
+        free (entry->value.native.args);
+        printf("Freeing NATIVE\n");
+    }
+    else if (entry->type == CUSTOM)
+    {
+        // Todo
+    }
+    else if (entry->type == CONTXT)
+    {
+        entry_p *e = entry->value.contxt.args; 
+        while (*e && *e != entry)
+        {
+            kill (*e);
+            e++; 
+        }
+        e = entry->value.contxt.syms; 
+        while (*e && *e != entry)
+        {
+            kill (*e);
+            e++; 
+        }
+        free (entry->value.contxt.args);
+        free (entry->value.contxt.syms);
+        printf("Freeing CONTXT\n");
+    }
+    free (entry); 
 }
 
