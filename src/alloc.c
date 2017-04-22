@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "debug.h"
 #include "alloc.h"
 #include "native.h"
 
@@ -187,23 +188,27 @@ void kill (entry_p entry)
     }
     else if (entry->type == NUMBER)
     {
-        printf("Freeing NUMBER (%d)\n", entry->value.number);
+        DEBUG("Freeing NUMBER (%d)\n", 
+               entry->value.number);
     }
     else if (entry->type == STRING)
     {
-        printf("Freeing STRING (%s)\n", entry->value.string);
         free (entry->value.string); 
+        DEBUG("Freeing STRING (%s)\n", 
+               entry->value.string);
     }
     else if (entry->type == SYMBOL)
     {
         kill (entry->value.symbol.data);
+        DEBUG("Freeing SYMBOL (%s)\n", 
+               entry->value.symbol.name);
         free (entry->value.symbol.name); 
-        printf("Freeing SYMBOL\n");
     }
     else if (entry->type == SYMREF)
     {
+        DEBUG("Freeing SYMREF (%s)\n", 
+               entry->value.symref.name);
         free (entry->value.symref.name); 
-        printf("Freeing SYMREF\n");
     }
     else if (entry->type == NATIVE)
     {
@@ -214,11 +219,12 @@ void kill (entry_p entry)
             e++; 
         }
         free (entry->value.native.args);
-        printf("Freeing NATIVE\n");
+        DEBUG("Freeing NATIVE\n"); 
     }
     else if (entry->type == CUSTOM)
     {
         // Todo
+        DEBUG("TODO: Free CUSTOM\n"); 
     }
     else if (entry->type == CONTXT)
     {
@@ -236,7 +242,7 @@ void kill (entry_p entry)
         }
         free (entry->value.contxt.args);
         free (entry->value.contxt.syms);
-        printf("Freeing CONTXT\n");
+        DEBUG("Freeing CONTXT\n"); 
     }
     free (entry); 
 }
