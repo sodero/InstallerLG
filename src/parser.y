@@ -127,9 +127,3 @@ int main(int argc, char **argv)
     LEAK_CHECK;
 }
 
-int yyerror(char *err)
-{
-    fprintf(stderr, "%s\n", err);
-    return 0;
-}
-

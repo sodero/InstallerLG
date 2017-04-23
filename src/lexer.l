@@ -84,6 +84,15 @@
     /*
     The bottom feeders
     */
-[\n\t ]+                { N(' ');        }
-;.*$                    { N(';');        }
+\n                    { N(' '); yylineno++; }
+[\t ]+                { N(' '); }
+;.*$                  { N(';'); }
 %%
+
+int yyerror(char *err)
+{
+    fprintf(stderr, "Line %d: %s at '%s'\n", 
+            yylineno, err, yytext);
+    return 0;
+}
+

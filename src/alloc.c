@@ -188,25 +188,25 @@ void kill (entry_p entry)
     }
     else if (entry->type == NUMBER)
     {
-        DEBUG("Freeing NUMBER (%d)\n", 
+        TRACE("Freeing NUMBER (%d)\n", 
                entry->value.number);
     }
     else if (entry->type == STRING)
     {
         free (entry->value.string); 
-        DEBUG("Freeing STRING (%s)\n", 
+        TRACE("Freeing STRING (%s)\n", 
                entry->value.string);
     }
     else if (entry->type == SYMBOL)
     {
         kill (entry->value.symbol.data);
-        DEBUG("Freeing SYMBOL (%s)\n", 
+        TRACE("Freeing SYMBOL (%s)\n", 
                entry->value.symbol.name);
         free (entry->value.symbol.name); 
     }
     else if (entry->type == SYMREF)
     {
-        DEBUG("Freeing SYMREF (%s)\n", 
+        TRACE("Freeing SYMREF (%s)\n", 
                entry->value.symref.name);
         free (entry->value.symref.name); 
     }
@@ -219,12 +219,12 @@ void kill (entry_p entry)
             e++; 
         }
         free (entry->value.native.args);
-        DEBUG("Freeing NATIVE\n"); 
+        TRACE("Freeing NATIVE\n"); 
     }
     else if (entry->type == CUSTOM)
     {
         // Todo
-        DEBUG("TODO: Free CUSTOM\n"); 
+        TRACE("TODO: Free CUSTOM\n"); 
     }
     else if (entry->type == CONTXT)
     {
@@ -242,7 +242,7 @@ void kill (entry_p entry)
         }
         free (entry->value.contxt.args);
         free (entry->value.contxt.syms);
-        DEBUG("Freeing CONTXT\n"); 
+        TRACE("Freeing CONTXT\n"); 
     }
     free (entry); 
 }
