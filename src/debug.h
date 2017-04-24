@@ -7,7 +7,7 @@
 
 #define TRACE(...) fprintf (stderr, __VA_ARGS__)
 #ifdef __APPLE__
-#define LEAK_CHECK if (0) { char leaks[256]; \
+#define LEAK_CHECK if (1) { char leaks[256]; \
                             snprintf(leaks,  \
                             sizeof (leaks),  \
                             "leaks %u >&2",  \

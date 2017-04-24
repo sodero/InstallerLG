@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "native.h"
 #include "eval.h"
+#include "util.h"
 
 int yylex(void);
 int yyerror(char *err);
@@ -19,14 +20,17 @@ int yyerror(char *err);
 %token<n> INT HEX BIN 
 %token SET AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT
 
-%type<e> s p vp np ap v n a
 %type<e> add set
+%type<e> s p vp np ap v n a
+
+%destructor { free($$); } SYM STR
+%destructor { kill($$); } s p vp np ap v n a add set
 
 %%
-entry:      s    
+start:      s    
             { 
                 eval_as_contxt ($1); 
-                kill ($1);           
+                kill($1);
             } 
 
 s:          s vp 
