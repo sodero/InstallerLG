@@ -4,6 +4,7 @@
 #include "eval.h"
 #include "alloc.h"
 #include "util.h"
+#include "debug.h"
 
 entry_p eval_as_number(entry_p entry)
 { 
@@ -48,13 +49,13 @@ entry_p eval_as_number(entry_p entry)
             if (*s == 0 || *s == e)
             {
                 // Symbol not found 
-                printf ("Unknown symbol\n");
+                TRACE ("Unknown symbol\n");
             }
         }
         else
         {
             // Panic
-            printf ("No context\n");
+            TRACE ("No context\n");
         }
     }
     else if (entry->type == STRING)
@@ -74,15 +75,18 @@ entry_p eval_as_number(entry_p entry)
         else
         {
             // Panic
+            TRACE ("Panic\n");
         }
     }
     else if (entry->type == CUSTOM)
     {
         // Todo 
+        TRACE ("Custom\n");
     }
     else
     {
         // Panic
+        TRACE ("Panic\n");
     }
 
     return &num; 
@@ -100,7 +104,7 @@ entry_p eval_as_string(entry_p entry)
     return &num; 
 }
 
-entry_p eval_as_contxt(entry_p entry)
+void run(entry_p entry)
 { 
     int i = 0; 
     while (entry->value.contxt.args[i] && 
@@ -120,6 +124,6 @@ entry_p eval_as_contxt(entry_p entry)
         }
         i++; 
     }
-    return entry;
+    kill (entry); 
 }
 
