@@ -28,12 +28,12 @@ extern int yylineno;
 
 %type<e> start 
 %type<e> add set
-%type<e> s p vp np ap v n a
+%type<e> s p vp np
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
 %destructor { kill($$); } add set
-%destructor { kill($$); } s p vp np ap v n a
+%destructor { kill($$); } s p vp np
 
 %%
 start:      s    
@@ -45,20 +45,7 @@ s:          s vp
             } 
             |
 
-            s ap 
-            { 
-                push ($$, $2);                  
-            } 
-            |
-
             vp   
-            { 
-                $$ = new_contxt();   
-                push ($$, $1);    
-            } 
-            |
-
-            ap   
             { 
                 $$ = new_contxt();   
                 push ($$, $1);    
@@ -70,19 +57,12 @@ p:          vp
             np
             ;
 
-vp:         v  
+vp:         add
+            |
+            set
             ;
 
-np:         n     
-            ;
-
-ap:         a
-            ;
-
-v:          add
-            ;
-
-n:          INT  
+np:         INT  
             { 
                 $$ = new_number ($1); 
             } 
@@ -110,9 +90,6 @@ n:          INT
             { 
                 $$ = new_symref ($1, yylineno); 
             }    
-            ;
-
-a:          set
             ;
 
 add:        '(' '+' p p ')' 
