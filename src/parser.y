@@ -27,13 +27,13 @@ extern int yylineno;
 %token SHIFTLEFT SHIFTRIGHT
 
 %type<e> start 
-%type<e> add set
 %type<e> s p vp np
+%type<e> add set set_pp
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
-%destructor { kill($$); } add set
 %destructor { kill($$); } s p vp np
+%destructor { kill($$); } add set set_pp
 
 %%
 start:      s    
@@ -100,12 +100,21 @@ add:        '(' '+' p p ')'
             } 
             ;
 
-set:        '(' SET SYM p ')' 
+set:        '(' SET set_pp ')' 
             { 
-                $$ = new_symbol ($3, $4); 
+                $$ = $3; 
             } 
             ;
 
+set_pp:     set_pp SYM p
+            { 
+            } 
+            |
+            SYM p
+            { 
+                $$ = new_symbol ($1, $2); 
+            } 
+            ;
 %%
 
 int main(int argc, char **argv)
