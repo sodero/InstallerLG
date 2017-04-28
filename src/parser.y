@@ -7,6 +7,8 @@
 
 int yylex(void);
 int yyerror(char *err);
+
+extern int yylineno; 
 %}
 
 %union 
@@ -106,7 +108,7 @@ n:          INT
 
             SYM  
             { 
-                $$ = new_symref ($1); 
+                $$ = new_symref ($1, yylineno); 
             }    
             ;
 

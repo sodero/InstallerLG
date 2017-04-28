@@ -4,7 +4,6 @@
 VPATH := ../src
 CFLAGS += -I . -I $(VPATH) 
 LFLAGS += -DNDEBUG
-YFLAGS += --locations
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 
 #---------------------------------------------------------------------------------#
@@ -14,7 +13,7 @@ OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 	$(LEX) $(LFLAGS) -t $< > $@
 
 %.c: %.y
-	$(YACC) $(YFLAGS) -d $< -o $@
+	$(YACC) -d $< -o $@
 
 #---------------------------------------------------------------------------------#
 # Build targets

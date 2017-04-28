@@ -31,6 +31,7 @@ struct entry_s
         struct 
         {
             char *name; 
+            int line; 
         } symref; 
         struct 
         {

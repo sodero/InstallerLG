@@ -75,13 +75,14 @@ entry_p new_symbol (char *s, entry_p e)
     return 0; 
 }
 
-entry_p new_symref (char *s) 
+entry_p new_symref (char *s, int l)
 {
     entry_p entry = malloc (sizeof (entry_t)); 
     if (entry && s)
     {
         entry->type = SYMREF; 
         entry->value.symref.name = s;
+        entry->value.symref.line = l;
         return entry; 
     }
     // Panic
