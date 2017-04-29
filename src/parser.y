@@ -108,11 +108,13 @@ set:        '(' SET set_pp ')'
 
 set_pp:     set_pp SYM p
             { 
+                push ($$, new_symbol ($2, $3));  
             } 
             |
             SYM p
             { 
-                $$ = new_symbol ($1, $2); 
+                $$ = new_native (m_set, 2); 
+                push ($$, new_symbol ($1, $2));  
             } 
             ;
 %%

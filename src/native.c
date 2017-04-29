@@ -2,6 +2,41 @@
 #include "eval.h"
 #include "native.h"
 #include "util.h"
+#include "debug.h"
+
+
+entry_p m_set (entry_p *argv)
+{
+    entry_p e = argv[0]->parent;
+
+    pretty_print(e); 
+    TRACE("this:\t%p\n", m_set);
+    
+    TRACE("1\n");
+
+    while (e && e->type != CONTXT)
+    {
+        e = e->parent;
+    }
+    pretty_print(e); 
+    if (e->type == CONTXT)
+    {
+        int i = 0; 
+        TRACE("2\n");
+        while(argv[i] && argv[i] != argv[i]->parent)
+        {
+            TRACE("3\n");
+            push(e, argv[i]); 
+            i++; 
+       }
+    }
+    else
+    {
+        // Panic
+        TRACE ("No context\n");
+    }
+    return new_number(1); 
+}
 
 /*
 `(+ <expr1> <expr2> ...)'
@@ -9,13 +44,11 @@
 */
 entry_p m_add (entry_p *argv)
 {
-    entry_p entry; 
     int a = eval_as_number(argv[0])->value.number, 
         b = eval_as_number(argv[1])->value.number; 
+    entry_p e = new_number (a + b); 
 
-    entry = new_number (a + b); 
-
-    return entry;  
+    return e;  
 }
 
 /* 

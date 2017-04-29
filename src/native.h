@@ -6,6 +6,7 @@
 
 entry_p eval(entry_p entry);
 
+entry_p m_set(entry_p *argv);
 entry_p m_add(entry_p *argv);
 
 int m_sub(int a, int b);

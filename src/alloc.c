@@ -185,6 +185,7 @@ void kill (entry_p entry)
 {
     if (!entry)
     {
+        TRACE("Freeing NULL\n");
         return; 
     }
     else if (entry->type == NUMBER)
@@ -235,12 +236,14 @@ void kill (entry_p entry)
             kill (*e);
             e++; 
         }
+        /*
         e = entry->value.contxt.syms; 
         while (*e && *e != entry)
         {
             kill (*e);
             e++; 
         }
+*/
         free (entry->value.contxt.args);
         free (entry->value.contxt.syms);
         TRACE("Freeing CONTXT\n"); 
