@@ -60,6 +60,48 @@ entry_p new_string (char *s)
     return entry;
 }
 
+entry_p new_success () 
+{
+    char *name = strdup("Success");
+    entry_p status = malloc (sizeof (entry_t)); 
+
+    if (status && name)
+    {
+        status->type = STATUS;
+        status->value.status.value = 1;
+        status->value.status.name = name;
+    }
+    else
+    {
+        // Panic
+        free(name); 
+        free(status); 
+        status = 0;
+    }
+    return status;
+}
+
+entry_p new_failure (char *s) 
+{
+    char *name = strdup(s ? s : "Failure");
+    entry_p status = malloc (sizeof (entry_t)); 
+
+    if (status && name)
+    {
+        status->type = STATUS;
+        status->value.status.value = 0;
+        status->value.status.name = name;
+    }
+    else
+    {
+        // Panic
+        free(name); 
+        free(status); 
+        status = 0;
+    }
+    return status;
+}
+
 entry_p new_symbol (char *s, entry_p e) 
 {
     entry_p entry = malloc (sizeof (entry_t)); 
@@ -185,31 +227,19 @@ void kill (entry_p entry)
 {
     if (!entry)
     {
-        TRACE("Freeing NULL\n");
         return; 
-    }
-    else if (entry->type == NUMBER)
-    {
-        TRACE("Freeing NUMBER (%d)\n", 
-               entry->value.number);
     }
     else if (entry->type == STRING)
     {
         free (entry->value.string); 
-        TRACE("Freeing STRING (%s)\n", 
-               entry->value.string);
     }
     else if (entry->type == SYMBOL)
     {
         kill (entry->value.symbol.data);
-        TRACE("Freeing SYMBOL (%s)\n", 
-               entry->value.symbol.name);
         free (entry->value.symbol.name); 
     }
     else if (entry->type == SYMREF)
     {
-        TRACE("Freeing SYMREF (%s)\n", 
-               entry->value.symref.name);
         free (entry->value.symref.name); 
     }
     else if (entry->type == NATIVE)
@@ -221,7 +251,6 @@ void kill (entry_p entry)
             e++; 
         }
         free (entry->value.native.args);
-        TRACE("Freeing NATIVE\n"); 
     }
     else if (entry->type == CUSTOM)
     {
@@ -236,18 +265,14 @@ void kill (entry_p entry)
             kill (*e);
             e++; 
         }
-        /*
-        e = entry->value.contxt.syms; 
-        while (*e && *e != entry)
-        {
-            kill (*e);
-            e++; 
-        }
-*/
         free (entry->value.contxt.args);
         free (entry->value.contxt.syms);
-        TRACE("Freeing CONTXT\n"); 
     }
+    else if (entry->type == STATUS)
+    {
+        free (entry->value.status.name); 
+    }
+
     free (entry); 
 }
 

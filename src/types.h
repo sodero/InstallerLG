@@ -18,6 +18,7 @@ struct entry_s
         NATIVE, 
         CUSTOM, 
         CONTXT,
+        STATUS,
     } type;
     union
     {
@@ -49,6 +50,11 @@ struct entry_s
             entry_p *syms; 
             entry_p *args; 
         } contxt; 
+        struct 
+        {
+            char *name; 
+            int value; 
+        } status; 
     } value; 
     entry_p parent; 
 }; 

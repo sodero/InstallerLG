@@ -8,34 +8,24 @@
 entry_p m_set (entry_p *argv)
 {
     entry_p e = argv[0]->parent;
-
-    pretty_print(e); 
-    TRACE("this:\t%p\n", m_set);
-    
-    TRACE("1\n");
-
     while (e && e->type != CONTXT)
     {
         e = e->parent;
     }
-    pretty_print(e); 
     if (e->type == CONTXT)
     {
         int i = 0; 
-        TRACE("2\n");
         while(argv[i] && argv[i] != argv[i]->parent)
         {
-            TRACE("3\n");
             push(e, argv[i]); 
             i++; 
-       }
+        }
     }
     else
     {
-        // Panic
-        TRACE ("No context\n");
+        return new_failure("No context"); 
     }
-    return new_number(1); 
+    return new_success(); 
 }
 
 /*

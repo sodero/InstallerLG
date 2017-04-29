@@ -124,7 +124,7 @@ void run(entry_p entry)
             if (call && args)
             {
                 entry_p ret = call (args);
-                plain_print (ret);
+                eval_print (ret);
                 kill (ret);
             }
         }

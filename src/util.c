@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "util.h"
 
-void plain_print (entry_p entry)
+void eval_print (entry_p entry)
 {
     switch (entry->type)
     {
@@ -14,23 +14,14 @@ void plain_print (entry_p entry)
             break;
 
         case SYMBOL:
-            plain_print (entry->value.symbol.data);
+            eval_print (entry->value.symbol.data);
             break;
 
         case SYMREF:
-            printf ("%s", entry->value.symbol.name);
-            break;
-
         case NATIVE:
-            printf ("NATIVE\n"); 
-            break;
-
         case CUSTOM:
-            printf ("%s\n", entry->value.custom.name);
-            break;
-
         case CONTXT:
-            printf ("CONTXT\n"); 
+        case STATUS:
             break;
     }
 }
@@ -74,6 +65,12 @@ void pretty_print (entry_p entry)
 
         case CONTXT:
             printf ("\tCONTXT\n"); 
+            break;
+
+        case STATUS:
+            printf ("\tSTATUS\n");
+            printf ("Name:\t%s\n", entry->value.status.name);
+            printf ("Value:\t%d\n", entry->value.status.value);
             break;
     }
 }
