@@ -1,0 +1,33 @@
+
+    if (src->type != SYMBOL)
+    {
+        switch (dst->type)
+        {
+            case CONTXT:
+                dst_p = &dst->value.contxt.args; 
+                break; 
+
+            case NATIVE:
+                dst_p = &dst->value.native.args; 
+                break; 
+
+            case CUSTOM:
+                dst_p = &dst->value.custom.args; 
+                break; 
+
+            default: 
+                break; 
+        }
+    }
+    else if (dst->type == CONTXT)
+    {
+        dst_p = &dst->value.contxt.syms; 
+    }
+
+    if (!dst_p) 
+    {
+        // Panic
+        return;
+    }
+
+

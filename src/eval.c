@@ -81,6 +81,10 @@ entry_p eval_as_number(entry_p entry)
             TRACE ("Panic\n");
         }
     }
+    else if (entry->type == STATUS)
+    {
+        num.value.number = entry->value.status.value;
+    }
     else if (entry->type == CUSTOM)
     {
         // Todo

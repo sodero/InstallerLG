@@ -164,30 +164,43 @@ void push (entry_p dst, entry_p src)
         return;
     }
 
-    switch (dst->type)
+    if (dst->type == CONTXT && 
+        src->type == SYMBOL)
     {
-        case CONTXT:
-            switch (src->type)
+        while (dst->value.contxt.syms[u] &&
+               dst->value.contxt.syms[u] != dst)
+        {
+            entry_p cur = dst->value.contxt.syms[u]; 
+            char *old = cur->value.symbol.name, 
+                 *new = src->value.symbol.name; 
+            if (strcmp (old, new) == 0)
             {
-                case SYMBOL:
-                    dst_p = &dst->value.contxt.syms; 
-                    break; 
-                
-                default: 
-                    dst_p = &dst->value.contxt.args; 
+                dst->value.contxt.syms[u] = src;
+                return; 
             }
-            break; 
+            u++;
+        }
+        dst_p = &dst->value.contxt.syms; 
+    }
+    else
+    {
+        switch (dst->type)
+        {
+            case CONTXT:
+                dst_p = &dst->value.contxt.args; 
+                break; 
 
-        case NATIVE:
-            dst_p = &dst->value.native.args; 
-            break; 
+            case NATIVE:
+                dst_p = &dst->value.native.args; 
+                break; 
 
-        case CUSTOM:
-            dst_p = &dst->value.custom.args; 
-            break; 
+            case CUSTOM:
+                dst_p = &dst->value.custom.args; 
+                break; 
 
-        default: 
-            return; 
+            default: 
+                return; 
+        }
     }
 
     // Free space? 
