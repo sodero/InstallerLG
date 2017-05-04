@@ -7,17 +7,20 @@
 
 entry_p m_set (entry_p *argv)
 {
-    entry_p e = argv[0]->parent;
-    while (e && e->type != CONTXT)
+    entry_p par = argv[0]->parent, 
+            con = argv[0]->parent;
+
+    while (con && con->type != CONTXT)
     {
-        e = e->parent;
+        con = con->parent;
     }
-    if (e->type == CONTXT)
+
+    if (con->type == CONTXT)
     {
         int i = 0; 
-        while(argv[i] && argv[i] != argv[i]->parent)
+        while(argv[i] && argv[i] != SENTINEL)
         {
-            push(e, argv[i]); 
+            push(con, argv[i]); 
             i++; 
         }
     }
@@ -25,6 +28,7 @@ entry_p m_set (entry_p *argv)
     {
         return new_failure("No context"); 
     }
+
     return new_success(); 
 }
 

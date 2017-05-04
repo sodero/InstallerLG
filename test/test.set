@@ -1,2 +1,5 @@
 (set a 1) (+ a 1) ; out="2"
-(set a 1 b 2) (+ a b) ; out="2"
+(set a 1 b 2) (+ a b) ; out="3"
+(set a 1 b 2) (set a 2) (+ a b) ; out="4"
+(set a (+ 10 10)) (set b 2) (+ a b) ; out="22"
+(set a "1") (+ a 1) ; out="2"

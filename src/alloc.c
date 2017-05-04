@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "debug.h"
+#include "util.h"
 #include "alloc.h"
 #include "native.h"
 
@@ -143,7 +144,7 @@ entry_p new_native (call_t call, int nargs)
         {
             entry->type = NATIVE;
             entry->value.native.call = call;
-            entry->value.native.args[nargs] = entry; 
+            entry->value.native.args[nargs] = SENTINEL; 
             return entry;
         }
     }
@@ -204,7 +205,7 @@ void push (entry_p dst, entry_p src)
     }
 
     // Free space? 
-    while ((*dst_p)[u] != dst)
+    while ((*dst_p)[u] != SENTINEL)
     {
         if (!(*dst_p)[u])
         {
@@ -221,7 +222,7 @@ void push (entry_p dst, entry_p src)
     if (new)
     {
         // Put the sentinel in place
-        new[u << 1] = dst; 
+        new[u << 1] = SENTINEL; 
         // Make the swap and release the old array
         memmove (new, *dst_p, u * sizeof (entry_p)); 
         free (*dst_p); 
@@ -258,7 +259,7 @@ void kill (entry_p entry)
     else if (entry->type == NATIVE)
     {
         entry_p *e = entry->value.native.args; 
-        while (*e && *e != entry)
+        while (*e && *e != SENTINEL)
         {
             kill (*e);
             e++; 
@@ -273,7 +274,7 @@ void kill (entry_p entry)
     else if (entry->type == CONTXT)
     {
         entry_p *e = entry->value.contxt.args; 
-        while (*e && *e != entry)
+        while (*e && *e != SENTINEL)
         {
             kill (*e);
             e++; 
