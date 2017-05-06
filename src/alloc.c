@@ -43,7 +43,6 @@ entry_p new_number (int n)
 
 entry_p new_string (char *s) 
 {
-    ASSERT(s);
     if(s)
     {
         entry_p entry = calloc (1, sizeof (entry_t)); 
@@ -91,7 +90,6 @@ entry_p new_failure (char *s)
 
 entry_p new_symbol (char *s, entry_p e) 
 {
-    ASSERT(s && e); 
     if (s && e)
     {
         entry_p entry = calloc (1, sizeof (entry_t)); 
@@ -109,7 +107,6 @@ entry_p new_symbol (char *s, entry_p e)
 
 entry_p new_symref (char *s, int l)
 {
-    ASSERT(s && (l > 0));
     if(s && (l > 0))
     {
         entry_p entry = calloc (1, sizeof (entry_t)); 
@@ -128,7 +125,6 @@ entry_p new_symref (char *s, int l)
 
 entry_p new_native (call_t call, int nargs)
 {
-    ASSERT(call); 
     if (call)
     {
         entry_p entry = calloc (1, sizeof (entry_t)); 
@@ -150,13 +146,10 @@ entry_p new_native (call_t call, int nargs)
 
 void push (entry_p dst, entry_p src)
 {
-    ASSERT(dst && src); 
     if (dst && src)
     {
         int u = 0; 
-        entry_p *new; 
         entry_p **dst_p = &dst->children;
-
         if (dst->type == CONTXT && 
             src->type == SYMBOL)
         {
@@ -175,32 +168,35 @@ void push (entry_p dst, entry_p src)
             }
             dst_p = &dst->symbols; 
         }
-        // Free space? 
-        ASSERT(*dst_p);
-        while ((*dst_p)[u] != SENTINEL)
+        if(*dst_p)
         {
-            if (!(*dst_p)[u])
+            entry_p *new; 
+            // Free space? 
+            while ((*dst_p)[u] != SENTINEL)
             {
-                // If true, push and return
+                if (!(*dst_p)[u])
+                {
+                    // If true, push and return
+                    (*dst_p)[u] = src; 
+                    src->parent = dst; 
+                    return; 
+                }
+                u++;
+            }
+            // Make the new array twice as big (+sentinel)
+            new = calloc (1 + (u << 1), sizeof (entry_p));
+            if (new)
+            {
+                // Insert sentinel
+                new[u << 1] = SENTINEL; 
+                // Make the swap and free the old array
+                memmove (new, *dst_p, u * sizeof (entry_p)); 
+                free (*dst_p); 
+                *dst_p = new; 
+                // Do the push
                 (*dst_p)[u] = src; 
                 src->parent = dst; 
-                return; 
             }
-            u++;
-        }
-        // Make the new array twice as big (+sentinel)
-        new = calloc (1 + (u << 1), sizeof (entry_p));
-        if (new)
-        {
-            // Insert sentinel
-            new[u << 1] = SENTINEL; 
-            // Make the swap and free the old array
-            memmove (new, *dst_p, u * sizeof (entry_p)); 
-            free (*dst_p); 
-            *dst_p = new; 
-            // Do the push
-            (*dst_p)[u] = src; 
-            src->parent = dst; 
         }
     }
 }
