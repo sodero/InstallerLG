@@ -8,285 +8,221 @@
 
 entry_p new_contxt ()
 {
-    entry_p entry = malloc (sizeof (entry_t)); 
+    entry_p entry = calloc (1, sizeof (entry_t)); 
     if (entry)
     {
-        entry_p *syms, *args; 
-        syms = calloc (ENTRIES + 1, sizeof (entry_p)); 
-        args = calloc (ENTRIES + 1, sizeof (entry_p)); 
-        if (syms && args)
+        entry_p *symbols, *children; 
+        symbols = calloc (ENTRIES + 1, sizeof (entry_p)); 
+        children = calloc (ENTRIES + 1, sizeof (entry_p)); 
+        if (symbols && children)
         {
             entry->type = CONTXT;
-            entry->value.contxt.syms = syms; 
-            entry->value.contxt.args = args; 
-            entry->value.contxt.syms[ENTRIES] = entry; 
-            entry->value.contxt.args[ENTRIES] = entry; 
+            entry->symbols = symbols; 
+            entry->children = children; 
+            entry->symbols[ENTRIES] = SENTINEL; 
+            entry->children[ENTRIES] = SENTINEL; 
             return entry; 
         }
-        free (syms); 
-        free (args); 
+        free (symbols); 
+        free (children); 
     }
-    // OOM panic
     free (entry);
     return 0;
 }
 
 entry_p new_number (int n)
 {
-    entry_p entry = malloc (sizeof (entry_t)); 
+    entry_p entry = calloc (1, sizeof (entry_t)); 
     if (entry)
     {
         entry->type = NUMBER;
-        entry->value.number = n;
-    }
-    else
-    {
-        // Panic
+        entry->id = n;
     }
     return entry;
 }
 
 entry_p new_string (char *s) 
 {
-    entry_p entry = malloc (sizeof (entry_t)); 
-    if (entry)
+    ASSERT(s);
+    if(s)
     {
-        entry->type = STRING;
-        entry->value.string = s;
+        entry_p entry = calloc (1, sizeof (entry_t)); 
+        if (entry)
+        {
+            entry->type = STRING;
+            entry->name = s;
+            return entry;
+        }
     }
-    else
-    {
-        // Panic
-    }
-    return entry;
+    return 0; 
 }
 
 entry_p new_success () 
 {
     char *name = strdup("Success");
-    entry_p status = malloc (sizeof (entry_t)); 
-
+    entry_p status = calloc (1, sizeof (entry_t)); 
     if (status && name)
     {
         status->type = STATUS;
-        status->value.status.value = 1;
-        status->value.status.name = name;
+        status->id = 1;
+        status->name = name;
+        return status;
     }
-    else
-    {
-        // Panic
-        free(name); 
-        free(status); 
-        status = 0;
-    }
-    return status;
+    free(name); 
+    free(status); 
+    return 0;
 }
 
 entry_p new_failure (char *s) 
 {
     char *name = strdup(s ? s : "Failure");
-    entry_p status = malloc (sizeof (entry_t)); 
-
+    entry_p status = calloc (1, sizeof (entry_t)); 
     if (status && name)
     {
         status->type = STATUS;
-        status->value.status.value = 0;
-        status->value.status.name = name;
+        status->id = 0;
+        status->name = name;
+        return status;
     }
-    else
-    {
-        // Panic
-        free(name); 
-        free(status); 
-        status = 0;
-    }
-    return status;
+    free(name); 
+    free(status); 
+    return 0;
 }
 
 entry_p new_symbol (char *s, entry_p e) 
 {
-    entry_p entry = malloc (sizeof (entry_t)); 
-    if (entry && s && e)
+    ASSERT(s && e); 
+    if (s && e)
     {
-        entry->type = SYMBOL; 
-        entry->value.symbol.name = s;
-        entry->value.symbol.data = e;
-        return entry; 
+        entry_p entry = calloc (1, sizeof (entry_t)); 
+        if (entry)
+        {
+            entry->type = SYMBOL; 
+            entry->name = s;
+            entry->reference = e;
+            return entry; 
+        }
+        free (entry);  
     }
-    // Panic
-    free (entry);  
     return 0; 
 }
 
 entry_p new_symref (char *s, int l)
 {
-    entry_p entry = malloc (sizeof (entry_t)); 
-    if (entry && s)
+    ASSERT(s && (l > 0));
+    if(s && (l > 0))
     {
-        entry->type = SYMREF; 
-        entry->value.symref.name = s;
-        entry->value.symref.line = l;
-        return entry; 
+        entry_p entry = calloc (1, sizeof (entry_t)); 
+        if (entry)
+        {
+            entry->type = SYMREF; 
+            entry->name = s;
+            entry->id = l;
+            return entry; 
+        }
+        free (entry);  
     }
-    // Panic
-    free (entry);  
     return 0; 
 }
 
 
 entry_p new_native (call_t call, int nargs)
 {
-    entry_p entry = malloc (sizeof (entry_t)); 
-    if (entry && call)
+    ASSERT(call); 
+    if (call)
     {
-        entry->value.native.args = calloc (nargs + 1, sizeof (entry_p));
-        if (entry->value.native.args)
+        entry_p entry = calloc (1, sizeof (entry_t)); 
+        if (entry)
         {
-            entry->type = NATIVE;
-            entry->value.native.call = call;
-            entry->value.native.args[nargs] = SENTINEL; 
-            return entry;
+            entry->children = calloc (nargs + 1, sizeof (entry_p));
+            if (entry->children)
+            {
+                entry->type = NATIVE;
+                entry->call = call;
+                entry->children[nargs] = SENTINEL; 
+                return entry;
+            }
+            free (entry);
         }
     }
-    // Panic
-    free (entry);
     return 0;
 }
 
 void push (entry_p dst, entry_p src)
 {
-    int u = 0; 
-    entry_p *new; 
-    entry_p **dst_p; 
-
-    if (!dst || !src)
+    ASSERT(dst && src); 
+    if (dst && src)
     {
-        // Panic
-        return;
-    }
+        int u = 0; 
+        entry_p *new; 
+        entry_p **dst_p = &dst->children;
 
-    if (dst->type == CONTXT && 
-        src->type == SYMBOL)
-    {
-        while (dst->value.contxt.syms[u] &&
-               dst->value.contxt.syms[u] != dst)
+        if (dst->type == CONTXT && 
+            src->type == SYMBOL)
         {
-            entry_p cur = dst->value.contxt.syms[u]; 
-            char *old = cur->value.symbol.name, 
-                 *new = src->value.symbol.name; 
-            if (strcmp (old, new) == 0)
+            while (dst->symbols[u] &&
+                   dst->symbols[u] != dst)
             {
-                dst->value.contxt.syms[u] = src;
+                entry_p cur = dst->symbols[u]; 
+                char *old = cur->name, 
+                     *new = src->name; 
+                if (strcmp (old, new) == 0)
+                {
+                    dst->symbols[u] = src;
+                    return; 
+                }
+                u++;
+            }
+            dst_p = &dst->symbols; 
+        }
+        // Free space? 
+        ASSERT(*dst_p);
+        while ((*dst_p)[u] != SENTINEL)
+        {
+            if (!(*dst_p)[u])
+            {
+                // If true, push and return
+                (*dst_p)[u] = src; 
+                src->parent = dst; 
                 return; 
             }
             u++;
         }
-        dst_p = &dst->value.contxt.syms; 
-    }
-    else
-    {
-        switch (dst->type)
+        // Make the new array twice as big (+sentinel)
+        new = calloc (1 + (u << 1), sizeof (entry_p));
+        if (new)
         {
-            case CONTXT:
-                dst_p = &dst->value.contxt.args; 
-                break; 
-
-            case NATIVE:
-                dst_p = &dst->value.native.args; 
-                break; 
-
-            case CUSTOM:
-                dst_p = &dst->value.custom.args; 
-                break; 
-
-            default: 
-                return; 
-        }
-    }
-
-    // Free space? 
-    while ((*dst_p)[u] != SENTINEL)
-    {
-        if (!(*dst_p)[u])
-        {
-            // If true, push and return
+            // Insert sentinel
+            new[u << 1] = SENTINEL; 
+            // Make the swap and free the old array
+            memmove (new, *dst_p, u * sizeof (entry_p)); 
+            free (*dst_p); 
+            *dst_p = new; 
+            // Do the push
             (*dst_p)[u] = src; 
             src->parent = dst; 
-            return; 
         }
-        u++;
-    }
-
-    // Make the new array twice as big (+sentinel)
-    new = calloc (1 + (u << 1), sizeof (entry_p));
-    if (new)
-    {
-        // Put the sentinel in place
-        new[u << 1] = SENTINEL; 
-        // Make the swap and release the old array
-        memmove (new, *dst_p, u * sizeof (entry_p)); 
-        free (*dst_p); 
-        *dst_p = new; 
-        // Finally, do the push
-        (*dst_p)[u] = src; 
-        src->parent = dst; 
-    }
-    else
-    {
-        // Panic!
     }
 }
 
 void kill (entry_p entry)
 {
-    if (!entry)
+    if (entry)
     {
-        return; 
-    }
-    else if (entry->type == STRING)
-    {
-        free (entry->value.string); 
-    }
-    else if (entry->type == SYMBOL)
-    {
-        kill (entry->value.symbol.data);
-        free (entry->value.symbol.name); 
-    }
-    else if (entry->type == SYMREF)
-    {
-        free (entry->value.symref.name); 
-    }
-    else if (entry->type == NATIVE)
-    {
-        entry_p *e = entry->value.native.args; 
-        while (*e && *e != SENTINEL)
+        free (entry->name); 
+        kill (entry->reference);
+        if(entry->children)
         {
-            kill (*e);
-            e++; 
+            entry_p *e = entry->children; 
+            while (*e && *e != SENTINEL)
+            {
+                kill (*e);
+                e++; 
+            }
+            free (entry->children);
         }
-        free (entry->value.native.args);
+        free (entry->symbols);
+        free (entry); 
     }
-    else if (entry->type == CUSTOM)
-    {
-        // Todo
-        TRACE("TODO: Free CUSTOM\n"); 
-    }
-    else if (entry->type == CONTXT)
-    {
-        entry_p *e = entry->value.contxt.args; 
-        while (*e && *e != SENTINEL)
-        {
-            kill (*e);
-            e++; 
-        }
-        free (entry->value.contxt.args);
-        free (entry->value.contxt.syms);
-    }
-    else if (entry->type == STATUS)
-    {
-        free (entry->value.status.name); 
-    }
-
-    free (entry); 
 }
 

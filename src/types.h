@@ -21,47 +21,16 @@ struct entry_s
         CONTXT,
         STATUS,
     } type;
-    union
-    {
-        int number; 
-        char *string; 
-        struct 
-        {
-            char *name; 
-            entry_p data; 
-        } symbol; 
-        struct 
-        {
-            char *name; 
-            int line; 
-        } symref; 
-        struct 
-        {
-            call_t call; 
-            entry_p *args; 
-        } native; 
-        struct 
-        {
-            char *name; 
-            call_t call; 
-            entry_p *args; 
-        } custom; 
-        struct 
-        {
-            entry_p *syms; 
-            entry_p *args; 
-        } contxt; 
-        struct 
-        {
-            char *name; 
-            int value; 
-        } status; 
-    } value; 
+
+    int id; 
+    char *name; 
+    call_t call; 
+    entry_p reference; 
+    entry_p *children; 
+    entry_p *symbols; 
     entry_p parent; 
 }; 
 
 typedef struct entry_s entry_t; 
-
-
 
 #endif

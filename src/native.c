@@ -38,8 +38,8 @@ entry_p m_set (entry_p *argv)
 */
 entry_p m_add (entry_p *argv)
 {
-    int a = eval_as_number(argv[0])->value.number, 
-        b = eval_as_number(argv[1])->value.number; 
+    int a = eval_as_number(argv[0])->id, 
+        b = eval_as_number(argv[1])->id; 
     entry_p e = new_number (a + b); 
 
     return e;  
