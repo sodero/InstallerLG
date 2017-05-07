@@ -5,24 +5,7 @@
 #include "alloc.h"
 #include "util.h"
 #include "debug.h"
-
-static int error(int id, char *type, char *info)
-{
-    static int err = 0;
-    if (id && type && info)
-    {
-        err++; 
-        fprintf(stderr, "Line %d: ", id); 
-        fprintf(stderr, "%s ", type); 
-        fprintf(stderr, "'%s'\n", info);
-    }
-    return err; 
-}
-
-static int runtime_error()
-{
-    return error(0, NULL, NULL);
-}
+#include "error.h"
 
 static entry_p resolve_symref(entry_p entry)
 {
@@ -38,7 +21,8 @@ static entry_p resolve_symref(entry_p entry)
             entry_p *s = e->symbols;
             while (*s && *s != SENTINEL)
             {
-                if (strcmp (entry->name, (*s)->name) == 0)
+                if (strcmp (entry->name, 
+                    (*s)->name) == 0)
                 {
                     entry_p r = (*s)->reference;
                     return r; 
@@ -46,54 +30,80 @@ static entry_p resolve_symref(entry_p entry)
                 s++;
             }
         }
+        error(entry->id, "Undefined variable", 
+              entry->name); 
     }
-    // Symbol not found
-    error(entry->id, "Undefined variable", entry->name); 
+    else
+    {
+        error(__LINE__, "Internal error", 
+              __func__); 
+    }
+    return NULL;
+}
+
+static entry_p resolve_native(entry_p entry)
+{
+    if(entry)
+    {
+        call_t call = entry->call;
+        entry_p *args = entry->children;
+        if (call && args)
+        {
+            entry_p result = call(args);
+            return result; 
+        }
+    }
+    else
+    {
+        error(__LINE__, "Internal error", 
+              __func__); 
+    }
     return NULL;
 }
 
 entry_p eval_as_number(entry_p entry)
 {
     static entry_t num;
-    num.type = NUMBER;
+
     num.id = 0;
+    num.type = NUMBER;
 
     if(entry)
     {
-        if (entry->type == NUMBER || 
-            entry->type == STATUS )
+        entry_p r; 
+        switch(entry->type)
         {
-            num.id = entry->id;
-        }
-        else if (entry->type == STRING)
-        {
-            num.id = atoi (entry->name);
-        }
-        else if (entry->type == SYMBOL)
-        {
-            entry_p r = entry->reference;
-            num.id = eval_as_number(r)->id;
-        }
-        else if (entry->type == SYMREF)
-        {
-            entry_p r = resolve_symref(entry); 
-            num.id = eval_as_number(r)->id;
-        }
-        else if (entry->type == NATIVE)
-        {
-            call_t call = entry->call;
-            entry_p *args = entry->children;
-            if (call && args)
-            {
-                entry_p result = call (args);
-                num.id =  eval_as_number(result)->id;
-                kill (result);
-            }
-        }
-        else if (entry->type == CUSTOM)
-        {
-            // Todo
-            TRACE ("Custom\n");
+            case NUMBER:
+            case STATUS:
+                num.id = entry->id;
+                break;
+
+            case STRING:
+                num.id = atoi (entry->name);
+                break;
+
+            case SYMBOL:
+                r = entry->reference;
+                num.id = eval_as_number(r)->id;
+                break;
+
+            case SYMREF:
+                r = resolve_symref(entry); 
+                num.id = eval_as_number(r)->id;
+                break;
+
+            case NATIVE:
+                r = resolve_native(entry);
+                num.id =  eval_as_number(r)->id;
+                kill(r);
+                break;
+            
+            case CUSTOM:
+                break;
+
+            default:
+                error(__LINE__, "Internal error", 
+                      __func__); 
         }
     }
     return &num;
