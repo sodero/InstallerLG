@@ -122,6 +122,6 @@ set_pp:     set_pp SYM p
 int main(int argc, char **argv)
 {
     yyparse();
-    LEAK_CHECK;
+    leak_check();
 }
 

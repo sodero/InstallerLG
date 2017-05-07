@@ -14,7 +14,7 @@ entry_p m_set (entry_p *argv)
         {
             con = con->parent;
         }
-        if (con && con->type == CONTXT)
+        if (con)
         {
             int i = 0; 
             while(argv[i] && argv[i] != SENTINEL)

@@ -6,7 +6,51 @@
 #include "util.h"
 #include "debug.h"
 
-int runtime_error;
+static int error(int id, char *type, char *info)
+{
+    static int err = 0;
+    if (id && type && info)
+    {
+        err++; 
+        fprintf(stderr, "Line %d: ", id); 
+        fprintf(stderr, "%s ", type); 
+        fprintf(stderr, "'%s'\n", info);
+    }
+    return err; 
+}
+
+static int runtime_error()
+{
+    return error(0, NULL, NULL);
+}
+
+static entry_p resolve_symref(entry_p entry)
+{
+    if(entry)
+    {
+        entry_p e = entry->parent;
+        while (e && e->type != CONTXT)
+        {
+            e = e->parent;
+        }
+        if (e)
+        {
+            entry_p *s = e->symbols;
+            while (*s && *s != SENTINEL)
+            {
+                if (strcmp (entry->name, (*s)->name) == 0)
+                {
+                    entry_p r = (*s)->reference;
+                    return r; 
+                }
+                s++;
+            }
+        }
+    }
+    // Symbol not found
+    error(entry->id, "Undefined variable", entry->name); 
+    return NULL;
+}
 
 entry_p eval_as_number(entry_p entry)
 {
@@ -32,35 +76,8 @@ entry_p eval_as_number(entry_p entry)
         }
         else if (entry->type == SYMREF)
         {
-            entry_p e = entry->parent;
-            while (e && e->type != CONTXT)
-            {
-                e = e->parent;
-            }
-            if (e && e->type == CONTXT)
-            {
-                char *ref_name = entry->name;
-                entry_p *s = e->symbols;
-                while (*s && *s != e)
-                {
-                    char *sym_name = (*s)->name;
-                    if (strcmp (sym_name, ref_name) == 0)
-                    {
-                        entry_p r = (*s)->reference;
-                        num.id = eval_as_number(r)->id;
-                        break;
-                    }
-                    s++;
-                }
-
-                if (*s == 0 || *s == e)
-                {
-                    // Symbol not found
-                    fprintf(stderr, "Line %d: Undefined variable '%s'\n",
-                            entry->id, ref_name);
-                    runtime_error = 1;
-                }
-            }
+            entry_p r = resolve_symref(entry); 
+            num.id = eval_as_number(r)->id;
         }
         else if (entry->type == NATIVE)
         {
@@ -97,13 +114,11 @@ entry_p eval_as_string(entry_p entry)
 void run(entry_p entry)
 {
     int i = 0;
-    runtime_error = 0;
-
     if(entry)
     {
-        while (entry->children[i] &&
-               entry->children[i] != entry &&
-               !runtime_error)
+        while (!runtime_error() && 
+               entry->children[i] &&
+               entry->children[i] != SENTINEL )
         {
             entry_p curr = entry->children[i];
             if (curr && curr->type == NATIVE)

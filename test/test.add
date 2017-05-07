@@ -13,3 +13,4 @@
 (set a 1) (set b 1) (+ a (+ a (+ a b))) ; out="4"
 (set a "1") (+ a "1") ; out="2"
 (set a %1) (+ a $1) ; out="2"
+(+ a 1) ; out="Line 1: Undefined variable 'a'"
