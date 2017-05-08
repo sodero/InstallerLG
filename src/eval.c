@@ -79,7 +79,7 @@ entry_p eval_as_number(entry_p entry)
                 break;
 
             case STRING:
-                num.id = atoi (entry->name);
+                num.id = atoi(entry->name);
                 break;
 
             case SYMBOL:
@@ -145,6 +145,11 @@ void run(entry_p entry)
             i++;
         }
         kill (entry);
+    }
+    else
+    {
+        error(__LINE__, "Internal error", 
+              __func__); 
     }
 }
 

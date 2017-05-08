@@ -2,6 +2,7 @@
 #include "eval.h"
 #include "native.h"
 #include "util.h"
+#include "error.h"
 #include "debug.h"
 
 
@@ -25,6 +26,11 @@ entry_p m_set (entry_p *argv)
             return new_success(); 
         }
     }
+    else
+    {
+        error(__LINE__, "Internal error", 
+              __func__); 
+    }
     return new_failure("No context"); 
 }
 
@@ -36,9 +42,8 @@ entry_p m_add (entry_p *argv)
 {
     int a = eval_as_number(argv[0])->id, 
         b = eval_as_number(argv[1])->id; 
-    entry_p e = new_number (a + b); 
-
-    return e;  
+    entry_p n = new_number(a + b); 
+    return n; 
 }
 
 /* 

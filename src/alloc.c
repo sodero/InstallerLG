@@ -4,27 +4,34 @@
 #include "debug.h"
 #include "util.h"
 #include "alloc.h"
+#include "error.h"
 #include "native.h"
 
-entry_p new_contxt ()
+entry_p new_contxt()
 {
+    const int size = 8; 
     entry_p entry = calloc (1, sizeof (entry_t)); 
     if (entry)
     {
         entry_p *symbols, *children; 
-        symbols = calloc (ENTRIES + 1, sizeof (entry_p)); 
-        children = calloc (ENTRIES + 1, sizeof (entry_p)); 
+        symbols = calloc (size + 1, sizeof (entry_p)); 
+        children = calloc (size + 1, sizeof (entry_p)); 
         if (symbols && children)
         {
             entry->type = CONTXT;
             entry->symbols = symbols; 
             entry->children = children; 
-            entry->symbols[ENTRIES] = SENTINEL; 
-            entry->children[ENTRIES] = SENTINEL; 
+            entry->symbols[size] = SENTINEL; 
+            entry->children[size] = SENTINEL; 
             return entry; 
         }
         free (symbols); 
         free (children); 
+    }
+    else
+    {
+        error(__LINE__, "Internal error", 
+              __func__); 
     }
     free (entry);
     return 0;
@@ -37,6 +44,11 @@ entry_p new_number (int n)
     {
         entry->type = NUMBER;
         entry->id = n;
+    }
+    else
+    {
+        error(__LINE__, "Internal error", 
+              __func__); 
     }
     return entry;
 }
@@ -52,8 +64,13 @@ entry_p new_string (char *s)
             entry->name = s;
             return entry;
         }
+        else
+        {
+            error(__LINE__, "Internal error", 
+                  __func__); 
+        }
     }
-    return 0; 
+    return NULL; 
 }
 
 entry_p new_success () 
@@ -67,9 +84,14 @@ entry_p new_success ()
         status->name = name;
         return status;
     }
+    else
+    {
+        error(__LINE__, "Internal error", 
+              __func__); 
+    }
     free(name); 
     free(status); 
-    return 0;
+    return NULL;
 }
 
 entry_p new_failure (char *s) 
@@ -83,9 +105,14 @@ entry_p new_failure (char *s)
         status->name = name;
         return status;
     }
+    else
+    {
+        error(__LINE__, "Internal error", 
+              __func__); 
+    }
     free(name); 
     free(status); 
-    return 0;
+    return NULL;
 }
 
 entry_p new_symbol (char *s, entry_p e) 
@@ -100,9 +127,14 @@ entry_p new_symbol (char *s, entry_p e)
             entry->reference = e;
             return entry; 
         }
+        else
+        {
+            error(__LINE__, "Internal error", 
+                  __func__); 
+        }
         free (entry);  
     }
-    return 0; 
+    return NULL; 
 }
 
 entry_p new_symref (char *s, int l)
@@ -117,9 +149,14 @@ entry_p new_symref (char *s, int l)
             entry->id = l;
             return entry; 
         }
+        else
+        {
+            error(__LINE__, "Internal error", 
+                  __func__); 
+        }
         free (entry);  
     }
-    return 0; 
+    return NULL; 
 }
 
 
@@ -138,10 +175,26 @@ entry_p new_native (call_t call, int nargs)
                 entry->children[nargs] = SENTINEL; 
                 return entry;
             }
+            else
+            {
+                error(__LINE__, "Internal error", 
+                      __func__); 
+            }
             free (entry);
         }
+        else
+        {
+            error(__LINE__, "Internal error", 
+                  __func__); 
+        }
     }
-    return 0;
+    return NULL;
+}
+
+entry_p new_cusref (char *s, entry_p e)
+{
+    fprintf(stderr, "%s\n", s);
+    return NULL;
 }
 
 void push (entry_p dst, entry_p src)
@@ -154,7 +207,7 @@ void push (entry_p dst, entry_p src)
             src->type == SYMBOL)
         {
             while (dst->symbols[u] &&
-                   dst->symbols[u] != dst)
+                   dst->symbols[u] != SENTINEL)
             {
                 entry_p cur = dst->symbols[u]; 
                 char *old = cur->name, 
@@ -171,6 +224,7 @@ void push (entry_p dst, entry_p src)
         if(*dst_p)
         {
             entry_p *new; 
+            int new_size; 
             // Free space? 
             while ((*dst_p)[u] != SENTINEL)
             {
@@ -184,11 +238,12 @@ void push (entry_p dst, entry_p src)
                 u++;
             }
             // Make the new array twice as big (+sentinel)
-            new = calloc (1 + (u << 1), sizeof (entry_p));
+            new_size = u ? u << 1 : 1;  
+            new = calloc (1 + new_size, sizeof (entry_p));
             if (new)
             {
                 // Insert sentinel
-                new[u << 1] = SENTINEL; 
+                new[new_size] = SENTINEL; 
                 // Make the swap and free the old array
                 memmove (new, *dst_p, u * sizeof (entry_p)); 
                 free (*dst_p); 
@@ -196,6 +251,11 @@ void push (entry_p dst, entry_p src)
                 // Do the push
                 (*dst_p)[u] = src; 
                 src->parent = dst; 
+            }
+            else
+            {
+                error(__LINE__, "Internal error", 
+                      __func__); 
             }
         }
     }

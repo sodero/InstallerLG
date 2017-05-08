@@ -27,8 +27,9 @@ extern int yylineno;
 %token SHIFTLEFT SHIFTRIGHT
 
 %type<e> start 
-%type<e> s p vp np
-%type<e> add set set_pp
+%type<e> s p vp np nps
+%type<e> add set cus 
+%type<e> set_pp 
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
@@ -41,7 +42,8 @@ start:      s
 
 s:          s vp 
             { 
-                push ($$, $2);                  
+                push ($1, $2);                  
+                $$ = $1;
             } 
             |
 
@@ -60,6 +62,8 @@ p:          vp
 vp:         add
             |
             set
+            |
+            cus 
             ;
 
 np:         INT  
@@ -92,6 +96,19 @@ np:         INT
             }    
             ;
 
+nps:        nps np
+            { 
+                push ($1, $2);    
+                $$ = $1;   
+            }    
+            |
+            np
+            { 
+                $$ = new_contxt();   
+                push ($$, $1);    
+            }    
+            ;
+
 add:        '(' '+' p p ')' 
             { 
                 $$ = new_native (m_add, 2); 
@@ -108,7 +125,8 @@ set:        '(' SET set_pp ')'
 
 set_pp:     set_pp SYM p
             { 
-                push ($$, new_symbol ($2, $3));  
+                push ($1, new_symbol ($2, $3));  
+                $$ = $1;
             } 
             |
             SYM p
@@ -117,6 +135,13 @@ set_pp:     set_pp SYM p
                 push ($$, new_symbol ($1, $2));  
             } 
             ;
+
+cus:        '(' SYM nps ')' 
+            { 
+                $$ = new_cusref ($2, $3); 
+            } 
+            ;
+
 %%
 
 int main(int argc, char **argv)

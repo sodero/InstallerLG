@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "types.h"
 #include "parser.h"
+#include "error.h"
 
 #ifdef _DEBUG
 # define P(X) printf("L:%s|%s|\n", #X, yytext)
@@ -91,8 +92,7 @@
 
 int yyerror(char *err)
 {
-    fprintf(stderr, "Line %d: %s at '%s'\n", 
-            yylineno, err, yytext);
+    error(yylineno, err, yytext); 
     return 0;
 }
 

@@ -14,9 +14,8 @@ int error(int id,
     if (id && type && info)
     {
         err++; 
-        fprintf(stderr, "Line %d: ", id); 
-        fprintf(stderr, "%s ", type); 
-        fprintf(stderr, "'%s'\n", info);
+        fprintf(stderr, "Line %d: %s '%s'\n", 
+                id, type, info);
     }
     return err; 
 }
