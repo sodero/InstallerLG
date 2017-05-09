@@ -33,9 +33,6 @@ if(1) { \
         contxt->children[i] == \
         SENTINEL ) { ok = 0; break; } i++; } \
   } else { ok = 0; } \
-  if(!ok) { \
-    error(__LINE__, "Internal error", \
-          __func__); \
-    return new_failure(NULL); } }
+  if(!ok) { PANIC; return new_failure(NULL); }}
 
 #endif
