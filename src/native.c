@@ -6,8 +6,11 @@
 #include "debug.h"
 
 
-entry_p m_set (entry_p *argv)
+entry_p m_set (entry_p contxt)
 {
+    printf ("hej!\n");
+    return contxt; 
+   /* 
     if(argv && argv[0]->parent)
     {
         entry_p con = argv[0]->parent;
@@ -32,18 +35,22 @@ entry_p m_set (entry_p *argv)
               __func__); 
     }
     return new_failure("No context"); 
+*/
 }
 
 /*
 `(+ <expr1> <expr2> ...)'
      returns sum of expressions
 */
-entry_p m_add (entry_p *argv)
+
+entry_p m_add (entry_p contxt)
 {
-    int a = eval_as_number(argv[0])->id, 
-        b = eval_as_number(argv[1])->id; 
-    entry_p n = new_number(a + b); 
-    return n; 
+    CCHECK(2);
+    return new_number
+    (
+        eval_as_number(contxt->children[0])->id +
+        eval_as_number(contxt->children[1])->id
+    ); 
 }
 
 /* 

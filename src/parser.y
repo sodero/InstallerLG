@@ -27,14 +27,13 @@ extern int yylineno;
 %token SHIFTLEFT SHIFTRIGHT
 
 %type<e> start 
-%type<e> s p vp np nps
+%type<e> s p pp vp np nps sp sps
 %type<e> add set cus 
-%type<e> set_pp 
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
-%destructor { kill($$); } s p vp np
-%destructor { kill($$); } add set set_pp
+%destructor { kill($$); } s p vp np nps sp sps
+%destructor { kill($$); } add set 
 
 %%
 start:      s    
@@ -57,6 +56,14 @@ s:          s vp
 p:          vp 
             |
             np
+            ;
+
+pp:         p p
+            { 
+                $$ = new_contxt();   
+                push ($$, $1);    
+                push ($$, $2);    
+            } 
             ;
 
 vp:         add
@@ -109,30 +116,34 @@ nps:        nps np
             }    
             ;
 
-add:        '(' '+' p p ')' 
+sp:         SYM p
             { 
-                $$ = new_native (m_add, 2); 
-                push ($$, $3);  
-                push ($$, $4);  
+                $$ = new_symbol ($1, $2);   
             } 
             ;
 
-set:        '(' SET set_pp ')' 
+sps:        sps sp
             { 
-                $$ = $3; 
-            } 
-            ;
-
-set_pp:     set_pp SYM p
-            { 
-                push ($1, new_symbol ($2, $3));  
-                $$ = $1;
-            } 
+                push ($1, $2);    
+                $$ = $1;   
+            }    
             |
-            SYM p
+            sp
             { 
-                $$ = new_native (m_set, 2); 
-                push ($$, new_symbol ($1, $2));  
+                $$ = new_contxt();   
+                push ($$, $1);    
+            }    
+            ;
+
+add:        '(' '+' pp ')' 
+            { 
+                $$ = new_native (m_add, $3); 
+            } 
+            ;
+
+set:        '(' SET sps ')' 
+            { 
+                $$ = new_native (m_set, $3); 
             } 
             ;
 

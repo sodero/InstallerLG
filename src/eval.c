@@ -64,11 +64,10 @@ static entry_p resolve_native(entry_p entry)
 entry_p eval_as_number(entry_p entry)
 {
     static entry_t num;
-
     num.id = 0;
     num.type = NUMBER;
-
-    if(entry)
+    if(entry && 
+       entry != SENTINEL)
     {
         entry_p r; 
         switch(entry->type)
@@ -106,6 +105,11 @@ entry_p eval_as_number(entry_p entry)
                       __func__); 
         }
     }
+    else
+    {
+        error(__LINE__, "Internal error", 
+              __func__); 
+    }
     return &num;
 }
 
@@ -134,10 +138,9 @@ void run(entry_p entry)
             if (curr && curr->type == NATIVE)
             {
                 call_t call = curr->call;
-                entry_p *args = curr->children;
-                if (call && args)
+                if (call)
                 {
-                    entry_p ret = call (args);
+                    entry_p ret = call (curr);
                     eval_print (ret);
                     kill (ret);
                 }

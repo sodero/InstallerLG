@@ -159,7 +159,33 @@ entry_p new_symref (char *s, int l)
     return NULL; 
 }
 
+entry_p new_native (call_t call, entry_p e)
+{
+    if (call)
+    {
+        entry_p entry = calloc (1, sizeof (entry_t)); 
+        if (entry)
+        {
+            entry->call = call;
+            entry->type = NATIVE;
+            if(e && e->type == CONTXT)
+            {
+                entry->children = e->children; 
+                e->children = NULL; 
+                kill(e); 
+            }
+            return entry;
+        }
+        else
+        {
+            error(__LINE__, "Internal error", 
+                  __func__); 
+        }
+    }
+    return NULL;
+}
 
+/*
 entry_p new_native (call_t call, int nargs)
 {
     if (call)
@@ -190,7 +216,7 @@ entry_p new_native (call_t call, int nargs)
     }
     return NULL;
 }
-
+*/
 entry_p new_cusref (char *s, entry_p e)
 {
     fprintf(stderr, "%s\n", s);
