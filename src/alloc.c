@@ -280,9 +280,10 @@ void kill (entry_p entry)
 {
     if (entry)
     {
+        //if(entry->name)
+        //    printf("Freeing:'%s'\n", entry-name); 
+
         free (entry->name); 
-
-
         kill (entry->reference);
         if(entry->children)
         {
@@ -293,6 +294,16 @@ void kill (entry_p entry)
                 e++; 
             }
             free (entry->children);
+        }
+        if(entry->type == NATIVE &&
+           entry->symbols)
+        {
+            entry_p *e = entry->symbols; 
+            while (*e && *e != SENTINEL)
+            {
+                kill (*e);
+                e++; 
+            }
         }
         free (entry->symbols);
         free (entry); 

@@ -9,12 +9,7 @@
 entry_p m_set (entry_p contxt)
 {
     entry_p dst; 
-
-    pretty_print(contxt);
-    pretty_print(contxt->parent);
-
     SCHECK(1);
-
     for(dst = contxt->parent; 
         dst && dst->type != CONTXT; 
         dst = dst->parent);
@@ -30,35 +25,7 @@ entry_p m_set (entry_p contxt)
         return new_success(); 
     }
     PANIC;
-    return new_failure(NULL); 
-
-
-   /* 
-    if(argv && argv[0]->parent)
-    {
-        entry_p con = argv[0]->parent;
-        while (con && con->type != CONTXT)
-        {
-            con = con->parent;
-        }
-        if (con)
-        {
-            int i = 0; 
-            while(argv[i] && argv[i] != SENTINEL)
-            {
-                push(con, argv[i]); 
-                i++; 
-            }
-            return new_success(); 
-        }
-    }
-    else
-    {
-        error(__LINE__, "Internal error", 
-              __func__); 
-    }
     return new_failure("No context"); 
-*/
 }
 
 /*
@@ -69,9 +36,6 @@ entry_p m_set (entry_p contxt)
 entry_p m_add (entry_p contxt)
 {
     CCHECK(2);
-    printf("----\n");
-    pretty_print(contxt->children[0]);
-    pretty_print(contxt->children[1]);
     return new_number
     (
         eval_as_number(contxt->children[0])->id +

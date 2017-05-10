@@ -12,13 +12,10 @@ static entry_p resolve_symref(entry_p entry)
     if(entry)
     {
         entry_p e = entry->parent;
-        printf("e1:%p\n", e); 
-        pretty_print(e); 
         while (e && e->type != CONTXT)
         {
             e = e->parent;
         }
-        printf("e2:%p\n", e); 
         if (e)
         {
             entry_p *s = e->symbols;
