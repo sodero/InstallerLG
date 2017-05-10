@@ -12,10 +12,13 @@ static entry_p resolve_symref(entry_p entry)
     if(entry)
     {
         entry_p e = entry->parent;
+        printf("e1:%p\n", e); 
+        pretty_print(e); 
         while (e && e->type != CONTXT)
         {
             e = e->parent;
         }
+        printf("e2:%p\n", e); 
         if (e)
         {
             entry_p *s = e->symbols;
@@ -35,10 +38,9 @@ static entry_p resolve_symref(entry_p entry)
     }
     else
     {
-        error(__LINE__, "Internal error", 
-              __func__); 
+        PANIC; 
     }
-    return NULL;
+    return new_failure(NULL);
 }
 
 static entry_p resolve_native(entry_p entry)
@@ -46,18 +48,13 @@ static entry_p resolve_native(entry_p entry)
     if(entry)
     {
         call_t call = entry->call;
-        entry_p *args = entry->children;
-        if (call && args)
+        if(call)
         {
-            entry_p result = call(args);
+            entry_p result = call(entry);
             return result; 
         }
     }
-    else
-    {
-        error(__LINE__, "Internal error", 
-              __func__); 
-    }
+    PANIC; 
     return NULL;
 }
 
@@ -101,14 +98,12 @@ entry_p eval_as_number(entry_p entry)
                 break;
 
             default:
-                error(__LINE__, "Internal error", 
-                      __func__); 
+                PANIC;
         }
     }
     else
     {
-        error(__LINE__, "Internal error", 
-              __func__); 
+        PANIC;
     }
     return &num;
 }

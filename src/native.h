@@ -26,13 +26,28 @@ int m_shiftright(int a, int n);
 #define CCHECK(X) \
 if(1) { \
   int ok = 1; \
-  if(contxt->children) { \
-    int i = 0; \
+  if(contxt->parent && \
+     contxt->children) \
+  { int i = 0; \
     while (i < X) { \
       if(!contxt->children[i] || \
         contxt->children[i] == \
         SENTINEL ) { ok = 0; break; } i++; } \
   } else { ok = 0; } \
   if(!ok) { PANIC; return new_failure(NULL); }}
+
+#define SCHECK(X) \
+if(1) { \
+  int ok = 1; \
+  if(contxt->parent && \
+     contxt->symbols) \
+  { int i = 0; \
+    while (i < X) { \
+      if(!contxt->symbols[i] || \
+        contxt->symbols[i] == \
+        SENTINEL ) { ok = 0; break; } i++; } \
+  } else { ok = 0; } \
+  if(!ok) { PANIC; return new_failure(NULL); }}
+
 
 #endif

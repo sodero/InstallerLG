@@ -152,7 +152,6 @@ cus:        '(' SYM nps ')'
                 $$ = new_cusref ($2, $3); 
             } 
             ;
-
 %%
 
 int main(int argc, char **argv)

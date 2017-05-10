@@ -30,8 +30,7 @@ entry_p new_contxt()
     }
     else
     {
-        error(__LINE__, "Internal error", 
-              __func__); 
+        PANIC; 
     }
     free (entry);
     return 0;
@@ -47,8 +46,7 @@ entry_p new_number (int n)
     }
     else
     {
-        error(__LINE__, "Internal error", 
-              __func__); 
+        PANIC; 
     }
     return entry;
 }
@@ -66,8 +64,7 @@ entry_p new_string (char *s)
         }
         else
         {
-            error(__LINE__, "Internal error", 
-                  __func__); 
+            PANIC; 
         }
     }
     return NULL; 
@@ -86,8 +83,7 @@ entry_p new_success ()
     }
     else
     {
-        error(__LINE__, "Internal error", 
-              __func__); 
+        PANIC; 
     }
     free(name); 
     free(status); 
@@ -107,8 +103,7 @@ entry_p new_failure (char *s)
     }
     else
     {
-        error(__LINE__, "Internal error", 
-              __func__); 
+        PANIC; 
     }
     free(name); 
     free(status); 
@@ -129,8 +124,7 @@ entry_p new_symbol (char *s, entry_p e)
         }
         else
         {
-            error(__LINE__, "Internal error", 
-                  __func__); 
+            PANIC; 
         }
         free (entry);  
     }
@@ -151,8 +145,7 @@ entry_p new_symref (char *s, int l)
         }
         else
         {
-            error(__LINE__, "Internal error", 
-                  __func__); 
+            PANIC; 
         }
         free (entry);  
     }
@@ -170,53 +163,29 @@ entry_p new_native (call_t call, entry_p e)
             entry->type = NATIVE;
             if(e && e->type == CONTXT)
             {
-                entry->children = e->children; 
-                e->children = NULL; 
-                kill(e); 
+                if(e->type == CONTXT)
+                {
+                    entry->children = e->children; 
+                    entry->symbols = e->symbols; 
+                    e->children = NULL; 
+                    e->symbols = NULL; 
+                    kill(e); 
+                }
+                else
+                {
+                    PANIC; 
+                }
             }
             return entry;
         }
         else
         {
-            error(__LINE__, "Internal error", 
-                  __func__); 
+            PANIC; 
         }
     }
     return NULL;
 }
 
-/*
-entry_p new_native (call_t call, int nargs)
-{
-    if (call)
-    {
-        entry_p entry = calloc (1, sizeof (entry_t)); 
-        if (entry)
-        {
-            entry->children = calloc (nargs + 1, sizeof (entry_p));
-            if (entry->children)
-            {
-                entry->type = NATIVE;
-                entry->call = call;
-                entry->children[nargs] = SENTINEL; 
-                return entry;
-            }
-            else
-            {
-                error(__LINE__, "Internal error", 
-                      __func__); 
-            }
-            free (entry);
-        }
-        else
-        {
-            error(__LINE__, "Internal error", 
-                  __func__); 
-        }
-    }
-    return NULL;
-}
-*/
 entry_p new_cusref (char *s, entry_p e)
 {
     fprintf(stderr, "%s\n", s);
@@ -280,8 +249,7 @@ void push (entry_p dst, entry_p src)
             }
             else
             {
-                error(__LINE__, "Internal error", 
-                      __func__); 
+                PANIC; 
             }
         }
     }

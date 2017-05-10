@@ -3,6 +3,11 @@
 
 void eval_print (entry_p entry)
 {
+    if(!entry)
+    {
+        printf ("NULL\n");
+        return; 
+    }
     switch (entry->type)
     {
         case NUMBER:
@@ -29,6 +34,11 @@ void eval_print (entry_p entry)
 void pretty_print (entry_p entry)
 {
     printf("\nType:"); 
+    if(!entry)
+    {
+        printf ("\tNULL\n");
+        return; 
+    }
     switch (entry->type)
     {
         case NUMBER:

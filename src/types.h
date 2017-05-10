@@ -5,7 +5,7 @@
 #define SENTINEL ((entry_p) push)
 
 typedef struct entry_s * entry_p;
-typedef entry_p (*call_t) (entry_p *);
+typedef entry_p (*call_t) (entry_p);
 
 struct entry_s
 {
