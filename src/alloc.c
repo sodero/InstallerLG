@@ -152,6 +152,25 @@ entry_p new_symref (char *s, int l)
     return NULL; 
 }
 
+static void move_contxt(entry_p dst, entry_p src)
+{
+    entry_p *c = dst->children = src->children; 
+    entry_p *s = dst->symbols = src->symbols; 
+    while(*c && *c != SENTINEL)
+    {
+        (*c)->parent = dst; 
+        c++; 
+    }
+    while(*s && *s != SENTINEL)
+    {
+        (*s)->parent = dst; 
+        s++; 
+    }
+    src->children = NULL; 
+    src->symbols = NULL; 
+    kill(src); 
+}
+
 entry_p new_native (call_t call, entry_p e)
 {
     if (call)
@@ -161,15 +180,17 @@ entry_p new_native (call_t call, entry_p e)
         {
             entry->call = call;
             entry->type = NATIVE;
-            if(e && e->type == CONTXT)
+            if(e)
             {
                 if(e->type == CONTXT)
                 {
+                    move_contxt(entry, e); 
+                    /*
                     entry->children = e->children; 
                     entry->symbols = e->symbols; 
                     e->children = NULL; 
                     e->symbols = NULL; 
-                    kill(e); 
+                    kill(e); */
                 }
                 else
                 {
@@ -260,6 +281,8 @@ void kill (entry_p entry)
     if (entry)
     {
         free (entry->name); 
+
+
         kill (entry->reference);
         if(entry->children)
         {
