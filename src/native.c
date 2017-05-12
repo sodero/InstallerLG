@@ -9,11 +9,10 @@
 entry_p m_set (entry_p contxt)
 {
     entry_p dst; 
-    SCHECK(1);
+    S_CHECK(1);
     for(dst = contxt->parent; 
         dst && dst->type != CONTXT; 
         dst = dst->parent);
-
     if (dst)
     {
         entry_p *cur = contxt->symbols; 
@@ -32,10 +31,9 @@ entry_p m_set (entry_p contxt)
 `(+ <expr1> <expr2> ...)'
      returns sum of expressions
 */
-
 entry_p m_add (entry_p contxt)
 {
-    CCHECK(2);
+    C_CHECK(2);
     return new_number
     (
         eval_as_number(contxt->children[0])->id +

@@ -23,28 +23,18 @@ int m_bitnot(int a);
 int m_shiftleft(int a, int n);
 int m_shiftright(int a, int n);
 
-#define CCHECK(X) \
-if(1) { \
-  int ok = 1; \
-  if(contxt->parent && \
-     contxt->children) \
-  { int i = 0; \
-    while (i < X) { \
-      if(!contxt->children[i] || \
-        contxt->children[i] == \
-        SENTINEL ) { ok = 0; break; } i++; } \
-  } else { ok = 0; } \
-  if(!ok) { PANIC; return new_failure(NULL); }}
+#define S_CHECK(X) CHECK(X,symbols,contxt)
+#define C_CHECK(X) CHECK(X,children,contxt)
 
-#define SCHECK(X) \
+#define CHECK(X,W,Q) \
 if(1) { \
   int ok = 1; \
-  if(contxt->parent && \
-     contxt->symbols) \
+  if(Q->parent && \
+     Q->W) \
   { int i = 0; \
     while (i < X) { \
-      if(!contxt->symbols[i] || \
-        contxt->symbols[i] == \
+      if(!Q->W[i] || \
+        Q->W[i] == \
         SENTINEL ) { ok = 0; break; } i++; } \
   } else { ok = 0; } \
   if(!ok) { PANIC; return new_failure(NULL); }}
