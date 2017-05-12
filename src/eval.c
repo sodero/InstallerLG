@@ -52,9 +52,9 @@ static entry_p resolve_native(entry_p entry)
         }
     }
     PANIC; 
-    return NULL;
+    return new_failure(NULL);
 }
-
+ 
 entry_p eval_as_number(entry_p entry)
 {
     static entry_t num;

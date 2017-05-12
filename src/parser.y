@@ -119,6 +119,7 @@ nps:        nps np
 sp:         SYM p
             { 
                 $$ = new_symbol ($1, $2);   
+                $2->parent = $$;
             } 
             ;
 

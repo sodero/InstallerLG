@@ -185,12 +185,6 @@ entry_p new_native (call_t call, entry_p e)
                 if(e->type == CONTXT)
                 {
                     move_contxt(entry, e); 
-                    /*
-                    entry->children = e->children; 
-                    entry->symbols = e->symbols; 
-                    e->children = NULL; 
-                    e->symbols = NULL; 
-                    kill(e); */
                 }
                 else
                 {
@@ -280,9 +274,6 @@ void kill (entry_p entry)
 {
     if (entry)
     {
-        //if(entry->name)
-        //    printf("Freeing:'%s'\n", entry-name); 
-
         free (entry->name); 
         kill (entry->reference);
         if(entry->children)
