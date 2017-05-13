@@ -11,14 +11,14 @@ static entry_p resolve_symref(entry_p entry)
 {
     if(entry)
     {
-        entry_p e = entry->parent;
-        while (e && e->type != CONTXT)
+        entry_p par = entry->parent;
+        while (par && par->type != CONTXT)
         {
-            e = e->parent;
+            par = par->parent;
         }
-        if (e)
+        if (par)
         {
-            entry_p *s = e->symbols;
+            entry_p *s = par->symbols;
             while (*s && *s != SENTINEL)
             {
                 if (strcmp (entry->name, 
