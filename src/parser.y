@@ -27,12 +27,12 @@ extern int yylineno;
 %token SHIFTLEFT SHIFTRIGHT
 
 %type<e> start 
-%type<e> s p pp vp np nps sp sps
+%type<e> s p pp ps vp np sp sps
 %type<e> add set cus 
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
-%destructor { kill($$); } s p vp np nps sp sps
+%destructor { kill($$); } s p pp ps vp np sp sps
 %destructor { kill($$); } add set 
 
 %%
@@ -41,7 +41,7 @@ start:      s
 
 s:          s vp 
             { 
-                push ($1, $2);                  
+                push($1, $2);                  
                 $$ = $1;
             } 
             |
@@ -49,7 +49,7 @@ s:          s vp
             vp   
             { 
                 $$ = new_contxt();   
-                push ($$, $1);    
+                push($$, $1);    
             } 
             ;
 
@@ -61,9 +61,22 @@ p:          vp
 pp:         p p
             { 
                 $$ = new_contxt();   
-                push ($$, $1);    
-                push ($$, $2);    
+                push($$, $1);    
+                push($$, $2);    
             } 
+            ;
+
+ps:         ps p
+            { 
+                push ($1, $2);    
+                $$ = $1;   
+            }    
+            |
+            p
+            { 
+                $$ = new_contxt();   
+                push ($$, $1);    
+            }    
             ;
 
 vp:         add
@@ -75,50 +88,37 @@ vp:         add
 
 np:         INT  
             { 
-                $$ = new_number ($1); 
+                $$ = new_number($1); 
             } 
             |
 
             HEX  
             { 
-                $$ = new_number ($1); 
+                $$ = new_number($1); 
             } 
             |
 
             BIN  
             { 
-                $$ = new_number ($1); 
+                $$ = new_number($1); 
             }                        
             |
 
             STR  
             { 
-                $$ = new_string ($1); 
+                $$ = new_string($1); 
             }                        
             |
 
             SYM  
             { 
-                $$ = new_symref ($1, yylineno); 
-            }    
-            ;
-
-nps:        nps np
-            { 
-                push ($1, $2);    
-                $$ = $1;   
-            }    
-            |
-            np
-            { 
-                $$ = new_contxt();   
-                push ($$, $1);    
+                $$ = new_symref($1, yylineno); 
             }    
             ;
 
 sp:         SYM p
             { 
-                $$ = new_symbol ($1, $2);   
+                $$ = new_symbol($1, $2);   
                 $2->parent = $$;
             } 
             ;
@@ -138,19 +138,19 @@ sps:        sps sp
 
 add:        '(' '+' pp ')' 
             { 
-                $$ = new_native (m_add, $3); 
+                $$ = new_native(m_add, $3); 
             } 
             ;
 
 set:        '(' SET sps ')' 
             { 
-                $$ = new_native (m_set, $3); 
+                $$ = new_native(m_set, $3); 
             } 
             ;
 
-cus:        '(' SYM nps ')' 
+cus:        '(' SYM ps ')' 
             { 
-                $$ = new_cusref ($2, $3); 
+                $$ = new_cusref($2, $3); 
             } 
             ;
 %%
