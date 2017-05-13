@@ -42,14 +42,10 @@ static entry_p resolve_symref(entry_p entry)
 
 static entry_p resolve_native(entry_p entry)
 {
-    if(entry)
+    if(entry && entry->call)
     {
-        call_t call = entry->call;
-        if(call)
-        {
-            entry_p result = call(entry);
-            return result; 
-        }
+        entry_p result = entry->call(entry);
+        return result; 
     }
     PANIC; 
     return new_failure(NULL);
@@ -119,32 +115,36 @@ entry_p eval_as_string(entry_p entry)
 
 void run(entry_p entry)
 {
-    int i = 0;
-    if(entry)
+    if(entry && entry->children)
     {
-        while (!runtime_error() && 
-               entry->children[i] &&
-               entry->children[i] != SENTINEL )
+        entry_p *vec = entry->children;
+        while (*vec && *vec != SENTINEL &&
+               !runtime_error())
         {
-            entry_p curr = entry->children[i];
-            if (curr && curr->type == NATIVE)
+            entry_p cur = *vec; 
+            if(cur)
             {
-                call_t call = curr->call;
-                if (call)
+                entry_p ret = NULL; 
+                switch(cur->type) 
                 {
-                    entry_p ret = call (curr);
-                    eval_print (ret);
-                    kill (ret);
+                    case NATIVE:
+                        ret = resolve_native(cur);
+                        break; 
+
+                    default:
+                        vec++; 
+                        continue; 
                 }
+                eval_print(ret);
+                kill(ret);
+                vec++; 
             }
-            i++;
         }
         kill (entry);
     }
     else
     {
-        error(__LINE__, "Internal error", 
-              __func__); 
+        PANIC; 
     }
 }
 

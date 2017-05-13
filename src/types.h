@@ -17,6 +17,7 @@ struct entry_s
         SYMREF,
         NATIVE, 
         CUSTOM, 
+        CUSREF, 
         CONTXT,
         STATUS,
     } type;

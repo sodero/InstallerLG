@@ -19,12 +19,10 @@ void eval_print (entry_p entry)
             break;
 
         case SYMBOL:
-            eval_print (entry->reference);
-            break;
-
         case SYMREF:
         case NATIVE:
         case CUSTOM:
+        case CUSREF:
         case CONTXT:
         case STATUS:
             break;
@@ -71,6 +69,10 @@ void pretty_print (entry_p entry)
             printf ("\tCUSTOM\n");
             printf ("Name:\t%s\n", entry->name);
             printf ("Call:\t%p\n", entry->call);
+            break;
+
+        case CUSREF:
+            printf ("\tCUSREF\n");
             break;
 
         case CONTXT:
