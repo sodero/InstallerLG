@@ -7,7 +7,7 @@
 #include "error.h"
 #include "native.h"
 
-entry_p new_contxt()
+entry_p new_contxt(void)
 {
     const int size = 8; 
     entry_p entry = calloc (1, sizeof (entry_t)); 
@@ -30,7 +30,7 @@ entry_p new_contxt()
     }
     else
     {
-        PANIC; 
+        error(PANIC);
     }
     free (entry);
     return 0;
@@ -46,7 +46,7 @@ entry_p new_number (int n)
     }
     else
     {
-        PANIC; 
+        error(PANIC);
     }
     return entry;
 }
@@ -64,50 +64,33 @@ entry_p new_string (char *s)
         }
         else
         {
-            PANIC; 
+            error(PANIC);
         }
     }
     return NULL; 
 }
 
-entry_p new_success () 
+static entry_p new_status(int s)
 {
-    char *name = strdup("Success");
     entry_p status = calloc (1, sizeof (entry_t)); 
-    if (status && name)
+    if (status)
     {
         status->type = STATUS;
-        status->id = 1;
-        status->name = name;
+        status->id = s;
         return status;
     }
-    else
-    {
-        PANIC; 
-    }
-    free(name); 
-    free(status); 
+    error(PANIC);
     return NULL;
 }
 
-entry_p new_failure (char *s) 
+entry_p new_success(void) 
 {
-    char *name = strdup(s ? s : "Failure");
-    entry_p status = calloc (1, sizeof (entry_t)); 
-    if (status && name)
-    {
-        status->type = STATUS;
-        status->id = 0;
-        status->name = name;
-        return status;
-    }
-    else
-    {
-        PANIC; 
-    }
-    free(name); 
-    free(status); 
-    return NULL;
+    return new_status(1); 
+}
+
+entry_p new_failure(void) 
+{
+    return new_status(0); 
 }
 
 entry_p new_symbol (char *s, entry_p e) 
@@ -124,7 +107,7 @@ entry_p new_symbol (char *s, entry_p e)
         }
         else
         {
-            PANIC; 
+            error(PANIC);
         }
         free (entry);  
     }
@@ -145,7 +128,7 @@ entry_p new_symref (char *s, int l)
         }
         else
         {
-            PANIC; 
+            error(PANIC);
         }
         free (entry);  
     }
@@ -187,7 +170,7 @@ entry_p new_native (call_t call, entry_p e)
             return entry;
         }
     }
-    PANIC; 
+    error(PANIC);
     return NULL;
 }
 
@@ -209,7 +192,7 @@ entry_p new_cusref (char *s, int l, entry_p e)
             return entry;
         }
     }
-    PANIC;
+    error(PANIC);
     return NULL; 
 }
 
@@ -270,7 +253,7 @@ void push (entry_p dst, entry_p src)
             }
             else
             {
-                PANIC; 
+                error(PANIC);
             }
         }
     }

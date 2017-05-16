@@ -23,14 +23,16 @@ entry_p m_cus (entry_p contxt)
                !strcmp((*cus)->name, contxt->name))
             {
                 // Fixa contxt och anropa
-                return new_success("Found!"); 
+                return new_success(); 
             }
             cus++; 
         }
-        return new_failure("Undefined function"); 
+        error(contxt->id, "Undefined function", 
+              contxt->name); 
+        return new_failure(); 
     }
-    PANIC;
-    return new_failure("No context"); 
+    error(PANIC);
+    return new_failure(); 
 }
 
 /*
@@ -52,8 +54,8 @@ entry_p m_set (entry_p contxt)
         }
         return new_success(); 
     }
-    PANIC;
-    return new_failure("No context"); 
+    error(PANIC);
+    return new_failure(); 
 }
 
 /*

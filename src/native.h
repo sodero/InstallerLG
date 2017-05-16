@@ -38,6 +38,6 @@ if(1) { \
         Q->W[i] == \
         SENTINEL ) { ok = 0; break; } i++; } \
   } else { ok = 0; } \
-  if(!ok) { PANIC; return new_failure(NULL); }}
+  if(!ok) { error(PANIC); return new_failure(); }}
 
 #endif

@@ -30,20 +30,20 @@ static entry_p resolve_symref(entry_p entry)
     }
     else
     {
-        PANIC;
+        error(PANIC);
     }
-    return new_failure(NULL);
+    return new_failure();
 }
 
 static entry_p resolve_native(entry_p entry)
 {
-    if(entry && entry->call)
+    if(entry->call)
     {
         entry_p result = entry->call(entry);
         return result; 
     }
-    PANIC; 
-    return new_failure(NULL);
+    error(PANIC);
+    return new_failure();
 }
  
 entry_p eval_as_number(entry_p entry)
@@ -76,9 +76,10 @@ entry_p eval_as_number(entry_p entry)
                 num.id = eval_as_number(r)->id;
                 break;
 
+            case CUSREF:
             case NATIVE:
                 r = resolve_native(entry);
-                num.id =  eval_as_number(r)->id;
+                num.id = eval_as_number(r)->id;
                 kill(r);
                 break;
             
@@ -86,12 +87,12 @@ entry_p eval_as_number(entry_p entry)
                 break;
 
             default:
-                PANIC;
+                error(PANIC);
         }
     }
     else
     {
-        PANIC;
+        error(PANIC);
     }
     return &num;
 }
@@ -122,6 +123,7 @@ void run(entry_p entry)
                 entry_p ret = NULL; 
                 switch(cur->type) 
                 {
+                    case CUSREF:
                     case NATIVE:
                         ret = resolve_native(cur);
                         break; 
@@ -139,7 +141,7 @@ void run(entry_p entry)
     }
     else
     {
-        PANIC; 
+        error(PANIC);
     }
 }
 
