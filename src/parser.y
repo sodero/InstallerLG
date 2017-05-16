@@ -150,7 +150,7 @@ set:        '(' SET sps ')'
 
 cus:        '(' SYM ps ')' 
             { 
-                $$ = new_cusref($2, $3); 
+                $$ = new_cusref($2, yylineno, $3); 
             } 
             ;
 %%

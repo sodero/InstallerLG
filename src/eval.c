@@ -9,25 +9,20 @@
 
 static entry_p resolve_symref(entry_p entry)
 {
-    if(entry)
+    entry_p par; 
+    for(par = entry->parent; 
+        par && par->type != CONTXT; 
+        par = par->parent);
+    if(par)
     {
-        entry_p par = entry->parent;
-        while (par && par->type != CONTXT)
+        entry_p *s; 
+        for(s = par->symbols;
+            *s && *s != SENTINEL; s++)
         {
-            par = par->parent;
-        }
-        if (par)
-        {
-            entry_p *s = par->symbols;
-            while (*s && *s != SENTINEL)
+            if(!strcmp((*s)->name, entry->name)) 
             {
-                if (strcmp (entry->name, 
-                    (*s)->name) == 0)
-                {
-                    entry_p r = (*s)->reference;
-                    return r; 
-                }
-                s++;
+                entry_p r = (*s)->reference;
+                return r; 
             }
         }
         error(entry->id, "Undefined variable", 
@@ -35,7 +30,7 @@ static entry_p resolve_symref(entry_p entry)
     }
     else
     {
-        PANIC; 
+        PANIC;
     }
     return new_failure(NULL);
 }

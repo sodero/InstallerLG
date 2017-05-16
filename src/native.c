@@ -1,11 +1,40 @@
 #include <stdio.h>
+#include <string.h>
 #include "eval.h"
 #include "native.h"
 #include "util.h"
 #include "error.h"
 #include "debug.h"
 
+/*
+*/
+entry_p m_cus (entry_p contxt)
+{
+    entry_p con; 
+    for(con = contxt->parent; 
+        con && con->type != CONTXT; 
+        con = con->parent);
+    if (con && con->children)
+    {
+        entry_p *cus = con->children; 
+        while(*cus && *cus != SENTINEL)
+        {
+            if((*cus)->type == CUSTOM &&
+               !strcmp((*cus)->name, contxt->name))
+            {
+                // Fixa contxt och anropa
+                return new_success("Found!"); 
+            }
+            cus++; 
+        }
+        return new_failure("Undefined function"); 
+    }
+    PANIC;
+    return new_failure("No context"); 
+}
 
+/*
+*/
 entry_p m_set (entry_p contxt)
 {
     entry_p dst; 

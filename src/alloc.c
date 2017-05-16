@@ -173,38 +173,44 @@ static void move_contxt(entry_p dst, entry_p src)
 
 entry_p new_native (call_t call, entry_p e)
 {
-    if (call)
+    if(call)
     {
         entry_p entry = calloc (1, sizeof (entry_t)); 
         if (entry)
         {
             entry->call = call;
             entry->type = NATIVE;
-            if(e)
+            if(e && e->type == CONTXT)
             {
-                if(e->type == CONTXT)
-                {
-                    move_contxt(entry, e); 
-                }
-                else
-                {
-                    PANIC; 
-                }
+                move_contxt(entry, e); 
             }
             return entry;
         }
-        else
-        {
-            PANIC; 
-        }
     }
+    PANIC; 
     return NULL;
 }
 
-entry_p new_cusref (char *s, entry_p e)
+entry_p new_cusref (char *s, int l, entry_p e)
 {
-    fprintf(stderr, "%s\n", s);
-    return NULL;
+    if(s && (l > 0))
+    {
+        entry_p entry = calloc (1, sizeof (entry_t)); 
+        if (entry)
+        {
+            entry->id = l; 
+            entry->name = s; 
+            entry->call = m_cus;
+            entry->type = CUSREF;
+            if(e && e->type == CONTXT)
+            {
+                move_contxt(entry, e); 
+            }
+            return entry;
+        }
+    }
+    PANIC;
+    return NULL; 
 }
 
 void push (entry_p dst, entry_p src)

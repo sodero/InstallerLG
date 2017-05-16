@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "util.h"
+#include "alloc.h"
 
 void eval_print (entry_p entry)
 {
@@ -77,6 +78,15 @@ void pretty_print (entry_p entry)
 
         case CONTXT:
             printf ("\tCONTXT\n"); 
+            if(entry->children)
+            {
+                entry_p *e = entry->children;
+                while(*e && *e != SENTINEL)
+                {
+                    pretty_print(*e); 
+                    e++; 
+                }
+            }
             break;
 
         case STATUS:
