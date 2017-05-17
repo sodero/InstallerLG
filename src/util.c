@@ -26,6 +26,7 @@ void eval_print (entry_p entry)
         case CUSREF:
         case CONTXT:
         case STATUS:
+        case DANGLE:
             break;
     }
 }
@@ -93,6 +94,10 @@ void pretty_print (entry_p entry)
             printf ("\tSTATUS\n");
             printf ("Name:\t%s\n", entry->name);
             printf ("Id:\t%d\n", entry->id);
+            break;
+
+        case DANGLE:
+            printf ("\tDANGLE\n");
             break;
     }
 }

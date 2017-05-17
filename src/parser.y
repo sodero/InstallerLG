@@ -21,36 +21,25 @@ extern int yylineno;
 %token<s> SYM STR 
 %token<n> INT HEX BIN 
 
-%token SET 
+%token SET DCL 
 %token AND OR XOR NOT 
 %token BITAND BITOR BITXOR BITNOT 
 %token SHIFTLEFT SHIFTRIGHT
 
 %type<e> start 
-%type<e> s p pp ps vp np sp sps
-%type<e> add set cus 
+%type<e> s p pp ps vp vps np sp sps par 
+%type<e> add set cus dcl
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
-%destructor { kill($$); } s p pp ps vp np sp sps
-%destructor { kill($$); } add set 
+%destructor { kill($$); } s p pp ps vp vps np sp sps par 
+%destructor { kill($$); } add set cus dcl
 
 %%
 start:      s    
             ;
 
-s:          s vp 
-            { 
-                push($1, $2);                  
-                $$ = $1;
-            } 
-            |
-
-            vp   
-            { 
-                $$ = new_contxt();   
-                push($$, $1);    
-            } 
+s:          vps
             ;
 
 p:          vp 
@@ -72,6 +61,7 @@ ps:         ps p
                 $$ = $1;   
             }    
             |
+
             p
             { 
                 $$ = new_contxt();   
@@ -84,6 +74,22 @@ vp:         add
             set
             |
             cus 
+            |
+            dcl
+            ;
+
+vps:        vps vp 
+            { 
+                push($1, $2);                  
+                $$ = $1;
+            } 
+            |
+
+            vp   
+            { 
+                $$ = new_contxt();   
+                push($$, $1);    
+            } 
             ;
 
 np:         INT  
@@ -147,6 +153,38 @@ set:        '(' SET sps ')'
                 $$ = new_native(m_set, $3); 
             } 
             ;
+
+par:        par SYM
+            { 
+                push($1, new_symbol($2, new_dangle())); 
+                $$ = $1;   
+            }    
+            |
+
+            SYM
+            { 
+                $$ = new_contxt();   
+                push($$, new_symbol($1, new_dangle())); 
+            }    
+            ;
+
+dcl:        '(' DCL SYM par s ')' 
+            { 
+                $$ = new_custom($3, $4, $5); 
+            } 
+            |
+
+            '(' DCL SYM s ')' 
+            { 
+                $$ = new_custom($3, NULL, $4); 
+            } 
+            ;
+
+/*
+ (procedure P_ADDMUL arg1 arg2 arg3
+          (* (+ arg1 arg2) arg3)
+ )
+*/
 
 cus:        '(' SYM ps ')' 
             { 

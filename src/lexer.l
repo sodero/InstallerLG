@@ -64,6 +64,7 @@
 "shiftleft"             { R(SHIFTLEFT);  }
 "shiftright"            { R(SHIFTRIGHT); }
 "set"                   { R(SET);        }
+"procedure"             { R(DCL);        }
 
     /*
     Strings

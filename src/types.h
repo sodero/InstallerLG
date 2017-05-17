@@ -20,6 +20,7 @@ struct entry_s
         CUSREF, 
         CONTXT,
         STATUS,
+        DANGLE,
     } type;
 
     int id; 

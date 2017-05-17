@@ -28,11 +28,8 @@ entry_p new_contxt(void)
         free (symbols); 
         free (children); 
     }
-    else
-    {
-        error(PANIC);
-    }
-    free (entry);
+    error(PANIC);
+    free(entry);
     return 0;
 }
 
@@ -43,30 +40,25 @@ entry_p new_number (int n)
     {
         entry->type = NUMBER;
         entry->id = n;
+        return entry;
     }
-    else
-    {
-        error(PANIC);
-    }
-    return entry;
+    error(PANIC);
+    return NULL;
 }
 
-entry_p new_string (char *s) 
+entry_p new_string (char *n) 
 {
-    if(s)
+    if(n)
     {
         entry_p entry = calloc (1, sizeof (entry_t)); 
         if (entry)
         {
             entry->type = STRING;
-            entry->name = s;
+            entry->name = n;
             return entry;
         }
-        else
-        {
-            error(PANIC);
-        }
     }
+    error(PANIC);
     return NULL; 
 }
 
@@ -93,65 +85,82 @@ entry_p new_failure(void)
     return new_status(0); 
 }
 
-entry_p new_symbol (char *s, entry_p e) 
+entry_p new_symbol (char *n, entry_p e) 
 {
-    if (s && e)
+    if (n && e)
     {
         entry_p entry = calloc (1, sizeof (entry_t)); 
         if (entry)
         {
             entry->type = SYMBOL; 
-            entry->name = s;
+            entry->name = n;
             entry->reference = e;
             return entry; 
         }
-        else
-        {
-            error(PANIC);
-        }
         free (entry);  
     }
+    error(PANIC);
     return NULL; 
 }
 
-entry_p new_symref (char *s, int l)
+entry_p new_custom(char *n, entry_p s, entry_p c) 
 {
-    if(s && (l > 0))
+    printf("hej!\n");
+    if (n && c)
+    {
+        entry_p entry = calloc (1, sizeof (entry_t)); 
+        if (entry)
+        {
+            entry->type = CUSTOM; 
+            entry->name = n;
+            return entry; 
+        }
+        free (entry);  
+    }
+    error(PANIC);
+    return NULL; 
+}
+
+entry_p new_symref (char *n, int l)
+{
+    if(n && (l > 0))
     {
         entry_p entry = calloc (1, sizeof (entry_t)); 
         if (entry)
         {
             entry->type = SYMREF; 
-            entry->name = s;
+            entry->name = n;
             entry->id = l;
             return entry; 
         }
-        else
-        {
-            error(PANIC);
-        }
         free (entry);  
     }
+    error(PANIC);
     return NULL; 
 }
 
 static void move_contxt(entry_p dst, entry_p src)
 {
-    entry_p *c = dst->children = src->children; 
-    entry_p *s = dst->symbols = src->symbols; 
-    while(*c && *c != SENTINEL)
+    if(dst && src)
     {
-        (*c)->parent = dst; 
-        c++; 
+        entry_p *c = dst->children = src->children; 
+        entry_p *s = dst->symbols = src->symbols; 
+        while(*c && *c != SENTINEL)
+        {
+            (*c)->parent = dst; 
+            c++; 
+        }
+        while(*s && *s != SENTINEL)
+        {
+            (*s)->parent = dst; 
+            s++; 
+        }
+        src->children = NULL; 
+        src->symbols = NULL; 
+        kill(src); 
+        return; 
     }
-    while(*s && *s != SENTINEL)
-    {
-        (*s)->parent = dst; 
-        s++; 
-    }
-    src->children = NULL; 
-    src->symbols = NULL; 
-    kill(src); 
+    error(PANIC);
 }
 
 entry_p new_native (call_t call, entry_p e)
@@ -174,15 +183,15 @@ entry_p new_native (call_t call, entry_p e)
     return NULL;
 }
 
-entry_p new_cusref (char *s, int l, entry_p e)
+entry_p new_cusref (char *n, int l, entry_p e)
 {
-    if(s && (l > 0))
+    if(n && (l > 0))
     {
         entry_p entry = calloc (1, sizeof (entry_t)); 
         if (entry)
         {
             entry->id = l; 
-            entry->name = s; 
+            entry->name = n; 
             entry->call = m_cus;
             entry->type = CUSREF;
             if(e && e->type == CONTXT)
@@ -194,6 +203,18 @@ entry_p new_cusref (char *s, int l, entry_p e)
     }
     error(PANIC);
     return NULL; 
+}
+
+entry_p new_dangle(void)
+{
+    entry_p entry = calloc (1, sizeof (entry_t)); 
+    if (entry)
+    {
+        entry->type = DANGLE;
+        return entry;
+    }
+    error(PANIC);
+    return NULL;
 }
 
 void push (entry_p dst, entry_p src)
@@ -250,43 +271,41 @@ void push (entry_p dst, entry_p src)
                 // Do the push
                 (*dst_p)[u] = src; 
                 src->parent = dst; 
-            }
-            else
-            {
-                error(PANIC);
+                return; 
             }
         }
     }
+    error(PANIC);
 }
 
-void kill (entry_p entry)
+void kill(entry_p entry)
 {
-    if (entry)
+    if(entry)
     {
-        free (entry->name); 
-        kill (entry->reference);
+        free(entry->name); 
+        kill(entry->reference);
         if(entry->children)
         {
             entry_p *e = entry->children; 
-            while (*e && *e != SENTINEL)
+            while(*e && *e != SENTINEL)
             {
                 kill (*e);
                 e++; 
             }
-            free (entry->children);
+            free(entry->children);
         }
         if(entry->type == NATIVE &&
            entry->symbols)
         {
             entry_p *e = entry->symbols; 
-            while (*e && *e != SENTINEL)
+            while(*e && *e != SENTINEL)
             {
                 kill (*e);
                 e++; 
             }
         }
-        free (entry->symbols);
-        free (entry); 
+        free(entry->symbols);
+        free(entry); 
     }
 }
 

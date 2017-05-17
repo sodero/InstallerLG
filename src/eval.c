@@ -59,6 +59,7 @@ entry_p eval_as_number(entry_p entry)
         {
             case NUMBER:
             case STATUS:
+            case DANGLE:
                 num.id = entry->id;
                 break;
 
