@@ -282,20 +282,23 @@ void kill(entry_p entry)
 {
     if(entry)
     {
+
         free(entry->name); 
         kill(entry->reference);
-        if(entry->children)
+
+        if(entry->type != NATIVE)
         {
-            entry_p *e = entry->children; 
-            while(*e && *e != SENTINEL)
-            {
-                kill (*e);
-                e++; 
-            }
-            free(entry->children);
+            free(entry->symbols);
+            entry->symbols = NULL; 
         }
-        if(entry->type == NATIVE &&
-           entry->symbols)
+
+        if(entry->type == CUSTOM)
+        {
+            free(entry->children);
+            entry->children = NULL; 
+        }
+
+        if(entry->symbols)
         {
             entry_p *e = entry->symbols; 
             while(*e && *e != SENTINEL)
@@ -304,6 +307,18 @@ void kill(entry_p entry)
                 e++; 
             }
         }
+
+        if(entry->children)
+        {
+            entry_p *e = entry->children; 
+            while(*e && *e != SENTINEL)
+            {
+                kill (*e);
+                e++; 
+            }
+        }
+
+        free(entry->children);
         free(entry->symbols);
         free(entry); 
     }
