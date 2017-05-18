@@ -97,7 +97,6 @@ entry_p new_symbol (char *n, entry_p e)
             entry->reference = e;
             return entry; 
         }
-        free (entry);  
     }
     error(PANIC);
     return NULL; 
@@ -105,17 +104,24 @@ entry_p new_symbol (char *n, entry_p e)
 
 entry_p new_custom(char *n, entry_p s, entry_p c) 
 {
-    printf("hej!\n");
     if (n && c)
     {
         entry_p entry = calloc (1, sizeof (entry_t)); 
         if (entry)
         {
-            entry->type = CUSTOM; 
             entry->name = n;
+            entry->type = CUSTOM; 
+            if(s && s->symbols)
+            {
+                entry->symbols = s->symbols; 
+                s->symbols = NULL; 
+                kill(s); 
+            }
+            entry->children = c->children;
+            c->children = NULL; 
+            kill(c); 
             return entry; 
         }
-        free (entry);  
     }
     error(PANIC);
     return NULL; 
@@ -133,7 +139,6 @@ entry_p new_symref (char *n, int l)
             entry->id = l;
             return entry; 
         }
-        free (entry);  
     }
     error(PANIC);
     return NULL; 
@@ -282,23 +287,12 @@ void kill(entry_p entry)
 {
     if(entry)
     {
-
         free(entry->name); 
         kill(entry->reference);
 
-        if(entry->type != NATIVE)
-        {
-            free(entry->symbols);
-            entry->symbols = NULL; 
-        }
-
-        if(entry->type == CUSTOM)
-        {
-            free(entry->children);
-            entry->children = NULL; 
-        }
-
-        if(entry->symbols)
+        if(entry->symbols && (
+           entry->type == NATIVE || 
+           entry->type == CUSTOM ))
         {
             entry_p *e = entry->symbols; 
             while(*e && *e != SENTINEL)
@@ -318,8 +312,8 @@ void kill(entry_p entry)
             }
         }
 
-        free(entry->children);
         free(entry->symbols);
+        free(entry->children);
         free(entry); 
     }
 }
