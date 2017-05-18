@@ -8,7 +8,17 @@
 
 /*
 */
-entry_p m_cus (entry_p contxt)
+entry_p m_procedure(entry_p contxt)
+{
+    // Put in place and make sure that
+    // we don't have any collisions
+    error(PANIC);
+    return NULL; 
+}
+
+/*
+*/
+entry_p m_gosub(entry_p contxt)
 {
     entry_p con; 
     for(con = contxt->parent; 

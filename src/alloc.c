@@ -111,6 +111,7 @@ entry_p new_custom(char *n, entry_p s, entry_p c)
         {
             entry->name = n;
             entry->type = CUSTOM; 
+            entry->call = m_procedure;
             if(s && s->symbols)
             {
                 entry->symbols = s->symbols; 
@@ -197,7 +198,7 @@ entry_p new_cusref (char *n, int l, entry_p e)
         {
             entry->id = l; 
             entry->name = n; 
-            entry->call = m_cus;
+            entry->call = m_gosub;
             entry->type = CUSREF;
             if(e && e->type == CONTXT)
             {
