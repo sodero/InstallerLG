@@ -102,3 +102,15 @@ void pretty_print (entry_p entry)
     }
 }
 
+entry_p local(entry_p e)
+{
+    for(; e && e->type != CONTXT; e = e->parent);
+    return e; 
+}
+
+entry_p global(entry_p e)
+{
+    for(e = local(e); local(e->parent); e = local(e->parent)); 
+    return e; 
+}
+

@@ -10,20 +10,21 @@
 */
 entry_p m_procedure(entry_p contxt)
 {
-    // Put in place and make sure that
-    // we don't have any collisions
+    entry_p con = global(contxt);  
+    if (con)
+    {
+        push(con, contxt); 
+        return new_success(); 
+    }
     error(PANIC);
-    return NULL; 
+    return new_failure(); 
 }
 
 /*
 */
 entry_p m_gosub(entry_p contxt)
 {
-    entry_p con; 
-    for(con = contxt->parent; 
-        con && con->type != CONTXT; 
-        con = con->parent);
+    entry_p con = global(contxt);  
     if (con && con->children)
     {
         entry_p *cus = con->children; 
@@ -33,6 +34,7 @@ entry_p m_gosub(entry_p contxt)
                !strcmp((*cus)->name, contxt->name))
             {
                 // Fixa contxt och anropa
+                printf("Found %s!\n", contxt->name);
                 return new_success(); 
             }
             cus++; 
@@ -51,9 +53,7 @@ entry_p m_set (entry_p contxt)
 {
     entry_p dst; 
     S_CHECK(1);
-    for(dst = contxt->parent; 
-        dst && dst->type != CONTXT; 
-        dst = dst->parent);
+    dst = global(contxt);
     if (dst)
     {
         entry_p *cur = contxt->symbols; 

@@ -102,13 +102,14 @@ entry_p new_symbol (char *n, entry_p e)
     return NULL; 
 }
 
-entry_p new_custom(char *n, entry_p s, entry_p c) 
+entry_p new_custom(char *n, int l, entry_p s, entry_p c) 
 {
     if (n && c)
     {
         entry_p entry = calloc (1, sizeof (entry_t)); 
         if (entry)
         {
+            entry->id = l;
             entry->name = n;
             entry->type = CUSTOM; 
             entry->call = m_procedure;
@@ -260,6 +261,14 @@ void push (entry_p dst, entry_p src)
                     (*dst_p)[u] = src; 
                     src->parent = dst; 
                     return; 
+                }
+                else if(src->type == CUSTOM) 
+                {
+                    if(strcmp(src->name, (*dst_p)[u]->name) == 0)
+                    {
+                        error(src->id, "Procedure naming collision", 
+                              src->name); 
+                    }
                 }
                 u++;
             }

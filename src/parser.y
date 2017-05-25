@@ -170,13 +170,13 @@ par:        par SYM
 
 dcl:        '(' DCL SYM par s ')' 
             { 
-                $$ = new_custom($3, $4, $5); 
+                $$ = new_custom($3, yylineno, $4, $5); 
             } 
             |
 
             '(' DCL SYM s ')' 
             { 
-                $$ = new_custom($3, NULL, $4); 
+                $$ = new_custom($3, yylineno, NULL, $4); 
             } 
             ;
 
