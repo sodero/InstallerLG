@@ -35,6 +35,7 @@ entry_p m_gosub(entry_p contxt)
             {
                 // Fixa contxt och anropa
                 printf("Found %s!\n", contxt->name);
+                run(*cus); 
                 return new_success(); 
             }
             cus++; 

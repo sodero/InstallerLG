@@ -180,15 +180,15 @@ dcl:        '(' DCL SYM par s ')'
             } 
             ;
 
-/*
- (procedure P_ADDMUL arg1 arg2 arg3
-          (* (+ arg1 arg2) arg3)
- )
-*/
-
 cus:        '(' SYM ps ')' 
             { 
                 $$ = new_cusref($2, yylineno, $3); 
+            } 
+            |
+
+            '(' SYM ')' 
+            { 
+                $$ = new_cusref($2, yylineno, NULL); 
             } 
             ;
 %%
