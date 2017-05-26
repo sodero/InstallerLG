@@ -60,6 +60,7 @@ entry_p eval_as_number(entry_p entry)
             case NUMBER:
             case STATUS:
             case DANGLE:
+            case CUSTOM:
                 num.id = entry->id;
                 break;
 
@@ -82,9 +83,6 @@ entry_p eval_as_number(entry_p entry)
                 r = resolve_native(entry);
                 num.id = eval_as_number(r)->id;
                 kill(r);
-                break;
-            
-            case CUSTOM:
                 break;
 
             default:
@@ -110,39 +108,39 @@ entry_p eval_as_string(entry_p entry)
     return &str;
 }
 
-void run(entry_p entry)
+entry_p invoke(entry_p entry)
 {
-    if(entry && entry->children)
+    entry_p ret = new_failure(); 
+    if(entry)
     {
         entry_p *vec = entry->children;
-        while (*vec && *vec != SENTINEL &&
+        while (*vec && 
+               *vec != SENTINEL &&
                !runtime_error())
         {
             entry_p cur = *vec; 
-            if(cur)
+            if(cur && ( 
+               cur->type == NATIVE ||
+               cur->type == CUSREF))
             {
-                entry_p ret = NULL; 
-                switch(cur->type) 
-                {
-                    case CUSREF:
-                    case NATIVE:
-                        ret = resolve_native(cur);
-                        break; 
-
-                    default:
-                        vec++; 
-                        continue; 
-                }
-                eval_print(ret);
                 kill(ret);
-                vec++; 
+                ret = resolve_native(cur);
             }
+            vec++; 
         }
-        kill (entry);
     }
     else
     {
         error(PANIC);
     }
+    return ret;
+}
+
+void run(entry_p entry)
+{
+    entry_p status = invoke(entry);
+    eval_print(status);
+    kill(status);
+    kill(entry);
 }
 
