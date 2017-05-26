@@ -262,9 +262,10 @@ void push (entry_p dst, entry_p src)
                     src->parent = dst; 
                     return; 
                 }
-                else if(src->type == CUSTOM) 
+                else if(src->type == CUSTOM &&
+                       (*dst_p)[u]->type == CUSTOM) 
                 {
-                    if(strcmp(src->name, (*dst_p)[u]->name) == 0)
+                    if(!strcmp(src->name, (*dst_p)[u]->name))
                     {
                         error(src->id, "Procedure naming collision", 
                               src->name); 

@@ -1,0 +1,3 @@
+(procedure flygel (+ 1 2)); out="" 
+(procedure flygel (+ 1 2)) (procedure flygel (+ 1 1)); out="Line 1: Procedure naming collision 'flygel'" 
+(procedure flyg (+ 1 2)) (procedure el (+ 1 1)); out="" 

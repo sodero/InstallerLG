@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #define TRACE(...) fprintf (stderr, __VA_ARGS__)
+#define HERE TRACE("%s : %d\n", __func__, __LINE__)
 
 void leak_check();
 
