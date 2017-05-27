@@ -68,6 +68,7 @@ void pretty_print (entry_p entry)
 
         case NATIVE:
             printf ("\tNATIVE\n");
+            printf ("%sName:\t%s\n", tbs[ind], entry->name);
             printf ("%sCall:\t%p\n", tbs[ind], entry->call);
             break;
 

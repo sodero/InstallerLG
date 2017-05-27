@@ -144,13 +144,13 @@ sps:        sps sp
 
 add:        '(' '+' pp ')' 
             { 
-                $$ = new_native(m_add, $3); 
+                $$ = new_native("add", m_add, $3); 
             } 
             ;
 
 set:        '(' SET sps ')' 
             { 
-                $$ = new_native(m_set, $3); 
+                $$ = new_native("set", m_set, $3); 
             } 
             ;
 

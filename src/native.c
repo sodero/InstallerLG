@@ -42,7 +42,7 @@ entry_p m_gosub(entry_p contxt)
                 // TODO Fixa contxt
 
 
-//    pretty_print(*cus);
+    pretty_print(*cus);
 
                 return invoke(*cus); 
             }

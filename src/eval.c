@@ -119,12 +119,6 @@ entry_p eval_as_string(entry_p entry)
 entry_p invoke(entry_p entry)
 {
     entry_p ret = new_failure(); 
-
-    pretty_print(entry);
-//    type_print(entry->symbols[0]);
-//    pretty_print(entry->symbols[0]);
-    
-
     if(entry)
     {
         entry_p *vec = entry->children;
