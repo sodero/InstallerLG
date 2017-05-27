@@ -12,12 +12,14 @@ static entry_p resolve_symref(entry_p entry)
     entry_p con = local(entry); 
     if(con)
     {
-        pretty_print(con);
         do
         {
             entry_p nxt; 
             entry_p *tmp; 
-HERE; 
+
+     //       type_print(entry);
+     //       type_print(con);
+
             for(tmp = con->symbols;
                 *tmp && *tmp != SENTINEL; tmp++)
             {
@@ -117,6 +119,12 @@ entry_p eval_as_string(entry_p entry)
 entry_p invoke(entry_p entry)
 {
     entry_p ret = new_failure(); 
+
+    pretty_print(entry);
+//    type_print(entry->symbols[0]);
+//    pretty_print(entry->symbols[0]);
+    
+
     if(entry)
     {
         entry_p *vec = entry->children;
@@ -145,6 +153,7 @@ entry_p invoke(entry_p entry)
 void run(entry_p entry)
 {
     entry_p status = invoke(entry);
+//    pretty_print(entry);
     eval_print(status);
     kill(status);
     kill(entry);

@@ -40,6 +40,10 @@ entry_p m_gosub(entry_p contxt)
                     printf("Ja\n");
                 }
                 // TODO Fixa contxt
+
+
+//    pretty_print(*cus);
+
                 return invoke(*cus); 
             }
             cus++; 
