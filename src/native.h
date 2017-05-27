@@ -25,8 +25,8 @@ int m_bitnot(int a);
 int m_shiftleft(int a, int n);
 int m_shiftright(int a, int n);
 
-#define S_CHECK(X) CHECK(X,symbols,contxt)
-#define C_CHECK(X) CHECK(X,children,contxt)
+#define CHECK_SYMS(X) CHECK(X,symbols,contxt)
+#define CHECK_CHLD(X) CHECK(X,children,contxt)
 
 #define CHECK(X,W,Q) \
 if(1) { \

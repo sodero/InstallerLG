@@ -40,9 +40,11 @@ entry_p m_gosub(entry_p contxt)
         }
         error(contxt->id, "Undefined function", 
               contxt->name); 
-        return new_failure(); 
     }
-    error(PANIC);
+    else
+    {
+        error(PANIC);
+    }
     return new_failure(); 
 }
 
@@ -51,7 +53,7 @@ entry_p m_gosub(entry_p contxt)
 entry_p m_set (entry_p contxt)
 {
     entry_p dst; 
-    S_CHECK(1);
+    CHECK_SYMS(1);
     dst = global(contxt);
     if (dst)
     {
@@ -73,7 +75,7 @@ entry_p m_set (entry_p contxt)
 */
 entry_p m_add (entry_p contxt)
 {
-    C_CHECK(2);
+    CHECK_CHLD(2);
     return new_number
     (
         eval_as_number(contxt->children[0])->id +
