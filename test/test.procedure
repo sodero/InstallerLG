@@ -5,3 +5,5 @@
 (procedure f1 (+ 1 (+ 1 1))) (f1); out="3" 
 (procedure f1 (+ 1 1)) (procedure f2 (+ (f1) (f1))) (f2); out="4" 
 (procedure f1 (+ 1 1)) (procedure f2 (+ f1 f1)) (f2); out="Line 1: Undefined variable 'f1'"
+(procedure f1 (set a 1) (set b 2) (+ a (+ 1 b))) (f1); out="4" 
+
