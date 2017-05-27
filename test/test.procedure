@@ -2,4 +2,5 @@
 (procedure f1 (+ 1 2)) (procedure f1 (+ 1 1)); out="Line 1: Procedure naming collision 'f1'" 
 (procedure f1 (+ 1 2)) (procedure f2 (+ 1 1)); out="" 
 (f1); out="Line 1: Undefined function 'f1'"
-(procedure f1 (+ 1 2)) (f1); out="" 
+(procedure f1 (+ 1 (+ 1 1))) (f1); out="3" 
+(procedure f1 (+ 1 1)) (procedure f2 (+ (f1) (f1))) (f2); out="4" 

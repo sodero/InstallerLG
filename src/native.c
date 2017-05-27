@@ -33,10 +33,8 @@ entry_p m_gosub(entry_p contxt)
             if((*cus)->type == CUSTOM &&
                !strcmp((*cus)->name, contxt->name))
             {
-                // Fixa contxt och anropa
-                printf("Found %s!\n", contxt->name);
-                run(*cus); 
-                return new_success(); 
+                // TODO Fixa contxt
+                return invoke(*cus); 
             }
             cus++; 
         }
