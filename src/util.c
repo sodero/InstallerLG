@@ -104,7 +104,7 @@ void pretty_print (entry_p entry)
 
 entry_p local(entry_p e)
 {
-    for(; e && e->type != CONTXT; e = e->parent);
+    for(; e && e->type != CONTXT && e->type != CUSTOM; e = e->parent);
     return e; 
 }
 

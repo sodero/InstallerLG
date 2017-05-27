@@ -33,6 +33,12 @@ entry_p m_gosub(entry_p contxt)
             if((*cus)->type == CUSTOM &&
                !strcmp((*cus)->name, contxt->name))
             {
+                entry_p *arg = (*cus)->children, 
+                        *ina = contxt->children;
+                if(arg && *arg && ina && *ina)
+                {
+                    printf("Ja\n");
+                }
                 // TODO Fixa contxt
                 return invoke(*cus); 
             }

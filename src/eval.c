@@ -9,22 +9,28 @@
 
 static entry_p resolve_symref(entry_p entry)
 {
-    entry_p par; 
-    for(par = entry->parent; 
-        par && par->type != CONTXT; 
-        par = par->parent);
-    if(par)
+    entry_p con = local(entry); 
+    if(con)
     {
-        entry_p *s; 
-        for(s = par->symbols;
-            *s && *s != SENTINEL; s++)
+        pretty_print(con);
+        do
         {
-            if(!strcmp((*s)->name, entry->name)) 
+            entry_p nxt; 
+            entry_p *tmp; 
+HERE; 
+            for(tmp = con->symbols;
+                *tmp && *tmp != SENTINEL; tmp++)
             {
-                entry_p r = (*s)->reference;
-                return r; 
+                if(!strcmp((*tmp)->name, entry->name)) 
+                {
+                    entry_p ret = (*tmp)->reference;
+                    return ret; 
+                }
             }
+            nxt = global(entry);
+            con = con == nxt ? NULL : nxt; 
         }
+        while(con);
         error(entry->id, "Undefined variable", 
               entry->name); 
     }
