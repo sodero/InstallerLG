@@ -48,122 +48,59 @@ void pretty_print (entry_p entry)
         "DANGLE"
     };
 
-
-    if(!entry)
+    if(entry)
+    {
+        printf("%s\n", tps[entry->type]);
+        if(entry->id || entry->type == STATUS) 
+        {
+            printf("%sId:\t%d\n", tabs(ind), entry->id);
+        }
+        if(entry->name) 
+        {
+            printf("%sName:\t%s\n", tabs(ind), entry->name);
+        }
+        if(entry->reference) 
+        {
+            printf ("%sRef:\t", tabs(ind));
+            ind++; 
+            pretty_print (entry->reference);
+            ind--; 
+        }
+        if(entry->children) 
+        {
+            entry_p *e = entry->children;
+            if(e && *e)
+            {
+                while(*e && *e != SENTINEL)
+                {
+                    printf ("%sChl:\t", tabs(ind)); 
+                    ind++; 
+                    pretty_print(*e); 
+                    ind--; 
+                    e++; 
+                }
+            }
+        }
+        if(entry->symbols) 
+        {
+            entry_p *e = entry->symbols;
+            if(e && *e)
+            {
+                while(*e && *e != SENTINEL)
+                {
+                    printf ("%sSym:\t", tabs(ind)); 
+                    ind++; 
+                    pretty_print(*e); 
+                    ind--; 
+                    e++; 
+                }
+            }
+        }
+    }
+    else
     {
         printf ("NULL\n\n");
         return; 
-    }
-    switch (entry->type)
-    {
-        case NUMBER:
-            printf ("NUMBER\n");
-            printf ("%sId:\t%d\n", tabs(ind), entry->id);
-            break;
-
-        case STRING:
-            printf ("STRING\n");
-            printf ("%sName:\t%s\n", tabs(ind), entry->name);
-            break;
-
-        case SYMBOL:
-            printf ("SYMBOL\n");
-            printf ("%sName:\t%s\n", tabs(ind), entry->name);
-            printf ("%sRef:", tabs(ind));
-            pretty_print (entry->reference);
-            break;
-
-        case SYMREF:
-            printf ("SYMREF\n");
-            printf ("%sName:\t%s\n", tabs(ind), entry->name);
-            break;
-
-        case NATIVE:
-            printf ("NATIVE\n");
-            printf ("%sName:\t%s\n", tabs(ind), entry->name);
-            printf ("%sCall:\t%p\n", tabs(ind), entry->call);
-            break;
-
-        case CUSTOM:
-            printf ("CUSTOM\n");
-            printf ("%sName:\t%s\n", tabs(ind), entry->name);
-            printf ("%sCall:\t%p\n", tabs(ind), entry->call);
-            if(entry->children || 
-               entry->symbols)
-            {
-                entry_p *e = entry->children;
-                if(e && *e)
-                {
-                    while(*e && *e != SENTINEL)
-                    {
-                        printf ("%sChl:\t", tabs(ind)); 
-                        ind++; 
-                        pretty_print(*e); 
-                        ind--; 
-                        e++; 
-                    }
-                }
-                e = entry->symbols;
-                if(e && *e)
-                {
-                    while(*e && *e != SENTINEL)
-                    {
-                        printf ("%sSym:\t", tabs(ind)); 
-                        ind++; 
-                        pretty_print(*e); 
-                        ind--; 
-                        e++; 
-                    }
-                }
-            }
-            break;
-
-        case CUSREF:
-            printf ("CUSREF\n");
-            printf ("%sName:\t%s\n", tabs(ind), entry->name);
-            break;
-
-        case CONTXT:
-            printf ("CONTXT\n"); 
-            if(entry->children || 
-               entry->symbols)
-            {
-                entry_p *e = entry->children;
-                if(e && *e)
-                {
-                    while(*e && *e != SENTINEL)
-                    {
-                        printf ("%sChl:\t", tabs(ind)); 
-                        ind++; 
-                        pretty_print(*e); 
-                        ind--; 
-                        e++; 
-                    }
-                }
-                e = entry->symbols;
-                if(e && *e)
-                {
-                    while(*e && *e != SENTINEL)
-                    {
-                        printf ("%sSym:\t", tabs(ind)); 
-                        ind++; 
-                        pretty_print(*e); 
-                        ind--; 
-                        e++; 
-                    }
-                }
-            }
-            break;
-
-        case STATUS:
-            printf ("STATUS\n");
-            printf ("%sName:\t%s\n", tabs(ind), entry->name);
-            printf ("%sId:\t%d\n", tabs(ind), entry->id);
-            break;
-
-        case DANGLE:
-            printf ("DANGLE\n");
-            break;
     }
 }
 
