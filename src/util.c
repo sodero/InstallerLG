@@ -34,15 +34,6 @@ char *tabs(int n)
 void pretty_print (entry_p entry)
 {
     static int ind = 0; 
-    char *tbs[] = 
-    { 
-        "\t", 
-        "\t\t", 
-        "\t\t\t", 
-        "\t\t\t\t", 
-        "\t\t\t\t\t" 
-    }; 
-
     static char *tps[] = 
     {
         "NUMBER",
