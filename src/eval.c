@@ -17,7 +17,8 @@ static entry_p resolve_symref(entry_p entry)
             entry_p nxt; 
             entry_p *tmp; 
             for(tmp = con->symbols;
-                *tmp && *tmp != SENTINEL; tmp++)
+                tmp && *tmp && *tmp != SENTINEL; 
+                tmp++)
             {
                 if(!strcmp((*tmp)->name, entry->name)) 
                 {
