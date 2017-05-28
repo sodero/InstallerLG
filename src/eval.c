@@ -62,8 +62,8 @@ entry_p eval_as_number(entry_p entry)
         entry_p r; 
         switch(entry->type)
         {
-            case NUMBER:
             case STATUS:
+            case NUMBER:
             case DANGLE:
             case CUSTOM:
                 num.id = entry->id;

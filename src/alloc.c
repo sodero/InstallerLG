@@ -64,15 +64,9 @@ entry_p new_string (char *n)
 
 static entry_p new_status(int s)
 {
-    entry_p status = calloc (1, sizeof (entry_t)); 
-    if (status)
-    {
-        status->type = STATUS;
-        status->id = s;
-        return status;
-    }
-    error(PANIC);
-    return NULL;
+    static entry_t status = { STATUS, 0 };
+    status.id = s; 
+    return &status; 
 }
 
 entry_p new_success(void) 
@@ -231,7 +225,7 @@ entry_p new_dangle(void)
     if (entry)
     {
         entry->type = DANGLE;
-        entry->id = 666;
+        entry->id = 0;
         return entry;
     }
     error(PANIC);
@@ -310,11 +304,10 @@ void push (entry_p dst, entry_p src)
 
 void kill(entry_p entry)
 {
-    if(entry)
+    if(entry && entry->type != STATUS)
     {
         free(entry->name); 
         kill(entry->reference);
-
         if(entry->symbols && (
            entry->type == NATIVE || 
            entry->type == CUSTOM ))
@@ -326,7 +319,6 @@ void kill(entry_p entry)
                 e++; 
             }
         }
-
         if(entry->children)
         {
             entry_p *e = entry->children; 
@@ -336,7 +328,6 @@ void kill(entry_p entry)
                 e++; 
             }
         }
-
         free(entry->symbols);
         free(entry->children);
         free(entry); 
