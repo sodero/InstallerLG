@@ -147,7 +147,7 @@ entry_p invoke(entry_p entry)
 void run(entry_p entry)
 {
     entry_p status = invoke(entry);
-//    pretty_print(entry);
+    pretty_print(entry);
     eval_print(status);
     kill(status);
     kill(entry);

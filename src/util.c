@@ -5,77 +5,98 @@
 
 void eval_print (entry_p entry)
 {
-    if(!entry)
+    if(entry)
+    {
+        if(entry->type == NUMBER)
+        {
+            printf ("%d\n", entry->id);
+        }
+        else if(entry->type == STRING)
+        {
+            printf ("%s\n", entry->name);
+        }
+    }
+    else
     {
         printf ("NULL\n");
-        return; 
     }
-    switch (entry->type)
-    {
-        case NUMBER:
-            printf ("%d\n", entry->id);
-            break;
+    return;     
+}
 
-        case STRING:
-            printf ("%s\n", entry->name);
-            break;
-
-        case SYMBOL:
-        case SYMREF:
-        case NATIVE:
-        case CUSTOM:
-        case CUSREF:
-        case CONTXT:
-        case STATUS:
-        case DANGLE:
-            break;
-    }
+char *tabs(int n)
+{
+    static char t[16]; 
+    n = n < sizeof(t) ? n : sizeof(t); 
+    for(t[n] = '\0'; n--; t[n] = '\t'); 
+    return t; 
 }
 
 void pretty_print (entry_p entry)
 {
     static int ind = 0; 
-    char *tbs[] = { "\t", "\t\t", "\t\t\t", 
-                    "\t\t\t\t", "\t\t\t\t\t" }; 
+    char *tbs[] = 
+    { 
+        "\t", 
+        "\t\t", 
+        "\t\t\t", 
+        "\t\t\t\t", 
+        "\t\t\t\t\t" 
+    }; 
+
+    static char *tps[] = 
+    {
+        "NUMBER",
+        "STRING", 
+        "SYMBOL",
+        "SYMREF",
+        "NATIVE", 
+        "CUSTOM", 
+        "CUSREF", 
+        "CONTXT",
+        "STATUS",
+        "DANGLE"
+    };
+
+
     if(!entry)
     {
-        printf ("\tNULL\n\n");
+        printf ("NULL\n\n");
         return; 
     }
     switch (entry->type)
     {
         case NUMBER:
-            printf ("\tNUMBER\n");
-            printf ("%sId:\t%d\n", tbs[ind], entry->id);
+            printf ("NUMBER\n");
+            printf ("%sId:\t%d\n", tabs(ind), entry->id);
             break;
 
         case STRING:
-            printf ("\tSTRING\n");
-            printf ("%sName:\t%s\n", tbs[ind], entry->name);
+            printf ("STRING\n");
+            printf ("%sName:\t%s\n", tabs(ind), entry->name);
             break;
 
         case SYMBOL:
-            printf ("\tSYMBOL\n");
-            printf ("%sName:\t%s\n", tbs[ind], entry->name);
-            printf ("%sRef:", tbs[ind]);
+            printf ("SYMBOL\n");
+            printf ("%sName:\t%s\n", tabs(ind), entry->name);
+            printf ("%sRef:", tabs(ind));
             pretty_print (entry->reference);
             break;
 
         case SYMREF:
-            printf ("\tSYMREF\n");
-            printf ("%sName:\t%s\n", tbs[ind], entry->name);
+            printf ("SYMREF\n");
+            printf ("%sName:\t%s\n", tabs(ind), entry->name);
             break;
 
         case NATIVE:
-            printf ("\tNATIVE\n");
-            printf ("%sName:\t%s\n", tbs[ind], entry->name);
-            printf ("%sCall:\t%p\n", tbs[ind], entry->call);
+            printf ("NATIVE\n");
+            printf ("%sName:\t%s\n", tabs(ind), entry->name);
+            printf ("%sCall:\t%p\n", tabs(ind), entry->call);
             break;
 
         case CUSTOM:
-            printf ("\tCUSTOM\n");
-            printf ("%sName:\t%s\n", tbs[ind], entry->name);
-            printf ("%sCall:\t%p\n", tbs[ind], entry->call);
+            printf ("CUSTOM\n");
+            printf ("%sName:\t%s\n", tabs(ind), entry->name);
+            printf ("%sCall:\t%p\n", tabs(ind), entry->call);
             if(entry->children || 
                entry->symbols)
             {
@@ -84,7 +105,7 @@ void pretty_print (entry_p entry)
                 {
                     while(*e && *e != SENTINEL)
                     {
-                        printf ("%sChl:", tbs[ind]); 
+                        printf ("%sChl:\t", tabs(ind)); 
                         ind++; 
                         pretty_print(*e); 
                         ind--; 
@@ -96,7 +117,7 @@ void pretty_print (entry_p entry)
                 {
                     while(*e && *e != SENTINEL)
                     {
-                        printf ("%sSym:", tbs[ind]); 
+                        printf ("%sSym:\t", tabs(ind)); 
                         ind++; 
                         pretty_print(*e); 
                         ind--; 
@@ -107,12 +128,12 @@ void pretty_print (entry_p entry)
             break;
 
         case CUSREF:
-            printf ("\tCUSREF\n");
-            printf ("%sName:\t%s\n", tbs[ind], entry->name);
+            printf ("CUSREF\n");
+            printf ("%sName:\t%s\n", tabs(ind), entry->name);
             break;
 
         case CONTXT:
-            printf ("\tCONTXT\n"); 
+            printf ("CONTXT\n"); 
             if(entry->children || 
                entry->symbols)
             {
@@ -121,7 +142,7 @@ void pretty_print (entry_p entry)
                 {
                     while(*e && *e != SENTINEL)
                     {
-                        printf ("%sChl:", tbs[ind]); 
+                        printf ("%sChl:\t", tabs(ind)); 
                         ind++; 
                         pretty_print(*e); 
                         ind--; 
@@ -133,7 +154,7 @@ void pretty_print (entry_p entry)
                 {
                     while(*e && *e != SENTINEL)
                     {
-                        printf ("%sSym:", tbs[ind]); 
+                        printf ("%sSym:\t", tabs(ind)); 
                         ind++; 
                         pretty_print(*e); 
                         ind--; 
@@ -144,13 +165,13 @@ void pretty_print (entry_p entry)
             break;
 
         case STATUS:
-            printf ("\tSTATUS\n");
-            printf ("%sName:\t%s\n", tbs[ind], entry->name);
-            printf ("%sId:\t%d\n", tbs[ind], entry->id);
+            printf ("STATUS\n");
+            printf ("%sName:\t%s\n", tabs(ind), entry->name);
+            printf ("%sId:\t%d\n", tabs(ind), entry->id);
             break;
 
         case DANGLE:
-            printf ("\tDANGLE\n");
+            printf ("DANGLE\n");
             break;
     }
 }

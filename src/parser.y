@@ -144,7 +144,7 @@ sps:        sps sp
 
 add:        '(' '+' pp ')' 
             { 
-                $$ = new_native("add", m_add, $3); 
+                $$ = new_native("+", m_add, $3); 
             } 
             ;
 
