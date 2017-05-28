@@ -109,19 +109,31 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
         entry_p entry = calloc (1, sizeof (entry_t)); 
         if (entry)
         {
+            entry_p *e; 
             entry->id = l;
             entry->name = n;
             entry->type = CUSTOM; 
-            entry->call = m_procedure;
             if(s && s->symbols)
             {
                 entry->symbols = s->symbols; 
                 s->symbols = NULL; 
                 kill(s); 
+                e = entry->symbols; 
+                while(*e && *e != SENTINEL)
+                {
+                    (*e)->parent = entry;
+                    e++; 
+                }
             }
             entry->children = c->children;
             c->children = NULL; 
             kill(c); 
+            e = entry->children; 
+            while(*e && *e != SENTINEL)
+            {
+                (*e)->parent = entry;
+                e++; 
+            }
             return entry; 
         }
     }
@@ -219,6 +231,7 @@ entry_p new_dangle(void)
     if (entry)
     {
         entry->type = DANGLE;
+        entry->id = 666;
         return entry;
     }
     error(PANIC);

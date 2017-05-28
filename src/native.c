@@ -8,20 +8,6 @@
 
 /*
 */
-entry_p m_procedure(entry_p contxt)
-{
-    entry_p con = global(contxt);  
-    if (con)
-    {
-        push(con, contxt); 
-        return new_success(); 
-    }
-    error(PANIC);
-    return new_failure(); 
-}
-
-/*
-*/
 entry_p m_gosub(entry_p contxt)
 {
     entry_p con = global(contxt);  
@@ -37,13 +23,9 @@ entry_p m_gosub(entry_p contxt)
                         *ina = contxt->children;
                 if(arg && *arg && ina && *ina)
                 {
-                    printf("Ja\n");
+                    //printf("Ja\n");
                 }
                 // TODO Fixa contxt
-
-
-    pretty_print(*cus);
-
                 return invoke(*cus); 
             }
             cus++; 

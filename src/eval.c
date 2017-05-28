@@ -16,10 +16,6 @@ static entry_p resolve_symref(entry_p entry)
         {
             entry_p nxt; 
             entry_p *tmp; 
-
-     //       type_print(entry);
-     //       type_print(con);
-
             for(tmp = con->symbols;
                 *tmp && *tmp != SENTINEL; tmp++)
             {
@@ -147,7 +143,6 @@ entry_p invoke(entry_p entry)
 void run(entry_p entry)
 {
     entry_p status = invoke(entry);
-    pretty_print(entry);
     eval_print(status);
     kill(status);
     kill(entry);

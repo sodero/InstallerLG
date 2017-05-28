@@ -51,6 +51,8 @@ void pretty_print (entry_p entry)
     if(entry)
     {
         printf("%s\n", tps[entry->type]);
+        printf("%sThis:%p\n", tabs(ind), entry);
+        printf("%sParent:%p\n", tabs(ind), entry->parent);
         if(entry->id || entry->type == STATUS) 
         {
             printf("%sId:\t%d\n", tabs(ind), entry->id);
@@ -106,10 +108,21 @@ void pretty_print (entry_p entry)
 
 entry_p local(entry_p e)
 {
+    int i = 0; 
     for(; e && 
         e->type != CONTXT && 
         e->type != CUSTOM 
-        ; e = e->parent);
+        ; e = e->parent)
+{
+//    printf("i:%d\n", i); 
+ //   pretty_print(e); 
+  //  i++; 
+}
+
+  //  printf("i:%d\n", i); 
+  //  pretty_print(e); 
+
+//    ;
     return e; 
 }
 
