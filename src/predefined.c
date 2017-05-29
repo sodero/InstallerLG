@@ -1,4 +1,5 @@
 /*
+predefined variables
 @default-dest
 @each-name
 @each-type
