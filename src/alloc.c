@@ -221,15 +221,8 @@ entry_p new_cusref (char *n, int l, entry_p e)
 
 entry_p new_dangle(void)
 {
-    entry_p entry = calloc (1, sizeof (entry_t)); 
-    if (entry)
-    {
-        entry->type = DANGLE;
-        entry->id = 0;
-        return entry;
-    }
-    error(PANIC);
-    return NULL;
+    static entry_t dangle = { DANGLE, 0 };
+    return &dangle; 
 }
 
 void push (entry_p dst, entry_p src)
@@ -304,10 +297,16 @@ void push (entry_p dst, entry_p src)
 
 void kill(entry_p entry)
 {
-    if(entry && entry->type != STATUS)
+    if(entry && 
+       entry->type != STATUS &&
+       entry->type != DANGLE)
     {
         free(entry->name); 
-        kill(entry->reference);
+        if(entry->reference &&
+           entry->reference->parent == entry)
+        {
+            kill(entry->reference);
+        }
         if(entry->symbols && (
            entry->type == NATIVE || 
            entry->type == CUSTOM ))

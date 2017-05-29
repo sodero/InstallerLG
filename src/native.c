@@ -14,18 +14,32 @@ entry_p m_gosub(entry_p contxt)
     if (con && con->children)
     {
         entry_p *cus = con->children; 
-        while(*cus && *cus != SENTINEL)
+        while(*cus && 
+              *cus != SENTINEL)
         {
             if((*cus)->type == CUSTOM &&
                !strcmp((*cus)->name, contxt->name))
             {
-                entry_p *arg = (*cus)->children, 
+                entry_p *arg = (*cus)->symbols, 
                         *ina = contxt->children;
-                if(arg && *arg && ina && *ina)
+                if(arg && ina)
                 {
-                    //printf("Ja\n");
+                    while(*arg && 
+                         (*arg)->reference &&
+                          *ina)
+                    {
+                        if((*ina)->type == CUSREF &&
+                           !strcmp((*ina)->name, contxt->name))          
+                        {
+                            error(contxt->id, "Infinite recursion", 
+                                  contxt->name); 
+                            return new_failure(); 
+                        }
+                        (*arg)->reference = *ina; 
+                        arg++; 
+                        ina++;
+                    }
                 }
-                // TODO Fixa contxt
                 return invoke(*cus); 
             }
             cus++; 
