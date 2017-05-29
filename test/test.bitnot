@@ -1,3 +1,0 @@
-(BITNOT $00000000)  ; out="-1"
-(BITNOT $ffffffff)  ; out="0"
-(BITNOT $ffffff00)  ; out="255"

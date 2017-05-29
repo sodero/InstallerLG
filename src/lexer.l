@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "types.h"
 #include "parser.h"
+#include "error.h"
 
 #ifdef _DEBUG
 # define P(X) printf("L:%s|%s|\n", #X, yytext)
@@ -19,8 +20,7 @@
     Decimal numbers
     */
 -?[0-9]+                { 
-    yylval.val.num = strtol(yytext, NULL, 10);      
-    yylval.type = NUMBER; 
+    yylval.n = strtol(yytext, NULL, 10);      
     R(INT); 
 }
 
@@ -28,8 +28,7 @@
     Hexadecimal numbers
     */
 \$[0-9a-fA-F]+          { 
-    yylval.val.num = strtol(yytext + 1, NULL, 16);  
-    yylval.type = NUMBER; 
+    yylval.n = strtol(yytext + 1, NULL, 16);  
     R(HEX); 
 }
 
@@ -37,8 +36,7 @@
     Binary numbers
     */
 %[01]+                  { 
-    yylval.val.num = strtol(yytext + 1, NULL, 2);   
-    yylval.type = NUMBER; 
+    yylval.n = strtol(yytext + 1, NULL, 2);   
     R(BIN); 
 }
 
@@ -65,13 +63,15 @@
 "BITNOT"                { R(BITNOT);     }
 "shiftleft"             { R(SHIFTLEFT);  }
 "shiftright"            { R(SHIFTRIGHT); }
+"set"                   { R(SET);        }
+"procedure"             { R(DCL);        }
 
     /*
     Strings
     */
 \"[^\"]*\"              { 
-    yylval.val.str = yytext; 
-    yylval.type = STRING; 
+    yylval.s = strdup(yytext + 1); 
+    yylval.s[yyleng - 2] = 0; 
     R(STR);        
 }    
 
@@ -79,14 +79,21 @@
     Symbols
     */
 [^" \n\t\(\)\+\*/-]+    { 
-    yylval.val.str = yytext; 
-    yylval.type = SYMBOL; 
+    yylval.s = strdup(yytext); 
     R(SYM);        
 }
 
     /*
     The bottom feeders
     */
-[\n\t ]+                { N(' ');        }
-;.*$                    { N(';');        }
+\n                    { N(' '); yylineno++; }
+[\t ]+                { N(' '); }
+;.*$                  { N(';'); }
 %%
+
+int yyerror(char *err)
+{
+    error(yylineno, err, yytext); 
+    return 0;
+}
+

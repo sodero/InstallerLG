@@ -1,4 +1,0 @@
-(shiftleft %0100 1) ; out="8"
-(shiftleft %0100 2) ; out="16"
-(shiftleft %0100 3) ; out="32"
-(shiftleft %0000 3) ; out="0"

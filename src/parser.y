@@ -1,96 +1,201 @@
 %{
 #include <stdio.h>
-#include "types.h"
-#include "builtin.h"
+#include "debug.h"
+#include "native.h"
+#include "eval.h"
+#include "util.h"
 
 int yylex(void);
 int yyerror(char *err);
+
+extern int yylineno; 
 %}
 
-%token<val.str> SYM STR 
-%token<val.num> INT HEX BIN AND OR XOR NOT BITAND BITOR BITXOR BITNOT SHIFTLEFT SHIFTRIGHT
-%type<val.num> n np vp add sub mul div and or xor not bitand bitor bitxor bitnot shiftleft shiftright
+%union 
+{
+    int n; 
+    char *s; 
+    entry_p e;
+}
+
+%token<s> SYM STR 
+%token<n> INT HEX BIN 
+
+%token SET DCL 
+%token AND OR XOR NOT 
+%token BITAND BITOR BITXOR BITNOT 
+%token SHIFTLEFT SHIFTRIGHT
+
+%type<e> start 
+%type<e> s p pp ps vp vps np sp sps par 
+%type<e> add set cus dcl
+
+%destructor { run($$); } start 
+%destructor { free($$); } SYM STR
+%destructor { kill($$); } s p pp ps vp vps np sp sps par 
+%destructor { kill($$); } add set cus dcl
 
 %%
-s:          s vp                        { printf("%d\n", $2);       } |
-            vp                          { printf("%d\n", $1);       }
+start:      s    
             ;
 
-vp:         add                         { $$ = $1;                  } |
-            sub                         { $$ = $1;                  } |
-            mul                         { $$ = $1;                  } |
-            div                         { $$ = $1;                  } |
-            and                         { $$ = $1;                  } |
-            or                          { $$ = $1;                  } |
-            xor                         { $$ = $1;                  } |
-            not                         { $$ = $1;                  } |
-            bitand                      { $$ = $1;                  } |
-            bitor                       { $$ = $1;                  } |
-            bitxor                      { $$ = $1;                  } |
-            bitnot                      { $$ = $1;                  } |
-            shiftleft                   { $$ = $1;                  } |
-            shiftright                  { $$ = $1;                  } 
+s:          vps
             ;
 
-np:         n                           { $$ = $1;                  } 
+p:          vp 
+            |
+            np
             ;
 
-n:          INT                         { $$ = $1;                  } |
-            HEX                         { $$ = $1;                  } |
-            BIN                         { $$ = $1;                  } 
+pp:         p p
+            { 
+                $$ = new_contxt();   
+                push($$, $1);    
+                push($$, $2);    
+            } 
             ;
 
-add:        '(' '+' np np ')'           { $$ = add($3, $4);         } 
+ps:         ps p
+            { 
+                push ($1, $2);    
+                $$ = $1;   
+            }    
+            |
+
+            p
+            { 
+                $$ = new_contxt();   
+                push ($$, $1);    
+            }    
             ;
 
-sub:        '(' '-' np np ')'           { $$ = sub($3, $4);         } 
+vp:         add
+            |
+            set
+            |
+            cus 
+            |
+            dcl
             ;
 
-mul:        '(' '*' np np ')'           { $$ = mul($3, $4);         } 
+vps:        vps vp 
+            { 
+                push($1, $2);                  
+                $$ = $1;
+            } 
+            |
+
+            vp   
+            { 
+                $$ = new_contxt();   
+                push($$, $1);    
+            } 
             ;
 
-div:        '(' '/' np np ')'           { $$ = div($3, $4);         } 
+np:         INT  
+            { 
+                $$ = new_number($1); 
+            } 
+            |
+
+            HEX  
+            { 
+                $$ = new_number($1); 
+            } 
+            |
+
+            BIN  
+            { 
+                $$ = new_number($1); 
+            }                        
+            |
+
+            STR  
+            { 
+                $$ = new_string($1); 
+            }                        
+            |
+
+            SYM  
+            { 
+                $$ = new_symref($1, yylineno); 
+            }    
             ;
 
-and:        '(' AND np np ')'           { $$ = and($3, $4);         } 
+sp:         SYM p
+            { 
+                $$ = new_symbol($1, $2);   
+                $2->parent = $$;
+            } 
             ;
 
-or:         '(' OR np np ')'            { $$ = or($3, $4);          } 
+sps:        sps sp
+            { 
+                push ($1, $2);    
+                $$ = $1;   
+            }    
+            |
+            sp
+            { 
+                $$ = new_contxt();   
+                push ($$, $1);    
+            }    
             ;
 
-xor:        '(' XOR np np ')'           { $$ = xor($3, $4);         } 
+add:        '(' '+' pp ')' 
+            { 
+                $$ = new_native("+", m_add, $3); 
+            } 
             ;
 
-not:        '(' NOT np ')'              { $$ = not($3);             } 
+set:        '(' SET sps ')' 
+            { 
+                $$ = new_native("set", m_set, $3); 
+            } 
             ;
 
-bitand:     '(' BITAND np np ')'        { $$ = bitand($3, $4);      } 
+par:        par SYM
+            { 
+                push($1, new_symbol($2, new_dangle())); 
+                $$ = $1;   
+            }    
+            |
+
+            SYM
+            { 
+                $$ = new_contxt();   
+                push($$, new_symbol($1, new_dangle())); 
+            }    
             ;
 
-bitor:      '(' BITOR np np ')'         { $$ = bitor($3, $4);       } 
+dcl:        '(' DCL SYM par s ')' 
+            { 
+                $$ = new_custom($3, yylineno, $4, $5); 
+            } 
+            |
+
+            '(' DCL SYM s ')' 
+            { 
+                $$ = new_custom($3, yylineno, NULL, $4); 
+            } 
             ;
 
-bitxor:     '(' BITXOR np np ')'        { $$ = bitxor($3, $4);      } 
-            ;
+cus:        '(' SYM ps ')' 
+            { 
+                $$ = new_cusref($2, yylineno, $3); 
+            } 
+            |
 
-bitnot:     '(' BITNOT np ')'           { $$ = bitnot($3);          } 
-            ;
-
-shiftleft:  '(' SHIFTLEFT np np ')'     { $$ = shiftleft($3, $4);   } 
-            ;
-
-shiftright: '(' SHIFTRIGHT np np ')'    { $$ = shiftright($3, $4);  } 
+            '(' SYM ')' 
+            { 
+                $$ = new_cusref($2, yylineno, NULL); 
+            } 
             ;
 %%
 
 int main(int argc, char **argv)
 {
     yyparse();
-}
-
-int yyerror(char *err)
-{
-    fprintf(stderr, "%s\n", err);
-    return 0;
+    leak_check();
 }
 

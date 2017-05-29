@@ -1,23 +1,37 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-#define YYSTYPE node_t
+#define BUFSIZE 256
+#define SENTINEL ((entry_p) push)
 
-typedef enum 
-{
-    STRING, 
-    SYMBOL, 
-    NUMBER
-} data_t;
+typedef struct entry_s * entry_p;
+typedef entry_p (*call_t) (entry_p);
 
-typedef struct
+struct entry_s
 {
-    union
+    enum 
     {
-        int num; 
-        char *str; 
-    } val; 
-    data_t type; 
-} node_t; 
+        NUMBER,
+        STRING, 
+        SYMBOL,
+        SYMREF,
+        NATIVE, 
+        CUSTOM, 
+        CUSREF, 
+        CONTXT,
+        STATUS,
+        DANGLE,
+    } type;
+
+    int id; 
+    char *name; 
+    call_t call; 
+    entry_p reference; 
+    entry_p *children; 
+    entry_p *symbols; 
+    entry_p parent; 
+}; 
+
+typedef struct entry_s entry_t; 
 
 #endif

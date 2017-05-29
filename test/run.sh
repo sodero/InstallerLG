@@ -5,9 +5,12 @@ exe()
 
 out()
 {
-    if [ `echo $1 | $prg` = "$2" ]; then
+    o=`echo $1 | $prg 2>&1 | head -n 1` 
+    if [ "$o" = "$2" ]; then
         return 1
     else
+        echo "Got: $o"
+        echo "Exp: $2"
         return 0
     fi
 }
