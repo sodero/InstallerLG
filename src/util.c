@@ -53,7 +53,9 @@ void pretty_print (entry_p entry)
         printf("%s\n", tps[entry->type]);
         printf("%sThis:%p\n", tabs(ind), entry);
         printf("%sParent:%p\n", tabs(ind), entry->parent);
-        if(entry->id || entry->type == STATUS) 
+        if(entry->id || 
+           entry->type == STATUS ||
+           entry->type == NUMBER) 
         {
             printf("%sId:\t%d\n", tabs(ind), entry->id);
         }

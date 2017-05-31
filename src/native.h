@@ -35,7 +35,9 @@ if(1) { \
     while (i < X) { \
       if(!Q->W[i] || \
         Q->W[i] == \
-        SENTINEL ) { ok = 0; break; } i++; } \
+        SENTINEL || \
+        Q->W[i]->parent != \
+        Q) { ok = 0; break; } i++; } \
   } else { ok = 0; } \
   if(!ok) { error(PANIC); return new_failure(); }}
 

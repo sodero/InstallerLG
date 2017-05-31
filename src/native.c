@@ -79,7 +79,24 @@ entry_p m_set (entry_p contxt)
 */
 entry_p m_if(entry_p contxt)
 {
-    pretty_print(contxt);
+    CHECK_CHLD(3);
+    entry_p cond = contxt->children[0];
+    entry_p path = eval_as_number(cond)->id ? 
+                   contxt->children[1] :
+                   contxt->children[2];
+    if(path->type == CONTXT)
+    {
+        return invoke(path);
+    }
+    else if(path->type == NATIVE ||
+            path->type == CUSREF)
+    {
+        if(path->call)
+        {
+            return path->call(path); 
+        }
+    }
+    error(PANIC);
     return new_failure(); 
 }
 
