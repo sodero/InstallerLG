@@ -21,19 +21,19 @@ extern int yylineno;
 %token<s> SYM STR 
 %token<n> INT HEX BIN 
 
-%token SET DCL 
+%token SET DCL IF
 %token AND OR XOR NOT 
 %token BITAND BITOR BITXOR BITNOT 
 %token SHIFTLEFT SHIFTRIGHT
 
 %type<e> start 
 %type<e> s p pp ps vp vps np sp sps par 
-%type<e> add set cus dcl
+%type<e> add set cus dcl if
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
 %destructor { kill($$); } s p pp ps vp vps np sp sps par 
-%destructor { kill($$); } add set cus dcl
+%destructor { kill($$); } add set cus dcl if
 
 %%
 start:      s    
@@ -44,6 +44,7 @@ s:          vps
 
 p:          vp 
             |
+
             np
             ;
 
@@ -71,11 +72,17 @@ ps:         ps p
 
 vp:         add
             |
+
             set
             |
+
             cus 
             |
+
             dcl
+            |
+
+            if 
             ;
 
 vps:        vps vp 
@@ -135,6 +142,7 @@ sps:        sps sp
                 $$ = $1;   
             }    
             |
+
             sp
             { 
                 $$ = new_contxt();   
@@ -191,6 +199,21 @@ cus:        '(' SYM ps ')'
                 $$ = new_cusref($2, yylineno, NULL); 
             } 
             ;
+
+if:         '(' IF p vp vp ')' 
+            { 
+                printf("1 We have an IF!\n"); 
+                $$ = NULL; 
+            } 
+            |
+
+            '(' IF p '(' vps ')' '(' vps ')' ')' 
+            { 
+                printf("2 We have a in IF!\n"); 
+                $$ = NULL; 
+            } 
+            ;
+
 %%
 
 int main(int argc, char **argv)

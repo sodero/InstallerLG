@@ -3,9 +3,11 @@
 #include "types.h"
 #include "parser.h"
 #include "error.h"
+#include "debug.h"
 
 #ifdef _DEBUG
-# define P(X) printf("L:%s|%s|\n", #X, yytext)
+# define P(X) \
+  TRACE("L:%s|%s|\n", #X, yytext)
 #else
 # define P(X)
 #endif
@@ -65,6 +67,7 @@
 "shiftright"            { R(SHIFTRIGHT); }
 "set"                   { R(SET);        }
 "procedure"             { R(DCL);        }
+"if"                    { R(IF);         }
 
     /*
     Strings
