@@ -27,12 +27,12 @@ extern int yylineno;
 %token SHIFTLEFT SHIFTRIGHT
 
 %type<e> start 
-%type<e> s p pp ps vp vps np sp sps par cvv
+%type<e> s p pp ps vp vps vpb np sp sps par cvv
 %type<e> add set cus dcl if
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
-%destructor { kill($$); } s p pp ps vp vps np sp sps par cvv
+%destructor { kill($$); } s p pp ps vp vps vpb np sp sps par cvv
 %destructor { kill($$); } add set cus dcl if
 
 %%
@@ -97,6 +97,15 @@ vps:        vps vp
                 $$ = new_contxt();   
                 push($$, $1);    
             } 
+            ;
+
+vpb:        '(' vps ')'
+            { 
+                $$ = $2;
+            } 
+            |
+
+            vp
             ;
 
 np:         INT  
@@ -200,39 +209,12 @@ cus:        '(' SYM ps ')'
             } 
             ;
 
-cvv:        p vp vp 
+cvv:        p vpb vpb 
             { 
                 $$ = new_contxt();   
                 push($$, $1);    
                 push($$, $2);    
                 push($$, $3);    
-            } 
-            |
-
-            p vp '(' vps ')' 
-            { 
-                $$ = new_contxt();   
-                push($$, $1);    
-                push($$, $2);    
-                push($$, $4);    
-            } 
-            | 
-
-            p '(' vps ')' vp
-            { 
-                $$ = new_contxt();   
-                push($$, $1);    
-                push($$, $3);    
-                push($$, $5);    
-            } 
-            | 
-
-            p '(' vps ')' '(' vps ')' 
-            { 
-                $$ = new_contxt();   
-                push($$, $1);    
-                push($$, $3);    
-                push($$, $6);    
             } 
             ;
 
