@@ -209,6 +209,24 @@ cvv:        p vp vp
             } 
             |
 
+            p vp '(' vps ')' 
+            { 
+                $$ = new_contxt();   
+                push($$, $1);    
+                push($$, $2);    
+                push($$, $4);    
+            } 
+            | 
+
+            p '(' vps ')' vp
+            { 
+                $$ = new_contxt();   
+                push($$, $1);    
+                push($$, $3);    
+                push($$, $5);    
+            } 
+            | 
+
             p '(' vps ')' '(' vps ')' 
             { 
                 $$ = new_contxt();   
