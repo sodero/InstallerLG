@@ -27,12 +27,12 @@ extern int yylineno;
 %token SHIFTLEFT SHIFTRIGHT
 
 %type<e> start 
-%type<e> s p pp ps vp vps np sp sps par 
+%type<e> s p pp ps vp vps np sp sps par cvv
 %type<e> add set cus dcl if
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
-%destructor { kill($$); } s p pp ps vp vps np sp sps par 
+%destructor { kill($$); } s p pp ps vp vps np sp sps par cvv
 %destructor { kill($$); } add set cus dcl if
 
 %%
@@ -200,17 +200,27 @@ cus:        '(' SYM ps ')'
             } 
             ;
 
-if:         '(' IF p vp vp ')' 
+cvv:        p vp vp 
             { 
-                printf("1 We have an IF!\n"); 
-                $$ = NULL; 
+                $$ = new_contxt();   
+                push($$, $1);    
+                push($$, $2);    
+                push($$, $3);    
             } 
             |
 
-            '(' IF p '(' vps ')' '(' vps ')' ')' 
+            p '(' vps ')' '(' vps ')' 
             { 
-                printf("2 We have a in IF!\n"); 
-                $$ = NULL; 
+                $$ = new_contxt();   
+                push($$, $1);    
+                push($$, $3);    
+                push($$, $6);    
+            } 
+            ;
+
+if:         '(' IF cvv ')' 
+            { 
+                $$ = new_native("if", m_if, $3); 
             } 
             ;
 
