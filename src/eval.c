@@ -51,6 +51,47 @@ static entry_p resolve_native(entry_p entry)
     return new_failure();
 }
  
+entry_p resolve(entry_p entry)
+{
+    if(entry)
+    {
+        entry_p ret; 
+        switch(entry->type)
+        {
+            case NUMBER:
+            case STRING:
+            case CUSTOM:
+                ret = malloc(sizeof(entry_t)); 
+                if(ret)
+                {
+                    memmove(ret, entry, sizeof(entry_t)); 
+                    ret->name = entry->name ? strdup(entry->name) : NULL; 
+                    return ret; 
+                }
+                break;
+
+            case SYMBOL: 
+                return resolve(entry->reference);
+
+            case SYMREF: 
+                return resolve(resolve_symref(entry));
+
+            case CONTXT: 
+                return invoke(entry);
+
+            case STATUS: 
+            case DANGLE:
+                return entry; 
+
+            case CUSREF:
+            case NATIVE:
+                return resolve(entry->call ? entry->call(entry) : NULL);
+        }
+    }
+    error(PANIC);
+    return new_failure();
+}
+
 entry_p eval_as_number(entry_p entry)
 {
     static entry_t num;
@@ -100,6 +141,19 @@ entry_p eval_as_number(entry_p entry)
     }
     return &num;
 }
+
+/*
+
+Nar behover vi eval + deep copy? 
+- vid "set" pa global niva.
+- vid overgang till funktionskontext, dvs nar vi
+  gor "set" pa lokala variabler for att overfora
+  info fran anropande kontext.
+
+
+
+
+*/
 
 entry_p eval_as_string(entry_p entry)
 {

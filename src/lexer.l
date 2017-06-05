@@ -68,6 +68,7 @@
 "set"                   { R(SET);        }
 "procedure"             { R(DCL);        }
 "if"                    { R(IF);         }
+"while"                 { R(WHILE);      }
 
     /*
     Strings

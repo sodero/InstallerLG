@@ -21,19 +21,19 @@ extern int yylineno;
 %token<s> SYM STR 
 %token<n> INT HEX BIN 
 
-%token SET DCL IF
+%token SET DCL IF WHILE
 %token AND OR XOR NOT 
 %token BITAND BITOR BITXOR BITNOT 
 %token SHIFTLEFT SHIFTRIGHT
 
 %type<e> start 
-%type<e> s p pp ps vp vps vpb np sp sps par cvv
-%type<e> add set cus dcl if
+%type<e> s p pp ps vp vps vpb np sp sps par cv cvv
+%type<e> add set cus dcl if while
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
-%destructor { kill($$); } s p pp ps vp vps vpb np sp sps par cvv
-%destructor { kill($$); } add set cus dcl if
+%destructor { kill($$); } s p pp ps vp vps vpb np sp sps par cv cvv
+%destructor { kill($$); } add set cus dcl if while
 
 %%
 start:      s    
@@ -83,6 +83,9 @@ vp:         add
             |
 
             if 
+            |
+
+            while 
             ;
 
 vps:        vps vp 
@@ -209,6 +212,14 @@ cus:        '(' SYM ps ')'
             } 
             ;
 
+cv:         p vpb 
+            { 
+                $$ = new_contxt();   
+                push($$, $1);    
+                push($$, $2);    
+            } 
+            ;
+
 cvv:        p vpb vpb 
             { 
                 $$ = new_contxt();   
@@ -224,6 +235,11 @@ if:         '(' IF cvv ')'
             } 
             ;
 
+while:      '(' WHILE cv ')' 
+            { 
+                $$ = new_native("while", m_while, $3); 
+            } 
+            ;
 %%
 
 int main(int argc, char **argv)

@@ -225,6 +225,7 @@ entry_p new_dangle(void)
     return &dangle; 
 }
 
+// Do not use this one outside the parser:
 void push (entry_p dst, entry_p src)
 {
     if (dst && src)

@@ -66,6 +66,10 @@ entry_p m_set (entry_p contxt)
         entry_p *cur = contxt->symbols; 
         while(*cur && *cur != SENTINEL)
         {
+            entry_p res = resolve((*cur)->reference); 
+            kill((*cur)->reference);
+            (*cur)->reference = res;
+            res->parent = *cur; 
             push(dst, *cur); 
             cur++; 
         }
@@ -100,7 +104,44 @@ entry_p m_if(entry_p contxt)
     return new_failure(); 
 }
 
+/*
+*/
+entry_p m_while(entry_p contxt)
+{
+    CHECK_CHLD(2);
+    entry_p ret = new_failure(); 
+    entry_p cnd = contxt->children[0];
+    entry_p bdy = contxt->children[1]; 
 
+    while(eval_as_number(cnd)->id)
+    {
+HERE;
+        if(bdy->type == CONTXT)
+        {
+    HERE; 
+            kill(ret); 
+            ret = invoke(bdy);
+        }
+        else if(bdy->type == NATIVE ||
+                bdy->type == CUSREF)
+        {
+            if(bdy->call)
+            {
+    HERE; 
+                kill(ret); 
+                ret = bdy->call(bdy); 
+            }
+            else
+            {
+    HERE; 
+                error(PANIC);
+            }
+        }
+    HERE; 
+    }
+    HERE; 
+    return ret; 
+}
 
 /*
 `(+ <expr1> <expr2> ...)'
