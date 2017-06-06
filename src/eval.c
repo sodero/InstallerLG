@@ -23,10 +23,6 @@ static entry_p find_symbol(entry_p entry)
                 if(!strcmp((*tmp)->name, entry->name)) 
                 {
                     return *tmp; 
-                    /*
-                    entry_p ret = (*tmp)->expression;
-                    return ret; 
-                    */
                 }
             }
             nxt = global(entry);
@@ -77,7 +73,7 @@ entry_p resolve(entry_p entry)
                 return resolve(entry->expression);
 
             case SYMREF: 
-                return resolve(resolve_symref(entry));
+                return resolve(find_symbol(entry));
 
             case CONTXT: 
                 return invoke(entry);
@@ -118,18 +114,15 @@ entry_p eval_as_number(entry_p entry)
                 break;
 
             case SYMBOL:
-                /*
-                r = entry->expression;
-                num.id = eval_as_number(r)->id;
-                */
-                num.id = entry->resolved->id;
+                num.id = eval_as_number(entry->resolved)->id; 
                 break;
 
             case SYMREF:
-                num.id = find_symbol(entry)->resolved->id; 
                 /*
-                r = resolve_symref(entry); 
-                num.id = eval_as_number(r)->id;*/
+                r = find_symbol(entry);
+                pretty_print(r->resolved);
+                    */
+                num.id = eval_as_number(find_symbol(entry))->id; 
                 break;
 
             case CUSREF:

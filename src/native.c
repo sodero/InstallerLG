@@ -123,22 +123,22 @@ printf("%d\n", eval_as_number(cnd)->id);
         else if(bdy->type == NATIVE ||
                 bdy->type == CUSREF)
         {
-pretty_print(bdy);
+//pretty_print(bdy);
             if(bdy->call)
             {
-    HERE; 
+//    HERE; 
                 kill(ret); 
                 ret = bdy->call(bdy); 
             }
             else
             {
-    HERE; 
+//    HERE; 
                 error(PANIC);
             }
         }
-    HERE; 
+//    HERE; 
     }
-    HERE; 
+//    HERE; 
     return ret; 
 }
 
