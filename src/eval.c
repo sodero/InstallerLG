@@ -7,7 +7,7 @@
 #include "debug.h"
 #include "error.h"
 
-static entry_p resolve_symref(entry_p entry)
+static entry_p find_symbol(entry_p entry)
 {
     entry_p con = local(entry); 
     if(con)
@@ -22,8 +22,11 @@ static entry_p resolve_symref(entry_p entry)
             {
                 if(!strcmp((*tmp)->name, entry->name)) 
                 {
+                    return *tmp; 
+                    /*
                     entry_p ret = (*tmp)->expression;
                     return ret; 
+                    */
                 }
             }
             nxt = global(entry);
@@ -123,8 +126,10 @@ entry_p eval_as_number(entry_p entry)
                 break;
 
             case SYMREF:
+                num.id = find_symbol(entry)->resolved->id; 
+                /*
                 r = resolve_symref(entry); 
-                num.id = eval_as_number(r)->id;
+                num.id = eval_as_number(r)->id;*/
                 break;
 
             case CUSREF:
