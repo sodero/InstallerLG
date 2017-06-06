@@ -88,7 +88,7 @@ entry_p new_symbol (char *n, entry_p e)
         {
             entry->type = SYMBOL; 
             entry->name = n;
-            entry->reference = e;
+            entry->expression = e;
             return entry; 
         }
     }
@@ -303,10 +303,11 @@ void kill(entry_p entry)
        entry->type != DANGLE)
     {
         free(entry->name); 
-        if(entry->reference &&
-           entry->reference->parent == entry)
+        kill(entry->resolved);
+        if(entry->expression &&
+           entry->expression->parent == entry)
         {
-            kill(entry->reference);
+            kill(entry->expression);
         }
         if(entry->symbols && (
            entry->type == NATIVE || 

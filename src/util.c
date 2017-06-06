@@ -63,11 +63,11 @@ void pretty_print (entry_p entry)
         {
             printf("%sName:\t%s\n", tabs(ind), entry->name);
         }
-        if(entry->reference) 
+        if(entry->expression) 
         {
             printf ("%sRef:\t", tabs(ind));
             ind++; 
-            pretty_print (entry->reference);
+            pretty_print (entry->expression);
             ind--; 
         }
         if(entry->children) 

@@ -22,7 +22,7 @@ static entry_p resolve_symref(entry_p entry)
             {
                 if(!strcmp((*tmp)->name, entry->name)) 
                 {
-                    entry_p ret = (*tmp)->reference;
+                    entry_p ret = (*tmp)->expression;
                     return ret; 
                 }
             }
@@ -71,7 +71,7 @@ entry_p resolve(entry_p entry)
                 break;
 
             case SYMBOL: 
-                return resolve(entry->reference);
+                return resolve(entry->expression);
 
             case SYMREF: 
                 return resolve(resolve_symref(entry));
@@ -115,8 +115,11 @@ entry_p eval_as_number(entry_p entry)
                 break;
 
             case SYMBOL:
-                r = entry->reference;
+                /*
+                r = entry->expression;
                 num.id = eval_as_number(r)->id;
+                */
+                num.id = entry->resolved->id;
                 break;
 
             case SYMREF:

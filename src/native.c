@@ -25,7 +25,7 @@ entry_p m_gosub(entry_p contxt)
                 if(arg && ina)
                 {
                     while(*arg && 
-                         (*arg)->reference &&
+                         (*arg)->expression &&
                           *ina)
                     {
                         if((*ina)->type == CUSREF &&
@@ -35,7 +35,7 @@ entry_p m_gosub(entry_p contxt)
                                   contxt->name); 
                             return new_failure(); 
                         }
-                        (*arg)->reference = *ina; 
+                        (*arg)->expression = *ina; 
                         arg++; 
                         ina++;
                     }
@@ -66,10 +66,9 @@ entry_p m_set (entry_p contxt)
         entry_p *cur = contxt->symbols; 
         while(*cur && *cur != SENTINEL)
         {
-            entry_p res = resolve((*cur)->reference); 
-            kill((*cur)->reference);
-            (*cur)->reference = res;
-            res->parent = *cur; 
+            kill((*cur)->resolved);
+            (*cur)->resolved = resolve((*cur)->expression); 
+            (*cur)->resolved->parent = *cur; 
             push(dst, *cur); 
             cur++; 
         }
@@ -115,16 +114,16 @@ entry_p m_while(entry_p contxt)
 
     while(eval_as_number(cnd)->id)
     {
-HERE;
+printf("%d\n", eval_as_number(cnd)->id); 
         if(bdy->type == CONTXT)
         {
-    HERE; 
             kill(ret); 
             ret = invoke(bdy);
         }
         else if(bdy->type == NATIVE ||
                 bdy->type == CUSREF)
         {
+pretty_print(bdy);
             if(bdy->call)
             {
     HERE; 
