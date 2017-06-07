@@ -89,6 +89,7 @@ entry_p new_symbol (char *n, entry_p e)
             entry->type = SYMBOL; 
             entry->name = n;
             entry->expression = e;
+            entry->resolved = new_dangle();
             return entry; 
         }
     }
@@ -302,13 +303,8 @@ void kill(entry_p entry)
        entry->type != STATUS &&
        entry->type != DANGLE)
     {
-        free(entry->name); 
         kill(entry->resolved);
-        if(entry->expression &&
-           entry->expression->parent == entry)
-        {
-            kill(entry->expression);
-        }
+        kill(entry->expression);
         if(entry->symbols && (
            entry->type == NATIVE || 
            entry->type == CUSTOM ))
@@ -329,6 +325,7 @@ void kill(entry_p entry)
                 e++; 
             }
         }
+        free(entry->name); 
         free(entry->symbols);
         free(entry->children);
         free(entry); 

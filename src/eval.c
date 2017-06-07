@@ -118,10 +118,6 @@ entry_p eval_as_number(entry_p entry)
                 break;
 
             case SYMREF:
-                /*
-                r = find_symbol(entry);
-                pretty_print(r->resolved);
-                    */
                 num.id = eval_as_number(find_symbol(entry))->id; 
                 break;
 

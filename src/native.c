@@ -24,18 +24,10 @@ entry_p m_gosub(entry_p contxt)
                         *ina = contxt->children;
                 if(arg && ina)
                 {
-                    while(*arg && 
-                         (*arg)->expression &&
-                          *ina)
+                    while(*arg && *ina)
                     {
-                        if((*ina)->type == CUSREF &&
-                           !strcmp((*ina)->name, contxt->name))          
-                        {
-                            error(contxt->id, "Infinite recursion", 
-                                  contxt->name); 
-                            return new_failure(); 
-                        }
-                        (*arg)->expression = *ina; 
+                        kill((*arg)->resolved); 
+                        (*arg)->resolved = resolve(*ina); 
                         arg++; 
                         ina++;
                     }
@@ -123,22 +115,17 @@ printf("%d\n", eval_as_number(cnd)->id);
         else if(bdy->type == NATIVE ||
                 bdy->type == CUSREF)
         {
-//pretty_print(bdy);
             if(bdy->call)
             {
-//    HERE; 
                 kill(ret); 
                 ret = bdy->call(bdy); 
             }
             else
             {
-//    HERE; 
                 error(PANIC);
             }
         }
-//    HERE; 
     }
-//    HERE; 
     return ret; 
 }
 
