@@ -40,6 +40,8 @@ if(1) { \
         Q->W[i]->parent != \
         Q) { ok = 0; break; } i++; } \
   } else { ok = 0; } \
-  if(!ok) { error(PANIC); return new_failure(); }}
+  if(!ok) { error(PANIC); \
+            pretty_print(Q); \
+            return new_failure(); }}
 
 #endif

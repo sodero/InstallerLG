@@ -23,7 +23,7 @@ struct entry_s
         DANGLE,
     } type;
 
-    int id; 
+    short id; 
     char *name; 
     call_t call; 
     entry_p expression; 

@@ -90,6 +90,7 @@ entry_p new_symbol (char *n, entry_p e)
             entry->name = n;
             entry->expression = e;
             entry->resolved = new_dangle();
+            entry->resolved->parent = entry; 
             return entry; 
         }
     }
@@ -181,7 +182,7 @@ entry_p new_native (char *n, call_t call, entry_p e)
 {
     if(call && n)
     {
-        entry_p entry = calloc (1, sizeof (entry_t)); 
+        entry_p entry = calloc(1, sizeof (entry_t)); 
         if (entry)
         {
             entry->call = call;
@@ -244,12 +245,16 @@ void push (entry_p dst, entry_p src)
                      *new = src->name; 
                 if (strcmp (old, new) == 0)
                 {
+//HERE;
+//pretty_print(src);
                     dst->symbols[u] = src;
                     return; 
                 }
                 u++;
             }
             dst_p = &dst->symbols; 
+//HERE;
+//pretty_print(src);
         }
         if(*dst_p)
         {

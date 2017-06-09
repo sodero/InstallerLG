@@ -84,7 +84,11 @@ entry_p resolve(entry_p entry)
 
             case CUSREF:
             case NATIVE:
-                return resolve(entry->call ? entry->call(entry) : NULL);
+                if(entry->call)
+                {
+                    return entry->call(entry); 
+                }
+                break;
         }
     }
     error(PANIC);

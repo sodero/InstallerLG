@@ -52,6 +52,7 @@ entry_p m_set (entry_p contxt)
 {
     entry_p dst; 
     CHECK_SYMS(1);
+
     dst = global(contxt);
     if (dst)
     {
@@ -103,6 +104,7 @@ entry_p m_while(entry_p contxt)
     entry_p ret = new_failure(); 
     entry_p cnd = contxt->children[0];
     entry_p bdy = contxt->children[1]; 
+
 
     while(eval_as_number(cnd)->id)
     {

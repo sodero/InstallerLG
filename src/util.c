@@ -65,9 +65,16 @@ void pretty_print (entry_p entry)
         }
         if(entry->expression) 
         {
-            printf ("%sRef:\t", tabs(ind));
+            printf ("%sExp:\t", tabs(ind));
             ind++; 
             pretty_print (entry->expression);
+            ind--; 
+        }
+        if(entry->resolved) 
+        {
+            printf ("%sRes:\t", tabs(ind));
+            ind++; 
+            pretty_print (entry->resolved);
             ind--; 
         }
         if(entry->children) 
