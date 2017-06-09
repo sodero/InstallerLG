@@ -105,10 +105,8 @@ entry_p m_while(entry_p contxt)
     entry_p cnd = contxt->children[0];
     entry_p bdy = contxt->children[1]; 
 
-
     while(eval_as_number(cnd)->id)
     {
-printf("%d\n", eval_as_number(cnd)->id); 
         if(bdy->type == CONTXT)
         {
             kill(ret); 
@@ -142,6 +140,83 @@ entry_p m_add (entry_p contxt)
     (
         eval_as_number(contxt->children[0])->id +
         eval_as_number(contxt->children[1])->id
+    ); 
+}
+
+/*
+`(< <expr1> <expr2>)'
+     less than test (returns 0 or 1)
+*/
+entry_p m_lt(entry_p contxt)
+{
+    int a, b, r; 
+    CHECK_CHLD(2);
+    a = eval_as_number(contxt->children[0])->id; 
+    b = eval_as_number(contxt->children[1])->id; 
+    return new_number
+    (
+        a < b ? 1 : 0
+    ); 
+}
+
+/*
+`(<= <expr1> <expr2>)'
+     less than or equal test (returns 0 or 1)
+*/
+entry_p m_lte(entry_p contxt)
+{
+    int a, b, r; 
+    CHECK_CHLD(2);
+    a = eval_as_number(contxt->children[0])->id; 
+    b = eval_as_number(contxt->children[1])->id; 
+    return new_number
+    (
+        a <= b ? 1 : 0
+    ); 
+}
+
+/*
+`(< <expr1> <expr2>)'
+     greater than test (returns 0 or 1)
+*/
+entry_p m_gt(entry_p contxt)
+{
+    int a, b, r; 
+    CHECK_CHLD(2);
+    a = eval_as_number(contxt->children[0])->id; 
+    b = eval_as_number(contxt->children[1])->id; 
+    return new_number
+    (
+        a > b ? 1 : 0
+    ); 
+}
+
+/*
+`(<= <expr1> <expr2>)'
+     greater than or equal test (returns 0 or 1)
+*/
+entry_p m_gte(entry_p contxt)
+{
+    int a, b, r; 
+    CHECK_CHLD(2);
+    a = eval_as_number(contxt->children[0])->id; 
+    b = eval_as_number(contxt->children[1])->id; 
+    return new_number
+    (
+        a >= b ? 1 : 0
+    ); 
+}
+
+/*
+`(= <expr1> <expr2>)'
+     equality test (returns 0 or 1)
+*/
+entry_p m_eq(entry_p contxt)
+{
+    CHECK_CHLD(2);
+    return new_number
+    (
+        0
     ); 
 }
 

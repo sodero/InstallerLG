@@ -22,18 +22,18 @@ extern int yylineno;
 %token<n> INT HEX BIN 
 
 %token SET DCL IF WHILE
-%token AND OR XOR NOT 
+%token AND OR XOR NOT LTE GTE
 %token BITAND BITOR BITXOR BITNOT 
 %token SHIFTLEFT SHIFTRIGHT
 
 %type<e> start 
 %type<e> s p pp ps vp vps vpb np sp sps par cv cvv
-%type<e> add set cus dcl if while
+%type<e> add lt lte gt gte eq set cus dcl if while
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
 %destructor { kill($$); } s p pp ps vp vps vpb np sp sps par cv cvv
-%destructor { kill($$); } add set cus dcl if while
+%destructor { kill($$); } add lt lte gt gte eq set cus dcl if while
 
 %%
 start:      s    
@@ -71,6 +71,21 @@ ps:         ps p
             ;
 
 vp:         add
+            |
+
+            lt
+            |
+
+            lte
+            |
+
+            gt
+            |
+
+            gte
+            |
+
+            eq
             |
 
             set
@@ -165,6 +180,36 @@ sps:        sps sp
 add:        '(' '+' pp ')' 
             { 
                 $$ = new_native("+", m_add, $3); 
+            } 
+            ;
+
+lt:         '(' '<' pp ')' 
+            { 
+                $$ = new_native("<", m_lt, $3); 
+            } 
+            ;
+
+lte:        '(' LTE pp ')' 
+            { 
+                $$ = new_native("<=", m_lte, $3); 
+            } 
+            ;
+
+gt:         '(' '>' pp ')' 
+            { 
+                $$ = new_native(">", m_gt, $3); 
+            } 
+            ;
+
+gte:        '(' GTE pp ')' 
+            { 
+                $$ = new_native(">=", m_gte, $3); 
+            } 
+            ;
+
+eq:         '(' '=' pp ')' 
+            { 
+                $$ = new_native("=", m_eq, $3); 
             } 
             ;
 
