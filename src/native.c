@@ -50,10 +50,7 @@ entry_p m_gosub(entry_p contxt)
 */
 entry_p m_set (entry_p contxt)
 {
-    entry_p dst; 
-    CHECK_SYMS(1);
-
-    dst = global(contxt);
+    entry_p dst = global(contxt);
     if (dst)
     {
         entry_p *cur = contxt->symbols; 
@@ -75,21 +72,18 @@ entry_p m_set (entry_p contxt)
 */
 entry_p m_if(entry_p contxt)
 {
-    CHECK_CHLD(3);
-    entry_p cond = contxt->children[0];
-    entry_p path = eval_as_number(cond)->id ? 
-                   contxt->children[1] :
-                   contxt->children[2];
-    if(path->type == CONTXT)
+    TRIPLES(c, p1, p2); 
+    entry_p p = eval_as_number(c)->id ? p1 : p2; 
+    if(p->type == CONTXT)
     {
-        return invoke(path);
+        return invoke(p);
     }
-    else if(path->type == NATIVE ||
-            path->type == CUSREF)
+    else if(p->type == NATIVE ||
+            p->type == CUSREF)
     {
-        if(path->call)
+        if(p->call)
         {
-            return path->call(path); 
+            return p->call(p); 
         }
     }
     error(PANIC);
@@ -100,25 +94,22 @@ entry_p m_if(entry_p contxt)
 */
 entry_p m_while(entry_p contxt)
 {
-    CHECK_CHLD(2);
     entry_p ret = new_failure(); 
-    entry_p cnd = contxt->children[0];
-    entry_p bdy = contxt->children[1]; 
-
-    while(eval_as_number(cnd)->id)
+    TWINS(c, b); 
+    while(eval_as_number(c)->id)
     {
-        if(bdy->type == CONTXT)
+        if(b->type == CONTXT)
         {
             kill(ret); 
-            ret = invoke(bdy);
+            ret = invoke(b);
         }
-        else if(bdy->type == NATIVE ||
-                bdy->type == CUSREF)
+        else if(b->type == NATIVE ||
+                b->type == CUSREF)
         {
-            if(bdy->call)
+            if(b->call)
             {
                 kill(ret); 
-                ret = bdy->call(bdy); 
+                ret = b->call(b); 
             }
             else
             {
@@ -135,12 +126,35 @@ entry_p m_while(entry_p contxt)
 */
 entry_p m_add (entry_p contxt)
 {
-    CHECK_CHLD(2);
+    TWINS(a, b); 
     return new_number
     (
-        eval_as_number(contxt->children[0])->id +
-        eval_as_number(contxt->children[1])->id
+        eval_as_number(a)->id +
+        eval_as_number(b)->id
     ); 
+}
+
+/*
+ Impl. helper; < <= = > >=. 
+*/
+static entry_p m_cmp(entry_p contxt, char c1, char c2)
+{
+    int r; 
+    TWINS(a, b); 
+    if(a->type == STRING &&
+       b->type == STRING)
+    {
+        r = strcmp(a->name, b->name); 
+    }
+    else
+    {
+        r = eval_as_number(a)->id - 
+            eval_as_number(b)->id;
+    }
+    r = (c1 == '=' && r == 0) ||
+        (c2 == '<' && r < 0) ||
+        (c2 == '>' && r > 0) ? 1 : 0; 
+    return new_number(r);
 }
 
 /*
@@ -149,14 +163,7 @@ entry_p m_add (entry_p contxt)
 */
 entry_p m_lt(entry_p contxt)
 {
-    int a, b, r; 
-    CHECK_CHLD(2);
-    a = eval_as_number(contxt->children[0])->id; 
-    b = eval_as_number(contxt->children[1])->id; 
-    return new_number
-    (
-        a < b ? 1 : 0
-    ); 
+    return m_cmp(contxt, '\0', '<');
 }
 
 /*
@@ -165,14 +172,7 @@ entry_p m_lt(entry_p contxt)
 */
 entry_p m_lte(entry_p contxt)
 {
-    int a, b, r; 
-    CHECK_CHLD(2);
-    a = eval_as_number(contxt->children[0])->id; 
-    b = eval_as_number(contxt->children[1])->id; 
-    return new_number
-    (
-        a <= b ? 1 : 0
-    ); 
+    return m_cmp(contxt, '=', '<');
 }
 
 /*
@@ -181,14 +181,7 @@ entry_p m_lte(entry_p contxt)
 */
 entry_p m_gt(entry_p contxt)
 {
-    int a, b, r; 
-    CHECK_CHLD(2);
-    a = eval_as_number(contxt->children[0])->id; 
-    b = eval_as_number(contxt->children[1])->id; 
-    return new_number
-    (
-        a > b ? 1 : 0
-    ); 
+    return m_cmp(contxt, '\0', '>');
 }
 
 /*
@@ -197,14 +190,7 @@ entry_p m_gt(entry_p contxt)
 */
 entry_p m_gte(entry_p contxt)
 {
-    int a, b, r; 
-    CHECK_CHLD(2);
-    a = eval_as_number(contxt->children[0])->id; 
-    b = eval_as_number(contxt->children[1])->id; 
-    return new_number
-    (
-        a >= b ? 1 : 0
-    ); 
+    return m_cmp(contxt, '=', '>');
 }
 
 /*
@@ -213,11 +199,7 @@ entry_p m_gte(entry_p contxt)
 */
 entry_p m_eq(entry_p contxt)
 {
-    CHECK_CHLD(2);
-    return new_number
-    (
-        0
-    ); 
+    return m_cmp(contxt, '=', '\0');
 }
 
 /* 

@@ -29,24 +29,52 @@ int m_bitnot(int a);
 int m_shiftleft(int a, int n);
 int m_shiftright(int a, int n);
 
-#define CHECK_SYMS(X) CHECK(X,symbols,contxt)
-#define CHECK_CHLD(X) CHECK(X,children,contxt)
+#define TWINS(A,B)\
+entry_p A, B;\
+if(contxt &&\
+   contxt->parent &&\
+   contxt->children &&\
+   contxt->children[0] &&\
+   contxt->children[0] != SENTINEL &&\
+   contxt->children[0]->parent == contxt &&\
+   contxt->children[1] &&\
+   contxt->children[1] != SENTINEL &&\
+   contxt->children[1]->parent == contxt)\
+{\
+    A = contxt->children[0];\
+    B = contxt->children[1];\
+}\
+else\
+{\
+    error(PANIC);\
+    pretty_print(contxt);\
+    return new_failure();\
+}
 
-#define CHECK(X,W,Q) \
-if(1) { \
-  int ok = 1; \
-  if(Q->parent && \
-     Q->W) \
-  { int i = 0; \
-    while (i < X) { \
-      if(!Q->W[i] || \
-        Q->W[i] == \
-        SENTINEL || \
-        Q->W[i]->parent != \
-        Q) { ok = 0; break; } i++; } \
-  } else { ok = 0; } \
-  if(!ok) { error(PANIC); \
-            pretty_print(Q); \
-            return new_failure(); }}
+#define TRIPLES(A,B,C)\
+entry_p A, B, C;\
+if(contxt &&\
+   contxt->parent &&\
+   contxt->children &&\
+   contxt->children[0] &&\
+   contxt->children[0] != SENTINEL &&\
+   contxt->children[0]->parent == contxt &&\
+   contxt->children[1] &&\
+   contxt->children[1] != SENTINEL &&\
+   contxt->children[1]->parent == contxt &&\
+   contxt->children[2] &&\
+   contxt->children[2] != SENTINEL &&\
+   contxt->children[2]->parent == contxt)\
+{\
+    A = contxt->children[0];\
+    B = contxt->children[1];\
+    C = contxt->children[2];\
+}\
+else\
+{\
+    error(PANIC);\
+    pretty_print(contxt);\
+    return new_failure();\
+}
 
 #endif
