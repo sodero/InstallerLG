@@ -178,13 +178,14 @@ static void move_contxt(entry_p dst, entry_p src)
     error(PANIC);
 }
 
-entry_p new_native (char *n, call_t call, entry_p e)
+entry_p new_native (char *n, int l, call_t call, entry_p e)
 {
-    if(call && n)
+    if(call && n && (l > 0))
     {
         entry_p entry = calloc(1, sizeof (entry_t)); 
         if (entry)
         {
+            entry->id = l;
             entry->call = call;
             entry->type = NATIVE;
             entry->name = strdup(n);

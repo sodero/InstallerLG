@@ -95,7 +95,7 @@ entry_p resolve(entry_p entry)
     return new_failure();
 }
 
-entry_p eval_as_number(entry_p entry)
+entry_p number(entry_p entry)
 {
     static entry_t num;
     num.id = 0;
@@ -118,17 +118,17 @@ entry_p eval_as_number(entry_p entry)
                 break;
 
             case SYMBOL:
-                num.id = eval_as_number(entry->resolved)->id; 
+                num.id = number(entry->resolved)->id; 
                 break;
 
             case SYMREF:
-                num.id = eval_as_number(find_symbol(entry))->id; 
+                num.id = number(find_symbol(entry))->id; 
                 break;
 
             case CUSREF:
             case NATIVE:
                 r = resolve_native(entry);
-                num.id = eval_as_number(r)->id;
+                num.id = number(r)->id;
                 kill(r);
                 break;
 
@@ -156,7 +156,7 @@ Nar behover vi eval + deep copy?
 
 */
 
-entry_p eval_as_string(entry_p entry)
+entry_p string(entry_p entry)
 {
     static entry_t str;
     static char buf[BUFSIZE];

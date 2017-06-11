@@ -6,8 +6,7 @@
 void run(entry_p entry);
 entry_p invoke(entry_p entry);
 entry_p resolve(entry_p entry);
-
-entry_p eval_as_number(entry_p entry);
-entry_p eval_as_string(entry_p entry);
+entry_p number(entry_p entry);
+entry_p string(entry_p entry);
 
 #endif

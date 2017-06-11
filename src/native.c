@@ -73,7 +73,7 @@ entry_p m_set (entry_p contxt)
 entry_p m_if(entry_p contxt)
 {
     TRIPLES(c, p1, p2); 
-    entry_p p = eval_as_number(c)->id ? p1 : p2; 
+    entry_p p = number(c)->id ? p1 : p2; 
     if(p->type == CONTXT)
     {
         return invoke(p);
@@ -96,7 +96,7 @@ entry_p m_while(entry_p contxt)
 {
     entry_p ret = new_failure(); 
     TWINS(c, b); 
-    while(eval_as_number(c)->id)
+    while(number(c)->id)
     {
         if(b->type == CONTXT)
         {
@@ -133,7 +133,7 @@ entry_p m_add (entry_p contxt)
         entry_p *cur = contxt->children; 
         while(*cur && *cur != SENTINEL)
         {
-            s += eval_as_number(*cur)->id;
+            s += number(*cur)->id;
             cur++; 
         }
         return new_number(s); 
@@ -156,7 +156,7 @@ entry_p m_lt(entry_p contxt)
     return new_number
     (
         ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) < 0) ||
-         (!(a->type == STRING && b->type == STRING) && eval_as_number(a)->id < eval_as_number(b)->id)) ? 1 : 0
+         (!(a->type == STRING && b->type == STRING) && number(a)->id < number(b)->id)) ? 1 : 0
     );
 }
 
@@ -170,7 +170,7 @@ entry_p m_lte(entry_p contxt)
     return new_number
     (
         ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) <= 0) ||
-         (!(a->type == STRING && b->type == STRING) && eval_as_number(a)->id <= eval_as_number(b)->id)) ? 1 : 0
+         (!(a->type == STRING && b->type == STRING) && number(a)->id <= number(b)->id)) ? 1 : 0
     );
 }
 
@@ -184,7 +184,7 @@ entry_p m_gt(entry_p contxt)
     return new_number
     (
         ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) > 0) ||
-         (!(a->type == STRING && b->type == STRING) && eval_as_number(a)->id > eval_as_number(b)->id)) ? 1 : 0
+         (!(a->type == STRING && b->type == STRING) && number(a)->id > number(b)->id)) ? 1 : 0
     );
 }
 
@@ -198,7 +198,7 @@ entry_p m_gte(entry_p contxt)
     return new_number
     (
         ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) >= 0) ||
-         (!(a->type == STRING && b->type == STRING) && eval_as_number(a)->id >= eval_as_number(b)->id)) ? 1 : 0
+         (!(a->type == STRING && b->type == STRING) && number(a)->id >= number(b)->id)) ? 1 : 0
     );
 }
 
@@ -212,7 +212,7 @@ entry_p m_eq(entry_p contxt)
     return new_number
     (
         ((a->type == STRING && b->type == STRING && !strcmp(a->name, b->name)) ||
-         (!(a->type == STRING && b->type == STRING) && eval_as_number(a)->id == eval_as_number(b)->id)) ? 1 : 0
+         (!(a->type == STRING && b->type == STRING) && number(a)->id == number(b)->id)) ? 1 : 0
     );
 }
 
@@ -220,9 +220,13 @@ entry_p m_eq(entry_p contxt)
 `(- <expr1> <expr2>)'
      returns `<expr1>' minus `<expr2>'
 */
-int m_sub(int a, int b)
+entry_p m_sub(entry_p contxt)
 {
-    return a - b; 
+    TWINS(a, b); 
+    return new_number
+    (
+         number(a)->id - number(b)->id
+    );
 }
 
 /*
@@ -238,7 +242,7 @@ entry_p m_mul(entry_p contxt)
         entry_p *cur = contxt->children; 
         while(*cur && *cur != SENTINEL)
         {
-            s *= eval_as_number(*cur)->id;
+            s *= number(*cur)->id;
             cur++; 
         }
         return new_number(s); 
@@ -255,9 +259,23 @@ entry_p m_mul(entry_p contxt)
 `(/ <expr1> <expr2>)'
      returns `<expr1>' divided by `<expr2>'
 */
-int m_div(int a, int b)
+entry_p m_div(entry_p contxt)
 {
-    return a / (b ? b : 1); 
+    TWINS(a, b); 
+    int denom = number(b)->id;
+    if(denom)
+    {
+        return new_number
+        (
+            number(a)->id / denom
+        );
+    }
+    else
+    {
+        error(contxt->id, "Division by zero", 
+              contxt->name); 
+        return new_failure(); 
+    }
 }
 
 /* 
