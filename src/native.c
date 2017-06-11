@@ -73,7 +73,7 @@ entry_p m_set (entry_p contxt)
 entry_p m_if(entry_p contxt)
 {
     TRIPLES(c, p1, p2); 
-    entry_p p = number(c)->id ? p1 : p2; 
+    entry_p p = num(c) ? p1 : p2; 
     if(p->type == CONTXT)
     {
         return invoke(p);
@@ -96,7 +96,7 @@ entry_p m_while(entry_p contxt)
 {
     entry_p ret = new_failure(); 
     TWINS(c, b); 
-    while(number(c)->id)
+    while(num(c))
     {
         if(b->type == CONTXT)
         {
@@ -133,7 +133,7 @@ entry_p m_add (entry_p contxt)
         entry_p *cur = contxt->children; 
         while(*cur && *cur != SENTINEL)
         {
-            s += number(*cur)->id;
+            s += num(*cur);
             cur++; 
         }
         return new_number(s); 
@@ -156,7 +156,7 @@ entry_p m_lt(entry_p contxt)
     return new_number
     (
         ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) < 0) ||
-         (!(a->type == STRING && b->type == STRING) && number(a)->id < number(b)->id)) ? 1 : 0
+         (!(a->type == STRING && b->type == STRING) && num(a) < num(b))) ? 1 : 0
     );
 }
 
@@ -170,7 +170,7 @@ entry_p m_lte(entry_p contxt)
     return new_number
     (
         ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) <= 0) ||
-         (!(a->type == STRING && b->type == STRING) && number(a)->id <= number(b)->id)) ? 1 : 0
+         (!(a->type == STRING && b->type == STRING) && num(a) <= num(b))) ? 1 : 0
     );
 }
 
@@ -184,7 +184,7 @@ entry_p m_gt(entry_p contxt)
     return new_number
     (
         ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) > 0) ||
-         (!(a->type == STRING && b->type == STRING) && number(a)->id > number(b)->id)) ? 1 : 0
+         (!(a->type == STRING && b->type == STRING) && num(a) > num(b))) ? 1 : 0
     );
 }
 
@@ -198,7 +198,7 @@ entry_p m_gte(entry_p contxt)
     return new_number
     (
         ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) >= 0) ||
-         (!(a->type == STRING && b->type == STRING) && number(a)->id >= number(b)->id)) ? 1 : 0
+         (!(a->type == STRING && b->type == STRING) && num(a) >= num(b))) ? 1 : 0
     );
 }
 
@@ -212,7 +212,7 @@ entry_p m_eq(entry_p contxt)
     return new_number
     (
         ((a->type == STRING && b->type == STRING && !strcmp(a->name, b->name)) ||
-         (!(a->type == STRING && b->type == STRING) && number(a)->id == number(b)->id)) ? 1 : 0
+         (!(a->type == STRING && b->type == STRING) && num(a) == num(b))) ? 1 : 0
     );
 }
 
@@ -225,7 +225,7 @@ entry_p m_sub(entry_p contxt)
     TWINS(a, b); 
     return new_number
     (
-         number(a)->id - number(b)->id
+         num(a) - num(b)
     );
 }
 
@@ -242,7 +242,7 @@ entry_p m_mul(entry_p contxt)
         entry_p *cur = contxt->children; 
         while(*cur && *cur != SENTINEL)
         {
-            s *= number(*cur)->id;
+            s *= num(*cur);
             cur++; 
         }
         return new_number(s); 
@@ -262,12 +262,11 @@ entry_p m_mul(entry_p contxt)
 entry_p m_div(entry_p contxt)
 {
     TWINS(a, b); 
-    int denom = number(b)->id;
-    if(denom)
+    if(num(b))
     {
         return new_number
         (
-            number(a)->id / denom
+            num(a) / num(b)
         );
     }
     else

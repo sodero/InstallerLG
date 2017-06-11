@@ -95,14 +95,12 @@ entry_p resolve(entry_p entry)
     return new_failure();
 }
 
-entry_p number(entry_p entry)
+int num(entry_p entry)
 {
-    static entry_t num;
-    num.id = 0;
-    num.type = NUMBER;
     if(entry && 
        entry != SENTINEL)
     {
+        int n; 
         entry_p r; 
         switch(entry->type)
         {
@@ -110,27 +108,23 @@ entry_p number(entry_p entry)
             case NUMBER:
             case DANGLE:
             case CUSTOM:
-                num.id = entry->id;
-                break;
+                return entry->id;
 
             case STRING:
-                num.id = atoi(entry->name);
-                break;
+                return atoi(entry->name);
 
             case SYMBOL:
-                num.id = number(entry->resolved)->id; 
-                break;
+                return num(entry->resolved); 
 
             case SYMREF:
-                num.id = number(find_symbol(entry))->id; 
-                break;
+                return num(find_symbol(entry)); 
 
             case CUSREF:
             case NATIVE:
                 r = resolve_native(entry);
-                num.id = number(r)->id;
+                n = num(r);
                 kill(r);
-                break;
+                return n; 
 
             default:
                 error(PANIC);
@@ -140,32 +134,13 @@ entry_p number(entry_p entry)
     {
         error(PANIC);
     }
-    return &num;
+    return 0; 
 }
 
-/*
-
-Nar behover vi eval + deep copy? 
-- vid "set" pa global niva.
-- vid overgang till funktionskontext, dvs nar vi
-  gor "set" pa lokala variabler for att overfora
-  info fran anropande kontext.
-
-
-
-
-*/
-
-entry_p string(entry_p entry)
+char *str(entry_p entry)
 {
-    static entry_t str;
     static char buf[BUFSIZE];
-
-    str.type = STRING;
-    str.name = buf;
-    memset (str.name, 0, BUFSIZE);
-
-    return &str;
+    return buf;
 }
 
 entry_p invoke(entry_p entry)
