@@ -177,7 +177,7 @@ sps:        sps sp
             }    
             ;
 
-add:        '(' '+' pp ')' 
+add:        '(' '+' ps ')' 
             { 
                 $$ = new_native("+", m_add, $3); 
             } 

@@ -126,35 +126,24 @@ entry_p m_while(entry_p contxt)
 */
 entry_p m_add (entry_p contxt)
 {
-    TWINS(a, b); 
-    return new_number
-    (
-        eval_as_number(a)->id +
-        eval_as_number(b)->id
-    ); 
-}
-
-/*
- Impl. helper; < <= = > >=. 
-*/
-static entry_p m_cmp(entry_p contxt, char c1, char c2)
-{
-    int r; 
-    TWINS(a, b); 
-    if(a->type == STRING &&
-       b->type == STRING)
+    if(contxt && 
+       contxt->children)
     {
-        r = strcmp(a->name, b->name); 
+        int s = 0; 
+        entry_p *cur = contxt->children; 
+        while(*cur && *cur != SENTINEL)
+        {
+            s += eval_as_number(*cur)->id;
+            cur++; 
+        }
+        return new_number(s); 
     }
     else
     {
-        r = eval_as_number(a)->id - 
-            eval_as_number(b)->id;
+        error(PANIC);
+        pretty_print(contxt);
+        return new_failure();
     }
-    r = (c1 == '=' && r == 0) ||
-        (c2 == '<' && r < 0) ||
-        (c2 == '>' && r > 0) ? 1 : 0; 
-    return new_number(r);
 }
 
 /*
@@ -163,7 +152,12 @@ static entry_p m_cmp(entry_p contxt, char c1, char c2)
 */
 entry_p m_lt(entry_p contxt)
 {
-    return m_cmp(contxt, '\0', '<');
+    TWINS(a, b); 
+    return new_number
+    (
+        ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) < 0) ||
+         (!(a->type == STRING && b->type == STRING) && eval_as_number(a)->id < eval_as_number(b)->id)) ? 1 : 0
+    );
 }
 
 /*
@@ -172,7 +166,12 @@ entry_p m_lt(entry_p contxt)
 */
 entry_p m_lte(entry_p contxt)
 {
-    return m_cmp(contxt, '=', '<');
+    TWINS(a, b); 
+    return new_number
+    (
+        ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) <= 0) ||
+         (!(a->type == STRING && b->type == STRING) && eval_as_number(a)->id <= eval_as_number(b)->id)) ? 1 : 0
+    );
 }
 
 /*
@@ -181,7 +180,12 @@ entry_p m_lte(entry_p contxt)
 */
 entry_p m_gt(entry_p contxt)
 {
-    return m_cmp(contxt, '\0', '>');
+    TWINS(a, b); 
+    return new_number
+    (
+        ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) > 0) ||
+         (!(a->type == STRING && b->type == STRING) && eval_as_number(a)->id > eval_as_number(b)->id)) ? 1 : 0
+    );
 }
 
 /*
@@ -190,7 +194,12 @@ entry_p m_gt(entry_p contxt)
 */
 entry_p m_gte(entry_p contxt)
 {
-    return m_cmp(contxt, '=', '>');
+    TWINS(a, b); 
+    return new_number
+    (
+        ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) >= 0) ||
+         (!(a->type == STRING && b->type == STRING) && eval_as_number(a)->id >= eval_as_number(b)->id)) ? 1 : 0
+    );
 }
 
 /*
@@ -199,7 +208,12 @@ entry_p m_gte(entry_p contxt)
 */
 entry_p m_eq(entry_p contxt)
 {
-    return m_cmp(contxt, '=', '\0');
+    TWINS(a, b); 
+    return new_number
+    (
+        ((a->type == STRING && b->type == STRING && !strcmp(a->name, b->name)) ||
+         (!(a->type == STRING && b->type == STRING) && eval_as_number(a)->id == eval_as_number(b)->id)) ? 1 : 0
+    );
 }
 
 /* 
@@ -215,9 +229,26 @@ int m_sub(int a, int b)
 `(* <expr1> <expr2> ...)'
      returns product of expressions
 */
-int m_mul(int a, int b)
+entry_p m_mul(entry_p contxt)
 {
-    return a * b; 
+    if(contxt && 
+       contxt->children)
+    {
+        int s = 1; 
+        entry_p *cur = contxt->children; 
+        while(*cur && *cur != SENTINEL)
+        {
+            s *= eval_as_number(*cur)->id;
+            cur++; 
+        }
+        return new_number(s); 
+    }
+    else
+    {
+        error(PANIC);
+        pretty_print(contxt);
+        return new_failure();
+    }
 }
 
 /* 
