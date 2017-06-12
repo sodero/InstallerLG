@@ -105,6 +105,7 @@ int num(entry_p entry)
         switch(entry->type)
         {
             case STATUS:
+//pretty_print(entry);
             case NUMBER:
             case DANGLE:
             case CUSTOM:

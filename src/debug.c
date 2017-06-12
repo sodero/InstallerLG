@@ -2,7 +2,7 @@
 
 void leak_check()
 {
-#if 1
+#if 1 
 # ifdef __APPLE__
     char leaks[256]; 
     snprintf(leaks, sizeof (leaks), "leaks %u > /dev/null", getpid());       
