@@ -10,13 +10,13 @@
 entry_p new_contxt(void)
 {
     const int size = 8; 
-    entry_p entry = calloc (1, sizeof (entry_t)); 
-    if (entry)
+    entry_p entry = calloc (1, sizeof(entry_t)); 
+    if(entry)
     {
         entry_p *symbols, *children; 
-        symbols = calloc (size + 1, sizeof (entry_p)); 
-        children = calloc (size + 1, sizeof (entry_p)); 
-        if (symbols && children)
+        symbols = calloc(size + 1, sizeof(entry_p)); 
+        children = calloc(size + 1, sizeof(entry_p)); 
+        if(symbols && children)
         {
             entry->type = CONTXT;
             entry->symbols = symbols; 
@@ -25,18 +25,18 @@ entry_p new_contxt(void)
             entry->children[size] = SENTINEL; 
             return entry; 
         }
-        free (symbols); 
-        free (children); 
+        free(symbols); 
+        free(children); 
     }
     error(PANIC);
     free(entry);
     return 0;
 }
 
-entry_p new_number (int n)
+entry_p new_number(int n)
 {
-    entry_p entry = calloc (1, sizeof (entry_t)); 
-    if (entry)
+    entry_p entry = calloc(1, sizeof(entry_t)); 
+    if(entry)
     {
         entry->type = NUMBER;
         entry->id = n;
@@ -46,11 +46,11 @@ entry_p new_number (int n)
     return NULL;
 }
 
-entry_p new_string (char *n) 
+entry_p new_string(char *n) 
 {
     if(n)
     {
-        entry_p entry = calloc (1, sizeof (entry_t)); 
+        entry_p entry = calloc(1, sizeof (entry_t)); 
         if (entry)
         {
             entry->type = STRING;
@@ -79,12 +79,12 @@ entry_p new_failure(void)
     return new_status(0); 
 }
 
-entry_p new_symbol (char *n, entry_p e) 
+entry_p new_symbol(char *n, entry_p e) 
 {
-    if (n && e)
+    if(n && e)
     {
-        entry_p entry = calloc (1, sizeof (entry_t)); 
-        if (entry)
+        entry_p entry = calloc(1, sizeof(entry_t)); 
+        if(entry)
         {
             entry->type = SYMBOL; 
             entry->name = n;
@@ -100,10 +100,10 @@ entry_p new_symbol (char *n, entry_p e)
 
 entry_p new_custom(char *n, int l, entry_p s, entry_p c) 
 {
-    if (n && c)
+    if(n && c)
     {
-        entry_p entry = calloc (1, sizeof (entry_t)); 
-        if (entry)
+        entry_p entry = calloc(1, sizeof(entry_t)); 
+        if(entry)
         {
             entry_p *e; 
             entry->id = l;
@@ -137,12 +137,12 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
     return NULL; 
 }
 
-entry_p new_symref (char *n, int l)
+entry_p new_symref(char *n, int l)
 {
     if(n && (l > 0))
     {
-        entry_p entry = calloc (1, sizeof (entry_t)); 
-        if (entry)
+        entry_p entry = calloc(1, sizeof(entry_t)); 
+        if(entry)
         {
             entry->type = SYMREF; 
             entry->name = n;

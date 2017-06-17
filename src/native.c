@@ -282,6 +282,153 @@ entry_p m_div(entry_p contxt)
 }
 
 /* 
+`("<fmt>" <expr1> <expr2>)'
+     returns a formatted string
+*/
+entry_p m_fmt(entry_p contxt)
+{
+    char *ret = NULL, *fmt = contxt->name; 
+    char **sct = calloc((strlen(fmt) >> 1) + 1, sizeof(char *));
+printf("sct size:%d\n", (strlen(fmt) >> 1) + 1);
+
+    if(contxt && fmt && sct)
+    {
+        int i = 0, j = 0, k = 0, l = 0; 
+        entry_p *arg = contxt->children; 
+        for(; fmt[i]; i++)
+        {
+            if(fmt[i] == '%')
+            {
+                if(!i || (i && fmt[i - 1] != '\\'))
+                {
+                    i++; 
+                    if(fmt[i] == 's' || (
+                       fmt[i++] == 'l' &&
+                       fmt[i] && fmt[i] == 'd'))
+                    {
+                        sct[k] = calloc(i - j + 2, sizeof(char)); 
+                        if(sct[k])
+                        {
+                            memmove(sct[k], fmt + j, i - j + 1);
+                            j = i + 1;  
+                            k++; 
+                        }
+                        else
+                        {
+                            error(PANIC);
+                        }
+                    }
+                    else 
+                    {
+                        error(contxt->id, "Invalid format string", 
+                        contxt->name); 
+                        break; 
+                    }
+                }
+            }
+        }
+        if(k)
+        {
+            for(k = 0; sct[k]; k++)
+            {
+                if(arg && *arg && 
+                   *arg != SENTINEL)
+                {
+                    int oln = strlen(sct[k]);  
+                    entry_p cur = resolve(*arg); 
+printf("Creqteing:\n");
+pretty_print(cur);
+                    if(sct[k][oln - 1] == 's' &&
+                       cur->type == STRING)
+                    {
+                        int nln = oln + strlen(cur->name);  
+                        char *new = calloc(nln + 1, sizeof(char)); 
+                        if(new)
+                        {
+                            l += snprintf(new, nln, sct[k], cur->name);  
+                            free(sct[k]); 
+                            sct[k] = new; 
+                        }
+                        else
+                        {
+                            error(PANIC);
+                        }
+                    }
+                    else
+                    if(sct[k][oln - 1] == 'd' &&
+                       cur->type == NUMBER)
+                    {
+                        int nln = oln + 16;  
+                        char *new = calloc(nln + 1, sizeof(char)); 
+                        if(new)
+                        {
+                            l += snprintf(new, nln, sct[k], cur->id);  
+                            free(sct[k]); 
+                            sct[k] = new; 
+                        }
+                        else
+                        {
+                            error(PANIC);
+                        }
+                    }
+                    else
+                    {
+                        error(contxt->id, "Format string type mismatch", 
+                        contxt->name); 
+                    }
+printf("killinh:\n");
+pretty_print(cur);
+                    kill(cur); 
+                    arg++; 
+                }
+                else 
+                {
+                    error(contxt->id, "Missing format string arguments", 
+                    contxt->name); 
+                    break; 
+                }
+            }
+        }
+        l += strlen(fmt + j); 
+        ret = calloc(l + 1, sizeof(char)); 
+        if(ret)
+        {
+            for(k = 0; sct[k]; k++)
+            {
+                strcat(ret, sct[k]); 
+            }
+            strcat(ret, fmt + j); 
+        }
+        else
+        {
+            error(PANIC);
+        }
+        for(k = 0; sct[k]; k++)
+        {
+            free(sct[k]);
+        }
+        free(sct);
+        if(/*arg &&*/ *arg && 
+           *arg != SENTINEL)
+        {
+            error(contxt->id, "Superfluous format string arguments", 
+                  contxt->name); 
+        }
+        else
+        if(ret)
+        {
+            return new_string(ret); 
+        }
+    }
+    else
+    {
+        error(PANIC);
+    }
+    free(ret);
+    return new_failure(); 
+}
+
+/* 
 `(AND <expr1> <expr2>)'
      returns logical `AND' of `<expr1>' and `<expr2>'
 */

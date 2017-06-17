@@ -28,12 +28,12 @@ extern int yylineno;
 
 %type<e> start 
 %type<e> s p pp ps vp vps vpb np sp sps par cv cvv
-%type<e> add sub div mul lt lte gt gte eq set cus dcl if while
+%type<e> add sub div mul lt lte gt gte eq set cus dcl fmt if while
 
 %destructor { run($$); } start 
 %destructor { free($$); } SYM STR
 %destructor { kill($$); } s p pp ps vp vps vpb np sp sps par cv cvv
-%destructor { kill($$); } add sub div mul lt lte gt gte eq set cus dcl if while
+%destructor { kill($$); } add sub div mul lt lte gt gte eq set cus dcl fmt if while
 
 %%
 start:      s    
@@ -104,6 +104,9 @@ vp:         add
             |
 
             dcl
+            |
+
+            fmt 
             |
 
             if 
@@ -281,6 +284,18 @@ cus:        '(' SYM ps ')'
             '(' SYM ')' 
             { 
                 $$ = new_cusref($2, yylineno, NULL); 
+            } 
+            ;
+
+fmt:        '(' STR ps ')' 
+            { 
+                $$ = new_native($2, yylineno, m_fmt, $3); 
+            } 
+            |
+
+            '(' STR ')' 
+            { 
+                $$ = new_native($2, yylineno, m_fmt, NULL); 
             } 
             ;
 

@@ -121,17 +121,7 @@ entry_p local(entry_p e)
     for(; e && 
         e->type != CONTXT && 
         e->type != CUSTOM 
-        ; e = e->parent)
-{
-//    printf("i:%d\n", i); 
- //   pretty_print(e); 
-  //  i++; 
-}
-
-  //  printf("i:%d\n", i); 
-  //  pretty_print(e); 
-
-//    ;
+        ; e = e->parent);
     return e; 
 }
 
