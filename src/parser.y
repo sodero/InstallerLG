@@ -5,6 +5,7 @@
 #include "native.h"
 #include "eval.h"
 #include "util.h"
+#include "sysenv.h"
 
 int yylex(void);
 int yyerror(char *err);
@@ -38,6 +39,9 @@ extern int yylineno;
 
 %%
 start:      s    
+            { 
+                bootstrap($1); 
+            } 
             ;
 
 s:          vps

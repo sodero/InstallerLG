@@ -228,7 +228,6 @@ entry_p new_dangle(void)
     return &dangle; 
 }
 
-// Do not use this one outside the parser:
 void push (entry_p dst, entry_p src)
 {
     if (dst && src)
@@ -246,16 +245,12 @@ void push (entry_p dst, entry_p src)
                      *new = src->name; 
                 if (strcmp (old, new) == 0)
                 {
-//HERE;
-//pretty_print(src);
                     dst->symbols[u] = src;
                     return; 
                 }
                 u++;
             }
             dst_p = &dst->symbols; 
-//HERE;
-//pretty_print(src);
         }
         if(*dst_p)
         {
