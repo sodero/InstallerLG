@@ -87,7 +87,7 @@
     /*
     Symbols
     */
-[^" \n\t\(\)\+\*/-]+    { 
+[^" \n\t\(\)\+\*/]+    { 
     yylval.s = strdup(yytext); 
     R(SYM);        
 }

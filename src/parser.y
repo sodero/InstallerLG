@@ -41,6 +41,7 @@ extern int yylineno;
 start:      s    
             { 
                 bootstrap($1); 
+                $$ = $1; 
             } 
             ;
 
