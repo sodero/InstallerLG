@@ -289,8 +289,6 @@ entry_p m_fmt(entry_p contxt)
 {
     char *ret = NULL, *fmt = contxt->name; 
     char **sct = calloc((strlen(fmt) >> 1) + 1, sizeof(char *));
-printf("sct size:%d\n", (strlen(fmt) >> 1) + 1);
-
     if(contxt && fmt && sct)
     {
         int i = 0, j = 0, k = 0, l = 0; 
@@ -336,8 +334,6 @@ printf("sct size:%d\n", (strlen(fmt) >> 1) + 1);
                 {
                     int oln = strlen(sct[k]);  
                     entry_p cur = resolve(*arg); 
-printf("Creqteing:\n");
-pretty_print(cur);
                     if(sct[k][oln - 1] == 's' &&
                        cur->type == STRING)
                     {
@@ -376,8 +372,6 @@ pretty_print(cur);
                         error(contxt->id, "Format string type mismatch", 
                         contxt->name); 
                     }
-printf("killinh:\n");
-pretty_print(cur);
                     kill(cur); 
                     arg++; 
                 }
@@ -408,7 +402,7 @@ pretty_print(cur);
             free(sct[k]);
         }
         free(sct);
-        if(/*arg &&*/ *arg && 
+        if(arg && *arg && 
            *arg != SENTINEL)
         {
             error(contxt->id, "Superfluous format string arguments", 

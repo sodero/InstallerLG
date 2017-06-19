@@ -1,6 +1,8 @@
 ("%s"); out="Line 1: Missing format string arguments '%s'"
 ("%ld"); out="Line 1: Missing format string arguments '%ld'"
 ("prefix-%ld-postfix" 1) ; out="prefix-1-postfix"
+("prefix-%ld-postfix" %00001) ; out="prefix-1-postfix"
+("prefix-%ld-postfix" $ff) ; out="prefix-255-postfix"
 ("prefix-%ld-postfix" 1 1) ; out="Line 1: Superfluous format string arguments 'prefix-%ld-postfix'"
 ("prefix-%ld-postfix" "1") ; out="Line 1: Format string type mismatch 'prefix-%ld-postfix'"
 ("prefix-%s-postfix" "1") ; out="prefix-1-postfix"
@@ -9,6 +11,5 @@
 (set a "1") ("prefix-%ld-postfix" a) ; out="Line 1: Format string type mismatch 'prefix-%ld-postfix'"
 (set a 1) ("prefix-%ld-postfix" a) ; out="prefix-1-postfix"
 (set a 1) ("prefix-%s-postfix" a) ; out="Line 1: Format string type mismatch 'prefix-%s-postfix'"
-
 ("%s" ("prefix-%ld-postfix" 1)) ; out="prefix-1-postfix"
 

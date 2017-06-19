@@ -188,7 +188,7 @@ entry_p new_native (char *n, int l, call_t call, entry_p e)
             entry->id = l;
             entry->call = call;
             entry->type = NATIVE;
-            entry->name = strdup(n);
+            entry->name = n; 
             if(e && e->type == CONTXT)
             {
                 move_contxt(entry, e); 

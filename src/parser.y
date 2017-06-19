@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <string.h>
 #include "debug.h"
 #include "native.h"
 #include "eval.h"
@@ -191,61 +192,61 @@ sps:        sps sp
 
 add:        '(' '+' ps ')' 
             { 
-                $$ = new_native("+", yylineno, m_add, $3); 
+                $$ = new_native(strdup("+"), yylineno, m_add, $3); 
             } 
             ;
 
 mul:        '(' '*' ps ')' 
             { 
-                $$ = new_native("*", yylineno, m_mul, $3); 
+                $$ = new_native(strdup("*"), yylineno, m_mul, $3); 
             } 
             ;
 
 sub:        '(' '-' pp ')' 
             { 
-                $$ = new_native("-", yylineno, m_sub, $3); 
+                $$ = new_native(strdup("-"), yylineno, m_sub, $3); 
             } 
             ;
 
 div:        '(' '/' pp ')' 
             { 
-                $$ = new_native("/", yylineno, m_div, $3); 
+                $$ = new_native(strdup("/"), yylineno, m_div, $3); 
             } 
             ;
 
 lt:         '(' '<' pp ')' 
             { 
-                $$ = new_native("<", yylineno, m_lt, $3); 
+                $$ = new_native(strdup("<"), yylineno, m_lt, $3); 
             } 
             ;
 
 lte:        '(' LTE pp ')' 
             { 
-                $$ = new_native("<=", yylineno, m_lte, $3); 
+                $$ = new_native(strdup("<="), yylineno, m_lte, $3); 
             } 
             ;
 
 gt:         '(' '>' pp ')' 
             { 
-                $$ = new_native(">", yylineno, m_gt, $3); 
+                $$ = new_native(strdup(">"), yylineno, m_gt, $3); 
             } 
             ;
 
 gte:        '(' GTE pp ')' 
             { 
-                $$ = new_native(">=", yylineno, m_gte, $3); 
+                $$ = new_native(strdup(">="), yylineno, m_gte, $3); 
             } 
             ;
 
 eq:         '(' '=' pp ')' 
             { 
-                $$ = new_native("=", yylineno, m_eq, $3); 
+                $$ = new_native(strdup("="), yylineno, m_eq, $3); 
             } 
             ;
 
 set:        '(' SET sps ')' 
             { 
-                $$ = new_native("set", yylineno, m_set, $3); 
+                $$ = new_native(strdup("set"), yylineno, m_set, $3); 
             } 
             ;
 
@@ -318,13 +319,13 @@ cvv:        p vpb vpb
 
 if:         '(' IF cvv ')' 
             { 
-                $$ = new_native("if", yylineno, m_if, $3); 
+                $$ = new_native(strdup("if"), yylineno, m_if, $3); 
             } 
             ;
 
 while:      '(' WHILE cv ')' 
             { 
-                $$ = new_native("while", yylineno, m_while, $3); 
+                $$ = new_native(strdup("while"), yylineno, m_while, $3); 
             } 
             ;
 %%
