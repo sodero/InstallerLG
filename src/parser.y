@@ -110,18 +110,18 @@ eq:         '(' '=' pp ')'          { $$ = new_native(strdup("="), yylineno, m_e
 
 set:        '(' SET sps ')'         { $$ = new_native(strdup("set"), yylineno, m_set, $3); };
 
+if:         '(' IF cvv ')'          { $$ = new_native(strdup("if"), yylineno, m_if, $3); };
+
+while:      '(' WHILE cv ')'        { $$ = new_native(strdup("while"), yylineno, m_while, $3); };
+
+fmt:        '(' STR ps ')'          { $$ = new_native($2, yylineno, m_fmt, $3); } |
+            '(' STR ')'             { $$ = new_native($2, yylineno, m_fmt, NULL); };
+
 dcl:        '(' DCL SYM par s ')'   { $$ = new_custom($3, yylineno, $4, $5); } |
             '(' DCL SYM s ')'       { $$ = new_custom($3, yylineno, NULL, $4); };
 
 cus:        '(' SYM ps ')'          { $$ = new_cusref($2, yylineno, $3); } |
             '(' SYM ')'             { $$ = new_cusref($2, yylineno, NULL); };
-
-fmt:        '(' STR ps ')'          { $$ = new_native($2, yylineno, m_fmt, $3); } |
-            '(' STR ')'             { $$ = new_native($2, yylineno, m_fmt, NULL); };
-
-if:         '(' IF cvv ')'          { $$ = new_native(strdup("if"), yylineno, m_if, $3); };
-
-while:      '(' WHILE cv ')'        { $$ = new_native(strdup("while"), yylineno, m_while, $3); };
 %%
 
 int main(int argc, char **argv)
