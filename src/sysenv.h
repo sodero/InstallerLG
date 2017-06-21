@@ -3,6 +3,6 @@
 
 #include "types.h"
 
-void bootstrap(entry_p contxt); 
+entry_p init(entry_p contxt); 
 
 #endif

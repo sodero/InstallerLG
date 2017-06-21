@@ -32,7 +32,7 @@ extern int yylineno;
 %type<e> s p pp ps vp vps vpb np sp sps par cv cvv
 %type<e> add sub div mul lt lte gt gte eq set cus dcl fmt if while
 
-%destructor { run($$); } start 
+%destructor { run($$);  } start 
 %destructor { free($$); } SYM STR
 %destructor { kill($$); } s p pp ps vp vps vpb np sp sps par cv cvv
 %destructor { kill($$); } add sub div mul lt lte gt gte eq set cus dcl fmt if while
@@ -40,8 +40,7 @@ extern int yylineno;
 %%
 start:      s    
             { 
-                bootstrap($1); 
-                $$ = $1; 
+                $$ = init($1); 
             } 
             ;
 

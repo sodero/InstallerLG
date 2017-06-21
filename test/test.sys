@@ -1,1 +1,8 @@
 ("%s" @default-dest) ; out="Work:"
+("%s" @error-msg) ; out="Unknown error"
+("%s" @execute-dir) ; out="-"
+("%s" @icon) ; out="-"
+("%s" @language) ; out="english"
+("%ld" @pretend) ; out="1"
+("%s" @special-msg) ; out="Custom error"
+("%ld" @user-level) ; out="2"

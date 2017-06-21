@@ -91,6 +91,7 @@ entry_p new_symbol(char *n, entry_p e)
             entry->expression = e;
             entry->resolved = new_dangle();
             entry->resolved->parent = entry; 
+            e->parent = entry; 
             return entry; 
         }
     }
@@ -228,7 +229,7 @@ entry_p new_dangle(void)
     return &dangle; 
 }
 
-void push (entry_p dst, entry_p src)
+entry_p push(entry_p dst, entry_p src)
 {
     if (dst && src)
     {
@@ -246,7 +247,7 @@ void push (entry_p dst, entry_p src)
                 if (strcmp (old, new) == 0)
                 {
                     dst->symbols[u] = src;
-                    return; 
+                    return dst; 
                 }
                 u++;
             }
@@ -264,7 +265,7 @@ void push (entry_p dst, entry_p src)
                     // If true, push and return
                     (*dst_p)[u] = src; 
                     src->parent = dst; 
-                    return; 
+                    return dst; 
                 }
                 else if(src->type == CUSTOM &&
                        (*dst_p)[u]->type == CUSTOM) 
@@ -291,11 +292,12 @@ void push (entry_p dst, entry_p src)
                 // Do the push
                 (*dst_p)[u] = src; 
                 src->parent = dst; 
-                return; 
+                return dst; 
             }
         }
     }
     error(PANIC);
+    return dst; 
 }
 
 void kill(entry_p entry)

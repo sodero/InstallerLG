@@ -115,6 +115,29 @@ void pretty_print (entry_p entry)
     }
 }
 
+void ror(entry_p *e)
+{
+    if(e && *e)
+    {
+        int i = 0; 
+        while(e[i] && e[i] != SENTINEL)
+        {
+            i++; 
+        }
+        i--; 
+        if(i)
+        {
+            entry_p f = e[i]; 
+            while(i)
+            {
+                e[i] = e[i - 1]; 
+                i--; 
+            }
+            e[0] = f; 
+        }
+    }
+}
+
 entry_p local(entry_p e)
 {
     int i = 0; 
