@@ -55,23 +55,19 @@ p:          vp
 
 pp:         p p
             { 
-                $$ = new_contxt();   
-                push($$, $1);    
-                push($$, $2);    
+                $$ = push(push(new_contxt(), $1), $2);    
             } 
             ;
 
 ps:         ps p
             { 
-                push ($1, $2);    
-                $$ = $1;   
+                $$ = push($1, $2);    
             }    
             |
 
             p
             { 
-                $$ = new_contxt();   
-                push ($$, $1);    
+                $$ = push(new_contxt(), $1);    
             }    
             ;
 
@@ -122,15 +118,13 @@ vp:         add
 
 vps:        vps vp 
             { 
-                push($1, $2);                  
-                $$ = $1;
+                $$ = push($1, $2);                  
             } 
             |
 
             vp   
             { 
-                $$ = new_contxt();   
-                push($$, $1);    
+                $$ = push(new_contxt(), $1);    
             } 
             ;
 
@@ -176,21 +170,18 @@ np:         INT
 sp:         SYM p
             { 
                 $$ = new_symbol($1, $2);   
-                $2->parent = $$;
             } 
             ;
 
 sps:        sps sp
             { 
-                push ($1, $2);    
-                $$ = $1;   
+                $$ = push($1, $2);    
             }    
             |
 
             sp
             { 
-                $$ = new_contxt();   
-                push ($$, $1);    
+                $$ = push(new_contxt(), $1);    
             }    
             ;
 
@@ -256,15 +247,13 @@ set:        '(' SET sps ')'
 
 par:        par SYM
             { 
-                push($1, new_symbol($2, new_dangle())); 
-                $$ = $1;   
+                $$ = push($1, new_symbol($2, new_dangle())); 
             }    
             |
 
             SYM
             { 
-                $$ = new_contxt();   
-                push($$, new_symbol($1, new_dangle())); 
+                $$ = push(new_contxt(), new_symbol($1, new_dangle())); 
             }    
             ;
 
@@ -306,18 +295,13 @@ fmt:        '(' STR ps ')'
 
 cv:         p vpb 
             { 
-                $$ = new_contxt();   
-                push($$, $1);    
-                push($$, $2);    
+                $$ = push(push(new_contxt(), $1), $2);    
             } 
             ;
 
 cvv:        p vpb vpb 
             { 
-                $$ = new_contxt();   
-                push($$, $1);    
-                push($$, $2);    
-                push($$, $3);    
+                $$ = push(push(push(new_contxt(), $1), $2), $3);    
             } 
             ;
 
