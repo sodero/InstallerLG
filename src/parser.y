@@ -38,284 +38,90 @@ extern int yylineno;
 %destructor { kill($$); } add sub div mul lt lte gt gte eq set cus dcl fmt if while
 
 %%
-start:      s    
-            { 
-                $$ = init($1); 
-            } 
-            ;
+start:      s                       { $$ = init($1); };
 
-s:          vps
-            ;
+s:          vps                     ;
 
-p:          vp 
-            |
+p:          vp                      |
+            np                      ;
 
-            np
-            ;
+pp:         p p                     { $$ = push(push(new_contxt(), $1), $2); };
 
-pp:         p p
-            { 
-                $$ = push(push(new_contxt(), $1), $2);    
-            } 
-            ;
+ps:         ps p                    { $$ = push($1, $2); } |
+            p                       { $$ = push(new_contxt(), $1); };
 
-ps:         ps p
-            { 
-                $$ = push($1, $2);    
-            }    
-            |
+vps:        vps vp                  { $$ = push($1, $2); } |
+            vp                      { $$ = push(new_contxt(), $1); };
 
-            p
-            { 
-                $$ = push(new_contxt(), $1);    
-            }    
-            ;
+vpb:        '(' vps ')'             { $$ = $2; } |
+            vp                      ;
 
-vp:         add
-            |
+np:         INT                     { $$ = new_number($1); } |
+            HEX                     { $$ = new_number($1); } |
+            BIN                     { $$ = new_number($1); } |
+            STR                     { $$ = new_string($1); } |
+            SYM                     { $$ = new_symref($1, yylineno); };
 
-            sub 
-            |
+sp:         SYM p                   { $$ = new_symbol($1, $2); };
 
-            div
-            |
+sps:        sps sp                  { $$ = push($1, $2); } |
+            sp                      { $$ = push(new_contxt(), $1); };
 
-            mul
-            |
+par:        par SYM                 { $$ = push($1, new_symbol($2, new_dangle())); } |
+            SYM                     { $$ = push(new_contxt(), new_symbol($1, new_dangle())); };
 
-            lt
-            |
+cv:         p vpb                   { $$ = push(push(new_contxt(), $1), $2); };
 
-            lte
-            |
+cvv:        p vpb vpb               { $$ = push(push(push(new_contxt(), $1), $2), $3); };
 
-            gt
-            |
+vp:         add                     |
+            sub                     |
+            div                     |
+            mul                     |
+            lt                      |
+            lte                     |
+            gt                      |
+            gte                     |
+            eq                      |
+            set                     |
+            cus                     |
+            dcl                     |
+            fmt                     |
+            if                      |
+            while                   ;
 
-            gte
-            |
+add:        '(' '+' ps ')'          { $$ = new_native(strdup("+"), yylineno, m_add, $3); };
 
-            eq
-            |
+mul:        '(' '*' ps ')'          { $$ = new_native(strdup("*"), yylineno, m_mul, $3); };
 
-            set
-            |
+sub:        '(' '-' pp ')'          { $$ = new_native(strdup("-"), yylineno, m_sub, $3); };
 
-            cus 
-            |
+div:        '(' '/' pp ')'          { $$ = new_native(strdup("/"), yylineno, m_div, $3); };
 
-            dcl
-            |
+lt:         '(' '<' pp ')'          { $$ = new_native(strdup("<"), yylineno, m_lt, $3); };
 
-            fmt 
-            |
+lte:        '(' LTE pp ')'          { $$ = new_native(strdup("<="), yylineno, m_lte, $3); };
 
-            if 
-            |
+gt:         '(' '>' pp ')'          { $$ = new_native(strdup(">"), yylineno, m_gt, $3); };
 
-            while 
-            ;
+gte:        '(' GTE pp ')'          { $$ = new_native(strdup(">="), yylineno, m_gte, $3); };
 
-vps:        vps vp 
-            { 
-                $$ = push($1, $2);                  
-            } 
-            |
+eq:         '(' '=' pp ')'          { $$ = new_native(strdup("="), yylineno, m_eq, $3); };
 
-            vp   
-            { 
-                $$ = push(new_contxt(), $1);    
-            } 
-            ;
+set:        '(' SET sps ')'         { $$ = new_native(strdup("set"), yylineno, m_set, $3); };
 
-vpb:        '(' vps ')'
-            { 
-                $$ = $2;
-            } 
-            |
+dcl:        '(' DCL SYM par s ')'   { $$ = new_custom($3, yylineno, $4, $5); } |
+            '(' DCL SYM s ')'       { $$ = new_custom($3, yylineno, NULL, $4); };
 
-            vp
-            ;
+cus:        '(' SYM ps ')'          { $$ = new_cusref($2, yylineno, $3); } |
+            '(' SYM ')'             { $$ = new_cusref($2, yylineno, NULL); };
 
-np:         INT  
-            { 
-                $$ = new_number($1); 
-            } 
-            |
+fmt:        '(' STR ps ')'          { $$ = new_native($2, yylineno, m_fmt, $3); } |
+            '(' STR ')'             { $$ = new_native($2, yylineno, m_fmt, NULL); };
 
-            HEX  
-            { 
-                $$ = new_number($1); 
-            } 
-            |
+if:         '(' IF cvv ')'          { $$ = new_native(strdup("if"), yylineno, m_if, $3); };
 
-            BIN  
-            { 
-                $$ = new_number($1); 
-            }                        
-            |
-
-            STR  
-            { 
-                $$ = new_string($1); 
-            }                        
-            |
-
-            SYM  
-            { 
-                $$ = new_symref($1, yylineno); 
-            }    
-            ;
-
-sp:         SYM p
-            { 
-                $$ = new_symbol($1, $2);   
-            } 
-            ;
-
-sps:        sps sp
-            { 
-                $$ = push($1, $2);    
-            }    
-            |
-
-            sp
-            { 
-                $$ = push(new_contxt(), $1);    
-            }    
-            ;
-
-add:        '(' '+' ps ')' 
-            { 
-                $$ = new_native(strdup("+"), yylineno, m_add, $3); 
-            } 
-            ;
-
-mul:        '(' '*' ps ')' 
-            { 
-                $$ = new_native(strdup("*"), yylineno, m_mul, $3); 
-            } 
-            ;
-
-sub:        '(' '-' pp ')' 
-            { 
-                $$ = new_native(strdup("-"), yylineno, m_sub, $3); 
-            } 
-            ;
-
-div:        '(' '/' pp ')' 
-            { 
-                $$ = new_native(strdup("/"), yylineno, m_div, $3); 
-            } 
-            ;
-
-lt:         '(' '<' pp ')' 
-            { 
-                $$ = new_native(strdup("<"), yylineno, m_lt, $3); 
-            } 
-            ;
-
-lte:        '(' LTE pp ')' 
-            { 
-                $$ = new_native(strdup("<="), yylineno, m_lte, $3); 
-            } 
-            ;
-
-gt:         '(' '>' pp ')' 
-            { 
-                $$ = new_native(strdup(">"), yylineno, m_gt, $3); 
-            } 
-            ;
-
-gte:        '(' GTE pp ')' 
-            { 
-                $$ = new_native(strdup(">="), yylineno, m_gte, $3); 
-            } 
-            ;
-
-eq:         '(' '=' pp ')' 
-            { 
-                $$ = new_native(strdup("="), yylineno, m_eq, $3); 
-            } 
-            ;
-
-set:        '(' SET sps ')' 
-            { 
-                $$ = new_native(strdup("set"), yylineno, m_set, $3); 
-            } 
-            ;
-
-par:        par SYM
-            { 
-                $$ = push($1, new_symbol($2, new_dangle())); 
-            }    
-            |
-
-            SYM
-            { 
-                $$ = push(new_contxt(), new_symbol($1, new_dangle())); 
-            }    
-            ;
-
-dcl:        '(' DCL SYM par s ')' 
-            { 
-                $$ = new_custom($3, yylineno, $4, $5); 
-            } 
-            |
-
-            '(' DCL SYM s ')' 
-            { 
-                $$ = new_custom($3, yylineno, NULL, $4); 
-            } 
-            ;
-
-cus:        '(' SYM ps ')' 
-            { 
-                $$ = new_cusref($2, yylineno, $3); 
-            } 
-            |
-
-            '(' SYM ')' 
-            { 
-                $$ = new_cusref($2, yylineno, NULL); 
-            } 
-            ;
-
-fmt:        '(' STR ps ')' 
-            { 
-                $$ = new_native($2, yylineno, m_fmt, $3); 
-            } 
-            |
-
-            '(' STR ')' 
-            { 
-                $$ = new_native($2, yylineno, m_fmt, NULL); 
-            } 
-            ;
-
-cv:         p vpb 
-            { 
-                $$ = push(push(new_contxt(), $1), $2);    
-            } 
-            ;
-
-cvv:        p vpb vpb 
-            { 
-                $$ = push(push(push(new_contxt(), $1), $2), $3);    
-            } 
-            ;
-
-if:         '(' IF cvv ')' 
-            { 
-                $$ = new_native(strdup("if"), yylineno, m_if, $3); 
-            } 
-            ;
-
-while:      '(' WHILE cv ')' 
-            { 
-                $$ = new_native(strdup("while"), yylineno, m_while, $3); 
-            } 
-            ;
+while:      '(' WHILE cv ')'        { $$ = new_native(strdup("while"), yylineno, m_while, $3); };
 %%
 
 int main(int argc, char **argv)
