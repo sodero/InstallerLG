@@ -10,6 +10,48 @@ entry_p init(entry_p contxt)
                  new_symbol(strdup("@init-done"), 
                  new_string(strdup("")))))); ror(contxt->children);
     push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@abort-button"), 
+                 new_string(strdup("Abort")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@app-name"), 
+                 new_string(strdup("Application name")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@io-err"), 
+                 new_number(0))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@askoptions-help"), 
+                 new_string(strdup("-")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@askchoice-help"), 
+                 new_string(strdup("-")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@asknumber-help"), 
+                 new_string(strdup("-")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@askstring-help"), 
+                 new_string(strdup("-")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@askdisk-help"), 
+                 new_string(strdup("-")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@askfile-help"), 
+                 new_string(strdup("-")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@askdir-help"), 
+                 new_string(strdup("-")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@copylib-help"), 
+                 new_string(strdup("-")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@copyfiles-help"), 
+                 new_string(strdup("-")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@makedir-help"), 
+                 new_string(strdup("-")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@startup-help"), 
+                 new_string(strdup("-")))))); ror(contxt->children);
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
                  new_symbol(strdup("@default-dest"), 
                  new_string(strdup("Work:")))))); ror(contxt->children);
     push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
