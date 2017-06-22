@@ -20,22 +20,22 @@ extern int yylineno;
     entry_p e;
 }
 
-%token<s> SYM STR 
-%token<n> INT HEX BIN 
+%token                      SET DCL IF WHILE
+%token                      AND OR XOR NOT LTE GTE
+%token                      BITAND BITOR BITXOR BITNOT 
+%token                      SHIFTLEFT SHIFTRIGHT
+%token<s>                   SYM STR 
+%destructor { free($$); }   SYM STR
+%token<n>                   INT HEX BIN 
 
-%token SET DCL IF WHILE
-%token AND OR XOR NOT LTE GTE
-%token BITAND BITOR BITXOR BITNOT 
-%token SHIFTLEFT SHIFTRIGHT
-
-%type<e> start 
-%type<e> s p pp ps vp vps vpb np sp sps par cv cvv
-%type<e> add sub div mul lt lte gt gte eq set cus dcl fmt if while
-
-%destructor { run($$);  } start 
-%destructor { free($$); } SYM STR
-%destructor { kill($$); } s p pp ps vp vps vpb np sp sps par cv cvv
-%destructor { kill($$); } add sub div mul lt lte gt gte eq set cus dcl fmt if while
+%type<e>                    start 
+%destructor { run($$);  }   start 
+%type<e>                    s p pp ps vp vps vpb np sp sps par cv cvv
+%destructor { kill($$); }   s p pp ps vp vps vpb np sp sps par cv cvv
+%type<e>                    add sub div mul lt lte gt gte eq set cus dcl fmt if while
+%destructor { kill($$); }   add sub div mul lt lte gt gte eq set cus dcl fmt if while
+%type<e>                    and or xor not bitand bitor bitxor bitnot shiftleft shiftright
+%destructor { kill($$); }   and or xor not bitand bitor bitxor bitnot shiftleft shiftright
 
 %%
 start:      s                       { $$ = init($1); };
@@ -88,7 +88,17 @@ vp:         add                     |
             dcl                     |
             fmt                     |
             if                      |
-            while                   ;
+            while                   |
+            and                     |
+            or                      |
+            xor                     |
+            not                     |
+            bitand                  |
+            bitor                   |
+            bitxor                  |
+            bitnot                  |
+            shiftleft               | 
+            shiftright              ;
 
 add:        '(' '+' ps ')'          { $$ = new_native(strdup("+"), yylineno, m_add, $3); };
 
@@ -122,6 +132,27 @@ dcl:        '(' DCL SYM par s ')'   { $$ = new_custom($3, yylineno, $4, $5); } |
 
 cus:        '(' SYM ps ')'          { $$ = new_cusref($2, yylineno, $3); } |
             '(' SYM ')'             { $$ = new_cusref($2, yylineno, NULL); };
+
+and:        '(' AND pp ')'          { $$ = new_native(strdup("AND"), yylineno, m_and, $3); }; 
+
+or:         '(' OR pp ')'           { $$ = new_native(strdup("OR"), yylineno, m_or, $3); }; 
+
+xor:        '(' XOR pp ')'          { $$ = new_native(strdup("XOR"), yylineno, m_xor, $3); }; 
+
+not:        '(' NOT p ')'           { $$ = new_native(strdup("NOT"), yylineno, m_not, push(new_contxt(), $3)); }; 
+
+bitand:     '(' BITAND pp ')'       { $$ = new_native(strdup("BITAND"), yylineno, m_bitand, $3); }; 
+
+bitor:      '(' BITOR pp ')'        { $$ = new_native(strdup("BITOR"), yylineno, m_bitor, $3); }; 
+
+bitxor:     '(' BITXOR pp ')'       { $$ = new_native(strdup("BITXOR"), yylineno, m_bitxor, $3); }; 
+
+bitnot:     '(' BITNOT p ')'       { $$ = new_native(strdup("BITNOT"), yylineno, m_bitnot, push(new_contxt(), $3)); }; 
+
+shiftleft:  '(' SHIFTLEFT pp ')'    { $$ = new_native(strdup("shiftleft"), yylineno, m_shiftleft, $3); }; 
+
+shiftright: '(' SHIFTRIGHT pp ')'   { $$ = new_native(strdup("shiftright"), yylineno, m_shiftright, $3); }; 
+
 %%
 
 int main(int argc, char **argv)

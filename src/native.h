@@ -18,17 +18,34 @@ entry_p m_mul(entry_p contxt);
 entry_p m_sub(entry_p contxt);
 entry_p m_div(entry_p contxt);
 entry_p m_fmt(entry_p contxt);
+entry_p m_and(entry_p contxt);
+entry_p m_or(entry_p contxt);
+entry_p m_xor(entry_p contxt);
+entry_p m_not(entry_p contxt);
+entry_p m_bitand(entry_p contxt);
+entry_p m_bitor(entry_p contxt);
+entry_p m_bitxor(entry_p contxt);
+entry_p m_bitnot(entry_p contxt);
+entry_p m_shiftleft(entry_p contxt);
+entry_p m_shiftright(entry_p contxt);
 
-int m_and(int a, int b);
-int m_or(int a, int b);
-int m_xor(int a, int b);
-int m_not(int a);
-int m_bitand(int a, int b);
-int m_bitor(int a, int b);
-int m_bitxor(int a, int b);
-int m_bitnot(int a);
-int m_shiftleft(int a, int n);
-int m_shiftright(int a, int n);
+#define ONLY(A)\
+entry_p A;\
+if(contxt &&\
+   contxt->parent &&\
+   contxt->children &&\
+   contxt->children[0] &&\
+   contxt->children[0] != SENTINEL &&\
+   contxt->children[0]->parent == contxt)\
+{\
+    A = contxt->children[0];\
+}\
+else\
+{\
+    error(PANIC);\
+    pretty_print(contxt);\
+    return new_failure();\
+}
 
 #define TWINS(A,B)\
 entry_p A, B;\

@@ -426,102 +426,135 @@ entry_p m_fmt(entry_p contxt)
 `(AND <expr1> <expr2>)'
      returns logical `AND' of `<expr1>' and `<expr2>'
 */
-int m_and(int a, int b)
+entry_p m_and(entry_p contxt)
 {
-    return a && b; 
+    TWINS(a, b); 
+    return new_number
+    (
+        num(a) && num(b)
+    );
 }
 
 /* 
 `(OR <expr1> <expr2>)'
      returns logical `OR' of `<expr1>' and `<expr2>'
 */
-int m_or(int a, int b)
+entry_p m_or(entry_p contxt)
 {
-    return a || b; 
+    TWINS(a, b); 
+    return new_number
+    (
+        num(a) || num(b)
+    );
 }
 
 /* 
 `(XOR <expr1> <expr2>)'
      returns logical `XOR' of `<expr1>' and `<expr2>'
 */
-int m_xor(int a, int b)
+entry_p m_xor(entry_p contxt)
 {
-    return (a && !b) || (!a && b); 
+    TWINS(a, b); 
+    return new_number
+    (
+        (num(a) && !num(b)) || 
+        (num(b) && !num(a)) 
+    );
 }
 
 /* 
 `(NOT <expr>)'
      returns logical `NOT' of `<expr>'
 */
-int m_not(int a)
+entry_p m_not(entry_p contxt)
 {
-    return !a; 
+    ONLY(a); 
+    return new_number
+    (
+         !num(a)
+    );
 }
 
 /* 
 `(BITAND <expr1> <expr2>)'
      returns bitwise `AND' of `<expr1>' and `<expr2>'
 */
-int m_bitand(int a, int b)
+entry_p m_bitand(entry_p contxt)
 {
-    return a & b; 
+    TWINS(a, b); 
+    return new_number
+    (
+         num(a) & num(b)
+    );
 }
 
 /* 
 `(BITOR <expr1> <expr2>)'
      returns bitwise `OR' of `<expr1>' and `<expr2>'
 */
-int m_bitor(int a, int b)
+entry_p m_bitor(entry_p contxt)
 {
-    return a | b; 
+    TWINS(a, b); 
+    return new_number
+    (
+         num(a) | num(b)
+    );
 }
 
 /* 
 `(BITXOR <expr1> <expr2>)'
      returns bitwise `XOR' of `<expr1>' and `<expr2>'
 */
-int m_bitxor(int a, int b)
+entry_p m_bitxor(entry_p contxt)
 {
-    return a ^ b; 
+    TWINS(a, b); 
+    return new_number
+    (
+         num(a) ^ num(b)
+    );
 }
 
 /* 
 `(BITNOT <expr>)'
      returns bitwise `NOT' of `<expr>'
 */
-int m_bitnot(int a)
+entry_p m_bitnot(entry_p contxt)
 {
-    return ~a; 
+    ONLY(a); 
+    return new_number
+    (
+         ~num(a)
+    );
 }
 
 /* 
 `(shiftleft <number> <amount to shift>)'
      logical shift left
 */
-int m_shiftleft(int a, int n)
+entry_p m_shiftleft(entry_p contxt)
 {
-    return a << n; 
+    TWINS(a, b); 
+    return new_number
+    (
+         num(a) << num(b)
+    );
 }
 
 /* 
 `(shiftright <number> <amount to shift>)'
      logical shift right
 */
-int m_shiftright(int a, int n)
+entry_p m_shiftright(entry_p contxt)
 {
-    return a >> n; 
+    TWINS(a, b); 
+    return new_number
+    (
+         num(a) >> num(b)
+    );
 }
-
 
 /*
 message
-=  
->  
->= 
-<  
-<= 
-<> 
-set
 symbolset
 cat
 substr

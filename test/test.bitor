@@ -1,0 +1,6 @@
+(BITOR %00 %00) ; out="0"
+(BITOR %00 %01) ; out="1"
+(BITOR %01 %01) ; out="1"
+(BITOR %01 %11) ; out="3"
+(BITOR %11 %11) ; out="3"
+(BITOR %10 %10) ; out="2"

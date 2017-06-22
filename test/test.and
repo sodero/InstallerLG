@@ -1,0 +1,6 @@
+(AND "1" "2") ; out="1"
+(AND "0" "1") ; out="0"
+(AND 1 1) ; out="1"
+(AND -1 1) ; out="1"
+(AND 0 0) ; out="0"
+(AND "a" "b") ; out="0"

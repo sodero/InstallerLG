@@ -1,0 +1,2 @@
+(shiftleft $0f 4) ; out="240"
+(shiftleft 1 1) ; out="2"
