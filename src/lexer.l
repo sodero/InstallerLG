@@ -70,10 +70,13 @@
 "BITNOT"                { R(BITNOT);     }
 "shiftleft"             { R(SHIFTLEFT);  }
 "shiftright"            { R(SHIFTRIGHT); }
+"IN"                    { R(IN);         }
 "set"                   { R(SET);        }
 "procedure"             { R(DCL);        }
 "if"                    { R(IF);         }
 "while"                 { R(WHILE);      }
+"strlen"                { R(STRLEN);     }
+"substr"                { R(SUBSTR);     }
 
     /*
     Strings

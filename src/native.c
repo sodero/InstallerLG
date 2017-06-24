@@ -145,7 +145,6 @@ entry_p m_add (entry_p contxt)
     else
     {
         error(PANIC);
-        pretty_print(contxt);
         return new_failure();
     }
 }
@@ -254,7 +253,6 @@ entry_p m_mul(entry_p contxt)
     else
     {
         error(PANIC);
-        pretty_print(contxt);
         return new_failure();
     }
 }
@@ -552,6 +550,85 @@ entry_p m_shiftright(entry_p contxt)
          num(a) >> num(b)
     );
 }
+
+/*
+`(IN <expr> <bit-number> <bitnumber>...)'
+     returns `<expr>' `AND' bits
+*/
+entry_p m_in(entry_p contxt)
+{
+    if(contxt && 
+       contxt->children)
+    {
+        entry_p *cur = contxt->children; 
+        int m = 0, r = num(*cur); 
+        cur++; 
+        while(*cur && *cur != SENTINEL)
+        {
+            m += 1 << num(*cur);
+            cur++; 
+        }
+        return new_number(r & m); 
+    }
+    else
+    {
+        error(PANIC);
+        return new_failure();
+    }
+}
+
+/*
+`(strlen <string>)'
+    returns string length
+*/
+entry_p m_strlen(entry_p contxt)
+{
+    ONLY(a); 
+    return new_number
+    (
+        strlen(str(a))
+    );
+}
+
+/*
+`(substr <string> <start> [<count>])'
+    returns a substring of <string>
+*/
+entry_p m_substr(entry_p contxt)
+{
+    int len; 
+    char *full, *sub; 
+    ONLY(a); 
+    full = str(a); 
+    len = strlen(full); 
+    sub = calloc(len, sizeof(char)); 
+    if(sub)
+    {
+        int i = 0, l = len; 
+        entry_p start = contxt->children[1]; 
+        if(start && start != SENTINEL)
+        {
+            entry_p n = contxt->children[2]; 
+            i = num(start); 
+            i = i > 0 ? i : 0;  
+            i = i > len - 1 ? 0 : i; 
+            if(n && n != SENTINEL)
+            {
+                l = num(n); 
+                l = l > 0 ? l : len;  
+                l = l + i > len ? len - i : l; 
+            }
+        }
+        strncpy(sub, full + i, l); 
+        return new_string(sub); 
+    }
+    else
+    {
+        error(PANIC); 
+        return new_failure(); 
+    }
+}
+
 
 /*
 message

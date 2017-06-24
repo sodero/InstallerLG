@@ -1,0 +1,7 @@
+(strlen "") ; out="0"
+(strlen "test") ; out="4"
+(strlen 1) ; out="1"
+(strlen ("%s" "test")) ; out="4"
+(strlen ("%s%ld" "test" 1)) ; out="5"
+(strlen %0001) ; out="1"
+(strlen $f) ; out="2"

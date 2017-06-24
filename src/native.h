@@ -28,6 +28,9 @@ entry_p m_bitxor(entry_p contxt);
 entry_p m_bitnot(entry_p contxt);
 entry_p m_shiftleft(entry_p contxt);
 entry_p m_shiftright(entry_p contxt);
+entry_p m_in(entry_p contxt);
+entry_p m_strlen(entry_p contxt);
+entry_p m_substr(entry_p contxt);
 
 #define ONLY(A)\
 entry_p A;\

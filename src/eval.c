@@ -104,43 +104,63 @@ int num(entry_p entry)
         entry_p r; 
         switch(entry->type)
         {
+            case CONTXT:
             case STATUS:
             case NUMBER:
             case DANGLE:
             case CUSTOM:
                 return entry->id;
-
             case STRING:
                 return atoi(entry->name);
-
             case SYMBOL:
                 return num(entry->resolved); 
-
             case SYMREF:
                 return num(find_symbol(entry)); 
-
             case CUSREF:
             case NATIVE:
                 r = resolve_native(entry);
                 n = num(r);
                 kill(r);
                 return n; 
-
-            default:
-                error(PANIC);
         }
     }
-    else
-    {
-        error(PANIC);
-    }
+    error(PANIC);
     return 0; 
 }
 
 char *str(entry_p entry)
 {
     static char buf[BUFSIZE];
-    return buf;
+    if(entry && 
+       entry != SENTINEL)
+    {
+        entry_p r; 
+        switch(entry->type)
+        {
+            case CONTXT:
+            case STATUS:
+            case NUMBER:
+            case DANGLE:
+            case CUSTOM:
+                snprintf(buf, BUFSIZE, "%d", entry->id); 
+                return buf;
+            case STRING:
+                return entry->name;
+            case SYMBOL:
+                return str(entry->resolved); 
+            case SYMREF:
+                return str(find_symbol(entry)); 
+            case CUSREF:
+            case NATIVE:
+                r = resolve_native(entry);
+                strncpy(buf, str(r), BUFSIZE);
+                kill(r);
+                return buf; 
+        }
+    }
+    buf[0] = 0;  
+    error(PANIC);
+    return buf; 
 }
 
 entry_p invoke(entry_p entry)
