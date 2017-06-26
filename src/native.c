@@ -557,24 +557,20 @@ entry_p m_shiftright(entry_p contxt)
 */
 entry_p m_in(entry_p contxt)
 {
-    if(contxt && 
-       contxt->children)
+    TWINS(a, b); 
+    if(b->children)
     {
-        entry_p *cur = contxt->children; 
-        int m = 0, r = num(*cur); 
-        cur++; 
+        int m = 0;  
+        entry_p *cur = b->children; 
         while(*cur && *cur != SENTINEL)
         {
             m += 1 << num(*cur);
             cur++; 
         }
-        return new_number(r & m); 
+        return new_number(num(a) & m); 
     }
-    else
-    {
-        error(PANIC);
-        return new_failure();
-    }
+    error(PANIC);
+    return new_failure();
 }
 
 /*
@@ -596,53 +592,84 @@ entry_p m_strlen(entry_p contxt)
 */
 entry_p m_substr(entry_p contxt)
 {
-    int len; 
-    char *full, *sub; 
-    ONLY(a); 
-    full = str(a); 
-    len = strlen(full); 
-    sub = calloc(len, sizeof(char)); 
-    if(sub)
+    TWINS(a, b); 
+    if(b->children)
     {
-        int i = 0, l = len; 
-        entry_p start = contxt->children[1]; 
-        if(start && start != SENTINEL)
+        char *full = str(a);
+        int len = strlen(full); 
+        char *sub = calloc(len, sizeof(char)); 
+        if(sub)
         {
-            entry_p n = contxt->children[2]; 
-            i = num(start); 
-            i = i > 0 ? i : 0;  
-            i = i > len - 1 ? 0 : i; 
-            if(n && n != SENTINEL)
+            int i = 0, l = len; 
+            entry_p start = b->children[0]; 
+            if(start && start != SENTINEL)
             {
-                l = num(n); 
-                l = l > 0 ? l : len;  
-                l = l + i > len ? len - i : l; 
+                entry_p n = b->children[1]; 
+                i = num(start); 
+                i = i > 0 ? i : 0;  
+                i = i > len - 1 ? 0 : i; 
+                if(n && n != SENTINEL)
+                {
+                    l = num(n); 
+                    l = l > 0 ? l : len;  
+                    l = l + i > len ? len - i : l; 
+                }
+            }
+            strncpy(sub, full + i, l); 
+            return new_string(sub); 
+        }
+    }
+    error(PANIC);
+    return new_failure(); 
+}
+
+/*
+`(select <n> <item1> <item2> ...)'
+    return n'th item
+*/
+entry_p m_select(entry_p contxt)
+{
+    TWINS(a, b); 
+    if(b->children)
+    {
+        int i = 0, j = num(a) - 1; 
+        while(b->children[i] && 
+              b->children[i] != SENTINEL)
+        {
+            if(i == j)
+            {
+                return resolve(b->children[i]); 
+            }
+            else
+            {
+                i++; 
             }
         }
-        strncpy(sub, full + i, l); 
-        return new_string(sub); 
+        error(contxt->id, "No such item", 
+              contxt->name); 
     }
     else
     {
         error(PANIC); 
-        return new_failure(); 
     }
+    return new_failure(); 
 }
 
 
+
+
 /*
+select
+
 message
 symbolset
 cat
-substr
-strlen
 exists
 makedir
 copyfiles
 textfile
 rename
 delete
-procedure
 welcome
 copylib
 startup
@@ -679,7 +706,6 @@ getenv
 getassign
 iconinfo
 database
-select
 patmatch
 symbolval
 */

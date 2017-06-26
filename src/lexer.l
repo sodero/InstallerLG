@@ -77,6 +77,7 @@
 "while"                 { R(WHILE);      }
 "strlen"                { R(STRLEN);     }
 "substr"                { R(SUBSTR);     }
+"select"                { R(SELECT);     }
 
     /*
     Strings

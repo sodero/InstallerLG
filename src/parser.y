@@ -24,7 +24,7 @@ extern int yylineno;
 %token                      AND OR XOR NOT LTE GTE
 %token                      BITAND BITOR BITXOR BITNOT 
 %token                      SHIFTLEFT SHIFTRIGHT IN
-%token                      STRLEN SUBSTR
+%token                      STRLEN SUBSTR SELECT
 %token<s>                   SYM STR 
 %destructor { free($$); }   SYM STR
 %token<n>                   INT HEX BIN 
@@ -37,8 +37,8 @@ extern int yylineno;
 %destructor { kill($$); }   add sub div mul lt lte gt gte eq set cus dcl fmt if while
 %type<e>                    and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
 %destructor { kill($$); }   and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
-%type<e>                    strlen substr 
-%destructor { kill($$); }   strlen substr
+%type<e>                    strlen substr select
+%destructor { kill($$); }   strlen substr select
 
 %%
 start:      s                       { $$ = init($1); };
@@ -91,7 +91,8 @@ vp:         add                     |
             shiftright              |
             in                      | 
             strlen                  | 
-            substr                  ;
+            substr                  | 
+            select                  ;
 fmt:        '(' STR ps ')'          { $$ = new_native($2, yylineno, m_fmt, $3); } |
             '(' STR ')'             { $$ = new_native($2, yylineno, m_fmt, NULL); };
 dcl:        '(' DCL SYM par s ')'   { $$ = new_custom($3, yylineno, $4, $5); } |
@@ -120,9 +121,10 @@ bitxor:     '(' BITXOR pp ')'       { $$ = new_native(strdup("BITXOR"), yylineno
 bitnot:     '(' BITNOT p ')'        { $$ = new_native(strdup("BITNOT"), yylineno, m_bitnot, push(new_contxt(), $3)); }; 
 shiftleft:  '(' SHIFTLEFT pp ')'    { $$ = new_native(strdup("shiftleft"), yylineno, m_shiftleft, $3); }; 
 shiftright: '(' SHIFTRIGHT pp ')'   { $$ = new_native(strdup("shiftright"), yylineno, m_shiftright, $3); }; 
-in:         '(' IN ps ')'           { $$ = new_native(strdup("IN"), yylineno, m_in, $3); }; 
+in:         '(' IN p ps ')'         { $$ = new_native(strdup("IN"), yylineno, m_in, push(push(new_contxt(), $3), $4)); }; 
 strlen:     '(' STRLEN p ')'        { $$ = new_native(strdup("strlen"), yylineno, m_strlen, push(new_contxt(), $3)); }; 
-substr:     '(' SUBSTR ps ')'       { $$ = new_native(strdup("substr"), yylineno, m_substr, $3); }; 
+substr:     '(' SUBSTR p ps ')'     { $$ = new_native(strdup("substr"), yylineno, m_substr, push(push(new_contxt(), $3), $4)); }; 
+select:     '(' SELECT p ps ')'     { $$ = new_native(strdup("select"), yylineno, m_select, push(push(new_contxt(), $3), $4)); }; 
 %%
 
 int main(int argc, char **argv)

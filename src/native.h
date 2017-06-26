@@ -31,6 +31,7 @@ entry_p m_shiftright(entry_p contxt);
 entry_p m_in(entry_p contxt);
 entry_p m_strlen(entry_p contxt);
 entry_p m_substr(entry_p contxt);
+entry_p m_select(entry_p contxt);
 
 #define ONLY(A)\
 entry_p A;\
