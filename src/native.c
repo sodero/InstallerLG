@@ -665,38 +665,43 @@ entry_p m_symbolset(entry_p contxt)
     TWINS(a, b); 
     if(contxt->symbols)
     {
-        int i = 0; 
-        entry_p sym, res; 
-        while(contxt->symbols[i] &&
-              contxt->symbols[i] != SENTINEL) 
+        entry_p res = resolve(b); 
+        if(res && !runtime_error())
         {
-            if(!strcmp(contxt->symbols[i]->name, a->name))
+            int i = 0; 
+            entry_p sym; 
+            while(contxt->symbols[i] &&
+                  contxt->symbols[i] != SENTINEL) 
             {
-                // Replace old
+                if(!strcmp(contxt->symbols[i]->name, a->name))
+                {
+                    // Replace old
+                    kill(contxt->symbols[i]->expression);
+                    contxt->symbols[i]->expression = resolve(res); 
+                    kill(contxt->symbols[i]->resolved);
+                    contxt->symbols[i]->resolved = resolve(res); 
+                    return res; 
+                }
+                else
+                {
+                    i++; 
+                }
+            }
+    printf("i:%d\n", i); 
+            if(contxt->symbols[i])
+            {
+                // Grow
                 HERE; 
-                contxt->symbols[i] = 0; 
             }
-            else
+            sym = new_symbol(strdup(str(a)), resolve(res)); 
+            if(sym)
             {
-                i++; 
+                res->parent = b; 
+                sym->resolved = resolve(res); 
+                contxt->symbols[i] = sym; 
+                push(global(contxt), sym); 
+                return res; 
             }
-        }
-printf("i:%d\n", i); 
-        if(contxt->symbols[i])
-        {
-            // Grow
-            HERE; 
-        }
-        sym = new_symbol(strdup(str(a)), resolve(b)); 
-        res = resolve(b);  
-        if(!runtime_error() &&
-            sym && res)
-        {
-            res->parent = b; 
-            sym->resolved = res; 
-            contxt->symbols[i] = sym; 
-            push(global(contxt), sym); 
-            return resolve(res); 
         }
     }
     else
