@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "error.h"
+#include "debug.h"
 
 int runtime_error()
 {

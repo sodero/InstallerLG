@@ -246,6 +246,7 @@ entry_p push(entry_p dst, entry_p src)
                 if (strcmp (old, new) == 0)
                 {
                     dst->symbols[u] = src;
+                    src->parent = dst; 
                     return dst; 
                 }
                 u++;

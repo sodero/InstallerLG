@@ -48,7 +48,7 @@ entry_p m_gosub(entry_p contxt)
 
 /*
 */
-entry_p m_set (entry_p contxt)
+entry_p m_set(entry_p contxt)
 {
     entry_p dst = global(contxt);
     if (dst)
@@ -60,7 +60,7 @@ entry_p m_set (entry_p contxt)
             kill((*cur)->resolved);
             val = (*cur)->expression;
             (*cur)->resolved = resolve(val); 
-            (*cur)->resolved->parent = *cur; 
+            (*cur)->resolved->parent = val; 
             val = (*cur)->resolved;
             push(dst, *cur); 
             cur++; 
@@ -674,24 +674,35 @@ entry_p m_symbolset(entry_p contxt)
             {
                 // Replace old
                 HERE; 
+                contxt->symbols[i] = 0; 
             }
-            i++; 
+            else
+            {
+                i++; 
+            }
         }
+printf("i:%d\n", i); 
         if(contxt->symbols[i])
         {
             // Grow
             HERE; 
         }
+        sym = new_symbol(strdup(str(a)), resolve(b)); 
         res = resolve(b);  
-        sym = new_symbol(strdup(str(a)), res); 
-        if(sym && res)
+        if(!runtime_error() &&
+            sym && res)
         {
+            res->parent = b; 
+            sym->resolved = res; 
             contxt->symbols[i] = sym; 
             push(global(contxt), sym); 
             return resolve(res); 
         }
     }
-    error(PANIC); 
+    else
+    {
+        error(PANIC); 
+    }
     return new_failure(); 
 }
 
