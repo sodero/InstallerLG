@@ -669,45 +669,54 @@ entry_p m_symbolset(entry_p contxt)
         if(res && !runtime_error())
         {
             int i = 0; 
-            entry_p sym; 
+            entry_p glb = global(contxt); 
             while(contxt->symbols[i] &&
                   contxt->symbols[i] != SENTINEL) 
             {
                 if(!strcmp(contxt->symbols[i]->name, a->name))
                 {
-                    // Replace old
                     kill(contxt->symbols[i]->expression);
                     contxt->symbols[i]->expression = resolve(res); 
                     kill(contxt->symbols[i]->resolved);
                     contxt->symbols[i]->resolved = resolve(res); 
                     return res; 
                 }
-                else
-                {
-                    i++; 
-                }
+                i++; 
             }
-    printf("i:%d\n", i); 
             if(contxt->symbols[i])
             {
-                // Grow
-                HERE; 
+                int n = i << 1, j = 0; 
+                entry_p *new = calloc(1 + n, sizeof(entry_p));
+                if(new)
+                {
+                    new[n] = SENTINEL; 
+                    contxt->symbols[i] = NULL; 
+                    memmove(new, contxt->symbols, i * sizeof(entry_p)); 
+                    free(contxt->symbols); 
+                    while(new[j])
+                    {
+                        push(glb, new[j]); 
+                        j++; 
+                    }
+                    contxt->symbols = new;
+                }
             }
-            sym = new_symbol(strdup(str(a)), resolve(res)); 
-            if(sym)
+            if(!contxt->symbols[i])
             {
-                res->parent = b; 
-                sym->resolved = resolve(res); 
-                contxt->symbols[i] = sym; 
-                push(global(contxt), sym); 
-                return res; 
+                entry_p sym = new_symbol(strdup(str(a)), resolve(res)); 
+                if(sym)
+                {
+                    res->parent = b; 
+                    sym->resolved = resolve(res); 
+                    contxt->symbols[i] = sym; 
+                    push(global(contxt), sym); 
+                    return res; 
+                }
             }
+            kill(res); 
         }
     }
-    else
-    {
-        error(PANIC); 
-    }
+    error(PANIC); 
     return new_failure(); 
 }
 

@@ -41,7 +41,7 @@ extern int yylineno;
 %destructor { kill($$); }   strlen substr select symbolset symbolval
 
 %%
-start:      s                       { $$ = $1 /*init($1)*/; };
+start:      s                       { $$ = init($1); };
 s:          vps                     ;
 p:          vp                      |
             np                      ;
