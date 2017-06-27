@@ -9,20 +9,19 @@
 
 entry_p new_contxt(void)
 {
-    const int size = 8; 
     entry_p entry = calloc (1, sizeof(entry_t)); 
     if(entry)
     {
         entry_p *symbols, *children; 
-        symbols = calloc(size + 1, sizeof(entry_p)); 
-        children = calloc(size + 1, sizeof(entry_p)); 
+        symbols = calloc(SYMSIZE + 1, sizeof(entry_p)); 
+        children = calloc(SYMSIZE + 1, sizeof(entry_p)); 
         if(symbols && children)
         {
             entry->type = CONTXT;
             entry->symbols = symbols; 
             entry->children = children; 
-            entry->symbols[size] = SENTINEL; 
-            entry->children[size] = SENTINEL; 
+            entry->symbols[SYMSIZE] = SENTINEL; 
+            entry->children[SYMSIZE] = SENTINEL; 
             return entry; 
         }
         free(symbols); 

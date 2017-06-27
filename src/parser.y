@@ -24,7 +24,7 @@ extern int yylineno;
 %token                      AND OR XOR NOT LTE GTE
 %token                      BITAND BITOR BITXOR BITNOT 
 %token                      SHIFTLEFT SHIFTRIGHT IN
-%token                      STRLEN SUBSTR SELECT
+%token                      STRLEN SUBSTR SELECT SYMBOLSET SYMBOLVAL
 %token<s>                   SYM STR 
 %destructor { free($$); }   SYM STR
 %token<n>                   INT HEX BIN 
@@ -37,8 +37,8 @@ extern int yylineno;
 %destructor { kill($$); }   add sub div mul lt lte gt gte eq set cus dcl fmt if while
 %type<e>                    and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
 %destructor { kill($$); }   and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
-%type<e>                    strlen substr select
-%destructor { kill($$); }   strlen substr select
+%type<e>                    strlen substr select symbolset symbolval
+%destructor { kill($$); }   strlen substr select symbolset symbolval
 
 %%
 start:      s                       { $$ = init($1); };
@@ -92,7 +92,9 @@ vp:         add                     |
             in                      | 
             strlen                  | 
             substr                  | 
-            select                  ;
+            select                  |
+            symbolset               |
+            symbolval               ;
 fmt:        '(' STR ps ')'          { $$ = new_native($2, yylineno, m_fmt, $3); } |
             '(' STR ')'             { $$ = new_native($2, yylineno, m_fmt, NULL); };
 dcl:        '(' DCL SYM par s ')'   { $$ = new_custom($3, yylineno, $4, $5); } |
@@ -125,6 +127,8 @@ in:         '(' IN p ps ')'         { $$ = new_native(strdup("IN"), yylineno, m_
 strlen:     '(' STRLEN p ')'        { $$ = new_native(strdup("strlen"), yylineno, m_strlen, push(new_contxt(), $3)); }; 
 substr:     '(' SUBSTR p ps ')'     { $$ = new_native(strdup("substr"), yylineno, m_substr, push(push(new_contxt(), $3), $4)); }; 
 select:     '(' SELECT p ps ')'     { $$ = new_native(strdup("select"), yylineno, m_select, push(push(new_contxt(), $3), $4)); }; 
+symbolset:  '(' SYMBOLSET pp ')'    { $$ = new_native(strdup("symbolset"), yylineno, m_symbolset, $3); }; 
+symbolval:  '(' SYMBOLVAL p ')'     { $$ = new_native(strdup("symbolval"), yylineno, m_symbolval, push(new_contxt(), $3)); }; 
 %%
 
 int main(int argc, char **argv)

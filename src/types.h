@@ -1,6 +1,7 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
+#define SYMSIZE 8 
 #define BUFSIZE 256
 #define SENTINEL ((entry_p) push)
 

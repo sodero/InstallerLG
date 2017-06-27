@@ -32,6 +32,8 @@ entry_p m_in(entry_p contxt);
 entry_p m_strlen(entry_p contxt);
 entry_p m_substr(entry_p contxt);
 entry_p m_select(entry_p contxt);
+entry_p m_symbolset(entry_p contxt);
+entry_p m_symbolval(entry_p contxt);
 
 #define ONLY(A)\
 entry_p A;\

@@ -655,14 +655,60 @@ entry_p m_select(entry_p contxt)
     return new_failure(); 
 }
 
-
-
+/*
+`(symbolset <symbolname> <expression>)'
+    assign a value to a variable named by the string result of
+    `<symbolname>' (V42.9)
+*/
+entry_p m_symbolset(entry_p contxt)
+{
+    TWINS(a, b); 
+    if(contxt->symbols)
+    {
+        int i = 0; 
+        entry_p sym, res; 
+        while(contxt->symbols[i] &&
+              contxt->symbols[i] != SENTINEL) 
+        {
+            if(!strcmp(contxt->symbols[i]->name, a->name))
+            {
+                // Replace old
+                HERE; 
+            }
+            i++; 
+        }
+        if(contxt->symbols[i])
+        {
+            // Grow
+            HERE; 
+        }
+        res = resolve(b);  
+        sym = new_symbol(strdup(str(a)), res); 
+        if(sym && res)
+        {
+            contxt->symbols[i] = sym; 
+            push(global(contxt), sym); 
+            return resolve(res); 
+        }
+    }
+    error(PANIC); 
+    return new_failure(); 
+}
 
 /*
-select
+`(symbolval <symbolname>)'
+    returns the value of the symbol named by the string expression
+    `<smbolval>' (V42.9)
+*/
+entry_p m_symbolval(entry_p contxt)
+{
+    ONLY(a); 
+    pretty_print(contxt); 
+    return new_failure(); 
+}
 
+/*
 message
-symbolset
 cat
 exists
 makedir
@@ -707,5 +753,4 @@ getassign
 iconinfo
 database
 patmatch
-symbolval
 */

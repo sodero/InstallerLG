@@ -78,6 +78,8 @@
 "strlen"                { R(STRLEN);     }
 "substr"                { R(SUBSTR);     }
 "select"                { R(SELECT);     }
+"symbolset"             { R(SYMBOLSET);  }
+"symbolval"             { R(SYMBOLVAL);  }
 
     /*
     Strings
