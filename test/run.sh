@@ -32,7 +32,7 @@ evl()
 
 prg=$1
 tst=$2
-for f in $tst/test.*; 
+for f in `ls -t $tst/test.*`; 
 do 
     echo "-> $f"
     while read -r l; 
