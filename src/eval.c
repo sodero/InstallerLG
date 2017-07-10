@@ -73,7 +73,8 @@ entry_p resolve(entry_p entry)
                 return resolve(entry->expression);
 
             case SYMREF: 
-                return resolve(find_symbol(entry)->resolved);
+                ret = find_symbol(entry); 
+                return ret->resolved ? resolve(ret->resolved) : new_failure(); 
 
             case CONTXT: 
                 return invoke(entry);

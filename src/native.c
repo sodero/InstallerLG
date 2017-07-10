@@ -727,8 +727,24 @@ entry_p m_symbolset(entry_p contxt)
 */
 entry_p m_symbolval(entry_p contxt)
 {
+    entry_p ref; 
     ONLY(a); 
-    pretty_print(contxt); 
+    ref = new_symref(strdup(str(a)), contxt->id); 
+    if(ref)
+    {
+        entry_p val; 
+        ref->parent = contxt; 
+        val = resolve(ref); 
+        kill(ref); 
+        if(!runtime_error())
+        {
+            return val; 
+        }
+    }
+    else
+    {
+        error(PANIC);
+    }
     return new_failure(); 
 }
 
