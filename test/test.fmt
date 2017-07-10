@@ -12,4 +12,4 @@
 (set a 1) ("prefix-%ld-postfix" a) ; out="prefix-1-postfix"
 (set a 1) ("prefix-%s-postfix" a) ; out="Line 1: Format string type mismatch 'prefix-%s-postfix'"
 ("%s" ("prefix-%ld-postfix" 1)) ; out="prefix-1-postfix"
-
+(set i 1) (set i (+ 1 i)) ("%ld" i) ; out="2"

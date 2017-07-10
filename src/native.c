@@ -673,7 +673,7 @@ entry_p m_symbolset(entry_p contxt)
             while(contxt->symbols[i] &&
                   contxt->symbols[i] != SENTINEL) 
             {
-                if(!strcmp(contxt->symbols[i]->name, a->name))
+                if(!strcmp(contxt->symbols[i]->name, str(a)))
                 {
                     kill(contxt->symbols[i]->expression);
                     contxt->symbols[i]->expression = resolve(res); 
