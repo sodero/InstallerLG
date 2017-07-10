@@ -75,6 +75,7 @@
 "procedure"             { R(DCL);        }
 "if"                    { R(IF);         }
 "while"                 { R(WHILE);      }
+"until"                 { R(UNTIL);      }
 "strlen"                { R(STRLEN);     }
 "substr"                { R(SUBSTR);     }
 "select"                { R(SELECT);     }

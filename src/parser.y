@@ -20,7 +20,7 @@ extern int yylineno;
     entry_p e;
 }
 
-%token                      SET DCL IF WHILE
+%token                      SET DCL IF WHILE UNTIL
 %token                      AND OR XOR NOT LTE GTE
 %token                      BITAND BITOR BITXOR BITNOT 
 %token                      SHIFTLEFT SHIFTRIGHT IN
@@ -33,8 +33,8 @@ extern int yylineno;
 %destructor { run($$);  }   start 
 %type<e>                    s p pp ps vp vps vpb np sp sps par cv cvv
 %destructor { kill($$); }   s p pp ps vp vps vpb np sp sps par cv cvv
-%type<e>                    add sub div mul lt lte gt gte eq set cus dcl fmt if while
-%destructor { kill($$); }   add sub div mul lt lte gt gte eq set cus dcl fmt if while
+%type<e>                    add sub div mul lt lte gt gte eq set cus dcl fmt if while until
+%destructor { kill($$); }   add sub div mul lt lte gt gte eq set cus dcl fmt if while until
 %type<e>                    and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
 %destructor { kill($$); }   and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
 %type<e>                    strlen substr select symbolset symbolval
@@ -79,6 +79,7 @@ vp:         add                     |
             fmt                     |
             if                      |
             while                   |
+            until                   |
             and                     |
             or                      |
             xor                     |
@@ -113,6 +114,7 @@ eq:         '(' '=' pp ')'          { $$ = new_native(strdup("="), yylineno, m_e
 set:        '(' SET sps ')'         { $$ = new_native(strdup("set"), yylineno, m_set, $3); };
 if:         '(' IF cvv ')'          { $$ = new_native(strdup("if"), yylineno, m_if, $3); };
 while:      '(' WHILE cv ')'        { $$ = new_native(strdup("while"), yylineno, m_while, $3); };
+until:      '(' UNTIL cv ')'        { $$ = new_native(strdup("until"), yylineno, m_until, $3); };
 and:        '(' AND pp ')'          { $$ = new_native(strdup("AND"), yylineno, m_and, $3); }; 
 or:         '(' OR pp ')'           { $$ = new_native(strdup("OR"), yylineno, m_or, $3); }; 
 xor:        '(' XOR pp ')'          { $$ = new_native(strdup("XOR"), yylineno, m_xor, $3); }; 

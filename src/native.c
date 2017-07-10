@@ -95,11 +95,11 @@ entry_p m_if(entry_p contxt)
 
 /*
 */
-entry_p m_while(entry_p contxt)
+static entry_p m_whunt(entry_p contxt, int m)
 {
     entry_p r = new_number(0); 
     TWINS(c, b); 
-    while(num(c) && 
+    while((m ^ num(c)) && 
           !runtime_error())
     {
         if(b->type == CONTXT)
@@ -122,6 +122,20 @@ entry_p m_while(entry_p contxt)
         }
     }
     return r; 
+}
+
+/*
+*/
+entry_p m_while(entry_p contxt)
+{
+    return m_whunt(contxt, 0); 
+}
+
+/*
+*/
+entry_p m_until(entry_p contxt)
+{
+    return m_whunt(contxt, 1); 
 }
 
 /*

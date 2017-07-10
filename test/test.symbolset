@@ -1,5 +1,6 @@
 (symbolset "a" 1) (+ a 1) ; out="2"
 (symbolset "a" 1) (set b 2) (+ a b) ; out="3"
+(symbolset "a" 1) (symbolset "a" 2) (+ a 1) ; out="3"
 (symbolset "a" 1) (set b 2) (symbolset "a" 2) (+ a b) ; out="4"
 (symbolset "a" (+ 10 10)) (symbolset "b" 2) (+ a b) ; out="22"
 (symbolset "a" 1) (symbolset "a" (+ a 1)) (+ a a); out="4"
