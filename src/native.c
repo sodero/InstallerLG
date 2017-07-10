@@ -588,6 +588,298 @@ entry_p m_in(entry_p contxt)
 }
 
 /*
+`(askdir (prompt..) (help..) (default..) (newpath) (disk))'
+      ask for directory name
+
+GRAMMAR: all options ignored
+
+*/
+entry_p m_askdir(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(askfile (prompt..) (help..) (default..) (newpath) (disk))'
+     ask for file name
+
+GRAMMAR: all options ignored
+
+*/
+entry_p m_askfile(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(askstring (prompt..) (help..) (default..))'
+     ask for a string
+
+GRAMMAR: all options ignored
+
+*/
+entry_p m_askstring(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(asknumber (prompt..) (help..) (range..) (default..))'
+     ask for a number
+
+GRAMMAR: all options ignored
+
+*/
+entry_p m_asknumber(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(askchoice (prompt..) (choices..) (default..))'
+     choose 1 options
+
+GRAMMAR: all options ignored
+
+*/
+entry_p m_askchoice(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(askoptions (prompt (help..) (choices..) default..))'
+     choose n options
+
+GRAMMAR: all options ignored
+
+*/
+entry_p m_askoptions(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(askbool (prompt..) (help..) (default..) (choices..))'
+     0=no, 1=yes
+
+GRAMMAR: all options ignored
+
+*/
+entry_p m_askbool(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(askdisk (prompt..) (help..) (dest..) (newname..) (assigns))'
+
+GRAMMAR: all options ignored
+
+*/
+entry_p m_askdisk(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(cat <string1> <string2>...)'
+     returns concatenation of strings
+*/
+entry_p m_cat(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(exists <filename> (noreq))'
+     0 if no, 1 if file, 2 if dir
+
+GRAMMAR: (noreq) is ignored
+
+*/
+entry_p m_exists(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(expandpath <path>)'
+     Expands a short path to its full path equivalent
+*/
+entry_p m_expandpath(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(earlier <file1> <file2>)'
+     true if file1 earlier than file2
+*/
+entry_p m_earlier(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(fileonly <path>)'
+     return file part of path (see pathonly)
+*/
+entry_p m_fileonly(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(getassign <name> <opts>)'
+     return value of logical name (no `:') `<opts>': 'v'-volumes,
+     'a'-assigns, 'd'-devices
+*/
+entry_p m_getassign(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(getdevice <path>)'
+     returns name of device upon which <path> resides
+*/
+entry_p m_getdevice(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(getdiskspace <path>)'
+     return available space
+*/
+entry_p m_getdiskspace(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(getenv <name>)'
+     return value of environment variable
+*/
+entry_p m_getenv(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(getsize <file>)'
+     return size
+*/
+entry_p m_getsize(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(getsum <file>)'
+     return checksum of file for comparison purposes
+*/
+entry_p m_getsum(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(getversion <file> (resident))'
+     return version/revision of file, library, etc. as 32 bit num
+
+GRAMMAR: (resident) is missing
+
+*/
+entry_p m_getversion(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(iconinfo <parameters>)'
+      return information about an icon (V42.12)
+*/
+entry_p m_iconinfo(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+ `(pathonly <path>)'
+      return dir part of path (see fileonly)
+*/
+entry_p m_pathonly(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(patmatch <pattern> <string>)'
+      Does <pattern> match <string> ? TRUE : FALSE
+*/
+entry_p m_patmatch(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(select <n> <item1> <item2> ...)'
+    return n'th item
+*/
+entry_p m_select(entry_p contxt)
+{
+    TWINS(a, b); 
+    if(b->children)
+    {
+        int i = 0, j = num(a) - 1; 
+        while(b->children[i] && 
+              b->children[i] != SENTINEL)
+        {
+            if(i == j)
+            {
+                return resolve(b->children[i]); 
+            }
+            else
+            {
+                i++; 
+            }
+        }
+        error(contxt->id, "No such item", 
+              contxt->name); 
+    }
+    else
+    {
+        error(PANIC); 
+    }
+    return new_failure(); 
+}
+
+/*
 `(strlen <string>)'
     returns string length
 */
@@ -634,38 +926,6 @@ entry_p m_substr(entry_p contxt)
         }
     }
     error(PANIC);
-    return new_failure(); 
-}
-
-/*
-`(select <n> <item1> <item2> ...)'
-    return n'th item
-*/
-entry_p m_select(entry_p contxt)
-{
-    TWINS(a, b); 
-    if(b->children)
-    {
-        int i = 0, j = num(a) - 1; 
-        while(b->children[i] && 
-              b->children[i] != SENTINEL)
-        {
-            if(i == j)
-            {
-                return resolve(b->children[i]); 
-            }
-            else
-            {
-                i++; 
-            }
-        }
-        error(contxt->id, "No such item", 
-              contxt->name); 
-    }
-    else
-    {
-        error(PANIC); 
-    }
     return new_failure(); 
 }
 
@@ -763,49 +1023,21 @@ entry_p m_symbolval(entry_p contxt)
 }
 
 /*
-message
-cat
-exists
-makedir
-copyfiles
-textfile
-rename
-delete
-welcome
-copylib
-startup
-tooltype
-execute
-run
-rexx
-makeassign
-protect
-complete
-working
-user
-debug
-transcript
-tackon
-fileonly
-pathonly
-expandpath
-askdir
-askfile
-askstring
-asknumber
-askchoice
-askoptions
-askbool
-askdisk
-earlier
-getsize
-getdevice
-getdiskspace
-getsum
-getversion
-getenv
-getassign
-iconinfo
-database
-patmatch
+`(tackon <path> <file>)'
+     return properly concatenated file to path
 */
+entry_p m_tackon(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(transcript <string1> <string2>)'
+     puts concatenated strings in log file
+*/
+entry_p m_transcript(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}

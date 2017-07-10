@@ -30,11 +30,36 @@ entry_p m_bitnot(entry_p contxt);
 entry_p m_shiftleft(entry_p contxt);
 entry_p m_shiftright(entry_p contxt);
 entry_p m_in(entry_p contxt);
+entry_p m_askdir(entry_p contxt);
+entry_p m_askfile(entry_p contxt);
+entry_p m_askstring(entry_p contxt);
+entry_p m_asknumber(entry_p contxt);
+entry_p m_askchoice(entry_p contxt);
+entry_p m_askoptions(entry_p contxt);
+entry_p m_askbool(entry_p contxt);
+entry_p m_askdisk(entry_p contxt);
+entry_p m_cat(entry_p contxt);
+entry_p m_exists(entry_p contxt);
+entry_p m_expandpath(entry_p contxt);
+entry_p m_earlier(entry_p contxt);
+entry_p m_fileonly(entry_p contxt);
+entry_p m_getassign(entry_p contxt);
+entry_p m_getdevice(entry_p contxt);
+entry_p m_getdiskspace(entry_p contxt);
+entry_p m_getenv(entry_p contxt);
+entry_p m_getsize(entry_p contxt);
+entry_p m_getsum(entry_p contxt);
+entry_p m_getversion(entry_p contxt);
+entry_p m_iconinfo(entry_p contxt);
+entry_p m_pathonly(entry_p contxt);
+entry_p m_patmatch(entry_p contxt);
+entry_p m_select(entry_p contxt);
 entry_p m_strlen(entry_p contxt);
 entry_p m_substr(entry_p contxt);
-entry_p m_select(entry_p contxt);
 entry_p m_symbolset(entry_p contxt);
 entry_p m_symbolval(entry_p contxt);
+entry_p m_tackon(entry_p contxt);
+entry_p m_transcript(entry_p contxt);
 
 #define ONLY(A)\
 entry_p A;\

@@ -45,42 +45,67 @@
     /*
     Syntactic markers
     */
-"("                     { R('(');        }
-")"                     { R(')');        }
+"("                     { R('(');           }
+")"                     { R(')');           }
 
     /*
     Builtin functions
     */
-"="                     { R('=');        }
-"<"                     { R('<');        }
-"<="                    { R(LTE);        }
-">"                     { R('>');        }
-">="                    { R(GTE);        }
-"+"                     { R('+');        }
-"-"                     { R('-');        }
-"*"                     { R('*');        }
-"/"                     { R('/');        }
-"AND"                   { R(AND);        }
-"OR"                    { R(OR);         }
-"XOR"                   { R(XOR);        }
-"NOT"                   { R(NOT);        }
-"BITAND"                { R(BITAND);     }
-"BITOR"                 { R(BITOR);      }
-"BITXOR"                { R(BITXOR);     }
-"BITNOT"                { R(BITNOT);     }
-"shiftleft"             { R(SHIFTLEFT);  }
-"shiftright"            { R(SHIFTRIGHT); }
-"IN"                    { R(IN);         }
-"set"                   { R(SET);        }
-"procedure"             { R(DCL);        }
-"if"                    { R(IF);         }
-"while"                 { R(WHILE);      }
-"until"                 { R(UNTIL);      }
-"strlen"                { R(STRLEN);     }
-"substr"                { R(SUBSTR);     }
-"select"                { R(SELECT);     }
-"symbolset"             { R(SYMBOLSET);  }
-"symbolval"             { R(SYMBOLVAL);  }
+"="                     { R('=');           }
+"<"                     { R('<');           }
+"<="                    { R(LTE);           }
+">"                     { R('>');           }
+">="                    { R(GTE);           }
+"+"                     { R('+');           }
+"-"                     { R('-');           }
+"*"                     { R('*');           }
+"/"                     { R('/');           }
+"AND"                   { R(AND);           }
+"OR"                    { R(OR);            }
+"XOR"                   { R(XOR);           }
+"NOT"                   { R(NOT);           }
+"BITAND"                { R(BITAND);        }
+"BITOR"                 { R(BITOR);         }
+"BITXOR"                { R(BITXOR);        }
+"BITNOT"                { R(BITNOT);        }
+"shiftleft"             { R(SHIFTLEFT);     }
+"shiftright"            { R(SHIFTRIGHT);    }
+"IN"                    { R(IN);            }
+"set"                   { R(SET);           }
+"procedure"             { R(DCL);           }
+"if"                    { R(IF);            }
+"while"                 { R(WHILE);         }
+"until"                 { R(UNTIL);         }
+"strlen"                { R(STRLEN);        }
+"substr"                { R(SUBSTR);        }
+"askdir"                { R(ASKDIR);        }
+"askfile"               { R(ASKFILE);       }
+"askstring"             { R(ASKSTRING);     }
+"asknumber"             { R(ASKNUMBER);     }
+"askchoice"             { R(ASKCHOICE);     }
+"askoptions"            { R(ASKOPTIONS);    }
+"askbool"               { R(ASKBOOL);       }
+"askdisk"               { R(ASKDISK);       }
+"cat"                   { R(CAT);           }
+"exists"                { R(EXISTS);        }
+"expandpath"            { R(EXPANDPATH);    }
+"earlier"               { R(EARLIER);       }
+"fileonly"              { R(FILEONLY);      }
+"getassign"             { R(GETASSIGN);     }
+"getdevice"             { R(GETDEVICE);     }
+"getdiskspace"          { R(GETDISKSPACE);  }
+"getenv"                { R(GETENV);        }
+"getsize"               { R(GETSIZE);       }
+"getsum"                { R(GETSUM);        }
+"getversion"            { R(GETVERSION);    }
+"iconinfo"              { R(ICONINFO);      }
+"pathonly"              { R(PATHONLY);      }
+"patmatch"              { R(PATMATCH);      }
+"select"                { R(SELECT);        }
+"symbolset"             { R(SYMBOLSET);     }
+"symbolval"             { R(SYMBOLVAL);     }
+"tackon"                { R(TACKON);        }
+"transcript"            { R(TRANSCRIPT);    }
 
     /*
     Strings
@@ -103,8 +128,8 @@
     The bottom feeders
     */
 \n                    { N(' '); yylineno++; }
-[\t ]+                { N(' '); }
-;.*$                  { N(';'); }
+[\t ]+                { N(' ');             }
+;.*$                  { N(';');             }
 %%
 
 int yyerror(char *err)
