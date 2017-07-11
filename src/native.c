@@ -1041,3 +1041,266 @@ entry_p m_transcript(entry_p contxt)
     error(MISS); 
     return new_failure(); 
 }
+
+/*
+`(makedir <name> (prompt..) (help..) (infos) (confirm..) (safe))'
+     make a directory
+*/
+entry_p m_makedir(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)'
+     `(all) (pattern..) (files) (infos) (confirm..) (safe) (optional
+     <option> <option> ...) (delopts <option> <option> ...) (nogauge))'
+
+     copy files (and subdir's by default).  files option say NO
+     subdirectories
+*/
+entry_p m_copyfiles(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(copylib (prompt..) (help..) (source..) (dest..) (newname..) (infos) (confirm)'
+     `(safe) (optional <option> <option> ...) (delopts <option>
+     <option> ...) (nogauge))'
+
+     install a library if newer version
+*/
+entry_p m_copylib(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(startup (prompt..) (command..))'
+     add a command to the boot scripts (startup-sequence, user-startup)
+*/
+entry_p m_startup(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(tooltype (prompt..) (help..) (dest..) (settooltype..) (setstack..)'
+     `(setdefaulttool..) (noposition) (confirm..) (safe))'
+
+     modify an icon
+*/
+entry_p m_tooltype(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(textfile (prompt..) (help..) (dest..) (append) (include..) (confirm..) (safe))'
+     create text file from other text files and strings
+*/
+entry_p m_textfile(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(execute <arg> (help..) (prompt..) (confirm) (safe))'
+     execute script file
+*/
+entry_p m_execute(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(run <arg> (help..) (prompt..) (confirm..) (safe))'
+     execute program
+*/
+entry_p m_run(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(rexx <arg> (help..) (prompt..) (confirm..) (safe))'
+     execute ARexx script
+*/
+entry_p m_rexx(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(makeassign <assign> <path> (safe)) ; note: <assign> doesn't need `:''
+     create an assignment
+*/
+entry_p m_makeassign(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(rename <old> <new> (help..) (prompt..) (confirm..) (safe))'
+     rename files
+*/
+entry_p m_rename(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(delete file (help..) (prompt..) (confirm..) (infos) (optional <option> <option> ...) (all)'
+     `(delopts <option> <option> ...) (safe))'
+
+     delete file
+*/
+entry_p m_delete(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(protect <file> [<string of flags to change>] [<decimal mask>] <parameters>)'
+     get/set file protection flags
+*/
+entry_p m_protect(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(complete <num>)'
+     display percentage through install in titlebar
+*/
+entry_p m_complete(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(message <string1> <string2>... (all))'
+     display message with Proceed, Abort buttons
+*/
+entry_p m_message(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(working)'
+     indicate to user that Installer is busy doing things
+*/
+entry_p m_working(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(welcome <string> <string> ...)'
+     allow Installation to commence.
+*/
+entry_p m_welcome(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(foreach <dir> <pattern> <statements>)'
+     do for entries in directory
+*/
+entry_p m_foreach(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(abort <string1> <string2> ...)'
+     abandon installation
+*/
+entry_p m_abort(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(exit <string> <string> ... (quiet))'
+     end installation after displaying strings (if provided)
+*/
+entry_p m_exit(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(trap <flags> <statements>)'
+     trap errors.  flags: 1-abort, 2-nomem, 3-error, 4-dos, 5-badargs
+*/
+entry_p m_trap(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(onerror (<statements>))'
+     general error trap
+*/
+entry_p m_onerror(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(user <user-level>)'
+   change the user level (debugging purposes only)
+*/
+entry_p m_user(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(debug <anything> <anything> ...)'
+    print to stdout when running from a shell
+*/
+entry_p m_debug(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+
+/*
+`(database <feature> [<checkvalue>])'
+    return information about the Amiga that the Installer 
+    is running on.  
+*/
+entry_p m_database(entry_p contxt)
+{
+    error(MISS); 
+    return new_failure(); 
+}
+

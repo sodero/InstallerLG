@@ -60,6 +60,30 @@ entry_p m_symbolset(entry_p contxt);
 entry_p m_symbolval(entry_p contxt);
 entry_p m_tackon(entry_p contxt);
 entry_p m_transcript(entry_p contxt);
+entry_p m_makedir(entry_p contxt);
+entry_p m_copyfiles(entry_p contxt);
+entry_p m_copylib(entry_p contxt);
+entry_p m_startup(entry_p contxt);
+entry_p m_tooltype(entry_p contxt);
+entry_p m_textfile(entry_p contxt);
+entry_p m_execute(entry_p contxt);
+entry_p m_run(entry_p contxt);
+entry_p m_rexx(entry_p contxt);
+entry_p m_makeassign(entry_p contxt);
+entry_p m_rename(entry_p contxt);
+entry_p m_delete(entry_p contxt);
+entry_p m_protect(entry_p contxt);
+entry_p m_complete(entry_p contxt);
+entry_p m_message(entry_p contxt);
+entry_p m_working(entry_p contxt);
+entry_p m_welcome(entry_p contxt);
+entry_p m_foreach(entry_p contxt);
+entry_p m_exit(entry_p contxt);
+entry_p m_trap(entry_p contxt);
+entry_p m_onerror(entry_p contxt);
+entry_p m_user(entry_p contxt);
+entry_p m_debug(entry_p contxt);
+entry_p m_database(entry_p contxt);
 
 #define ONLY(A)\
 entry_p A;\
