@@ -1,1 +1,1 @@
-(copyfiles) ; out="Line 1: Implementation missing m_copyfiles"
+(copyfiles (all)) ; out="Line 1: Implementation missing m_copyfiles"
