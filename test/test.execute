@@ -1,1 +1,5 @@
-(execute) ; out="Line 1: Implementation missing m_execute"
+(execute) ; out="Line 1: syntax error ')'"
+(execute "file" err) ; out="Line 1: syntax error 'err'"
+(execute "file") ; out="Line 1: Implementation missing 'm_execute'"
+(execute "file" (safe)) ; out="Line 1: Implementation missing 'm_execute'"
+(execute "file" (safe) err) ; out="Line 1: syntax error 'err'"

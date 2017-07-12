@@ -24,9 +24,8 @@ extern int yylineno;
 %token                      AND OR XOR NOT LTE GTE
 %token                      BITAND BITOR BITXOR BITNOT 
 %token                      SHIFTLEFT SHIFTRIGHT IN
-%token                      STRLEN SUBSTR ASKDIR ASKFILE ASKSTRING ASKNUMBER ASKCHOICE ASKOPTIONS ASKBOOL ASKDISK CAT EXISTS EXPANDPATH EARLIER FILEONLY GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM GETVERSION ICONINFO PATHONLY PATMATCH SELECT SYMBOLSET SYMBOLVAL TACKON TRANSCRIPT COMPLETE USER WORKING WELCOME ABORT COPYFILES
+%token                      STRLEN SUBSTR ASKDIR ASKFILE ASKSTRING ASKNUMBER ASKCHOICE ASKOPTIONS ASKBOOL ASKDISK CAT EXISTS EXPANDPATH EARLIER FILEONLY GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM GETVERSION ICONINFO PATHONLY PATMATCH SELECT SYMBOLSET SYMBOLVAL TACKON TRANSCRIPT COMPLETE USER WORKING WELCOME ABORT COPYFILES COPYLIB DATABASE DEBUG DELETE EXECUTE
 %token                      ALL APPEND ASKUSER ASSIGNS CHOICES COMMAND COMPRESSION CONFIRM DEFAULT DELOPTS DEST DISK FAIL FILES FONTS FORCE HELP INFOS INCLUDE NEWNAME NEWPATH NOFAIL NOGAUGE NOPOSITION NOREQ OKNODELETE PATTERN PROMPT RANGE SAFE SETDEFAULTTOOL SETSTACK SETTOOLTYPE SOURCE SWAPCOLORS OPTIONAL RESIDENT 
-
 %token<s>                   SYM STR 
 %destructor { free($$); }   SYM STR
 %token<n>                   INT HEX BIN 
@@ -38,8 +37,8 @@ extern int yylineno;
 %destructor { kill($$); }   add sub div mul lt lte gt gte eq set cus dcl fmt if while until
 %type<e>                    and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
 %destructor { kill($$); }   and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
-%type<e>                    strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles
-%destructor { kill($$); }   strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles
+%type<e>                    strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute
+%destructor { kill($$); }   strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute
 %type<e>                    all append askuser assigns choices command compression confirm default delopts dest disk fail files fonts force help infos include newname newpath nofail nogauge noposition noreq oknodelete pattern prompt range safe setdefaulttool setstack settooltype source swapcolors optional resident 
 %destructor { kill($$); }   all append askuser assigns choices command compression confirm default delopts dest disk fail files fonts force help infos include newname newpath nofail nogauge noposition noreq oknodelete pattern prompt range safe setdefaulttool setstack settooltype source swapcolors optional resident 
 
@@ -168,6 +167,11 @@ vp:             add                         |
                 welcome                     |
                 abort                       |
                 copyfiles                   |
+                copylib                     |
+                database                    |
+                debug                       |
+                delete                      |
+                execute                     |
                 complete                    ;
 fmt:            '(' STR ps ')'              { $$ = new_native($2, yylineno, m_fmt, $3); } |
                 '(' STR ')'                 { $$ = new_native($2, yylineno, m_fmt, NULL); };
@@ -235,6 +239,14 @@ working:        '(' WORKING ')'             { $$ = new_native(strdup("working"),
 welcome:        '(' WELCOME ps ')'          { $$ = new_native(strdup("welcome"), yylineno, m_welcome, $3); }; 
 abort:          '(' ABORT ps ')'            { $$ = new_native(strdup("abort"), yylineno, m_abort, $3); }; 
 copyfiles:      '(' COPYFILES opts ')'      { $$ = new_native(strdup("copyfiles"), yylineno, m_copyfiles, $3); }; 
+copylib:        '(' COPYLIB opts ')'        { $$ = new_native(strdup("copylib"), yylineno, m_copylib, $3); }; 
+database:       '(' DATABASE p ')'          { $$ = new_native(strdup("database"), yylineno, m_database, push(new_contxt(), $3)); } | 
+                '(' DATABASE pp ')'         { $$ = new_native(strdup("database"), yylineno, m_database, $3); }; 
+debug:          '(' DEBUG ps ')'            { $$ = new_native(strdup("debug"), yylineno, m_debug, $3); }; 
+delete:         '(' DELETE p opts')'        { $$ = new_native(strdup("delete"), yylineno, m_delete, push(push(new_contxt(), $3), $4)); } | 
+                '(' DELETE p ')'            { $$ = new_native(strdup("delete"), yylineno, m_delete, push(new_contxt(), $3)); }; 
+execute:        '(' EXECUTE p opts')'       { $$ = new_native(strdup("execute"), yylineno, m_execute, push(push(new_contxt(), $3), $4)); } | 
+                '(' EXECUTE p ')'           { $$ = new_native(strdup("execute"), yylineno, m_execute, push(new_contxt(), $3)); }; 
 
 all:            '(' ALL ')'                 { $$ = new_option(strdup("all"), OPT_ALL, NULL); };
 append:         '(' APPEND p ')'            { $$ = new_option(strdup("append"), OPT_APPEND, push(new_contxt(), $3)); }; 

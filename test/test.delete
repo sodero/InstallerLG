@@ -1,1 +1,5 @@
-(delete) ; out="Line 1: Implementation missing m_delete"
+(delete) ; out="Line 1: syntax error ')'"
+(delete "file" err) ; out="Line 1: syntax error 'err'"
+(delete "file") ; out="Line 1: Implementation missing 'm_delete'"
+(delete "file" (safe)) ; out="Line 1: Implementation missing 'm_delete'"
+(delete "file" (safe) err) ; out="Line 1: syntax error 'err'"

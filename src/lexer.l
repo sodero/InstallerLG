@@ -112,6 +112,11 @@
 "welcome"               { R(WELCOME);        }
 "abort"                 { R(ABORT);          }
 "copyfiles"             { R(COPYFILES);      }
+"copylib"               { R(COPYLIB);        }
+"database"              { R(DATABASE);       }
+"debug"                 { R(DEBUG);          }
+"delete"                { R(DELETE);         }
+"execute"               { R(EXECUTE);        }
 
 "all"                   { R(ALL);            }
 "append"                { R(APPEND);         }
