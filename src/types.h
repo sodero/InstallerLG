@@ -9,10 +9,40 @@ typedef struct entry_s * entry_p;
 typedef entry_p (*call_t) (entry_p);
 typedef enum 
 { 
-    ALL,
-    RESIDENT, 
-    NOREQ, 
-
+    OPT_ALL,
+    OPT_RESIDENT, 
+    OPT_NOREQ, 
+    OPT_PROMPT,
+    OPT_HELP,
+    OPT_SOURCE,
+    OPT_DEST,
+    OPT_NEWNAME,
+    OPT_CHOICES,
+    OPT_CONFIRM,
+    OPT_COMMAND,
+    OPT_PATTERN,
+    OPT_FILES,
+    OPT_INFOS,
+    OPT_NOPOSITION,
+    OPT_SETTOOLTYPE,
+    OPT_SETDEFAULTTOOL,
+    OPT_SETSTACK,
+    OPT_SETPOSITION, 
+    OPT_SWAPCOLORS,
+    OPT_NOGAUGE,
+    OPT_FAIL,
+    OPT_NOFAIL,
+    OPT_OKNODELETE,
+    OPT_FONTS,
+    OPT_FORCE,
+    OPT_ASKUSER,
+    OPT_SAFE,
+    OPT_COMPRESSION,
+    OPT_APPEND,
+    OPT_INCLUDE,
+    OPT_DISK,
+    OPT_ASSIGNS,
+    OPT_NEWPATH
 } opt_t; 
 typedef enum 
 {

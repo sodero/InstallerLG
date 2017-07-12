@@ -24,21 +24,23 @@ extern int yylineno;
 %token                      AND OR XOR NOT LTE GTE
 %token                      BITAND BITOR BITXOR BITNOT 
 %token                      SHIFTLEFT SHIFTRIGHT IN
-%token                      STRLEN SUBSTR ASKDIR ASKFILE ASKSTRING ASKNUMBER ASKCHOICE ASKOPTIONS ASKBOOL ASKDISK CAT EXISTS EXPANDPATH EARLIER FILEONLY GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM GETVERSION ICONINFO PATHONLY PATMATCH SELECT SYMBOLSET SYMBOLVAL TACKON TRANSCRIPT COMPLETE USER WORKING WELCOME ABORT
+%token                      STRLEN SUBSTR ASKDIR ASKFILE ASKSTRING ASKNUMBER ASKCHOICE ASKOPTIONS ASKBOOL ASKDISK CAT EXISTS EXPANDPATH EARLIER FILEONLY GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM GETVERSION ICONINFO PATHONLY PATMATCH SELECT SYMBOLSET SYMBOLVAL TACKON TRANSCRIPT COMPLETE USER WORKING WELCOME ABORT COPYFILES
+%token                      ALL ASSIGNS DISK FONTS INFOS NEWPATH NOGAUGE NOPOSITION SAFE SWAPCOLORS RESIDENT   
 %token<s>                   SYM STR 
 %destructor { free($$); }   SYM STR
 %token<n>                   INT HEX BIN 
-
 %type<e>                    start 
 %destructor { run($$);  }   start 
-%type<e>                    s p pp ps vp vps vpb np sp sps par cv cvv
-%destructor { kill($$); }   s p pp ps vp vps vpb np sp sps par cv cvv
+%type<e>                    s p pp ps vp vps opt opts vpb np sp sps par cv cvv
+%destructor { kill($$); }   s p pp ps vp vps opt opts vpb np sp sps par cv cvv
 %type<e>                    add sub div mul lt lte gt gte eq set cus dcl fmt if while until
 %destructor { kill($$); }   add sub div mul lt lte gt gte eq set cus dcl fmt if while until
 %type<e>                    and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
 %destructor { kill($$); }   and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
-%type<e>                    strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort
-%destructor { kill($$); }   strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort
+%type<e>                    strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles
+%destructor { kill($$); }   strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles
+%type<e>                    all assigns disk fonts infos newpath nogauge noposition safe swapcolors resident   
+%destructor { kill($$); }   all assigns disk fonts infos newpath nogauge noposition safe swapcolors resident   
 
 %%
 start:         s                       { $$ = init($1); };
@@ -50,6 +52,8 @@ ps:            ps p                    { $$ = push($1, $2); } |
                p                       { $$ = push(new_contxt(), $1); };
 vps:           vps vp                  { $$ = push($1, $2); } |
                vp                      { $$ = push(new_contxt(), $1); };
+opts:          opts opt                { $$ = push($1, $2); } |
+               opt                     { $$ = push(new_contxt(), $1); };
 vpb:           '(' vps ')'             { $$ = $2; } |
                vp                      ;
 np:            INT                     { $$ = new_number($1); } |
@@ -64,6 +68,17 @@ par:           par SYM                 { $$ = push($1, new_symbol($2, new_dangle
                SYM                     { $$ = push(new_contxt(), new_symbol($1, new_dangle())); };
 cv:            p vpb                   { $$ = push(push(new_contxt(), $1), $2); };
 cvv:           p vpb vpb               { $$ = push(push(push(new_contxt(), $1), $2), $3); };
+opt:           all                     |
+               assigns                 | 
+               disk                    | 
+               fonts                   | 
+               infos                   | 
+               newpath                 | 
+               nogauge                 | 
+               noposition              | 
+               safe                    | 
+               swapcolors              | 
+               resident                ;
 vp:            add                     |
                sub                     |
                div                     |
@@ -125,6 +140,7 @@ vp:            add                     |
                working                 |
                welcome                 |
                abort                   |
+               copyfiles               |
                complete                ;
 fmt:           '(' STR ps ')'          { $$ = new_native($2, yylineno, m_fmt, $3); } |
                '(' STR ')'             { $$ = new_native($2, yylineno, m_fmt, NULL); };
@@ -191,6 +207,19 @@ user:          '(' USER p ')'          { $$ = new_native(strdup("user"), yylinen
 working:       '(' WORKING ')'         { $$ = new_native(strdup("working"), yylineno, m_working, new_contxt()); }; 
 welcome:       '(' WELCOME ps ')'      { $$ = new_native(strdup("welcome"), yylineno, m_welcome, $3); }; 
 abort:         '(' ABORT ps ')'        { $$ = new_native(strdup("abort"), yylineno, m_abort, $3); }; 
+copyfiles:     '(' COPYFILES opts ')'  { $$ = new_native(strdup("copyfiles"), yylineno, m_copyfiles, $3); }; 
+all:           '(' ALL ')'             { $$ = new_option(strdup("all"), OPT_ALL, NULL); };
+assigns:       '(' ASSIGNS ')'         { $$ = new_option(strdup("assigns"), OPT_ASSIGNS, NULL); };
+disk:          '(' DISK ')'            { $$ = new_option(strdup("disk"), OPT_DISK, NULL); };
+fonts:         '(' FONTS ')'           { $$ = new_option(strdup("fonts"), OPT_FONTS, NULL); };
+infos:         '(' INFOS ')'           { $$ = new_option(strdup("infos"), OPT_INFOS, NULL); };
+newpath:       '(' NEWPATH ')'         { $$ = new_option(strdup("newpath"), OPT_NEWPATH, NULL); };
+nogauge:       '(' NOGAUGE ')'         { $$ = new_option(strdup("nogauge"), OPT_NOGAUGE, NULL); };
+noposition:    '(' NOPOSITION ')'      { $$ = new_option(strdup("noposition"), OPT_NOPOSITION, NULL); };
+safe:          '(' SAFE ')'            { $$ = new_option(strdup("safe"), OPT_SAFE, NULL); };
+swapcolors:    '(' SWAPCOLORS ')'      { $$ = new_option(strdup("swapcolors"), OPT_SWAPCOLORS, NULL); };
+resident:      '(' RESIDENT ')'        { $$ = new_option(strdup("resident"), OPT_RESIDENT, NULL); };
+
 %%
 
 int main(int argc, char **argv)

@@ -111,6 +111,17 @@
 "working"               { R(WORKING);       }
 "welcome"               { R(WELCOME);       }
 "abort"                 { R(ABORT);         }
+"all"                   { R(ALL);           }
+"assigns"               { R(ASSIGNS);       }
+"disk"                  { R(DISK);          }
+"fonts"                 { R(FONTS);         }
+"infos"                 { R(INFOS);         }
+"newpath"               { R(NEWPATH);       }
+"nogauge"               { R(NOGAUGE);       }
+"noposition"            { R(NOPOSITION);    } 
+"safe"                  { R(SAFE);          }
+"swapcolors"            { R(SWAPCOLORS);    }
+"resident"              { R(RESIDENT);      }
 
     /*
     Strings
