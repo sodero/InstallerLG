@@ -7,24 +7,31 @@
 
 typedef struct entry_s * entry_p;
 typedef entry_p (*call_t) (entry_p);
+typedef enum 
+{ 
+    ALL,
+    RESIDENT, 
+    NOREQ, 
+
+} opt_t; 
+typedef enum 
+{
+    NUMBER,
+    STRING, 
+    SYMBOL,
+    SYMREF,
+    NATIVE, 
+    OPTION, 
+    CUSTOM, 
+    CUSREF, 
+    CONTXT,
+    STATUS,
+    DANGLE
+} type_t;
 
 struct entry_s
 {
-    enum 
-    {
-        NUMBER,
-        STRING, 
-        SYMBOL,
-        SYMREF,
-        NATIVE, 
-        OPTION, 
-        CUSTOM, 
-        CUSREF, 
-        CONTXT,
-        STATUS,
-        DANGLE
-    } type;
-
+    type_t type; 
     int id; 
     char *name; 
     call_t call; 

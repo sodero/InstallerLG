@@ -200,14 +200,14 @@ entry_p new_native (char *n, int l, call_t call, entry_p e)
     return NULL;
 }
 
-entry_p new_option (char *n, int l, entry_p e)
+entry_p new_option (char *n, opt_t t, entry_p e)
 {
-    if(n && (l >= 0))
+    if(n)
     {
         entry_p entry = calloc(1, sizeof (entry_t)); 
         if (entry)
         {
-            entry->id = l;
+            entry->id = (int) t;
             entry->type = OPTION;
             entry->name = n; 
             if(e && e->type == CONTXT)
