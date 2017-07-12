@@ -41,6 +41,7 @@ void pretty_print (entry_p entry)
         "SYMBOL",
         "SYMREF",
         "NATIVE", 
+        "OPTION", 
         "CUSTOM", 
         "CUSREF", 
         "CONTXT",

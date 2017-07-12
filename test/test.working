@@ -1,1 +1,2 @@
-(working) ; out="Line 1: Implementation missing m_working"
+(working) ; out="Line 1: Implementation missing 'm_working'"
+(working err) ; out="Line 1: syntax error 'err'"

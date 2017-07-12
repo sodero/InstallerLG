@@ -24,7 +24,7 @@ extern int yylineno;
 %token                      AND OR XOR NOT LTE GTE
 %token                      BITAND BITOR BITXOR BITNOT 
 %token                      SHIFTLEFT SHIFTRIGHT IN
-%token                      STRLEN SUBSTR ASKDIR ASKFILE ASKSTRING ASKNUMBER ASKCHOICE ASKOPTIONS ASKBOOL ASKDISK CAT EXISTS EXPANDPATH EARLIER FILEONLY GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM GETVERSION ICONINFO PATHONLY PATMATCH SELECT SYMBOLSET SYMBOLVAL TACKON TRANSCRIPT
+%token                      STRLEN SUBSTR ASKDIR ASKFILE ASKSTRING ASKNUMBER ASKCHOICE ASKOPTIONS ASKBOOL ASKDISK CAT EXISTS EXPANDPATH EARLIER FILEONLY GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM GETVERSION ICONINFO PATHONLY PATMATCH SELECT SYMBOLSET SYMBOLVAL TACKON TRANSCRIPT COMPLETE USER WORKING WELCOME ABORT
 %token<s>                   SYM STR 
 %destructor { free($$); }   SYM STR
 %token<n>                   INT HEX BIN 
@@ -37,8 +37,8 @@ extern int yylineno;
 %destructor { kill($$); }   add sub div mul lt lte gt gte eq set cus dcl fmt if while until
 %type<e>                    and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
 %destructor { kill($$); }   and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
-%type<e>                    strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript
-%destructor { kill($$); }   strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript
+%type<e>                    strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort
+%destructor { kill($$); }   strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort
 
 %%
 start:         s                       { $$ = init($1); };
@@ -120,7 +120,12 @@ vp:            add                     |
                symbolset               |
                symbolval               |
                tackon                  |
-               transcript              ;
+               transcript              |
+               user                    |
+               working                 |
+               welcome                 |
+               abort                   |
+               complete                ;
 fmt:           '(' STR ps ')'          { $$ = new_native($2, yylineno, m_fmt, $3); } |
                '(' STR ')'             { $$ = new_native($2, yylineno, m_fmt, NULL); };
 dcl:           '(' DCL SYM par s ')'   { $$ = new_custom($3, yylineno, $4, $5); } |
@@ -181,6 +186,11 @@ symbolset:     '(' SYMBOLSET pp ')'    { $$ = new_native(strdup("symbolset"), yy
 symbolval:     '(' SYMBOLVAL p ')'     { $$ = new_native(strdup("symbolval"), yylineno, m_symbolval, push(new_contxt(), $3)); }; 
 tackon:        '(' TACKON pp ')'       { $$ = new_native(strdup("tackon"), yylineno, m_tackon, $3); }; 
 transcript:    '(' TRANSCRIPT pp ')'   { $$ = new_native(strdup("transcript"), yylineno, m_transcript, $3); }; 
+complete:      '(' COMPLETE p ')'      { $$ = new_native(strdup("complete"), yylineno, m_complete, push(new_contxt(), $3)); }; 
+user:          '(' USER p ')'          { $$ = new_native(strdup("user"), yylineno, m_user, push(new_contxt(), $3)); }; 
+working:       '(' WORKING ')'         { $$ = new_native(strdup("working"), yylineno, m_working, new_contxt()); }; 
+welcome:       '(' WELCOME ps ')'      { $$ = new_native(strdup("welcome"), yylineno, m_welcome, $3); }; 
+abort:         '(' ABORT ps ')'        { $$ = new_native(strdup("abort"), yylineno, m_abort, $3); }; 
 %%
 
 int main(int argc, char **argv)

@@ -17,6 +17,7 @@ struct entry_s
         SYMBOL,
         SYMREF,
         NATIVE, 
+        OPTION, 
         CUSTOM, 
         CUSREF, 
         CONTXT,

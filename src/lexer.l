@@ -106,6 +106,11 @@
 "symbolval"             { R(SYMBOLVAL);     }
 "tackon"                { R(TACKON);        }
 "transcript"            { R(TRANSCRIPT);    }
+"complete"              { R(COMPLETE);      }
+"user"                  { R(USER);          }
+"working"               { R(WORKING);       }
+"welcome"               { R(WELCOME);       }
+"abort"                 { R(ABORT);         }
 
     /*
     Strings

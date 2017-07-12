@@ -1,1 +1,3 @@
-(welcome) ; out="Line 1: Implementation missing m_welcome"
+(welcome "Welcome") ; out="Line 1: Implementation missing 'm_welcome'"
+(welcome "Welcome" "Wilkommen") ; out="Line 1: Implementation missing 'm_welcome'"
+(welcome) ; out="Line 1: syntax error ')'"

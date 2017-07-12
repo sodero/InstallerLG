@@ -80,6 +80,7 @@ entry_p resolve(entry_p entry)
                 return invoke(entry);
 
             case STATUS: 
+            case OPTION: 
             case DANGLE:
                 return entry; 
 
@@ -109,6 +110,7 @@ int num(entry_p entry)
             case STATUS:
             case NUMBER:
             case DANGLE:
+            case OPTION:
             case CUSTOM:
                 return entry->id;
             case STRING:
@@ -145,6 +147,7 @@ char *str(entry_p entry)
             case CUSTOM:
                 snprintf(buf, BUFSIZE, "%d", entry->id); 
                 return buf;
+            case OPTION:
             case STRING:
                 return entry->name;
             case SYMBOL:

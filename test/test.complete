@@ -1,1 +1,3 @@
-(complete) ; out="Line 1: Implementation missing m_complete"
+(complete 1) ; out="Line 1: Implementation missing 'm_complete'"
+(complete) ; out="Line 1: syntax error ')'"
+(complete 1 err) ; out="Line 1: syntax error 'err'"

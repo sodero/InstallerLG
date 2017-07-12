@@ -1,0 +1,3 @@
+(abort "1") ; out="Line 1: Implementation missing 'm_abort'"
+(abort "1" "2") ; out="Line 1: Implementation missing 'm_abort'"
+(abort) ; out="Line 1: syntax error ')'"

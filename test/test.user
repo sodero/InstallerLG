@@ -1,1 +1,3 @@
-(user) ; out="Line 1: Implementation missing m_user"
+(user 1) ; out="Line 1: Implementation missing 'm_user'"
+(user) ; out="Line 1: syntax error ')'"
+(user 1 err) ; out="Line 1: syntax error 'err'"

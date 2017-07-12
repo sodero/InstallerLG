@@ -200,6 +200,27 @@ entry_p new_native (char *n, int l, call_t call, entry_p e)
     return NULL;
 }
 
+entry_p new_option (char *n, int l, entry_p e)
+{
+    if(n && (l >= 0))
+    {
+        entry_p entry = calloc(1, sizeof (entry_t)); 
+        if (entry)
+        {
+            entry->id = l;
+            entry->type = OPTION;
+            entry->name = n; 
+            if(e && e->type == CONTXT)
+            {
+                move_contxt(entry, e); 
+            }
+            return entry;
+        }
+    }
+    error(PANIC);
+    return NULL;
+}
+
 entry_p new_cusref (char *n, int l, entry_p e)
 {
     if(n && (l > 0))
