@@ -55,7 +55,7 @@ vps:            vps vp                      { $$ = push($1, $2); } |
 opts:           opts opt                    { $$ = push($1, $2); } |
                 opt                         { $$ = push(new_contxt(), $1); };
 vpb:            '(' vps ')'                 { $$ = $2; } |
-                vp                          ;
+                vp                          { $$ = push(new_contxt(), $1); };
 np:             INT                         { $$ = new_number($1); } |
                 HEX                         { $$ = new_number($1); } |
                 BIN                         { $$ = new_number($1); } |

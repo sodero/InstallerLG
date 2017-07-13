@@ -8,9 +8,9 @@ out()
     instfile=`mktemp ./installer.tmp.XXXXXX`
     echo $1 > $instfile
     if [ `uname` = "Linux" ]; then
-        valgrind -q --leak-check=full --error-exitcode=1 $prg $instfile > /dev/null 2>&1
+        valgrind -q --leak-check=full --show-leak-kinds=all --error-exitcode=1 $prg $instfile > /dev/null 2>&1
         if [ $? = 1 ]; then
-            valgrind --leak-check=full --show-reachable=yes --track-fds=yes --track-origins=yes $prg $instfile 
+            valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes --track-origins=yes $prg $instfile 
             mv $instfile `mktemp ./leak.tmp.XXXXXX`
             return 0
         fi
