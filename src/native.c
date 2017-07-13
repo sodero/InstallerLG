@@ -385,7 +385,15 @@ entry_p m_fmt(entry_p contxt)
                         contxt->name); 
                     }
                     kill(cur); 
-                    arg++; 
+                    if(runtime_error())
+                    {
+                        arg = NULL; 
+                        break;
+                    }
+                    else
+                    {
+                        arg++; 
+                    }
                 }
                 else 
                 {
@@ -395,19 +403,22 @@ entry_p m_fmt(entry_p contxt)
                 }
             }
         }
-        l += strlen(fmt + j); 
-        ret = calloc(l + 1, sizeof(char)); 
-        if(ret)
+        if(k)
         {
-            for(k = 0; sct[k]; k++)
+            l += strlen(fmt + j); 
+            ret = calloc(l + 1, sizeof(char)); 
+            if(ret)
             {
-                strcat(ret, sct[k]); 
+                for(k = 0; sct[k]; k++)
+                {
+                    strcat(ret, sct[k]); 
+                }
+                strcat(ret, fmt + j); 
             }
-            strcat(ret, fmt + j); 
-        }
-        else
-        {
-            error(PANIC);
+            else
+            {
+                error(PANIC);
+            }
         }
         for(k = 0; sct[k]; k++)
         {
