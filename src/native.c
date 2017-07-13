@@ -57,12 +57,13 @@ entry_p m_set(entry_p contxt)
         entry_p *cur = contxt->symbols; 
         while(*cur && *cur != SENTINEL)
         {
-            kill((*cur)->resolved);
+            entry_p old = (*cur)->resolved;
             val = (*cur)->expression;
             (*cur)->resolved = resolve(val); 
             (*cur)->resolved->parent = val; 
             val = (*cur)->resolved;
             push(dst, *cur); 
+            kill(old);
             cur++; 
         }
         return resolve(val);

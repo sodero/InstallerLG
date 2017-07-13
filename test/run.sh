@@ -11,8 +11,7 @@ out()
         valgrind -q --leak-check=full --show-leak-kinds=all --error-exitcode=1 $prg $instfile > /dev/null 2>&1
         if [ $? = 1 ]; then
             valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes --track-origins=yes $prg $instfile 
-            mv $instfile `mktemp ./leak.tmp.XXXXXX`
-            return 0
+            cp $instfile `mktemp ./leak.tmp.XXXXXX`
         fi
     fi
     o=`$prg $instfile 2>&1 | head -n 1` 
