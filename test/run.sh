@@ -5,7 +5,10 @@ exe()
 
 out()
 {
-    o=`echo $1 | $prg 2>&1 | head -n 1` 
+    tmpfile=`mktemp ./installer.tmp.XXXXXX`
+    echo $1 > $tmpfile
+    o=`$prg $tmpfile 2>&1 | head -n 1` 
+    rm $tmpfile
     if [ "$o" = "$2" ]; then
         return 1
     else

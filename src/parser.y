@@ -326,9 +326,3 @@ optional:       '(' OPTIONAL opts ')'       { $$ = new_option(strdup("optional")
 resident:       '(' RESIDENT ')'            { $$ = new_option(strdup("resident"), OPT_RESIDENT, NULL); };
 %%
 
-int main(int argc, char **argv)
-{
-    yyparse();
-    leak_check();
-}
-

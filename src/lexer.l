@@ -201,3 +201,27 @@ int yyerror(char *err)
     return 0;
 }
 
+int main(int argc, char **argv)
+{
+    if(argc == 2)
+    {
+        yyin = fopen(argv[1], "r"); 
+        if(yyin)
+        {
+            yyparse();
+            fclose(yyin); 
+            leak_check();
+            return 0; 
+        }
+        else
+        {
+            printf("Error: Could not open file '%s'\n", argv[1]); 
+        }
+    }
+    else
+    {
+        printf("Syntax: installer <install script>\n"); 
+    }
+    return 1; 
+}
+
