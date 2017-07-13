@@ -910,30 +910,28 @@ entry_p m_strlen(entry_p contxt)
 entry_p m_substr(entry_p contxt)
 {
     TWINS(a, b); 
-    if(b->children)
+    if(b->children &&
+       b->children[0] && 
+       b->children[0] != SENTINEL) 
     {
-        char *full = str(a);
-        int len = strlen(full); 
-        char *sub = calloc(len, sizeof(char)); 
-        if(sub)
+        char *r, *s = str(a);
+        int n, l = strlen(s); 
+        int i = num(b->children[0]); 
+        i = i > 0 ? i : 0;  
+        i = i >= l ? 0 : i; 
+        n = l - i; 
+        if(b->children[1] && 
+           b->children[1] != SENTINEL) 
         {
-            int i = 0, l = len; 
-            entry_p start = b->children[0]; 
-            if(start && start != SENTINEL)
-            {
-                entry_p n = b->children[1]; 
-                i = num(start); 
-                i = i > 0 ? i : 0;  
-                i = i > len - 1 ? 0 : i; 
-                if(n && n != SENTINEL)
-                {
-                    l = num(n); 
-                    l = l > 0 ? l : len;  
-                    l = l + i > len ? len - i : l; 
-                }
-            }
-            strncpy(sub, full + i, l); 
-            return new_string(sub); 
+            int j = num(b->children[1]); 
+            j = j > 0 ? j : n; 
+            n = j < n ? j : n; 
+        }
+        r = calloc(n + 1, sizeof(char)); 
+        if(r)
+        {
+            strncpy(r, s + i, n); 
+            return new_string(r); 
         }
     }
     error(PANIC);
