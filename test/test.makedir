@@ -1,1 +1,5 @@
-(makedir) ; out="Line 1: Implementation missing m_makedir"
+(makedir) ; out="Line 1: syntax error ')'"
+(makedir (safe)) ; out="Line 1: syntax error 'safe'"
+(makedir "t" safe) ; out="Line 1: syntax error 'safe'"
+(makedir "t" (safe)) ; out="Line 1: Implementation missing 'm_makedir'"
+(makedir "t" (safe) (quiet)) ; out="Line 1: Implementation missing 'm_makedir'"

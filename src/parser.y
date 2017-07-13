@@ -24,8 +24,8 @@ extern int yylineno;
 %token                      AND OR XOR NOT LTE GTE
 %token                      BITAND BITOR BITXOR BITNOT 
 %token                      SHIFTLEFT SHIFTRIGHT IN
-%token                      STRLEN SUBSTR ASKDIR ASKFILE ASKSTRING ASKNUMBER ASKCHOICE ASKOPTIONS ASKBOOL ASKDISK CAT EXISTS EXPANDPATH EARLIER FILEONLY GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM GETVERSION ICONINFO PATHONLY PATMATCH SELECT SYMBOLSET SYMBOLVAL TACKON TRANSCRIPT COMPLETE USER WORKING WELCOME ABORT COPYFILES COPYLIB DATABASE DEBUG DELETE EXECUTE
-%token                      ALL APPEND ASKUSER ASSIGNS CHOICES COMMAND COMPRESSION CONFIRM DEFAULT DELOPTS DEST DISK FAIL FILES FONTS FORCE HELP INFOS INCLUDE NEWNAME NEWPATH NOFAIL NOGAUGE NOPOSITION NOREQ OKNODELETE PATTERN PROMPT RANGE SAFE SETDEFAULTTOOL SETSTACK SETTOOLTYPE SOURCE SWAPCOLORS OPTIONAL RESIDENT 
+%token                      STRLEN SUBSTR ASKDIR ASKFILE ASKSTRING ASKNUMBER ASKCHOICE ASKOPTIONS ASKBOOL ASKDISK CAT EXISTS EXPANDPATH EARLIER FILEONLY GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM GETVERSION ICONINFO PATHONLY PATMATCH SELECT SYMBOLSET SYMBOLVAL TACKON TRANSCRIPT COMPLETE USER WORKING WELCOME ABORT COPYFILES COPYLIB DATABASE DEBUG DELETE EXECUTE EXIT FOREACH MAKEASSIGN MAKEDIR MESSAGE ONERROR PROTECT RENAME REXX RUN STARTUP TEXTFILE TOOLTYPE TRAP
+%token                      ALL APPEND ASKUSER ASSIGNS CHOICES COMMAND COMPRESSION CONFIRM DEFAULT DELOPTS DEST DISK FAIL FILES FONTS FORCE HELP INFOS INCLUDE NEWNAME NEWPATH NOFAIL NOGAUGE NOPOSITION NOREQ OKNODELETE PATTERN PROMPT QUIET RANGE SAFE SETDEFAULTTOOL SETSTACK SETTOOLTYPE SOURCE SWAPCOLORS OPTIONAL RESIDENT 
 %token<s>                   SYM STR 
 %destructor { free($$); }   SYM STR
 %token<n>                   INT HEX BIN 
@@ -37,10 +37,10 @@ extern int yylineno;
 %destructor { kill($$); }   add sub div mul lt lte gt gte eq set cus dcl fmt if while until
 %type<e>                    and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
 %destructor { kill($$); }   and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
-%type<e>                    strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute
-%destructor { kill($$); }   strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute
-%type<e>                    all append askuser assigns choices command compression confirm default delopts dest disk fail files fonts force help infos include newname newpath nofail nogauge noposition noreq oknodelete pattern prompt range safe setdefaulttool setstack settooltype source swapcolors optional resident 
-%destructor { kill($$); }   all append askuser assigns choices command compression confirm default delopts dest disk fail files fonts force help infos include newname newpath nofail nogauge noposition noreq oknodelete pattern prompt range safe setdefaulttool setstack settooltype source swapcolors optional resident 
+%type<e>                    strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap
+%destructor { kill($$); }   strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap
+%type<e>                    all append askuser assigns choices command compression confirm default delopts dest disk fail files fonts force help infos include newname newpath nofail nogauge noposition noreq oknodelete pattern prompt quiet range safe setdefaulttool setstack settooltype source swapcolors optional resident 
+%destructor { kill($$); }   all append askuser assigns choices command compression confirm default delopts dest disk fail files fonts force help infos include newname newpath nofail nogauge noposition noreq oknodelete pattern prompt quiet range safe setdefaulttool setstack settooltype source swapcolors optional resident 
 
 %%
 start:          s                           { $$ = init($1); };
@@ -96,6 +96,7 @@ opt:            all                         |
                 oknodelete                  |        
                 pattern                     |        
                 prompt                      |         
+                quiet                       |         
                 range                       |          
                 safe                        |           
                 setdefaulttool              | 
@@ -172,6 +173,20 @@ vp:             add                         |
                 debug                       |
                 delete                      |
                 execute                     |
+                exit                        |
+                foreach                     |
+                makeassign                  |
+                makedir                     |
+                message                     |
+                onerror                     |
+                protect                     |
+                rename                      |
+                rexx                        |
+                run                         |
+                startup                     |
+                textfile                    |
+                tooltype                    |
+                trap                        |
                 complete                    ;
 fmt:            '(' STR ps ')'              { $$ = new_native($2, yylineno, m_fmt, $3); } |
                 '(' STR ')'                 { $$ = new_native($2, yylineno, m_fmt, NULL); };
@@ -247,6 +262,29 @@ delete:         '(' DELETE p opts')'        { $$ = new_native(strdup("delete"), 
                 '(' DELETE p ')'            { $$ = new_native(strdup("delete"), yylineno, m_delete, push(new_contxt(), $3)); }; 
 execute:        '(' EXECUTE p opts')'       { $$ = new_native(strdup("execute"), yylineno, m_execute, push(push(new_contxt(), $3), $4)); } | 
                 '(' EXECUTE p ')'           { $$ = new_native(strdup("execute"), yylineno, m_execute, push(new_contxt(), $3)); }; 
+exit:           '(' EXIT ps opt')'          { $$ = new_native(strdup("exit"), yylineno, m_exit, push(push(new_contxt(), $3), $4)); } | 
+                '(' EXIT ps ')'             { $$ = new_native(strdup("exit"), yylineno, m_exit, push(new_contxt(), $3)); } |
+                '(' EXIT ')'                { $$ = new_native(strdup("exit"), yylineno, m_exit, NULL); }; 
+foreach:        '(' FOREACH pp vpb ')'      { $$ = new_native(strdup("foreach"), yylineno, m_foreach, push($3, $4)); };
+makeassign:     '(' MAKEASSIGN pp opt')'    { $$ = new_native(strdup("makeassign"), yylineno, m_makeassign, push(push(new_contxt(), $3), $4)); } | 
+                '(' MAKEASSIGN pp ')'       { $$ = new_native(strdup("makeassign"), yylineno, m_makeassign, push(new_contxt(), $3)); };
+makedir:        '(' MAKEDIR p opts')'       { $$ = new_native(strdup("makedir"), yylineno, m_makedir, push(push(new_contxt(), $3), $4)); } | 
+                '(' MAKEDIR p ')'           { $$ = new_native(strdup("makedir"), yylineno, m_makedir, push(new_contxt(), $3)); }; 
+message:        '(' MESSAGE ps opt')'       { $$ = new_native(strdup("message"), yylineno, m_message, push(push(new_contxt(), $3), $4)); } | 
+                '(' MESSAGE ps ')'          { $$ = new_native(strdup("message"), yylineno, m_message, push(new_contxt(), $3)); };
+onerror:        '(' ONERROR vpb ')'         { $$ = new_native(strdup("onerror"), yylineno, m_onerror, $3); };
+protect:        '(' PROTECT pp opt ')'      { $$ = new_native(strdup("protect"), yylineno, m_protect, push($3, $4)); } | 
+                '(' PROTECT pp ')'          { $$ = new_native(strdup("protect"), yylineno, m_protect, $3); };
+rename:         '(' RENAME pp opts')'       { $$ = new_native(strdup("rename"), yylineno, m_rename, push($3, $4)); } | 
+                '(' RENAME pp ')'           { $$ = new_native(strdup("rename"), yylineno, m_rename, $3); }; 
+rexx:           '(' REXX p opts')'          { $$ = new_native(strdup("rexx"), yylineno, m_rexx, push(push(new_contxt(), $3), $4)); } |
+                '(' REXX p ')'              { $$ = new_native(strdup("rexx"), yylineno, m_rexx, push(new_contxt(), $3)); };
+run:            '(' RUN p opts')'           { $$ = new_native(strdup("run"), yylineno, m_run, push(push(new_contxt(), $3), $4)); } |
+                '(' RUN p ')'               { $$ = new_native(strdup("run"), yylineno, m_run, push(new_contxt(), $3)); };
+startup:        '(' STARTUP p opts')'       { $$ = new_native(strdup("startup"), yylineno, m_startup, push(push(new_contxt(), $3), $4)); };
+textfile:       '(' TEXTFILE opts ')'       { $$ = new_native(strdup("textfile"), yylineno, m_textfile, $3); }; 
+tooltype:       '(' TOOLTYPE opts ')'       { $$ = new_native(strdup("tooltype"), yylineno, m_tooltype, $3); }; 
+trap:           '(' TRAP p vpb ')'          { $$ = new_native(strdup("trap"), yylineno, m_trap, push(push(new_contxt(), $3), $4)); };
 
 all:            '(' ALL ')'                 { $$ = new_option(strdup("all"), OPT_ALL, NULL); };
 append:         '(' APPEND p ')'            { $$ = new_option(strdup("append"), OPT_APPEND, push(new_contxt(), $3)); }; 
@@ -276,6 +314,7 @@ noreq:          '(' NOREQ ')'               { $$ = new_option(strdup("noreq"), O
 oknodelete:     '(' OKNODELETE ')'          { $$ = new_option(strdup("oknodelete"), OPT_OKNODELETE, NULL); };
 pattern:        '(' PATTERN p ')'           { $$ = new_option(strdup("pattern"), OPT_PATTERN, push(new_contxt(), $3)); }; 
 prompt:         '(' PROMPT ps ')'           { $$ = new_option(strdup("prompt"), OPT_PROMPT, $3); }; 
+quiet:          '(' QUIET ')'               { $$ = new_option(strdup("quiet"), OPT_QUIET, NULL); };
 range:          '(' RANGE pp ')'            { $$ = new_option(strdup("range"), OPT_RANGE, $3); }; 
 safe:           '(' SAFE ')'                { $$ = new_option(strdup("safe"), OPT_SAFE, NULL); };
 setdefaulttool: '(' SETDEFAULTTOOL p ')'    { $$ = new_option(strdup("setdefaulttool"), OPT_SETDEFAULTTOOL, push(new_contxt(), $3)); }; 

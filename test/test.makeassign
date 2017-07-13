@@ -1,1 +1,6 @@
-(makeassign) ; out="Line 1: Implementation missing m_makeassign"
+(makeassign) ; out="Line 1: syntax error ')'"
+(makeassign "t" "ram:") ; out="Line 1: Implementation missing 'm_makeassign'"
+(makeassign "t" "ram:" 1) ; out="Line 1: syntax error '1'"
+(makeassign "t" "ram:" (safe)) ; out="Line 1: Implementation missing 'm_makeassign'"
+(makeassign "t" "ram:" (safe) (quiet)) ; out="Line 1: syntax error '('"
+(makeassign "t" (safe) (quiet)) ; out="Line 1: syntax error 'safe'"

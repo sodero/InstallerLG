@@ -37,6 +37,7 @@ typedef enum
     OPT_OKNODELETE,
     OPT_PATTERN,
     OPT_PROMPT,
+    OPT_QUIET,
     OPT_RANGE, 
     OPT_SAFE,
     OPT_SETDEFAULTTOOL,

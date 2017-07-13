@@ -1,1 +1,5 @@
-(exit) ; out="Line 1: Implementation missing m_exit"
+(exit) ; out="Line 1: Implementation missing 'm_exit'"
+(exit "1") ; out="Line 1: Implementation missing 'm_exit'"
+(exit "1" "2" "3") ; out="Line 1: Implementation missing 'm_exit'"
+(exit "1" "2" "3" (quiet)) ; out="Line 1: Implementation missing 'm_exit'"
+(exit "1" "2" "3" (quiet) (safe)) ; out="Line 1: syntax error '('"

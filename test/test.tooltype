@@ -1,1 +1,4 @@
-(tooltype) ; out="Line 1: Implementation missing m_tooltype"
+(tooltype) ; out="Line 1: syntax error ')'"
+(tooltype (safe)) ; out="Line 1: Implementation missing 'm_tooltype'"
+(tooltype (safe) (quiet)) ; out="Line 1: Implementation missing 'm_tooltype'"
+(tooltype err (safe)) ; out="Line 1: syntax error 'err'"

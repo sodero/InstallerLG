@@ -1,1 +1,5 @@
-(startup) ; out="Line 1: Implementation missing m_startup"
+(startup) ; out="Line 1: syntax error ')'"
+(startup (safe)) ; out="Line 1: syntax error 'safe'"
+(startup "app" safe) ; out="Line 1: syntax error 'safe'"
+(startup "app" (safe)) ; out="Line 1: Implementation missing 'm_startup'"
+(startup "app" (safe) (quiet)) ; out="Line 1: Implementation missing 'm_startup'"

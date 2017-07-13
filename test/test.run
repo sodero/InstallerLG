@@ -1,1 +1,6 @@
-(run) ; out="Line 1: Implementation missing m_run"
+(run "script") ; out="Line 1: Implementation missing 'm_run'"
+(run "script "x") ; out="Line 1: syntax error 'x'"
+(run "script" (safe)) ; out="Line 1: Implementation missing 'm_run'"
+(run "script" (safe) (quiet)) ; out="Line 1: Implementation missing 'm_run'"
+(run "script" "x" (safe) (quiet)) ; out="Line 1: syntax error '"x"'"
+(run) ; out="Line 1: syntax error ')'"

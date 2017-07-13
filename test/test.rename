@@ -1,1 +1,5 @@
-(rename) ; out="Line 1: Implementation missing m_rename"
+(rename "old" "new") ; out="Line 1: Implementation missing 'm_rename'"
+(rename "old" "new" (safe)) ; out="Line 1: Implementation missing 'm_rename'"
+(rename "old" "new" (safe) (quiet)) ; out="Line 1: Implementation missing 'm_rename'"
+(rename) ; out="Line 1: syntax error ')'"
+(rename "old") ; out="Line 1: syntax error ')'"

@@ -1,1 +1,7 @@
-(foreach) ; out="Line 1: Implementation missing m_foreach"
+(foreach "1" "2" (message "!")) ; out="Line 1: Implementation missing 'm_foreach'"
+(foreach "1" "2" ((message "!") (message "?"))) ; out="Line 1: Implementation missing 'm_foreach'"
+(foreach "1" "2" (message "!") (safe)) ; out="Line 1: syntax error '('"
+(foreach "1" "2" err) ; out="Line 1: syntax error 'err'"
+(foreach "1" "2") ; out="Line 1: syntax error ')'"
+(foreach "1") ; out="Line 1: syntax error ')'"
+(foreach) ; out="Line 1: syntax error ')'"

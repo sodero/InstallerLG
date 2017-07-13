@@ -1,1 +1,6 @@
-(rexx) ; out="Line 1: Implementation missing m_rexx"
+(rexx "script") ; out="Line 1: Implementation missing 'm_rexx'"
+(rexx "script "x") ; out="Line 1: syntax error 'x'"
+(rexx "script" (safe)) ; out="Line 1: Implementation missing 'm_rexx'"
+(rexx "script" (safe) (quiet)) ; out="Line 1: Implementation missing 'm_rexx'"
+(rexx "script" "x" (safe) (quiet)) ; out="Line 1: syntax error '"x"'"
+(rexx) ; out="Line 1: syntax error ')'"
