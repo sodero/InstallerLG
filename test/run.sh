@@ -5,10 +5,18 @@ exe()
 
 out()
 {
-    tmpfile=`mktemp ./installer.tmp.XXXXXX`
-    echo $1 > $tmpfile
-    o=`$prg $tmpfile 2>&1 | head -n 1` 
-    rm $tmpfile
+    instfile=`mktemp ./installer.tmp.XXXXXX`
+    echo $1 > $instfile
+    if [ `uname` = "Linux" ]; then
+        valgrind -q --leak-check=full --error-exitcode=1 $prg $instfile > /dev/null 2>&1
+        if [ $? = 1 ]; then
+            valgrind --leak-check=full --show-reachable=yes --track-fds=yes --track-origins=yes $prg $instfile 
+            mv $instfile `mktemp ./leak.tmp.XXXXXX`
+            return 0
+        fi
+    fi
+    o=`$prg $instfile 2>&1 | head -n 1` 
+    rm $instfile 
     if [ "$o" = "$2" ]; then
         return 1
     else

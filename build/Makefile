@@ -18,7 +18,7 @@ OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 #---------------------------------------------------------------------------------#
 # Build targets
 #---------------------------------------------------------------------------------#
-parser: $(OBJ) parser.o lexer.o
+installer: $(OBJ) parser.o lexer.o
 	$(CC) $^ -o $@ 
 
 parser.c: parser.y
@@ -29,10 +29,10 @@ lexer.c: lexer.l parser.c
 # Misc
 #---------------------------------------------------------------------------------#
 .PHONY: test
-test: parser
-	@sh ../test/run.sh $(PWD)/parser ../test
+test: installer
+	@sh ../test/run.sh $(PWD)/installer ../test
 
 .PHONY: clean
 clean: 
-	$(RM) *.c *.h *.o parser lexer 
+	$(RM) *.c *.h *.o installer lexer installer.tmp.* leak.*
 

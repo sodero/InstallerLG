@@ -210,7 +210,6 @@ int main(int argc, char **argv)
         {
             yyparse();
             fclose(yyin); 
-            leak_check();
             return 0; 
         }
         else
