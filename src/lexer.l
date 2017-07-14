@@ -209,6 +209,7 @@ int main(int argc, char **argv)
         if(yyin)
         {
             yyparse();
+            yy_delete_buffer(YY_CURRENT_BUFFER);
             fclose(yyin); 
             return 0; 
         }
@@ -224,3 +225,25 @@ int main(int argc, char **argv)
     return 1; 
 }
 
+/*
+About the memory leaks:
+-------------------------------
+The default flex skeleton allocates an input buffer and a small 
+buffer stack, which it never frees. You could free the input 
+buffer manually with yy_delete_buffer(YY_CURRENT_BUFFER); but 
+there is no way to delete the buffer stack. (It's only 8 bytes 
+in your application, so it's not a disaster.)
+
+If you want to write a clean application, you should generate 
+a reentrant scanner, which puts all persistent data into a 
+scanner context object. Your code must allocate and free this 
+object, and freeing it will free all memory allocations. (You 
+might also want to generate a pure parser, which works roughly 
+the same way.)
+
+However, the reentrant scanner has a very different API, so 
+you will need to get your parser to pass through the scanner 
+context object. If you use a reentrant (pure) parser as well,
+you'll need to modify your scanner actions because with the 
+reentrant parser, yylval is a YYSTYPE* instead of YYSTYPE.
+*/
