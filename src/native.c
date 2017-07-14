@@ -26,8 +26,9 @@ entry_p m_gosub(entry_p contxt)
                 {
                     while(*arg && *ina)
                     {
-                        kill((*arg)->resolved); 
+                        entry_p old = (*arg)->resolved;
                         (*arg)->resolved = resolve(*ina); 
+                        kill(old); 
                         arg++; 
                         ina++;
                     }
