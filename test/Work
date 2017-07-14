@@ -1,0 +1,52 @@
+Linux       Mix             AROS
+-----------------------------------------------
+                            welcome
+                            message
+cat
+exit
+            copyfiles
+                            copylib
+            startup
+                            makeassign
+            makedir
+exists
+delete
+rename
+fileonly
+pathonly
+tackon
+                            getassign
+                            getdevice
+                            getdiskspace
+getsize
+                            getversion
+                            askbool
+                            askchoice
+                            askdir
+                            askdisk
+                            askfile
+                            asknumber
+                            askoptions
+                            askstring
+                            protect
+                            database
+                            expandpath
+                            foreach
+patmatch
+abort
+onerror
+            complete
+                            earlier
+            run
+                            execute
+            getenv
+                            iconinfo
+getsum
+textfile
+                            tooltype
+transcript
+                            trap
+                            rexx
+            working
+debug
+user
