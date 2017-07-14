@@ -3,11 +3,12 @@ run()
     instfile=`mktemp ./installer.tmp.XXXXXX`
     echo $1 > $instfile
     if [ `uname` = "Linux" ]; then
-        #valgrind -q --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --error-exitcode=1 $prg $instfile > /dev/null 2>&1
-        valgrind -q --error-exitcode=1 $prg $instfile > /dev/null 2>&1
-        if [ $? = 1 ]; then
-            valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes --track-origins=yes $prg $instfile 
-            cp $instfile `mktemp ./leak.tmp.XXXXXX`
+        o=`valgrind --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 $prg $instfile 2>&1`
+        if [ $? -ne 0 ]; then
+            l=`mktemp ./leak.tmp.XXXXXX`
+            cp $instfile $l
+            echo $o | sed -r 's/==[0-9]+/\n;==/g' >> $l
+            cat $l
         fi
     fi
     o=`$prg $instfile 2>&1 | head -n 1` 
