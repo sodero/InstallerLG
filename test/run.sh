@@ -51,6 +51,8 @@ evl()
 
 prg=$1
 tst=$2
+nfl=0
+nok=0
 for f in `ls -t $tst/test.*`; 
 do 
     echo "-> $f"
@@ -62,9 +64,21 @@ do
            evl "$p" "$r" 
            if [ $? = 1 ]; then
                echo "OK -> $p" 
+               nok=$(( $nok + 1 ))
            else 
                echo "FAIL -> $p"
+               nfl=$(( $nfl + 1 ))
            fi
        fi
     done < $f
 done
+tot=$(( $nok + $nfl ))
+echo "--------------------------------------------"
+if [ $nfl -eq 0 ]; then
+    echo "All $tot test(s) passed"
+else
+    echo "$nfl test(s) failed"
+    echo "$nok test(s) passed"
+fi
+echo "--------------------------------------------"
+
