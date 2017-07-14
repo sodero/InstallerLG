@@ -1,1 +1,1 @@
-(patmatch "pattern" "string") ; out="Line 1: Implementation missing 'm_patmatch'"
+(patmatch "pattern" "string") ; "","Line 1: Implementation missing 'm_patmatch'",""

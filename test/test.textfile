@@ -1,4 +1,4 @@
-(textfile) ; out="Line 1: syntax error ')'"
-(textfile (safe)) ; out="Line 1: Implementation missing 'm_textfile'"
-(textfile (safe) (quiet)) ; out="Line 1: Implementation missing 'm_textfile'"
-(textfile err (safe)) ; out="Line 1: syntax error 'err'"
+(textfile) ; "","Line 1: syntax error ')'",""
+(textfile (safe)) ; "","Line 1: Implementation missing 'm_textfile'",""
+(textfile (safe) (quiet)) ; "","Line 1: Implementation missing 'm_textfile'",""
+(textfile err (safe)) ; "","Line 1: syntax error 'err'",""

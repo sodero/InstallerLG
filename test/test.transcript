@@ -1,1 +1,1 @@
-(transcript "string1" "string2") ; out="Line 1: Implementation missing 'm_transcript'"
+(transcript "string1" "string2") ; "","Line 1: Implementation missing 'm_transcript'",""

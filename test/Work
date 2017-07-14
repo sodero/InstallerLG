@@ -1,17 +1,17 @@
 Linux       Mix             AROS
 -----------------------------------------------
+exists
+delete
+rename
+exit
+cat
                             welcome
                             message
-cat
-exit
             copyfiles
                             copylib
             startup
                             makeassign
             makedir
-exists
-delete
-rename
 fileonly
 pathonly
 tackon

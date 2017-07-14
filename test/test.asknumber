@@ -1,1 +1,1 @@
-(asknumber) ; out="Line 1: Implementation missing 'm_asknumber'"
+(asknumber) ; "","Line 1: Implementation missing 'm_asknumber'",""

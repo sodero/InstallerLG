@@ -1,2 +1,2 @@
-(shiftright $f0 4) ; out="15"
-(shiftright 2 1) ; out="1"
+(shiftright $f0 4) ; "","15",""
+(shiftright 2 1) ; "","1",""

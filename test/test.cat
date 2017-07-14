@@ -1,1 +1,1 @@
-(cat "a" "b" "c") ; out="Line 1: Implementation missing 'm_cat'"
+(cat "a" "b" "c") ; "","Line 1: Implementation missing 'm_cat'",""

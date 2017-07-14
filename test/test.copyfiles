@@ -1,1 +1,1 @@
-(copyfiles (safe)) ; out="Line 1: Implementation missing 'm_copyfiles'"
+(copyfiles (safe)) ; "","Line 1: Implementation missing 'm_copyfiles'",""

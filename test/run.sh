@@ -1,14 +1,10 @@
-exe()
-{
-    return 0
-}
-
-out()
+run()
 {
     instfile=`mktemp ./installer.tmp.XXXXXX`
     echo $1 > $instfile
     if [ `uname` = "Linux" ]; then
-        valgrind -q --leak-check=full --show-leak-kinds=all --error-exitcode=1 $prg $instfile > /dev/null 2>&1
+        #valgrind -q --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --error-exitcode=1 $prg $instfile > /dev/null 2>&1
+        valgrind -q --error-exitcode=1 $prg $instfile > /dev/null 2>&1
         if [ $? = 1 ]; then
             valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes --track-origins=yes $prg $instfile 
             cp $instfile `mktemp ./leak.tmp.XXXXXX`
@@ -19,25 +15,38 @@ out()
     if [ "$o" = "$2" ]; then
         return 1
     else
-        echo "Got: $o"
-        echo "Exp: $2"
+        echo "Actual result: $o"
+        echo "Expected result: $2"
         return 0
     fi
 }
 
 evl()
 {
-    t=`echo "$2" | sed -e 's/=.*$//'`
-    w=`echo "$2" | sed -e 's/.*=\"\(.*\)\".*/\1/'`
-    if [ $t = "out" ]; then 
-        out "$1" "$w" 
-        return $?
-    elif [ $t = "exe" ]; then
-        exe "$1" "$w"
-        return $?
-    else
-        return 0
+    cur=`echo "$2" | sed -e 's/.*\"\(.*\)\",\".*\",\".*\".*$/\1/'`
+    if [ -n "$cur" ]; then 
+        o=`eval "$cur" 2>&1`
+        if [ $? -ne 0 ]; then
+            echo "ERR:$o"
+            return 0
+        fi
     fi
+    cur=`echo "$2" | sed -e 's/.*\".*\",\"\(.*\)\",\".*\".*$/\1/'`
+    if [ -n "$cur" ]; then 
+        run "$1" "$cur" 
+        if [ $? -eq 0 ]; then
+            return 0
+        fi
+    fi
+    cur=`echo "$2" | sed -e 's/.*\".*\",\".*\",\"\(.*\)\".*$/\1/'`
+    if [ -n "$cur" ]; then 
+        o=`eval "$cur" 2>&1`
+        if [ $? -ne 0 ]; then
+            echo "FAIL/ERR:$o"
+            return 0
+        fi
+    fi
+    return 1 
 }
 
 prg=$1

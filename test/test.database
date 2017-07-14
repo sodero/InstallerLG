@@ -1,4 +1,4 @@
-(database "cpu") ; out="Line 1: Implementation missing 'm_database'"
-(database "cpu" "68000") ; out="Line 1: Implementation missing 'm_database'"
-(database "cpu" "68000" err) ; out="Line 1: syntax error 'err'"
-(database) ; out="Line 1: syntax error ')'"
+(database "cpu") ; "","Line 1: Implementation missing 'm_database'",""
+(database "cpu" "68000") ; "","Line 1: Implementation missing 'm_database'",""
+(database "cpu" "68000" err) ; "","Line 1: syntax error 'err'",""
+(database) ; "","Line 1: syntax error ')'",""

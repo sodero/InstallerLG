@@ -1,1 +1,1 @@
-(tackon "dir" "file") ; out="Line 1: Implementation missing 'm_tackon'"
+(tackon "dir" "file") ; "","Line 1: Implementation missing 'm_tackon'",""

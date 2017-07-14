@@ -1,1 +1,1 @@
-(getenv "file") ; out="Line 1: Implementation missing 'm_getenv'"
+(getenv "file") ; "","Line 1: Implementation missing 'm_getenv'",""

@@ -1,4 +1,4 @@
-(onerror (message "!")) ; out="Line 1: Implementation missing 'm_onerror'"
-(onerror ((message "!") (message "?"))) ; out="Line 1: Implementation missing 'm_onerror'"
-(onerror) ; out="Line 1: syntax error ')'"
-(onerror err) ; out="Line 1: syntax error 'err'"
+(onerror (message "!")) ; "","Line 1: Implementation missing 'm_onerror'",""
+(onerror ((message "!") (message "?"))) ; "","Line 1: Implementation missing 'm_onerror'",""
+(onerror) ; "","Line 1: syntax error ')'",""
+(onerror err) ; "","Line 1: syntax error 'err'",""
