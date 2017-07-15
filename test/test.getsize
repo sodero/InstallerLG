@@ -1,1 +1,5 @@
-(getsize "file") ; "","Line 1: Implementation missing 'm_getsize'",""
+(getsize) ; "","Line 1: syntax error ')'",""
+(getsize "_ne_" err) ; "","Line 1: syntax error 'err'",""
+(getsize "_ne_") ; "","Line 1: Could not open file '_ne_'",""
+(getsize "_gs_") ; "echo '123' > _gs_","4","rm _gs_"
+(getsize "_gs_") ; "touch _gs_","0","rm _gs_"

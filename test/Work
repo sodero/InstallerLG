@@ -1,8 +1,11 @@
 Linux       Mix             AROS
 -----------------------------------------------
-exists
-delete
-rename
+fileonly
+pathonly
+tackon
+            exists
+            delete
+            rename
 exit
 cat
                             welcome
@@ -12,13 +15,9 @@ cat
             startup
                             makeassign
             makedir
-fileonly
-pathonly
-tackon
                             getassign
                             getdevice
                             getdiskspace
-getsize
                             getversion
                             askbool
                             askchoice
@@ -41,7 +40,6 @@ onerror
                             execute
             getenv
                             iconinfo
-getsum
 textfile
                             tooltype
 transcript

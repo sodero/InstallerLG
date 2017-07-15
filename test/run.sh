@@ -16,8 +16,8 @@ run()
     if [ "$o" = "$2" ]; then
         return 1
     else
-        echo "Actual result: $o"
-        echo "Expected result: $2"
+        echo "Actual result [$o]"
+        echo "Expected result [$2]"
         return 0
     fi
 }
@@ -33,11 +33,9 @@ evl()
         fi
     fi
     cur=`echo "$2" | sed -e 's/.*\".*\",\"\(.*\)\",\".*\".*$/\1/'`
-    if [ -n "$cur" ]; then 
-        run "$1" "$cur" 
-        if [ $? -eq 0 ]; then
-            return 0
-        fi
+    run "$1" "$cur" 
+    if [ $? -eq 0 ]; then
+        return 0
     fi
     cur=`echo "$2" | sed -e 's/.*\".*\",\".*\",\"\(.*\)\".*$/\1/'`
     if [ -n "$cur" ]; then 

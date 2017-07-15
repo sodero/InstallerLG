@@ -803,8 +803,24 @@ entry_p m_getenv(entry_p contxt)
 */
 entry_p m_getsize(entry_p contxt)
 {
-    error(MISS); 
-    return new_failure(); 
+    FILE *f; 
+    char *n; 
+    ONLY(a); 
+    n = str(a); 
+    f = fopen(n, "r"); 
+    if(f)
+    {
+        int s; 
+        fseek(f, 0L, SEEK_END);
+        s = ftell(f);
+        fclose(f); 
+        return new_number(s); 
+    }
+    else
+    {
+        error(contxt->id, "Could not open file", n); 
+        return new_failure(); 
+    }
 }
 
 /*
@@ -813,8 +829,28 @@ entry_p m_getsize(entry_p contxt)
 */
 entry_p m_getsum(entry_p contxt)
 {
-    error(MISS); 
-    return new_failure(); 
+    FILE *f; 
+    char *n; 
+    ONLY(a); 
+    n = str(a); 
+    f = fopen(n, "r"); 
+    if(f)
+    {
+        int c = getc(f); 
+        unsigned int s = 0, n = 1;
+        while(c != EOF)
+        {
+            s -= (c + n);
+            c = getc(f); 
+            n = ~s; 
+        }
+        return new_number(s); 
+    }
+    else
+    {
+        error(contxt->id, "Could not open file", n); 
+        return new_failure(); 
+    }
 }
 
 /*
