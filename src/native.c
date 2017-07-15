@@ -752,7 +752,32 @@ entry_p m_earlier(entry_p contxt)
 */
 entry_p m_fileonly(entry_p contxt)
 {
-    error(MISS); 
+    char *s; 
+    int i, l; 
+    ONLY(a); 
+    s = str(a); 
+    l = strlen(s); 
+    i = l - 1; 
+    if(l && 
+       s[i] != '/' &&
+       s[i] != ':' )
+    {
+        char *r; 
+        while(i &&
+              s[i - 1] != '/' && 
+              s[i - 1] != ':' ) i--;
+        r = calloc(l - i + 1, sizeof(char)); 
+        if(r)
+        {
+            strncpy(r, s + i, l - i); 
+            return new_string(r); 
+        }
+        error(PANIC); 
+    }
+    else
+    {
+        error(contxt->id, "Not a file", s); 
+    }
     return new_failure(); 
 }
 
