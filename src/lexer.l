@@ -15,14 +15,14 @@
 #define N(X) P(X)
 %}
 
-%option noyywrap
+%option noyywrap reentrant bison-bridge
 
 %%
     /*
     Decimal numbers
     */
 -?[0-9]+                { 
-    yylval.n = strtol(yytext, NULL, 10);      
+    yylval->n = strtol(yytext, NULL, 10);      
     R(INT); 
 }
 
@@ -30,7 +30,7 @@
     Hexadecimal numbers
     */
 \$[0-9a-fA-F]+          { 
-    yylval.n = strtol(yytext + 1, NULL, 16);  
+    yylval->n = strtol(yytext + 1, NULL, 16);  
     R(HEX); 
 }
 
@@ -38,7 +38,7 @@
     Binary numbers
     */
 %[01]+                  { 
-    yylval.n = strtol(yytext + 1, NULL, 2);   
+    yylval->n = strtol(yytext + 1, NULL, 2);   
     R(BIN); 
 }
 
@@ -174,8 +174,8 @@
     Strings
     */
 \"[^\"]*\"              { 
-    yylval.s = strdup(yytext + 1); 
-    yylval.s[yyleng - 2] = 0; 
+    yylval->s = strdup(yytext + 1); 
+    yylval->s[yyleng - 2] = 0; 
     R(STR);        
 }    
 
@@ -183,7 +183,7 @@
     Symbols
     */
 [^" \n\t\(\)\+\*/]+    { 
-    yylval.s = strdup(yytext); 
+    yylval->s = strdup(yytext); 
     R(SYM);        
 }
 
@@ -195,55 +195,43 @@
 ;.*$                  { N(';');             }
 %%
 
-int yyerror(char *err)
-{
-    error(yylineno, err, yytext); 
+int yyerror(yyscan_t scanner, char *err)
+{                                                                                                                                                                                                                                       
+    int line = yyget_lineno(scanner); 
+    char *who = yyget_text(scanner);
+    error(line, err, who); 
     return 0;
 }
 
 int main(int argc, char **argv)
 {
-    if(argc == 2)
+    yyscan_t lexer; 
+    if(argc != 2)
     {
-        yyin = fopen(argv[1], "r"); 
-        if(yyin)
+        printf("Syntax: installer <install script>\n"); 
+        return 1; 
+    }
+    if(yylex_init(&lexer) == 0)
+    {
+        FILE *f = fopen(argv[1], "r");
+        if(f)
         {
-            yyparse();
-            yy_delete_buffer(YY_CURRENT_BUFFER);
-            fclose(yyin); 
+            yyset_in(f, lexer); 
+            yyparse(lexer);
+            yylex_destroy(lexer);
+            fclose(f); 
             return 0; 
         }
         else
         {
             printf("Error: Could not open file '%s'\n", argv[1]); 
+            yylex_destroy(lexer);
         }
     }
     else
     {
-        printf("Syntax: installer <install script>\n"); 
+        printf("Unknown error\n"); 
     }
     return 1; 
 }
 
-/*
-About the memory leaks:
--------------------------------
-The default flex skeleton allocates an input buffer and a small 
-buffer stack, which it never frees. You could free the input 
-buffer manually with yy_delete_buffer(YY_CURRENT_BUFFER); but 
-there is no way to delete the buffer stack. (It's only 8 bytes 
-in your application, so it's not a disaster.)
-
-If you want to write a clean application, you should generate 
-a reentrant scanner, which puts all persistent data into a 
-scanner context object. Your code must allocate and free this 
-object, and freeing it will free all memory allocations. (You 
-might also want to generate a pure parser, which works roughly 
-the same way.)
-
-However, the reentrant scanner has a very different API, so 
-you will need to get your parser to pass through the scanner 
-context object. If you use a reentrant (pure) parser as well,
-you'll need to modify your scanner actions because with the 
-reentrant parser, yylval is a YYSTYPE* instead of YYSTYPE.
-*/
