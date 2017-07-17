@@ -24,22 +24,22 @@ run()
 
 evl()
 {
-    cur=`echo "$2" | sed -e 's/.*\"\(.*\)\",\".*\",\".*\".*$/\1/'`
-    if [ -n "$cur" ]; then 
-        o=`eval "$cur" 2>&1`
+    pre=`echo "$2" | sed -e 's/.*\"\(.*\)\",\".*\",\".*\".*$/\1/'`
+    inf=`echo "$2" | sed -e 's/.*\".*\",\"\(.*\)\",\".*\".*$/\1/'`
+    pst=`echo "$2" | sed -e 's/.*\".*\",\".*\",\"\(.*\)\".*$/\1/'`
+    if [ -n "$pre" ]; then 
+        o=`eval "$pre" 2>&1`
         if [ $? -ne 0 ]; then
             echo "ERR:$o"
             return 0
         fi
     fi
-    cur=`echo "$2" | sed -e 's/.*\".*\",\"\(.*\)\",\".*\".*$/\1/'`
-    run "$1" "$cur" 
+    run "$1 ; [$pre ; $pst]" "$inf" 
     if [ $? -eq 0 ]; then
         return 0
     fi
-    cur=`echo "$2" | sed -e 's/.*\".*\",\".*\",\"\(.*\)\".*$/\1/'`
-    if [ -n "$cur" ]; then 
-        o=`eval "$cur" 2>&1`
+    if [ -n "$pst" ]; then 
+        o=`eval "$pst" 2>&1`
         if [ $? -ne 0 ]; then
             echo "FAIL/ERR:$o"
             return 0

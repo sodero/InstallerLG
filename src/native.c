@@ -869,6 +869,7 @@ entry_p m_getsum(entry_p contxt)
             c = getc(f); 
             n = ~s; 
         }
+        fclose(f); 
         return new_number(s); 
     }
     else
