@@ -1,8 +1,9 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-#define SYMSIZE 8 
-#define BUFSIZE 512
+#define VECLEN 4 
+#define NUMLEN 16
+#define BUFSIZE 4096
 #define SENTINEL ((entry_p) push)
 
 typedef struct entry_s * entry_p;

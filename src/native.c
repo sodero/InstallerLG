@@ -368,7 +368,7 @@ entry_p m_fmt(entry_p contxt)
                     if(sct[k][oln - 1] == 'd' &&
                        cur->type == NUMBER)
                     {
-                        int nln = oln + 16;  
+                        int nln = oln + NUMLEN;  
                         char *new = calloc(nln + 1, sizeof(char)); 
                         if(new)
                         {

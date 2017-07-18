@@ -13,15 +13,15 @@ entry_p new_contxt(void)
     if(entry)
     {
         entry_p *symbols, *children; 
-        symbols = calloc(SYMSIZE + 1, sizeof(entry_p)); 
-        children = calloc(SYMSIZE + 1, sizeof(entry_p)); 
+        symbols = calloc(VECLEN + 1, sizeof(entry_p)); 
+        children = calloc(VECLEN + 1, sizeof(entry_p)); 
         if(symbols && children)
         {
             entry->type = CONTXT;
             entry->symbols = symbols; 
             entry->children = children; 
-            entry->symbols[SYMSIZE] = SENTINEL; 
-            entry->children[SYMSIZE] = SENTINEL; 
+            entry->symbols[VECLEN] = SENTINEL; 
+            entry->children[VECLEN] = SENTINEL; 
             return entry; 
         }
         free(symbols); 
