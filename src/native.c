@@ -908,8 +908,30 @@ entry_p m_iconinfo(entry_p contxt)
 */
 entry_p m_pathonly(entry_p contxt)
 {
-    error(MISS); 
-    return new_failure(); 
+    int i; 
+    char *s; 
+    ONLY(a); 
+    s = str(a); 
+    i = strlen(s); 
+    if(i)
+    {
+        while(i-- &&
+              s[i] != '/' && 
+              s[i] != ':' );
+        if(i >= 0) 
+        {
+            char *r; 
+            r = calloc(i + 2, sizeof(char)); 
+            if(r)
+            {
+                strncpy(r, s, i + 1); 
+                return new_string(r); 
+            }
+            error(PANIC); 
+            return new_failure(); 
+        }
+    }
+    return new_string(strdup("")); 
 }
 
 /*

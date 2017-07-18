@@ -1,7 +1,5 @@
 Linux       Mix             AROS
 -----------------------------------------------
-fileonly
-pathonly
 tackon
             exists
             delete
