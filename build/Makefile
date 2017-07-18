@@ -2,21 +2,22 @@
 # General 
 #---------------------------------------------------------------------------------#
 VPATH := ../src
-CCCONF := -I . -I $(VPATH) -std=c99 
-CFLAGS += $(CCCONF)
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
+OS := $(shell uname)
 
 #---------------------------------------------------------------------------------#
 # OS specifics
 #---------------------------------------------------------------------------------#
-OS := $(shell uname)
+CCCONF := -I . -I $(VPATH) -std=c99 
 ifeq ($(OS),Linux)
-CFLAGS += -D_BSD_SOURCE -D_POSIX_SOURCE -Wall
+CCCONF += -D_BSD_SOURCE -D_POSIX_SOURCE
+CFLAGS += -Wall
 else
 ifeq ($(OS),Darwin)
 CFLAGS += -Weverything -Wno-format-nonliteral
 endif
 endif
+CFLAGS += $(CCCONF)
 
 #---------------------------------------------------------------------------------#
 # Build targets
