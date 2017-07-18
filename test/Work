@@ -1,16 +1,17 @@
 Linux       Mix             AROS
 -----------------------------------------------
-tackon
+cat
+abort
+onerror
             exists
             delete
             rename
-exit
-cat
+            exit
+            startup
                             welcome
                             message
             copyfiles
                             copylib
-            startup
                             makeassign
             makedir
                             getassign
@@ -29,16 +30,14 @@ cat
                             database
                             expandpath
                             foreach
-patmatch
-abort
-onerror
+                            patmatch
             complete
                             earlier
             run
                             execute
             getenv
                             iconinfo
-textfile
+                            textfile
                             tooltype
 transcript
                             trap

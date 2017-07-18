@@ -1123,7 +1123,52 @@ entry_p m_symbolval(entry_p contxt)
 */
 entry_p m_tackon(entry_p contxt)
 {
-    error(MISS); 
+    int lp, lf; 
+    char *p, *f, *r; 
+    TWINS(a, b); 
+    p = str(a); 
+    f = str(b);
+    lp = strlen(p); 
+    lf = strlen(f); 
+    if(!lp) 
+    {
+        return new_string(strdup(f)); 
+    }
+    if(!lf) 
+    {
+        return new_string(strdup(p)); 
+    }
+    if(f[lf - 1] == '/' ||
+       f[lf - 1] == ':') 
+    {
+        error(contxt->id, "Not a file", f); 
+        return new_failure(); 
+    }
+    r = calloc(lp + lf + 2, sizeof(char)); 
+    if(r)
+    {
+        strncpy(r, p, lp); 
+        if(p[lp - 1] == '/' ||
+           p[lp - 1] == ':') 
+        {
+            if(f[0] == '/' ||
+               f[0] == ':') 
+            {
+                f++; 
+            }
+        }
+        else
+        {
+            if(f[0] != '/' && 
+               f[0] != ':') 
+            {
+                strcat(r, "/"); 
+            }
+        }
+        strcat(r, f); 
+        return new_string(r); 
+    }
+    error(PANIC); 
     return new_failure(); 
 }
 
