@@ -2,7 +2,7 @@
 #define TYPES_H_
 
 #define SYMSIZE 8 
-#define BUFSIZE 256
+#define BUFSIZE 512
 #define SENTINEL ((entry_p) push)
 
 typedef struct entry_s * entry_p;

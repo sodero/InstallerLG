@@ -157,7 +157,7 @@ char *str(entry_p entry)
             case CUSREF:
             case NATIVE:
                 r = resolve_native(entry);
-                strncpy(buf, str(r), BUFSIZE);
+                strncpy(buf, str(r), BUFSIZE); // Den här kan du göra dig av med
                 kill(r);
                 return buf; 
         }

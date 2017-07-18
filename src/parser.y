@@ -6,21 +6,12 @@
 #include "eval.h"
 #include "util.h"
 #include "sysenv.h"
-
-typedef void *yyscan_t;
-#define LINE yyget_lineno(scanner)
+#include "lexer.h"
 %}
 
 %define api.pure full                                                                                            
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
-
-%union 
-{
-    int n; 
-    char *s; 
-    entry_p e;
-}
 
 %token                      SET DCL IF WHILE UNTIL
 %token                      AND OR XOR NOT LTE GTE

@@ -2,7 +2,7 @@
 # Bla bli bla bla 
 #---------------------------------------------------------------------------------#
 VPATH := ../src
-CFLAGS += -I . -I $(VPATH) 
+CFLAGS += -std=c99 -I . -I $(VPATH) -D_BSD_SOURCE -D_POSIX_SOURCE
 LFLAGS += -DNDEBUG
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 
@@ -21,7 +21,7 @@ OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 installer: $(OBJ) parser.o lexer.o
 	$(CC) $^ -o $@ 
 
-parser.c: parser.y
+parser.c: parser.y lexer.h
 
 lexer.c: lexer.l parser.c
 

@@ -4,6 +4,7 @@
 #include "parser.h"
 #include "error.h"
 #include "debug.h"
+#include "lexer.h"
 
 #ifdef _DEBUG
 # define P(X) \
