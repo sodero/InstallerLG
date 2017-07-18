@@ -15,7 +15,7 @@ entry_p m_gosub(entry_p contxt)
     {
         entry_p *cus = con->children; 
         while(*cus && 
-              *cus != SENTINEL)
+              *cus != end())
         {
             if((*cus)->type == CUSTOM &&
                !strcmp((*cus)->name, contxt->name))
@@ -56,7 +56,7 @@ entry_p m_set(entry_p contxt)
     {
         entry_p val = NULL; 
         entry_p *cur = contxt->symbols; 
-        while(*cur && *cur != SENTINEL)
+        while(*cur && *cur != end())
         {
             entry_p old = (*cur)->resolved;
             val = (*cur)->expression;
@@ -151,7 +151,7 @@ entry_p m_add (entry_p contxt)
     {
         int s = 0; 
         entry_p *cur = contxt->children; 
-        while(*cur && *cur != SENTINEL)
+        while(*cur && *cur != end())
         {
             s += num(*cur);
             cur++; 
@@ -259,7 +259,7 @@ entry_p m_mul(entry_p contxt)
     {
         int s = 1; 
         entry_p *cur = contxt->children; 
-        while(*cur && *cur != SENTINEL)
+        while(*cur && *cur != end())
         {
             s *= num(*cur);
             cur++; 
@@ -305,7 +305,7 @@ entry_p m_fmt(entry_p contxt)
     char **sct = calloc((strlen(fmt) >> 1) + 1, sizeof(char *));
     if(contxt && fmt && sct)
     {
-        int i = 0, j = 0, k = 0, l = 0; 
+        size_t i = 0, j = 0, k = 0, l = 0; 
         entry_p *arg = contxt->children; 
         for(; fmt[i]; i++)
         {
@@ -344,18 +344,19 @@ entry_p m_fmt(entry_p contxt)
             for(k = 0; sct[k]; k++)
             {
                 if(arg && *arg && 
-                   *arg != SENTINEL)
+                   *arg != end())
                 {
-                    int oln = strlen(sct[k]);  
+                    size_t oln = strlen(sct[k]);  
                     entry_p cur = resolve(*arg); 
                     if(sct[k][oln - 1] == 's' &&
                        cur->type == STRING)
                     {
-                        int nln = oln + strlen(cur->name);  
+                        size_t nln = oln + strlen(cur->name);  
                         char *new = calloc(nln + 1, sizeof(char)); 
                         if(new)
                         {
-                            l += snprintf(new, nln, sct[k], cur->name);  
+                            int n = snprintf(new, nln, sct[k], cur->name); 
+                            l += n > 0 ? (size_t) n : 0; 
                             free(sct[k]); 
                             sct[k] = new; 
                         }
@@ -368,11 +369,12 @@ entry_p m_fmt(entry_p contxt)
                     if(sct[k][oln - 1] == 'd' &&
                        cur->type == NUMBER)
                     {
-                        int nln = oln + NUMLEN;  
+                        size_t nln = oln + NUMLEN;  
                         char *new = calloc(nln + 1, sizeof(char)); 
                         if(new)
                         {
-                            l += snprintf(new, nln, sct[k], cur->id);  
+                            int n = snprintf(new, nln, sct[k], cur->id);  
+                            l += n > 0 ? (size_t) n : 0; 
                             free(sct[k]); 
                             sct[k] = new; 
                         }
@@ -428,7 +430,7 @@ entry_p m_fmt(entry_p contxt)
         }
         free(sct);
         if(arg && *arg && 
-           *arg != SENTINEL)
+           *arg != end())
         {
             error(contxt->id, "Superfluous format string arguments", 
                   contxt->name); 
@@ -589,7 +591,7 @@ entry_p m_in(entry_p contxt)
     {
         int m = 0;  
         entry_p *cur = b->children; 
-        while(*cur && *cur != SENTINEL)
+        while(*cur && *cur != end())
         {
             m += 1 << num(*cur);
             cur++; 
@@ -609,6 +611,7 @@ GRAMMAR: all options ignored
 */
 entry_p m_askdir(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -622,6 +625,7 @@ GRAMMAR: all options ignored
 */
 entry_p m_askfile(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -635,6 +639,7 @@ GRAMMAR: all options ignored
 */
 entry_p m_askstring(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -648,6 +653,7 @@ GRAMMAR: all options ignored
 */
 entry_p m_asknumber(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -661,6 +667,7 @@ GRAMMAR: all options ignored
 */
 entry_p m_askchoice(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -674,6 +681,7 @@ GRAMMAR: all options ignored
 */
 entry_p m_askoptions(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -687,6 +695,7 @@ GRAMMAR: all options ignored
 */
 entry_p m_askbool(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -699,6 +708,7 @@ GRAMMAR: all options ignored
 */
 entry_p m_askdisk(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -709,6 +719,7 @@ entry_p m_askdisk(entry_p contxt)
 */
 entry_p m_cat(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -722,6 +733,7 @@ GRAMMAR: (noreq) is ignored
 */
 entry_p m_exists(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -732,6 +744,7 @@ entry_p m_exists(entry_p contxt)
 */
 entry_p m_expandpath(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -742,6 +755,7 @@ entry_p m_expandpath(entry_p contxt)
 */
 entry_p m_earlier(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -753,7 +767,7 @@ entry_p m_earlier(entry_p contxt)
 entry_p m_fileonly(entry_p contxt)
 {
     char *s; 
-    int i, l; 
+    size_t i, l; 
     ONLY(a); 
     s = str(a); 
     l = strlen(s); 
@@ -788,6 +802,7 @@ entry_p m_fileonly(entry_p contxt)
 */
 entry_p m_getassign(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -798,6 +813,7 @@ entry_p m_getassign(entry_p contxt)
 */
 entry_p m_getdevice(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -808,6 +824,7 @@ entry_p m_getdevice(entry_p contxt)
 */
 entry_p m_getdiskspace(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -818,6 +835,7 @@ entry_p m_getdiskspace(entry_p contxt)
 */
 entry_p m_getenv(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -835,11 +853,11 @@ entry_p m_getsize(entry_p contxt)
     f = fopen(n, "r"); 
     if(f)
     {
-        int s; 
+        long s; 
         fseek(f, 0L, SEEK_END);
         s = ftell(f);
         fclose(f); 
-        return new_number(s); 
+        return new_number((int) s); 
     }
     else
     {
@@ -855,14 +873,12 @@ entry_p m_getsize(entry_p contxt)
 entry_p m_getsum(entry_p contxt)
 {
     FILE *f; 
-    char *n; 
     ONLY(a); 
-    n = str(a); 
-    f = fopen(n, "r"); 
+    f = fopen(str(a), "r"); 
     if(f)
     {
         int c = getc(f); 
-        unsigned int s = 0, n = 1;
+        int s = 0, n = 1;
         while(c != EOF)
         {
             s -= (c + n);
@@ -874,7 +890,7 @@ entry_p m_getsum(entry_p contxt)
     }
     else
     {
-        error(contxt->id, "Could not open file", n); 
+        error(contxt->id, "Could not open file", str(a)); 
         return new_failure(); 
     }
 }
@@ -888,6 +904,7 @@ GRAMMAR: (resident) is missing
 */
 entry_p m_getversion(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -898,6 +915,7 @@ entry_p m_getversion(entry_p contxt)
 */
 entry_p m_iconinfo(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -908,27 +926,28 @@ entry_p m_iconinfo(entry_p contxt)
 */
 entry_p m_pathonly(entry_p contxt)
 {
-    int i; 
     char *s; 
+    size_t i; 
     ONLY(a); 
     s = str(a); 
     i = strlen(s); 
     if(i)
     {
-        while(i-- &&
-              s[i] != '/' && 
-              s[i] != ':' );
-        if(i >= 0) 
+        while(i--) 
         {
-            char *r; 
-            r = calloc(i + 2, sizeof(char)); 
-            if(r)
+            if(s[i] == '/' ||
+               s[i] == ':' )
             {
-                strncpy(r, s, i + 1); 
-                return new_string(r); 
+                char *r; 
+                r = calloc(i + 2, sizeof(char)); 
+                if(r)
+                {
+                    strncpy(r, s, i + 1); 
+                    return new_string(r); 
+                }
+                error(PANIC); 
+                return new_failure(); 
             }
-            error(PANIC); 
-            return new_failure(); 
         }
     }
     return new_string(strdup("")); 
@@ -940,6 +959,7 @@ entry_p m_pathonly(entry_p contxt)
 */
 entry_p m_patmatch(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -955,7 +975,7 @@ entry_p m_select(entry_p contxt)
     {
         int i = 0, j = num(a) - 1; 
         while(b->children[i] && 
-              b->children[i] != SENTINEL)
+              b->children[i] != end())
         {
             if(i == j)
             {
@@ -985,7 +1005,7 @@ entry_p m_strlen(entry_p contxt)
     ONLY(a); 
     return new_number
     (
-        strlen(str(a))
+        (int) strlen(str(a))
     );
 }
 
@@ -998,19 +1018,19 @@ entry_p m_substr(entry_p contxt)
     TWINS(a, b); 
     if(b->children &&
        b->children[0] && 
-       b->children[0] != SENTINEL) 
+       b->children[0] != end()) 
     {
         char *r, *s = str(a);
-        int n, l = strlen(s); 
-        int i = num(b->children[0]); 
-        i = i > 0 ? i : 0;  
+        size_t n, l = strlen(s); 
+        size_t i = num(b->children[0]) > 0 ? (size_t) 
+                   num(b->children[0]) : 0; 
         i = i >= l ? 0 : i; 
         n = l - i; 
         if(b->children[1] && 
-           b->children[1] != SENTINEL) 
+           b->children[1] != end()) 
         {
-            int j = num(b->children[1]); 
-            j = j > 0 ? j : n; 
+            size_t j = num(b->children[1]) > 0 ? (size_t) 
+                       num(b->children[1]) : n; 
             n = j < n ? j : n; 
         }
         r = calloc(n + 1, sizeof(char)); 
@@ -1037,10 +1057,10 @@ entry_p m_symbolset(entry_p contxt)
         entry_p res = resolve(b); 
         if(res && !runtime_error())
         {
-            int i = 0; 
+            size_t i = 0; 
             entry_p glb = global(contxt); 
             while(contxt->symbols[i] &&
-                  contxt->symbols[i] != SENTINEL) 
+                  contxt->symbols[i] != end()) 
             {
                 if(!strcmp(contxt->symbols[i]->name, str(a)))
                 {
@@ -1054,11 +1074,11 @@ entry_p m_symbolset(entry_p contxt)
             }
             if(contxt->symbols[i])
             {
-                int n = i << 1, j = 0; 
+                size_t n = i << 1, j = 0; 
                 entry_p *new = calloc(1 + n, sizeof(entry_p));
                 if(new)
                 {
-                    new[n] = SENTINEL; 
+                    new[n] = end(); 
                     contxt->symbols[i] = NULL; 
                     memmove(new, contxt->symbols, i * sizeof(entry_p)); 
                     free(contxt->symbols); 
@@ -1123,7 +1143,7 @@ entry_p m_symbolval(entry_p contxt)
 */
 entry_p m_tackon(entry_p contxt)
 {
-    int lp, lf; 
+    size_t lp, lf; 
     char *p, *f, *r; 
     TWINS(a, b); 
     p = str(a); 
@@ -1178,6 +1198,7 @@ entry_p m_tackon(entry_p contxt)
 */
 entry_p m_transcript(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1188,6 +1209,7 @@ entry_p m_transcript(entry_p contxt)
 */
 entry_p m_makedir(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1202,6 +1224,7 @@ entry_p m_makedir(entry_p contxt)
 */
 entry_p m_copyfiles(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1215,6 +1238,7 @@ entry_p m_copyfiles(entry_p contxt)
 */
 entry_p m_copylib(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1225,6 +1249,7 @@ entry_p m_copylib(entry_p contxt)
 */
 entry_p m_startup(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1237,6 +1262,7 @@ entry_p m_startup(entry_p contxt)
 */
 entry_p m_tooltype(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1247,6 +1273,7 @@ entry_p m_tooltype(entry_p contxt)
 */
 entry_p m_textfile(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1257,6 +1284,7 @@ entry_p m_textfile(entry_p contxt)
 */
 entry_p m_execute(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1267,6 +1295,7 @@ entry_p m_execute(entry_p contxt)
 */
 entry_p m_run(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1277,6 +1306,7 @@ entry_p m_run(entry_p contxt)
 */
 entry_p m_rexx(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1287,6 +1317,7 @@ entry_p m_rexx(entry_p contxt)
 */
 entry_p m_makeassign(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1297,6 +1328,7 @@ entry_p m_makeassign(entry_p contxt)
 */
 entry_p m_rename(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1309,6 +1341,7 @@ entry_p m_rename(entry_p contxt)
 */
 entry_p m_delete(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1319,6 +1352,7 @@ entry_p m_delete(entry_p contxt)
 */
 entry_p m_protect(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1329,6 +1363,7 @@ entry_p m_protect(entry_p contxt)
 */
 entry_p m_complete(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1339,6 +1374,7 @@ entry_p m_complete(entry_p contxt)
 */
 entry_p m_message(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1349,6 +1385,7 @@ entry_p m_message(entry_p contxt)
 */
 entry_p m_working(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1359,6 +1396,7 @@ entry_p m_working(entry_p contxt)
 */
 entry_p m_welcome(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1369,6 +1407,7 @@ entry_p m_welcome(entry_p contxt)
 */
 entry_p m_foreach(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1379,6 +1418,7 @@ entry_p m_foreach(entry_p contxt)
 */
 entry_p m_abort(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1389,6 +1429,7 @@ entry_p m_abort(entry_p contxt)
 */
 entry_p m_exit(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1399,6 +1440,7 @@ entry_p m_exit(entry_p contxt)
 */
 entry_p m_trap(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1409,6 +1451,7 @@ entry_p m_trap(entry_p contxt)
 */
 entry_p m_onerror(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1419,6 +1462,7 @@ entry_p m_onerror(entry_p contxt)
 */
 entry_p m_user(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1429,6 +1473,7 @@ entry_p m_user(entry_p contxt)
 */
 entry_p m_debug(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }
@@ -1440,6 +1485,7 @@ entry_p m_debug(entry_p contxt)
 */
 entry_p m_database(entry_p contxt)
 {
+    (void) contxt; 
     error(MISS); 
     return new_failure(); 
 }

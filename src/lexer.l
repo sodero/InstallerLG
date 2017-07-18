@@ -5,15 +5,6 @@
 #include "error.h"
 #include "debug.h"
 #include "lexer.h"
-
-#ifdef _DEBUG
-# define P(X) \
-  TRACE("L:%s|%s|\n", #X, yytext)
-#else
-# define P(X)
-#endif
-#define R(X) P(X); return X
-#define N(X) P(X)
 %}
 
 %option noyywrap reentrant bison-bridge
@@ -24,7 +15,7 @@
     */
 -?[0-9]+                { 
     yylval->n = strtol(yytext, NULL, 10);      
-    R(INT); 
+    return INT; 
 }
 
     /*
@@ -32,7 +23,7 @@
     */
 \$[0-9a-fA-F]+          { 
     yylval->n = strtol(yytext + 1, NULL, 16);  
-    R(HEX); 
+    return HEX; 
 }
 
     /*
@@ -40,136 +31,136 @@
     */
 %[01]+                  { 
     yylval->n = strtol(yytext + 1, NULL, 2);   
-    R(BIN); 
+    return BIN; 
 }
 
     /*
     Syntactic markers
     */
-"("                     { R('(');            }
-")"                     { R(')');            }
+"("                     { return '(';            }
+")"                     { return ')';            }
 
     /*
     Builtin functions
     */
-"="                     { R('=');            }
-"<"                     { R('<');            }
-"<="                    { R(LTE);            }
-">"                     { R('>');            }
-">="                    { R(GTE);            }
-"+"                     { R('+');            }
-"-"                     { R('-');            }
-"*"                     { R('*');            }
-"/"                     { R('/');            }
-"AND"                   { R(AND);            }
-"OR"                    { R(OR);             }
-"XOR"                   { R(XOR);            }
-"NOT"                   { R(NOT);            }
-"BITAND"                { R(BITAND);         }
-"BITOR"                 { R(BITOR);          }
-"BITXOR"                { R(BITXOR);         }
-"BITNOT"                { R(BITNOT);         }
-"shiftleft"             { R(SHIFTLEFT);      }
-"shiftright"            { R(SHIFTRIGHT);     }
-"IN"                    { R(IN);             }
-"set"                   { R(SET);            }
-"procedure"             { R(DCL);            }
-"if"                    { R(IF);             }
-"while"                 { R(WHILE);          }
-"until"                 { R(UNTIL);          }
-"strlen"                { R(STRLEN);         }
-"substr"                { R(SUBSTR);         }
-"askdir"                { R(ASKDIR);         }
-"askfile"               { R(ASKFILE);        }
-"askstring"             { R(ASKSTRING);      }
-"asknumber"             { R(ASKNUMBER);      }
-"askchoice"             { R(ASKCHOICE);      }
-"askoptions"            { R(ASKOPTIONS);     }
-"askbool"               { R(ASKBOOL);        }
-"askdisk"               { R(ASKDISK);        }
-"cat"                   { R(CAT);            }
-"exists"                { R(EXISTS);         }
-"expandpath"            { R(EXPANDPATH);     }
-"earlier"               { R(EARLIER);        }
-"fileonly"              { R(FILEONLY);       }
-"getassign"             { R(GETASSIGN);      }
-"getdevice"             { R(GETDEVICE);      }
-"getdiskspace"          { R(GETDISKSPACE);   }
-"getenv"                { R(GETENV);         }
-"getsize"               { R(GETSIZE);        }
-"getsum"                { R(GETSUM);         }
-"getversion"            { R(GETVERSION);     }
-"iconinfo"              { R(ICONINFO);       }
-"pathonly"              { R(PATHONLY);       }
-"patmatch"              { R(PATMATCH);       }
-"select"                { R(SELECT);         }
-"symbolset"             { R(SYMBOLSET);      }
-"symbolval"             { R(SYMBOLVAL);      }
-"tackon"                { R(TACKON);         }
-"transcript"            { R(TRANSCRIPT);     }
-"complete"              { R(COMPLETE);       }
-"user"                  { R(USER);           }
-"working"               { R(WORKING);        }
-"welcome"               { R(WELCOME);        }
-"abort"                 { R(ABORT);          }
-"copyfiles"             { R(COPYFILES);      }
-"copylib"               { R(COPYLIB);        }
-"database"              { R(DATABASE);       }
-"debug"                 { R(DEBUG);          }
-"delete"                { R(DELETE);         }
-"execute"               { R(EXECUTE);        }
-"exit"                  { R(EXIT);           }
-"foreach"               { R(FOREACH);        }
-"makeassign"            { R(MAKEASSIGN);     }
-"makedir"               { R(MAKEDIR);        }
-"message"               { R(MESSAGE);        }
-"onerror"               { R(ONERROR);        }
-"protect"               { R(PROTECT);        }
-"rename"                { R(RENAME);         }
-"rexx"                  { R(REXX);           }
-"run"                   { R(RUN);            }
-"startup"               { R(STARTUP);        }
-"textfile"              { R(TEXTFILE);       }
-"tooltype"              { R(TOOLTYPE);       }
-"trap"                  { R(TRAP);           }
-"all"                   { R(ALL);            }
-"append"                { R(APPEND);         }
-"askuser"               { R(ASKUSER);        }
-"assigns"               { R(ASSIGNS);        }
-"choices"               { R(CHOICES);        }
-"command"               { R(COMMAND);        }
-"compression"           { R(COMPRESSION);    }
-"confirm"               { R(CONFIRM);        }
-"default"               { R(DEFAULT);        }
-"delopts"               { R(DELOPTS);        }
-"dest"                  { R(DEST);           }
-"disk"                  { R(DISK);           }
-"fail"                  { R(FAIL);           }
-"files"                 { R(FILES);          }
-"fonts"                 { R(FONTS);          }
-"force"                 { R(FORCE);          }
-"help"                  { R(HELP);           }
-"infos"                 { R(INFOS);          }
-"include"               { R(INCLUDE);        }
-"newname"               { R(NEWNAME);        }
-"newpath"               { R(NEWPATH);        }
-"nofail"                { R(NOFAIL);         }
-"nogauge"               { R(NOGAUGE);        }
-"noposition"            { R(NOPOSITION);     } 
-"noreq"                 { R(NOREQ);          } 
-"oknodelete"            { R(OKNODELETE);     } 
-"pattern"               { R(PATTERN);        }
-"prompt"                { R(PROMPT);         }
-"quiet"                 { R(QUIET);          }
-"range"                 { R(RANGE);          }
-"safe"                  { R(SAFE);           }
-"setdefaulttool"        { R(SETDEFAULTTOOL); }
-"setstack"              { R(SETSTACK);       }
-"settooltype"           { R(SETTOOLTYPE);    }
-"source"                { R(SOURCE);         }
-"swapcolors"            { R(SWAPCOLORS);     }
-"optional"              { R(OPTIONAL);       }
-"resident"              { R(RESIDENT);       }
+"="                     { return '=';            }
+"<"                     { return '<';            }
+"<="                    { return LTE;            }
+">"                     { return '>';            }
+">="                    { return GTE;            }
+"+"                     { return '+';            }
+"-"                     { return '-';            }
+"*"                     { return '*';            }
+"/"                     { return '/';            }
+"AND"                   { return AND;            }
+"OR"                    { return OR;             }
+"XOR"                   { return XOR;            }
+"NOT"                   { return NOT;            }
+"BITAND"                { return BITAND;         }
+"BITOR"                 { return BITOR;          }
+"BITXOR"                { return BITXOR;         }
+"BITNOT"                { return BITNOT;         }
+"shiftleft"             { return SHIFTLEFT;      }
+"shiftright"            { return SHIFTRIGHT;     }
+"IN"                    { return IN;             }
+"set"                   { return SET;            }
+"procedure"             { return DCL;            }
+"if"                    { return IF;             }
+"while"                 { return WHILE;          }
+"until"                 { return UNTIL;          }
+"strlen"                { return STRLEN;         }
+"substr"                { return SUBSTR;         }
+"askdir"                { return ASKDIR;         }
+"askfile"               { return ASKFILE;        }
+"askstring"             { return ASKSTRING;      }
+"asknumber"             { return ASKNUMBER;      }
+"askchoice"             { return ASKCHOICE;      }
+"askoptions"            { return ASKOPTIONS;     }
+"askbool"               { return ASKBOOL;        }
+"askdisk"               { return ASKDISK;        }
+"cat"                   { return CAT;            }
+"exists"                { return EXISTS;         }
+"expandpath"            { return EXPANDPATH;     }
+"earlier"               { return EARLIER;        }
+"fileonly"              { return FILEONLY;       }
+"getassign"             { return GETASSIGN;      }
+"getdevice"             { return GETDEVICE;      }
+"getdiskspace"          { return GETDISKSPACE;   }
+"getenv"                { return GETENV;         }
+"getsize"               { return GETSIZE;        }
+"getsum"                { return GETSUM;         }
+"getversion"            { return GETVERSION;     }
+"iconinfo"              { return ICONINFO;       }
+"pathonly"              { return PATHONLY;       }
+"patmatch"              { return PATMATCH;       }
+"select"                { return SELECT;         }
+"symbolset"             { return SYMBOLSET;      }
+"symbolval"             { return SYMBOLVAL;      }
+"tackon"                { return TACKON;         }
+"transcript"            { return TRANSCRIPT;     }
+"complete"              { return COMPLETE;       }
+"user"                  { return USER;           }
+"working"               { return WORKING;        }
+"welcome"               { return WELCOME;        }
+"abort"                 { return ABORT;          }
+"copyfiles"             { return COPYFILES;      }
+"copylib"               { return COPYLIB;        }
+"database"              { return DATABASE;       }
+"debug"                 { return DEBUG;          }
+"delete"                { return DELETE;         }
+"execute"               { return EXECUTE;        }
+"exit"                  { return EXIT;           }
+"foreach"               { return FOREACH;        }
+"makeassign"            { return MAKEASSIGN;     }
+"makedir"               { return MAKEDIR;        }
+"message"               { return MESSAGE;        }
+"onerror"               { return ONERROR;        }
+"protect"               { return PROTECT;        }
+"rename"                { return RENAME;         }
+"rexx"                  { return REXX;           }
+"run"                   { return RUN;            }
+"startup"               { return STARTUP;        }
+"textfile"              { return TEXTFILE;       }
+"tooltype"              { return TOOLTYPE;       }
+"trap"                  { return TRAP;           }
+"all"                   { return ALL;            }
+"append"                { return APPEND;         }
+"askuser"               { return ASKUSER;        }
+"assigns"               { return ASSIGNS;        }
+"choices"               { return CHOICES;        }
+"command"               { return COMMAND;        }
+"compression"           { return COMPRESSION;    }
+"confirm"               { return CONFIRM;        }
+"default"               { return DEFAULT;        }
+"delopts"               { return DELOPTS;        }
+"dest"                  { return DEST;           }
+"disk"                  { return DISK;           }
+"fail"                  { return FAIL;           }
+"files"                 { return FILES;          }
+"fonts"                 { return FONTS;          }
+"force"                 { return FORCE;          }
+"help"                  { return HELP;           }
+"infos"                 { return INFOS;          }
+"include"               { return INCLUDE;        }
+"newname"               { return NEWNAME;        }
+"newpath"               { return NEWPATH;        }
+"nofail"                { return NOFAIL;         }
+"nogauge"               { return NOGAUGE;        }
+"noposition"            { return NOPOSITION;     } 
+"noreq"                 { return NOREQ;          } 
+"oknodelete"            { return OKNODELETE;     } 
+"pattern"               { return PATTERN;        }
+"prompt"                { return PROMPT;         }
+"quiet"                 { return QUIET;          }
+"range"                 { return RANGE;          }
+"safe"                  { return SAFE;           }
+"setdefaulttool"        { return SETDEFAULTTOOL; }
+"setstack"              { return SETSTACK;       }
+"settooltype"           { return SETTOOLTYPE;    }
+"source"                { return SOURCE;         }
+"swapcolors"            { return SWAPCOLORS;     }
+"optional"              { return OPTIONAL;       }
+"resident"              { return RESIDENT;       }
 
     /*
     Strings
@@ -177,7 +168,7 @@
 \"[^\"]*\"              { 
     yylval->s = strdup(yytext + 1); 
     yylval->s[yyleng - 2] = 0; 
-    R(STR);        
+    return STR;        
 }    
 
     /*
@@ -185,15 +176,15 @@
     */
 [^" \n\t\(\)\+\*/]+    { 
     yylval->s = strdup(yytext); 
-    R(SYM);        
+    return SYM;        
 }
 
     /*
     The bottom feeders
     */
-\n                    { N(' '); yylineno++; }
-[\t ]+                { N(' ');             }
-;.*$                  { N(';');             }
+\n                    { yylineno++;         }
+[\t ]+                {                     }
+;.*$                  {                     }
 %%
 
 int yyerror(yyscan_t scanner, char *err)

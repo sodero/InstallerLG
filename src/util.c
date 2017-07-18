@@ -3,7 +3,7 @@
 #include "debug.h"
 #include "alloc.h"
 
-void eval_print (entry_p entry)
+void eval_print(entry_p entry)
 {
     if(entry)
     {
@@ -23,7 +23,7 @@ void eval_print (entry_p entry)
     return;     
 }
 
-char *tabs(int n)
+static char *tabs(unsigned int n)
 {
     static char t[16]; 
     n = n < sizeof(t) ? n : sizeof(t); 
@@ -31,9 +31,9 @@ char *tabs(int n)
     return t; 
 }
 
-void pretty_print (entry_p entry)
+void pretty_print(entry_p entry)
 {
-    static int ind = 0; 
+    static unsigned int ind = 0; 
     static char *tps[] = 
     {
         "NUMBER",
@@ -48,12 +48,11 @@ void pretty_print (entry_p entry)
         "STATUS",
         "DANGLE"
     };
-
     if(entry)
     {
         printf("%s\n", tps[entry->type]);
-        printf("%sThis:%p\n", tabs(ind), entry);
-        printf("%sParent:%p\n", tabs(ind), entry->parent);
+        printf("%sThis:%p\n", tabs(ind), (void *) entry);
+        printf("%sParent:%p\n", tabs(ind), (void *) entry->parent);
         if(entry->id || 
            entry->type == STATUS ||
            entry->type == NUMBER) 
@@ -83,7 +82,7 @@ void pretty_print (entry_p entry)
             entry_p *e = entry->children;
             if(e && *e)
             {
-                while(*e && *e != SENTINEL)
+                while(*e && *e != end())
                 {
                     printf ("%sChl:\t", tabs(ind)); 
                     ind++; 
@@ -98,7 +97,7 @@ void pretty_print (entry_p entry)
             entry_p *e = entry->symbols;
             if(e && *e)
             {
-                while(*e && *e != SENTINEL)
+                while(*e && *e != end())
                 {
                     printf ("%sSym:\t", tabs(ind)); 
                     ind++; 
@@ -121,7 +120,7 @@ void ror(entry_p *e)
     if(e && *e)
     {
         int i = 0; 
-        while(e[i] && e[i] != SENTINEL)
+        while(e[i] && e[i] != end())
         {
             i++; 
         }
@@ -141,7 +140,6 @@ void ror(entry_p *e)
 
 entry_p local(entry_p e)
 {
-    int i = 0; 
     for(; e && 
         e->type != CONTXT && 
         e->type != CUSTOM 

@@ -17,7 +17,7 @@ static entry_p find_symbol(entry_p entry)
             entry_p nxt; 
             entry_p *tmp; 
             for(tmp = con->symbols;
-                tmp && *tmp && *tmp != SENTINEL; 
+                tmp && *tmp && *tmp != end(); 
                 tmp++)
             {
                 if(!strcmp((*tmp)->name, entry->name)) 
@@ -100,7 +100,7 @@ entry_p resolve(entry_p entry)
 int num(entry_p entry)
 {
     if(entry && 
-       entry != SENTINEL)
+       entry != end())
     {
         int n; 
         entry_p r; 
@@ -135,7 +135,7 @@ char *str(entry_p entry)
 {
     static char buf[BUFSIZE];
     if(entry && 
-       entry != SENTINEL)
+       entry != end())
     {
         entry_p r; 
         switch(entry->type)
@@ -174,7 +174,7 @@ entry_p invoke(entry_p entry)
     {
         entry_p *vec = entry->children;
         while (*vec && 
-               *vec != SENTINEL &&
+               *vec != end() &&
                !runtime_error())
         {
             entry_p cur = *vec; 

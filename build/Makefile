@@ -1,19 +1,22 @@
 #---------------------------------------------------------------------------------#
-# Bla bli bla bla 
+# General 
 #---------------------------------------------------------------------------------#
 VPATH := ../src
-CFLAGS += -std=c99 -I . -I $(VPATH) -D_BSD_SOURCE -D_POSIX_SOURCE
-LFLAGS += -DNDEBUG
+CCCONF := -I . -I $(VPATH) -std=c99 
+CFLAGS += $(CCCONF)
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 
 #---------------------------------------------------------------------------------#
-# Pattern rules
+# OS specifics
 #---------------------------------------------------------------------------------#
-%.c: %.l
-	$(LEX) $(LFLAGS) -t $< > $@
-
-%.c: %.y
-	$(YACC) -d $< -o $@
+OS := $(shell uname)
+ifeq ($(OS),Linux)
+CFLAGS += -D_BSD_SOURCE -D_POSIX_SOURCE -Wall
+else
+ifeq ($(OS),Darwin)
+CFLAGS += -Weverything -Wno-format-nonliteral
+endif
+endif
 
 #---------------------------------------------------------------------------------#
 # Build targets
@@ -21,9 +24,15 @@ OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 installer: $(OBJ) parser.o lexer.o
 	$(CC) $^ -o $@ 
 
-parser.c: parser.y lexer.h
+parser.h: parser.o
 
-lexer.c: lexer.l parser.c
+parser.o: parser.y
+	$(YACC) -d $< -o $(notdir $(basename $<)).c
+	$(CC) $(CCCONF) -c $(notdir $(basename $<)).c
+
+lexer.o: lexer.l parser.h
+	$(LEX) $(LFLAGS) -t $< > $(notdir $(basename $<)).c
+	$(CC) $(CCCONF) -c $(notdir $(basename $<)).c
 
 #---------------------------------------------------------------------------------#
 # Misc

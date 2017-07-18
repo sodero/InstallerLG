@@ -4,7 +4,6 @@
 #define VECLEN 4 
 #define NUMLEN 16
 #define BUFSIZE 4096
-#define SENTINEL ((entry_p) push)
 
 typedef struct entry_s * entry_p;
 typedef entry_p (*call_t) (entry_p);

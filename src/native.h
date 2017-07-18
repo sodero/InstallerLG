@@ -92,7 +92,7 @@ if(contxt &&\
    contxt->parent &&\
    contxt->children &&\
    contxt->children[0] &&\
-   contxt->children[0] != SENTINEL &&\
+   contxt->children[0] != end() &&\
    contxt->children[0]->parent == contxt)\
 {\
     A = contxt->children[0];\
@@ -110,10 +110,10 @@ if(contxt &&\
    contxt->parent &&\
    contxt->children &&\
    contxt->children[0] &&\
-   contxt->children[0] != SENTINEL &&\
+   contxt->children[0] != end() &&\
    contxt->children[0]->parent == contxt &&\
    contxt->children[1] &&\
-   contxt->children[1] != SENTINEL &&\
+   contxt->children[1] != end() &&\
    contxt->children[1]->parent == contxt)\
 {\
     A = contxt->children[0];\
@@ -132,13 +132,13 @@ if(contxt &&\
    contxt->parent &&\
    contxt->children &&\
    contxt->children[0] &&\
-   contxt->children[0] != SENTINEL &&\
+   contxt->children[0] != end() &&\
    contxt->children[0]->parent == contxt &&\
    contxt->children[1] &&\
-   contxt->children[1] != SENTINEL &&\
+   contxt->children[1] != end() &&\
    contxt->children[1]->parent == contxt &&\
    contxt->children[2] &&\
-   contxt->children[2] != SENTINEL &&\
+   contxt->children[2] != end() &&\
    contxt->children[2]->parent == contxt)\
 {\
     A = contxt->children[0];\

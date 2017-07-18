@@ -2,8 +2,11 @@
 #define LEXER_H_
 
 #define LINE yyget_lineno(scanner)
+#ifndef YY_TYPEDEF_YY_SCANNER_T
+#define YY_TYPEDEF_YY_SCANNER_T
+typedef void* yyscan_t;
+#endif
 
-typedef void *yyscan_t;
 typedef union
 {
     int n; 

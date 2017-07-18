@@ -18,5 +18,6 @@ entry_p new_failure(void);
 
 void kill(entry_p entry);
 entry_p push(entry_p dst, entry_p src);
+entry_p end(void); 
 
 #endif

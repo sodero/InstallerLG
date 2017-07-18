@@ -20,8 +20,8 @@ entry_p new_contxt(void)
             entry->type = CONTXT;
             entry->symbols = symbols; 
             entry->children = children; 
-            entry->symbols[VECLEN] = SENTINEL; 
-            entry->children[VECLEN] = SENTINEL; 
+            entry->symbols[VECLEN] = end(); 
+            entry->children[VECLEN] = end(); 
             return entry; 
         }
         free(symbols); 
@@ -63,7 +63,8 @@ entry_p new_string(char *n)
 
 static entry_p new_status(int s)
 {
-    static entry_t status = { STATUS, 0 };
+    static entry_t status; 
+    status.type = STATUS; 
     status.id = s; 
     return &status; 
 }
@@ -115,7 +116,7 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
                 s->symbols = NULL; 
                 kill(s); 
                 e = entry->symbols; 
-                while(*e && *e != SENTINEL)
+                while(*e && *e != end())
                 {
                     (*e)->parent = entry;
                     e++; 
@@ -125,7 +126,7 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
             c->children = NULL; 
             kill(c); 
             e = entry->children; 
-            while(*e && *e != SENTINEL)
+            while(*e && *e != end())
             {
                 (*e)->parent = entry;
                 e++; 
@@ -160,12 +161,12 @@ static void move_contxt(entry_p dst, entry_p src)
     {
         entry_p *c = dst->children = src->children; 
         entry_p *s = dst->symbols = src->symbols; 
-        while(*c && *c != SENTINEL)
+        while(*c && *c != end())
         {
             (*c)->parent = dst; 
             c++; 
         }
-        while(*s && *s != SENTINEL)
+        while(*s && *s != end())
         {
             (*s)->parent = dst; 
             s++; 
@@ -245,7 +246,9 @@ entry_p new_cusref (char *n, int l, entry_p e)
 
 entry_p new_dangle(void)
 {
-    static entry_t dangle = { DANGLE, 0 };
+    static entry_t dangle; 
+    dangle.type = DANGLE; 
+    dangle.id = 0; 
     return &dangle; 
 }
 
@@ -253,13 +256,13 @@ entry_p push(entry_p dst, entry_p src)
 {
     if (dst && src)
     {
-        int u = 0; 
+        size_t u = 0; 
         entry_p **dst_p = &dst->children;
         if (dst->type == CONTXT && 
             src->type == SYMBOL)
         {
             while (dst->symbols[u] &&
-                   dst->symbols[u] != SENTINEL)
+                   dst->symbols[u] != end())
             {
                 entry_p cur = dst->symbols[u]; 
                 char *old = cur->name, 
@@ -277,9 +280,9 @@ entry_p push(entry_p dst, entry_p src)
         if(*dst_p)
         {
             entry_p *new; 
-            int new_size; 
+            size_t new_size; 
             // Free space? 
-            while ((*dst_p)[u] != SENTINEL)
+            while ((*dst_p)[u] != end())
             {
                 if (!(*dst_p)[u])
                 {
@@ -305,7 +308,7 @@ entry_p push(entry_p dst, entry_p src)
             if (new)
             {
                 // Insert sentinel
-                new[new_size] = SENTINEL; 
+                new[new_size] = end(); 
                 // Make the swap and free the old array
                 memmove (new, *dst_p, u * sizeof (entry_p)); 
                 free (*dst_p); 
@@ -334,7 +337,7 @@ void kill(entry_p entry)
            entry->type == CUSTOM ))
         {
             entry_p *e = entry->symbols; 
-            while(*e && *e != SENTINEL)
+            while(*e && *e != end())
             {
                 kill (*e);
                 e++; 
@@ -343,7 +346,7 @@ void kill(entry_p entry)
         if(entry->children)
         {
             entry_p *e = entry->children; 
-            while(*e && *e != SENTINEL)
+            while(*e && *e != end())
             {
                 kill (*e);
                 e++; 
@@ -356,3 +359,8 @@ void kill(entry_p entry)
     }
 }
 
+entry_p end(void)
+{
+    static entry_t snt; 
+    return &snt; 
+}

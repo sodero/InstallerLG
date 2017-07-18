@@ -2,7 +2,7 @@
 #include "error.h"
 #include "debug.h"
 
-int runtime_error()
+int runtime_error(void)
 {
     return error(0, NULL, NULL);
 }

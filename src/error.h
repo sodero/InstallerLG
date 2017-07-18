@@ -4,7 +4,7 @@
 #define PANIC __LINE__, "Internal error", __func__
 #define MISS 1, "Implementation missing", __func__
 
-int runtime_error();
+int runtime_error(void);
 int error(int id, 
           const char *type, 
           const char *info);
