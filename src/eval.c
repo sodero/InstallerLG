@@ -158,10 +158,10 @@ char *str(entry_p entry)
             case CUSREF:
             case NATIVE:
                 r = resolve_native(entry);
-                char *s = str(r); 
+                s = str(r); 
                 if(s != buf)
                 {
-                    strncpy(buf, s, BUFSIZE); 
+                    strcpy(buf, s); 
                 }
                 kill(r);
                 return buf; 

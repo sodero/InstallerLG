@@ -1,4 +1,5 @@
 (cat "a" "b" "c") ; "","abc",""
+(cat "a" "" "c") ; "","ac",""
 (cat 1 2 3 ) ; "","123",""
 (cat 1 "a" 2 "b" 3 "c") ; "","1a2b3c",""
 (set a "b") (set b a) (cat "a" b "c") ; "","abc",""

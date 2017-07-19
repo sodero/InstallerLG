@@ -321,7 +321,7 @@ entry_p m_fmt(entry_p contxt)
                         sct[k] = calloc(i - j + 2, sizeof(char)); 
                         if(sct[k])
                         {
-                            memmove(sct[k], fmt + j, i - j + 1);
+                            memcpy(sct[k], fmt + j, i - j + 1);
                             j = i + 1;  
                             k++; 
                         }
@@ -731,36 +731,41 @@ entry_p m_cat(entry_p contxt)
             while(contxt->children[i] && 
                   contxt->children[i] != end()) 
             {
+                size_t ln; 
                 char *s = str(contxt->children[i++]); 
                 if(runtime_error())
                 {
                     free(buf); 
                     return new_failure();
                 }
-                l += strlen(s); 
-                if(l > n) 
+                ln = strlen(s); 
+                if(ln)
                 {
-                    char *tmp; 
-                    while(n && n < l)
+                    l += strlen(s); 
+                    if(l > n) 
                     {
-                        n = n << 1;  
+                        char *tmp; 
+                        while(n && n < l)
+                        {
+                            n = n << 1;  
+                        }
+                        tmp = calloc(n + 1, sizeof(char));  
+                        if(tmp && n) 
+                        {
+                            memcpy(tmp, buf, l - ln + 1); 
+                            free(buf); 
+                            buf = tmp; 
+                        }
+                        else
+                        {
+                            free(tmp); 
+                            free(buf); 
+                            buf = NULL; 
+                            break; 
+                        }
                     }
-                    tmp = calloc(n + 1, sizeof(char));  
-                    if(tmp && n) 
-                    {
-                        strcpy(tmp, buf); 
-                        free(buf); 
-                        buf = tmp; 
-                    }
-                    else
-                    {
-                        free(tmp); 
-                        free(buf); 
-                        buf = NULL; 
-                        break; 
-                    }
+                    strncat(buf, s, n); 
                 }
-                strncat(buf, s, n); 
             } 
             if(buf)
             {
@@ -831,7 +836,7 @@ entry_p m_fileonly(entry_p contxt)
         r = calloc(l - i + 1, sizeof(char)); 
         if(r)
         {
-            strncpy(r, s + i, l - i); 
+            memcpy(r, s + i, l - i); 
             return new_string(r); 
         }
         error(PANIC); 
@@ -990,7 +995,7 @@ entry_p m_pathonly(entry_p contxt)
                 r = calloc(i + 2, sizeof(char)); 
                 if(r)
                 {
-                    strncpy(r, s, i + 1); 
+                    memcpy(r, s, i + 1); 
                     return new_string(r); 
                 }
                 error(PANIC); 
@@ -1084,7 +1089,7 @@ entry_p m_substr(entry_p contxt)
         r = calloc(n + 1, sizeof(char)); 
         if(r)
         {
-            strncpy(r, s + i, n); 
+            memcpy(r, s + i, n); 
             return new_string(r); 
         }
     }
@@ -1128,7 +1133,7 @@ entry_p m_symbolset(entry_p contxt)
                 {
                     new[n] = end(); 
                     contxt->symbols[i] = NULL; 
-                    memmove(new, contxt->symbols, i * sizeof(entry_p)); 
+                    memcpy(new, contxt->symbols, i * sizeof(entry_p)); 
                     free(contxt->symbols); 
                     while(new[j])
                     {
@@ -1215,7 +1220,7 @@ entry_p m_tackon(entry_p contxt)
     r = calloc(lp + lf + 2, sizeof(char)); 
     if(r)
     {
-        strncpy(r, p, lp); 
+        memcpy(r, p, lp); 
         if(p[lp - 1] == '/' ||
            p[lp - 1] == ':') 
         {

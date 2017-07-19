@@ -62,3 +62,8 @@ Kolla hur MorphOS-varianten beter sig:
  907 
 
 
+
+-----
+Du skulle kunna anvanda ->resolved for native-funktioner ocksa. Det hade
+blivit rappt och fint (och du kan ha oandligt langa strangar i str())
+
