@@ -719,9 +719,57 @@ entry_p m_askdisk(entry_p contxt)
 */
 entry_p m_cat(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt && 
+       contxt->children)
+    {
+        char *buf; 
+        size_t n = DEFLEN; 
+        buf = calloc(n + 1, sizeof(char));  
+        if(buf)
+        {
+            size_t l = 0, i = 0; 
+            while(contxt->children[i] && 
+                  contxt->children[i] != end()) 
+            {
+                char *s = str(contxt->children[i++]); 
+                if(runtime_error())
+                {
+                    free(buf); 
+                    return new_failure();
+                }
+                l += strlen(s); 
+                if(l > n) 
+                {
+                    char *tmp; 
+                    while(n && n < l)
+                    {
+                        n = n << 1;  
+                    }
+                    tmp = calloc(n + 1, sizeof(char));  
+                    if(tmp && n) 
+                    {
+                        strcpy(tmp, buf); 
+                        free(buf); 
+                        buf = tmp; 
+                    }
+                    else
+                    {
+                        free(tmp); 
+                        free(buf); 
+                        buf = NULL; 
+                        break; 
+                    }
+                }
+                strncat(buf, s, n); 
+            } 
+            if(buf)
+            {
+                return new_string(buf); 
+            }
+        }
+    }
+    error(PANIC);
+    return new_failure();
 }
 
 /*

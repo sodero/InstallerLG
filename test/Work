@@ -1,6 +1,5 @@
 Linux       Mix             AROS
 -----------------------------------------------
-cat
 abort
 onerror
             exists
@@ -45,3 +44,21 @@ transcript
             working
 debug
 user
+
+--------------------
+Kolla hur MorphOS-varianten beter sig: 
+
+--------------@{UB}
+ 897          
+ 898      (set <varname> <value> [<varname2> <value2> ...])
+ 899 
+ 900    Set the variable `<varname>' to the indicated value.  If `<varname>'
+ 901 does not exist it will be created.  Set returns the value of the last
+ 902 assignment.
+ 903 
+ 904 @{B}NOTE:@{UB} All variables are typeless, and any variable may be used
+ 905 wherever a string could be used.  All variables are global. For naming
+ 906 conventions, please check the @{"Style Guide" Link "Style Guide"}.
+ 907 
+
+

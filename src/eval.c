@@ -137,6 +137,7 @@ char *str(entry_p entry)
     if(entry && 
        entry != end())
     {
+        char *s; 
         entry_p r; 
         switch(entry->type)
         {
@@ -157,7 +158,11 @@ char *str(entry_p entry)
             case CUSREF:
             case NATIVE:
                 r = resolve_native(entry);
-                strncpy(buf, str(r), BUFSIZE); 
+                char *s = str(r); 
+                if(s != buf)
+                {
+                    strncpy(buf, s, BUFSIZE); 
+                }
                 kill(r);
                 return buf; 
         }

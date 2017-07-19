@@ -3,6 +3,7 @@
 
 #define VECLEN 4 
 #define NUMLEN 16
+#define DEFLEN 32
 #define BUFSIZE 4096
 
 typedef struct entry_s * entry_p;
