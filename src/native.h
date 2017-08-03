@@ -86,70 +86,34 @@ entry_p m_user(entry_p contxt);
 entry_p m_debug(entry_p contxt);
 entry_p m_database(entry_p contxt);
 
-#define ONLY(A)\
-entry_p A;\
-if(contxt &&\
-   contxt->parent &&\
-   contxt->children &&\
-   contxt->children[0] &&\
-   contxt->children[0] != end() &&\
-   contxt->children[0]->parent == contxt)\
-{\
-    A = contxt->children[0];\
-}\
-else\
-{\
-    error(PANIC);\
-    pretty_print(contxt);\
-    return new_failure();\
-}
-
-#define TWINS(A,B)\
-entry_p A, B;\
-if(contxt &&\
-   contxt->parent &&\
-   contxt->children &&\
-   contxt->children[0] &&\
-   contxt->children[0] != end() &&\
-   contxt->children[0]->parent == contxt &&\
-   contxt->children[1] &&\
-   contxt->children[1] != end() &&\
-   contxt->children[1]->parent == contxt)\
-{\
-    A = contxt->children[0];\
-    B = contxt->children[1];\
-}\
-else\
-{\
-    error(PANIC);\
-    pretty_print(contxt);\
-    return new_failure();\
-}
-
-#define TRIPLES(A,B,C)\
-entry_p A, B, C;\
-if(contxt &&\
-   contxt->parent &&\
-   contxt->children &&\
-   contxt->children[0] &&\
-   contxt->children[0] != end() &&\
-   contxt->children[0]->parent == contxt &&\
-   contxt->children[1] &&\
-   contxt->children[1] != end() &&\
-   contxt->children[1]->parent == contxt &&\
-   contxt->children[2] &&\
-   contxt->children[2] != end() &&\
-   contxt->children[2]->parent == contxt)\
-{\
-    A = contxt->children[0];\
-    B = contxt->children[1];\
-    C = contxt->children[2];\
-}\
-else\
-{\
-    error(PANIC);\
-    pretty_print(contxt);\
-    return new_failure();\
-}
+#define SET0 
+#define SET1     a1 = contxt->children[0]
+#define SET2     a2 = contxt->children[1]; SET1
+#define SET3     a3 = contxt->children[2]; SET2
+#define SETA(n)  SET##n 
+#define ARG0 
+#define ARG1     entry_p a1; ARG0
+#define ARG2     entry_p a2; ARG1
+#define ARG3     entry_p a3; ARG2
+#define ARGS(n)  ARG##n SANE(n) SETA(n)
+#define FAIL0    error(PANIC);\
+                 pretty_print(contxt);\
+                 return new_failure()
+#define SANE0    contxt &&\
+                 contxt->parent &&\
+                 contxt->children 
+#define SANE1    SANE0 &&\
+                 contxt->children[0] &&\
+                 contxt->children[0] != end() &&\
+                 contxt->children[0]->parent == contxt  
+#define SANE2    SANE1 &&\
+                 contxt->children[1] &&\
+                 contxt->children[1] != end() &&\
+                 contxt->children[1]->parent == contxt  
+#define SANE3    SANE2 &&\
+                 contxt->children[2] &&\
+                 contxt->children[2] != end() &&\
+                 contxt->children[2]->parent == contxt  
+#define SANE(n)  if(!(SANE##n)) { FAIL0; }
 
 #endif

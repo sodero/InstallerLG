@@ -77,8 +77,8 @@ entry_p m_set(entry_p contxt)
 */
 entry_p m_if(entry_p contxt)
 {
-    TRIPLES(c, p1, p2); 
-    entry_p p = num(c) ? p1 : p2; 
+    ARGS(3); 
+    entry_p p = num(a1) ? a2 : a3; 
     if(p->type == CONTXT)
     {
         return invoke(p);
@@ -99,28 +99,33 @@ entry_p m_if(entry_p contxt)
 */
 static entry_p m_whunt(entry_p contxt, int m)
 {
-    entry_p r = new_number(0); 
-    TWINS(c, b); 
-    while((m ^ num(c)) && 
+    ARGS(2); 
+    entry_p r = new_failure(); 
+    while((m ^ num(a1)) && 
           !runtime_error())
     {
-        if(b->type == CONTXT)
+        if(a2->type == CONTXT)
         {
             kill(r); 
-            r = invoke(b);
+            r = invoke(a2);
         }
-        else if(b->type == NATIVE ||
-                b->type == CUSREF)
+        else if(a2->type == NATIVE ||
+                a2->type == CUSREF)
         {
-            if(b->call)
+            if(a2->call)
             {
                 kill(r); 
-                r = b->call(b); 
+                r = a2->call(a2); 
             }
             else
             {
                 error(PANIC);
             }
+        }
+        else
+        {
+            error(PANIC);
+            break; 
         }
     }
     return r; 
@@ -146,23 +151,15 @@ entry_p m_until(entry_p contxt)
 */
 entry_p m_add (entry_p contxt)
 {
-    if(contxt && 
-       contxt->children)
+    ARGS(0); 
+    int s = 0; 
+    entry_p *cur = contxt->children; 
+    while(*cur && *cur != end())
     {
-        int s = 0; 
-        entry_p *cur = contxt->children; 
-        while(*cur && *cur != end())
-        {
-            s += num(*cur);
-            cur++; 
-        }
-        return new_number(s); 
+        s += num(*cur);
+        cur++; 
     }
-    else
-    {
-        error(PANIC);
-        return new_failure();
-    }
+    return new_number(s); 
 }
 
 /*
@@ -171,11 +168,11 @@ entry_p m_add (entry_p contxt)
 */
 entry_p m_lt(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-        ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) < 0) ||
-         (!(a->type == STRING && b->type == STRING) && num(a) < num(b))) ? 1 : 0
+        ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) < 0) ||
+         (!(a1->type == STRING && a2->type == STRING) && num(a1) < num(a2))) ? 1 : 0
     );
 }
 
@@ -185,11 +182,11 @@ entry_p m_lt(entry_p contxt)
 */
 entry_p m_lte(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-        ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) <= 0) ||
-         (!(a->type == STRING && b->type == STRING) && num(a) <= num(b))) ? 1 : 0
+        ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) <= 0) ||
+         (!(a1->type == STRING && a2->type == STRING) && num(a1) <= num(a2))) ? 1 : 0
     );
 }
 
@@ -199,11 +196,11 @@ entry_p m_lte(entry_p contxt)
 */
 entry_p m_gt(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-        ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) > 0) ||
-         (!(a->type == STRING && b->type == STRING) && num(a) > num(b))) ? 1 : 0
+        ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) > 0) ||
+         (!(a1->type == STRING && a2->type == STRING) && num(a1) > num(a2))) ? 1 : 0
     );
 }
 
@@ -213,11 +210,11 @@ entry_p m_gt(entry_p contxt)
 */
 entry_p m_gte(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-        ((a->type == STRING && b->type == STRING && strcmp(a->name, b->name) >= 0) ||
-         (!(a->type == STRING && b->type == STRING) && num(a) >= num(b))) ? 1 : 0
+        ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) >= 0) ||
+         (!(a1->type == STRING && a2->type == STRING) && num(a1) >= num(a2))) ? 1 : 0
     );
 }
 
@@ -227,11 +224,11 @@ entry_p m_gte(entry_p contxt)
 */
 entry_p m_eq(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-        ((a->type == STRING && b->type == STRING && !strcmp(a->name, b->name)) ||
-         (!(a->type == STRING && b->type == STRING) && num(a) == num(b))) ? 1 : 0
+        ((a1->type == STRING && a2->type == STRING && !strcmp(a1->name, a2->name)) ||
+         (!(a1->type == STRING && a2->type == STRING) && num(a1) == num(a2))) ? 1 : 0
     );
 }
 
@@ -241,10 +238,10 @@ entry_p m_eq(entry_p contxt)
 */
 entry_p m_sub(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-         num(a) - num(b)
+         num(a1) - num(a2)
     );
 }
 
@@ -254,23 +251,15 @@ entry_p m_sub(entry_p contxt)
 */
 entry_p m_mul(entry_p contxt)
 {
-    if(contxt && 
-       contxt->children)
+    ARGS(0); 
+    int s = 1; 
+    entry_p *cur = contxt->children; 
+    while(*cur && *cur != end())
     {
-        int s = 1; 
-        entry_p *cur = contxt->children; 
-        while(*cur && *cur != end())
-        {
-            s *= num(*cur);
-            cur++; 
-        }
-        return new_number(s); 
+        s *= num(*cur);
+        cur++; 
     }
-    else
-    {
-        error(PANIC);
-        return new_failure();
-    }
+    return new_number(s); 
 }
 
 /* 
@@ -279,13 +268,11 @@ entry_p m_mul(entry_p contxt)
 */
 entry_p m_div(entry_p contxt)
 {
-    TWINS(a, b); 
-    if(num(b))
+    ARGS(2); 
+    int d = num(a2); 
+    if(d)
     {
-        return new_number
-        (
-            num(a) / num(b)
-        );
+        return new_number(num(a1) / d); 
     }
     else
     {
@@ -455,10 +442,10 @@ entry_p m_fmt(entry_p contxt)
 */
 entry_p m_and(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-        num(a) && num(b)
+        num(a1) && num(a2)
     );
 }
 
@@ -468,10 +455,10 @@ entry_p m_and(entry_p contxt)
 */
 entry_p m_or(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-        num(a) || num(b)
+        num(a1) || num(a2)
     );
 }
 
@@ -481,11 +468,11 @@ entry_p m_or(entry_p contxt)
 */
 entry_p m_xor(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-        (num(a) && !num(b)) || 
-        (num(b) && !num(a)) 
+        (num(a1) && !num(a2)) || 
+        (num(a2) && !num(a1)) 
     );
 }
 
@@ -495,10 +482,10 @@ entry_p m_xor(entry_p contxt)
 */
 entry_p m_not(entry_p contxt)
 {
-    ONLY(a); 
+    ARGS(1); 
     return new_number
     (
-         !num(a)
+         !num(a1)
     );
 }
 
@@ -508,10 +495,10 @@ entry_p m_not(entry_p contxt)
 */
 entry_p m_bitand(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-         num(a) & num(b)
+         num(a1) & num(a2)
     );
 }
 
@@ -521,10 +508,10 @@ entry_p m_bitand(entry_p contxt)
 */
 entry_p m_bitor(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-         num(a) | num(b)
+         num(a1) | num(a2)
     );
 }
 
@@ -534,10 +521,10 @@ entry_p m_bitor(entry_p contxt)
 */
 entry_p m_bitxor(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-         num(a) ^ num(b)
+         num(a1) ^ num(a2)
     );
 }
 
@@ -547,10 +534,10 @@ entry_p m_bitxor(entry_p contxt)
 */
 entry_p m_bitnot(entry_p contxt)
 {
-    ONLY(a); 
+    ARGS(1); 
     return new_number
     (
-         ~num(a)
+         ~num(a1)
     );
 }
 
@@ -560,10 +547,10 @@ entry_p m_bitnot(entry_p contxt)
 */
 entry_p m_shiftleft(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-         num(a) << num(b)
+         num(a1) << num(a2)
     );
 }
 
@@ -573,10 +560,10 @@ entry_p m_shiftleft(entry_p contxt)
 */
 entry_p m_shiftright(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     return new_number
     (
-         num(a) >> num(b)
+         num(a1) >> num(a2)
     );
 }
 
@@ -586,17 +573,17 @@ entry_p m_shiftright(entry_p contxt)
 */
 entry_p m_in(entry_p contxt)
 {
-    TWINS(a, b); 
-    if(b->children)
+    ARGS(2); 
+    if(a2->children)
     {
         int m = 0;  
-        entry_p *cur = b->children; 
+        entry_p *cur = a2->children; 
         while(*cur && *cur != end())
         {
             m += 1 << num(*cur);
             cur++; 
         }
-        return new_number(num(a) & m); 
+        return new_number(num(a1) & m); 
     }
     error(PANIC);
     return new_failure();
@@ -719,58 +706,55 @@ entry_p m_askdisk(entry_p contxt)
 */
 entry_p m_cat(entry_p contxt)
 {
-    if(contxt && 
-       contxt->children)
+    ARGS(0); 
+    char *buf; 
+    size_t n = DEFLEN; 
+    buf = calloc(n + 1, sizeof(char));  
+    if(buf)
     {
-        char *buf; 
-        size_t n = DEFLEN; 
-        buf = calloc(n + 1, sizeof(char));  
+        size_t l = 0, i = 0; 
+        while(contxt->children[i] && 
+              contxt->children[i] != end()) 
+        {
+            size_t ln; 
+            char *s = str(contxt->children[i++]); 
+            if(runtime_error())
+            {
+                free(buf); 
+                return new_failure();
+            }
+            ln = strlen(s); 
+            if(ln)
+            {
+                l += strlen(s); 
+                if(l > n) 
+                {
+                    char *tmp; 
+                    while(n && n < l)
+                    {
+                        n = n << 1;  
+                    }
+                    tmp = calloc(n + 1, sizeof(char));  
+                    if(tmp && n) 
+                    {
+                        memcpy(tmp, buf, l - ln + 1); 
+                        free(buf); 
+                        buf = tmp; 
+                    }
+                    else
+                    {
+                        free(tmp); 
+                        free(buf); 
+                        buf = NULL; 
+                        break; 
+                    }
+                }
+                strncat(buf, s, n); 
+            }
+        } 
         if(buf)
         {
-            size_t l = 0, i = 0; 
-            while(contxt->children[i] && 
-                  contxt->children[i] != end()) 
-            {
-                size_t ln; 
-                char *s = str(contxt->children[i++]); 
-                if(runtime_error())
-                {
-                    free(buf); 
-                    return new_failure();
-                }
-                ln = strlen(s); 
-                if(ln)
-                {
-                    l += strlen(s); 
-                    if(l > n) 
-                    {
-                        char *tmp; 
-                        while(n && n < l)
-                        {
-                            n = n << 1;  
-                        }
-                        tmp = calloc(n + 1, sizeof(char));  
-                        if(tmp && n) 
-                        {
-                            memcpy(tmp, buf, l - ln + 1); 
-                            free(buf); 
-                            buf = tmp; 
-                        }
-                        else
-                        {
-                            free(tmp); 
-                            free(buf); 
-                            buf = NULL; 
-                            break; 
-                        }
-                    }
-                    strncat(buf, s, n); 
-                }
-            } 
-            if(buf)
-            {
-                return new_string(buf); 
-            }
+            return new_string(buf); 
         }
     }
     error(PANIC);
@@ -819,12 +803,9 @@ entry_p m_earlier(entry_p contxt)
 */
 entry_p m_fileonly(entry_p contxt)
 {
-    char *s; 
-    size_t i, l; 
-    ONLY(a); 
-    s = str(a); 
-    l = strlen(s); 
-    i = l - 1; 
+    ARGS(1); 
+    char *s = str(a1); 
+    size_t l = strlen(s), i = l - 1;
     if(l && 
        s[i] != '/' &&
        s[i] != ':' )
@@ -899,11 +880,9 @@ entry_p m_getenv(entry_p contxt)
 */
 entry_p m_getsize(entry_p contxt)
 {
-    FILE *f; 
-    char *n; 
-    ONLY(a); 
-    n = str(a); 
-    f = fopen(n, "r"); 
+    ARGS(1); 
+    char *n = str(a1); 
+    FILE *f = fopen(n, "r"); 
     if(f)
     {
         long s; 
@@ -925,9 +904,8 @@ entry_p m_getsize(entry_p contxt)
 */
 entry_p m_getsum(entry_p contxt)
 {
-    FILE *f; 
-    ONLY(a); 
-    f = fopen(str(a), "r"); 
+    ARGS(1); 
+    FILE *f = fopen(str(a1), "r"); 
     if(f)
     {
         int c = getc(f); 
@@ -943,7 +921,7 @@ entry_p m_getsum(entry_p contxt)
     }
     else
     {
-        error(contxt->id, "Could not open file", str(a)); 
+        error(contxt->id, "Could not open file", str(a1)); 
         return new_failure(); 
     }
 }
@@ -979,11 +957,9 @@ entry_p m_iconinfo(entry_p contxt)
 */
 entry_p m_pathonly(entry_p contxt)
 {
-    char *s; 
-    size_t i; 
-    ONLY(a); 
-    s = str(a); 
-    i = strlen(s); 
+    ARGS(1); 
+    char *s = str(a1); 
+    size_t i = strlen(s); 
     if(i)
     {
         while(i--) 
@@ -1023,16 +999,16 @@ entry_p m_patmatch(entry_p contxt)
 */
 entry_p m_select(entry_p contxt)
 {
-    TWINS(a, b); 
-    if(b->children)
+    ARGS(2); 
+    if(a2->children)
     {
-        int i = 0, j = num(a) - 1; 
-        while(b->children[i] && 
-              b->children[i] != end())
+        int i = 0, j = num(a1) - 1; 
+        while(a2->children[i] && 
+              a2->children[i] != end())
         {
             if(i == j)
             {
-                return resolve(b->children[i]); 
+                return resolve(a2->children[i]); 
             }
             else
             {
@@ -1055,10 +1031,10 @@ entry_p m_select(entry_p contxt)
 */
 entry_p m_strlen(entry_p contxt)
 {
-    ONLY(a); 
+    ARGS(1); 
     return new_number
     (
-        (int) strlen(str(a))
+        (int) strlen(str(a1))
     );
 }
 
@@ -1068,22 +1044,22 @@ entry_p m_strlen(entry_p contxt)
 */
 entry_p m_substr(entry_p contxt)
 {
-    TWINS(a, b); 
-    if(b->children &&
-       b->children[0] && 
-       b->children[0] != end()) 
+    ARGS(2); 
+    if(a2->children &&
+       a2->children[0] && 
+       a2->children[0] != end()) 
     {
-        char *r, *s = str(a);
+        char *r, *s = str(a1);
         size_t n, l = strlen(s); 
-        size_t i = num(b->children[0]) > 0 ? (size_t) 
-                   num(b->children[0]) : 0; 
+        size_t i = num(a2->children[0]) > 0 ? (size_t) 
+                   num(a2->children[0]) : 0; 
         i = i >= l ? 0 : i; 
         n = l - i; 
-        if(b->children[1] && 
-           b->children[1] != end()) 
+        if(a2->children[1] && 
+           a2->children[1] != end()) 
         {
-            size_t j = num(b->children[1]) > 0 ? (size_t) 
-                       num(b->children[1]) : n; 
+            size_t j = num(a2->children[1]) > 0 ? (size_t) 
+                       num(a2->children[1]) : n; 
             n = j < n ? j : n; 
         }
         r = calloc(n + 1, sizeof(char)); 
@@ -1104,10 +1080,10 @@ entry_p m_substr(entry_p contxt)
 */
 entry_p m_symbolset(entry_p contxt)
 {
-    TWINS(a, b); 
+    ARGS(2); 
     if(contxt->symbols)
     {
-        entry_p res = resolve(b); 
+        entry_p res = resolve(a2); 
         if(res && !runtime_error())
         {
             size_t i = 0; 
@@ -1115,7 +1091,7 @@ entry_p m_symbolset(entry_p contxt)
             while(contxt->symbols[i] &&
                   contxt->symbols[i] != end()) 
             {
-                if(!strcmp(contxt->symbols[i]->name, str(a)))
+                if(!strcmp(contxt->symbols[i]->name, str(a1)))
                 {
                     kill(contxt->symbols[i]->expression);
                     contxt->symbols[i]->expression = resolve(res); 
@@ -1145,10 +1121,10 @@ entry_p m_symbolset(entry_p contxt)
             }
             if(!contxt->symbols[i])
             {
-                entry_p sym = new_symbol(strdup(str(a)), resolve(res)); 
+                entry_p sym = new_symbol(strdup(str(a1)), resolve(res)); 
                 if(sym)
                 {
-                    res->parent = b; 
+                    res->parent = a2; 
                     sym->resolved = resolve(res); 
                     contxt->symbols[i] = sym; 
                     push(global(contxt), sym); 
@@ -1169,9 +1145,8 @@ entry_p m_symbolset(entry_p contxt)
 */
 entry_p m_symbolval(entry_p contxt)
 {
-    entry_p ref; 
-    ONLY(a); 
-    ref = new_symref(strdup(str(a)), contxt->id); 
+    ARGS(1); 
+    entry_p ref = new_symref(strdup(str(a1)), contxt->id); 
     if(ref)
     {
         entry_p val; 
@@ -1196,13 +1171,9 @@ entry_p m_symbolval(entry_p contxt)
 */
 entry_p m_tackon(entry_p contxt)
 {
-    size_t lp, lf; 
-    char *p, *f, *r; 
-    TWINS(a, b); 
-    p = str(a); 
-    f = str(b);
-    lp = strlen(p); 
-    lf = strlen(f); 
+    ARGS(2); 
+    char *p = str(a1), *f = str(a2), *r; 
+    size_t lp = strlen(p), lf = strlen(f); 
     if(!lp) 
     {
         return new_string(strdup(f)); 
