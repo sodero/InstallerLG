@@ -194,7 +194,23 @@ entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
             {
                 move_contxt(entry, e); 
             }
-            return entry;
+            if(r == NUMBER)
+            {
+                entry->resolved = new_number(0); 
+            }
+            else if(r == STRING)
+            {
+                entry->resolved = new_string(strdup("")); 
+            }
+            else
+            {
+                return entry;
+            }
+            if(entry->resolved)
+            {
+                return entry;
+            }
+            free(entry); 
         }
     }
     error(PANIC);
