@@ -126,22 +126,17 @@ int num(entry_p entry)
     return 0; 
 }
 
-char *str(entry_p entry)
+const char *str(entry_p entry)
 {
-    static char buf[BUFSIZE];
     if(entry && 
        entry != end())
     {
-        char *s; 
-        entry_p r; 
         switch(entry->type)
         {
             case CONTXT:
             case STATUS:
-            case NUMBER:
             case DANGLE:
-                snprintf(buf, BUFSIZE, "%d", entry->id); 
-                return buf;
+                break;
             case CUSTOM:
             case OPTION:
             case STRING:
@@ -152,19 +147,19 @@ char *str(entry_p entry)
                 return str(find_symbol(entry)); 
             case CUSREF:
             case NATIVE:
-                r = resolve_native(entry);
-                s = str(r); 
-                if(s != buf)
+                return str(entry->call ? entry->call(entry) : NULL); 
+            case NUMBER:
+                free(entry->name); 
+                entry->name = malloc(NUMLEN); 
+                if(entry->name)
                 {
-                    strcpy(buf, s); 
+                    snprintf(entry->name, NUMLEN, "%d", entry->id); 
+                    return entry->name;
                 }
-       //         kill(r);
-                return buf; 
         }
     }
-    buf[0] = 0;  
     error(PANIC);
-    return buf; 
+    return ""; 
 }
 
 entry_p invoke(entry_p entry)

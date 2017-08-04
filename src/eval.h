@@ -8,6 +8,6 @@ entry_p invoke(entry_p entry);
 entry_p resolve(entry_p entry);
 
 int num(entry_p entry);
-char *str(entry_p entry);
+const char *str(entry_p entry);
 
 #endif
