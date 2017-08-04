@@ -342,11 +342,12 @@ entry_p push(entry_p dst, entry_p src)
 
 void kill(entry_p entry)
 {
+return; 
     if(entry && 
        entry->type != STATUS &&
        entry->type != DANGLE)
     {
-        kill(entry->resolved);
+     //   kill(entry->resolved);
         kill(entry->expression);
         if(entry->symbols && (
            entry->type == NATIVE || 

@@ -106,10 +106,10 @@ int num(entry_p entry)
         {
             case CONTXT:
             case STATUS:
-            case DANGLE:
             case CUSTOM:
             case OPTION:
                 break;
+            case DANGLE:
             case NUMBER:
                 return entry->id;
             case SYMBOL:
@@ -136,10 +136,11 @@ const char *str(entry_p entry)
         {
             case CONTXT:
             case STATUS:
-            case DANGLE:
             case CUSTOM:
             case OPTION:
                 break;
+            case DANGLE:
+                return ""; 
             case STRING:
                 return entry->name;
             case SYMBOL:
