@@ -179,7 +179,7 @@ static void move_contxt(entry_p dst, entry_p src)
     error(PANIC);
 }
 
-entry_p new_native (char *n, int l, call_t call, entry_p e)
+entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
 {
     if(call && n && (l > 0))
     {
