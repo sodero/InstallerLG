@@ -159,7 +159,7 @@ entry_p m_add (entry_p contxt)
         s += num(*cur);
         cur++; 
     }
-    return new_number(s); 
+    RNUM(s); 
 }
 
 /*

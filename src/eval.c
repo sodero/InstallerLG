@@ -102,8 +102,6 @@ int num(entry_p entry)
     if(entry && 
        entry != end())
     {
-        int n; 
-        entry_p r; 
         switch(entry->type)
         {
             case CONTXT:
@@ -121,10 +119,7 @@ int num(entry_p entry)
                 return num(find_symbol(entry)); 
             case CUSREF:
             case NATIVE:
-                r = resolve_native(entry);
-                n = num(r);
-                kill(r);
-                return n; 
+                return num(entry->call ? entry->call(entry) : NULL); 
         }
     }
     error(PANIC);
@@ -145,9 +140,9 @@ char *str(entry_p entry)
             case STATUS:
             case NUMBER:
             case DANGLE:
-            case CUSTOM:
                 snprintf(buf, BUFSIZE, "%d", entry->id); 
                 return buf;
+            case CUSTOM:
             case OPTION:
             case STRING:
                 return entry->name;
@@ -163,7 +158,7 @@ char *str(entry_p entry)
                 {
                     strcpy(buf, s); 
                 }
-                kill(r);
+       //         kill(r);
                 return buf; 
         }
     }
@@ -187,7 +182,7 @@ entry_p invoke(entry_p entry)
                cur->type == NATIVE ||
                cur->type == CUSREF))
             {
-                kill(ret);
+            //    kill(ret);
                 ret = resolve_native(cur);
             }
             vec++; 
@@ -204,7 +199,7 @@ void run(entry_p entry)
 {
     entry_p status = invoke(entry);
     eval_print(status);
-    kill(status);
+//    kill(status);
     kill(entry);
 }
 

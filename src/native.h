@@ -115,5 +115,6 @@ entry_p m_database(entry_p contxt);
                  contxt->children[2] != end() &&\
                  contxt->children[2]->parent == contxt  
 #define SANE(n)  if(!(SANE##n)) { FAIL0; }
+#define RNUM(X)  contxt->resolved->id = X; return contxt->resolved
 
 #endif
