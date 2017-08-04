@@ -169,7 +169,7 @@ entry_p m_add (entry_p contxt)
 entry_p m_lt(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
         ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) < 0) ||
          (!(a1->type == STRING && a2->type == STRING) && num(a1) < num(a2))) ? 1 : 0
@@ -183,7 +183,7 @@ entry_p m_lt(entry_p contxt)
 entry_p m_lte(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
         ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) <= 0) ||
          (!(a1->type == STRING && a2->type == STRING) && num(a1) <= num(a2))) ? 1 : 0
@@ -197,7 +197,7 @@ entry_p m_lte(entry_p contxt)
 entry_p m_gt(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
         ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) > 0) ||
          (!(a1->type == STRING && a2->type == STRING) && num(a1) > num(a2))) ? 1 : 0
@@ -211,7 +211,7 @@ entry_p m_gt(entry_p contxt)
 entry_p m_gte(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
         ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) >= 0) ||
          (!(a1->type == STRING && a2->type == STRING) && num(a1) >= num(a2))) ? 1 : 0
@@ -225,7 +225,7 @@ entry_p m_gte(entry_p contxt)
 entry_p m_eq(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
         ((a1->type == STRING && a2->type == STRING && !strcmp(a1->name, a2->name)) ||
          (!(a1->type == STRING && a2->type == STRING) && num(a1) == num(a2))) ? 1 : 0
@@ -239,7 +239,7 @@ entry_p m_eq(entry_p contxt)
 entry_p m_sub(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
          num(a1) - num(a2)
     );
@@ -259,7 +259,7 @@ entry_p m_mul(entry_p contxt)
         s *= num(*cur);
         cur++; 
     }
-    return new_number(s); 
+    RNUM(s); 
 }
 
 /* 
@@ -272,7 +272,7 @@ entry_p m_div(entry_p contxt)
     int d = num(a2); 
     if(d)
     {
-        return new_number(num(a1) / d); 
+        RNUM(num(a1) / d); 
     }
     else
     {
@@ -443,7 +443,7 @@ entry_p m_fmt(entry_p contxt)
 entry_p m_and(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
         num(a1) && num(a2)
     );
@@ -456,7 +456,7 @@ entry_p m_and(entry_p contxt)
 entry_p m_or(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
         num(a1) || num(a2)
     );
@@ -469,7 +469,7 @@ entry_p m_or(entry_p contxt)
 entry_p m_xor(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
         (num(a1) && !num(a2)) || 
         (num(a2) && !num(a1)) 
@@ -483,7 +483,7 @@ entry_p m_xor(entry_p contxt)
 entry_p m_not(entry_p contxt)
 {
     ARGS(1); 
-    return new_number
+    RNUM
     (
          !num(a1)
     );
@@ -496,7 +496,7 @@ entry_p m_not(entry_p contxt)
 entry_p m_bitand(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
          num(a1) & num(a2)
     );
@@ -509,7 +509,7 @@ entry_p m_bitand(entry_p contxt)
 entry_p m_bitor(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
          num(a1) | num(a2)
     );
@@ -522,7 +522,7 @@ entry_p m_bitor(entry_p contxt)
 entry_p m_bitxor(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
          num(a1) ^ num(a2)
     );
@@ -535,7 +535,7 @@ entry_p m_bitxor(entry_p contxt)
 entry_p m_bitnot(entry_p contxt)
 {
     ARGS(1); 
-    return new_number
+    RNUM
     (
          ~num(a1)
     );
@@ -548,7 +548,7 @@ entry_p m_bitnot(entry_p contxt)
 entry_p m_shiftleft(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
          num(a1) << num(a2)
     );
@@ -561,7 +561,7 @@ entry_p m_shiftleft(entry_p contxt)
 entry_p m_shiftright(entry_p contxt)
 {
     ARGS(2); 
-    return new_number
+    RNUM
     (
          num(a1) >> num(a2)
     );
@@ -583,7 +583,7 @@ entry_p m_in(entry_p contxt)
             m += 1 << num(*cur);
             cur++; 
         }
-        return new_number(num(a1) & m); 
+        RNUM(num(a1) & m); 
     }
     error(PANIC);
     return new_failure();
@@ -889,7 +889,7 @@ entry_p m_getsize(entry_p contxt)
         fseek(f, 0L, SEEK_END);
         s = ftell(f);
         fclose(f); 
-        return new_number((int) s); 
+        RNUM((int) s); 
     }
     else
     {
@@ -917,7 +917,7 @@ entry_p m_getsum(entry_p contxt)
             n = ~s; 
         }
         fclose(f); 
-        return new_number(s); 
+        RNUM(s); 
     }
     else
     {
@@ -1175,11 +1175,11 @@ entry_p m_tackon(entry_p contxt)
     size_t lp = strlen(p), lf = strlen(f); 
     if(!lp) 
     {
-        return new_string(strdup(f)); 
+        RSTR(strdup(f)); 
     }
     if(!lf) 
     {
-        return new_string(strdup(p)); 
+        RSTR(strdup(p)); 
     }
     if(f[lf - 1] == '/' ||
        f[lf - 1] == ':') 
@@ -1209,7 +1209,7 @@ entry_p m_tackon(entry_p contxt)
             }
         }
         strcat(r, f); 
-        return new_string(r); 
+        RSTR(r); 
     }
     error(PANIC); 
     return new_failure(); 
