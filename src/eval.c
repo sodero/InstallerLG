@@ -106,13 +106,12 @@ int num(entry_p entry)
         {
             case CONTXT:
             case STATUS:
-            case NUMBER:
             case DANGLE:
-            case OPTION:
             case CUSTOM:
+            case OPTION:
+                break;
+            case NUMBER:
                 return entry->id;
-            case STRING:
-                return atoi(entry->name);
             case SYMBOL:
                 return num(entry->resolved); 
             case SYMREF:
@@ -120,6 +119,8 @@ int num(entry_p entry)
             case CUSREF:
             case NATIVE:
                 return num(entry->call ? entry->call(entry) : NULL); 
+            case STRING:
+                return atoi(entry->name);
         }
     }
     error(PANIC);
@@ -136,9 +137,9 @@ const char *str(entry_p entry)
             case CONTXT:
             case STATUS:
             case DANGLE:
-                break;
             case CUSTOM:
             case OPTION:
+                break;
             case STRING:
                 return entry->name;
             case SYMBOL:

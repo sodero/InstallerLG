@@ -425,7 +425,7 @@ entry_p m_fmt(entry_p contxt)
         else
         if(ret)
         {
-            return new_string(ret); 
+            RSTR(ret); 
         }
     }
     else
@@ -717,7 +717,7 @@ entry_p m_cat(entry_p contxt)
               contxt->children[i] != end()) 
         {
             size_t ln; 
-            char *s = str(contxt->children[i++]); 
+            const char *s = str(contxt->children[i++]); 
             if(runtime_error())
             {
                 free(buf); 
@@ -754,7 +754,7 @@ entry_p m_cat(entry_p contxt)
         } 
         if(buf)
         {
-            return new_string(buf); 
+            RSTR(buf); 
         }
     }
     error(PANIC);
@@ -804,7 +804,7 @@ entry_p m_earlier(entry_p contxt)
 entry_p m_fileonly(entry_p contxt)
 {
     ARGS(1); 
-    char *s = str(a1); 
+    const char *s = str(a1); 
     size_t l = strlen(s), i = l - 1;
     if(l && 
        s[i] != '/' &&
@@ -818,7 +818,7 @@ entry_p m_fileonly(entry_p contxt)
         if(r)
         {
             memcpy(r, s + i, l - i); 
-            return new_string(r); 
+            RSTR(r); 
         }
         error(PANIC); 
     }
@@ -881,7 +881,7 @@ entry_p m_getenv(entry_p contxt)
 entry_p m_getsize(entry_p contxt)
 {
     ARGS(1); 
-    char *n = str(a1); 
+    const char *n = str(a1); 
     FILE *f = fopen(n, "r"); 
     if(f)
     {
@@ -958,7 +958,7 @@ entry_p m_iconinfo(entry_p contxt)
 entry_p m_pathonly(entry_p contxt)
 {
     ARGS(1); 
-    char *s = str(a1); 
+    const char *s = str(a1); 
     size_t i = strlen(s); 
     if(i)
     {
@@ -972,14 +972,14 @@ entry_p m_pathonly(entry_p contxt)
                 if(r)
                 {
                     memcpy(r, s, i + 1); 
-                    return new_string(r); 
+                    RSTR(r); 
                 }
                 error(PANIC); 
                 return new_failure(); 
             }
         }
     }
-    return new_string(strdup("")); 
+    RSTR(strdup("")); 
 }
 
 /*
@@ -1046,7 +1046,8 @@ entry_p m_substr(entry_p contxt)
        a2->children[0] && 
        a2->children[0] != end()) 
     {
-        char *r, *s = str(a1);
+        char *r; 
+        const char *s = str(a1);
         size_t n, l = strlen(s); 
         size_t i = num(a2->children[0]) > 0 ? (size_t) 
                    num(a2->children[0]) : 0; 
@@ -1063,7 +1064,7 @@ entry_p m_substr(entry_p contxt)
         if(r)
         {
             memcpy(r, s + i, n); 
-            return new_string(r); 
+            RSTR(r); 
         }
     }
     error(PANIC);
@@ -1169,7 +1170,8 @@ entry_p m_symbolval(entry_p contxt)
 entry_p m_tackon(entry_p contxt)
 {
     ARGS(2); 
-    char *p = str(a1), *f = str(a2), *r; 
+    char *r; 
+    const char *p = str(a1), *f = str(a2); 
     size_t lp = strlen(p), lf = strlen(f); 
     if(!lp) 
     {

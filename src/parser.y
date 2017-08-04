@@ -181,51 +181,51 @@ vp:             add                         |
                 tooltype                    |
                 trap                        |
                 complete                    ;
-fmt:            '(' STR ps ')'              { $$ = new_native($2, LINE, m_fmt, $3, DANGLE); } |
-                '(' STR ')'                 { $$ = new_native($2, LINE, m_fmt, NULL, DANGLE); };
+fmt:            '(' STR ps ')'              { $$ = new_native($2, LINE, m_fmt, $3, STRING); } |
+                '(' STR ')'                 { $$ = new_native($2, LINE, m_fmt, NULL, STRING); };
 dcl:            '(' DCL SYM par s ')'       { $$ = new_custom($3, LINE, $4, $5); } |
                 '(' DCL SYM s ')'           { $$ = new_custom($3, LINE, NULL, $4); };
 cus:            '(' SYM ps ')'              { $$ = new_cusref($2, LINE, $3); } |
                 '(' SYM ')'                 { $$ = new_cusref($2, LINE, NULL); };
 add:            '(' '+' ps ')'              { $$ = new_native(strdup("+"), LINE, m_add, $3, NUMBER); };
-mul:            '(' '*' ps ')'              { $$ = new_native(strdup("*"), LINE, m_mul, $3, DANGLE); };
-sub:            '(' '-' pp ')'              { $$ = new_native(strdup("-"), LINE, m_sub, $3, DANGLE); };
-div:            '(' '/' pp ')'              { $$ = new_native(strdup("/"), LINE, m_div, $3, DANGLE); };
-lt:             '(' '<' pp ')'              { $$ = new_native(strdup("<"), LINE, m_lt, $3, DANGLE); };
-lte:            '(' LTE pp ')'              { $$ = new_native(strdup("<="), LINE, m_lte, $3, DANGLE); };
-gt:             '(' '>' pp ')'              { $$ = new_native(strdup(">"), LINE, m_gt, $3, DANGLE); };
-gte:            '(' GTE pp ')'              { $$ = new_native(strdup(">="), LINE, m_gte, $3, DANGLE); };
-eq:             '(' '=' pp ')'              { $$ = new_native(strdup("="), LINE, m_eq, $3, DANGLE); };
+mul:            '(' '*' ps ')'              { $$ = new_native(strdup("*"), LINE, m_mul, $3, NUMBER); };
+sub:            '(' '-' pp ')'              { $$ = new_native(strdup("-"), LINE, m_sub, $3, NUMBER); };
+div:            '(' '/' pp ')'              { $$ = new_native(strdup("/"), LINE, m_div, $3, NUMBER); };
+lt:             '(' '<' pp ')'              { $$ = new_native(strdup("<"), LINE, m_lt, $3, NUMBER); };
+lte:            '(' LTE pp ')'              { $$ = new_native(strdup("<="), LINE, m_lte, $3, NUMBER); };
+gt:             '(' '>' pp ')'              { $$ = new_native(strdup(">"), LINE, m_gt, $3, NUMBER); };
+gte:            '(' GTE pp ')'              { $$ = new_native(strdup(">="), LINE, m_gte, $3, NUMBER); };
+eq:             '(' '=' pp ')'              { $$ = new_native(strdup("="), LINE, m_eq, $3, NUMBER); };
 set:            '(' SET sps ')'             { $$ = new_native(strdup("set"), LINE, m_set, $3, DANGLE); };
 if:             '(' IF cvv ')'              { $$ = new_native(strdup("if"), LINE, m_if, $3, DANGLE); };
 while:          '(' WHILE cv ')'            { $$ = new_native(strdup("while"), LINE, m_while, $3, DANGLE); };
 until:          '(' UNTIL cv ')'            { $$ = new_native(strdup("until"), LINE, m_until, $3, DANGLE); };
-and:            '(' AND pp ')'              { $$ = new_native(strdup("AND"), LINE, m_and, $3, DANGLE); }; 
-or:             '(' OR pp ')'               { $$ = new_native(strdup("OR"), LINE, m_or, $3, DANGLE); }; 
-xor:            '(' XOR pp ')'              { $$ = new_native(strdup("XOR"), LINE, m_xor, $3, DANGLE); }; 
-not:            '(' NOT p ')'               { $$ = new_native(strdup("NOT"), LINE, m_not, push(new_contxt(), $3), DANGLE); }; 
-bitand:         '(' BITAND pp ')'           { $$ = new_native(strdup("BITAND"), LINE, m_bitand, $3, DANGLE); }; 
-bitor:          '(' BITOR pp ')'            { $$ = new_native(strdup("BITOR"), LINE, m_bitor, $3, DANGLE); }; 
-bitxor:         '(' BITXOR pp ')'           { $$ = new_native(strdup("BITXOR"), LINE, m_bitxor, $3, DANGLE); }; 
-bitnot:         '(' BITNOT p ')'            { $$ = new_native(strdup("BITNOT"), LINE, m_bitnot, push(new_contxt(), $3), DANGLE); }; 
-shiftleft:      '(' SHIFTLEFT pp ')'        { $$ = new_native(strdup("shiftleft"), LINE, m_shiftleft, $3, DANGLE); }; 
-shiftright:     '(' SHIFTRIGHT pp ')'       { $$ = new_native(strdup("shiftright"), LINE, m_shiftright, $3, DANGLE); }; 
-in:             '(' IN p ps ')'             { $$ = new_native(strdup("IN"), LINE, m_in, push(push(new_contxt(), $3), $4), DANGLE); }; 
+and:            '(' AND pp ')'              { $$ = new_native(strdup("AND"), LINE, m_and, $3, NUMBER); }; 
+or:             '(' OR pp ')'               { $$ = new_native(strdup("OR"), LINE, m_or, $3, NUMBER); }; 
+xor:            '(' XOR pp ')'              { $$ = new_native(strdup("XOR"), LINE, m_xor, $3, NUMBER); }; 
+not:            '(' NOT p ')'               { $$ = new_native(strdup("NOT"), LINE, m_not, push(new_contxt(), $3), NUMBER); }; 
+bitand:         '(' BITAND pp ')'           { $$ = new_native(strdup("BITAND"), LINE, m_bitand, $3, NUMBER); }; 
+bitor:          '(' BITOR pp ')'            { $$ = new_native(strdup("BITOR"), LINE, m_bitor, $3, NUMBER); }; 
+bitxor:         '(' BITXOR pp ')'           { $$ = new_native(strdup("BITXOR"), LINE, m_bitxor, $3, NUMBER); }; 
+bitnot:         '(' BITNOT p ')'            { $$ = new_native(strdup("BITNOT"), LINE, m_bitnot, push(new_contxt(), $3), NUMBER); }; 
+shiftleft:      '(' SHIFTLEFT pp ')'        { $$ = new_native(strdup("shiftleft"), LINE, m_shiftleft, $3, NUMBER); }; 
+shiftright:     '(' SHIFTRIGHT pp ')'       { $$ = new_native(strdup("shiftright"), LINE, m_shiftright, $3, NUMBER); }; 
+in:             '(' IN p ps ')'             { $$ = new_native(strdup("IN"), LINE, m_in, push(push(new_contxt(), $3), $4), NUMBER); }; 
 strlen:         '(' STRLEN p ')'            { $$ = new_native(strdup("strlen"), LINE, m_strlen, push(new_contxt(), $3), NUMBER); }; 
-substr:         '(' SUBSTR p ps ')'         { $$ = new_native(strdup("substr"), LINE, m_substr, push(push(new_contxt(), $3), $4), DANGLE); }; 
-askdir:         '(' ASKDIR ')'              { $$ = new_native(strdup("askdir"), LINE, m_askdir, NULL, DANGLE); };
-askfile:        '(' ASKFILE ')'             { $$ = new_native(strdup("askfile"), LINE, m_askfile, NULL, DANGLE); };
-askstring:      '(' ASKSTRING ')'           { $$ = new_native(strdup("askstring"), LINE, m_askstring, NULL, DANGLE); };
+substr:         '(' SUBSTR p ps ')'         { $$ = new_native(strdup("substr"), LINE, m_substr, push(push(new_contxt(), $3), $4), STRING); }; 
+askdir:         '(' ASKDIR ')'              { $$ = new_native(strdup("askdir"), LINE, m_askdir, NULL, STRING); };
+askfile:        '(' ASKFILE ')'             { $$ = new_native(strdup("askfile"), LINE, m_askfile, NULL, STRING); };
+askstring:      '(' ASKSTRING ')'           { $$ = new_native(strdup("askstring"), LINE, m_askstring, NULL, STRING); };
 asknumber:      '(' ASKNUMBER ')'           { $$ = new_native(strdup("asknumber"), LINE, m_asknumber, NULL, DANGLE); };
 askchoice:      '(' ASKCHOICE ')'           { $$ = new_native(strdup("askchoice"), LINE, m_askchoice, NULL, DANGLE); };
 askoptions:     '(' ASKOPTIONS ')'          { $$ = new_native(strdup("askoptions"), LINE, m_askoptions, NULL, DANGLE); };
 askbool:        '(' ASKBOOL ')'             { $$ = new_native(strdup("askbool"), LINE, m_askbool, NULL, DANGLE); };
 askdisk:        '(' ASKDISK ')'             { $$ = new_native(strdup("askdisk"), LINE, m_askdisk, NULL, DANGLE); };
-cat:            '(' CAT ps ')'              { $$ = new_native(strdup("cat"), LINE, m_cat, $3, DANGLE); };
+cat:            '(' CAT ps ')'              { $$ = new_native(strdup("cat"), LINE, m_cat, $3, STRING); };
 exists:         '(' EXISTS p ')'            { $$ = new_native(strdup("exists"), LINE, m_exists, push(new_contxt(), $3), DANGLE); }; 
 expandpath:     '(' EXPANDPATH p ')'        { $$ = new_native(strdup("expandpath"), LINE, m_expandpath, push(new_contxt(), $3), DANGLE); }; 
 earlier:        '(' EARLIER pp ')'          { $$ = new_native(strdup("earlier"), LINE, m_earlier, $3, DANGLE); }; 
-fileonly:       '(' FILEONLY p ')'          { $$ = new_native(strdup("fileonly"), LINE, m_fileonly, push(new_contxt(), $3), DANGLE); }; 
+fileonly:       '(' FILEONLY p ')'          { $$ = new_native(strdup("fileonly"), LINE, m_fileonly, push(new_contxt(), $3), STRING); }; 
 getassign:      '(' GETASSIGN pp ')'        { $$ = new_native(strdup("getassign"), LINE, m_getassign, $3, DANGLE); }; 
 getdevice:      '(' GETDEVICE p ')'         { $$ = new_native(strdup("getdevice"), LINE, m_getdevice, push(new_contxt(), $3), DANGLE); }; 
 getdiskspace:   '(' GETDISKSPACE p ')'      { $$ = new_native(strdup("getdiskspace"), LINE, m_getdiskspace, push(new_contxt(), $3), DANGLE); }; 
@@ -234,7 +234,7 @@ getsize:        '(' GETSIZE p ')'           { $$ = new_native(strdup("getsize"),
 getsum:         '(' GETSUM p ')'            { $$ = new_native(strdup("getsum"), LINE, m_getsum, push(new_contxt(), $3), DANGLE); }; 
 getversion:     '(' GETVERSION p ')'        { $$ = new_native(strdup("getversion"), LINE, m_getversion, push(new_contxt(), $3), DANGLE); }; 
 iconinfo:       '(' ICONINFO p ')'          { $$ = new_native(strdup("iconinfo"), LINE, m_iconinfo, push(new_contxt(), $3), DANGLE); }; 
-pathonly:       '(' PATHONLY p ')'          { $$ = new_native(strdup("pathonly"), LINE, m_pathonly, push(new_contxt(), $3), DANGLE); }; 
+pathonly:       '(' PATHONLY p ')'          { $$ = new_native(strdup("pathonly"), LINE, m_pathonly, push(new_contxt(), $3), STRING); }; 
 patmatch:       '(' PATMATCH pp ')'         { $$ = new_native(strdup("patmatch"), LINE, m_patmatch, $3, DANGLE); }; 
 select:         '(' SELECT p ps ')'         { $$ = new_native(strdup("select"), LINE, m_select, push(push(new_contxt(), $3), $4), DANGLE); }; 
 symbolset:      '(' SYMBOLSET pp ')'        { $$ = new_native(strdup("symbolset"), LINE, m_symbolset, $3, DANGLE); }; 
