@@ -26,9 +26,9 @@ entry_p m_gosub(entry_p contxt)
                 {
                     while(*arg && *ina)
                     {
-                        entry_p old = (*arg)->resolved;
+ //                       entry_p old = (*arg)->resolved;
                         (*arg)->resolved = resolve(*ina); 
-                        kill(old); 
+//                        kill(old); 
                         arg++; 
                         ina++;
                     }
@@ -106,7 +106,7 @@ static entry_p m_whunt(entry_p contxt, int m)
     {
         if(a2->type == CONTXT)
         {
-            kill(r); 
+//            kill(r); 
             r = invoke(a2);
         }
         else if(a2->type == NATIVE ||
@@ -114,7 +114,7 @@ static entry_p m_whunt(entry_p contxt, int m)
         {
             if(a2->call)
             {
-                kill(r); 
+ //               kill(r); 
                 r = a2->call(a2); 
             }
             else
@@ -375,7 +375,7 @@ entry_p m_fmt(entry_p contxt)
                         error(contxt->id, "Format string type mismatch", 
                         contxt->name); 
                     }
-                    kill(cur); 
+                 //   kill(cur); 
                     if(runtime_error())
                     {
                         arg = NULL; 
@@ -1092,8 +1092,8 @@ entry_p m_symbolset(entry_p contxt)
                 if(!strcmp(contxt->symbols[i]->name, str(a1)))
                 {
                     kill(contxt->symbols[i]->expression);
-                    contxt->symbols[i]->expression = resolve(res); 
-                    kill(contxt->symbols[i]->resolved);
+                    contxt->symbols[i]->expression = clone(resolve(res)); 
+                   // kill(contxt->symbols[i]->resolved);
                     contxt->symbols[i]->resolved = resolve(res); 
                     return res; 
                 }
@@ -1119,7 +1119,7 @@ entry_p m_symbolset(entry_p contxt)
             }
             if(!contxt->symbols[i])
             {
-                entry_p sym = new_symbol(strdup(str(a1)), resolve(res)); 
+                entry_p sym = new_symbol(strdup(str(a1)), clone(resolve(res))); 
                 if(sym)
                 {
                     res->parent = a2; 
@@ -1129,7 +1129,7 @@ entry_p m_symbolset(entry_p contxt)
                     return res; 
                 }
             }
-            kill(res); 
+            //kill(res); 
         }
     }
     error(PANIC); 

@@ -6,6 +6,7 @@
   
 entry_p init(entry_p contxt)
 {
+return contxt; 
     push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
                  new_symbol(strdup("@init-done"), 
                  new_string(strdup("")))), DANGLE)); ror(contxt->children);

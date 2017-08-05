@@ -67,3 +67,15 @@ Kolla hur MorphOS-varianten beter sig:
 Du skulle kunna anvanda ->resolved for native-funktioner ocksa. Det hade
 blivit rappt och fint (och du kan ha oandligt langa strangar i str())
 
+----
+Vad ar egentligen vardet av expression? Borde inte detta egentligen bara
+vara ett argument i set / setsymbol osv. Det ar ju bara dar det evalueras
+eller? 
+
+
+
+
+
+
+
+

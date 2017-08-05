@@ -346,7 +346,6 @@ void kill(entry_p entry)
        entry->type != STATUS &&
        entry->type != DANGLE)
     {
-        kill(entry->resolved);
         kill(entry->expression);
         if(entry->symbols && (
            entry->type == NATIVE || 

@@ -50,6 +50,23 @@ static entry_p resolve_native(entry_p entry)
     return new_failure();
 }
  
+// Temp. not needed later on. 
+entry_p clone(entry_p entry)
+{
+    if(entry && (entry->type == NUMBER || entry->type == STRING))
+    {
+        entry_p ret = malloc(sizeof(entry_t)); 
+        if(ret)
+        {
+            memmove(ret, entry, sizeof(entry_t)); 
+            ret->name = entry->name ? strdup(entry->name) : NULL; 
+            return ret; 
+        }
+    }
+    error(PANIC);
+    return new_failure(); 
+}
+
 entry_p resolve(entry_p entry)
 {
     if(entry)
@@ -57,6 +74,14 @@ entry_p resolve(entry_p entry)
         entry_p ret; 
         switch(entry->type)
         {
+            case NUMBER:
+            case STRING:
+            case CUSTOM:
+            case STATUS: 
+            case OPTION: 
+            case DANGLE:
+                return entry; 
+/*
             case NUMBER:
             case STRING:
             case CUSTOM:
@@ -68,22 +93,14 @@ entry_p resolve(entry_p entry)
                     return ret; 
                 }
                 break;
-
+*/
             case SYMBOL: 
                 return resolve(entry->expression);
-
             case SYMREF: 
                 ret = find_symbol(entry); 
                 return ret->resolved ? resolve(ret->resolved) : new_failure(); 
-
             case CONTXT: 
                 return invoke(entry);
-
-            case STATUS: 
-            case OPTION: 
-            case DANGLE:
-                return entry; 
-
             case CUSREF:
             case NATIVE:
                 if(entry->call)
@@ -197,6 +214,7 @@ void run(entry_p entry)
     entry_p status = invoke(entry);
     eval_print(status);
 //    kill(status);
+//pretty_print(entry); 
     kill(entry);
 }
 
