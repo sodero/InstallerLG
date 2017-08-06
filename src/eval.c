@@ -39,6 +39,7 @@ static entry_p find_symbol(entry_p entry)
     return new_failure();
 }
 
+/*
 static entry_p resolve_native(entry_p entry)
 {
     if(entry->call)
@@ -49,6 +50,7 @@ static entry_p resolve_native(entry_p entry)
     error(PANIC);
     return new_failure();
 }
+*/
  
 // Temp. not needed later on. 
 entry_p clone(entry_p entry)
@@ -191,21 +193,23 @@ entry_p invoke(entry_p entry)
                *vec != end() &&
                !runtime_error())
         {
-            entry_p cur = *vec; 
-            if(cur && ( 
-               cur->type == NATIVE ||
-               cur->type == CUSREF))
+            if((*vec)->type == NATIVE ||
+               (*vec)->type == CUSREF)
             {
             //    kill(ret);
-                ret = resolve_native(cur);
+                //ret = resolve_native(*vec);
+                if((*vec)->call)
+                {
+//pretty_print(*vec); 
+                    ret = (*vec)->call(*vec); 
+//HERE; 
+                }
             }
             vec++; 
         }
+        return ret;
     }
-    else
-    {
-        error(PANIC);
-    }
+    error(PANIC);
     return ret;
 }
 

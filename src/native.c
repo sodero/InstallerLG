@@ -58,16 +58,17 @@ entry_p m_set(entry_p contxt)
         entry_p *cur = contxt->symbols; 
         while(*cur && *cur != end())
         {
-            entry_p old = (*cur)->resolved;
+        //    entry_p old = (*cur)->resolved;
             val = (*cur)->expression;
             (*cur)->resolved = resolve(val); 
             (*cur)->resolved->parent = val; 
             val = (*cur)->resolved;
             push(dst, *cur); 
-            kill(old);
+         //   kill(old);
             cur++; 
         }
-        return resolve(val);
+        //return resolve(val);
+        return val;
     }
     error(PANIC);
     return new_failure(); 
@@ -101,20 +102,24 @@ static entry_p m_whunt(entry_p contxt, int m)
 {
     ARGS(2); 
     entry_p r = new_failure(); 
+// Den har maste du skriva om, den ar idiotisk
     while((m ^ num(a1)) && 
           !runtime_error())
     {
         if(a2->type == CONTXT)
         {
 //            kill(r); 
+//HERE;
             r = invoke(a2);
         }
-        else if(a2->type == NATIVE ||
+        else if(a2->type == NATIVE || // Ar detta nogonsin sant?
                 a2->type == CUSREF)
         {
+            error(PANIC); 
             if(a2->call)
             {
  //               kill(r); 
+//HERE;
                 r = a2->call(a2); 
             }
             else
