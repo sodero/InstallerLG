@@ -54,6 +54,7 @@ entry_p m_set(entry_p contxt)
     entry_p dst = global(contxt);
     if (dst)
     {
+// Skriv om 
         entry_p val = NULL; 
         entry_p *cur = contxt->symbols; 
         while(*cur && *cur != end())
@@ -1125,12 +1126,14 @@ entry_p m_symbolset(entry_p contxt)
             if(!contxt->symbols[i])
             {
                 entry_p sym = new_symbol(strdup(str(a1)), clone(resolve(res))); 
+//pretty_print(res); 
                 if(sym)
                 {
                     res->parent = a2; 
-                    sym->resolved = resolve(res); 
+                    sym->resolved = clone(resolve(res)); 
                     contxt->symbols[i] = sym; 
                     push(global(contxt), sym); 
+//pretty_print(sym); 
                     return res; 
                 }
             }
