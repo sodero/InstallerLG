@@ -61,6 +61,7 @@ entry_p new_string(char *n)
     return NULL; 
 }
 
+/*
 static entry_p new_status(int s)
 {
     static entry_t status; 
@@ -73,25 +74,29 @@ entry_p new_success(void)
 {
     return new_status(1); 
 }
+*/
 
 entry_p new_failure(void) 
 {
-    return new_status(0); 
+    static entry_t status; 
+    status.type = STATUS; 
+    status.id = 0; 
+    return &status; 
 }
 
-entry_p new_symbol(char *n, entry_p e) 
+entry_p new_symbol(char *n) //, entry_p e) 
 {
-    if(n && e)
+    if(n) // && e)
     {
         entry_p entry = calloc(1, sizeof(entry_t)); 
         if(entry)
         {
             entry->type = SYMBOL; 
             entry->name = n;
-            entry->expression = e;
-            entry->resolved = new_dangle();
-            entry->resolved->parent = entry; 
-            e->parent = entry; 
+       //     entry->expression = e;
+       //     entry->resolved = new_dangle();
+       //     entry->resolved->parent = entry; 
+       //     e->parent = entry; 
             return entry; 
         }
     }
@@ -346,7 +351,7 @@ void kill(entry_p entry)
        entry->type != STATUS &&
        entry->type != DANGLE)
     {
-        kill(entry->expression);
+//        kill(entry->expression);
         if(entry->symbols && (
            entry->type == NATIVE || 
            entry->type == CUSTOM ))

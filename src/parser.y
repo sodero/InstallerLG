@@ -24,8 +24,8 @@
 %token<n>                   INT HEX BIN 
 %type<e>                    start 
 %destructor { run($$);  }   start 
-%type<e>                    s p pp ps vp vps opt opts vpb np sp sps par cv cvv
-%destructor { kill($$); }   s p pp ps vp vps opt opts vpb np sp sps par cv cvv
+%type<e>                    s p pp ps vp vps opt opts vpb np sps par cv cvv
+%destructor { kill($$); }   s p pp ps vp vps opt opts vpb np sps par cv cvv
 %type<e>                    add sub div mul lt lte gt gte eq set cus dcl fmt if while until
 %destructor { kill($$); }   add sub div mul lt lte gt gte eq set cus dcl fmt if while until
 %type<e>                    and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
@@ -54,11 +54,10 @@ np:             INT                         { $$ = new_number($1); } |
                 BIN                         { $$ = new_number($1); } |
                 STR                         { $$ = new_string($1); } |
                 SYM                         { $$ = new_symref($1, LINE); };
-sp:             SYM p                       { $$ = new_symbol($1, $2); };
-sps:            sps sp                      { $$ = push($1, $2); } |
-                sp                          { $$ = push(new_contxt(), $1); };
-par:            par SYM                     { $$ = push($1, new_symbol($2, new_dangle())); } |
-                SYM                         { $$ = push(new_contxt(), new_symbol($1, new_dangle())); };
+sps:            sps SYM p                   { $$ = push(push($1, new_symbol($2)), $3) ; } |
+                SYM p                       { $$ = push(push(new_contxt(), new_symbol($1)), $2); };
+par:            par SYM                     { $$ = push($1, new_symbol($2)); } |
+                SYM                         { $$ = push(new_contxt(), new_symbol($1)); };
 cv:             p vpb                       { $$ = push(push(new_contxt(), $1), $2); };
 cvv:            p vpb vpb                   { $$ = push(push(push(new_contxt(), $1), $2), $3); };
 opt:            all                         |            

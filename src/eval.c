@@ -73,7 +73,7 @@ entry_p resolve(entry_p entry)
 {
     if(entry)
     {
-        entry_p ret; 
+        //entry_p ret; 
         switch(entry->type)
         {
             case NUMBER:
@@ -83,33 +83,17 @@ entry_p resolve(entry_p entry)
             case OPTION: 
             case DANGLE:
                 return entry; 
-/*
-            case NUMBER:
-            case STRING:
-            case CUSTOM:
-                ret = malloc(sizeof(entry_t)); 
-                if(ret)
-                {
-                    memmove(ret, entry, sizeof(entry_t)); 
-                    ret->name = entry->name ? strdup(entry->name) : NULL; 
-                    return ret; 
-                }
-                break;
-*/
             case SYMBOL: 
-                return resolve(entry->expression);
+               // return resolve(entry->expression);
+                return entry->resolved ? entry->resolved : new_failure(); 
             case SYMREF: 
-                ret = find_symbol(entry); 
-                return ret->resolved ? resolve(ret->resolved) : new_failure(); 
+                return resolve(find_symbol(entry)); 
+               // return ret->resolved ? resolve(ret->resolved) : new_failure(); 
             case CONTXT: 
                 return invoke(entry);
             case CUSREF:
             case NATIVE:
-                if(entry->call)
-                {
-                    return entry->call(entry); 
-                }
-                break;
+                return entry->call ? entry->call(entry) : new_failure(); 
         }
     }
     error(PANIC);

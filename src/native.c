@@ -51,6 +51,8 @@ entry_p m_gosub(entry_p contxt)
 */
 entry_p m_set(entry_p contxt)
 {
+    return contxt; 
+/*
     entry_p dst = global(contxt);
     if (dst)
     {
@@ -73,6 +75,8 @@ entry_p m_set(entry_p contxt)
     }
     error(PANIC);
     return new_failure(); 
+*/
+
 }
 
 /*
@@ -1084,6 +1088,8 @@ entry_p m_substr(entry_p contxt)
 */
 entry_p m_symbolset(entry_p contxt)
 {
+    return contxt; 
+/*
     ARGS(2); 
     if(contxt->symbols)
     {
@@ -1142,6 +1148,7 @@ entry_p m_symbolset(entry_p contxt)
     }
     error(PANIC); 
     return new_failure(); 
+*/
 }
 
 /*

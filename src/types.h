@@ -70,7 +70,7 @@ struct entry_s
     int id; 
     char *name; 
     call_t call; 
-    entry_p expression; 
+//    entry_p expression; 
     entry_p resolved; 
     entry_p *children; 
     entry_p *symbols; 

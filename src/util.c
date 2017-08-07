@@ -63,6 +63,7 @@ void pretty_print(entry_p entry)
         {
             printf("%sName:\t%s\n", tabs(ind), entry->name);
         }
+/*
         if(entry->expression) 
         {
             printf ("%sExp:\t", tabs(ind));
@@ -70,6 +71,7 @@ void pretty_print(entry_p entry)
             pretty_print (entry->expression);
             ind--; 
         }
+*/
         if(entry->resolved) 
         {
             printf ("%sRes:\t", tabs(ind));
