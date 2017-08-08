@@ -310,7 +310,7 @@ static entry_p append(entry_p **dst, entry_p e)
 
 entry_p push(entry_p dst, entry_p src)
 {
-    if (dst && src)
+    if(dst && src)
     {
         size_t u = 0; 
         entry_p **dst_p = &dst->children;
@@ -323,7 +323,7 @@ entry_p push(entry_p dst, entry_p src)
                 entry_p cur = dst->symbols[u]; 
                 char *old = cur->name, 
                      *new = src->name; 
-                if (strcmp (old, new) == 0)
+                if(strcmp (old, new) == 0)
                 {
                     dst->symbols[u] = src;
                     src->parent = dst; 
@@ -335,49 +335,24 @@ entry_p push(entry_p dst, entry_p src)
         }
         if(*dst_p)
         {
-            entry_p *new; 
-            size_t new_size; 
-            // Free space? 
-            while ((*dst_p)[u] != end())
+            if(src->type == CUSTOM)
             {
-                if (!(*dst_p)[u])
+                while ((*dst_p)[u] &&
+                       (*dst_p)[u] != end())
                 {
-                    // If true, push and return
-                    (*dst_p)[u] = src; 
-                    src->parent = dst; 
-                    return dst; 
-                }
-                else if(src->type == CUSTOM &&
-                       (*dst_p)[u]->type == CUSTOM) 
-                {
-                    if(!strcmp(src->name, (*dst_p)[u]->name))
+                    if((*dst_p)[u]->type == CUSTOM &&
+                       !strcmp(src->name, (*dst_p)[u]->name))
                     {
                         error(src->id, "Procedure naming collision", 
                               src->name); 
+                        return dst; 
                     }
+                    u++; 
                 }
-                u++;
             }
-            // Make the new array twice as big (+sentinel)
-/*
-            new_size = u ? u << 1 : 1;  
-            new = calloc (1 + new_size, sizeof (entry_p));
-            if (new)
-            {
-                // Insert sentinel
-                new[new_size] = end(); 
-                // Make the swap and free the old array
-                memmove (new, *dst_p, u * sizeof (entry_p)); 
-                free (*dst_p); 
-                *dst_p = new; 
-                // Do the push
-                (*dst_p)[u] = src; 
-                src->parent = dst; 
-                return dst; 
-            }
-*/
             if(append(dst_p, src))
             {
+                src->parent = dst; 
                 return dst; 
             }
         }
