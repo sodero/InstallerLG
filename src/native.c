@@ -24,11 +24,23 @@ entry_p m_gosub(entry_p contxt)
                         *ina = contxt->children;
                 if(arg && ina)
                 {
-                    while(*arg && *ina)
+                    while(*arg && *arg != end() &&
+                          *ina && *ina != end())
                     {
- //                       entry_p old = (*arg)->resolved;
-                        (*arg)->resolved = resolve(*ina); 
-//                        kill(old); 
+                        entry_p res = malloc(sizeof(entry_t)); 
+                        if(res)
+                        {
+                            memmove(res, resolve(*ina), sizeof(entry_t)); 
+                            res->name = res->name ? strdup(res->name) : NULL; 
+                            res->parent = *arg; 
+                            kill((*arg)->resolved); 
+                            (*arg)->resolved = res; 
+                        }
+                        else
+                        {
+                            error(PANIC);
+                            return new_failure(); 
+                        }
                         arg++; 
                         ina++;
                     }
@@ -51,32 +63,36 @@ entry_p m_gosub(entry_p contxt)
 */
 entry_p m_set(entry_p contxt)
 {
-    return contxt; 
-/*
     entry_p dst = global(contxt);
     if (dst)
     {
-// Skriv om 
-        entry_p val = NULL; 
-        entry_p *cur = contxt->symbols; 
-        while(*cur && *cur != end())
+        entry_p *sym = contxt->symbols, 
+                *val = contxt->children; 
+        while(*sym && *sym != end() &&
+              *val && *val != end())
         {
-        //    entry_p old = (*cur)->resolved;
-            val = (*cur)->expression;
-            (*cur)->resolved = resolve(val); 
-            (*cur)->resolved->parent = val; 
-            val = (*cur)->resolved;
-            push(dst, *cur); 
-         //   kill(old);
-            cur++; 
+            entry_p res = malloc(sizeof(entry_t)); 
+            if(res)
+            {
+                memmove(res, resolve(*val), sizeof(entry_t)); 
+                res->name = res->name ? strdup(res->name) : NULL; 
+                res->parent = *sym; 
+                kill((*sym)->resolved); 
+                (*sym)->resolved = res; 
+                push(dst, *sym); 
+            }
+            else
+            {
+                break; 
+            }
+            if(*(++sym) == *(++val))
+            {
+                return res; 
+            }
         }
-        //return resolve(val);
-        return val;
     }
     error(PANIC);
     return new_failure(); 
-*/
-
 }
 
 /*
@@ -164,6 +180,9 @@ entry_p m_add (entry_p contxt)
     ARGS(0); 
     int s = 0; 
     entry_p *cur = contxt->children; 
+//pretty_print(contxt); 
+//print_list(cur); 
+//HERE; 
     while(*cur && *cur != end())
     {
         s += num(*cur);

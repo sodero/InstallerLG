@@ -31,6 +31,23 @@ static char *tabs(unsigned int n)
     return t; 
 }
 
+void print_list(entry_p *entry)
+{
+    if(entry)
+    {
+        printf ("List:%p\n", (void *) entry);
+        while(*entry != end())
+        {
+            printf ("Item:%p\n", (void *) *entry);
+            entry++; 
+        }
+    }
+    else
+    {
+        printf ("List:NULL\n");
+    }
+}
+
 void pretty_print(entry_p entry)
 {
     static unsigned int ind = 0; 

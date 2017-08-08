@@ -93,6 +93,7 @@ entry_p new_symbol(char *n) //, entry_p e)
         {
             entry->type = SYMBOL; 
             entry->name = n;
+            entry->resolved = new_dangle();
        //     entry->expression = e;
        //     entry->resolved = new_dangle();
        //     entry->resolved->parent = entry; 
@@ -124,6 +125,7 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
                 while(*e && *e != end())
                 {
                     (*e)->parent = entry;
+                    (*e)->resolved = new_dangle();
                     e++; 
                 }
             }
@@ -164,8 +166,8 @@ static void move_contxt(entry_p dst, entry_p src)
 {
     if(dst && src)
     {
-        entry_p *c = dst->children = src->children; 
-        entry_p *s = dst->symbols = src->symbols; 
+        entry_p *s = dst->symbols = src->symbols,
+                *c = dst->children = src->children; 
         while(*c && *c != end())
         {
             (*c)->parent = dst; 
@@ -273,6 +275,39 @@ entry_p new_dangle(void)
     return &dangle; 
 }
 
+static entry_p append(entry_p **dst, entry_p e)
+{
+    if(dst && *dst)
+    {
+        size_t n = 0; 
+        while((*dst)[n] && 
+              (*dst)[n] != end())
+        {
+            n++; 
+        }
+        if((*dst)[n])
+        {
+            entry_p *new = calloc((n << 1) + 1, sizeof(entry_p));
+            if(new)
+            {
+                new[n << 1] = end(); 
+                memcpy(new, *dst, n * sizeof(entry_p)); 
+                free(*dst); 
+                *dst = new; 
+            }
+            else
+            {
+                error(PANIC);
+                return NULL; 
+            }
+        }
+        (*dst)[n] = e; 
+        return e; 
+    }
+    error(PANIC);
+    return NULL; 
+}
+
 entry_p push(entry_p dst, entry_p src)
 {
     if (dst && src)
@@ -324,6 +359,7 @@ entry_p push(entry_p dst, entry_p src)
                 u++;
             }
             // Make the new array twice as big (+sentinel)
+/*
             new_size = u ? u << 1 : 1;  
             new = calloc (1 + new_size, sizeof (entry_p));
             if (new)
@@ -337,6 +373,11 @@ entry_p push(entry_p dst, entry_p src)
                 // Do the push
                 (*dst_p)[u] = src; 
                 src->parent = dst; 
+                return dst; 
+            }
+*/
+            if(append(dst_p, src))
+            {
                 return dst; 
             }
         }
