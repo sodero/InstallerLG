@@ -123,36 +123,17 @@ static entry_p m_whunt(entry_p contxt, int m)
 {
     ARGS(2); 
     entry_p r = new_failure(); 
-// Den har maste du skriva om, den ar idiotisk
-    while((m ^ num(a1)) && 
-          !runtime_error())
+    if(a2->type == CONTXT)
     {
-        if(a2->type == CONTXT)
+        while((m ^ num(a1)) && 
+              !runtime_error())
         {
-//            kill(r); 
-//HERE;
             r = invoke(a2);
         }
-        else if(a2->type == NATIVE || // Ar detta nogonsin sant?
-                a2->type == CUSREF)
-        {
-            error(PANIC); 
-            if(a2->call)
-            {
- //               kill(r); 
-//HERE;
-                r = a2->call(a2); 
-            }
-            else
-            {
-                error(PANIC);
-            }
-        }
-        else
-        {
-            error(PANIC);
-            break; 
-        }
+    }
+    else
+    {
+        error(PANIC);
     }
     return r; 
 }

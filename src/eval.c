@@ -41,29 +41,22 @@ static entry_p find_symbol(entry_p entry)
 
 entry_p resolve(entry_p entry)
 {
-    if(entry)
+    if(entry && 
+       entry != end())
     {
-        //entry_p ret; 
         switch(entry->type)
         {
-            case NUMBER:
-            case STRING:
-            case CUSTOM:
-            case STATUS: 
-            case OPTION: 
-            case DANGLE:
-                return entry; 
             case SYMBOL: 
-               // return resolve(entry->expression);
                 return entry->resolved ? entry->resolved : new_failure(); 
             case SYMREF: 
                 return resolve(find_symbol(entry)); 
-               // return ret->resolved ? resolve(ret->resolved) : new_failure(); 
             case CONTXT: 
                 return invoke(entry);
             case CUSREF:
             case NATIVE:
                 return entry->call ? entry->call(entry) : new_failure(); 
+            default:
+                return entry; 
         }
     }
     error(PANIC);
@@ -77,11 +70,6 @@ int num(entry_p entry)
     {
         switch(entry->type)
         {
-            case CONTXT:
-            case STATUS:
-            case CUSTOM:
-            case OPTION:
-                break;
             case DANGLE:
             case NUMBER:
                 return entry->id;
@@ -94,6 +82,8 @@ int num(entry_p entry)
                 return num(entry->call ? entry->call(entry) : NULL); 
             case STRING:
                 return atoi(entry->name);
+            default:
+                break; 
         }
     }
     error(PANIC);
@@ -107,11 +97,6 @@ const char *str(entry_p entry)
     {
         switch(entry->type)
         {
-            case CONTXT:
-            case STATUS:
-            case CUSTOM:
-            case OPTION:
-                break;
             case DANGLE:
                 return ""; 
             case STRING:
@@ -124,13 +109,17 @@ const char *str(entry_p entry)
             case NATIVE:
                 return str(entry->call ? entry->call(entry) : NULL); 
             case NUMBER:
-                free(entry->name); 
-                entry->name = malloc(NUMLEN); 
+                if(!entry->name)
+                {
+                    entry->name = malloc(NUMLEN); 
+                }
                 if(entry->name)
                 {
                     snprintf(entry->name, NUMLEN, "%d", entry->id); 
                     return entry->name;
                 }
+            default:
+                break;
         }
     }
     error(PANIC);
@@ -150,13 +139,14 @@ entry_p invoke(entry_p entry)
             if((*vec)->type == NATIVE ||
                (*vec)->type == CUSREF)
             {
-            //    kill(ret);
-                //ret = resolve_native(*vec);
                 if((*vec)->call)
                 {
-//pretty_print(*vec); 
                     ret = (*vec)->call(*vec); 
-//HERE; 
+                }
+                else
+                {
+                    error(PANIC);
+                    break; 
                 }
             }
             vec++; 

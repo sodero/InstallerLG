@@ -14,7 +14,7 @@ CCCONF += -D_BSD_SOURCE -D_POSIX_SOURCE
 CFLAGS += -Wall
 else
 ifeq ($(OS),Darwin)
-CFLAGS += -Weverything -Wno-format-nonliteral
+CFLAGS += -Weverything -Wno-format-nonliteral -Wno-switch-enum
 endif
 endif
 CFLAGS += $(CCCONF)
