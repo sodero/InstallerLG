@@ -1107,67 +1107,45 @@ entry_p m_substr(entry_p contxt)
 */
 entry_p m_symbolset(entry_p contxt)
 {
-    return contxt; 
-/*
     ARGS(2); 
-    if(contxt->symbols)
+    entry_p sym = new_symbol(strdup(str(a1))); 
+    if(sym)
     {
-        entry_p res = resolve(a2); 
-        if(res && !runtime_error())
+        entry_p res = malloc(sizeof(entry_t)); 
+        if(res)
         {
-            size_t i = 0; 
-            entry_p glb = global(contxt); 
-            while(contxt->symbols[i] &&
-                  contxt->symbols[i] != end()) 
+            entry_p glb = global(contxt);
+            memmove(res, resolve(a2), sizeof(entry_t)); 
+            res->name = res->name ? strdup(res->name) : NULL; 
+            res->parent = sym; 
+            sym->resolved = res; 
+
+            for(size_t i = 0; 
+                contxt->symbols[i] &&
+                contxt->symbols[i] != end(); 
+                i++) 
             {
-                if(!strcmp(contxt->symbols[i]->name, str(a1)))
+                if(!strcmp(contxt->symbols[i]->name, sym->name))
                 {
-                    kill(contxt->symbols[i]->expression);
-                    contxt->symbols[i]->expression = clone(resolve(res)); 
-                   // kill(contxt->symbols[i]->resolved);
-                    contxt->symbols[i]->resolved = resolve(res); 
-                    return res; 
-                }
-                i++; 
-            }
-            if(contxt->symbols[i])
-            {
-                size_t n = i << 1, j = 0; 
-                entry_p *new = calloc(1 + n, sizeof(entry_p));
-                if(new)
-                {
-                    new[n] = end(); 
-                    contxt->symbols[i] = NULL; 
-                    memcpy(new, contxt->symbols, i * sizeof(entry_p)); 
-                    free(contxt->symbols); 
-                    while(new[j])
-                    {
-                        push(glb, new[j]); 
-                        j++; 
-                    }
-                    contxt->symbols = new;
-                }
-            }
-            if(!contxt->symbols[i])
-            {
-                entry_p sym = new_symbol(strdup(str(a1)), clone(resolve(res))); 
-//pretty_print(res); 
-                if(sym)
-                {
-                    res->parent = a2; 
-                    sym->resolved = clone(resolve(res)); 
+                    push(glb, sym); 
+                    kill(contxt->symbols[i]); 
                     contxt->symbols[i] = sym; 
-                    push(global(contxt), sym); 
-//pretty_print(sym); 
                     return res; 
                 }
             }
-            //kill(res); 
+            if(append(&contxt->symbols, sym))
+            {
+                push(glb, sym); 
+                return res; 
+            }
+        }
+        else
+        {
+            kill(sym); 
         }
     }
     error(PANIC); 
     return new_failure(); 
-*/
 }
 
 /*

@@ -39,36 +39,6 @@ static entry_p find_symbol(entry_p entry)
     return new_failure();
 }
 
-/*
-static entry_p resolve_native(entry_p entry)
-{
-    if(entry->call)
-    {
-        entry_p result = entry->call(entry);
-        return result; 
-    }
-    error(PANIC);
-    return new_failure();
-}
-*/
- 
-// Temp. not needed later on. 
-entry_p clone(entry_p entry)
-{
-    if(entry && (entry->type == NUMBER || entry->type == STRING))
-    {
-        entry_p ret = malloc(sizeof(entry_t)); 
-        if(ret)
-        {
-            memmove(ret, entry, sizeof(entry_t)); 
-            ret->name = entry->name ? strdup(entry->name) : NULL; 
-            return ret; 
-        }
-    }
-    error(PANIC);
-    return new_failure(); 
-}
-
 entry_p resolve(entry_p entry)
 {
     if(entry)

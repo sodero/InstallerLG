@@ -275,7 +275,7 @@ entry_p new_dangle(void)
     return &dangle; 
 }
 
-static entry_p append(entry_p **dst, entry_p e)
+entry_p append(entry_p **dst, entry_p e)
 {
     if(dst && *dst)
     {
@@ -314,11 +314,11 @@ entry_p push(entry_p dst, entry_p src)
     {
         size_t u = 0; 
         entry_p **dst_p = &dst->children;
-        if (dst->type == CONTXT && 
-            src->type == SYMBOL)
+        if(dst->type == CONTXT && 
+           src->type == SYMBOL)
         {
-            while (dst->symbols[u] &&
-                   dst->symbols[u] != end())
+            while(dst->symbols[u] &&
+                  dst->symbols[u] != end())
             {
                 entry_p cur = dst->symbols[u]; 
                 char *old = cur->name, 
@@ -337,8 +337,8 @@ entry_p push(entry_p dst, entry_p src)
         {
             if(src->type == CUSTOM)
             {
-                while ((*dst_p)[u] &&
-                       (*dst_p)[u] != end())
+                while((*dst_p)[u] &&
+                      (*dst_p)[u] != end())
                 {
                     if((*dst_p)[u]->type == CUSTOM &&
                        !strcmp(src->name, (*dst_p)[u]->name))
@@ -367,7 +367,6 @@ void kill(entry_p entry)
        entry->type != STATUS &&
        entry->type != DANGLE)
     {
-//        kill(entry->expression);
         if(entry->symbols && (
            entry->type == NATIVE || 
            entry->type == CUSTOM ))
