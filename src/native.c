@@ -161,9 +161,6 @@ entry_p m_add (entry_p contxt)
     ARGS(0); 
     int s = 0; 
     entry_p *cur = contxt->children; 
-//pretty_print(contxt); 
-//print_list(cur); 
-//HERE; 
     while(*cur && *cur != end())
     {
         s += num(*cur);
@@ -432,8 +429,7 @@ entry_p m_fmt(entry_p contxt)
             error(contxt->id, "Superfluous format string arguments", 
                   contxt->name); 
         }
-        else
-        if(ret)
+        else if(ret)
         {
             RSTR(ret); 
         }
@@ -1089,40 +1085,39 @@ entry_p m_substr(entry_p contxt)
 entry_p m_symbolset(entry_p contxt)
 {
     ARGS(2); 
-    entry_p sym = new_symbol(strdup(str(a1))); 
-    if(sym)
+    entry_p res = malloc(sizeof(entry_t)); 
+    if(res)
     {
-        entry_p res = malloc(sizeof(entry_t)); 
-        if(res)
+        size_t i = 0; 
+        char *n = str(a1); 
+        memmove(res, resolve(a2), sizeof(entry_t)); 
+        res->name = res->name ? strdup(res->name) : NULL; 
+        while(contxt->symbols[i] &&
+              contxt->symbols[i] != end())
         {
-            entry_p glb = global(contxt);
-            memmove(res, resolve(a2), sizeof(entry_t)); 
-            res->name = res->name ? strdup(res->name) : NULL; 
-            res->parent = sym; 
-            sym->resolved = res; 
-
-            for(size_t i = 0; 
-                contxt->symbols[i] &&
-                contxt->symbols[i] != end(); 
-                i++) 
+            if(!strcmp(contxt->symbols[i]->name, n))
             {
-                if(!strcmp(contxt->symbols[i]->name, sym->name))
-                {
-                    push(glb, sym); 
-                    kill(contxt->symbols[i]); 
-                    contxt->symbols[i] = sym; 
-                    return res; 
-                }
-            }
-            if(append(&contxt->symbols, sym))
-            {
-                push(glb, sym); 
+                kill(contxt->symbols[i]->resolved); 
+                contxt->symbols[i]->resolved = res;
                 return res; 
             }
+            i++; 
+        }
+        entry_p sym = new_symbol(strdup(n)); 
+        if(sym)
+        {
+            res->parent = sym; 
+            sym->resolved = res; 
+            if(append(&contxt->symbols, sym))
+            {
+                push(global(contxt), sym); 
+                return res; 
+            }
+            kill(sym); 
         }
         else
         {
-            kill(sym); 
+            kill(res); 
         }
     }
     error(PANIC); 
