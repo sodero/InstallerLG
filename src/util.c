@@ -70,25 +70,11 @@ void pretty_print(entry_p entry)
         printf("%s\n", tps[entry->type]);
         printf("%sThis:%p\n", tabs(ind), (void *) entry);
         printf("%sParent:%p\n", tabs(ind), (void *) entry->parent);
-        if(entry->id || 
-           entry->type == STATUS ||
-           entry->type == NUMBER) 
-        {
-            printf("%sId:\t%d\n", tabs(ind), entry->id);
-        }
+        printf("%sId:\t%d\n", tabs(ind), entry->id);
         if(entry->name) 
         {
             printf("%sName:\t%s\n", tabs(ind), entry->name);
         }
-/*
-        if(entry->expression) 
-        {
-            printf ("%sExp:\t", tabs(ind));
-            ind++; 
-            pretty_print (entry->expression);
-            ind--; 
-        }
-*/
         if(entry->resolved) 
         {
             printf ("%sRes:\t", tabs(ind));

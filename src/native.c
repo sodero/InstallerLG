@@ -79,7 +79,9 @@ entry_p m_set(entry_p contxt)
                 res->parent = *sym; 
                 kill((*sym)->resolved); 
                 (*sym)->resolved = res; 
+// skriv om utan push, se symbolset
                 push(dst, *sym); 
+                (*sym)->parent = contxt; 
             }
             else
             {
@@ -1089,7 +1091,7 @@ entry_p m_symbolset(entry_p contxt)
     if(res)
     {
         size_t i = 0; 
-        char *n = str(a1); 
+        const char *n = str(a1); 
         memmove(res, resolve(a2), sizeof(entry_t)); 
         res->name = res->name ? strdup(res->name) : NULL; 
         while(contxt->symbols[i] &&

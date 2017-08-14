@@ -215,6 +215,7 @@ entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
             }
             if(entry->resolved)
             {
+                entry->resolved->parent = entry; 
                 return entry;
             }
             free(entry); 
@@ -323,10 +324,10 @@ entry_p push(entry_p dst, entry_p src)
                 entry_p cur = dst->symbols[u]; 
                 char *old = cur->name, 
                      *new = src->name; 
-                if(strcmp (old, new) == 0)
+                if(!strcmp(old, new))
                 {
                     dst->symbols[u] = src;
-                    src->parent = dst; 
+            //        src->parent = dst; 
                     return dst; 
                 }
                 u++;
@@ -367,6 +368,52 @@ void kill(entry_p entry)
        entry->type != STATUS &&
        entry->type != DANGLE)
     {
+        free(entry->name); 
+        entry->name = NULL; 
+        if(entry->symbols)
+        {
+            entry_p *e = entry->symbols; 
+            while(*e && *e != end())
+            {
+                if((*e)->parent == entry)
+                {
+                    kill(*e);
+                }
+                e++; 
+            }
+        }
+        free(entry->symbols);
+        entry->symbols = NULL; 
+        if(entry->children)
+        {
+            entry_p *e = entry->children; 
+            while(*e && *e != end())
+            {
+                if((*e)->parent == entry)
+                {
+                    kill(*e);
+                }
+                e++; 
+            }
+        }
+        free(entry->children);
+        entry->children = NULL; 
+//HERE; 
+//pretty_print(entry); 
+        if(entry->resolved &&
+           entry->resolved->parent == entry)
+        {
+//HERE; 
+            kill(entry->resolved); 
+        }
+        free(entry); 
+    }
+
+    /*
+    if(entry && 
+       entry->type != STATUS &&
+       entry->type != DANGLE)
+    {
         if(entry->symbols && (
            entry->type == NATIVE || 
            entry->type == CUSTOM ))
@@ -392,6 +439,7 @@ void kill(entry_p entry)
         free(entry->children);
         free(entry); 
     }
+        */
 }
 
 entry_p end(void)
