@@ -81,7 +81,7 @@ entry_p m_set(entry_p contxt)
                 (*sym)->resolved = res; 
 // skriv om utan push, se symbolset
                 push(dst, *sym); 
-                (*sym)->parent = contxt; 
+                (*sym)->parent = contxt;  // bort
             }
             else
             {
