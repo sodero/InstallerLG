@@ -1113,6 +1113,7 @@ entry_p m_symbolset(entry_p contxt)
             if(append(&contxt->symbols, sym))
             {
                 push(global(contxt), sym); 
+                sym->parent = contxt;  // bort . skriv om. 
                 return res; 
             }
             kill(sym); 
