@@ -79,9 +79,8 @@ entry_p m_set(entry_p contxt)
                 res->parent = *sym; 
                 kill((*sym)->resolved); 
                 (*sym)->resolved = res; 
-// skriv om utan push, se symbolset
                 push(dst, *sym); 
-                (*sym)->parent = contxt;  // bort
+                (*sym)->parent = contxt;  
             }
             else
             {
@@ -384,7 +383,6 @@ entry_p m_fmt(entry_p contxt)
                         error(contxt->id, "Format string type mismatch", 
                         contxt->name); 
                     }
-                 //   kill(cur); 
                     if(runtime_error())
                     {
                         arg = NULL; 
@@ -1101,6 +1099,8 @@ entry_p m_symbolset(entry_p contxt)
             {
                 kill(contxt->symbols[i]->resolved); 
                 contxt->symbols[i]->resolved = res;
+                push(global(contxt), contxt->symbols[i]); 
+                res->parent = contxt->symbols[i]; 
                 return res; 
             }
             i++; 
@@ -1113,7 +1113,7 @@ entry_p m_symbolset(entry_p contxt)
             if(append(&contxt->symbols, sym))
             {
                 push(global(contxt), sym); 
-                sym->parent = contxt;  // bort . skriv om. 
+                sym->parent = contxt;  
                 return res; 
             }
             kill(sym); 

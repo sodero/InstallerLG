@@ -327,7 +327,6 @@ entry_p push(entry_p dst, entry_p src)
                 if(!strcmp(old, new))
                 {
                     dst->symbols[u] = src;
-            //        src->parent = dst; 
                     return dst; 
                 }
                 u++;
@@ -346,6 +345,7 @@ entry_p push(entry_p dst, entry_p src)
                     {
                         error(src->id, "Procedure naming collision", 
                               src->name); 
+                        kill(src); 
                         return dst; 
                     }
                     u++; 
@@ -398,12 +398,9 @@ void kill(entry_p entry)
         }
         free(entry->children);
         entry->children = NULL; 
-//HERE; 
-//pretty_print(entry); 
         if(entry->resolved &&
            entry->resolved->parent == entry)
         {
-//HERE; 
             kill(entry->resolved); 
         }
         free(entry); 
