@@ -11,7 +11,7 @@
 entry_p m_gosub(entry_p contxt)
 {
     entry_p con = global(contxt);  
-    if (con && con->children)
+    if(con && con->children)
     {
         entry_p *cus = con->children; 
         while(*cus && 
@@ -714,7 +714,7 @@ entry_p m_cat(entry_p contxt)
 {
     ARGS(0); 
     char *buf; 
-    size_t n = DEFLEN; 
+    size_t n = 64; 
     buf = calloc(n + 1, sizeof(char));  
     if(buf)
     {
@@ -1443,9 +1443,54 @@ entry_p m_abort(entry_p contxt)
 */
 entry_p m_exit(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt)
+    {
+        if(contxt->children)
+        {
+            size_t i = 0, j = 0; 
+            while(contxt->children[i] &&
+                  contxt->children[i] != end())
+            {
+                j = i; 
+                if(contxt->children[i]->type == OPTION)
+                {
+                    if(contxt->children[i]->id == OPT_QUIET)
+                    {
+                        j = 0; 
+                        break; 
+                    }
+                    else
+                    {
+                        error(contxt->id, "Invalid option", 
+                              contxt->children[i]->name); 
+                        RNUM(1); 
+                    }
+                }
+                i++; 
+            }
+            if(j)
+            {
+                for(i = 0; i <= j; i++)
+                {
+                    /*
+                    printf("%s\n", str(contxt->children[i])); 
+
+                    This causes normal termination of a script.  If strings are
+                    provided, they are displayed.  The "done with installation" message is
+                    then displayed.  The "onerror" statements are not executed.  If (quiet)
+                    is specified, the final report display is skipped.
+
+                    MISSING
+
+                    */
+                }
+            }
+        }
+        error(HALT); 
+        RNUM(0); 
+    }
+    error(PANIC);
+    RNUM(1); 
 }
 
 /*

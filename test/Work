@@ -5,7 +5,6 @@ onerror
             exists
             delete
             rename
-            exit
             startup
                             welcome
                             message
@@ -44,38 +43,4 @@ transcript
             working
 debug
 user
-
---------------------
-Kolla hur MorphOS-varianten beter sig: 
-
---------------@{UB}
- 897          
- 898      (set <varname> <value> [<varname2> <value2> ...])
- 899 
- 900    Set the variable `<varname>' to the indicated value.  If `<varname>'
- 901 does not exist it will be created.  Set returns the value of the last
- 902 assignment.
- 903 
- 904 @{B}NOTE:@{UB} All variables are typeless, and any variable may be used
- 905 wherever a string could be used.  All variables are global. For naming
- 906 conventions, please check the @{"Style Guide" Link "Style Guide"}.
- 907 
-
-
-
------
-Du skulle kunna anvanda ->resolved for native-funktioner ocksa. Det hade
-blivit rappt och fint (och du kan ha oandligt langa strangar i str())
-
-----
-Vad ar egentligen vardet av expression? Borde inte detta egentligen bara
-vara ett argument i set / setsymbol osv. Det ar ju bara dar det evalueras
-eller? 
-
-
-
-
-
-
-
 

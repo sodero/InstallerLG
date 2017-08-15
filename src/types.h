@@ -3,11 +3,7 @@
 
 #define VECLEN 4 
 #define NUMLEN 16
-#define DEFLEN 32
-#define BUFSIZE 4096
 
-typedef struct entry_s * entry_p;
-typedef entry_p (*call_t) (entry_p);
 typedef enum 
 { 
     OPT_ALL,
@@ -49,6 +45,7 @@ typedef enum
     OPT_OPTIONAL,
     OPT_RESIDENT 
 } opt_t; 
+
 typedef enum 
 {
     NUMBER,
@@ -64,13 +61,15 @@ typedef enum
     DANGLE
 } type_t;
 
+typedef struct entry_s * entry_p;
+typedef entry_p (*call_t) (entry_p);
+
 struct entry_s
 {
     type_t type; 
     int id; 
     char *name; 
     call_t call; 
-//    entry_p expression; 
     entry_p resolved; 
     entry_p *children; 
     entry_p *symbols; 

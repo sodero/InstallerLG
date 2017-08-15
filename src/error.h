@@ -3,6 +3,7 @@
 
 #define PANIC __LINE__, "Internal error", __func__
 #define MISS 1, "Implementation missing", __func__
+#define HALT -1, "Halt", __func__
 
 int runtime_error(void);
 int error(int id, 
