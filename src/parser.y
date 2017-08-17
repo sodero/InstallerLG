@@ -222,6 +222,7 @@ askbool:        '(' ASKBOOL ')'             { $$ = new_native(strdup("askbool"),
 askdisk:        '(' ASKDISK ')'             { $$ = new_native(strdup("askdisk"), LINE, m_askdisk, NULL, NUMBER); };
 cat:            '(' CAT ps ')'              { $$ = new_native(strdup("cat"), LINE, m_cat, $3, STRING); };
 exists:         '(' EXISTS p ')'            { $$ = new_native(strdup("exists"), LINE, m_exists, push(new_contxt(), $3), NUMBER); }; 
+exists:         '(' EXISTS p opt ')'        { $$ = new_native(strdup("exists"), LINE, m_exists, push(push(new_contxt(), $3), $4), NUMBER); }; 
 expandpath:     '(' EXPANDPATH p ')'        { $$ = new_native(strdup("expandpath"), LINE, m_expandpath, push(new_contxt(), $3), STRING); }; 
 earlier:        '(' EARLIER pp ')'          { $$ = new_native(strdup("earlier"), LINE, m_earlier, $3, NUMBER); }; 
 fileonly:       '(' FILEONLY p ')'          { $$ = new_native(strdup("fileonly"), LINE, m_fileonly, push(new_contxt(), $3), STRING); }; 

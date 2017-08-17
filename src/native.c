@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "eval.h"
 #include "native.h"
 #include "util.h"
@@ -770,15 +771,38 @@ entry_p m_cat(entry_p contxt)
 /*
 `(exists <filename> (noreq))'
      0 if no, 1 if file, 2 if dir
-
-GRAMMAR: (noreq) is ignored
-
 */
 entry_p m_exists(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    ARGS(1); 
+    struct stat fs; 
+    if(contxt->children[1] &&
+       contxt->children[1] != end() &&
+       contxt->children[1]->type == OPTION)
+    {
+        if(contxt->children[1]->id != OPT_NOREQ)
+        {
+            error(contxt->id, "Invalid option", 
+                  contxt->children[1]->name); 
+            return new_failure(); 
+        }
+    }
+    else
+    {
+        /* show mount req */
+    }
+    if(!stat(str(a1), &fs))
+    {
+        if(S_ISREG(fs.st_mode))
+        {
+            RNUM(1); 
+        }
+        if(S_ISDIR(fs.st_mode))
+        {
+            RNUM(2); 
+        }
+    }
+    RNUM(0); 
 }
 
 /*
