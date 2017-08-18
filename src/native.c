@@ -1402,17 +1402,16 @@ entry_p m_rename(entry_p contxt)
             return new_failure(); 
         }
     }
-//     printf(" %s - renaming '%s' to '%s'", strerror(errno), str(a1), str(a2));
-errno = 0; 
-    int r = rename( str(a1), str(a2) );
-    printf("%d:%d(%d)   ", r, errno, EACCES); //OK %s - renaming '%s' to '%s' ", strerror(errno), str(a1), str(a2));
+/*
+
+ Hantera OPTS!
+
+*/
     if(rename(str(a1), str(a2)) == 0)
     {
- //       printf("OK %s - renaming '%s' to '%s' ", strerror(errno), str(a1), str(a2));
         RNUM(1); 
     }
-//    printf("NOK %s - renaming '%s' to '%s' ", strerror(errno), str(a1), str(a2));
-    RNUM(1); 
+    RNUM(0); 
 }
 
 /*
