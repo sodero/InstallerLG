@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include "eval.h"
 #include "native.h"
 #include "util.h"
@@ -776,18 +777,10 @@ entry_p m_exists(entry_p contxt)
 {
     ARGS(1); 
     struct stat fs; 
-    if(contxt->children[1] &&
-       contxt->children[1] != end() &&
-       contxt->children[1]->type == OPTION)
-    {
-        if(contxt->children[1]->id != OPT_NOREQ)
-        {
-            error(contxt->id, "Invalid option", 
-                  contxt->children[1]->name); 
-            return new_failure(); 
-        }
-    }
-    else
+    if(!(contxt->children[1] &&
+         contxt->children[1] != end() &&
+         contxt->children[1]->type == OPTION &&
+         contxt->children[1]->id == OPT_NOREQ))
     {
         /* show mount req */
     }
@@ -1366,9 +1359,60 @@ entry_p m_makeassign(entry_p contxt)
 */
 entry_p m_rename(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    ARGS(2); 
+    entry_p help, prompt, confirm, safe; 
+    help = prompt = confirm = safe = NULL; 
+    if(contxt->children[2] &&
+       contxt->children[2] != end())
+    {
+        entry_p opt = contxt->children[2]; 
+        if(opt->type == CONTXT && 
+           opt->children)
+        {
+            for(size_t i = 0; 
+                opt->children[i] &&
+                opt->children[i] != end() &&
+                opt->children[i]->type == OPTION;
+                i++)
+            {
+                switch(opt->children[i]->id)
+                {
+                    case OPT_HELP: 
+                        help = opt->children[i];
+                        break;
+                    case OPT_PROMPT: 
+                        prompt = opt->children[i];
+                        break;
+                    case OPT_CONFIRM: 
+                        confirm = opt->children[i];
+                        break;
+                    case OPT_SAFE: 
+                        safe = opt->children[i];
+                        break;
+                    default: 
+                        error(contxt->id, "Invalid option", 
+                              opt->children[i]->name); 
+                        return new_failure(); 
+                }
+            }
+        }
+        else
+        {
+            error(PANIC); 
+            return new_failure(); 
+        }
+    }
+//     printf(" %s - renaming '%s' to '%s'", strerror(errno), str(a1), str(a2));
+errno = 0; 
+    int r = rename( str(a1), str(a2) );
+    printf("%d:%d(%d)   ", r, errno, EACCES); //OK %s - renaming '%s' to '%s' ", strerror(errno), str(a1), str(a2));
+    if(rename(str(a1), str(a2)) == 0)
+    {
+ //       printf("OK %s - renaming '%s' to '%s' ", strerror(errno), str(a1), str(a2));
+        RNUM(1); 
+    }
+//    printf("NOK %s - renaming '%s' to '%s' ", strerror(errno), str(a1), str(a2));
+    RNUM(1); 
 }
 
 /*
@@ -1471,43 +1515,31 @@ entry_p m_exit(entry_p contxt)
     {
         if(contxt->children)
         {
-            size_t i = 0, j = 0; 
-            while(contxt->children[i] &&
-                  contxt->children[i] != end())
+            for(size_t i = 0; 
+                contxt->children[i] &&
+                contxt->children[i] != end(); i++)
             {
-                j = i; 
-                if(contxt->children[i]->type == OPTION)
+                if(contxt->children[i]->type == OPTION && 
+                   contxt->children[i]->id == OPT_QUIET)
                 {
-                    if(contxt->children[i]->id == OPT_QUIET)
-                    {
-                        j = 0; 
-                        break; 
-                    }
-                    else
-                    {
-                        error(contxt->id, "Invalid option", 
-                              contxt->children[i]->name); 
-                        RNUM(1); 
-                    }
+                    error(HALT); 
+                    RNUM(0); 
                 }
-                i++; 
             }
-            if(j)
+            for(size_t i = 0; 
+                contxt->children[i] &&
+                contxt->children[i] != end(); i++)
             {
-                for(i = 0; i <= j; i++)
-                {
-                    /*
-                    printf("%s\n", str(contxt->children[i])); 
+                /*
+                printf("%s\n", str(contxt->children[i])); 
 
-                    This causes normal termination of a script.  If strings are
-                    provided, they are displayed.  The "done with installation" message is
-                    then displayed.  The "onerror" statements are not executed.  If (quiet)
-                    is specified, the final report display is skipped.
+                This causes normal termination of a script.  If strings are
+                provided, they are displayed.  The "done with installation" message is
+                then displayed.  The "onerror" statements are not executed.  If (quiet)
+                is specified, the final report display is skipped.
 
-                    MISSING
-
-                    */
-                }
+                MISSING
+                */
             }
         }
         error(HALT); 

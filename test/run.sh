@@ -24,6 +24,7 @@ run()
 
 evl()
 {
+    ret=1
     pre=`echo "$2" | sed -e 's/.*\"\(.*\)\",\".*\",\".*\".*$/\1/'`
     inf=`echo "$2" | sed -e 's/.*\".*\",\"\(.*\)\",\".*\".*$/\1/'`
     pst=`echo "$2" | sed -e 's/.*\".*\",\".*\",\"\(.*\)\".*$/\1/'`
@@ -36,16 +37,16 @@ evl()
     fi
     run "$1 ; [$pre ; $pst]" "$inf" 
     if [ $? -eq 0 ]; then
-        return 0
+        ret=0
     fi
     if [ -n "$pst" ]; then 
         o=`eval "$pst" 2>&1`
         if [ $? -ne 0 ]; then
             echo "FAIL/ERR:$o"
-            return 0
+            ret=0
         fi
     fi
-    return 1 
+    return $ret 
 }
 
 prg=$1

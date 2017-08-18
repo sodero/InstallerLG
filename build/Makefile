@@ -44,5 +44,5 @@ test: installer
 
 .PHONY: clean
 clean: 
-	$(RM) *.c *.h *.o installer lexer installer.tmp.* leak.*
+	$(RM) -R *.c *.h *.o installer lexer installer.tmp.* leak.* _??_
 

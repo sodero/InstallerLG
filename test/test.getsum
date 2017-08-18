@@ -1,6 +1,6 @@
 (getsum) ; "","Line 1: syntax error ')'",""
-(getsum "_ne_" err) ; "","Line 1: syntax error 'err'",""
-(getsum "_ne_") ; "","Line 1: Could not open file '_ne_'",""
+(getsum "_ne_" err) ; "rm -f _ne_","Line 1: syntax error 'err'",""
+(getsum "_ne_") ; "rm -f _ne_","Line 1: Could not open file '_ne_'",""
 (getsum "_gs_") ; "echo '0' > _gs_","-107","rm _gs_"
 (getsum "_gs_") ; "echo '00' > _gs_","-299","rm _gs_"
 (getsum "_gs_") ; "echo '000' > _gs_","-683","rm _gs_"
