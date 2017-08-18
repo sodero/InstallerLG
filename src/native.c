@@ -1360,8 +1360,8 @@ entry_p m_makeassign(entry_p contxt)
 entry_p m_rename(entry_p contxt)
 {
     ARGS(2); 
-    entry_p help, prompt, confirm, safe; 
-    help = prompt = confirm = safe = NULL; 
+    entry_p help = NULL, prompt = NULL, 
+            confirm = NULL, safe = NULL; 
     if(contxt->children[2] &&
        contxt->children[2] != end())
     {
@@ -1422,9 +1422,73 @@ entry_p m_rename(entry_p contxt)
 */
 entry_p m_delete(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    ARGS(1); 
+    entry_p help = NULL, prompt = NULL, 
+            confirm = NULL, infos = NULL, 
+            optional = NULL, all = NULL, 
+            delopts = NULL, safe = NULL; 
+    if(contxt->children[1] &&
+       contxt->children[1] != end())
+    {
+        entry_p opt = contxt->children[1]; 
+        if(opt->type == CONTXT && 
+           opt->children)
+        {
+            for(size_t i = 0; 
+                opt->children[i] &&
+                opt->children[i] != end() &&
+                opt->children[i]->type == OPTION;
+                i++)
+            {
+                switch(opt->children[i]->id)
+                {
+                    case OPT_HELP: 
+                        help = opt->children[i];
+                        break;
+                    case OPT_PROMPT: 
+                        prompt = opt->children[i];
+                        break;
+                    case OPT_CONFIRM: 
+                        confirm = opt->children[i];
+                        break;
+                    case OPT_INFOS: 
+                        infos = opt->children[i];
+                        break;
+                    case OPT_OPTIONAL: 
+                        optional = opt->children[i];
+                        break;
+                    case OPT_ALL: 
+                        all = opt->children[i];
+                        break;
+                    case OPT_DELOPTS: 
+                        delopts = opt->children[i];
+                        break;
+                    case OPT_SAFE: 
+                        safe = opt->children[i];
+                        break;
+                    default: 
+                        error(contxt->id, "Invalid option", 
+                              opt->children[i]->name); 
+                        return new_failure(); 
+                }
+            }
+        }
+        else
+        {
+            error(PANIC); 
+            return new_failure(); 
+        }
+    }
+/*
+
+ Hantera OPTS!
+
+*/
+    if(remove(str(a1)) == 0)
+    {
+        RNUM(1); 
+    }
+    RNUM(0); 
 }
 
 /*

@@ -2,8 +2,6 @@ Linux       Mix             AROS
 -----------------------------------------------
 abort
 onerror
-            delete
-            rename
             startup
                             welcome
                             message
