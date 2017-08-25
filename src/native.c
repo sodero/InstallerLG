@@ -1324,9 +1324,7 @@ entry_p m_startup(entry_p contxt)
         }
     }
 /*
-
  Hantera OPTS!
-
 */
     if(a2->type == OPTION && 
        a2->id == OPT_COMMAND &&
@@ -1358,43 +1356,58 @@ entry_p m_startup(entry_p contxt)
                     sprintf(fnd, ";%s\n", app); 
                     if(fread(buf, sizeof(char), fl, fp) == fl)
                     {
-                        char *b = strstr(buf, fnd) + al, 
-                             *e = strstr(b, fnd); 
-                        free(fnd); 
+                        char *b = strstr(buf, fnd),
+                             *e = b ? strstr(b + al, fnd) : NULL; 
+                        b += al; 
                         fclose(fp); 
-  fseek(fp, 0L, SEEK_SET);
                         if(e && b)
                         {
-                            memmove(b + cl + 1, e, buf + fl - e); 
-                            fl -= e - b - cl - 1;
-                            memcpy(b, cmd, cl); 
-                            b[cl] = '\n';
-fp = fopen("user-startup", "w"); 
-                            if(fwrite(buf, sizeof(char), fl, fp) == fl)
+                            fp = fopen("user-startup", "w"); 
+                            if(fp)
                             {
-                                free(buf); 
-                                fclose(fp); 
-                                RNUM(1);
+                                memmove(b + cl + 1, e, buf + fl - e); 
+                                fl -= e - b - cl - 1;
+                                memcpy(b, cmd, cl); 
+                                b[cl] = '\n';
+                                if(fwrite(buf, sizeof(char), fl, fp) == fl)
+                                {
+                                    fclose(fp); 
+                                    free(fnd); 
+                                    free(buf); 
+                                    RNUM(1);
+                                }
                             }
                         }
                         else
                         {
-                            // Append da shit
+                            fp = fopen("user-startup", "a"); 
+                            if(fp)
+                            {
+                                if(fprintf(fp, "%s%s\n%s", 
+                                   fnd, cmd, fnd) > 0)
+                                {
+                                    fclose(fp); 
+                                    free(fnd); 
+                                    free(buf); 
+                                    RNUM(1);
+                                }
+                            }
                         }
+                        error(contxt->id, "Could not write to file", 
+                                          "user-startup"); 
                     }
-                    free(buf); 
                 }
-                else
+                if(fp)
                 {
-                    free(buf);
-                    free(fnd);
-                    error(PANIC); 
+                    fclose(fp); 
                 }
+                free(buf);
+                free(fnd);
             }
         }
         else
         {
-            error(contxt->id, "Could not open file", 
+            error(contxt->id, "Could not read file", 
                               "user-startup"); 
         }
     }
