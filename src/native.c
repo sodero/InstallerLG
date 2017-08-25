@@ -1280,9 +1280,129 @@ entry_p m_copylib(entry_p contxt)
 */
 entry_p m_startup(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    ARGS(2); 
+    entry_p help = NULL, prompt = NULL, 
+            confirm = NULL, command = NULL;
+    if(contxt->children[2] &&
+       contxt->children[2] != end())
+    {
+        entry_p opt = contxt->children[2]; 
+        if(opt->type == CONTXT && 
+           opt->children)
+        {
+            for(size_t i = 0; 
+                opt->children[i] &&
+                opt->children[i] != end() &&
+                opt->children[i]->type == OPTION;
+                i++)
+            {
+                switch(opt->children[i]->id)
+                {
+                    case OPT_HELP: 
+                        help = opt->children[i];
+                        break;
+                    case OPT_PROMPT: 
+                        prompt = opt->children[i];
+                        break;
+                    case OPT_CONFIRM: 
+                        confirm = opt->children[i];
+                        break;
+                    case OPT_COMMAND: 
+                        command = opt->children[i];
+                        break;
+                    default: 
+                        error(contxt->id, "Invalid option", 
+                              opt->children[i]->name); 
+                        return new_failure(); 
+                }
+            }
+        }
+        else
+        {
+            error(PANIC); 
+            return new_failure(); 
+        }
+    }
+/*
+
+ Hantera OPTS!
+
+*/
+    if(a2->type == OPTION && 
+       a2->id == OPT_COMMAND &&
+       a2->children)
+    {
+        FILE *fp = fopen("user-startup", "r+"); 
+        const char *app = str(a1), 
+                   *cmd = str(a2->children[0]);
+        if(fp)
+        {
+            size_t al = strlen(app) + 2; 
+            if(al < 3)
+            {
+                fclose(fp); 
+                error(contxt->id, "Invalid name", "NULL"); 
+                RNUM(0);
+            }
+            else
+            {
+                char *fnd, *buf;
+                size_t fl, cl = strlen(cmd); 
+                fseek(fp, 0L, SEEK_END);
+                fl = ftell(fp);
+                fnd = calloc(al, sizeof(char)); 
+                buf = calloc(fl + 2 * (al + 1) + cl + 2, sizeof(char)); 
+                if(buf && fnd)
+                {
+                    fseek(fp, 0L, SEEK_SET);
+                    sprintf(fnd, ";%s\n", app); 
+                    if(fread(buf, sizeof(char), fl, fp) == fl)
+                    {
+                        char *b = strstr(buf, fnd) + al, 
+                             *e = strstr(b, fnd); 
+                        free(fnd); 
+                        fclose(fp); 
+  fseek(fp, 0L, SEEK_SET);
+                        if(e && b)
+                        {
+                            memmove(b + cl + 1, e, buf + fl - e); 
+                            fl -= e - b - cl - 1;
+                            memcpy(b, cmd, cl); 
+                            b[cl] = '\n';
+fp = fopen("user-startup", "w"); 
+                            if(fwrite(buf, sizeof(char), fl, fp) == fl)
+                            {
+                                free(buf); 
+                                fclose(fp); 
+                                RNUM(1);
+                            }
+                        }
+                        else
+                        {
+                            // Append da shit
+                        }
+                    }
+                    free(buf); 
+                }
+                else
+                {
+                    free(buf);
+                    free(fnd);
+                    error(PANIC); 
+                }
+            }
+        }
+        else
+        {
+            error(contxt->id, "Could not open file", 
+                              "user-startup"); 
+        }
+    }
+    else
+    {
+        error(PANIC); 
+    }
+    RNUM(0);
 }
 
 /*
