@@ -1281,8 +1281,8 @@ entry_p m_copylib(entry_p contxt)
 entry_p m_startup(entry_p contxt)
 {
     ARGS(2); 
-    entry_p help = NULL, prompt = NULL, 
-            confirm = NULL, command = NULL;
+    entry_p help = NULL, prompt = NULL, confirm = NULL, 
+            command = NULL, override = NULL;
     if(contxt->children[2] &&
        contxt->children[2] != end())
     {
@@ -1310,6 +1310,9 @@ entry_p m_startup(entry_p contxt)
                     case OPT_COMMAND: 
                         command = opt->children[i];
                         break;
+                    case OPT_OVERRIDE: 
+                        override = opt->children[i];
+                        break;
                     default: 
                         error(contxt->id, "Invalid option", 
                               opt->children[i]->name); 
@@ -1330,16 +1333,16 @@ entry_p m_startup(entry_p contxt)
        a2->id == OPT_COMMAND &&
        a2->children)
     {
-        FILE *fp = fopen("user-startup", "r+"); 
-        const char *app = str(a1), 
-                   *cmd = str(a2->children[0]);
+        const char *fln = override ? str(override->children[0]) : "s:user-startup";
+        const char *app = str(a1), *cmd = str(a2->children[0]);
+        FILE *fp = fopen(fln, "r+"); 
         if(fp)
         {
             size_t al = strlen(app) + 2; 
             if(al < 3)
             {
                 fclose(fp); 
-                error(contxt->id, "Invalid name", "NULL"); 
+                error(contxt->id, "Invalid application name", "NULL"); 
                 RNUM(0);
             }
             else
@@ -1362,7 +1365,7 @@ entry_p m_startup(entry_p contxt)
                         fclose(fp); 
                         if(e && b)
                         {
-                            fp = fopen("user-startup", "w"); 
+                            fp = fopen(fln, "w"); 
                             if(fp)
                             {
                                 memmove(b + cl + 1, e, buf + fl - e); 
@@ -1380,7 +1383,7 @@ entry_p m_startup(entry_p contxt)
                         }
                         else
                         {
-                            fp = fopen("user-startup", "a"); 
+                            fp = fopen(fln, "a"); 
                             if(fp)
                             {
                                 if(fprintf(fp, "%s%s\n%s", 
@@ -1393,8 +1396,7 @@ entry_p m_startup(entry_p contxt)
                                 }
                             }
                         }
-                        error(contxt->id, "Could not write to file", 
-                                          "user-startup"); 
+                        error(contxt->id, "Could not write to file", fln); 
                     }
                 }
                 if(fp)
@@ -1407,8 +1409,7 @@ entry_p m_startup(entry_p contxt)
         }
         else
         {
-            error(contxt->id, "Could not read file", 
-                              "user-startup"); 
+            error(contxt->id, "Could not read from file", fln); 
         }
     }
     else

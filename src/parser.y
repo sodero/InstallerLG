@@ -18,7 +18,7 @@
 %token                      BITAND BITOR BITXOR BITNOT 
 %token                      SHIFTLEFT SHIFTRIGHT IN
 %token                      STRLEN SUBSTR ASKDIR ASKFILE ASKSTRING ASKNUMBER ASKCHOICE ASKOPTIONS ASKBOOL ASKDISK CAT EXISTS EXPANDPATH EARLIER FILEONLY GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM GETVERSION ICONINFO PATHONLY PATMATCH SELECT SYMBOLSET SYMBOLVAL TACKON TRANSCRIPT COMPLETE USER WORKING WELCOME ABORT COPYFILES COPYLIB DATABASE DEBUG DELETE EXECUTE EXIT FOREACH MAKEASSIGN MAKEDIR MESSAGE ONERROR PROTECT RENAME REXX RUN STARTUP TEXTFILE TOOLTYPE TRAP
-%token                      ALL APPEND ASKUSER ASSIGNS CHOICES COMMAND COMPRESSION CONFIRM DEFAULT DELOPTS DEST DISK FAIL FILES FONTS FORCE HELP INFOS INCLUDE NEWNAME NEWPATH NOFAIL NOGAUGE NOPOSITION NOREQ OKNODELETE PATTERN PROMPT QUIET RANGE SAFE SETDEFAULTTOOL SETSTACK SETTOOLTYPE SOURCE SWAPCOLORS OPTIONAL RESIDENT 
+%token                      ALL APPEND ASKUSER ASSIGNS CHOICES COMMAND COMPRESSION CONFIRM DEFAULT DELOPTS DEST DISK FAIL FILES FONTS FORCE HELP INFOS INCLUDE NEWNAME NEWPATH NOFAIL NOGAUGE NOPOSITION NOREQ OKNODELETE PATTERN PROMPT QUIET RANGE SAFE SETDEFAULTTOOL SETSTACK SETTOOLTYPE SOURCE SWAPCOLORS OPTIONAL RESIDENT OVERRIDE
 %token<s>                   SYM STR 
 %destructor { free($$); }   SYM STR
 %token<n>                   INT HEX BIN 
@@ -32,8 +32,8 @@
 %destructor { kill($$); }   and or xor not bitand bitor bitxor bitnot shiftleft shiftright in
 %type<e>                    strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap
 %destructor { kill($$); }   strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier fileonly getassign getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap
-%type<e>                    all append askuser assigns choices command compression confirm default delopts dest disk fail files fonts force help infos include newname newpath nofail nogauge noposition noreq oknodelete pattern prompt quiet range safe setdefaulttool setstack settooltype source swapcolors optional resident 
-%destructor { kill($$); }   all append askuser assigns choices command compression confirm default delopts dest disk fail files fonts force help infos include newname newpath nofail nogauge noposition noreq oknodelete pattern prompt quiet range safe setdefaulttool setstack settooltype source swapcolors optional resident 
+%type<e>                    all append askuser assigns choices command compression confirm default delopts dest disk fail files fonts force help infos include newname newpath nofail nogauge noposition noreq oknodelete pattern prompt quiet range safe setdefaulttool setstack settooltype source swapcolors optional resident override
+%destructor { kill($$); }   all append askuser assigns choices command compression confirm default delopts dest disk fail files fonts force help infos include newname newpath nofail nogauge noposition noreq oknodelete pattern prompt quiet range safe setdefaulttool setstack settooltype source swapcolors optional resident override
 
 %%
 start:          s                               { $$ = init($1); };
@@ -97,7 +97,8 @@ opt:            all                             |
                 source                          |         
                 swapcolors                      |     
                 optional                        |       
-                resident                        ;
+                resident                        |
+                override                        ;
 vp:             add                             |
                 sub                             |
                 div                             |
@@ -318,5 +319,6 @@ source:         '(' SOURCE p ')'                { $$ = new_option(strdup("source
 swapcolors:     '(' SWAPCOLORS ')'              { $$ = new_option(strdup("swapcolors"), OPT_SWAPCOLORS, NULL); };
 optional:       '(' OPTIONAL opts ')'           { $$ = new_option(strdup("optional"), OPT_OPTIONAL, $3); }; 
 resident:       '(' RESIDENT ')'                { $$ = new_option(strdup("resident"), OPT_RESIDENT, NULL); };
+override:       '(' OVERRIDE p ')'              { $$ = new_option(strdup("override"), OPT_OVERRIDE, push(new_contxt(), $3)); }; 
 %%
 

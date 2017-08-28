@@ -43,7 +43,8 @@ typedef enum
     OPT_SOURCE,
     OPT_SWAPCOLORS,
     OPT_OPTIONAL,
-    OPT_RESIDENT 
+    OPT_RESIDENT,
+    OPT_OVERRIDE
 } opt_t; 
 
 typedef enum 

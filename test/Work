@@ -2,7 +2,6 @@ Linux       Mix             AROS
 -----------------------------------------------
 abort
 onerror
-            startup
                             welcome
                             message
             copyfiles

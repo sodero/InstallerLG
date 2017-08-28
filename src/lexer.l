@@ -161,6 +161,7 @@
 "swapcolors"            { return SWAPCOLORS;     }
 "optional"              { return OPTIONAL;       }
 "resident"              { return RESIDENT;       }
+"override"              { return OVERRIDE;       }
 
     /*
     Strings
