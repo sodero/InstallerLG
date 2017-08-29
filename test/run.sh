@@ -3,23 +3,30 @@ run()
     instfile=`mktemp ./installer.tmp.XXXXXX`
     echo $1 > $instfile
     if [ `uname` = "Linux" ]; then
-        o=`valgrind --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 $prg $instfile 2>&1`
+        l=`mktemp ./leak.tmp.XXXXXX`
+        o=`valgrind --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 $prg $instfile 2>$l`
         if [ $? -ne 0 ]; then
-            l=`mktemp ./leak.tmp.XXXXXX`
-            cp $instfile $l
-            echo $o | sed -r 's/==[0-9]+/\n;==/g' >> $l
-            cat $l
+            s=`mktemp ./leak.tmp.XXXXXX`
+            cat $l | sed -r 's/==[0-9]+/;==/g' >> $s
+            cat $instfile >> $s
+            cat $s
         fi
+        e=`cat $l | grep -e "^Line"`
+        if [ -n "$e" ]; then 
+            o="$e"
+        fi
+        rm $l
+    else 
+        o=`$prg $instfile 2>&1 | head -n 1` 
     fi
-    o=`$prg $instfile 2>&1 | head -n 1` 
     rm $instfile 
     if [ "$o" = "$2" ]; then
         return 1
     else
         l=`mktemp ./err.tmp.XXXXXX`
         echo $1 > $l
-        echo "Actual result [$o]"
-        echo "Expected result [$2]"
+        echo "; Actual result [$o]" >> $l
+        echo "; Expected result [$2]" >> $l
         return 0
     fi
 }
