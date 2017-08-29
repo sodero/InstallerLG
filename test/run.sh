@@ -16,6 +16,8 @@ run()
     if [ "$o" = "$2" ]; then
         return 1
     else
+        l=`mktemp ./err.tmp.XXXXXX`
+        echo $1 > $l
         echo "Actual result [$o]"
         echo "Expected result [$2]"
         return 0

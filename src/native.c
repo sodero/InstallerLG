@@ -1351,7 +1351,7 @@ entry_p m_startup(entry_p contxt)
                 size_t fl, cl = strlen(cmd); 
                 fseek(fp, 0L, SEEK_END);
                 fl = ftell(fp);
-                fnd = calloc(al, sizeof(char)); 
+                fnd = calloc(al + 1, sizeof(char)); 
                 buf = calloc(fl + 2 * (al + 1) + cl + 2, sizeof(char)); 
                 if(buf && fnd)
                 {
