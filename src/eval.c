@@ -20,7 +20,8 @@ static entry_p find_symbol(entry_p entry)
                 tmp && *tmp && *tmp != end(); 
                 tmp++)
             {
-                if(!strcmp((*tmp)->name, entry->name)) 
+                if((*tmp)->type == SYMBOL &&
+                   !strcmp((*tmp)->name, entry->name)) 
                 {
                     return *tmp; 
                 }
@@ -163,7 +164,7 @@ void run(entry_p entry)
 {
     entry_p status = invoke(entry);
     eval_print(status);
-    pretty_print(entry); 
+   // pretty_print(entry); 
     kill(entry);
 }
 

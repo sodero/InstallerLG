@@ -183,8 +183,8 @@ vp:             add                             |
                 complete                        ;
 fmt:            '(' STR ps ')'                  { $$ = new_native($2, LINE, m_fmt, $3, STRING); } |
                 '(' STR ')'                     { $$ = new_native($2, LINE, m_fmt, NULL, STRING); };
-dcl:            '(' DCL SYM par s ')'           { $$ = new_custom($3, LINE, $4, $5); } |
-                '(' DCL SYM s ')'               { $$ = new_custom($3, LINE, NULL, $4); };
+dcl:            '(' DCL SYM par s ')'           { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, $4, $5)), DANGLE); } |
+                '(' DCL SYM s ')'               { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, NULL, $4)), DANGLE); };
 cus:            '(' SYM ps ')'                  { $$ = new_cusref($2, LINE, $3); } |
                 '(' SYM ')'                     { $$ = new_cusref($2, LINE, NULL); };
 add:            '(' '+' ps ')'                  { $$ = new_native(strdup("+"), LINE, m_add, $3, NUMBER); };

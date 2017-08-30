@@ -17,7 +17,7 @@ run()
         fi
         rm $l
     else 
-        o=`$prg $instfile 2>&1 | head -n 1` 
+        o=`$prg $instfile 2>&1` 
     fi
     rm $instfile 
     o=`echo $o | tr -d  '\n'`

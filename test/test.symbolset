@@ -9,4 +9,4 @@
 (symbolset "a" 1) (set b 2) (while (< a b) ((symbolset "a" (+ a 1)) (symbolset "b" (- b a)))) ; "","0",""
 (set i 1) (symbolset ("i%ld" i) i) (set i 2) (symbolset ("i%ld" i) i) (+ i1 i2) ; "","3",""
 (set i 1) (while (<= i 5) ((symbolset ("i%ld" i) i) (set i (+ 1 i)))) (+ i1 (+ i2 (+ i3 (+ i4 i5)))) ; "","15",""
-(set i 1) (while (<= i 5) ((set i (+ 1 i)) (symbolset ("i%ld" i) i))) (+ i1 (+ i2 (+ i3 (+ i4 i5)))) ; "","Line 1: Undefined variable 'i1'",""
+(set i 1) (while (<= i 5) ((set i (+ 1 i)) (symbolset ("i%ld" i) i))) (+ i1 (+ i2 (+ i3 (+ i4 i5)))) ; "","Line 1: Undefined variable 'i1' 14",""

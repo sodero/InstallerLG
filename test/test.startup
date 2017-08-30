@@ -2,7 +2,7 @@
 (startup (safe)) ; "","Line 1: syntax error 'safe'",""
 (startup "app" safe) ; "","Line 1: syntax error 'safe'",""
 (startup "app" (safe)) ; "","Line 1: syntax error 'safe'",""
-(startup "app" (command "loadwb") (override "_st_")) ; "rm -f _st_","Line 1: Could not read from file '_st_'",""
+(startup "app" (command "loadwb") (override "_st_")) ; "rm -f _st_","Line 1: Could not read from file '_st_' 0",""
 (startup "app" (command "loadwb") (override "_st_")) ; "touch _st_","1","rm _st_"
 (startup "app" (command "loadwb") (override "_st_")) ; "cp ../test/data.startup.i1 _st_","1","cmp _st_ ../test/data.startup.o1 && rm _st_"
 (startup "app" (command "anticlick") (override "_st_")) ; "cp ../test/data.startup.i1 _st_","1","cmp _st_ ../test/data.startup.o2 && rm _st_"

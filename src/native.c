@@ -100,6 +100,23 @@ entry_p m_set(entry_p contxt)
 
 /*
 */
+entry_p m_procedure(entry_p contxt)
+{
+    entry_p dst = global(contxt);
+    if(dst && 
+       contxt->symbols &&
+       contxt->symbols[0] && 
+       contxt->symbols[0] != end())
+    {
+        push(dst, contxt->symbols[0]); 
+        return contxt->symbols[0];
+    }
+    error(PANIC);
+    return new_failure(); 
+}
+
+/*
+*/
 entry_p m_if(entry_p contxt)
 {
     ARGS(3); 
