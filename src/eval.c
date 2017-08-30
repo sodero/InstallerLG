@@ -70,6 +70,7 @@ int num(entry_p entry)
     {
         switch(entry->type)
         {
+            case STATUS:
             case DANGLE:
             case NUMBER:
                 return entry->id;
@@ -97,6 +98,7 @@ const char *str(entry_p entry)
     {
         switch(entry->type)
         {
+            case STATUS:
             case DANGLE:
                 return ""; 
             case STRING:

@@ -20,6 +20,7 @@ run()
         o=`$prg $instfile 2>&1 | head -n 1` 
     fi
     rm $instfile 
+    o=`echo $o | tr -d  '\n'`
     if [ "$o" = "$2" ]; then
         return 1
     else
