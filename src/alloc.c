@@ -315,8 +315,9 @@ entry_p push(entry_p dst, entry_p src)
     {
         size_t u = 0; 
         entry_p **dst_p = &dst->children;
-        if(dst->type == CONTXT && 
-           src->type == SYMBOL)
+        if((src->type == SYMBOL || 
+            src->type == CUSTOM) &&
+            dst->type == CONTXT)
         {
             while(dst->symbols[u] &&
                   dst->symbols[u] != end())
@@ -335,6 +336,7 @@ entry_p push(entry_p dst, entry_p src)
         }
         if(*dst_p)
         {
+            /*
             if(src->type == CUSTOM)
             {
                 while((*dst_p)[u] &&
@@ -351,6 +353,7 @@ entry_p push(entry_p dst, entry_p src)
                     u++; 
                 }
             }
+            */
             if(append(dst_p, src))
             {
                 src->parent = dst; 

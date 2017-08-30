@@ -13,9 +13,9 @@
 entry_p m_gosub(entry_p contxt)
 {
     entry_p con = global(contxt);  
-    if(con && con->children)
+    if(con && con->symbols)
     {
-        entry_p *cus = con->children; 
+        entry_p *cus = con->symbols; 
         while(*cus && 
               *cus != end())
         {
