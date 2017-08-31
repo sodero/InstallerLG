@@ -5,3 +5,4 @@
 (onerror (+ 1)) (@onerror); "","1",""
 (onerror (+ 1) (+ 2)) (@onerror); "","Line 1: syntax error '('",""
 (onerror ((+ 1) (+ 2))) (@onerror); "","2",""
+(onerror (+ 1)) (onerror (+ 2)) (@onerror); "","2",""
