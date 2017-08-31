@@ -82,7 +82,6 @@ entry_p m_foreach(entry_p contxt);
 entry_p m_abort(entry_p contxt);
 entry_p m_exit(entry_p contxt);
 entry_p m_trap(entry_p contxt);
-entry_p m_onerror(entry_p contxt);
 entry_p m_user(entry_p contxt);
 entry_p m_debug(entry_p contxt);
 entry_p m_database(entry_p contxt);
