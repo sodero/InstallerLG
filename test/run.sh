@@ -11,9 +11,9 @@ run()
             cat $instfile >> $s
             return 2
         fi
-        e=`cat $l | grep -e "^Line"`
+        e=`cat $l | grep -v "^==[0-9]\+=="`
         if [ -n "$e" ]; then 
-            o="$e"
+            o="$e $o"
         fi
         rm $l
     else 
@@ -73,7 +73,6 @@ do
        if [ ! -z "$p" ]; then 
            evl "$p" "$r" 
            s=$?
-           echo "R: $?"
            if [ $s -eq 2 ]; then
                echo "LEAK -> $p" 
                nok=$(( $nok + 1 ))

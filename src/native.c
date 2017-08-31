@@ -109,6 +109,7 @@ entry_p m_procedure(entry_p contxt)
        contxt->symbols[0] != end())
     {
         push(dst, contxt->symbols[0]); 
+        contxt->symbols[0]->parent = contxt; 
         return contxt->symbols[0];
     }
     error(PANIC);
