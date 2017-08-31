@@ -9,7 +9,7 @@ run()
             s=`mktemp ./leak.tmp.XXXXXX`
             cat $l | sed -r 's/==[0-9]+/;==/g' >> $s
             cat $instfile >> $s
-            cat $s
+            return 2
         fi
         e=`cat $l | grep -e "^Line"`
         if [ -n "$e" ]; then 
@@ -46,14 +46,14 @@ evl()
         fi
     fi
     run "$1 ; [$pre ; $pst]" "$inf" 
-    if [ $? -eq 0 ]; then
-        ret=0
-    fi
+    ret=$?
     if [ -n "$pst" ]; then 
         o=`eval "$pst" 2>&1`
         if [ $? -ne 0 ]; then
             echo "FAIL/ERR:$o"
-            ret=0
+            if [ $ret -eq 1 ]; then
+                ret=0
+            fi
         fi
     fi
     return $ret 
@@ -72,10 +72,15 @@ do
        r=`echo "$l" | sed -e 's/.*;//'`
        if [ ! -z "$p" ]; then 
            evl "$p" "$r" 
-           if [ $? = 1 ]; then
+           s=$?
+           echo "R: $?"
+           if [ $s -eq 2 ]; then
+               echo "LEAK -> $p" 
+               nok=$(( $nok + 1 ))
+           elif [ $s -eq 1 ]; then
                echo "OK -> $p" 
                nok=$(( $nok + 1 ))
-           else 
+           elif [ $s -eq 0 ]; then
                echo "FAIL -> $p"
                nfl=$(( $nfl + 1 ))
            fi
