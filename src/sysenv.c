@@ -14,15 +14,37 @@ entry_p init(entry_p contxt)
             new_contxt(),  
             new_native
             (
-                strdup("set1"), __LINE__, m_set,
-                new_contxt(), 
-                STRING
+                strdup("set"), __LINE__, m_set,
+                push(push(push(push(push(push
+                (
+                    new_contxt(), 
+                    new_symbol(strdup("@user-level"))),
+                    new_number(2)
+                ),
+                    new_symbol(strdup("@pretend"))),
+                    new_number(1)
+                ),
+                    new_symbol(strdup("@io-err"))),
+                    new_number(0)
+                ),
+                NUMBER
             ) 
         ),
             new_native
             (
-                strdup("set2"), __LINE__, m_set,
-                new_contxt(), 
+                strdup("set"), __LINE__, m_set,
+                push(push(push(push(push(push
+                (
+                    new_contxt(), 
+                    new_symbol(strdup("@abort-button"))),
+                    new_string(strdup("Abort"))
+                ),
+                    new_symbol(strdup("@app-name"))),
+                    new_string(strdup("Application name"))
+                ),
+                    new_symbol(strdup("@askoptions-help"))),
+                    new_string(strdup(""))
+                ),
                 STRING
             ) 
         )
@@ -35,23 +57,9 @@ return contxt;
 
 
     push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
-                 new_symbol(strdup("@init-done"), 
-                 new_string(strdup("")))), DANGLE)); ror(contxt->children);
-    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
-                 new_symbol(strdup("@abort-button"), 
-                 new_string(strdup("Abort")))), DANGLE)); ror(contxt->children);
-    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
-                 new_symbol(strdup("@app-name"), 
-                 new_string(strdup("Application name")))), DANGLE)); ror(contxt->children);
-    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
-                 new_symbol(strdup("@io-err"), 
-                 new_number(0))), DANGLE)); ror(contxt->children);
-    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
-                 new_symbol(strdup("@askoptions-help"), 
-                 new_string(strdup("-")))), DANGLE)); ror(contxt->children);
-    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
                  new_symbol(strdup("@askchoice-help"), 
                  new_string(strdup("-")))), DANGLE)); ror(contxt->children);
+
     push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
                  new_symbol(strdup("@asknumber-help"), 
                  new_string(strdup("-")))), DANGLE)); ror(contxt->children);
@@ -98,14 +106,20 @@ return contxt;
                  new_symbol(strdup("@language"), 
                  new_string(strdup("english")))), DANGLE)); ror(contxt->children);
     push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
-                 new_symbol(strdup("@pretend"), 
-                 new_number(1))), DANGLE)); ror(contxt->children);
-    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
                  new_symbol(strdup("@special-msg"), 
                  new_string(strdup("Custom error")))), DANGLE)); ror(contxt->children);
-    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+
+  push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
                  new_symbol(strdup("@user-level"), 
                  new_number(2))), DANGLE)); ror(contxt->children);
+
+    push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
+                 new_symbol(strdup("@pretend"), 
+                 new_number(1))), DANGLE)); ror(contxt->children);
+
+
+
+
     return contxt; 
 */
 /*
