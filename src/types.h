@@ -3,6 +3,7 @@
 
 #define VECLEN 4 
 #define NUMLEN 16
+#define MAXDEP 64
 
 typedef enum 
 { 

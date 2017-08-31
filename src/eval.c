@@ -14,7 +14,6 @@ static entry_p find_symbol(entry_p entry)
     {
         do
         {
-            entry_p nxt; 
             entry_p *tmp; 
             for(tmp = con->symbols;
                 tmp && *tmp && *tmp != end(); 
@@ -26,8 +25,7 @@ static entry_p find_symbol(entry_p entry)
                     return *tmp; 
                 }
             }
-            nxt = global(entry);
-            con = con == nxt ? NULL : nxt; 
+            con = local(con->parent);
         }
         while(con);
         error(entry->id, "Undefined variable", 

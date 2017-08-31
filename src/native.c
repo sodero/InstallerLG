@@ -12,6 +12,7 @@
 */
 entry_p m_gosub(entry_p contxt)
 {
+    static int dep = 0; 
     entry_p con = global(contxt);  
     if(con && con->symbols)
     {
@@ -22,6 +23,7 @@ entry_p m_gosub(entry_p contxt)
             if((*cus)->type == CUSTOM &&
                !strcmp((*cus)->name, contxt->name))
             {
+                entry_p ret; 
                 entry_p *arg = (*cus)->symbols, 
                         *ina = contxt->children;
                 if(arg && ina)
@@ -47,7 +49,18 @@ entry_p m_gosub(entry_p contxt)
                         ina++;
                     }
                 }
-                return invoke(*cus); 
+                if(dep++ < MAXDEP)
+                {
+                    ret = invoke(*cus); 
+                    dep--; 
+                    return ret; 
+                }
+                else
+                {
+                    error(contxt->id, "Max recursion depth exceeded", 
+                          contxt->name); 
+                    return new_failure(); 
+                }
             }
             cus++; 
         }
