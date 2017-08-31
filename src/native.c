@@ -1791,13 +1791,10 @@ entry_p m_trap(entry_p contxt)
 /*
 `(onerror (<statements>))'
      general error trap
+
+ IMPLEMENTED using m_procedure
+
 */
-entry_p m_onerror(entry_p contxt)
-{
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
-}
 
 /*
 `(user <user-level>)'
