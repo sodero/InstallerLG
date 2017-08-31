@@ -6,8 +6,34 @@
   
 entry_p init(entry_p contxt)
 {
+    entry_p c = new_custom
+    (
+        strdup("@init"), __LINE__, NULL, 
+        push(push
+        (
+            new_contxt(),  
+            new_native
+            (
+                strdup("set1"), __LINE__, m_set,
+                new_contxt(), 
+                STRING
+            ) 
+        ),
+            new_native
+            (
+                strdup("set2"), __LINE__, m_set,
+                new_contxt(), 
+                STRING
+            ) 
+        )
+    ); 
+
+    push(contxt, c); 
+//    push(contxt, new_custom(strdup("@onerror"), __LINE__, NULL, new_contxt()));
 return contxt; 
 /*
+
+
     push(contxt, new_native(strdup("set"), __LINE__, m_set, push(new_contxt(), 
                  new_symbol(strdup("@init-done"), 
                  new_string(strdup("")))), DANGLE)); ror(contxt->children);

@@ -161,6 +161,11 @@ entry_p invoke(entry_p entry)
 void run(entry_p entry)
 {
     entry_p status = invoke(entry);
+    if(runtime_error())
+    {
+        m_onerror(entry); 
+        printf("fockit\n"); 
+    }
     eval_print(status);
 //    pretty_print(entry); 
     kill(entry);
