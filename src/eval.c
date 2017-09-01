@@ -164,7 +164,7 @@ void run(entry_p entry)
     if(runtime_error())
     {
         m_onerror(entry); 
-        printf("fockit\n"); 
+//        printf("fockit\n"); 
     }
     eval_print(status);
 //    pretty_print(entry); 

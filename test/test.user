@@ -1,3 +1,6 @@
-(user 1) ; "","Line 1: Implementation missing 'm_user'",""
+(user 1) ; "","1",""
 (user) ; "","Line 1: syntax error ')'",""
 (user 1 err) ; "","Line 1: syntax error 'err'",""
+(user 0) (+ 1 @user-level); "","1",""
+(user 1) (+ @user-level @user-level); "","2",""
+(+ @user-level); "","2",""

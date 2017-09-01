@@ -1792,29 +1792,25 @@ entry_p m_trap(entry_p contxt)
 `(onerror (<statements>))'
      general error trap
 
+ ------------------------------------------------------
  In part implemented using m_procedure. This function
  just invokes the @onerror custom procedure inserted
  using (onerror) which is a special case of (procedure)
-
+ ------------------------------------------------------
 */
 entry_p m_onerror(entry_p contxt)
 {
-    pretty_print(contxt); 
     return new_failure(); 
 }
+
 /*
 `(user <user-level>)'
    change the user level (debugging purposes only)
+
+   -----------------------
+   Implemented using m_set
+   -----------------------
 */
-entry_p m_user(entry_p contxt)
-{
-    if(contxt)
-    {
-        return new_failure(); 
-    }
-    error(PANIC); 
-    return new_failure(); 
-}
 
 /*
 `(debug <anything> <anything> ...)'
