@@ -1,3 +1,4 @@
-(abort "1") ; "","Line 1: Implementation missing 'm_abort'",""
-(abort "1" "2") ; "","Line 1: Implementation missing 'm_abort'",""
-(abort) ; "","Line 1: syntax error ')'",""
+(abort "1") ; "","",""
+(abort "1" "2") ; "","",""
+(procedure die (die)) (onerror (die)) (abort "!"); "","Line 1: Max recursion depth exceeded 'die'",""
+(+ 1) (abort "!"); "","",""

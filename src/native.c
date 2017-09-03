@@ -1728,8 +1728,14 @@ entry_p m_foreach(entry_p contxt)
 */
 entry_p m_abort(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
+    ARGS(0); 
+    entry_p *cur = contxt->children; 
+    while(*cur && *cur != end())
+    {
+        /* show message */
+        cur++; 
+    }
+    error(-3, "Abort", __func__); 
     return new_failure(); 
 }
 

@@ -10,3 +10,5 @@
 (exit "1" "2" "3" (quiet)) (+ 1); "","0",""
 (exit "1" "2" "3" (quiet) (safe)) (+ 1); "","Line 1: syntax error '('",""
 (exit "1" "2" "3" (safe)) (+ 1); "","Line 1: syntax error 'safe'",""
+(procedure die (die)) (onerror (die)) (exit); "","0",""
+(procedure die (die)) (onerror (die)) (exit) (+ 1); "","0",""

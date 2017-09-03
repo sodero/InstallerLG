@@ -165,7 +165,7 @@ void run(entry_p entry)
     if(did_error() && !did_halt())
     {
         error(RESET); 
-        status = m_onerror(entry); 
+        m_onerror(entry); 
     }
     eval_print(status);
     kill(entry);
