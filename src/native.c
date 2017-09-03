@@ -1800,6 +1800,13 @@ entry_p m_trap(entry_p contxt)
 */
 entry_p m_onerror(entry_p contxt)
 {
+    if(contxt)
+    {
+        entry_p handler = new_cusref(strdup("@onerror"), __LINE__, NULL);
+        push(contxt, handler);
+        return m_gosub(handler); 
+    }
+    error(PANIC);  
     return new_failure(); 
 }
 

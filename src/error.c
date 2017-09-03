@@ -20,6 +20,10 @@ int error(int id,
             fprintf(stderr, "Line %d: %s '%s'\n", 
                     id, type, info);
         }
+        else if(id == -2)
+        {
+            err = 0; 
+        }
     }
     return err; 
 }

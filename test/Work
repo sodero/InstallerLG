@@ -1,7 +1,6 @@
 Linux       Mix             AROS
 -----------------------------------------------
 abort
-onerror
                             welcome
                             message
             copyfiles
@@ -38,5 +37,4 @@ transcript
                             rexx
             working
 debug
-user
 

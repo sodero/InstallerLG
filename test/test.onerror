@@ -6,3 +6,7 @@
 (onerror (+ 1) (+ 2)) (@onerror); "","Line 1: syntax error '('",""
 (onerror ((+ 1) (+ 2))) (@onerror); "","2",""
 (onerror (+ 1)) (onerror (+ 2)) (@onerror); "","2",""
+(onerror (+ 1)) (+ 2) (+ a); "","Line 1: Undefined variable 'a' 1",""
+(onerror (+ 1)) (+ 2) (onerror (+ 3)) (+ a); "","Line 1: Undefined variable 'a' 3",""
+(onerror (+ a)) (set a 10) (+ 2) (+ b); "","Line 1: Undefined variable 'b' 10",""
+(onerror (+ a)) (set a 10) (+ 2) (+ b) (+ 1); "","Line 1: Undefined variable 'b' 10",""

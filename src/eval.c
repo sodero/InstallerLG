@@ -6,6 +6,7 @@
 #include "util.h"
 #include "debug.h"
 #include "error.h"
+#include "native.h"
 
 static entry_p find_symbol(entry_p entry)
 {
@@ -163,11 +164,10 @@ void run(entry_p entry)
     entry_p status = invoke(entry);
     if(runtime_error())
     {
-        m_onerror(entry); 
-//        printf("fockit\n"); 
+        error(RESET); 
+        status = m_onerror(entry); 
     }
     eval_print(status);
-//    pretty_print(entry); 
     kill(entry);
 }
 
