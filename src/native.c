@@ -160,7 +160,7 @@ static entry_p m_whunt(entry_p contxt, int m)
     if(a2->type == CONTXT)
     {
         while((m ^ num(a1)) && 
-              !runtime_error())
+              !did_error())
         {
             r = invoke(a2);
         }
@@ -416,7 +416,7 @@ entry_p m_fmt(entry_p contxt)
                         error(contxt->id, "Format string type mismatch", 
                         contxt->name); 
                     }
-                    if(runtime_error())
+                    if(did_error())
                     {
                         arg = NULL; 
                         break;
@@ -757,7 +757,7 @@ entry_p m_cat(entry_p contxt)
         {
             size_t ln; 
             const char *s = str(contxt->children[i++]); 
-            if(runtime_error())
+            if(did_error())
             {
                 free(buf); 
                 return new_failure();
@@ -1190,7 +1190,7 @@ entry_p m_symbolval(entry_p contxt)
         ref->parent = contxt; 
         val = resolve(ref); 
         kill(ref); 
-        if(!runtime_error())
+        if(!did_error())
         {
             return val; 
         }

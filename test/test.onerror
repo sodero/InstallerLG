@@ -10,3 +10,5 @@
 (onerror (+ 1)) (+ 2) (onerror (+ 3)) (+ a); "","Line 1: Undefined variable 'a' 3",""
 (onerror (+ a)) (set a 10) (+ 2) (+ b); "","Line 1: Undefined variable 'b' 10",""
 (onerror (+ a)) (set a 10) (+ 2) (+ b) (+ 1); "","Line 1: Undefined variable 'b' 10",""
+(onerror (+ 5)) (set a 10) (+ 2) (+ b); "","Line 1: Undefined variable 'b' 5",""
+(onerror (+ 5)) (set a 10) (exit) (+ 2) (+ b); "","0",""

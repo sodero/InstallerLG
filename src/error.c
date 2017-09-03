@@ -2,9 +2,14 @@
 #include "error.h"
 #include "debug.h"
 
-int runtime_error(void)
+int did_error(void)
 {
-    return error(0, NULL, NULL);
+    return error(0, NULL, NULL) != 0;
+}
+
+int did_halt(void)
+{
+    return error(0, NULL, NULL) == -1;
 }
 
 int error(int id, 
@@ -14,7 +19,7 @@ int error(int id,
     static int err = 0;
     if(id && type && info)
     {
-        err++; 
+        err = id; 
         if(id > 0)
         {
             fprintf(stderr, "Line %d: %s '%s'\n", 

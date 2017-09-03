@@ -136,7 +136,7 @@ entry_p invoke(entry_p entry)
         entry_p *vec = entry->children;
         while (*vec && 
                *vec != end() &&
-               !runtime_error())
+               !did_error())
         {
             if((*vec)->type == NATIVE ||
                (*vec)->type == CUSREF)
@@ -162,7 +162,7 @@ entry_p invoke(entry_p entry)
 void run(entry_p entry)
 {
     entry_p status = invoke(entry);
-    if(runtime_error())
+    if(did_error() && !did_halt())
     {
         error(RESET); 
         status = m_onerror(entry); 
