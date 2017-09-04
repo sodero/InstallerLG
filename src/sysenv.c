@@ -11,17 +11,8 @@ entry_p init(entry_p contxt)
         contxt, 
         new_custom
         (
-            strdup("@onerror"), __LINE__, NULL, 
-            new_contxt()
-        )
-    );
-    push
-    (
-        contxt, 
-        new_custom
-        (
             strdup("@init"), __LINE__, NULL, 
-            push(push
+            push(push(push
             (
                 new_contxt(),  
                 new_native
@@ -114,6 +105,34 @@ entry_p init(entry_p contxt)
                     ),
                     STRING
                 ) 
+            ),
+                new_native
+                (
+                    strdup("onerror"), __LINE__, m_procedure, 
+                    push
+                    (
+                        new_contxt(), 
+                        new_custom
+                        (
+                            strdup("@onerror"), __LINE__, NULL, 
+                            push
+                            (
+                                new_contxt(),
+                                new_native
+                                (
+                                    strdup("select"), __LINE__, m_select,
+                                    push
+                                    (
+                                        new_contxt(),
+                                        new_number(0)
+                                    ), 
+                                    DANGLE
+                                ) 
+                            )
+                        )
+                    ),
+                    DANGLE
+                )
             )
         )
     ); 

@@ -162,6 +162,7 @@ entry_p invoke(entry_p entry)
 void run(entry_p entry)
 {
     entry_p status = invoke(entry);
+//    pretty_print(entry); 
     if(did_error() && !did_halt())
     {
         error(RESET); 
