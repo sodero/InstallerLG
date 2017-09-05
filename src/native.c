@@ -1260,8 +1260,68 @@ entry_p m_tackon(entry_p contxt)
 */
 entry_p m_transcript(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
+    if(contxt && 
+       contxt->children)
+    {
+        size_t len = 0; 
+        const char *log = "default.log"; 
+        for(size_t i = 0; 
+            contxt->children[i] &&
+            contxt->children[i] != end(); 
+            i++)
+        {
+            entry_p arg = contxt->children[i]; 
+            if(arg->type == OPTION)
+            {
+                if(arg->id == OPT_OVERRIDE &&
+                   arg->children) 
+                {
+                    log = str(arg->children[0]); 
+                }
+                else
+                {
+                    error(contxt->id, "Invalid option", 
+                          arg->name); 
+                    return new_failure(); 
+                }
+            }
+            else
+            {
+                len += strlen(str(arg)); 
+            }
+        }
+        char *buf = calloc(len + 2, sizeof(char));
+        if(buf)
+        {
+            for(size_t i = 0; 
+                contxt->children[i] &&
+                contxt->children[i] != end(); 
+                i++)
+            {
+                entry_p arg = contxt->children[i]; 
+                if(arg->type != OPTION)
+                {
+                    strcat(buf, str(arg)); 
+                }
+            }
+            FILE *fp = fopen(log, "w"); 
+            if(fp)
+            {
+                buf[len] = '\n'; 
+                if(fwrite(buf, sizeof(char), 
+                   len + 1, fp) == len + 1)
+                {
+                    fclose(fp); 
+                    free(buf); 
+                    RNUM(1);
+                }
+                fclose(fp); 
+            }
+            free(buf); 
+            RNUM(0); 
+        }
+    }
+    error(PANIC); 
     return new_failure(); 
 }
 
