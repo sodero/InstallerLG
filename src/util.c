@@ -48,6 +48,25 @@ void print_list(entry_p *entry)
     }
 }
 
+void short_print(entry_p entry)
+{
+    if(entry)
+    {
+        printf("T:%p P:%p Type:%d Id:%d Name:%s\n", 
+                (void *) entry, 
+                (void *) entry->parent, 
+                entry->type, 
+                entry->id, 
+                entry->name ? entry->name : "-");
+    }
+    else
+    {
+        printf ("NULL\n\n");
+        return; 
+    }
+}
+
+
 void pretty_print(entry_p entry)
 {
     static unsigned int ind = 0; 

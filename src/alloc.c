@@ -376,17 +376,20 @@ void kill(entry_p entry)
         if(entry->symbols)
         {
             entry_p *e = entry->symbols; 
-            while(*e && *e != end())
+            if(entry->parent)
             {
-                if((*e)->parent == entry)
+                while(*e && *e != end())
                 {
-                    kill(*e);
+                    if((*e)->parent == entry)
+                    {
+                        kill(*e);
+                    }
+                    e++; 
                 }
-                e++; 
             }
+            free(entry->symbols);
+            entry->symbols = NULL; 
         }
-        free(entry->symbols);
-        entry->symbols = NULL; 
         if(entry->children)
         {
             entry_p *e = entry->children; 
@@ -398,13 +401,14 @@ void kill(entry_p entry)
                 }
                 e++; 
             }
+            free(entry->children);
+            entry->children = NULL; 
         }
-        free(entry->children);
-        entry->children = NULL; 
         if(entry->resolved &&
            entry->resolved->parent == entry)
         {
             kill(entry->resolved); 
+            entry->resolved = NULL; 
         }
         free(entry); 
     }
