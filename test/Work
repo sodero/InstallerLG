@@ -31,7 +31,6 @@ Linux       Mix             AROS
                             iconinfo
                             textfile
                             tooltype
-transcript
                             trap
                             rexx
             working

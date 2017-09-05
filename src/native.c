@@ -1304,7 +1304,7 @@ entry_p m_transcript(entry_p contxt)
                     strcat(buf, str(arg)); 
                 }
             }
-            FILE *fp = fopen(log, "w"); 
+            FILE *fp = fopen(log, "a"); 
             if(fp)
             {
                 buf[len] = '\n'; 
@@ -1426,7 +1426,7 @@ entry_p m_startup(entry_p contxt)
     {
         const char *fln = override ? str(override->children[0]) : "s:user-startup";
         const char *app = str(a1), *cmd = str(a2->children[0]);
-        FILE *fp = fopen(fln, "r+"); 
+        FILE *fp = fopen(fln, "r"); 
         if(fp)
         {
             size_t al = strlen(app) + 2; 
@@ -1636,6 +1636,7 @@ entry_p m_rename(entry_p contxt)
     {
         RNUM(1); 
     }
+    error(contxt->id, "Could not rename file", str(a1)); 
     RNUM(0); 
 }
 
