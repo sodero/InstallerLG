@@ -923,9 +923,9 @@ entry_p m_getdiskspace(entry_p contxt)
 */
 entry_p m_getenv(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    ARGS(1);
+    char *e = getenv(str(a1)); 
+    RSTR(strdup(e ? e : "")); 
 }
 
 /*

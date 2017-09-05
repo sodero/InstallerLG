@@ -1,1 +1,4 @@
-(getenv "file") ; "","Line 1: Implementation missing 'm_getenv'",""
+(getenv "TERM") ; "","xterm",""
+(getenv "_ge_") ; "","",""
+(getenv "TERM" (safe)) ; "","Line 1: syntax error '('",""
+(getenv) ; "","Line 1: syntax error ')'",""

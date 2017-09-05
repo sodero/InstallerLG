@@ -23,15 +23,13 @@ Linux       Mix             AROS
                             expandpath
                             foreach
                             patmatch
-            complete
+                            complete
                             earlier
             run
                             execute
-            getenv
                             iconinfo
                             textfile
                             tooltype
                             trap
                             rexx
-            working
-
+                            working
