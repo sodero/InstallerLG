@@ -1892,8 +1892,20 @@ entry_p m_onerror(entry_p contxt)
 */
 entry_p m_debug(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
+    if(contxt &&
+       contxt->children)
+    {
+        for(size_t i = 0; 
+            contxt->children[i] &&
+            contxt->children[i] != end(); 
+            i++)
+        {
+            printf("%s ", str(contxt->children[i])); 
+        }
+        printf("\n"); 
+        RNUM(1); 
+    }
+    error(PANIC); 
     return new_failure(); 
 }
 

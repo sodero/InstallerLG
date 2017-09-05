@@ -1,2 +1,2 @@
-(debug "1" a b c) ; "","Line 1: Implementation missing 'm_debug'",""
+(debug "a" "b" "c") ; "","a b c 1",""
 (debug) ; "","Line 1: syntax error ')'",""
