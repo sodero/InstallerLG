@@ -459,7 +459,7 @@ entry_p m_fmt(entry_p contxt)
         if(arg && *arg && 
            *arg != end())
         {
-            error(contxt->id, "Superfluous format string arguments", 
+            error(contxt->id, "Unused format string arguments", 
                   contxt->name); 
         }
         else if(ret)

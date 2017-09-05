@@ -3,7 +3,7 @@
 ("prefix-%ld-postfix" 1) ; "","prefix-1-postfix",""
 ("prefix-%ld-postfix" %00001) ; "","prefix-1-postfix",""
 ("prefix-%ld-postfix" $ff) ; "","prefix-255-postfix",""
-("prefix-%ld-postfix" 1 1) ; "","Line 1: Superfluous format string arguments 'prefix-%ld-postfix'",""
+("prefix-%ld-postfix" 1 1) ; "","Line 1: Unused format string arguments 'prefix-%ld-postfix'",""
 ("prefix-%ld-postfix" "1") ; "","Line 1: Format string type mismatch 'prefix-%ld-postfix'",""
 ("prefix-%s-postfix" "1") ; "","prefix-1-postfix",""
 ("prefix-%ld-postfix" (+ -1 2)) ; "","prefix-1-postfix",""
