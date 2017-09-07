@@ -3,9 +3,8 @@ Linux       Mix             AROS
                             welcome
                             message
             copyfiles
-                            copylib
+            copylib
                             makeassign
-            makedir
                             getassign
                             getdevice
                             getdiskspace
