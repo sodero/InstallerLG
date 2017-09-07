@@ -1,1 +1,3 @@
-(askdisk) ; "","Line 1: Implementation missing 'm_askdisk'",""
+(askdisk) ; "","Line 1: syntax error ')'",""
+(askdisk (disk)) ; "","Line 1: syntax error ')'",""
+(askdisk (disk "disco")) ; "","1",""

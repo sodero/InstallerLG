@@ -10,6 +10,81 @@
 
 /*
 */
+entry_p m_procedure(entry_p contxt)
+{
+    entry_p dst = global(contxt);
+    if(dst && 
+       contxt->symbols &&
+       contxt->symbols[0] && 
+       contxt->symbols[0] != end())
+    {
+        push(dst, contxt->symbols[0]); 
+        contxt->symbols[0]->parent = contxt; 
+        return contxt->symbols[0];
+    }
+    error(PANIC);
+    return new_failure(); 
+}
+
+/*
+*/
+entry_p m_if(entry_p contxt)
+{
+    ARGS(3); 
+    entry_p p = num(a1) ? a2 : a3; 
+    if(p->type == CONTXT)
+    {
+        return invoke(p);
+    }
+    else if(p->type == NATIVE ||
+            p->type == CUSREF)
+    {
+        if(p->call)
+        {
+            return p->call(p); 
+        }
+    }
+    error(PANIC);
+    return new_failure(); 
+}
+
+/*
+*/
+static entry_p m_whunt(entry_p contxt, int m)
+{
+    ARGS(2); 
+    entry_p r = new_failure(); 
+    if(a2->type == CONTXT)
+    {
+        while((m ^ num(a1)) && 
+              !did_error())
+        {
+            r = invoke(a2);
+        }
+    }
+    else
+    {
+        error(PANIC);
+    }
+    return r; 
+}
+
+/*
+*/
+entry_p m_while(entry_p contxt)
+{
+    return m_whunt(contxt, 0); 
+}
+
+/*
+*/
+entry_p m_until(entry_p contxt)
+{
+    return m_whunt(contxt, 1); 
+}
+
+/*
+*/
 entry_p m_gosub(entry_p contxt)
 {
     static int dep = 0; 
@@ -109,81 +184,6 @@ entry_p m_set(entry_p contxt)
     }
     error(PANIC);
     return new_failure(); 
-}
-
-/*
-*/
-entry_p m_procedure(entry_p contxt)
-{
-    entry_p dst = global(contxt);
-    if(dst && 
-       contxt->symbols &&
-       contxt->symbols[0] && 
-       contxt->symbols[0] != end())
-    {
-        push(dst, contxt->symbols[0]); 
-        contxt->symbols[0]->parent = contxt; 
-        return contxt->symbols[0];
-    }
-    error(PANIC);
-    return new_failure(); 
-}
-
-/*
-*/
-entry_p m_if(entry_p contxt)
-{
-    ARGS(3); 
-    entry_p p = num(a1) ? a2 : a3; 
-    if(p->type == CONTXT)
-    {
-        return invoke(p);
-    }
-    else if(p->type == NATIVE ||
-            p->type == CUSREF)
-    {
-        if(p->call)
-        {
-            return p->call(p); 
-        }
-    }
-    error(PANIC);
-    return new_failure(); 
-}
-
-/*
-*/
-static entry_p m_whunt(entry_p contxt, int m)
-{
-    ARGS(2); 
-    entry_p r = new_failure(); 
-    if(a2->type == CONTXT)
-    {
-        while((m ^ num(a1)) && 
-              !did_error())
-        {
-            r = invoke(a2);
-        }
-    }
-    else
-    {
-        error(PANIC);
-    }
-    return r; 
-}
-
-/*
-*/
-entry_p m_while(entry_p contxt)
-{
-    return m_whunt(contxt, 0); 
-}
-
-/*
-*/
-entry_p m_until(entry_p contxt)
-{
-    return m_whunt(contxt, 1); 
 }
 
 /*
@@ -631,112 +631,145 @@ entry_p m_in(entry_p contxt)
 /*
 `(askdir (prompt..) (help..) (default..) (newpath) (disk))'
       ask for directory name
-
-GRAMMAR: all options ignored
-
 */
 entry_p m_askdir(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt)
+    {
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                help     = get_opt(contxt, OPT_HELP),
+                deflt    = get_opt(contxt, OPT_DEFAULT),
+                newpath  = get_opt(contxt, OPT_NEWNAME),
+                disk     = get_opt(contxt, OPT_NOGAUGE);
+        RSTR(strdup("")); 
+    }
+    error(PANIC); 
+    RSTR(strdup("")); 
 }
 
 /*
 `(askfile (prompt..) (help..) (default..) (newpath) (disk))'
      ask for file name
-
-GRAMMAR: all options ignored
-
 */
 entry_p m_askfile(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt)
+    {
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                help     = get_opt(contxt, OPT_HELP),
+                deflt    = get_opt(contxt, OPT_DEFAULT),
+                newpath  = get_opt(contxt, OPT_NEWNAME),
+                disk     = get_opt(contxt, OPT_NOGAUGE);
+        RSTR(strdup("")); 
+    }
+    error(PANIC); 
+    RSTR(strdup("")); 
 }
 
 /*
 `(askstring (prompt..) (help..) (default..))'
      ask for a string
-
-GRAMMAR: all options ignored
-
 */
 entry_p m_askstring(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt)
+    {
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                help     = get_opt(contxt, OPT_HELP),
+                deflt    = get_opt(contxt, OPT_DEFAULT);
+        RSTR(strdup("")); 
+    }
+    error(PANIC); 
+    RSTR(strdup("")); 
 }
 
 /*
 `(asknumber (prompt..) (help..) (range..) (default..))'
      ask for a number
-
-GRAMMAR: all options ignored
-
 */
 entry_p m_asknumber(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt)
+    {
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                help     = get_opt(contxt, OPT_HELP),
+                range    = get_opt(contxt, OPT_RANGE),
+                deflt    = get_opt(contxt, OPT_DEFAULT);
+        RNUM(1); 
+    }
+    error(PANIC); 
+    RNUM(0);
 }
 
 /*
 `(askchoice (prompt..) (choices..) (default..))'
      choose 1 options
-
-GRAMMAR: all options ignored
-
 */
 entry_p m_askchoice(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt)
+    {
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                choices  = get_opt(contxt, OPT_CHOICES),
+                deflt    = get_opt(contxt, OPT_DEFAULT);
+        RNUM(1); 
+    }
+    error(PANIC); 
+    RNUM(0);
 }
 
 /*
 `(askoptions (prompt (help..) (choices..) default..))'
      choose n options
-
-GRAMMAR: all options ignored
-
 */
 entry_p m_askoptions(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt)
+    {
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                help     = get_opt(contxt, OPT_HELP),
+                choices  = get_opt(contxt, OPT_CHOICES),
+                deflt    = get_opt(contxt, OPT_DEFAULT);
+        RNUM(1); 
+    }
+    error(PANIC); 
+    RNUM(0);
 }
 
 /*
 `(askbool (prompt..) (help..) (default..) (choices..))'
      0=no, 1=yes
-
-GRAMMAR: all options ignored
-
 */
 entry_p m_askbool(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt)
+    {
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                help     = get_opt(contxt, OPT_HELP),
+                deflt    = get_opt(contxt, OPT_DEFAULT),
+                choices  = get_opt(contxt, OPT_CHOICES);
+        RNUM(1); 
+    }
+    error(PANIC); 
+    RNUM(0);
 }
 
 /*
 `(askdisk (prompt..) (help..) (dest..) (newname..) (assigns))'
-
-GRAMMAR: all options ignored
-
 */
 entry_p m_askdisk(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt)
+    {
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                help     = get_opt(contxt, OPT_HELP),
+                dest     = get_opt(contxt, OPT_DEST),
+                newname  = get_opt(contxt, OPT_NEWNAME),
+                assigns  = get_opt(contxt, OPT_ASSIGNS);
+        RNUM(1); 
+    }
+    error(PANIC); 
+    RNUM(0);
 }
 
 /*

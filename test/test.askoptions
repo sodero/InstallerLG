@@ -1,1 +1,2 @@
-(askoptions) ; "","Line 1: Implementation missing 'm_askoptions'",""
+(askoptions) ; "","Line 1: syntax error ')'",""
+(askoptions (choices "a" "b" "c")) ; "","1",""
