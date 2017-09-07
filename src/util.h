@@ -10,5 +10,6 @@ void print_list(entry_p *entries);
 void ror(entry_p *e);
 entry_p local(entry_p e);
 entry_p global(entry_p e);
+entry_p get_opt(entry_p c, opt_t t);
 
 #endif

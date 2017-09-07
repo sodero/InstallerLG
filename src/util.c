@@ -179,3 +179,22 @@ entry_p global(entry_p e)
     return e; 
 }
 
+entry_p get_opt(entry_p c, opt_t t)
+{
+    if(c && 
+       c != end() &&
+       c->children)
+    {
+        entry_p *v = c->children;
+        while(*v && *v != end())
+        {
+            if((*v)->type == OPTION &&
+               (*v)->id == t)
+            {
+                return *v; 
+            }
+            v++; 
+        }
+    }
+    return NULL; 
+}

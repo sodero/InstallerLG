@@ -7,5 +7,4 @@
 (delete "_dl_" (safe) (confirm 1) (optional (askuser)) (help "help") (prompt "prompt")) ; "touch _dl_","1",""
 (delete "_dl_" (safe) (confirm 1) (optional (askuser)) (all) (help "help") (prompt "prompt")) ; "touch _dl_","1",""
 (delete "_dl_" (safe) (confirm 1) (optional (askuser)) (all) (delopts (askuser)) (help "help") (prompt "prompt")) ; "touch _dl_","1",""
-(delete "_dl_" (noreq)) ; "","Line 1: Invalid option 'noreq'",""
 (delete) ; "","Line 1: syntax error ')'",""

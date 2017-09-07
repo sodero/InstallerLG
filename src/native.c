@@ -808,10 +808,7 @@ entry_p m_exists(entry_p contxt)
 {
     ARGS(1); 
     struct stat fs; 
-    if(!(contxt->children[1] &&
-         contxt->children[1] != end() &&
-         contxt->children[1]->type == OPTION &&
-         contxt->children[1]->id == OPT_NOREQ))
+    if(get_opt(contxt, OPT_NOREQ))
     {
         /* show mount req */
     }
@@ -1264,31 +1261,12 @@ entry_p m_transcript(entry_p contxt)
        contxt->children)
     {
         size_t len = 0; 
-        const char *log = "default.log"; 
-        for(size_t i = 0; 
-            contxt->children[i] &&
-            contxt->children[i] != end(); 
-            i++)
+        entry_p override = get_opt(contxt, OPT_OVERRIDE); 
+        const char *log = override ? str(override->children[0]) : "default.log"; 
+        for(entry_p *e = contxt->children; 
+            *e && *e != end(); e++)
         {
-            entry_p arg = contxt->children[i]; 
-            if(arg->type == OPTION)
-            {
-                if(arg->id == OPT_OVERRIDE &&
-                   arg->children) 
-                {
-                    log = str(arg->children[0]); 
-                }
-                else
-                {
-                    error(contxt->id, "Invalid option", 
-                          arg->name); 
-                    return new_failure(); 
-                }
-            }
-            else
-            {
-                len += strlen(str(arg)); 
-            }
+            len += strlen(str(*e)); 
         }
         char *buf = calloc(len + 2, sizeof(char));
         if(buf)
@@ -1395,9 +1373,27 @@ entry_p m_makedir(entry_p contxt)
 */
 entry_p m_copyfiles(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt)
+    {
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                help     = get_opt(contxt, OPT_HELP),
+                source   = get_opt(contxt, OPT_SOURCE),
+                dest     = get_opt(contxt, OPT_DEST),
+                newname  = get_opt(contxt, OPT_NEWNAME),
+                choices  = get_opt(contxt, OPT_CHOICES),
+                all      = get_opt(contxt, OPT_ALL),
+                pattern  = get_opt(contxt, OPT_PATTERN),
+                files    = get_opt(contxt, OPT_FILES),
+                infos    = get_opt(contxt, OPT_INFOS),
+                confirm  = get_opt(contxt, OPT_CONFIRM),
+                safe     = get_opt(contxt, OPT_SAFE),
+                optional = get_opt(contxt, OPT_OPTIONAL),
+                delopts  = get_opt(contxt, OPT_DELOPTS),
+                nogauge  = get_opt(contxt, OPT_NOGAUGE);
+        RNUM(1); 
+    }
+    error(PANIC); 
+    RNUM(0); 
 }
 
 /*
@@ -1409,9 +1405,23 @@ entry_p m_copyfiles(entry_p contxt)
 */
 entry_p m_copylib(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(contxt)
+    {
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                help     = get_opt(contxt, OPT_HELP),
+                source   = get_opt(contxt, OPT_SOURCE),
+                dest     = get_opt(contxt, OPT_DEST),
+                newname  = get_opt(contxt, OPT_NEWNAME),
+                infos    = get_opt(contxt, OPT_INFOS),
+                confirm  = get_opt(contxt, OPT_CONFIRM),
+                safe     = get_opt(contxt, OPT_SAFE),
+                optional = get_opt(contxt, OPT_OPTIONAL),
+                delopts  = get_opt(contxt, OPT_DELOPTS),
+                nogauge  = get_opt(contxt, OPT_NOGAUGE);
+        RNUM(1); 
+    }
+    error(PANIC); 
+    RNUM(0); 
 }
 
 /*
@@ -1421,51 +1431,10 @@ entry_p m_copylib(entry_p contxt)
 entry_p m_startup(entry_p contxt)
 {
     ARGS(2); 
-    entry_p help = NULL, prompt = NULL, confirm = NULL, 
-            command = NULL, override = NULL;
-    if(contxt->children[2] &&
-       contxt->children[2] != end())
-    {
-        entry_p opt = contxt->children[2]; 
-        if(opt->type == CONTXT && 
-           opt->children)
-        {
-            for(size_t i = 0; 
-                opt->children[i] &&
-                opt->children[i] != end() &&
-                opt->children[i]->type == OPTION;
-                i++)
-            {
-                switch(opt->children[i]->id)
-                {
-                    case OPT_HELP: 
-                        help = opt->children[i];
-                        break;
-                    case OPT_PROMPT: 
-                        prompt = opt->children[i];
-                        break;
-                    case OPT_CONFIRM: 
-                        confirm = opt->children[i];
-                        break;
-                    case OPT_COMMAND: 
-                        command = opt->children[i];
-                        break;
-                    case OPT_OVERRIDE: 
-                        override = opt->children[i];
-                        break;
-                    default: 
-                        error(contxt->id, "Invalid option", 
-                              opt->children[i]->name); 
-                        return new_failure(); 
-                }
-            }
-        }
-        else
-        {
-            error(PANIC); 
-            return new_failure(); 
-        }
-    }
+    entry_p help     = get_opt(contxt->children[2], OPT_HELP),
+            prompt   = get_opt(contxt->children[2], OPT_PROMPT), 
+            confirm  = get_opt(contxt->children[2], OPT_CONFIRM), 
+            override = get_opt(contxt->children[2], OPT_OVERRIDE);
 /*
  Hantera OPTS!
 */
@@ -1634,52 +1603,12 @@ entry_p m_makeassign(entry_p contxt)
 entry_p m_rename(entry_p contxt)
 {
     ARGS(2); 
-    entry_p help = NULL, prompt = NULL, 
-            confirm = NULL, safe = NULL; 
-    if(contxt->children[2] &&
-       contxt->children[2] != end())
-    {
-        entry_p opt = contxt->children[2]; 
-        if(opt->type == CONTXT && 
-           opt->children)
-        {
-            for(size_t i = 0; 
-                opt->children[i] &&
-                opt->children[i] != end() &&
-                opt->children[i]->type == OPTION;
-                i++)
-            {
-                switch(opt->children[i]->id)
-                {
-                    case OPT_HELP: 
-                        help = opt->children[i];
-                        break;
-                    case OPT_PROMPT: 
-                        prompt = opt->children[i];
-                        break;
-                    case OPT_CONFIRM: 
-                        confirm = opt->children[i];
-                        break;
-                    case OPT_SAFE: 
-                        safe = opt->children[i];
-                        break;
-                    default: 
-                        error(contxt->id, "Invalid option", 
-                              opt->children[i]->name); 
-                        return new_failure(); 
-                }
-            }
-        }
-        else
-        {
-            error(PANIC); 
-            return new_failure(); 
-        }
-    }
+    entry_p help     = get_opt(contxt->children[2], OPT_HELP),
+            prompt   = get_opt(contxt->children[2], OPT_PROMPT), 
+            confirm  = get_opt(contxt->children[2], OPT_CONFIRM), 
+            safe     = get_opt(contxt->children[2], OPT_COMMAND);
 /*
-
  Hantera OPTS!
-
 */
     if(rename(str(a1), str(a2)) == 0)
     {
@@ -1698,66 +1627,16 @@ entry_p m_rename(entry_p contxt)
 entry_p m_delete(entry_p contxt)
 {
     ARGS(1); 
-    entry_p help = NULL, prompt = NULL, 
-            confirm = NULL, infos = NULL, 
-            optional = NULL, all = NULL, 
-            delopts = NULL, safe = NULL; 
-    if(contxt->children[1] &&
-       contxt->children[1] != end())
-    {
-        entry_p opt = contxt->children[1]; 
-        if(opt->type == CONTXT && 
-           opt->children)
-        {
-            for(size_t i = 0; 
-                opt->children[i] &&
-                opt->children[i] != end() &&
-                opt->children[i]->type == OPTION;
-                i++)
-            {
-                switch(opt->children[i]->id)
-                {
-                    case OPT_HELP: 
-                        help = opt->children[i];
-                        break;
-                    case OPT_PROMPT: 
-                        prompt = opt->children[i];
-                        break;
-                    case OPT_CONFIRM: 
-                        confirm = opt->children[i];
-                        break;
-                    case OPT_INFOS: 
-                        infos = opt->children[i];
-                        break;
-                    case OPT_OPTIONAL: 
-                        optional = opt->children[i];
-                        break;
-                    case OPT_ALL: 
-                        all = opt->children[i];
-                        break;
-                    case OPT_DELOPTS: 
-                        delopts = opt->children[i];
-                        break;
-                    case OPT_SAFE: 
-                        safe = opt->children[i];
-                        break;
-                    default: 
-                        error(contxt->id, "Invalid option", 
-                              opt->children[i]->name); 
-                        return new_failure(); 
-                }
-            }
-        }
-        else
-        {
-            error(PANIC); 
-            return new_failure(); 
-        }
-    }
+    entry_p help     = get_opt(contxt->children[1], OPT_HELP),
+            prompt   = get_opt(contxt->children[1], OPT_PROMPT), 
+            confirm  = get_opt(contxt->children[1], OPT_CONFIRM), 
+            infos    = get_opt(contxt->children[1], OPT_INFOS), 
+            optional = get_opt(contxt->children[1], OPT_OPTIONAL), 
+            all      = get_opt(contxt->children[1], OPT_ALL), 
+            delopts  = get_opt(contxt->children[1], OPT_DELOPTS), 
+            safe     = get_opt(contxt->children[1], OPT_SAFE); 
 /*
-
  Hantera OPTS!
-
 */
     if(remove(str(a1)) == 0)
     {
@@ -1859,31 +1738,23 @@ entry_p m_exit(entry_p contxt)
     {
         if(contxt->children)
         {
-            for(size_t i = 0; 
-                contxt->children[i] &&
-                contxt->children[i] != end(); i++)
+            if(!get_opt(contxt->children, OPT_QUIET))
             {
-                if(contxt->children[i]->type == OPTION && 
-                   contxt->children[i]->id == OPT_QUIET)
+                for(size_t i = 0; 
+                    contxt->children[i] &&
+                    contxt->children[i] != end(); i++)
                 {
-                    error(HALT); 
-                    RNUM(0); 
+                    /*
+                    printf("%s\n", str(contxt->children[i])); 
+
+                    This causes normal termination of a script.  If strings are
+                    provided, they are displayed.  The "done with installation" message is
+                    then displayed.  The "onerror" statements are not executed.  If (quiet)
+                    is specified, the final report display is skipped.
+
+                    MISSING
+                    */
                 }
-            }
-            for(size_t i = 0; 
-                contxt->children[i] &&
-                contxt->children[i] != end(); i++)
-            {
-                /*
-                printf("%s\n", str(contxt->children[i])); 
-
-                This causes normal termination of a script.  If strings are
-                provided, they are displayed.  The "done with installation" message is
-                then displayed.  The "onerror" statements are not executed.  If (quiet)
-                is specified, the final report display is skipped.
-
-                MISSING
-                */
             }
         }
         error(HALT); 

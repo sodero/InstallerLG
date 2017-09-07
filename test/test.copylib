@@ -1,2 +1,2 @@
 (copylib) ; "","Line 1: syntax error ')'",""
-(copylib (safe)) ; "","Line 1: Implementation missing 'm_copylib'",""
+(copylib (safe)) ; "","1",""
