@@ -1331,9 +1331,58 @@ entry_p m_transcript(entry_p contxt)
 */
 entry_p m_makedir(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    ARGS(1); 
+    char *dir = strdup(str(a1)); 
+    if(dir)
+    {
+        int l = strlen(dir), d = 1; 
+        entry_p opt = contxt->children[1]; 
+        if(opt)
+        {
+            // handle options
+        }
+        for(int i = 0; i < l; i++)
+        {
+            if(dir[i] == '/')
+            {
+                d++;  
+            }
+        }
+        while(d--)
+        {
+            for(int i = l; i >= 0; i--)
+            {
+                if(dir[i] == '/' ||
+                   dir[i] == '\0')
+                {
+                    char c = dir[i]; 
+                    dir[i] = '\0'; 
+                    if(mkdir(dir, 0777) == 0)
+                    {
+                        if(i == l)
+                        {
+                            free(dir);
+                            RNUM(1); 
+                        }
+                        dir[i] = c; 
+                        break; 
+                    }
+                    else
+                    {
+                        dir[i] = c; 
+                    }
+                }
+            }
+        }
+        free(dir);
+        error(contxt->id, "Could not create directory", 
+              str(a1)); 
+    }
+    else
+    {
+        error(PANIC); 
+    }
+    RNUM(0);
 }
 
 /*
