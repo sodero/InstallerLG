@@ -22,7 +22,7 @@ entry_p m_procedure(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -46,29 +46,30 @@ entry_p m_if(entry_p contxt)
         }
     }
     error(PANIC);
-    RNUM(0); 
+    RCUR; 
 }
 
 /*
 */
 static entry_p m_whunt(entry_p contxt, int m)
 {
-    if(c_sane(contxt, 2))
+    if(c_sane(contxt, 2) &&
+       CARG(2)->type == CONTXT)
     {
-        contxt->resolved->id = 0; 
-        if(CARG(2)->type == CONTXT)
+        DNUM = 0; 
+        entry_p r = DCUR; 
+        while((m ^ num(CARG(1))) && 
+              !did_error())
         {
-            entry_p r = contxt->resolved; 
-            while((m ^ num(CARG(1))) && 
-                  !did_error())
-            {
-                r = invoke(CARG(2));
-            }
-            return r; 
+            r = invoke(CARG(2));
         }
+        return r; 
     }
-    error(PANIC);
-    RNUM(0); 
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*
@@ -194,15 +195,38 @@ entry_p m_set(entry_p contxt)
 */
 entry_p m_add (entry_p contxt)
 {
-    ARGS(0); 
-    int s = 0; 
-    entry_p *cur = contxt->children; 
-    while(*cur && *cur != end())
+    if(c_sane(contxt, 1))
     {
-        s += num(*cur);
-        cur++; 
+        DNUM = 0; 
+        entry_p *cur = contxt->children; 
+        while(*cur && *cur != end())
+        {
+            DNUM += num(*cur);
+            cur++; 
+        }
+        RCUR; 
     }
-    RNUM(s); 
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
+}
+
+/*
+ * < <= == >= > 
+*/
+static int m_cmp(entry_p a, entry_p b)
+{
+    if(a->type == STRING &&
+       b->type == STRING)
+    {
+        return strcmp(a->name, b->name);
+    }
+    else
+    {
+        return num(a) - num(b); 
+    }
 }
 
 /*
@@ -211,12 +235,18 @@ entry_p m_add (entry_p contxt)
 */
 entry_p m_lt(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-        ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) < 0) ||
-         (!(a1->type == STRING && a2->type == STRING) && num(a1) < num(a2))) ? 1 : 0
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            m_cmp(CARG(1), CARG(2)) < 0 ? 1 : 0
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*
@@ -225,12 +255,18 @@ entry_p m_lt(entry_p contxt)
 */
 entry_p m_lte(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-        ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) <= 0) ||
-         (!(a1->type == STRING && a2->type == STRING) && num(a1) <= num(a2))) ? 1 : 0
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            m_cmp(CARG(1), CARG(2)) <= 0 ? 1 : 0
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*
@@ -239,12 +275,18 @@ entry_p m_lte(entry_p contxt)
 */
 entry_p m_gt(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-        ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) > 0) ||
-         (!(a1->type == STRING && a2->type == STRING) && num(a1) > num(a2))) ? 1 : 0
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            m_cmp(CARG(1), CARG(2)) > 0 ? 1 : 0
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*
@@ -253,12 +295,18 @@ entry_p m_gt(entry_p contxt)
 */
 entry_p m_gte(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-        ((a1->type == STRING && a2->type == STRING && strcmp(a1->name, a2->name) >= 0) ||
-         (!(a1->type == STRING && a2->type == STRING) && num(a1) >= num(a2))) ? 1 : 0
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            m_cmp(CARG(1), CARG(2)) >= 0 ? 1 : 0
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*
@@ -267,12 +315,18 @@ entry_p m_gte(entry_p contxt)
 */
 entry_p m_eq(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-        ((a1->type == STRING && a2->type == STRING && !strcmp(a1->name, a2->name)) ||
-         (!(a1->type == STRING && a2->type == STRING) && num(a1) == num(a2))) ? 1 : 0
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            !m_cmp(CARG(1), CARG(2)) ? 1 : 0
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /* 
@@ -292,7 +346,7 @@ entry_p m_sub(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -304,19 +358,19 @@ entry_p m_mul(entry_p contxt)
 {
     if(c_sane(contxt, 1))
     {
-        int s = 1; 
+        DNUM = 1; 
         entry_p *cur = contxt->children; 
         while(*cur && *cur != end())
         {
-            s *= num(*cur);
+            DNUM *= num(*cur);
             cur++; 
         }
-        RNUM(s); 
+        RCUR; 
     }
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -328,25 +382,25 @@ entry_p m_div(entry_p contxt)
 {
     if(c_sane(contxt, 2))
     {
-        int div = num(CARG(2)); 
-        if(div)
+        DNUM = num(CARG(2)); 
+        if(DNUM)
         {
             RNUM
             (
                 num(CARG(1)) / 
-                div
+                DNUM 
             ); 
         }
         else
         {
             error(contxt->id, "Division by zero", contxt->name); 
-            RNUM(0); 
+            RCUR; 
         }
     }
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -519,7 +573,7 @@ entry_p m_and(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -540,7 +594,7 @@ entry_p m_or(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -561,7 +615,7 @@ entry_p m_xor(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -578,7 +632,7 @@ entry_p m_not(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -599,7 +653,7 @@ entry_p m_bitand(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -620,7 +674,7 @@ entry_p m_bitor(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -641,7 +695,7 @@ entry_p m_bitxor(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -661,7 +715,7 @@ entry_p m_bitnot(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -682,7 +736,7 @@ entry_p m_shiftleft(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -703,7 +757,7 @@ entry_p m_shiftright(entry_p contxt)
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -715,23 +769,23 @@ entry_p m_in(entry_p contxt)
 {
     if(c_sane(contxt, 2))
     {
-        int m = 0;  
+        DNUM = 0;  
         entry_p *cur = CARG(2)->children; 
         while(*cur && *cur != end())
         {
-            m += 1 << num(*cur);
+            DNUM += 1 << num(*cur);
             cur++; 
         }
         RNUM
         (
             num(CARG(1)) & 
-            m
+            DNUM 
         );
     }
     else
     {
         error(PANIC);
-        RNUM(0); 
+        RCUR; 
     }
 }
 
@@ -748,10 +802,13 @@ entry_p m_askdir(entry_p contxt)
                 deflt    = get_opt(contxt, OPT_DEFAULT),
                 newpath  = get_opt(contxt, OPT_NEWNAME),
                 disk     = get_opt(contxt, OPT_NOGAUGE);
-        RSTR(strdup("")); 
+        RCUR; 
     }
-    error(PANIC); 
-    RSTR(strdup("")); 
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -767,10 +824,13 @@ entry_p m_askfile(entry_p contxt)
                 deflt    = get_opt(contxt, OPT_DEFAULT),
                 newpath  = get_opt(contxt, OPT_NEWNAME),
                 disk     = get_opt(contxt, OPT_NOGAUGE);
-        RSTR(strdup("")); 
+        RCUR; 
     }
-    error(PANIC); 
-    RSTR(strdup("")); 
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -784,10 +844,13 @@ entry_p m_askstring(entry_p contxt)
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
-        RSTR(strdup("")); 
+        RCUR; 
     }
-    error(PANIC); 
-    RSTR(strdup("")); 
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -804,8 +867,11 @@ entry_p m_asknumber(entry_p contxt)
                 deflt    = get_opt(contxt, OPT_DEFAULT);
         RNUM(1); 
     }
-    error(PANIC); 
-    RNUM(0);
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -821,8 +887,11 @@ entry_p m_askchoice(entry_p contxt)
                 deflt    = get_opt(contxt, OPT_DEFAULT);
         RNUM(1); 
     }
-    error(PANIC); 
-    RNUM(0);
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -839,8 +908,11 @@ entry_p m_askoptions(entry_p contxt)
                 deflt    = get_opt(contxt, OPT_DEFAULT);
         RNUM(1); 
     }
-    error(PANIC); 
-    RNUM(0);
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -857,8 +929,11 @@ entry_p m_askbool(entry_p contxt)
                 choices  = get_opt(contxt, OPT_CHOICES);
         RNUM(1); 
     }
-    error(PANIC); 
-    RNUM(0);
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -875,8 +950,11 @@ entry_p m_askdisk(entry_p contxt)
                 assigns  = get_opt(contxt, OPT_ASSIGNS);
         RNUM(1); 
     }
-    error(PANIC); 
-    RNUM(0);
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -937,7 +1015,7 @@ entry_p m_cat(entry_p contxt)
         }
     }
     error(PANIC);
-    return new_failure();
+    RCUR; 
 }
 
 /*
@@ -1012,6 +1090,7 @@ entry_p m_fileonly(entry_p contxt)
             RSTR(r); 
         }
         error(PANIC); 
+        RCUR; 
     }
     else
     {
@@ -1166,7 +1245,7 @@ entry_p m_pathonly(entry_p contxt)
                     RSTR(r); 
                 }
                 error(PANIC); 
-                return new_failure(); 
+                RCUR; 
             }
         }
     }
@@ -1212,6 +1291,7 @@ entry_p m_select(entry_p contxt)
     else
     {
         error(PANIC); 
+        RCUR;
     }
     return new_failure(); 
 }
@@ -1259,7 +1339,7 @@ entry_p m_substr(entry_p contxt)
         }
     }
     error(PANIC);
-    return new_failure(); 
+    RCUR; 
 }
 
 /*
@@ -1309,7 +1389,7 @@ entry_p m_symbolset(entry_p contxt)
         }
     }
     error(PANIC); 
-    return new_failure(); 
+    RCUR; 
 }
 
 /*
@@ -1335,6 +1415,7 @@ entry_p m_symbolval(entry_p contxt)
     else
     {
         error(PANIC);
+        RCUR;
     }
     return new_failure(); 
 }
@@ -1388,7 +1469,7 @@ entry_p m_tackon(entry_p contxt)
         RSTR(r); 
     }
     error(PANIC); 
-    return new_failure(); 
+    RCUR; 
 }
 
 /*
@@ -1440,7 +1521,7 @@ entry_p m_transcript(entry_p contxt)
         }
     }
     error(PANIC); 
-    return new_failure(); 
+    RCUR; 
 }
 
 /*
@@ -1533,7 +1614,7 @@ entry_p m_copyfiles(entry_p contxt)
         RNUM(1); 
     }
     error(PANIC); 
-    RNUM(0); 
+    RCUR;
 }
 
 /*
@@ -1561,7 +1642,7 @@ entry_p m_copylib(entry_p contxt)
         RNUM(1); 
     }
     error(PANIC); 
-    RNUM(0); 
+    RCUR;
 }
 
 /*
@@ -1901,7 +1982,7 @@ entry_p m_exit(entry_p contxt)
         RNUM(0); 
     }
     error(PANIC);
-    RNUM(1); 
+    RCUR;
 }
 
 /*
@@ -1934,7 +2015,7 @@ entry_p m_onerror(entry_p contxt)
         return m_gosub(handler); 
     }
     error(PANIC);  
-    return new_failure(); 
+    RCUR;
 }
 
 /*
@@ -1966,7 +2047,7 @@ entry_p m_debug(entry_p contxt)
         RNUM(1); 
     }
     error(PANIC); 
-    return new_failure(); 
+    RCUR;
 }
 
 /*

@@ -208,7 +208,8 @@ int c_sane(entry_p c, size_t n)
         {
             if(c->children[i] == NULL ||
                c->children[i] == end() ||
-               c->children[i]->parent != c)
+               c->children[i]->parent != c ||
+               (c->type == NATIVE && !c->resolved))
             {
                 return 0; 
             } 
@@ -236,4 +237,3 @@ int s_sane(entry_p c, size_t n)
     }
     return 0; 
 }
-
