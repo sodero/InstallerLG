@@ -11,10 +11,10 @@ OS := $(shell uname)
 CCCONF := -I . -I $(VPATH) -std=c99 
 ifeq ($(OS),Linux)
 CCCONF += -D_BSD_SOURCE -D_POSIX_SOURCE
-CFLAGS += -Wall -g
+CFLAGS += -Wall -g -Wno-unused-variable
 else
 ifeq ($(OS),Darwin)
-CFLAGS += -Weverything -Wno-format-nonliteral -Wno-switch-enum
+CFLAGS += -Weverything -Wno-format-nonliteral -Wno-switch-enum -Wno-unused-variable
 endif
 endif
 CFLAGS += $(CCCONF)

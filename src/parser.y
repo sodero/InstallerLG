@@ -169,8 +169,8 @@ vp:             add                             |
                 complete                        ;
 fmt:            '(' STR ps ')'                  { $$ = new_native($2, LINE, m_fmt, $3, STRING); } |
                 '(' STR ')'                     { $$ = new_native($2, LINE, m_fmt, NULL, STRING); };
-dcl:            '(' DCL SYM par s ')'           { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, $4, $5)), DANGLE); } |
-                '(' DCL SYM s ')'               { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, NULL, $4)), DANGLE); };
+dcl:            '(' DCL SYM par s ')'           { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, $4, $5)), NUMBER); } |
+                '(' DCL SYM s ')'               { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, NULL, $4)), NUMBER); };
 cus:            '(' SYM ps ')'                  { $$ = new_cusref($2, LINE, $3); } |
                 '(' SYM ')'                     { $$ = new_cusref($2, LINE, NULL); };
 add:            '(' '+' ps ')'                  { $$ = new_native(strdup("+"), LINE, m_add, $3, NUMBER); };
@@ -183,9 +183,9 @@ gt:             '(' '>' pp ')'                  { $$ = new_native(strdup(">"), L
 gte:            '(' GTE pp ')'                  { $$ = new_native(strdup(">="), LINE, m_gte, $3, NUMBER); };
 eq:             '(' '=' pp ')'                  { $$ = new_native(strdup("="), LINE, m_eq, $3, NUMBER); };
 set:            '(' SET sps ')'                 { $$ = new_native(strdup("set"), LINE, m_set, $3, DANGLE); };
-if:             '(' IF cvv ')'                  { $$ = new_native(strdup("if"), LINE, m_if, $3, DANGLE); };
-while:          '(' WHILE cv ')'                { $$ = new_native(strdup("while"), LINE, m_while, $3, DANGLE); };
-until:          '(' UNTIL cv ')'                { $$ = new_native(strdup("until"), LINE, m_until, $3, DANGLE); };
+if:             '(' IF cvv ')'                  { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); };
+while:          '(' WHILE cv ')'                { $$ = new_native(strdup("while"), LINE, m_while, $3, NUMBER); };
+until:          '(' UNTIL cv ')'                { $$ = new_native(strdup("until"), LINE, m_until, $3, NUMBER); };
 and:            '(' AND pp ')'                  { $$ = new_native(strdup("AND"), LINE, m_and, $3, NUMBER); }; 
 or:             '(' OR pp ')'                   { $$ = new_native(strdup("OR"), LINE, m_or, $3, NUMBER); }; 
 xor:            '(' XOR pp ')'                  { $$ = new_native(strdup("XOR"), LINE, m_xor, $3, NUMBER); }; 

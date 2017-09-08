@@ -198,3 +198,42 @@ entry_p get_opt(entry_p c, opt_t t)
     }
     return NULL; 
 }
+
+int c_sane(entry_p c, size_t n)
+{
+    if(c && c->children)
+    {
+        for(size_t i = 0; 
+            i < n; i++)
+        {
+            if(c->children[i] == NULL ||
+               c->children[i] == end() ||
+               c->children[i]->parent != c)
+            {
+                return 0; 
+            } 
+        }
+        return 1; 
+    }
+    return 0; 
+}
+
+int s_sane(entry_p c, size_t n)
+{
+    if(c && c->symbols)
+    {
+        for(size_t i = 0; 
+            i < n; i++)
+        {
+            if(c->symbols[i] == NULL ||
+               c->symbols[i] == end() ||
+               c->symbols[i]->parent != c)
+            {
+                return 0; 
+            } 
+        }
+        return 1; 
+    }
+    return 0; 
+}
+

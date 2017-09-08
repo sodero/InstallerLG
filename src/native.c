@@ -13,60 +13,62 @@
 entry_p m_procedure(entry_p contxt)
 {
     entry_p dst = global(contxt);
-    if(dst && 
-       contxt->symbols &&
-       contxt->symbols[0] && 
-       contxt->symbols[0] != end())
+    if(dst && s_sane(contxt, 1))
     {
         push(dst, contxt->symbols[0]); 
         contxt->symbols[0]->parent = contxt; 
         return contxt->symbols[0];
     }
-    error(PANIC);
-    return new_failure(); 
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /*
 */
 entry_p m_if(entry_p contxt)
 {
-    ARGS(3); 
-    entry_p p = num(a1) ? a2 : a3; 
-    if(p->type == CONTXT)
+    if(c_sane(contxt, 3))
     {
-        return invoke(p);
-    }
-    else if(p->type == NATIVE ||
-            p->type == CUSREF)
-    {
-        if(p->call)
+        entry_p p = num(CARG(1)) ? CARG(2) : CARG(3); 
+        if(p->type == CONTXT)
+        {
+            return invoke(p);
+        }
+        else 
+        if((p->type == NATIVE ||
+            p->type == CUSREF) &&
+            p->call)
         {
             return p->call(p); 
         }
     }
     error(PANIC);
-    return new_failure(); 
+    RNUM(0); 
 }
 
 /*
 */
 static entry_p m_whunt(entry_p contxt, int m)
 {
-    ARGS(2); 
-    entry_p r = new_failure(); 
-    if(a2->type == CONTXT)
+    if(c_sane(contxt, 2))
     {
-        while((m ^ num(a1)) && 
-              !did_error())
+        contxt->resolved->id = 0; 
+        if(CARG(2)->type == CONTXT)
         {
-            r = invoke(a2);
+            entry_p r = contxt->resolved; 
+            while((m ^ num(CARG(1))) && 
+                  !did_error())
+            {
+                r = invoke(CARG(2));
+            }
+            return r; 
         }
     }
-    else
-    {
-        error(PANIC);
-    }
-    return r; 
+    error(PANIC);
+    RNUM(0); 
 }
 
 /*
@@ -279,11 +281,19 @@ entry_p m_eq(entry_p contxt)
 */
 entry_p m_sub(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-         num(a1) - num(a2)
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            num(CARG(1)) - 
+            num(CARG(2))
+        ); 
+    }
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /*
@@ -292,15 +302,22 @@ entry_p m_sub(entry_p contxt)
 */
 entry_p m_mul(entry_p contxt)
 {
-    ARGS(0); 
-    int s = 1; 
-    entry_p *cur = contxt->children; 
-    while(*cur && *cur != end())
+    if(c_sane(contxt, 1))
     {
-        s *= num(*cur);
-        cur++; 
+        int s = 1; 
+        entry_p *cur = contxt->children; 
+        while(*cur && *cur != end())
+        {
+            s *= num(*cur);
+            cur++; 
+        }
+        RNUM(s); 
     }
-    RNUM(s); 
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /* 
@@ -309,17 +326,27 @@ entry_p m_mul(entry_p contxt)
 */
 entry_p m_div(entry_p contxt)
 {
-    ARGS(2); 
-    int d = num(a2); 
-    if(d)
+    if(c_sane(contxt, 2))
     {
-        RNUM(num(a1) / d); 
+        int div = num(CARG(2)); 
+        if(div)
+        {
+            RNUM
+            (
+                num(CARG(1)) / 
+                div
+            ); 
+        }
+        else
+        {
+            error(contxt->id, "Division by zero", contxt->name); 
+            RNUM(0); 
+        }
     }
     else
     {
-        error(contxt->id, "Division by zero", 
-              contxt->name); 
-        return new_failure(); 
+        error(PANIC);
+        RNUM(0); 
     }
 }
 
@@ -481,11 +508,19 @@ entry_p m_fmt(entry_p contxt)
 */
 entry_p m_and(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-        num(a1) && num(a2)
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            num(CARG(1)) && 
+            num(CARG(2))
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /* 
@@ -494,11 +529,19 @@ entry_p m_and(entry_p contxt)
 */
 entry_p m_or(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-        num(a1) || num(a2)
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            num(CARG(1)) ||  
+            num(CARG(2))
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /* 
@@ -507,12 +550,19 @@ entry_p m_or(entry_p contxt)
 */
 entry_p m_xor(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-        (num(a1) && !num(a2)) || 
-        (num(a2) && !num(a1)) 
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            (num(CARG(1)) && !num(CARG(2))) || 
+            (num(CARG(2)) && !num(CARG(1))) 
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /* 
@@ -521,11 +571,15 @@ entry_p m_xor(entry_p contxt)
 */
 entry_p m_not(entry_p contxt)
 {
-    ARGS(1); 
-    RNUM
-    (
-         !num(a1)
-    );
+    if(c_sane(contxt, 1))
+    {
+        RNUM(!num(CARG(1)));
+    }
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /* 
@@ -534,11 +588,19 @@ entry_p m_not(entry_p contxt)
 */
 entry_p m_bitand(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-         num(a1) & num(a2)
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            num(CARG(1)) & 
+            num(CARG(2))
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /* 
@@ -547,11 +609,19 @@ entry_p m_bitand(entry_p contxt)
 */
 entry_p m_bitor(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-         num(a1) | num(a2)
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            num(CARG(1)) | 
+            num(CARG(2))
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /* 
@@ -560,11 +630,19 @@ entry_p m_bitor(entry_p contxt)
 */
 entry_p m_bitxor(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-         num(a1) ^ num(a2)
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            num(CARG(1)) ^
+            num(CARG(2))
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /* 
@@ -573,11 +651,18 @@ entry_p m_bitxor(entry_p contxt)
 */
 entry_p m_bitnot(entry_p contxt)
 {
-    ARGS(1); 
-    RNUM
-    (
-         ~num(a1)
-    );
+    if(c_sane(contxt, 1))
+    {
+        RNUM
+        (
+            ~num(CARG(1))
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /* 
@@ -586,11 +671,19 @@ entry_p m_bitnot(entry_p contxt)
 */
 entry_p m_shiftleft(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-         num(a1) << num(a2)
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            num(CARG(1)) << 
+            num(CARG(2))
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /* 
@@ -599,11 +692,19 @@ entry_p m_shiftleft(entry_p contxt)
 */
 entry_p m_shiftright(entry_p contxt)
 {
-    ARGS(2); 
-    RNUM
-    (
-         num(a1) >> num(a2)
-    );
+    if(c_sane(contxt, 2))
+    {
+        RNUM
+        (
+            num(CARG(1)) >> 
+            num(CARG(2))
+        );
+    }
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /*
@@ -612,20 +713,26 @@ entry_p m_shiftright(entry_p contxt)
 */
 entry_p m_in(entry_p contxt)
 {
-    ARGS(2); 
-    if(a2->children)
+    if(c_sane(contxt, 2))
     {
         int m = 0;  
-        entry_p *cur = a2->children; 
+        entry_p *cur = CARG(2)->children; 
         while(*cur && *cur != end())
         {
             m += 1 << num(*cur);
             cur++; 
         }
-        RNUM(num(a1) & m); 
+        RNUM
+        (
+            num(CARG(1)) & 
+            m
+        );
     }
-    error(PANIC);
-    return new_failure();
+    else
+    {
+        error(PANIC);
+        RNUM(0); 
+    }
 }
 
 /*
@@ -1771,7 +1878,7 @@ entry_p m_exit(entry_p contxt)
     {
         if(contxt->children)
         {
-            if(!get_opt(contxt->children, OPT_QUIET))
+            if(!get_opt(contxt, OPT_QUIET))
             {
                 for(size_t i = 0; 
                     contxt->children[i] &&
