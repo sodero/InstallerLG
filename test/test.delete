@@ -8,3 +8,4 @@
 (delete "_dl_" (safe) (confirm 1) (optional (askuser)) (all) (help "help") (prompt "prompt")) ; "touch _dl_","1",""
 (delete "_dl_" (safe) (confirm 1) (optional (askuser)) (all) (delopts (askuser)) (help "help") (prompt "prompt")) ; "touch _dl_","1",""
 (delete) ; "","Line 1: syntax error ')'",""
+(delete "_dl_") ; "","Line 1: Could not delete file '_dl_' 0",""

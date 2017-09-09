@@ -1723,101 +1723,113 @@ entry_p m_copylib(entry_p contxt)
 entry_p m_startup(entry_p contxt)
 {
     ARGS(2); 
-    entry_p help     = get_opt(contxt->children[2], OPT_HELP),
-            prompt   = get_opt(contxt->children[2], OPT_PROMPT), 
-            confirm  = get_opt(contxt->children[2], OPT_CONFIRM), 
-            override = get_opt(contxt->children[2], OPT_OVERRIDE);
-/*
- Hantera OPTS!
-*/
-    if(a2->type == OPTION && 
-       a2->id == OPT_COMMAND &&
-       a2->children)
+
+// CLEAANAN!
+
+    if(c_sane(contxt, 2))
     {
-        const char *fln = override ? str(override->children[0]) : "s:user-startup";
-        const char *app = str(a1), *cmd = str(a2->children[0]);
-        FILE *fp = fopen(fln, "r"); 
-        if(fp)
+        entry_p command  = get_opt(contxt, OPT_COMMAND),
+                help     = get_opt(contxt->children[2], OPT_HELP),
+                prompt   = get_opt(contxt->children[2], OPT_PROMPT), 
+                confirm  = get_opt(contxt->children[2], OPT_CONFIRM), 
+                override = get_opt(contxt->children[2], OPT_OVERRIDE);
+        if(!command) 
         {
-            size_t al = strlen(app) + 2; 
-            if(al < 3)
+            error(contxt->id, "Missing option", "command"); 
+            RNUM(0); 
+        }
+        if(c_sane(command, 1))
+        {
+            const char *fln = override ? str(override->children[0]) : "s:user-startup";
+            const char *app = str(a1), *cmd = str(command->children[0]);
+            FILE *fp = fopen(fln, "r"); 
+            if(fp)
             {
-                fclose(fp); 
-                error(contxt->id, "Invalid application name", "NULL"); 
-                RNUM(0);
+                size_t al = strlen(app) + 2; 
+                if(al < 3)
+                {
+                    fclose(fp); 
+                    error(contxt->id, "Invalid application name", "NULL"); 
+                    RNUM(0);
+                }
+                else
+                {
+                    char *fnd, *buf;
+                    size_t fl, cl = strlen(cmd); 
+                    fseek(fp, 0L, SEEK_END);
+                    fl = ftell(fp);
+                    fnd = calloc(al + 1, sizeof(char)); 
+                    buf = calloc(fl + 2 * (al + 1) + cl + 2, sizeof(char)); 
+                    if(buf && fnd)
+                    {
+                        fseek(fp, 0L, SEEK_SET);
+                        sprintf(fnd, ";%s\n", app); 
+                        if(fread(buf, sizeof(char), fl, fp) == fl)
+                        {
+                            char *b = strstr(buf, fnd),
+                                 *e = b ? strstr(b + al, fnd) : NULL; 
+                            b += al; 
+                            fclose(fp); 
+                            if(e && b)
+                            {
+                                fp = fopen(fln, "w"); 
+                                if(fp)
+                                {
+                                    memmove(b + cl + 1, e, buf + fl - e); 
+                                    fl -= e - b - cl - 1;
+                                    memcpy(b, cmd, cl); 
+                                    b[cl] = '\n';
+                                    if(fwrite(buf, sizeof(char), fl, fp) == fl)
+                                    {
+                                        fclose(fp); 
+                                        free(fnd); 
+                                        free(buf); 
+                                        RNUM(1);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                fp = fopen(fln, "a"); 
+                                if(fp)
+                                {
+                                    if(fprintf(fp, "%s%s\n%s", 
+                                       fnd, cmd, fnd) > 0)
+                                    {
+                                        fclose(fp); 
+                                        free(fnd); 
+                                        free(buf); 
+                                        RNUM(1);
+                                    }
+                                }
+                            }
+                            error(contxt->id, "Could not write to file", fln); 
+                        }
+                    }
+                    if(fp)
+                    {
+                        fclose(fp); 
+                    }
+                    free(buf);
+                    free(fnd);
+                }
             }
             else
             {
-                char *fnd, *buf;
-                size_t fl, cl = strlen(cmd); 
-                fseek(fp, 0L, SEEK_END);
-                fl = ftell(fp);
-                fnd = calloc(al + 1, sizeof(char)); 
-                buf = calloc(fl + 2 * (al + 1) + cl + 2, sizeof(char)); 
-                if(buf && fnd)
-                {
-                    fseek(fp, 0L, SEEK_SET);
-                    sprintf(fnd, ";%s\n", app); 
-                    if(fread(buf, sizeof(char), fl, fp) == fl)
-                    {
-                        char *b = strstr(buf, fnd),
-                             *e = b ? strstr(b + al, fnd) : NULL; 
-                        b += al; 
-                        fclose(fp); 
-                        if(e && b)
-                        {
-                            fp = fopen(fln, "w"); 
-                            if(fp)
-                            {
-                                memmove(b + cl + 1, e, buf + fl - e); 
-                                fl -= e - b - cl - 1;
-                                memcpy(b, cmd, cl); 
-                                b[cl] = '\n';
-                                if(fwrite(buf, sizeof(char), fl, fp) == fl)
-                                {
-                                    fclose(fp); 
-                                    free(fnd); 
-                                    free(buf); 
-                                    RNUM(1);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            fp = fopen(fln, "a"); 
-                            if(fp)
-                            {
-                                if(fprintf(fp, "%s%s\n%s", 
-                                   fnd, cmd, fnd) > 0)
-                                {
-                                    fclose(fp); 
-                                    free(fnd); 
-                                    free(buf); 
-                                    RNUM(1);
-                                }
-                            }
-                        }
-                        error(contxt->id, "Could not write to file", fln); 
-                    }
-                }
-                if(fp)
-                {
-                    fclose(fp); 
-                }
-                free(buf);
-                free(fnd);
+                error(contxt->id, "Could not read from file", fln); 
             }
         }
         else
         {
-            error(contxt->id, "Could not read from file", fln); 
+            error(PANIC); 
+            RCUR; 
         }
     }
     else
     {
         error(PANIC); 
+        RCUR; 
     }
-    RNUM(0);
 }
 
 /*
@@ -1894,20 +1906,27 @@ entry_p m_makeassign(entry_p contxt)
 */
 entry_p m_rename(entry_p contxt)
 {
-    ARGS(2); 
-    entry_p help     = get_opt(contxt->children[2], OPT_HELP),
-            prompt   = get_opt(contxt->children[2], OPT_PROMPT), 
-            confirm  = get_opt(contxt->children[2], OPT_CONFIRM), 
-            safe     = get_opt(contxt->children[2], OPT_COMMAND);
-/*
- Hantera OPTS!
-*/
-    if(rename(str(a1), str(a2)) == 0)
+    if(c_sane(contxt, 2))
     {
-        RNUM(1); 
+        entry_p help     = get_opt(CARG(3), OPT_HELP),
+                prompt   = get_opt(CARG(3), OPT_PROMPT), 
+                confirm  = get_opt(CARG(3), OPT_CONFIRM), 
+                safe     = get_opt(CARG(3), OPT_COMMAND);
+        if(rename(str(CARG(1)), str(CARG(2))) == 0)
+        {
+            RNUM(1); 
+        }
+        else
+        {
+            error(contxt->id, "Could not rename file", str(CARG(1))); 
+            RNUM(0); 
+        }
+    }  
+    else
+    {
+        error(PANIC); 
+        RCUR; 
     }
-    error(contxt->id, "Could not rename file", str(a1)); 
-    RNUM(0); 
 }
 
 /*
@@ -1918,23 +1937,31 @@ entry_p m_rename(entry_p contxt)
 */
 entry_p m_delete(entry_p contxt)
 {
-    ARGS(1); 
-    entry_p help     = get_opt(contxt->children[1], OPT_HELP),
-            prompt   = get_opt(contxt->children[1], OPT_PROMPT), 
-            confirm  = get_opt(contxt->children[1], OPT_CONFIRM), 
-            infos    = get_opt(contxt->children[1], OPT_INFOS), 
-            optional = get_opt(contxt->children[1], OPT_OPTIONAL), 
-            all      = get_opt(contxt->children[1], OPT_ALL), 
-            delopts  = get_opt(contxt->children[1], OPT_DELOPTS), 
-            safe     = get_opt(contxt->children[1], OPT_SAFE); 
-/*
- Hantera OPTS!
-*/
-    if(remove(str(a1)) == 0)
+    if(c_sane(contxt, 1))
     {
-        RNUM(1); 
+        entry_p help     = get_opt(CARG(2), OPT_HELP),
+                prompt   = get_opt(CARG(2), OPT_PROMPT), 
+                confirm  = get_opt(CARG(2), OPT_CONFIRM), 
+                infos    = get_opt(CARG(2), OPT_INFOS), 
+                optional = get_opt(CARG(2), OPT_OPTIONAL), 
+                all      = get_opt(CARG(2), OPT_ALL), 
+                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
+                safe     = get_opt(CARG(2), OPT_SAFE); 
+        if(remove(str(CARG(1))) == 0)
+        {
+            RNUM(1); 
+        }
+        else
+        {
+            error(contxt->id, "Could not delete file", str(CARG(1))); 
+            RNUM(0); 
+        }
+    }  
+    else
+    {
+        error(PANIC); 
+        RCUR; 
     }
-    RNUM(0); 
 }
 
 /*

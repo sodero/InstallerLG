@@ -4,3 +4,5 @@
 (rename "_rn_" "_rm_" (safe) (confirm 1) (help "help") (prompt "prompt")) ; "touch _rn_","1","rm -f _rm_"
 (rename) ; "","Line 1: syntax error ')'",""
 (rename "_rn_") ; "","Line 1: syntax error ')'",""
+(rename "_rn_" "_rm_") ; "touch _rn_ && touch _rm_","1","rm -f _rm_ _rn_"
+(rename "_rn_" "_rm_") ; "touch _rm_","Line 1: Could not rename file '_rn_' 0","rm -f _rm_"
