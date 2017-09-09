@@ -92,7 +92,7 @@ entry_p m_gosub(entry_p contxt)
 {
     static int dep = 0; 
     entry_p con = global(contxt);  
-    if(con && con->symbols)
+    if(s_sane(con, 0)) 
     {
         entry_p *cus = con->symbols; 
         while(*cus && 

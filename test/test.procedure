@@ -20,6 +20,6 @@
 (procedure f1 a b (+ a b)) (f1 1 2) (f1 1 2 3 (f1)); "","3",""
 (procedure f1 a b (+ a b)) (f1 1 2) (f1 1) (f1 2 3 4); "","5",""
 (procedure f1 (+ 1 2)) (set a (f1)) (procedure f1 (+ 2 2)) (set a (+ a (f1))) (+ a); "","7",""
-(procedure f1 (+ 1 2)) (procedure f1 (+ 2 (f1))) (f1); "","Line 1: Max recursion depth exceeded 'f1' 128",""
+(procedure f1 (+ 1 2)) (procedure f1 (+ 2 (f1))) (f1); "","Line 1: Max recursion depth exceeded 'f1' 0",""
 (procedure f1 a (if (< a 65) (f1 (+ a 1)) (+ 0))) (f1 1); "","Line 1: Max recursion depth exceeded 'f1'",""
 (procedure f1 a (if (< a 64) (f1 (+ a 1)) (+ 0))) (f1 1); "","0",""
