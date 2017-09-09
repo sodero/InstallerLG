@@ -1,1 +1,7 @@
-(copyfiles (safe)) ; "","1",""
+(copyfiles) ; "","Line 1: syntax error ')'",""
+(copyfiles (safe)) ; "","Line 1: Missing option 'source' 0",""
+(copyfiles (source)) ; "","Line 1: syntax error ')'",""
+(copyfiles (source "src")) ; "","Line 1: Missing option 'dest' 0",""
+(copyfiles (source) (dest)) ; "","Line 1: syntax error ')'",""
+(copyfiles (source) (dest "dst")) ; "","Line 1: syntax error ')'",""
+(copyfiles (source "src") (dest "dst")) ; "","1",""

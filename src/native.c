@@ -1255,7 +1255,7 @@ entry_p m_iconinfo(entry_p contxt)
 {
     if(c_sane(contxt, 1))
     {
-        entry_p dst = get_opt(CARG(1), OPT_DEST);
+        entry_p dst = get_opt(contxt, OPT_DEST);
         if(c_sane(dst, 1))
         {
             /* do something */
@@ -1647,7 +1647,7 @@ entry_p m_makedir(entry_p contxt)
 */
 entry_p m_copyfiles(entry_p contxt)
 {
-    if(contxt)
+    if(c_sane(contxt, 1))
     {
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
@@ -1664,10 +1664,19 @@ entry_p m_copyfiles(entry_p contxt)
                 optional = get_opt(contxt, OPT_OPTIONAL),
                 delopts  = get_opt(contxt, OPT_DELOPTS),
                 nogauge  = get_opt(contxt, OPT_NOGAUGE);
+        if(!source || !dest) 
+        {
+            char *opt = !source ? "source" : "dest"; 
+            error(contxt->id, "Missing option", opt); 
+            RNUM(0); 
+        }
         RNUM(1); 
     }
-    error(PANIC); 
-    RCUR;
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*
@@ -1679,8 +1688,8 @@ entry_p m_copyfiles(entry_p contxt)
 */
 entry_p m_copylib(entry_p contxt)
 {
-    if(contxt)
-    {
+    if(c_sane(contxt, 1))
+    {   
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
                 source   = get_opt(contxt, OPT_SOURCE),
@@ -1692,10 +1701,19 @@ entry_p m_copylib(entry_p contxt)
                 optional = get_opt(contxt, OPT_OPTIONAL),
                 delopts  = get_opt(contxt, OPT_DELOPTS),
                 nogauge  = get_opt(contxt, OPT_NOGAUGE);
+        if(!source || !dest) 
+        {
+            char *opt = !source ? "source" : "dest"; 
+            error(contxt->id, "Missing option", opt); 
+            RNUM(0); 
+        }
         RNUM(1); 
     }
-    error(PANIC); 
-    RCUR;
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*

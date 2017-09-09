@@ -1,2 +1,7 @@
 (copylib) ; "","Line 1: syntax error ')'",""
-(copylib (safe)) ; "","1",""
+(copylib (safe)) ; "","Line 1: Missing option 'source' 0",""
+(copylib (source)) ; "","Line 1: syntax error ')'",""
+(copylib (source "src")) ; "","Line 1: Missing option 'dest' 0",""
+(copylib (source) (dest)) ; "","Line 1: syntax error ')'",""
+(copylib (source) (dest "dst")) ; "","Line 1: syntax error ')'",""
+(copylib (source "src") (dest "dst")) ; "","1",""
