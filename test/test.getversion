@@ -1,1 +1,4 @@
-(getversion "file") ; "","Line 1: Implementation missing 'm_getversion'",""
+(getversion "_gv_") ; "","0",""
+(getversion "_gv_" (resident)) ; "","0",""
+(getversion "_gv_" (resident) (safe)) ; "","Line 1: syntax error '('",""
+(getversion "_gv_" (safe)) ; "","Line 1: syntax error 'safe'",""

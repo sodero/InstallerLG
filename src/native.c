@@ -1228,15 +1228,23 @@ entry_p m_getsum(entry_p contxt)
 /*
 `(getversion <file> (resident))'
      return version/revision of file, library, etc. as 32 bit num
-
-GRAMMAR: (resident) is missing
-
 */
 entry_p m_getversion(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(c_sane(contxt, 1))
+    {
+        if(get_opt(contxt, OPT_RESIDENT))
+        {
+            /* do something */
+        }
+        /* do some more */
+        RNUM(0); 
+    }
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*
@@ -1245,9 +1253,25 @@ entry_p m_getversion(entry_p contxt)
 */
 entry_p m_iconinfo(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(c_sane(contxt, 1))
+    {
+        entry_p dst = get_opt(CARG(1), OPT_DEST);
+        if(c_sane(dst, 1))
+        {
+            /* do something */
+            RNUM(1); 
+        }
+        else
+        {
+            error(contxt->id, "Missing option", "dest"); 
+            RNUM(0); 
+        }
+    }
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*

@@ -1,1 +1,4 @@
-(iconinfo "parameters") ; "","Line 1: Implementation missing 'm_iconinfo'",""
+(iconinfo) ; "","Line 1: syntax error ')'",""
+(iconinfo (safe)) ; "","Line 1: Missing option 'dest' 0",""
+(iconinfo (dest) (safe)) ; "","Line 1: syntax error ')'",""
+(iconinfo (dest "shell.info") (safe)) ; "","1",""
