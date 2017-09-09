@@ -963,55 +963,56 @@ entry_p m_askdisk(entry_p contxt)
 */
 entry_p m_cat(entry_p contxt)
 {
-    ARGS(0); 
-    char *buf; 
-    size_t n = 64; 
-    buf = calloc(n + 1, sizeof(char));  
-    if(buf)
+    if(c_sane(contxt, 1))
     {
-        size_t l = 0, i = 0; 
-        while(contxt->children[i] && 
-              contxt->children[i] != end()) 
-        {
-            size_t ln; 
-            const char *s = str(contxt->children[i++]); 
-            if(did_error())
-            {
-                free(buf); 
-                return new_failure();
-            }
-            ln = strlen(s); 
-            if(ln)
-            {
-                l += strlen(s); 
-                if(l > n) 
-                {
-                    char *tmp; 
-                    while(n && n < l)
-                    {
-                        n = n << 1;  
-                    }
-                    tmp = calloc(n + 1, sizeof(char));  
-                    if(tmp && n) 
-                    {
-                        memcpy(tmp, buf, l - ln + 1); 
-                        free(buf); 
-                        buf = tmp; 
-                    }
-                    else
-                    {
-                        free(tmp); 
-                        free(buf); 
-                        buf = NULL; 
-                        break; 
-                    }
-                }
-                strncat(buf, s, n); 
-            }
-        } 
+        size_t n = 64; 
+        char *buf = calloc(n + 1, sizeof(char));  
         if(buf)
         {
-            RSTR(buf); 
+            size_t l = 0, i = 0; 
+            while(contxt->children[i] && 
+                  contxt->children[i] != end()) 
+            {
+                size_t ln; 
+                const char *s = str(contxt->children[i++]); 
+                if(did_error())
+                {
+                    free(buf); 
+                    return new_failure();
+                }
+                ln = strlen(s); 
+                if(ln)
+                {
+                    l += strlen(s); 
+                    if(l > n) 
+                    {
+                        char *tmp; 
+                        while(n && n < l)
+                        {
+                            n = n << 1;  
+                        }
+                        tmp = calloc(n + 1, sizeof(char));  
+                        if(tmp && n) 
+                        {
+                            memcpy(tmp, buf, l - ln + 1); 
+                            free(buf); 
+                            buf = tmp; 
+                        }
+                        else
+                        {
+                            free(tmp); 
+                            free(buf); 
+                            buf = NULL; 
+                            break; 
+                        }
+                    }
+                    strncat(buf, s, n); 
+                }
+            } 
+            if(buf)
+            {
+                RSTR(buf); 
+            }
         }
     }
     error(PANIC);
@@ -1024,24 +1025,31 @@ entry_p m_cat(entry_p contxt)
 */
 entry_p m_exists(entry_p contxt)
 {
-    ARGS(1); 
-    struct stat fs; 
-    if(get_opt(contxt, OPT_NOREQ))
+    if(c_sane(contxt, 1))
     {
-        /* show mount req */
+        struct stat fs; 
+        if(get_opt(contxt, OPT_NOREQ))
+        {
+            /* show mount req */
+        }
+        if(!stat(str(CARG(1)), &fs))
+        {
+            if(S_ISREG(fs.st_mode))
+            {
+                RNUM(1); 
+            }
+            if(S_ISDIR(fs.st_mode))
+            {
+                RNUM(2); 
+            }
+        }
+        RNUM(0); 
     }
-    if(!stat(str(a1), &fs))
+    else
     {
-        if(S_ISREG(fs.st_mode))
-        {
-            RNUM(1); 
-        }
-        if(S_ISDIR(fs.st_mode))
-        {
-            RNUM(2); 
-        }
+        error(PANIC);
+        RCUR; 
     }
-    RNUM(0); 
 }
 
 /*
@@ -1139,9 +1147,16 @@ entry_p m_getdiskspace(entry_p contxt)
 */
 entry_p m_getenv(entry_p contxt)
 {
-    ARGS(1);
-    char *e = getenv(str(a1)); 
-    RSTR(strdup(e ? e : "")); 
+    if(c_sane(contxt, 1))
+    {
+        char *e = getenv(str(CARG(1))); 
+        RSTR(strdup(e ? e : "")); 
+    }
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*
@@ -1150,21 +1165,27 @@ entry_p m_getenv(entry_p contxt)
 */
 entry_p m_getsize(entry_p contxt)
 {
-    ARGS(1); 
-    const char *n = str(a1); 
-    FILE *f = fopen(n, "r"); 
-    if(f)
+    if(c_sane(contxt, 1))
     {
-        long s; 
-        fseek(f, 0L, SEEK_END);
-        s = ftell(f);
-        fclose(f); 
-        RNUM((int) s); 
+        FILE *f = fopen(str(CARG(1)), "r"); 
+        if(f)
+        {
+            fseek(f, 0L, SEEK_END);
+            DNUM = ftell(f); 
+            fclose(f); 
+            RCUR; 
+        }
+        else
+        {
+            error(contxt->id, "Could not open file", 
+                  str(CARG(1))); 
+            RNUM(0); 
+        }
     }
     else
     {
-        error(contxt->id, "Could not open file", n); 
-        return new_failure(); 
+        error(PANIC);
+        RCUR; 
     }
 }
 
@@ -1174,25 +1195,33 @@ entry_p m_getsize(entry_p contxt)
 */
 entry_p m_getsum(entry_p contxt)
 {
-    ARGS(1); 
-    FILE *f = fopen(str(a1), "r"); 
-    if(f)
+    if(c_sane(contxt, 1))
     {
-        int c = getc(f); 
-        int s = 0, n = 1;
-        while(c != EOF)
+        DNUM = 0; 
+        FILE *f = fopen(str(CARG(1)), "r"); 
+        if(f)
         {
-            s -= (c + n);
-            c = getc(f); 
-            n = ~s; 
+            int c = getc(f), n = 1; 
+            while(c != EOF)
+            {
+                DNUM -= (c + n);
+                c = getc(f); 
+                n = ~DNUM; 
+            }
+            fclose(f); 
+            RCUR; 
         }
-        fclose(f); 
-        RNUM(s); 
+        else
+        {
+            error(contxt->id, "Could not open file", 
+                  str(CARG(1))); 
+            RCUR; 
+        }
     }
     else
     {
-        error(contxt->id, "Could not open file", str(a1)); 
-        return new_failure(); 
+        error(PANIC);
+        RCUR; 
     }
 }
 
