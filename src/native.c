@@ -1981,9 +1981,15 @@ entry_p m_protect(entry_p contxt)
 */
 entry_p m_complete(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(c_sane(contxt, 1))
+    {
+        RNUM(num(CARG(1))); 
+    }
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -1992,9 +1998,20 @@ entry_p m_complete(entry_p contxt)
 */
 entry_p m_message(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(c_sane(contxt, 1))
+    {
+        entry_p all = get_opt(contxt, OPT_ALL);
+        if(all)
+        {
+            /* do something */
+        }
+        RNUM(1); 
+    }
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -2036,15 +2053,22 @@ entry_p m_foreach(entry_p contxt)
 */
 entry_p m_abort(entry_p contxt)
 {
-    ARGS(0); 
-    entry_p *cur = contxt->children; 
-    while(*cur && *cur != end())
+    if(c_sane(contxt, 0))
     {
-        /* show message */
-        cur++; 
+        entry_p *cur = contxt->children; 
+        while(*cur && *cur != end())
+        {
+            /* show message */
+            cur++; 
+        }
+        error(-3, "Abort", __func__); 
+        RNUM(0);
     }
-    error(-3, "Abort", __func__); 
-    return new_failure(); 
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -2106,14 +2130,17 @@ entry_p m_trap(entry_p contxt)
 */
 entry_p m_onerror(entry_p contxt)
 {
-    if(contxt)
+    if(c_sane(contxt, 0))
     {
         entry_p handler = new_cusref(strdup("@onerror"), __LINE__, NULL);
         push(contxt, handler);
         return m_gosub(handler); 
     }
-    error(PANIC);  
-    RCUR;
+    else
+    {
+        error(PANIC);  
+        RCUR;
+    }
 }
 
 /*
@@ -2131,21 +2158,22 @@ entry_p m_onerror(entry_p contxt)
 */
 entry_p m_debug(entry_p contxt)
 {
-    if(contxt &&
-       contxt->children)
+    if(c_sane(contxt, 0))
     {
-        for(size_t i = 0; 
-            contxt->children[i] &&
-            contxt->children[i] != end(); 
-            i++)
+        entry_p *cur = contxt->children; 
+        while(*cur && *cur != end())
         {
-            printf("%s ", str(contxt->children[i])); 
+            printf("%s ", str(*cur)); 
+            cur++; 
         }
         printf("\n"); 
         RNUM(1); 
     }
-    error(PANIC); 
-    RCUR;
+    else
+    {
+        error(PANIC); 
+        RCUR;
+    }
 }
 
 /*

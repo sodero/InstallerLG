@@ -1,4 +1,5 @@
-(message "1" "2" (all)) ; "","Line 1: Implementation missing 'm_message'",""
-(message "1" ("%ld" 2) (all)) ; "","Line 1: Implementation missing 'm_message'",""
+(message "1" "2" (all)) ; "","1",""
+(message ("%ld" 2) 1 (all)) ; "","1",""
 (message "1" "2" (all) (safe)) ; "","Line 1: syntax error '('",""
 (message (all)) ; "","Line 1: syntax error 'all'",""
+(message "1" (safe)) ; "","Line 1: syntax error 'safe'",""
