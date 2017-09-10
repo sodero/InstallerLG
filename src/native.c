@@ -51,7 +51,7 @@ entry_p m_if(entry_p contxt)
 
 /*
 */
-static entry_p m_whunt(entry_p contxt, int m)
+static entry_p h_whunt(entry_p contxt, int m)
 {
     if(c_sane(contxt, 2) &&
        CARG(2)->type == CONTXT)
@@ -76,14 +76,14 @@ static entry_p m_whunt(entry_p contxt, int m)
 */
 entry_p m_while(entry_p contxt)
 {
-    return m_whunt(contxt, 0); 
+    return h_whunt(contxt, 0); 
 }
 
 /*
 */
 entry_p m_until(entry_p contxt)
 {
-    return m_whunt(contxt, 1); 
+    return h_whunt(contxt, 1); 
 }
 
 /*
@@ -216,7 +216,7 @@ entry_p m_add (entry_p contxt)
 /*
  * < <= == >= > 
 */
-static int m_cmp(entry_p a, entry_p b)
+static int h_cmp(entry_p a, entry_p b)
 {
     if(a->type == STRING &&
        b->type == STRING)
@@ -239,7 +239,7 @@ entry_p m_lt(entry_p contxt)
     {
         RNUM
         (
-            m_cmp(CARG(1), CARG(2)) < 0 ? 1 : 0
+            h_cmp(CARG(1), CARG(2)) < 0 ? 1 : 0
         );
     }
     else
@@ -259,7 +259,7 @@ entry_p m_lte(entry_p contxt)
     {
         RNUM
         (
-            m_cmp(CARG(1), CARG(2)) <= 0 ? 1 : 0
+            h_cmp(CARG(1), CARG(2)) <= 0 ? 1 : 0
         );
     }
     else
@@ -279,7 +279,7 @@ entry_p m_gt(entry_p contxt)
     {
         RNUM
         (
-            m_cmp(CARG(1), CARG(2)) > 0 ? 1 : 0
+            h_cmp(CARG(1), CARG(2)) > 0 ? 1 : 0
         );
     }
     else
@@ -299,7 +299,7 @@ entry_p m_gte(entry_p contxt)
     {
         RNUM
         (
-            m_cmp(CARG(1), CARG(2)) >= 0 ? 1 : 0
+            h_cmp(CARG(1), CARG(2)) >= 0 ? 1 : 0
         );
     }
     else
@@ -319,7 +319,7 @@ entry_p m_eq(entry_p contxt)
     {
         RNUM
         (
-            !m_cmp(CARG(1), CARG(2)) ? 1 : 0
+            !h_cmp(CARG(1), CARG(2)) ? 1 : 0
         );
     }
     else
@@ -1635,6 +1635,47 @@ entry_p m_makedir(entry_p contxt)
         error(PANIC); 
     }
     RNUM(0);
+}
+
+/*
+  copyfiles / copylib helper function
+*/
+static int h_copyfile(int id, 
+                      const char *src, 
+                      const char *dst)
+{
+    static char buf[BUFSIZ]; 
+    FILE *fs = fopen(src, "r"); 
+    if(fs)
+    {
+        FILE *fd = fopen(dst, "w"); 
+        if(fd)
+        {
+            size_t n = fread(buf, sizeof(char), BUFSIZ, fs);
+            while(n)
+            {
+                if(fwrite(buf, sizeof(char), n, fd) != n)
+                {
+                    error(id, "Error writing to file", dst); 
+                    break; 
+                }
+                n = fread(buf, sizeof(char), BUFSIZ, fs);
+            }
+            fclose(fs); 
+            fclose(fd); 
+            return n ? 0 : 1; 
+        }
+        else
+        {
+            fclose(fs); 
+            error(id, "Could not write to file", dst); 
+        }
+    }
+    else
+    {
+        error(id, "Could not read from file", src); 
+    }
+    return 0; 
 }
 
 /*
