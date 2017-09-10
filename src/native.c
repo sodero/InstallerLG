@@ -1171,7 +1171,7 @@ entry_p m_getsize(entry_p contxt)
         if(f)
         {
             fseek(f, 0L, SEEK_END);
-            DNUM = ftell(f); 
+            DNUM = (int) ftell(f); 
             fclose(f); 
             RCUR; 
         }
@@ -1587,7 +1587,7 @@ entry_p m_makedir(entry_p contxt)
     char *dir = strdup(str(a1)); 
     if(dir)
     {
-        int l = strlen(dir), d = 1; 
+        int l = (int) strlen(dir), d = 1; 
         entry_p opt = contxt->children[1]; 
         if(opt)
         {
@@ -1757,7 +1757,7 @@ entry_p m_startup(entry_p contxt)
                     char *fnd, *buf;
                     size_t fl, cl = strlen(cmd); 
                     fseek(fp, 0L, SEEK_END);
-                    fl = ftell(fp);
+                    fl = (size_t) ftell(fp);
                     fnd = calloc(al + 1, sizeof(char)); 
                     buf = calloc(fl + 2 * (al + 1) + cl + 2, sizeof(char)); 
                     if(buf && fnd)
@@ -1776,7 +1776,7 @@ entry_p m_startup(entry_p contxt)
                                 if(fp)
                                 {
                                     memmove(b + cl + 1, e, buf + fl - e); 
-                                    fl -= e - b - cl - 1;
+                                    fl -= (size_t) e - (size_t) b - cl - 1;
                                     memcpy(b, cmd, cl); 
                                     b[cl] = '\n';
                                     if(fwrite(buf, sizeof(char), fl, fp) == fl)
@@ -2079,32 +2079,33 @@ entry_p m_exit(entry_p contxt)
 {
     if(contxt)
     {
-        if(contxt->children)
+        if(contxt->children &&
+           !get_opt(contxt, OPT_QUIET))
         {
-            if(!get_opt(contxt, OPT_QUIET))
+            entry_p *cur = contxt->children; 
+            while(*cur && *cur != end())
             {
-                for(size_t i = 0; 
-                    contxt->children[i] &&
-                    contxt->children[i] != end(); i++)
-                {
-                    /*
-                    printf("%s\n", str(contxt->children[i])); 
+                /*
+                printf("%s\n", str(contxt->children[i])); 
 
-                    This causes normal termination of a script.  If strings are
-                    provided, they are displayed.  The "done with installation" message is
-                    then displayed.  The "onerror" statements are not executed.  If (quiet)
-                    is specified, the final report display is skipped.
+                This causes normal termination of a script.  If strings are
+                provided, they are displayed.  The "done with installation" message is
+                then displayed.  The "onerror" statements are not executed.  If (quiet)
+                is specified, the final report display is skipped.
 
-                    MISSING
-                    */
-                }
+                MISSING
+                */
+                cur++; 
             }
         }
         error(HALT); 
         RNUM(0); 
     }
-    error(PANIC);
-    RCUR;
+    else
+    {
+        error(PANIC);
+        RCUR;
+    }
 }
 
 /*
