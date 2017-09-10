@@ -6,4 +6,5 @@
 build/lexer.c
 build/parser.c
 build/parser.h
-build/parser
+build/installer
+build/_*
