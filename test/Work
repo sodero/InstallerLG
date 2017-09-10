@@ -18,7 +18,6 @@ Linux       Mix             AROS
                             askoptions
                             askstring
                             protect
-                            database
                             expandpath
                             foreach
                             patmatch
@@ -32,9 +31,3 @@ Linux       Mix             AROS
                             trap
                             rexx
                             working
-148
-Linux
-148504
-148912
-143008
-142856

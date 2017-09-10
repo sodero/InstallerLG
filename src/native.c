@@ -2183,8 +2183,42 @@ entry_p m_debug(entry_p contxt)
 */
 entry_p m_database(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(c_sane(contxt, 1))
+    {
+        entry_p n = NULL; 
+        const char *fin = str(CARG(1)); 
+        const char *fdb[] = 
+        {   
+            "vblank", "50",
+            "cpu", "68000",
+            "fpu", "NOFPU", 
+            "graphics-mem", "524288",
+            "total-mem", "524288",
+            "chiprev", "AGNUS", NULL
+        };
+        for(size_t i = 0; fdb[i]; i+= 2)
+        {
+            if(!strcmp(fdb[i], fin))
+            {
+                if(CARG(2) && 
+                   CARG(2) != end())
+                {
+                    fin = str(CARG(2)); 
+                    n = new_number(!strcmp(fdb[i + 1], fin) ? 1 : 0); 
+                }
+                else
+                {
+                    n = new_string(strdup(fdb[i + 1])); 
+                }
+            }
+        } 
+        kill(contxt->resolved); 
+        contxt->resolved = n ? n : new_number(0);
+        RCUR; 
+    }
+    else
+    {
+        error(PANIC); 
+        RCUR;
+    }
 }
-
