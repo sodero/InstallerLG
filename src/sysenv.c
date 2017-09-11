@@ -32,7 +32,7 @@ entry_p init(entry_p contxt)
                                 new_number(0)
                             )
                         ), 
-                        DANGLE
+                        NUMBER
                     ) 
                 )
             )

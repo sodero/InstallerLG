@@ -1329,31 +1329,26 @@ entry_p m_patmatch(entry_p contxt)
 */
 entry_p m_select(entry_p contxt)
 {
-    ARGS(2); 
-    if(a2->children)
+    if(c_sane(contxt, 2))
     {
-        int i = 0, j = num(a1) - 1; 
-        while(a2->children[i] && 
-              a2->children[i] != end())
+        int i = 0, j = num(CARG(1)) - 1; 
+        while(CARG(2)->children[i] && 
+              CARG(2)->children[i] != end())
         {
             if(i == j)
             {
-                return resolve(a2->children[i]); 
+                return resolve(CARG(2)->children[i]); 
             }
-            else
-            {
-                i++; 
-            }
+            i++; 
         }
-        error(contxt->id, "No such item", 
-              contxt->name); 
+        error(contxt->id, "No such item", str(CARG(1))); 
+        RNUM(0); 
     }
     else
     {
         error(PANIC); 
         RCUR;
     }
-    return new_failure(); 
 }
 
 /*
@@ -1362,8 +1357,18 @@ entry_p m_select(entry_p contxt)
 */
 entry_p m_strlen(entry_p contxt)
 {
-    ARGS(1); 
-    RNUM((int) strlen(str(a1))); 
+    if(c_sane(contxt, 1))
+    {
+        RNUM
+        (
+            (int) strlen(str(CARG(1)))
+        ); 
+    } 
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*
