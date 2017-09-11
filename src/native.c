@@ -1859,18 +1859,11 @@ entry_p m_startup(entry_p contxt)
             {
                 error(contxt->id, "Could not read from file", fln); 
             }
-        }
-        else
-        {
-            error(PANIC); 
-            RCUR; 
+            RNUM(0);
         }
     }
-    else
-    {
-        error(PANIC); 
-        RCUR; 
-    }
+    error(PANIC); 
+    RCUR; 
 }
 
 /*
@@ -2247,6 +2240,7 @@ entry_p m_database(entry_p contxt)
                 {
                     fin = str(CARG(2)); 
                     n = new_number(!strcmp(fdb[i + 1], fin) ? 1 : 0); 
+                    
                 }
                 else
                 {
@@ -2254,8 +2248,10 @@ entry_p m_database(entry_p contxt)
                 }
             }
         } 
+        n = n ? n : new_number(0); 
+        n->parent = contxt; 
         kill(contxt->resolved); 
-        contxt->resolved = n ? n : new_number(0);
+        contxt->resolved = n; 
         RCUR; 
     }
     else
