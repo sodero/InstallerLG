@@ -1080,31 +1080,34 @@ entry_p m_earlier(entry_p contxt)
 */
 entry_p m_fileonly(entry_p contxt)
 {
-    ARGS(1); 
-    const char *s = str(a1); 
-    size_t l = strlen(s), i = l - 1;
-    if(l && 
-       s[i] != '/' &&
-       s[i] != ':' )
+    if(c_sane(contxt, 1))
     {
-        char *r; 
-        while(i &&
-              s[i - 1] != '/' && 
-              s[i - 1] != ':' ) i--;
-        r = calloc(l - i + 1, sizeof(char)); 
-        if(r)
+        const char *s = str(CARG(1));
+        size_t l = strlen(s), 
+               i = l - 1;
+        if(l && 
+           s[i] != '/' &&
+           s[i] != ':' )
         {
-            memcpy(r, s + i, l - i); 
-            RSTR(r); 
+            char *r; 
+            while(i &&
+                  s[i - 1] != '/' && 
+                  s[i - 1] != ':' ) i--;
+            r = calloc(l - i + 1, sizeof(char)); 
+            if(r)
+            {
+                memcpy(r, s + i, l - i); 
+                RSTR(r); 
+            }
         }
-        error(PANIC); 
-        RCUR; 
+        else
+        {
+            error(contxt->id, "Not a file", s); 
+            RSTR(strdup("")); 
+        }
     }
-    else
-    {
-        error(contxt->id, "Not a file", s); 
-    }
-    return new_failure(); 
+    error(PANIC);
+    RCUR; 
 }
 
 /*
@@ -1280,11 +1283,10 @@ entry_p m_iconinfo(entry_p contxt)
 */
 entry_p m_pathonly(entry_p contxt)
 {
-    ARGS(1); 
-    const char *s = str(a1); 
-    size_t i = strlen(s); 
-    if(i)
+    if(c_sane(contxt, 1))
     {
+        const char *s = str(CARG(1)); 
+        size_t i = strlen(s); 
         while(i--) 
         {
             if(s[i] == '/' ||
@@ -1301,8 +1303,13 @@ entry_p m_pathonly(entry_p contxt)
                 RCUR; 
             }
         }
+        RSTR(strdup("")); 
     }
-    RSTR(strdup("")); 
+    else
+    {
+        error(PANIC);
+        RCUR; 
+    }
 }
 
 /*
@@ -1763,17 +1770,17 @@ entry_p m_copylib(entry_p contxt)
 */
 entry_p m_startup(entry_p contxt)
 {
-    ARGS(2); 
+//    ARGS(2); 
 
 // CLEAANAN!
 
     if(c_sane(contxt, 2))
     {
         entry_p command  = get_opt(contxt, OPT_COMMAND),
-                help     = get_opt(contxt->children[2], OPT_HELP),
-                prompt   = get_opt(contxt->children[2], OPT_PROMPT), 
-                confirm  = get_opt(contxt->children[2], OPT_CONFIRM), 
-                override = get_opt(contxt->children[2], OPT_OVERRIDE);
+                help     = get_opt(CARG(3), OPT_HELP),
+                prompt   = get_opt(CARG(3), OPT_PROMPT), 
+                confirm  = get_opt(CARG(3), OPT_CONFIRM), 
+                override = get_opt(CARG(3), OPT_OVERRIDE);
         if(!command) 
         {
             error(contxt->id, "Missing option", "command"); 
@@ -1781,8 +1788,11 @@ entry_p m_startup(entry_p contxt)
         }
         if(c_sane(command, 1))
         {
-            const char *fln = override ? str(override->children[0]) : "s:user-startup";
-            const char *app = str(a1), *cmd = str(command->children[0]);
+            const char *app = str(CARG(1)), 
+                       *cmd = str(command->children[0]),
+                       *fln = override ? 
+                              str(override->children[0]) : 
+                              "s:user-startup";
             FILE *fp = fopen(fln, "r"); 
             if(fp)
             {
