@@ -1493,37 +1493,28 @@ entry_p m_symbolval(entry_p contxt)
     return new_failure(); 
 }
 
-static const char *h_tackon(const char *d, 
+static const char *h_tackon(int id, 
+                            const char *p, 
                             const char *f)
 {
-    return NULL; 
-}
-
-/*
-`(tackon <path> <file>)'
-     return properly concatenated file to path
-*/
-entry_p m_tackon(entry_p contxt)
-{
-//    ARGS(2); 
-    if(c_sane(contxt, 2))
+    size_t lp = strlen(p), 
+           lf = strlen(f); 
+    if(lp || lf)
     {
         char *r; 
-        const char *p = str(CARG(1)), *f = str(CARG(2)); 
-        size_t lp = strlen(p), lf = strlen(f); 
         if(!lp) 
         {
-            RSTR(strdup(f)); 
+            return strdup(f); 
         }
         if(!lf) 
         {
-            RSTR(strdup(p)); 
+            return strdup(p); 
         }
         if(f[lf - 1] == '/' ||
            f[lf - 1] == ':') 
         {
-            error(contxt->id, "Not a file", f); 
-            RSTR(strdup("")); 
+            error(id, "Not a file", f); 
+            return NULL; 
         }
         r = calloc(lp + lf + 2, sizeof(char)); 
         if(r)
@@ -1547,8 +1538,24 @@ entry_p m_tackon(entry_p contxt)
                 }
             }
             strcat(r, f); 
-            RSTR(r); 
+            return r; 
         }
+        error(PANIC); 
+    }
+    return NULL; 
+}
+
+/*
+`(tackon <path> <file>)'
+     return properly concatenated file to path
+*/
+entry_p m_tackon(entry_p contxt)
+{
+    if(c_sane(contxt, 2))
+    {
+        char *d = str(CARG(1)), *f = str(CARG(2)),
+             *r = h_tackon(contxt->id, d, f); 
+        RSTR(r ? r : strdup("")); 
     }
     error(PANIC); 
     RCUR; 
