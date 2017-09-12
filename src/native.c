@@ -1551,8 +1551,7 @@ entry_p m_tackon(entry_p contxt)
 */
 entry_p m_transcript(entry_p contxt)
 {
-    if(contxt && 
-       contxt->children)
+    if(c_sane(contxt, 1))
     {
         size_t len = 0; 
         entry_p override = get_opt(contxt, OPT_OVERRIDE); 
@@ -1568,15 +1567,12 @@ entry_p m_transcript(entry_p contxt)
         char *buf = calloc(len + 2, sizeof(char));
         if(buf)
         {
-            for(size_t i = 0; 
-                contxt->children[i] &&
-                contxt->children[i] != end(); 
-                i++)
+            for(entry_p *e = contxt->children; 
+                *e && *e != end(); e++)
             {
-                entry_p arg = contxt->children[i]; 
-                if(arg->type != OPTION)
+                if((*e)->type != OPTION)
                 {
-                    strcat(buf, str(arg)); 
+                    strcat(buf, str(*e)); 
                 }
             }
             FILE *fp = fopen(log, "a"); 
@@ -1591,6 +1587,10 @@ entry_p m_transcript(entry_p contxt)
                     RNUM(1);
                 }
                 fclose(fp); 
+            }
+            else
+            {
+                error(contxt->id, "Error writing to log", log); 
             }
             free(buf); 
             RNUM(0); 
