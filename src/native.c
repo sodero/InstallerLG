@@ -1082,6 +1082,34 @@ entry_p m_earlier(entry_p contxt)
     return new_failure(); 
 }
 
+static char *h_fileonly(int id, 
+                        const char *s)
+{
+    size_t l = strlen(s), 
+           i = l - 1;
+    if(l && 
+       s[i] != '/' &&
+       s[i] != ':' )
+    {
+        char *r; 
+        while(i &&
+              s[i - 1] != '/' && 
+              s[i - 1] != ':' ) i--;
+        r = calloc(l - i + 1, sizeof(char)); 
+        if(r)
+        {
+            memcpy(r, s + i, l - i); 
+            return r; 
+        }
+        error(PANIC); 
+    }
+    else
+    {
+        error(id, "Not a file", s); 
+    }
+    return NULL; 
+}
+
 /*
 `(fileonly <path>)'
      return file part of path (see pathonly)
@@ -1090,32 +1118,15 @@ entry_p m_fileonly(entry_p contxt)
 {
     if(c_sane(contxt, 1))
     {
-        const char *s = str(CARG(1));
-        size_t l = strlen(s), 
-               i = l - 1;
-        if(l && 
-           s[i] != '/' &&
-           s[i] != ':' )
-        {
-            char *r; 
-            while(i &&
-                  s[i - 1] != '/' && 
-                  s[i - 1] != ':' ) i--;
-            r = calloc(l - i + 1, sizeof(char)); 
-            if(r)
-            {
-                memcpy(r, s + i, l - i); 
-                RSTR(r); 
-            }
-        }
-        else
-        {
-            error(contxt->id, "Not a file", s); 
-            RSTR(strdup("")); 
-        }
+        const char *f = str(CARG(1));
+        char *r = h_fileonly(contxt->id, f); 
+        RSTR(r ? r : strdup("")); 
     }
-    error(PANIC);
-    RCUR; 
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
@@ -1493,9 +1504,9 @@ entry_p m_symbolval(entry_p contxt)
     return new_failure(); 
 }
 
-static const char *h_tackon(int id, 
-                            const char *p, 
-                            const char *f)
+static char *h_tackon(int id, 
+                      const char *p, 
+                      const char *f)
 {
     size_t lp = strlen(p), 
            lf = strlen(f); 
@@ -1553,12 +1564,15 @@ entry_p m_tackon(entry_p contxt)
 {
     if(c_sane(contxt, 2))
     {
-        char *d = str(CARG(1)), *f = str(CARG(2)),
-             *r = h_tackon(contxt->id, d, f); 
+        const char *d = str(CARG(1)), *f = str(CARG(2));
+        char *r = h_tackon(contxt->id, d, f); 
         RSTR(r ? r : strdup("")); 
     }
-    error(PANIC); 
-    RCUR; 
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
