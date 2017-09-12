@@ -1019,6 +1019,23 @@ entry_p m_cat(entry_p contxt)
     RCUR; 
 }
 
+static int h_exists(const char *n)
+{
+    struct stat fs; 
+    if(!stat(n, &fs))
+    {
+        if(S_ISREG(fs.st_mode))
+        {
+            return 1; 
+        }
+        if(S_ISDIR(fs.st_mode))
+        {
+            return 2; 
+        }
+    }
+    return 0; 
+}
+
 /*
 `(exists <filename> (noreq))'
      0 if no, 1 if file, 2 if dir
@@ -1027,23 +1044,14 @@ entry_p m_exists(entry_p contxt)
 {
     if(c_sane(contxt, 1))
     {
-        struct stat fs; 
         if(get_opt(contxt, OPT_NOREQ))
         {
             /* show mount req */
         }
-        if(!stat(str(CARG(1)), &fs))
-        {
-            if(S_ISREG(fs.st_mode))
-            {
-                RNUM(1); 
-            }
-            if(S_ISDIR(fs.st_mode))
-            {
-                RNUM(2); 
-            }
-        }
-        RNUM(0); 
+        RNUM
+        (
+            h_exists(str(CARG(1))); 
+        ); 
     }
     else
     {
@@ -1548,11 +1556,14 @@ entry_p m_transcript(entry_p contxt)
     {
         size_t len = 0; 
         entry_p override = get_opt(contxt, OPT_OVERRIDE); 
-        const char *log = override ? str(override->children[0]) : "default.log"; 
+        const char *log = override ? str(override) : "default.log"; 
         for(entry_p *e = contxt->children; 
             *e && *e != end(); e++)
         {
-            len += strlen(str(*e)); 
+            if((*e)->type != OPTION)
+            {
+                len += strlen(str(*e)); 
+            }
         }
         char *buf = calloc(len + 2, sizeof(char));
         if(buf)
@@ -1717,13 +1728,48 @@ entry_p m_copyfiles(entry_p contxt)
                 optional = get_opt(contxt, OPT_OPTIONAL),
                 delopts  = get_opt(contxt, OPT_DELOPTS),
                 nogauge  = get_opt(contxt, OPT_NOGAUGE);
-        if(!source || !dest) 
+        if(source && dest) 
+        {
+            const char *src = str(source), 
+                       *dst = str(dest);
+            int st = h_exists(src), 
+                dt = h_exists(dst); 
+            if(!st)
+            {
+                error(contxt->id, "No such file or directory", src); 
+                RNUM(0); 
+            }
+            if(!dt)
+            {
+                /* Create dest dir */
+            }
+            else
+            if(dt == 1)
+            {
+                /* Dest is a file */                
+                error(contxt->id, "Not a directory", dst); 
+                RNUM(0); 
+            }
+            /* We have a dest dir */                
+            if(st == 1)
+            {
+                /* Src is a file */                
+                RNUM(1); 
+            }
+            else
+            {
+                /* Src is a dir */                
+                /* copy everything */
+                RNUM(1); 
+            }
+            RNUM(0); 
+        }
+        else
         {
             char *opt = !source ? "source" : "dest"; 
             error(contxt->id, "Missing option", opt); 
             RNUM(0); 
         }
-        RNUM(1); 
     }
     else
     {

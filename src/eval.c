@@ -100,6 +100,26 @@ const char *str(entry_p entry)
         switch(entry->type)
         {
             case OPTION:
+                switch(entry->id)
+                {
+                    case OPT_APPEND: 
+                    case OPT_CONFIRM: 
+                    case OPT_DEFAULT: 
+                    case OPT_DEST: 
+                    case OPT_DISK: 
+                    case OPT_INCLUDE: 
+                    case OPT_NEWNAME: 
+                    case OPT_PATTERN: 
+                    case OPT_SETDEFAULTTOOL: 
+                    case OPT_SETSTACK: 
+                    case OPT_SOURCE: 
+                    case OPT_OVERRIDE: 
+                        return str
+                        (
+                            entry->children ? 
+                            entry->children[0] : NULL
+                        );
+                }
             case STATUS:
             case DANGLE:
                 return ""; 
