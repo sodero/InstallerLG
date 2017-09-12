@@ -1493,53 +1493,62 @@ entry_p m_symbolval(entry_p contxt)
     return new_failure(); 
 }
 
+static const char *h_tackon(const char *d, 
+                            const char *f)
+{
+    return NULL; 
+}
+
 /*
 `(tackon <path> <file>)'
      return properly concatenated file to path
 */
 entry_p m_tackon(entry_p contxt)
 {
-    ARGS(2); 
-    char *r; 
-    const char *p = str(a1), *f = str(a2); 
-    size_t lp = strlen(p), lf = strlen(f); 
-    if(!lp) 
+//    ARGS(2); 
+    if(c_sane(contxt, 2))
     {
-        RSTR(strdup(f)); 
-    }
-    if(!lf) 
-    {
-        RSTR(strdup(p)); 
-    }
-    if(f[lf - 1] == '/' ||
-       f[lf - 1] == ':') 
-    {
-        error(contxt->id, "Not a file", f); 
-        return new_failure(); 
-    }
-    r = calloc(lp + lf + 2, sizeof(char)); 
-    if(r)
-    {
-        memcpy(r, p, lp); 
-        if(p[lp - 1] == '/' ||
-           p[lp - 1] == ':') 
+        char *r; 
+        const char *p = str(CARG(1)), *f = str(CARG(2)); 
+        size_t lp = strlen(p), lf = strlen(f); 
+        if(!lp) 
         {
-            if(f[0] == '/' ||
-               f[0] == ':') 
-            {
-                f++; 
-            }
+            RSTR(strdup(f)); 
         }
-        else
+        if(!lf) 
         {
-            if(f[0] != '/' && 
-               f[0] != ':') 
-            {
-                strcat(r, "/"); 
-            }
+            RSTR(strdup(p)); 
         }
-        strcat(r, f); 
-        RSTR(r); 
+        if(f[lf - 1] == '/' ||
+           f[lf - 1] == ':') 
+        {
+            error(contxt->id, "Not a file", f); 
+            RSTR(strdup("")); 
+        }
+        r = calloc(lp + lf + 2, sizeof(char)); 
+        if(r)
+        {
+            memcpy(r, p, lp); 
+            if(p[lp - 1] == '/' ||
+               p[lp - 1] == ':') 
+            {
+                if(f[0] == '/' ||
+                   f[0] == ':') 
+                {
+                    f++; 
+                }
+            }
+            else
+            {
+                if(f[0] != '/' && 
+                   f[0] != ':') 
+                {
+                    strcat(r, "/"); 
+                }
+            }
+            strcat(r, f); 
+            RSTR(r); 
+        }
     }
     error(PANIC); 
     RCUR; 
