@@ -4,4 +4,4 @@
 (copyfiles (source "src")) ; "","Line 1: Missing option 'dest' 0",""
 (copyfiles (source) (dest)) ; "","Line 1: syntax error ')'",""
 (copyfiles (source) (dest "dst")) ; "","Line 1: syntax error ')'",""
-(copyfiles (source "src") (dest "dst")) ; "","1",""
+(copyfiles (source "_cf_") (dest "_cg_")) ; "rm -f _cf_","Line 1: No such file or directory '_cf_' 0",""
