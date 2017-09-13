@@ -1769,6 +1769,67 @@ static int h_copyfile(int id,
 }
 
 /*
+  copyfiles / copylib helper function
+*/
+static int h_copydir(int id, 
+                     const char *src, 
+                     const char *dst)
+{
+    int r = 0; 
+    if(src && dst)
+    { 
+        DIR *dp = opendir(src);
+        if(dp) 
+        {
+            for(struct dirent *de = readdir(dp); 
+                de; de = readdir(dp))
+            {
+                char *fn = h_tackon(id, src, de->d_name);
+                if(fn)
+                {
+                    int t = h_exists(fn);
+                    if(t == 2)
+                    {
+                        /* A directory */
+                        if(strcmp(de->d_name, ".") &&
+                           strcmp(de->d_name, ".."))
+                        {
+                            char *nd = h_tackon(id, dst, de->d_name);
+                            if(nd)
+                            {
+                                printf("Create dir:%s\n", nd); 
+                                r = h_copydir(id, fn, nd);
+                                free(nd); 
+                            }
+                            else
+                            {
+                                error(PANIC); 
+                            }
+                        }
+                        else
+                        {
+                            r = 1; 
+                        }
+                    } 
+                    else
+                    {
+                        /* A file */
+                        printf("Copy file:%s\n", fn); 
+                    } 
+                    free(fn); 
+                }
+                else
+                {
+                    error(PANIC); 
+                }
+            }
+            closedir(dp);
+        }
+    }
+    return r; 
+}
+
+/*
 `(copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)'
      `(all) (pattern..) (files) (infos) (confirm..) (safe) (optional
      <option> <option> ...) (delopts <option> <option> ...) (nogauge))'
@@ -1835,18 +1896,10 @@ entry_p m_copyfiles(entry_p contxt)
             }
             else
             {
-                /* Source is a directory */                
-                DIR *dp = opendir(src);
-                if(dp) 
-                {
-                    for(struct dirent *de = readdir(dp); 
-                        de; de = readdir(dp))
-                    {
-                        printf("type:%d name:%s\n", h_exists(de->d_name), de->d_name); 
-                    }
-                    closedir(dp);
-                }
-                RNUM(1); 
+                RNUM
+                (
+                    h_copydir(contxt->id, src, dst)
+                );
             }
             RNUM(0); 
         }
