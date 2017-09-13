@@ -1769,7 +1769,7 @@ static int h_copyfile(int id,
 }
 
 /*
-  copyfiles / copylib helper function
+  copyfiles helper function
 */
 static int h_copydir(int id, 
                      const char *src, 
@@ -1782,12 +1782,14 @@ static int h_copydir(int id,
         if(dp) 
         {
             for(struct dirent *de = readdir(dp); 
-                de; de = readdir(dp))
+                de && !did_error(); 
+                de = readdir(dp))
             {
                 char *fn = h_tackon(id, src, de->d_name);
                 if(fn)
                 {
                     int t = h_exists(fn);
+                    r = 0; 
                     if(t == 2)
                     {
                         /* A directory */
@@ -1797,8 +1799,11 @@ static int h_copydir(int id,
                             char *nd = h_tackon(id, dst, de->d_name);
                             if(nd)
                             {
-                                printf("Create dir:%s\n", nd); 
-                                r = h_copydir(id, fn, nd);
+                                if(h_makedir(id, nd))
+                                {
+                                    /* Error is set by h_makedir*/
+                                    r = h_copydir(id, fn, nd);
+                                }
                                 free(nd); 
                             }
                             else
@@ -1814,7 +1819,20 @@ static int h_copydir(int id,
                     else
                     {
                         /* A file */
-                        printf("Copy file:%s\n", fn); 
+                        char *nf = h_tackon(id, dst, de->d_name);
+                        if(nf)
+                        {
+                            if(h_copyfile(id, fn, nf))
+                            {
+                                /* Error is set by h_makedir*/
+                                r = 1; 
+                            }
+                            free(nf); 
+                        }
+                        else
+                        {
+                            error(PANIC); 
+                        }
                     } 
                     free(fn); 
                 }
