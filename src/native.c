@@ -1843,6 +1843,10 @@ static int h_copydir(int id,
             }
             closedir(dp);
         }
+        else
+        {
+            error(id, "Could read directory", src); 
+        }
     }
     return r; 
 }
