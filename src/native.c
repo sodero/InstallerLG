@@ -1773,7 +1773,8 @@ static int h_copyfile(int id,
 */
 static int h_copydir(int id, 
                      const char *src, 
-                     const char *dst)
+                     const char *dst, 
+                     int nodir)
 {
     int r = 0; 
     if(src && dst)
@@ -1793,7 +1794,8 @@ static int h_copydir(int id,
                     if(t == 2)
                     {
                         /* A directory */
-                        if(strcmp(de->d_name, ".") &&
+                        if(!nodir &&
+                           strcmp(de->d_name, ".") &&
                            strcmp(de->d_name, ".."))
                         {
                             char *nd = h_tackon(id, dst, de->d_name);
@@ -1802,7 +1804,7 @@ static int h_copydir(int id,
                                 if(h_makedir(id, nd))
                                 {
                                     /* Error is set by h_makedir*/
-                                    r = h_copydir(id, fn, nd);
+                                    r = h_copydir(id, fn, nd, 0);
                                 }
                                 free(nd); 
                             }
@@ -1845,7 +1847,7 @@ static int h_copydir(int id,
         }
         else
         {
-            error(id, "Could read directory", src); 
+            error(id, "Could not read directory", src); 
         }
     }
     return r; 
@@ -1928,7 +1930,9 @@ entry_p m_copyfiles(entry_p contxt)
             {
                 RNUM
                 (
-                    h_copydir(contxt->id, src, dst)
+                    h_copydir(contxt->id, 
+                              src, dst, 
+                              files ? 1 : 0)
                 );
             }
             RNUM(0); 
