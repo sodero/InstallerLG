@@ -1085,27 +1085,30 @@ entry_p m_earlier(entry_p contxt)
 static char *h_fileonly(int id, 
                         const char *s)
 {
-    size_t l = strlen(s), 
-           i = l - 1;
-    if(l && 
-       s[i] != '/' &&
-       s[i] != ':' )
+    if(s)
     {
-        char *r; 
-        while(i &&
-              s[i - 1] != '/' && 
-              s[i - 1] != ':' ) i--;
-        r = calloc(l - i + 1, sizeof(char)); 
-        if(r)
+        size_t l = strlen(s), 
+               i = l - 1;
+        if(l && 
+           s[i] != '/' &&
+           s[i] != ':' )
         {
-            memcpy(r, s + i, l - i); 
-            return r; 
+            char *r; 
+            while(i &&
+                  s[i - 1] != '/' && 
+                  s[i - 1] != ':' ) i--;
+            r = calloc(l - i + 1, sizeof(char)); 
+            if(r)
+            {
+                memcpy(r, s + i, l - i); 
+                return r; 
+            }
+            error(PANIC); 
         }
-        error(PANIC); 
-    }
-    else
-    {
-        error(id, "Not a file", s); 
+        else
+        {
+            error(id, "Not a file", s); 
+        }   
     }
     return NULL; 
 }
@@ -1508,50 +1511,53 @@ static char *h_tackon(int id,
                       const char *p, 
                       const char *f)
 {
-    size_t lp = strlen(p), 
-           lf = strlen(f); 
-    if(lp || lf)
+    if(p && f)
     {
-        char *r; 
-        if(!lp) 
+        size_t lp = strlen(p), 
+               lf = strlen(f); 
+        if(lp || lf)
         {
-            return strdup(f); 
-        }
-        if(!lf) 
-        {
-            return strdup(p); 
-        }
-        if(f[lf - 1] == '/' ||
-           f[lf - 1] == ':') 
-        {
-            error(id, "Not a file", f); 
-            return NULL; 
-        }
-        r = calloc(lp + lf + 2, sizeof(char)); 
-        if(r)
-        {
-            memcpy(r, p, lp); 
-            if(p[lp - 1] == '/' ||
-               p[lp - 1] == ':') 
+            char *r; 
+            if(!lp) 
             {
-                if(f[0] == '/' ||
-                   f[0] == ':') 
-                {
-                    f++; 
-                }
+                return strdup(f); 
             }
-            else
+            if(!lf) 
             {
-                if(f[0] != '/' && 
-                   f[0] != ':') 
-                {
-                    strcat(r, "/"); 
-                }
+                return strdup(p); 
             }
-            strcat(r, f); 
-            return r; 
+            if(f[lf - 1] == '/' ||
+               f[lf - 1] == ':') 
+            {
+                error(id, "Not a file", f); 
+                return NULL; 
+            }
+            r = calloc(lp + lf + 2, sizeof(char)); 
+            if(r)
+            {
+                memcpy(r, p, lp); 
+                if(p[lp - 1] == '/' ||
+                   p[lp - 1] == ':') 
+                {
+                    if(f[0] == '/' ||
+                       f[0] == ':') 
+                    {
+                        f++; 
+                    }
+                }
+                else
+                {
+                    if(f[0] != '/' && 
+                       f[0] != ':') 
+                    {
+                        strcat(r, "/"); 
+                    }
+                }
+                strcat(r, f); 
+                return r; 
+            }
+            error(PANIC); 
         }
-        error(PANIC); 
     }
     return NULL; 
 }
@@ -1697,36 +1703,39 @@ static int h_copyfile(int id,
                       const char *src, 
                       const char *dst)
 {
-    static char buf[BUFSIZ]; 
-    FILE *fs = fopen(src, "r"); 
-    if(fs)
-    {
-        FILE *fd = fopen(dst, "w"); 
-        if(fd)
+    if(src && dst)
+    { 
+        static char buf[BUFSIZ]; 
+        FILE *fs = fopen(src, "r"); 
+        if(fs)
         {
-            size_t n = fread(buf, sizeof(char), BUFSIZ, fs);
-            while(n)
+            FILE *fd = fopen(dst, "w"); 
+            if(fd)
             {
-                if(fwrite(buf, sizeof(char), n, fd) != n)
+                size_t n = fread(buf, sizeof(char), BUFSIZ, fs);
+                while(n)
                 {
-                    error(id, "Error writing to file", dst); 
-                    break; 
+                    if(fwrite(buf, sizeof(char), n, fd) != n)
+                    {
+                        error(id, "Error writing to file", dst); 
+                        break; 
+                    }
+                    n = fread(buf, sizeof(char), BUFSIZ, fs);
                 }
-                n = fread(buf, sizeof(char), BUFSIZ, fs);
+                fclose(fs); 
+                fclose(fd); 
+                return n ? 0 : 1; 
             }
-            fclose(fs); 
-            fclose(fd); 
-            return n ? 0 : 1; 
+            else
+            {
+                fclose(fs); 
+                error(id, "Could not write to file", dst); 
+            }
         }
         else
         {
-            fclose(fs); 
-            error(id, "Could not write to file", dst); 
+            error(id, "Could not read from file", src); 
         }
-    }
-    else
-    {
-        error(id, "Could not read from file", src); 
     }
     return 0; 
 }
@@ -1783,13 +1792,17 @@ entry_p m_copyfiles(entry_p contxt)
             /* We have a dest dir */                
             if(st == 1)
             {
-                /* Src is a file */                
-                RNUM(1); 
+                /* Src is a single file */                
+                char *f = h_fileonly(contxt->id, src), 
+                     *p = h_tackon(contxt->id, dst, f);
+                int r = h_copyfile(contxt->id, src, p); 
+                free(f); 
+                free(p); 
+                RNUM(r); 
             }
             else
             {
-                /* Src is a dir */                
-                /* copy everything */
+                /* Src is a directory */                
                 RNUM(1); 
             }
             RNUM(0); 
