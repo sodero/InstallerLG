@@ -1899,22 +1899,30 @@ entry_p m_copyfiles(entry_p contxt)
                 }
             }
             else
-                if(dt == 1)
-                {
-                    /* Destination is a file, not a dir */                
-                    error(contxt->id, "Not a directory", dst); 
-                    RNUM(0); 
-                }
+            if(dt == 1)
+            {
+                /* Destination is a file, not a dir */                
+                error(contxt->id, "Not a directory", dst); 
+                RNUM(0); 
+            }
             /* We have a destination directory */                
             if(st == 1)
             {
-                /* Source is a single file */                
-                char *f = h_fileonly(contxt->id, src), 
+                char *f = newname ? 
+                     strdup(str(newname)) :
+                     h_fileonly(contxt->id, src), 
                      *p = h_tackon(contxt->id, dst, f);
-                int r = h_copyfile(contxt->id, src, p); 
+                if(f && p)
+                {
+                    DNUM = h_copyfile(contxt->id, src, p); 
+                }
+                else
+                {
+                    error(PANIC); 
+                }
                 free(f); 
                 free(p); 
-                RNUM(r); 
+                RCUR; 
             }
             else
             {
