@@ -1636,64 +1636,83 @@ entry_p m_transcript(entry_p contxt)
     RCUR; 
 }
 
+static int h_makedir(int id, const char *dst)
+{
+    if(dst)
+    {
+        char *dir = strdup(dst); 
+        if(dir)
+        {
+            int d = 1, 
+                l = (int) strlen(dir);
+            for(int i = 0; i < l; i++)
+            {
+                if(dir[i] == '/')
+                {
+                    d++;  
+                }
+            }
+            while(d--)
+            {
+                for(int i = l; i >= 0; i--)
+                {
+                    if(dir[i] == '/' ||
+                       dir[i] == '\0')
+                    {
+                        char c = dir[i]; 
+                        dir[i] = '\0'; 
+                        if(mkdir(dir, 0777) == 0)
+                        {
+                            if(i == l)
+                            {
+                                free(dir);
+                                return 1; 
+                            }
+                            dir[i] = c; 
+                            break; 
+                        }
+                        else
+                        {
+                            dir[i] = c; 
+                        }
+                    }
+                }
+            }
+            free(dir);
+            error(id, "Could not create directory", 
+                  dst); 
+        }
+        else
+        {
+            error(PANIC); 
+        }
+    }
+    return 0; 
+}
+
 /*
 `(makedir <name> (prompt..) (help..) (infos) (confirm..) (safe))'
      make a directory
 */
 entry_p m_makedir(entry_p contxt)
 {
-    ARGS(1); 
-    char *dir = strdup(str(a1)); 
-    if(dir)
+    if(c_sane(contxt, 1))
     {
-        int l = (int) strlen(dir), d = 1; 
         entry_p opt = contxt->children[1]; 
         if(opt)
         {
             // handle options
         }
-        for(int i = 0; i < l; i++)
-        {
-            if(dir[i] == '/')
-            {
-                d++;  
-            }
-        }
-        while(d--)
-        {
-            for(int i = l; i >= 0; i--)
-            {
-                if(dir[i] == '/' ||
-                   dir[i] == '\0')
-                {
-                    char c = dir[i]; 
-                    dir[i] = '\0'; 
-                    if(mkdir(dir, 0777) == 0)
-                    {
-                        if(i == l)
-                        {
-                            free(dir);
-                            RNUM(1); 
-                        }
-                        dir[i] = c; 
-                        break; 
-                    }
-                    else
-                    {
-                        dir[i] = c; 
-                    }
-                }
-            }
-        }
-        free(dir);
-        error(contxt->id, "Could not create directory", 
-              str(a1)); 
+        RNUM
+        (
+            h_makedir(contxt->id, str(CARG(1))); 
+        ); 
     }
     else
     {
         error(PANIC); 
+        RNUM(0);
     }
-    RNUM(0);
 }
 
 /*
@@ -1780,7 +1799,11 @@ entry_p m_copyfiles(entry_p contxt)
             }
             if(!dt)
             {
-                /* Create dest dir */
+                if(!h_makedir(contxt->id, dst))
+                {
+                    /* error is set by h_makedir*/
+                    RNUM(0); 
+                }
             }
             else
             if(dt == 1)
