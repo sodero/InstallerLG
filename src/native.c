@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <dirent.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include "eval.h"
@@ -1021,16 +1022,19 @@ entry_p m_cat(entry_p contxt)
 
 static int h_exists(const char *n)
 {
-    struct stat fs; 
-    if(!stat(n, &fs))
+    if(n)
     {
-        if(S_ISREG(fs.st_mode))
+        struct stat fs; 
+        if(!stat(n, &fs))
         {
-            return 1; 
-        }
-        if(S_ISDIR(fs.st_mode))
-        {
-            return 2; 
+            if(S_ISREG(fs.st_mode))
+            {
+                return 1; 
+            }
+            if(S_ISDIR(fs.st_mode))
+            {
+                return 2; 
+            }
         }
     }
     return 0; 
@@ -1640,7 +1644,12 @@ static int h_makedir(int id, const char *dst)
 {
     if(dst)
     {
-        char *dir = strdup(dst); 
+        char *dir; 
+        if(h_exists(dst) == 2)
+        {
+            return 1; 
+        }
+        dir = strdup(dst); 
         if(dir)
         {
             int d = 1, 
@@ -1799,23 +1808,24 @@ entry_p m_copyfiles(entry_p contxt)
             }
             if(!dt)
             {
+                /* We need to create the destination dir */
                 if(!h_makedir(contxt->id, dst))
                 {
-                    /* error is set by h_makedir*/
+                    /* Error is set by h_makedir*/
                     RNUM(0); 
                 }
             }
             else
-            if(dt == 1)
-            {
-                /* Dest is a file */                
-                error(contxt->id, "Not a directory", dst); 
-                RNUM(0); 
-            }
-            /* We have a dest dir */                
+                if(dt == 1)
+                {
+                    /* Destination is a file, not a dir */                
+                    error(contxt->id, "Not a directory", dst); 
+                    RNUM(0); 
+                }
+            /* We have a destination directory */                
             if(st == 1)
             {
-                /* Src is a single file */                
+                /* Source is a single file */                
                 char *f = h_fileonly(contxt->id, src), 
                      *p = h_tackon(contxt->id, dst, f);
                 int r = h_copyfile(contxt->id, src, p); 
@@ -1825,7 +1835,17 @@ entry_p m_copyfiles(entry_p contxt)
             }
             else
             {
-                /* Src is a directory */                
+                /* Source is a directory */                
+                DIR *dp = opendir(src);
+                if(dp) 
+                {
+                    for(struct dirent *de = readdir(dp); 
+                        de; de = readdir(dp))
+                    {
+                        printf("type:%d name:%s\n", h_exists(de->d_name), de->d_name); 
+                    }
+                    closedir(dp);
+                }
                 RNUM(1); 
             }
             RNUM(0); 
