@@ -71,6 +71,7 @@ int num(entry_p entry)
         switch(entry->type)
         {
             case OPTION:
+                return atoi(str(entry)); 
             case STATUS:
             case DANGLE:
             case NUMBER:

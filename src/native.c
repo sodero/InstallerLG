@@ -2235,12 +2235,88 @@ entry_p m_delete(entry_p contxt)
 /*
 `(protect <file> [<string of flags to change>] [<decimal mask>] <parameters>)'
      get/set file protection flags
+
+ 8 7 6 5 4 3 2 1  <- Bit number
+ h s p a r w e d  <- corresponding protection flag
+ ^ ^ ^ ^ ^ ^ ^ ^
+ | | | | | | | |
+ | | | | | | | +- \
+ | | | | | | +--- | 0 = flag set
+ | | | | | +----- | 1 = flag clear
+ | | | | +------- /
+ | | | |
+ | | | |
+ | | | +--------- \
+ | | +----------- | 0 = flag clear
+ | +------------- | 1 = flag set
+ +--------------- /
 */
 entry_p m_protect(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(c_sane(contxt, 2))
+    {
+        int mask = num(CARG(2)), r = 0; 
+        const char *file = str(CARG(1)); 
+        entry_p override = get_opt(CARG(3), OPT_OVERRIDE),
+                    safe = get_opt(CARG(3), OPT_SAFE); 
+        if(mask)
+        {
+            r = mask; 
+        }
+        else
+        {
+            int m = 0; 
+            const char *flags = str(CARG(2)); 
+            size_t n = strlen(flags); 
+            if(override)
+            {
+                r = num(override); 
+            }
+            else
+            {
+                /* current state -> r */
+            }
+            r ^= 0x0f; /* invert 1-4 */
+            for(size_t i = 0; i < n; i++)
+            {
+                int b = 0; 
+                switch(flags[i])
+                {
+                    case '+': m = 1; break; 
+                    case '-': m = 2; break; 
+                    case 'h': b = 1 << 7; break; 
+                    case 's': b = 1 << 6; break; 
+                    case 'p': b = 1 << 5; break; 
+                    case 'a': b = 1 << 4; break; 
+                    case 'r': b = 1 << 3; break; 
+                    case 'w': b = 1 << 2; break; 
+                    case 'e': b = 1 << 1; break; 
+                    case 'd': b = 1 << 0; break; 
+                }
+                switch(m)
+                {
+                    case 0: r = b; m = 1; break; 
+                    case 1: r |= b; break; 
+                    case 2: r &= ~b; break; 
+                }
+            }
+            r ^= 0x0f; /* invert 1-4 */
+        }
+        if(!override)
+        {
+            /* r = r -> current state */
+        }
+        else
+        {
+            r = mask ? mask : r; 
+        }
+        RNUM(r); 
+    }
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*

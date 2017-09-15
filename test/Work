@@ -2,7 +2,6 @@ Linux       Mix             AROS
 -----------------------------------------------
                             welcome
                             message
-            copyfiles
             copylib
                             makeassign
                             getassign
@@ -17,7 +16,6 @@ Linux       Mix             AROS
                             asknumber
                             askoptions
                             askstring
-                            protect
                             expandpath
                             foreach
                             patmatch
