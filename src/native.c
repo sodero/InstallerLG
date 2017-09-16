@@ -2119,9 +2119,64 @@ entry_p m_tooltype(entry_p contxt)
 */
 entry_p m_textfile(entry_p contxt)
 {
-    (void) contxt; 
-    error(MISS); 
-    return new_failure(); 
+    if(c_sane(contxt, 1))
+    {
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                help     = get_opt(contxt, OPT_HELP),
+                dest     = get_opt(contxt, OPT_DEST),
+                append   = get_opt(contxt, OPT_APPEND),
+                include  = get_opt(contxt, OPT_INCLUDE),
+                confirm  = get_opt(contxt, OPT_CONFIRM),
+                safe     = get_opt(contxt, OPT_SAFE); 
+        const char *fn = str(dest); 
+        FILE *fp = fopen(fn, "a"); 
+        if(fp)
+        {
+            DNUM = 1; 
+            if(include)
+            {
+                static char buf[BUFSIZ]; 
+                FILE *fs = fopen(str(include), "r"); 
+                if(fs)
+                {
+                    size_t n = fread(buf, sizeof(char), BUFSIZ, fs);
+                    while(n)
+                    {
+                        if(fwrite(buf, sizeof(char), n, fp) != n)
+                        {
+                            error(contxt->id, "Error writing to file", fn); 
+                            DNUM = 0; 
+                            break; 
+                        }
+                        n = fread(buf, sizeof(char), BUFSIZ, fs);
+                    }
+                    fclose(fs); 
+                }
+                else
+                {
+                    error(contxt->id, "Error reading from file", str(include)); 
+                    DNUM = 0;  
+                }
+            }
+            if(append && DNUM)
+            {
+                if(fputs(str(append), fp) == EOF)
+                {
+                    error(contxt->id, "Error writing to file", fn); 
+                    DNUM = 0; 
+                }
+            }
+            fclose(fp); 
+            RCUR; 
+        }
+        error(contxt->id, "Could not write to file", fn); 
+        RNUM(0); 
+    }
+    else
+    {
+        error(PANIC); 
+        RCUR; 
+    }
 }
 
 /*
