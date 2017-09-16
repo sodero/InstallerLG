@@ -34,7 +34,7 @@ static entry_p find_symbol(entry_p entry)
     }
     else
     {
-        error(PANIC);
+        error_ng(PANIC);
     }
     return new_failure();
 }
@@ -59,7 +59,7 @@ entry_p resolve(entry_p entry)
                 return entry; 
         }
     }
-    error(PANIC);
+    error_ng(PANIC);
     return new_failure();
 }
 
@@ -89,7 +89,7 @@ int num(entry_p entry)
                 break; 
         }
     }
-    error(PANIC);
+    error_ng(PANIC);
     return 0; 
 }
 
@@ -147,7 +147,7 @@ const char *str(entry_p entry)
                 break;
         }
     }
-    error(PANIC);
+    error_ng(PANIC);
     return ""; 
 }
 
@@ -170,7 +170,7 @@ entry_p invoke(entry_p entry)
                 }
                 else
                 {
-                    error(PANIC);
+                    error_ng(PANIC);
                     break; 
                 }
             }
@@ -178,7 +178,7 @@ entry_p invoke(entry_p entry)
         }
         return ret;
     }
-    error(PANIC);
+    error_ng(PANIC);
     return ret;
 }
 

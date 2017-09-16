@@ -96,7 +96,7 @@ entry_p m_database(entry_p contxt);
 #define ARG2     entry_p a2; ARG1
 #define ARG3     entry_p a3; ARG2
 #define ARGS(n)  ARG##n SANE(n) SETA(n)
-#define FAIL0    error(PANIC);\
+#define FAIL0    error_ng(PANIC);\
                  pretty_print(contxt);\
                  return new_failure()
 #define SANE0    contxt &&\
