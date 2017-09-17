@@ -12,29 +12,6 @@ int did_halt(void)
     return error(0, ERR_NONE, NULL) == -1;
 }
 
-/*
-int error(int id, 
-          const char *type, 
-          const char *info)
-{
-    static int err = 0;
-    if(id && type && info)
-    {
-        err = id; 
-        if(id > 0)
-        {
-            fprintf(stderr, "Line %d: %s '%s'\n", 
-                    id, type, info);
-        }
-        else if(id == -2)
-        {
-            err = 0; 
-        }
-    }
-    return err; 
-}
-*/
-
 int error(int id, 
           error_t type, 
           const char *info)
@@ -74,10 +51,12 @@ int error(int id,
         err = id; 
         if(id > 0)
         {
-            fprintf(stderr, "Line %d: %s '%s'\n", 
+            fprintf(stderr, 
+                    "Line %d: %s '%s'\n", 
                     id, des[type], info);
         }
-        else if(id == -2)
+        else 
+        if(id == -2)
         {
             err = 0; 
         }

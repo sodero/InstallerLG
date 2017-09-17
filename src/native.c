@@ -797,6 +797,9 @@ entry_p m_askdir(entry_p contxt)
                 deflt    = get_opt(contxt, OPT_DEFAULT),
                 newpath  = get_opt(contxt, OPT_NEWNAME),
                 disk     = get_opt(contxt, OPT_NOGAUGE);
+
+        prompt = help = deflt = newpath = disk;
+
         RCUR; 
     }
     else
@@ -819,6 +822,9 @@ entry_p m_askfile(entry_p contxt)
                 deflt    = get_opt(contxt, OPT_DEFAULT),
                 newpath  = get_opt(contxt, OPT_NEWNAME),
                 disk     = get_opt(contxt, OPT_NOGAUGE);
+
+        prompt = help = deflt = newpath = disk;
+
         RCUR; 
     }
     else
@@ -839,6 +845,9 @@ entry_p m_askstring(entry_p contxt)
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
+
+        prompt = help = deflt; 
+
         RCUR; 
     }
     else
@@ -860,6 +869,9 @@ entry_p m_asknumber(entry_p contxt)
                 help     = get_opt(contxt, OPT_HELP),
                 range    = get_opt(contxt, OPT_RANGE),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
+
+        prompt = help = range = deflt;
+
         RNUM(1); 
     }
     else
@@ -880,6 +892,9 @@ entry_p m_askchoice(entry_p contxt)
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 choices  = get_opt(contxt, OPT_CHOICES),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
+
+        prompt = choices = deflt; 
+
         RNUM(1); 
     }
     else
@@ -901,6 +916,9 @@ entry_p m_askoptions(entry_p contxt)
                 help     = get_opt(contxt, OPT_HELP),
                 choices  = get_opt(contxt, OPT_CHOICES),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
+
+        prompt = help = choices = deflt; 
+
         RNUM(1); 
     }
     else
@@ -922,6 +940,9 @@ entry_p m_askbool(entry_p contxt)
                 help     = get_opt(contxt, OPT_HELP),
                 deflt    = get_opt(contxt, OPT_DEFAULT),
                 choices  = get_opt(contxt, OPT_CHOICES);
+
+        prompt = help = choices = deflt; 
+
         RNUM(1); 
     }
     else
@@ -943,6 +964,9 @@ entry_p m_askdisk(entry_p contxt)
                 dest     = get_opt(contxt, OPT_DEST),
                 newname  = get_opt(contxt, OPT_NEWNAME),
                 assigns  = get_opt(contxt, OPT_ASSIGNS);
+
+        prompt = help = dest = newname = assigns; 
+
         RNUM(1); 
     }
     else
@@ -1871,6 +1895,11 @@ entry_p m_copyfiles(entry_p contxt)
                 optional = get_opt(contxt, OPT_OPTIONAL),
                 delopts  = get_opt(contxt, OPT_DELOPTS),
                 nogauge  = get_opt(contxt, OPT_NOGAUGE);
+
+        prompt = help = choices = all = pattern; 
+        infos = confirm = safe = optional; 
+        delopts = nogauge; 
+
         if(source && dest) 
         {
             const char *src = str(source), 
@@ -1964,6 +1993,11 @@ entry_p m_copylib(entry_p contxt)
                 optional = get_opt(contxt, OPT_OPTIONAL),
                 delopts  = get_opt(contxt, OPT_DELOPTS),
                 nogauge  = get_opt(contxt, OPT_NOGAUGE);
+
+        infos = confirm = safe; 
+        prompt = help = newname;
+        optional = delopts = nogauge; 
+
         if(!source || !dest) 
         {
             char *opt = !source ? "source" : "dest"; 
@@ -1996,6 +2030,9 @@ entry_p m_startup(entry_p contxt)
                 prompt   = get_opt(CARG(3), OPT_PROMPT), 
                 confirm  = get_opt(CARG(3), OPT_CONFIRM), 
                 override = get_opt(CARG(3), OPT_OVERRIDE);
+
+        help = prompt = confirm; 
+
         if(!command) 
         {
             error(contxt->id, ERR_MISSING_OPTION, "command"); 
@@ -2119,6 +2156,9 @@ entry_p m_textfile(entry_p contxt)
                 include  = get_opt(contxt, OPT_INCLUDE),
                 confirm  = get_opt(contxt, OPT_CONFIRM),
                 safe     = get_opt(contxt, OPT_SAFE); 
+
+        prompt = help = confirm = safe; 
+
         if(dest)
         {
             const char *fn = str(dest); 
@@ -2234,6 +2274,9 @@ entry_p m_rename(entry_p contxt)
                 prompt   = get_opt(CARG(3), OPT_PROMPT), 
                 confirm  = get_opt(CARG(3), OPT_CONFIRM), 
                 safe     = get_opt(CARG(3), OPT_COMMAND);
+
+        help = prompt = confirm = safe; 
+
         if(rename(str(CARG(1)), str(CARG(2))) == 0)
         {
             RNUM(1); 
@@ -2269,6 +2312,10 @@ entry_p m_delete(entry_p contxt)
                 all      = get_opt(CARG(2), OPT_ALL), 
                 delopts  = get_opt(CARG(2), OPT_DELOPTS), 
                 safe     = get_opt(CARG(2), OPT_SAFE); 
+
+        help = prompt = confirm = infos; 
+        optional = all = delopts = safe; 
+
         if(remove(str(CARG(1))) == 0)
         {
             RNUM(1); 
@@ -2313,6 +2360,10 @@ entry_p m_protect(entry_p contxt)
         const char *file = str(CARG(1)); 
         entry_p override = get_opt(CARG(3), OPT_OVERRIDE),
                     safe = get_opt(CARG(3), OPT_SAFE); 
+
+        safe = NULL; 
+        file = NULL; 
+
         if(mask)
         {
             r = mask; 

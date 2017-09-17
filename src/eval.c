@@ -93,7 +93,7 @@ int num(entry_p entry)
     return 0; 
 }
 
-const char *str(entry_p entry)
+char *str(entry_p entry)
 {
     if(entry && 
        entry != end())
