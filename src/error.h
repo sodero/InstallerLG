@@ -33,7 +33,8 @@ typedef enum
     ERR_FMT_UNUSED, 
     ERR_NO_ITEM, 
     ERR_MISSING_OPTION, 
-    ERR_INVALID_APP 
+    ERR_INVALID_APP,
+    ERR_NOTHING_TO_DO
 } error_t; 
 
 int did_error(void);

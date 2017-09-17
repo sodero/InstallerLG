@@ -44,7 +44,8 @@ int error(int id,
         "Unused format string arguments", 
         "No such item", 
         "Missing option",
-        "Invalid application name"
+        "Invalid application name",
+        "Nothing to do"
     };
     if(id && type && info)
     {

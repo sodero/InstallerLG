@@ -2019,10 +2019,6 @@ entry_p m_copylib(entry_p contxt)
 */
 entry_p m_startup(entry_p contxt)
 {
-//    ARGS(2); 
-
-// CLEAANAN!
-
     if(c_sane(contxt, 2))
     {
         entry_p command  = get_opt(contxt, OPT_COMMAND),
@@ -2200,7 +2196,12 @@ entry_p m_textfile(entry_p contxt)
                     }
                 }
                 fclose(fp); 
-                RCUR; 
+                if(append || include)
+                {
+                    RCUR; 
+                }
+                error(contxt->id, ERR_NOTHING_TO_DO, contxt->name); 
+                RNUM(0); 
             }
             error(contxt->id, ERR_WRITE_FILE, fn); 
         }
