@@ -1395,23 +1395,22 @@ entry_p m_strlen(entry_p contxt)
 */
 entry_p m_substr(entry_p contxt)
 {
-    ARGS(2); 
-    if(a2->children &&
-       a2->children[0] && 
-       a2->children[0] != end()) 
+    if(c_sane(contxt, 2) &&
+       c_sane(CARG(2), 1))
     {
         char *r; 
-        const char *s = str(a1);
-        size_t n, l = strlen(s); 
-        size_t i = num(a2->children[0]) > 0 ? (size_t) 
-                   num(a2->children[0]) : 0; 
+        const char *s = str(CARG(1));
+        entry_p se = CARG(2)->children[0], 
+                ne = CARG(2)->children[1];
+        size_t n, l = strlen(s),
+               i = num(se) > 0 ? 
+               (size_t) num(se) : 0;
         i = i >= l ? 0 : i; 
         n = l - i; 
-        if(a2->children[1] && 
-           a2->children[1] != end()) 
+        if(ne && ne != end())
         {
-            size_t j = num(a2->children[1]) > 0 ? (size_t) 
-                       num(a2->children[1]) : n; 
+            size_t j = num(ne) > 0 ? 
+                   (size_t) num(ne) : n; 
             n = j < n ? j : n; 
         }
         r = calloc(n + 1, sizeof(char)); 
@@ -1432,13 +1431,12 @@ entry_p m_substr(entry_p contxt)
 */
 entry_p m_symbolset(entry_p contxt)
 {
-    ARGS(2); 
     entry_p res = malloc(sizeof(entry_t)); 
-    if(res)
+    if(res && c_sane(contxt, 2))
     {
         size_t i = 0; 
-        const char *n = str(a1); 
-        memmove(res, resolve(a2), sizeof(entry_t)); 
+        const char *n = str(CARG(1)); 
+        memmove(res, resolve(CARG(2)), sizeof(entry_t)); 
         res->name = res->name ? strdup(res->name) : NULL; 
         while(contxt->symbols[i] &&
               contxt->symbols[i] != end())
@@ -1464,12 +1462,13 @@ entry_p m_symbolset(entry_p contxt)
                 sym->parent = contxt;  
                 return res; 
             }
-            kill(sym); 
         }
-        else
-        {
-            kill(res); 
-        }
+        kill(sym); 
+        kill(res); 
+    }
+    else
+    {
+        free(res); 
     }
     error(PANIC); 
     RCUR; 
@@ -1482,25 +1481,26 @@ entry_p m_symbolset(entry_p contxt)
 */
 entry_p m_symbolval(entry_p contxt)
 {
-    ARGS(1); 
-    entry_p ref = new_symref(strdup(str(a1)), contxt->id); 
-    if(ref)
+    if(c_sane(contxt, 1))
     {
-        entry_p val; 
-        ref->parent = contxt; 
-        val = resolve(ref); 
-        kill(ref); 
+        entry_p r; 
+        entry_t e; 
+        e.type = SYMREF; 
+        e.parent = contxt; 
+        e.id = contxt->id; 
+        e.name = str(CARG(1)); 
+        r = resolve(&e); 
         if(!did_error())
         {
-            return val; 
+            return r; 
         }
+        RNUM(0);
     }
     else
     {
         error(PANIC);
         RCUR;
     }
-    return new_failure(); 
 }
 
 static char *h_tackon(int id, 

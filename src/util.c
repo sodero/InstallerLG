@@ -211,6 +211,22 @@ int c_sane(entry_p c, size_t n)
                c->children[i]->parent != c ||
                (c->type == NATIVE && !c->resolved))
             {
+                if(c->children[i] == NULL)
+                {
+                    TRACE("c->children[%lu] == NULL\n", i);
+                }
+                if(c->children[i] == end())
+                {
+                    TRACE("c->children[%lu] == end()\n", i);
+                }
+                if(c->children[i]->parent != c)
+                {
+                    TRACE("c->children[%lu]->parent != %p\n", i, (void *) c);
+                }
+                if(c->type == NATIVE && !c->resolved)
+                {
+                    TRACE("c->type == NATIVE && !c->resolved\n"); 
+                }
                 return 0; 
             } 
         }
