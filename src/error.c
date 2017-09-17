@@ -4,14 +4,15 @@
 
 int did_error(void)
 {
-    return error(0, NULL, NULL) != 0;
+    return error(0, ERR_NONE, NULL) != 0;
 }
 
 int did_halt(void)
 {
-    return error(0, NULL, NULL) == -1;
+    return error(0, ERR_NONE, NULL) == -1;
 }
 
+/*
 int error(int id, 
           const char *type, 
           const char *info)
@@ -32,24 +33,27 @@ int error(int id,
     }
     return err; 
 }
+*/
 
-int error_ng(int id, 
-             error_t type, 
-             const char *info)
+int error(int id, 
+          error_t type, 
+          const char *info)
 {
     static int err = 0;
     static const char *des[] =
     {
+        NULL, 
         "Internal error",
         "Implementation missing",
         "Halt",
         "Reset",
+        "Abort",
         "Could not read from file", 
         "Could not read directory",
         "Could not write to file",
         "Could not create directory", 
         "Could not rename file",
-        "Could not delete file"
+        "Could not delete file",
         "Not a file",
         "Not a directory",
         "No such file or directory",
@@ -63,9 +67,9 @@ int error_ng(int id,
         "Unused format string arguments", 
         "No such item", 
         "Missing option",
-        "Invalid application name",
+        "Invalid application name"
     };
-    if(id && info)
+    if(id && type && info)
     {
         err = id; 
         if(id > 0)

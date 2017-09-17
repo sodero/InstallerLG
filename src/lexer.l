@@ -189,10 +189,10 @@
 %%
 
 int yyerror(yyscan_t scanner, char *err)
-{                                                                                                                                                                                                                                       
-    int line = yyget_lineno(scanner); 
-    char *who = yyget_text(scanner);
-    error(line, err, who); 
+{
+    fprintf(stderr, "Line %d: %s '%s'\n", 
+            yyget_lineno(scanner), err, 
+            yyget_text(scanner));
     return 0;
 }
 

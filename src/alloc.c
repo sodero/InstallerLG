@@ -27,7 +27,7 @@ entry_p new_contxt(void)
         free(symbols); 
         free(children); 
     }
-    error_ng(PANIC);
+    error(PANIC);
     free(entry);
     return 0;
 }
@@ -41,7 +41,7 @@ entry_p new_number(int n)
         entry->id = n;
         return entry;
     }
-    error_ng(PANIC);
+    error(PANIC);
     return NULL;
 }
 
@@ -57,7 +57,7 @@ entry_p new_string(char *n)
             return entry;
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return NULL; 
 }
 
@@ -101,7 +101,7 @@ entry_p new_symbol(char *n) //, entry_p e)
             return entry; 
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return NULL; 
 }
 
@@ -141,7 +141,7 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
             return entry; 
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return NULL; 
 }
 
@@ -158,7 +158,7 @@ entry_p new_symref(char *n, int l)
             return entry; 
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return NULL; 
 }
 
@@ -183,7 +183,7 @@ static void move_contxt(entry_p dst, entry_p src)
         kill(src); 
         return; 
     }
-    error_ng(PANIC);
+    error(PANIC);
 }
 
 entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
@@ -221,7 +221,7 @@ entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
             free(entry); 
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return NULL;
 }
 
@@ -242,7 +242,7 @@ entry_p new_option (char *n, opt_t t, entry_p e)
             return entry;
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return NULL;
 }
 
@@ -264,7 +264,7 @@ entry_p new_cusref (char *n, int l, entry_p e)
             return entry;
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return NULL; 
 }
 
@@ -298,14 +298,14 @@ entry_p append(entry_p **dst, entry_p e)
             }
             else
             {
-                error_ng(PANIC);
+                error(PANIC);
                 return NULL; 
             }
         }
         (*dst)[n] = e; 
         return e; 
     }
-    error_ng(PANIC);
+    error(PANIC);
     return NULL; 
 }
 
@@ -361,7 +361,7 @@ entry_p push(entry_p dst, entry_p src)
             }
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return dst; 
 }
 

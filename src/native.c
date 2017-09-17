@@ -22,7 +22,7 @@ entry_p m_procedure(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -46,7 +46,7 @@ entry_p m_if(entry_p contxt)
             return p->call(p); 
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     RCUR; 
 }
 
@@ -68,7 +68,7 @@ static entry_p h_whunt(entry_p contxt, int m)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -121,7 +121,7 @@ entry_p m_gosub(entry_p contxt)
                         }
                         else
                         {
-                            error_ng(PANIC);
+                            error(PANIC);
                             return new_failure(); 
                         }
                         arg++; 
@@ -136,19 +136,17 @@ entry_p m_gosub(entry_p contxt)
                 }
                 else
                 {
-                    error(contxt->id, "Max recursion depth exceeded", 
-                          contxt->name); 
+                    error(contxt->id, ERR_MAX_DEPTH, contxt->name); 
                     return new_failure(); 
                 }
             }
             cus++; 
         }
-        error(contxt->id, "Undefined function", 
-              contxt->name); 
+        error(contxt->id, ERR_UNDEF_FNC, contxt->name); 
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
     }
     return new_failure(); 
 }
@@ -186,7 +184,7 @@ entry_p m_set(entry_p contxt)
             }
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return new_failure(); 
 }
 
@@ -209,7 +207,7 @@ entry_p m_add (entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -245,7 +243,7 @@ entry_p m_lt(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -265,7 +263,7 @@ entry_p m_lte(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -285,7 +283,7 @@ entry_p m_gt(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -305,7 +303,7 @@ entry_p m_gte(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -325,7 +323,7 @@ entry_p m_eq(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -346,7 +344,7 @@ entry_p m_sub(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -370,7 +368,7 @@ entry_p m_mul(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -394,13 +392,13 @@ entry_p m_div(entry_p contxt)
         }
         else
         {
-            error(contxt->id, "Division by zero", contxt->name); 
+            error(contxt->id, ERR_DIV_BY_ZERO, contxt->name); 
             RCUR; 
         }
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -437,13 +435,12 @@ entry_p m_fmt(entry_p contxt)
                         }
                         else
                         {
-                            error_ng(PANIC);
+                            error(PANIC);
                         }
                     }
                     else 
                     {
-                        error(contxt->id, "Invalid format string", 
-                        contxt->name); 
+                        error(contxt->id, ERR_FMT_INVALID, contxt->name); 
                         break; 
                     }
                 }
@@ -472,7 +469,7 @@ entry_p m_fmt(entry_p contxt)
                         }
                         else
                         {
-                            error_ng(PANIC);
+                            error(PANIC);
                         }
                     }
                     else
@@ -490,13 +487,12 @@ entry_p m_fmt(entry_p contxt)
                         }
                         else
                         {
-                            error_ng(PANIC);
+                            error(PANIC);
                         }
                     }
                     else
                     {
-                        error(contxt->id, "Format string type mismatch", 
-                        contxt->name); 
+                        error(contxt->id, ERR_FMT_MISMATCH, contxt->name); 
                     }
                     if(did_error())
                     {
@@ -510,8 +506,7 @@ entry_p m_fmt(entry_p contxt)
                 }
                 else 
                 {
-                    error(contxt->id, "Missing format string arguments", 
-                    contxt->name); 
+                    error(contxt->id, ERR_FMT_MISSING, contxt->name); 
                     break; 
                 }
             }
@@ -530,7 +525,7 @@ entry_p m_fmt(entry_p contxt)
             }
             else
             {
-                error_ng(PANIC);
+                error(PANIC);
             }
         }
         for(k = 0; sct[k]; k++)
@@ -541,8 +536,7 @@ entry_p m_fmt(entry_p contxt)
         if(arg && *arg && 
            *arg != end())
         {
-            error(contxt->id, "Unused format string arguments", 
-                  contxt->name); 
+            error(contxt->id, ERR_FMT_UNUSED, contxt->name); 
         }
         else if(ret)
         {
@@ -551,7 +545,7 @@ entry_p m_fmt(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
     }
     free(ret);
     return new_failure(); 
@@ -573,7 +567,7 @@ entry_p m_and(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -594,7 +588,7 @@ entry_p m_or(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -615,7 +609,7 @@ entry_p m_xor(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -632,7 +626,7 @@ entry_p m_not(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -653,7 +647,7 @@ entry_p m_bitand(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -674,7 +668,7 @@ entry_p m_bitor(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -695,7 +689,7 @@ entry_p m_bitxor(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -715,7 +709,7 @@ entry_p m_bitnot(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -736,7 +730,7 @@ entry_p m_shiftleft(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -757,7 +751,7 @@ entry_p m_shiftright(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -785,7 +779,7 @@ entry_p m_in(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -807,7 +801,7 @@ entry_p m_askdir(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -829,7 +823,7 @@ entry_p m_askfile(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -849,7 +843,7 @@ entry_p m_askstring(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -870,7 +864,7 @@ entry_p m_asknumber(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -890,7 +884,7 @@ entry_p m_askchoice(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -911,7 +905,7 @@ entry_p m_askoptions(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -932,7 +926,7 @@ entry_p m_askbool(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -953,7 +947,7 @@ entry_p m_askdisk(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -1016,7 +1010,7 @@ entry_p m_cat(entry_p contxt)
             }
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     RCUR; 
 }
 
@@ -1059,7 +1053,7 @@ entry_p m_exists(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -1071,7 +1065,7 @@ entry_p m_exists(entry_p contxt)
 entry_p m_expandpath(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -1082,7 +1076,7 @@ entry_p m_expandpath(entry_p contxt)
 entry_p m_earlier(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -1107,11 +1101,11 @@ static char *h_fileonly(int id,
                 memcpy(r, s + i, l - i); 
                 return r; 
             }
-            error_ng(PANIC); 
+            error(PANIC); 
         }
         else
         {
-            error(id, "Not a file", s); 
+            error(id, ERR_NOT_A_FILE, s); 
         }   
     }
     return NULL; 
@@ -1131,7 +1125,7 @@ entry_p m_fileonly(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -1144,7 +1138,7 @@ entry_p m_fileonly(entry_p contxt)
 entry_p m_getassign(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -1155,7 +1149,7 @@ entry_p m_getassign(entry_p contxt)
 entry_p m_getdevice(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -1166,7 +1160,7 @@ entry_p m_getdevice(entry_p contxt)
 entry_p m_getdiskspace(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -1183,7 +1177,7 @@ entry_p m_getenv(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -1206,14 +1200,13 @@ entry_p m_getsize(entry_p contxt)
         }
         else
         {
-            error(contxt->id, "Could not open file", 
-                  str(CARG(1))); 
+            error(contxt->id, ERR_READ_FILE, str(CARG(1))); 
             RNUM(0); 
         }
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -1242,14 +1235,13 @@ entry_p m_getsum(entry_p contxt)
         }
         else
         {
-            error(contxt->id, "Could not open file", 
-                  str(CARG(1))); 
+            error(contxt->id, ERR_READ_FILE, str(CARG(1))); 
             RCUR; 
         }
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -1271,7 +1263,7 @@ entry_p m_getversion(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -1292,13 +1284,13 @@ entry_p m_iconinfo(entry_p contxt)
         }
         else
         {
-            error(contxt->id, "Missing option", "dest"); 
+            error(contxt->id, ERR_MISSING_OPTION, "dest"); 
             RNUM(0); 
         }
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -1325,7 +1317,7 @@ entry_p m_pathonly(entry_p contxt)
                     memcpy(r, s, i + 1); 
                     RSTR(r); 
                 }
-                error_ng(PANIC); 
+                error(PANIC); 
                 RCUR; 
             }
         }
@@ -1333,7 +1325,7 @@ entry_p m_pathonly(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -1345,7 +1337,7 @@ entry_p m_pathonly(entry_p contxt)
 entry_p m_patmatch(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -1367,12 +1359,12 @@ entry_p m_select(entry_p contxt)
             }
             i++; 
         }
-        error(contxt->id, "No such item", str(CARG(1))); 
+        error(contxt->id, ERR_NO_ITEM, str(CARG(1))); 
         RNUM(0); 
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR;
     }
 }
@@ -1392,7 +1384,7 @@ entry_p m_strlen(entry_p contxt)
     } 
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -1429,7 +1421,7 @@ entry_p m_substr(entry_p contxt)
             RSTR(r); 
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     RCUR; 
 }
 
@@ -1479,7 +1471,7 @@ entry_p m_symbolset(entry_p contxt)
             kill(res); 
         }
     }
-    error_ng(PANIC); 
+    error(PANIC); 
     RCUR; 
 }
 
@@ -1505,7 +1497,7 @@ entry_p m_symbolval(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR;
     }
     return new_failure(); 
@@ -1533,7 +1525,7 @@ static char *h_tackon(int id,
             if(f[lf - 1] == '/' ||
                f[lf - 1] == ':') 
             {
-                error(id, "Not a file", f); 
+                error(id, ERR_NOT_A_FILE, f); 
                 return NULL; 
             }
             r = calloc(lp + lf + 2, sizeof(char)); 
@@ -1560,7 +1552,7 @@ static char *h_tackon(int id,
                 strcat(r, f); 
                 return r; 
             }
-            error_ng(PANIC); 
+            error(PANIC); 
         }
     }
     return NULL; 
@@ -1580,7 +1572,7 @@ entry_p m_tackon(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -1630,13 +1622,13 @@ entry_p m_transcript(entry_p contxt)
             }
             else
             {
-                error(contxt->id, "Error writing to log", log); 
+                error(contxt->id, ERR_WRITE_FILE, log); 
             }
             free(buf); 
             RNUM(0); 
         }
     }
-    error_ng(PANIC); 
+    error(PANIC); 
     RCUR; 
 }
 
@@ -1688,12 +1680,11 @@ static int h_makedir(int id, const char *dst)
                 }
             }
             free(dir);
-            error(id, "Could not create directory", 
-                  dst); 
+            error(id, ERR_WRITE_DIR, dst); 
         }
         else
         {
-            error_ng(PANIC); 
+            error(PANIC); 
         }
     }
     return 0; 
@@ -1719,7 +1710,7 @@ entry_p m_makedir(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RNUM(0);
     }
 }
@@ -1745,8 +1736,7 @@ static int h_copyfile(int id,
                 {
                     if(fwrite(buf, sizeof(char), n, fd) != n)
                     {
-                        //error(id, "Error writing to file", dst); 
-                        error_ng(id, ERR_WRITE_FILE, dst); 
+                        error(id, ERR_WRITE_FILE, dst); 
                         break; 
                     }
                     n = fread(buf, sizeof(char), BUFSIZ, fs);
@@ -1758,14 +1748,12 @@ static int h_copyfile(int id,
             else
             {
                 fclose(fs); 
-       //         error(id, "Could not write to file", dst); 
-                error_ng(id, ERR_WRITE_FILE, dst); 
+                error(id, ERR_WRITE_FILE, dst); 
             }
         }
         else
         {
-       //     error(id, "Could not read from file", src); 
-            error_ng(id, ERR_READ_FILE, src); 
+            error(id, ERR_READ_FILE, src); 
         }
     }
     return 0; 
@@ -1813,7 +1801,7 @@ static int h_copydir(int id,
                             }
                             else
                             {
-                                error_ng(PANIC); 
+                                error(PANIC); 
                             }
                         }
                         else
@@ -1836,21 +1824,21 @@ static int h_copydir(int id,
                         }
                         else
                         {
-                            error_ng(PANIC); 
+                            error(PANIC); 
                         }
                     } 
                     free(fn); 
                 }
                 else
                 {
-                    error_ng(PANIC); 
+                    error(PANIC); 
                 }
             }
             closedir(dp);
         }
         else
         {
-            error(id, "Could not read directory", src); 
+            error(id, ERR_READ_DIR, src); 
         }
     }
     return r; 
@@ -1891,7 +1879,7 @@ entry_p m_copyfiles(entry_p contxt)
                 dt = h_exists(dst); 
             if(!st)
             {
-                error(contxt->id, "No such file or directory", src); 
+                error(contxt->id, ERR_NO_SUCH_FILE_OR_DIR, src); 
                 RNUM(0); 
             }
             if(!dt)
@@ -1907,7 +1895,7 @@ entry_p m_copyfiles(entry_p contxt)
             if(dt == 1)
             {
                 /* Destination is a file, not a dir */                
-                error(contxt->id, "Not a directory", dst); 
+                error(contxt->id, ERR_NOT_A_DIR, dst); 
                 RNUM(0); 
             }
             /* We have a destination directory */                
@@ -1923,7 +1911,7 @@ entry_p m_copyfiles(entry_p contxt)
                 }
                 else
                 {
-                    error_ng(PANIC); 
+                    error(PANIC); 
                 }
                 free(f); 
                 free(p); 
@@ -1943,13 +1931,13 @@ entry_p m_copyfiles(entry_p contxt)
         else
         {
             char *opt = !source ? "source" : "dest"; 
-            error(contxt->id, "Missing option", opt); 
+            error(contxt->id, ERR_MISSING_OPTION, opt); 
             RNUM(0); 
         }
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -1979,14 +1967,14 @@ entry_p m_copylib(entry_p contxt)
         if(!source || !dest) 
         {
             char *opt = !source ? "source" : "dest"; 
-            error(contxt->id, "Missing option", opt); 
+            error(contxt->id, ERR_MISSING_OPTION, opt); 
             RNUM(0); 
         }
         RNUM(1); 
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR; 
     }
 }
@@ -2010,7 +1998,7 @@ entry_p m_startup(entry_p contxt)
                 override = get_opt(CARG(3), OPT_OVERRIDE);
         if(!command) 
         {
-            error(contxt->id, "Missing option", "command"); 
+            error(contxt->id, ERR_MISSING_OPTION, "command"); 
             RNUM(0); 
         }
         if(c_sane(command, 1))
@@ -2027,7 +2015,7 @@ entry_p m_startup(entry_p contxt)
                 if(al < 3)
                 {
                     fclose(fp); 
-                    error(contxt->id, "Invalid application name", "NULL"); 
+                    error(contxt->id, ERR_INVALID_APP, "NULL"); 
                     RNUM(0);
                 }
                 else
@@ -2081,7 +2069,7 @@ entry_p m_startup(entry_p contxt)
                                     }
                                 }
                             }
-                            error(contxt->id, "Could not write to file", fln); 
+                            error(contxt->id, ERR_WRITE_FILE, fln); 
                         }
                     }
                     if(fp)
@@ -2094,12 +2082,12 @@ entry_p m_startup(entry_p contxt)
             }
             else
             {
-                error(contxt->id, "Could not read from file", fln); 
+                error(contxt->id, ERR_READ_FILE, fln); 
             }
             RNUM(0);
         }
     }
-    error_ng(PANIC); 
+    error(PANIC); 
     RCUR; 
 }
 
@@ -2112,7 +2100,7 @@ entry_p m_startup(entry_p contxt)
 entry_p m_tooltype(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -2131,53 +2119,61 @@ entry_p m_textfile(entry_p contxt)
                 include  = get_opt(contxt, OPT_INCLUDE),
                 confirm  = get_opt(contxt, OPT_CONFIRM),
                 safe     = get_opt(contxt, OPT_SAFE); 
-        const char *fn = str(dest); 
-        FILE *fp = fopen(fn, "a"); 
-        if(fp)
+        if(dest)
         {
-            DNUM = 1; 
-            if(include)
+            const char *fn = str(dest); 
+            FILE *fp = fopen(fn, "a"); 
+            if(fp)
             {
-                static char buf[BUFSIZ]; 
-                FILE *fs = fopen(str(include), "r"); 
-                if(fs)
+                DNUM = 1; 
+                if(include)
                 {
-                    size_t n = fread(buf, sizeof(char), BUFSIZ, fs);
-                    while(n)
+                    static char buf[BUFSIZ]; 
+                    FILE *fs = fopen(str(include), "r"); 
+                    if(fs)
                     {
-                        if(fwrite(buf, sizeof(char), n, fp) != n)
+                        size_t n = fread(buf, sizeof(char), BUFSIZ, fs);
+                        while(n)
                         {
-                            error(contxt->id, "Error writing to file", fn); 
-                            DNUM = 0; 
-                            break; 
+                            if(fwrite(buf, sizeof(char), n, fp) != n)
+                            {
+                                error(contxt->id, ERR_WRITE_FILE, fn); 
+                                DNUM = 0; 
+                                break; 
+                            }
+                            n = fread(buf, sizeof(char), BUFSIZ, fs);
                         }
-                        n = fread(buf, sizeof(char), BUFSIZ, fs);
+                        fclose(fs); 
                     }
-                    fclose(fs); 
+                    else
+                    {
+                        error(contxt->id, ERR_READ_FILE, str(include)); 
+                        DNUM = 0;  
+                    }
                 }
-                else
+                if(append && DNUM)
                 {
-                    error(contxt->id, "Error reading from file", str(include)); 
-                    DNUM = 0;  
+                    if(fputs(str(append), fp) == EOF)
+                    {
+                        error(contxt->id, ERR_WRITE_FILE, fn); 
+                        DNUM = 0; 
+                    }
                 }
+                fclose(fp); 
+                RCUR; 
             }
-            if(append && DNUM)
-            {
-                if(fputs(str(append), fp) == EOF)
-                {
-                    error(contxt->id, "Error writing to file", fn); 
-                    DNUM = 0; 
-                }
-            }
-            fclose(fp); 
+            error(contxt->id, ERR_WRITE_FILE, fn); 
+        }
+        else
+        {
+            error(contxt->id, ERR_MISSING_OPTION, "dest"); 
             RCUR; 
         }
-        error(contxt->id, "Could not write to file", fn); 
         RNUM(0); 
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -2189,7 +2185,7 @@ entry_p m_textfile(entry_p contxt)
 entry_p m_execute(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -2200,7 +2196,7 @@ entry_p m_execute(entry_p contxt)
 entry_p m_run(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -2211,7 +2207,7 @@ entry_p m_run(entry_p contxt)
 entry_p m_rexx(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -2222,7 +2218,7 @@ entry_p m_rexx(entry_p contxt)
 entry_p m_makeassign(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -2244,13 +2240,13 @@ entry_p m_rename(entry_p contxt)
         }
         else
         {
-            error(contxt->id, "Could not rename file", str(CARG(1))); 
+            error(contxt->id, ERR_RENAME_FILE, str(CARG(1))); 
             RNUM(0); 
         }
     }  
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -2279,13 +2275,13 @@ entry_p m_delete(entry_p contxt)
         }
         else
         {
-            error(contxt->id, "Could not delete file", str(CARG(1))); 
+            error(contxt->id, ERR_DELETE_FILE, str(CARG(1))); 
             RNUM(0); 
         }
     }  
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -2372,7 +2368,7 @@ entry_p m_protect(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -2389,7 +2385,7 @@ entry_p m_complete(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -2411,7 +2407,7 @@ entry_p m_message(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -2423,7 +2419,7 @@ entry_p m_message(entry_p contxt)
 entry_p m_working(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -2434,7 +2430,7 @@ entry_p m_working(entry_p contxt)
 entry_p m_welcome(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -2445,7 +2441,7 @@ entry_p m_welcome(entry_p contxt)
 entry_p m_foreach(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -2463,12 +2459,12 @@ entry_p m_abort(entry_p contxt)
             /* show message */
             cur++; 
         }
-        error(-3, "Abort", __func__); 
+        error(-3, ERR_ABORT, __func__); 
         RNUM(0);
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR; 
     }
 }
@@ -2505,7 +2501,7 @@ entry_p m_exit(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
         RCUR;
     }
 }
@@ -2517,7 +2513,7 @@ entry_p m_exit(entry_p contxt)
 entry_p m_trap(entry_p contxt)
 {
     (void) contxt; 
-    error_ng(MISS); 
+    error(MISS); 
     return new_failure(); 
 }
 
@@ -2541,7 +2537,7 @@ entry_p m_onerror(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC);  
+        error(PANIC);  
         RCUR;
     }
 }
@@ -2574,7 +2570,7 @@ entry_p m_debug(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR;
     }
 }
@@ -2624,7 +2620,7 @@ entry_p m_database(entry_p contxt)
     }
     else
     {
-        error_ng(PANIC); 
+        error(PANIC); 
         RCUR;
     }
 }

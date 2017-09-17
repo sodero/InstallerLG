@@ -29,12 +29,12 @@ static entry_p find_symbol(entry_p entry)
             con = local(con->parent);
         }
         while(con);
-        error(entry->id, "Undefined variable", 
+        error(entry->id, ERR_UNDEF_VAR, 
               entry->name); 
     }
     else
     {
-        error_ng(PANIC);
+        error(PANIC);
     }
     return new_failure();
 }
@@ -59,7 +59,7 @@ entry_p resolve(entry_p entry)
                 return entry; 
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return new_failure();
 }
 
@@ -89,7 +89,7 @@ int num(entry_p entry)
                 break; 
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return 0; 
 }
 
@@ -147,7 +147,7 @@ const char *str(entry_p entry)
                 break;
         }
     }
-    error_ng(PANIC);
+    error(PANIC);
     return ""; 
 }
 
@@ -170,7 +170,7 @@ entry_p invoke(entry_p entry)
                 }
                 else
                 {
-                    error_ng(PANIC);
+                    error(PANIC);
                     break; 
                 }
             }
@@ -178,7 +178,7 @@ entry_p invoke(entry_p entry)
         }
         return ret;
     }
-    error_ng(PANIC);
+    error(PANIC);
     return ret;
 }
 

@@ -1,4 +1,4 @@
 (textfile) ; "","Line 1: syntax error ')'",""
-(textfile (safe)) ; "","Line 1: Implementation missing 'm_textfile'",""
-(textfile (safe) (quiet)) ; "","Line 1: Implementation missing 'm_textfile'",""
+(textfile (safe)) ; "","Line 1: Missing option 'dest' 0",""
+(textfile (safe) (quiet)) ; "","Line 1: Missing option 'dest' 0",""
 (textfile err (safe)) ; "","Line 1: syntax error 'err'",""
