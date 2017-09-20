@@ -1998,13 +1998,25 @@ entry_p m_copylib(entry_p contxt)
         prompt = help = newname;
         optional = delopts = nogauge; 
 
-        if(!source || !dest) 
+        if(source && dest) 
+        {
+            /*
+            const char *d = str(dest);
+            if(h_makedir(contxt->id, d))
+            {
+                // Check if newer!
+                const char *s = str(source);
+                int r = h_copyfile(contxt->id, s, d);
+                RNUM(r); 
+            }
+            */
+        }
+        else
         {
             char *opt = !source ? "source" : "dest"; 
             error(contxt->id, ERR_MISSING_OPTION, opt); 
-            RNUM(0); 
         }
-        RNUM(1); 
+        RNUM(0); 
     }
     else
     {

@@ -4,4 +4,5 @@
 (copylib (source "src")) ; "","Line 1: Missing option 'dest' 0",""
 (copylib (source) (dest)) ; "","Line 1: syntax error ')'",""
 (copylib (source) (dest "dst")) ; "","Line 1: syntax error ')'",""
-(copylib (source "src") (dest "dst")) ; "","1",""
+;(copylib (source "_ne_") (dest "_cl_")) ; "","Line 1: Could not read from file '_ne_' 0",""
+;(copylib (source "_cl_") (dest "_co_")) ; "rm -Rf _cl_ && touch _cl_","1","test -e _co_ && rm -Rf _co_ _cl_"
