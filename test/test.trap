@@ -1,5 +1,5 @@
-(trap 1 (message "!")) ; "","Line 1: Implementation missing 'm_trap'",""
-(trap 1 ((message "!") (message "?"))) ; "","Line 1: Implementation missing 'm_trap'",""
+(trap 1 (message "!")) ; "","1",""
+(trap 1 ((message "!") (message "?"))) ; "","1",""
 (trap) ; "","Line 1: syntax error ')'",""
 (trap err) ; "","Line 1: syntax error ')'",""
 (trap 1 err ((message "!") (message "?"))) ; "","Line 1: syntax error 'err'",""

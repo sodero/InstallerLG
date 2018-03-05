@@ -1,1 +1,1 @@
-(askstring) ; "","",""
+(askstring) ; "","Line 1: Missing option 'prompt' 0",""

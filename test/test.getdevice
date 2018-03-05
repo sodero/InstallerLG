@@ -1,1 +1,3 @@
-(getdevice "path") ; "","Line 1: Implementation missing 'm_getdevice'",""
+(getdevice) ; "","Line 1: syntax error ')'",""
+(getdevice "path") ; "","",""
+(getdevice "path" err) ; "","Line 1: syntax error 'err'",""

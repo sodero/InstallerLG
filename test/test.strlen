@@ -5,3 +5,5 @@
 (strlen ("%s%ld" "test" 1)) ; "","5",""
 (strlen %0001) ; "","1",""
 (strlen $f) ; "","2",""
+(strlen a) ; "","Line 1: Undefined variable 'a' 0",""
+(strlen ("l%ld" (strlen $f))) ; "","2",""

@@ -1,1 +1,3 @@
-(getdiskspace "path") ; "","Line 1: Implementation missing 'm_getdiskspace'",""
+(getdiskspace) ; "","Line 1: syntax error ')'",""
+(getdiskspace "RAM:") ; "","-1",""
+(getdiskspace "RAM:" err) ; "","Line 1: syntax error 'err'",""

@@ -1,4 +1,4 @@
 (abort "1") ; "","0",""
 (abort "1" "2") ; "","0",""
-(procedure die (die)) (onerror (die)) (abort "!"); "","Line 1: Max recursion depth exceeded 'die' 0",""
+(procedure die (die)) (onerror (die)) (abort "!"); "","Line 1: Max recursion depth exceeded 'die'",""
 (+ 1) (abort "!"); "","0",""

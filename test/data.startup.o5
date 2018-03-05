@@ -1,12 +1,12 @@
 
 anticlick
 
-;app
+;BEGIN app
 loadwb
-;app
+;END app
 
-;ace
+;BEGIN ace
 frehley
-;ace
+;END ace
 
 extraclick

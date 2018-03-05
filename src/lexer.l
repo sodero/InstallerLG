@@ -1,53 +1,67 @@
 %{
-#include <stdlib.h>
-#include "types.h"
-#include "parser.h"
+#include "args.h"
 #include "error.h"
-#include "debug.h"
+#include "parser.h"
+#include "types.h"
+#include "resource.h"
 #include "lexer.h"
-%}
 
+#include <stdlib.h>
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* strduptr(const char *str) - Duplicate string and translate */
+/* escpate characters according to the Installer V42.6 guide  */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+static char *strduptr(const char *str);
+%}
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
+    /* We need the parser to be reentrant, not */
+    /* because we want to, but because it will */
+    /* will leak memory otherwise.             */
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 %option noyywrap reentrant bison-bridge
 
 %%
-    /*
-    Decimal numbers
-    */
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*- decimal numbers ----------------------------------------------------------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 -?[0-9]+                { 
     yylval->n = strtol(yytext, NULL, 10);      
     return INT; 
 }
 
-    /*
-    Hexadecimal numbers
-    */
+    
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*- hexadecimal numbers ------------------------------------------------------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 \$[0-9a-fA-F]+          { 
     yylval->n = strtol(yytext + 1, NULL, 16);  
     return HEX; 
 }
 
-    /*
-    Binary numbers
-    */
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*- binary numbers -----------------------------------------------------------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 %[01]+                  { 
     yylval->n = strtol(yytext + 1, NULL, 2);   
     return BIN; 
 }
 
-    /*
-    Syntactic markers
-    */
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*- syntactic markers --------------------------------------------------------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 "("                     { return '(';            }
 ")"                     { return ')';            }
 
-    /*
-    Builtin functions
-    */
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*- builting functions and options -------------------------------------------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 "="                     { return '=';            }
 "<"                     { return '<';            }
 "<="                    { return LTE;            }
 ">"                     { return '>';            }
 ">="                    { return GTE;            }
+"<>"                    { return NEQ;            }
 "+"                     { return '+';            }
 "-"                     { return '-';            }
 "*"                     { return '*';            }
@@ -139,6 +153,10 @@
 "files"                 { return FILES;          }
 "fonts"                 { return FONTS;          }
 "force"                 { return FORCE;          }
+"getdefaulttool"        { return GETDEFAULTTOOL; }
+"getposition"           { return GETPOSITION;    }
+"getstack"              { return GETSTACK;       }
+"gettooltype"           { return GETTOOLTYPE;    }
 "help"                  { return HELP;           }
 "infos"                 { return INFOS;          }
 "include"               { return INCLUDE;        }
@@ -157,74 +175,232 @@
 "setdefaulttool"        { return SETDEFAULTTOOL; }
 "setstack"              { return SETSTACK;       }
 "settooltype"           { return SETTOOLTYPE;    }
+"setposition"           { return SETPOSITION;    }
 "source"                { return SOURCE;         }
 "swapcolors"            { return SWAPCOLORS;     }
 "optional"              { return OPTIONAL;       }
 "resident"              { return RESIDENT;       }
 "override"              { return OVERRIDE;       }
 
-    /*
-    Strings
-    */
-\"[^\"]*\"              { 
-    yylval->s = strdup(yytext + 1); 
-    yylval->s[yyleng - 2] = 0; 
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*- strings ------------------------------------------------------------------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
+\"(\\.|[^"])*\"         {
+    yylval->s = strduptr(yytext); 
     return STR;        
 }    
 
-    /*
-    Symbols
-    */
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*- symbols ------------------------------------------------------------------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 [^" \n\t\(\)\+\*/]+    { 
     yylval->s = strdup(yytext); 
     return SYM;        
 }
 
-    /*
-    The bottom feeders
-    */
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*- the bottom feeders -------------------------------------------------------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 \n                    { yylineno++;         }
 [\t ]+                {                     }
 ;.*$                  {                     }
 %%
 
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*- yyerror ----------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 int yyerror(yyscan_t scanner, char *err)
 {
-    fprintf(stderr, "Line %d: %s '%s'\n", 
-            yyget_lineno(scanner), err, 
-            yyget_text(scanner));
-    return 0;
+    // Behave like the default yyerror(), 
+    // return the number of bytes printed 
+    return fprintf(stderr, tr(S_SYNT), 
+                   yyget_lineno(scanner), err, 
+                   yyget_text(scanner));
 }
 
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*- main -------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 int main(int argc, char **argv)
 {
-    yyscan_t lexer; 
-    if(argc != 2)
+    // Assume failure.
+    int r = -1; 
+
+    // Initialize the argument handling. Transparent 
+    // handling of Workbench and CLI arguments. 
+    if(arg_init(argc, argv))
     {
-        printf("Syntax: installer <install script>\n"); 
-        return 1; 
-    }
-    if(yylex_init(&lexer) == 0)
-    {
-        FILE *f = fopen(argv[1], "r");
-        if(f)
+        yyscan_t lexer; 
+
+        // Allocate and initialize whatever the lexer
+        // needs. Reentrant, see comment at the top. 
+        if(yylex_init(&lexer) == 0)
         {
-            yyset_in(f, lexer); 
-            yyparse(lexer);
+            // Get the name of the script from CLI
+            // or tooltypes / wb.  
+            char *n = arg_get(ARG_SCRIPT); 
+            FILE *f = fopen(n, "r");
+
+            if(f)
+            {
+                // Set input file and parse.
+                yyset_in(f, lexer); 
+
+                // Ignore the return value
+                // of yyparse.  
+                yyparse(lexer);
+                r = 0; 
+
+                // Close the input file. 
+                fclose(f); 
+            }
+            else
+            {
+                // We can't read from the file.
+                fprintf(stderr, tr(S_CNOF), n); 
+            }
+
+            // Free all resources allocated by
+            // the lexer.
             yylex_destroy(lexer);
-            fclose(f); 
-            return 0; 
         }
         else
         {
-            printf("Error: Could not open file '%s'\n", argv[1]); 
-            yylex_destroy(lexer);
+            // We most likely ran out of memory.
+            fprintf(stderr, "%s\n", tr(S_UNER));
+        }
+
+        // Free all resources allocated by
+        // the argument handling routines. 
+        arg_done(); 
+    }
+
+    // -1, 1 or 2
+    return r; 
+}
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* strduptr(const char *str) - Duplicate string and translate */
+/* escpate characters according to the Installer V42.6 guide  */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+static char *strduptr(const char *str)
+{
+    /* Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+     -------------------------------------------------------
+    `\n' newline character
+    `\r' return character
+    `\t' tab character
+    `\h' horizontal tab character (V42.6)
+    `\v' vertical tab character (V42.6)
+    `\b' backspace character (V42.6)
+    `\f' formfeed character (V42.6)
+    `\"' double quote
+    `\'' single quote
+    `\\' backslash
+    `\ooo' some octal number `ooo' (V42.6)
+    `\xXX' some hex number `XX' (V42.6) */
+    int len = strlen(str); 
+
+    // Translations
+    static char chr[] = "nrthvbf\"'\\\0";
+    static char raw[] = "\n\r\t\t\v\b\f\"'\\\0";
+
+    // Please note 'len -1', we strip the " from the string
+    // at this point, str index starts at 1 and we skip the 
+    // last character.
+    char *out = calloc(len - 1, 1); 
+
+    if(out)
+    {
+        int io = 0; 
+        for(int i = 1; i < len - 1; i++)
+        {
+            char cr = str[i];
+
+            // Are we dealing with a control character?
+            if(str[i] == '\\' &&
+               i + 1 < len - 1)
+            {
+                // Are we within the limits of the string?
+                if(i + 3 < len - 1)
+                {
+                    // Is this a hex number that needs to be
+                    // translated into a character?
+                    if(str[i + 1] == 'x' && (
+                      ((str[i + 2] >= 48 && str[i + 2] <= 57) || 
+                       (str[i + 2] >= 65 && str[i + 2] <= 70) ||
+                       (str[i + 2] >= 97 && str[i + 2] <= 102)) &&
+                      ((str[i + 3] >= 48 && str[i + 3] <= 57) || 
+                       (str[i + 3] >= 65 && str[i + 3] <= 70) ||
+                       (str[i + 3] >= 97 && str[i + 3] <= 102))))
+                    {
+                        // Temporary string for conversion 
+                        char h[] = 
+                        {
+                            str[i + 2], 
+                            str[i + 3], 
+                            '\0'
+                        };
+
+                        // Three digits, \ooo. 
+                        i += 3; 
+                        
+                        // Convert temp string to character.
+                        out[io++] = (char) strtol(h, NULL, 16);      
+
+                        // Continue with the rest of the string. 
+                        continue; 
+                    }
+                    // Is this a oct number that needs to be
+                    // translated into a character?
+                    if(str[i + 1] >= 48 && str[i + 1] <= 55 &&
+                       str[i + 2] >= 48 && str[i + 2] <= 55 &&
+                       str[i + 3] >= 48 && str[i + 3] <= 55)
+                    {
+                        // Temporary string for conversion 
+                        char h[] = 
+                        {
+                            str[i + 1], 
+                            str[i + 2], 
+                            str[i + 3], 
+                            '\0'
+                        };
+
+                        // Two digits + 'x', \xXX. 
+                        i += 3; 
+
+                        // Convert temp string to character.
+                        out[io++] = (char) strtol(h, NULL, 8);      
+
+                        // Continue with the rest of the string. 
+                        continue; 
+                    }
+                }
+
+                // Standard escape sequence. 
+                for(int j = 0; 
+                    chr[j]; j++)
+                {
+                    // A direct mapping between the current 
+                    // character and the value representing
+                    // the full escape sequence. 
+                    if(str[i + 1] == chr[j])
+                    {
+                        i++; 
+                        cr = raw[j];
+                        break;
+                    }
+                }
+            }
+
+            // Copy input to ouput. The 'cr' might have
+            // been translated, maybe it's just a copy.
+            out[io++] = cr; 
         }
     }
-    else
-    {
-        printf("Unknown error\n"); 
-    }
-    return 1; 
+
+    // Unless we're out of memory, 
+    // out will be a copy of str.
+    return out; 
 }
 

@@ -1,49 +1,83 @@
 #---------------------------------------------------------------------------------#
-# General 
+# Universal
 #---------------------------------------------------------------------------------#
 VPATH := ../src
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 OS := $(shell uname)
+EXE := installer
 
 #---------------------------------------------------------------------------------#
-# OS specifics
+# OS
 #---------------------------------------------------------------------------------#
-CCCONF := -I . -I $(VPATH) -std=c99 
+
 ifeq ($(OS),Linux)
-CCCONF += -D_BSD_SOURCE -D_POSIX_SOURCE
-CFLAGS += -Wall -g 
+CWRN = -Wall -Wno-unused-but-set-variable -Wno-empty-translation-unit
+CGEN = -g -std=c99
+CDEF = -D_POSIX_SOURCE -D_DEFAULT_SOURCE
 else
 ifeq ($(OS),Darwin)
-CFLAGS += -Weverything -Wno-format-nonliteral -Wno-switch-enum 
+CGEN = -std=c99
+CWRN = -Weverything -Wno-format-nonliteral -Wno-switch-enum 
+CWRN += -Wno-format-security -Werror -Wno-empty-translation-unit
+else
+CC := gcc
+AMIGA = true
+CWRN = -Wall -Wno-pointer-sign -Wno-unused-but-set-variable
+CWRN += -Wno-implicit-function-declaration
+CGEN = -O0 -std=c99 -DAMIGA
+LDFLAGS = -ldebug
+ifeq ($(OS),MorphOS)
+LDFLAGS += -noixemul
 endif
 endif
-CFLAGS += $(CCCONF)
+endif
+
+CINC += -I . -I $(VPATH)
+CFLAGS += $(CINC) $(CGEN) $(CWRN) $(CDEF)
 
 #---------------------------------------------------------------------------------#
-# Build targets
+# Targets
 #---------------------------------------------------------------------------------#
-installer: $(OBJ) parser.o lexer.o
-	$(CC) $^ -o $@ 
+$(EXE): $(OBJ) parser.o lexer.o
+	$(CC) $^ -o $@ $(LDFLAGS)
 
-parser.h: parser.o
+parser.o: parser.c
+	$(CC) $(CINC) $(CDEF) $(CGEN) -c $<
 
-parser.o: parser.y
-	$(YACC) -d $< -o $(notdir $(basename $<)).c
-	$(CC) $(CCCONF) -c $(notdir $(basename $<)).c
+lexer.o: lexer.c
+	$(CC) $(CINC) $(CDEF) $(CGEN) -c $<
 
-lexer.o: lexer.l parser.h
-	$(LEX) $(LFLAGS) -t $< > $(notdir $(basename $<)).c
-	$(CC) $(CCCONF) -c $(notdir $(basename $<)).c
+parser.c: parser.y
+ifneq ($(AMIGA),true)
+	$(YACC) $(YFLAGS) -d $< -o $@
+else
+	@echo "[SKIPPED] $(YACC) $(YFLAGS) -d $< -o $@"
+endif
+
+parser.h: parser.c
+
+lexer.c: lexer.l parser.h
+ifneq ($(AMIGA),true)
+	$(LEX) $(LFLAGS) -t $< > $@
+else
+	@echo "[SKIPPED] $(LEX) $(LFLAGS) -t $< > $@"
+endif
+
+gui.o: gui.c gui.h
+	$(CC) -O0 -c $< -DLLVL=2 $(CWRN)
 
 #---------------------------------------------------------------------------------#
 # Misc
 #---------------------------------------------------------------------------------#
 .PHONY: test
 test: installer
-	@sh ../test/run.sh $(PWD)/installer ../test
+ifneq ($(AMIGA),true)
+	@sh ../test/run.sh ./$(EXE) ../test
+else
+	@echo "[SKIPPED] @sh ../test/run.sh ./$(EXE) ../test"
+endif
 
 .PHONY: clean
 clean: 
-	$(RM) -R *.c *.h *.o installer lexer installer.tmp.* leak.* err.* _??_ _???_
-
+	$(RM) -R *.o $(EXE) $(EXE).tmp.* leak.* err.* _??_ _???_
 

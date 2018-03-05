@@ -1,5 +1,5 @@
 (execute) ; "","Line 1: syntax error ')'",""
 (execute "file" err) ; "","Line 1: syntax error 'err'",""
-(execute "file") ; "","Line 1: Implementation missing 'm_execute'",""
-(execute "file" (safe)) ; "","Line 1: Implementation missing 'm_execute'",""
+(execute "file") ; "","0",""
+(execute "file" (safe)) ; "","0",""
 (execute "file" (safe) err) ; "","Line 1: syntax error 'err'",""

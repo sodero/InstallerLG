@@ -1,75 +1,473 @@
-#include <stdio.h>
-#include "util.h"
-#include "debug.h"
+//----------------------------------------------------------------------------
+// util.c: 
+//
+// Misc utility functions primarily used by the 'native' methods.
+//----------------------------------------------------------------------------
+
 #include "alloc.h"
+#include "eval.h"
+#include "util.h"
 
-void eval_print(entry_p entry)
+#include <stdio.h>
+#include <string.h>
+
+#ifdef AMIGA
+#include <clib/debug_protos.h>
+#define DBG(...) KPrintF((CONST_STRPTR)__VA_ARGS__)
+#else
+#define DBG(...) fprintf(stderr, __VA_ARGS__)
+#endif
+
+//----------------------------------------------------------------------------
+// Name:        ror(entry_p *e)
+// Description: Rotate array of entries to the right.
+// Input:       entry_p *e: Array of entries.
+// Return:      -
+//----------------------------------------------------------------------------
+void ror(entry_p *e)
 {
-    if(entry)
+    // We have an array and it contains something.
+    if(e && *e)
     {
-        if(entry->type == NUMBER)
+        int i = 0; 
+
+        // Let 'i' be the index of the last entry. 
+        while(e[i] && e[i] != end())
         {
-            printf ("%d\n", entry->id);
+            i++; 
         }
-        else if(entry->type == STRING)
+        i--; 
+
+        // Nothing to do if we have < 2 entries.
+        if(i > 0)
         {
-            printf ("%s\n", entry->name);
+            // Save the last entry.
+            entry_p f = e[i]; 
+
+            // Shift the rest to the right. 
+            while(i)
+            {
+                e[i] = e[i - 1]; 
+                i--; 
+            }
+
+            // Put the saved entry first.
+            e[0] = f; 
+        }
+    }
+}
+
+//----------------------------------------------------------------------------
+// Name:        local(entry_p e)
+// Description: Find the next context going upwards in the tree.
+// Input:       entry_p e:  The starting point.
+// Return:      entry_p:    The closest context found, or 
+//                          NULL if no context was found. 
+//----------------------------------------------------------------------------
+entry_p local(entry_p e)
+{
+    // Go upwards until we find what we're
+    // looking for, or hit the (broken) top. 
+    for(; e && 
+        e->type != CONTXT && 
+        e->type != CUSTOM 
+        ; e = e->parent);
+
+    // Something or NULL: 
+    return e; 
+}
+
+//----------------------------------------------------------------------------
+// Name:        global(entry_p e)
+// Description: Find the root context. 
+// Input:       entry_p e:  The starting point.
+// Return:      entry_p:    The root context, or NULL
+//                          if no context was found. 
+//----------------------------------------------------------------------------
+entry_p global(entry_p e)
+{
+    // Go upwards until we can't go 
+    // any further.
+    for(e = local(e); 
+        e && local(e->parent); 
+        e = local(e->parent)); 
+
+    // Something or NULL: 
+    return e; 
+}
+
+//----------------------------------------------------------------------------
+// Name:        get_opt(entry_p c, opt_t t)
+// Description: Find option of a given type in a context.
+// Input:       entry_p c:  The context to search in. 
+//              opt_t t:    The type of option to search for.
+// Return:      entry_p:    An OPTION entry if found, NULL otherwise.
+//----------------------------------------------------------------------------
+entry_p get_opt(entry_p c, opt_t t)
+{
+    // We need a context. 
+    if(c && c != end() &&
+       c->children)
+    {
+        // And we need children.
+        entry_p *v = c->children;
+
+        // Iterate through all of them.
+        while(*v && *v != end())
+        {
+            // ID == the type of option.
+            if((*v)->type == OPTION &&
+               ((opt_t) (*v)->id) == t)
+            {
+                // We found something.
+                return *v; 
+            }
+
+            // Nope, next. 
+            v++; 
+        }
+    }
+
+    // Nothing found.
+    return NULL; 
+}
+
+//----------------------------------------------------------------------------
+// Name:        c_sane(entry_p c, size_t n)
+// Description: Context sanity check used by the NATIVE functions to verify
+//              that we have atleast the number of children needed and that 
+//              these are valid. If this fails, it typically, but not always,
+//              means that we have a parser problem.
+// Input:       entry_p c:  The context. 
+//              size_t n:   The number of children necessary.  
+// Return:      int:        1 if context is valid, 0 otherwise. 
+//----------------------------------------------------------------------------
+int c_sane(entry_p c, size_t n)
+{
+    // Assume success; 
+    int status = 1; 
+
+    // All contexts used by NATIVE functions must allocate an
+    // array for children, it could be empty though. 
+    if(c && c->children)
+    {
+        // Expect atleast n children. 
+        for(size_t i = 0; 
+            i < n; i++)
+        {
+            // Assume failure; 
+            status = 0; 
+
+            // Make sure that something exists.
+            if(c->children[i] == NULL)
+            {
+                DBG("c->children[%lu] == NULL\n", i);
+                break;
+            }
+
+            // Make sure that it's not a sentinel.
+            if(c->children[i] == end())
+            {
+                DBG("c->children[%lu] == end()\n", i);
+                break;
+            }
+
+            // Make sure that it belongs to us. 
+            if(c->children[i]->parent != c)
+            {
+                DBG("c->children[%lu]->parent != %p\n", i, (void *) c);
+                break;
+            }
+
+            // Make sure that all NATIVE functions have
+            // a default return value. 
+            if(c->type == NATIVE && !c->resolved)
+            {
+                DBG("c->type == NATIVE && !c->resolved\n"); 
+                break;
+            }
+            
+            // We're OK; 
+            status = 1; 
         }
     }
     else
     {
-        printf ("NULL\n");
+        // Badly broken.
+        status = 0; 
+        DBG("!c || !c->children\n");
     }
-    return;     
-}
 
-static char *tabs(unsigned int n)
-{
-    static char t[16]; 
-    n = n < sizeof(t) ? n : sizeof(t); 
-    for(t[n] = '\0'; n--; t[n] = '\t'); 
-    return t; 
-}
-
-void print_list(entry_p *entry)
-{
-    if(entry)
+    // Did we fail? 
+    if(!status)
     {
-        printf ("List:%p\n", (void *) entry);
-        while(*entry != end())
+        // Additional debugging info.
+        pretty_print(c); 
+    }
+
+    return status; 
+}
+
+//----------------------------------------------------------------------------
+// Name:        s_sane(entry_p c, size_t n)
+// Description: Context sanity check used by the NATIVE functions to verify
+//              that we have atleast the number of symbols needed and that 
+//              these are valid. If this fails it typically, but not always,
+//              means that we have a parser problem.
+// Input:       entry_p c:  The context. 
+//              size_t n:   The number of symbols necessary.  
+// Return:      int:        1 if context is valid, 0 otherwise. 
+//----------------------------------------------------------------------------
+int s_sane(entry_p c, size_t n)
+{
+    // Assume success; 
+    int status = 1; 
+
+    if(c && c->symbols)
+    {
+        // Expect atleast n symbols. 
+        for(size_t i = 0; 
+            i < n; i++)
         {
-            printf ("Item:%p\n", (void *) *entry);
-            entry++; 
+            // Assume failure; 
+            status = 0; 
+
+            // Make sure that somethings exists.
+            if(c->symbols[i] == NULL)
+            {
+                DBG("c->symbols[%lu] == NULL\n", i);
+                break;
+            }
+
+            // Make sure that it's not a sentinel.
+            if(c->symbols[i] == end())
+            {
+                DBG("c->symbols[%lu] == end()\n", i);
+                break;
+            }
+
+            // Make sure that it belongs to us. 
+            if(c->symbols[i]->parent != c)
+            {
+                DBG("c->symbols[%lu]->parent != %p\n", i, (void *) c);
+                break;
+            }
+
+            // We're OK; 
+            status = 1; 
         }
     }
     else
     {
-        printf ("List:NULL\n");
+        // Badly broken.
+        status = 0; 
+        DBG("!c || !c->symbols\n");
+    }
+
+    return status; 
+}
+
+//----------------------------------------------------------------------------
+// Name:        set_numvar(entry_p c, char *v, int n)
+// Description: Give an existing numerical variable a new value. Please note
+//              that the variable must exist and that the current resolved
+//              value must be a NUMBER, if not, this function will silently
+//              fail. 
+// Input:       entry_p c:  The context. 
+//              char *v:    The name of the variable.   
+//              int n:      The new value of the variable. 
+// Return:      -
+//----------------------------------------------------------------------------
+void set_numvar(entry_p c, char *v, int n)
+{
+    // We need a name and a context. 
+    if(c && v)
+    {
+        // Dummy reference used to find
+        // the variable.
+        entry_p s; 
+        static entry_t ref = { .type = SYMREF }; 
+
+        // Name and reparent dummy. 
+        ref.name = v; 
+        ref.parent = c; 
+
+        // Find whatever 'v' is. 
+        s = find_symbol(&ref);
+
+        // This should be a symbol.
+        if(s && s->type == SYMBOL)
+        {
+            // And it should be a resolved
+            // numerical one. 
+            if(s->resolved &&
+               s->resolved->type == NUMBER)
+            {
+                // Success. 
+                s->resolved->id = n;
+                return; 
+            }
+        }
+    }
+
+    // Failure. 
+}
+
+//----------------------------------------------------------------------------
+// Name:        get_numvar(entry_p c, char *v)
+// Description: Get the value of an existing numerical variable. Please note
+//              that the variable must exist and that the current resolved
+//              value must be a NUMBER.
+// Input:       entry_p c:  The context. 
+//              char *v:    The name of the variable.   
+// Return:      int:        The value of the variable or zero if the variable
+//                          can't be found.  
+//----------------------------------------------------------------------------
+int get_numvar(entry_p c, char *v)
+{
+    // We need a name and a context. 
+    if(c && v)
+    {
+        // Dummy reference used to find
+        // the variable.
+        entry_p s; 
+        static entry_t ref = { .type = SYMREF }; 
+
+        // Name and reparent dummy. 
+        ref.name = v; 
+        ref.parent = c; 
+
+        // Find whatever 'v' is. 
+        s = find_symbol(&ref);
+
+        // This should be a symbol.
+        if(s && s->type == SYMBOL)
+        {
+            // And it should be a resolved
+            // numerical one. 
+            if(s->resolved &&
+               s->resolved->type == NUMBER)
+            {
+                // Success.
+                return s->resolved->id; 
+            }
+        }
+    }
+
+    // Failure. 
+    return 0; 
+}
+
+//----------------------------------------------------------------------------
+// Name:        get_strvar(entry_p c, char *v)
+// Description: Get the value of an existing string variable. Please note
+//              that the variable must exist and that the current resolved
+//              value must be a STRING.
+// Input:       entry_p c:  The context. 
+//              char *v:    The name of the variable.   
+// Return:      char *:     The value of the variable or an empty string if 
+//                          the variable can't be found.  
+//----------------------------------------------------------------------------
+char *get_strvar(entry_p c, char *v)
+{
+    // We need a name and a context. 
+    if(c && v)
+    {
+        // Dummy reference used to find
+        // the variable.
+        entry_p s; 
+        static entry_t ref = { .type = SYMREF }; 
+
+        // Name and reparent dummy. 
+        ref.name = v; 
+        ref.parent = c; 
+
+        // Find whatever 'v' is. 
+        s = find_symbol(&ref);
+
+        // This should be a symbol.
+        if(s && s->type == SYMBOL)
+        {
+            // And it should be a resolved
+            // string. 
+            if(s->resolved &&
+               s->resolved->name &&
+               s->resolved->type == STRING)
+            {
+                // Success.
+                return s->resolved->name; 
+            }
+        }
+    }
+
+    // Failure. 
+    return ""; 
+}
+
+//----------------------------------------------------------------------------
+// Name:        set_strvar(entry_p c, char *v, char *n)
+// Description: Give an existing string variable a new value. Please note
+//              that the variable must exist and that the current resolved
+//              value must be a STRING, if not, this function will silently
+//              fail. 
+// Input:       entry_p c:  The context. 
+//              char *v:    The name of the variable.   
+//              char *n:    The new value of the variable. 
+// Return:      -
+//----------------------------------------------------------------------------
+void set_strvar(entry_p c, char *v, char *n)
+{
+    // We need a name and a context. 
+    if(c && v)
+    {
+        // Dummy reference used to find
+        // the variable.
+        entry_p s; 
+        static entry_t ref = { .type = SYMREF }; 
+
+        // Name and reparent dummy. 
+        ref.name = v; 
+        ref.parent = c; 
+
+        // Find whatever 'v' is. 
+        s = find_symbol(&ref);
+
+        // This should be a symbol.
+        if(s && s->type == SYMBOL)
+        {
+            // And it should be a resolved
+            // STRING. 
+            if(s->resolved &&
+               s->resolved->type == STRING)
+            {
+                // Taking ownership of 'n'. 
+                free(s->resolved->name); 
+                s->resolved->name = n; 
+            }
+        }
     }
 }
 
-void short_print(entry_p entry)
+//----------------------------------------------------------------------------
+// Name:        pp_aux(entry_p entry, int indent)
+// Description: Refer to pretty_print below. 
+// Input:       entry_p entry:  The tree to print.  
+//              int indent:     Indentation level.
+// Return:      -
+//----------------------------------------------------------------------------
+static void pp_aux(entry_p entry, int indent)
 {
-    if(entry)
-    {
-        printf("T:%p P:%p Type:%d Id:%d Name:%s\n", 
-                (void *) entry, 
-                (void *) entry->parent, 
-                entry->type, 
-                entry->id, 
-                entry->name ? entry->name : "-");
-    }
-    else
-    {
-        printf ("NULL\n\n");
-        return; 
-    }
-}
+    // Indentation galore. 
+    static char t[16] = "\t\t\t\t"
+                        "\t\t\t\t"
+                        "\t\t\t\t"
+                        "\t\t\t\0"; 
+    
+    // Going backwards to go forward. 
+    char *ts = t + sizeof(t) - 1 - indent; 
+    ts = ts < t ? t : ts; 
 
-
-void pretty_print(entry_p entry)
-{
-    static unsigned int ind = 0; 
+    // Data type descriptions. 
     static char *tps[] = 
     {
         "NUMBER",
@@ -84,172 +482,74 @@ void pretty_print(entry_p entry)
         "STATUS",
         "DANGLE"
     };
+
+    // NULL is a valid value.
     if(entry)
     {
-        printf("%s\n", tps[entry->type]);
-        printf("%sThis:%p\n", tabs(ind), (void *) entry);
-        printf("%sParent:%p\n", tabs(ind), (void *) entry->parent);
-        printf("%sId:\t%d\n", tabs(ind), entry->id);
+        // All entries have a type, a parent and an ID.
+        DBG("%s\n", tps[entry->type]);
+        DBG("%sThis:%p\n", ts, (void *) entry);
+        DBG("%sParent:%p\n", ts, (void *) entry->parent);
+        DBG("%sId:\t%d\n", ts, entry->id);
+
+        // Most, but not all, have a name.
         if(entry->name) 
         {
-            printf("%sName:\t%s\n", tabs(ind), entry->name);
+            DBG("%sName:\t%s\n", ts, entry->name);
         }
+
+        // Functions / symbols can be 'resolved'.
         if(entry->resolved) 
         {
-            printf ("%sRes:\t", tabs(ind));
-            ind++; 
-            pretty_print (entry->resolved);
-            ind--; 
+            DBG("%sRes:\t", ts);
+
+            // Pretty print the 'resolved' entry, 
+            // last / default return value and 
+            // values refered to by symbols. 
+            pp_aux(entry->resolved, indent + 1);
         }
+
+        // Pretty print all children.
         if(entry->children) 
         {
             entry_p *e = entry->children;
-            if(e && *e)
+
+            while(*e && *e != end())
             {
-                while(*e && *e != end())
-                {
-                    printf ("%sChl:\t", tabs(ind)); 
-                    ind++; 
-                    pretty_print(*e); 
-                    ind--; 
-                    e++; 
-                }
+                DBG("%sChl:\t", ts); 
+                pp_aux(*e, indent + 1); 
+                e++; 
             }
         }
+
+        // Pretty print all symbols.
         if(entry->symbols) 
         {
             entry_p *e = entry->symbols;
-            if(e && *e)
+
+            while(*e && *e != end())
             {
-                while(*e && *e != end())
-                {
-                    printf ("%sSym:\t", tabs(ind)); 
-                    ind++; 
-                    pretty_print(*e); 
-                    ind--; 
-                    e++; 
-                }
+                DBG("%sSym:\t", ts); 
+                pp_aux(*e, indent + 1); 
+                e++; 
             }
         }
     }
     else
     {
-        printf ("NULL\n\n");
-        return; 
+        DBG("NULL\n\n");
     }
 }
 
-void ror(entry_p *e)
+//----------------------------------------------------------------------------
+// Name:        pretty_print(entry_p entry)
+// Description: Pretty print the complete tree in 'entry'.
+// Input:       entry_p entry:  The tree to print.  
+// Return:      -
+//----------------------------------------------------------------------------
+void pretty_print(entry_p entry)
 {
-    if(e && *e)
-    {
-        int i = 0; 
-        while(e[i] && e[i] != end())
-        {
-            i++; 
-        }
-        i--; 
-        if(i)
-        {
-            entry_p f = e[i]; 
-            while(i)
-            {
-                e[i] = e[i - 1]; 
-                i--; 
-            }
-            e[0] = f; 
-        }
-    }
+    // Start with no indentation.
+    pp_aux(entry, 0); 
 }
 
-entry_p local(entry_p e)
-{
-    for(; e && 
-        e->type != CONTXT && 
-        e->type != CUSTOM 
-        ; e = e->parent);
-    return e; 
-}
-
-entry_p global(entry_p e)
-{
-    for(e = local(e); 
-        local(e->parent); 
-        e = local(e->parent)); 
-    return e; 
-}
-
-entry_p get_opt(entry_p c, opt_t t)
-{
-    if(c && 
-       c != end() &&
-       c->children)
-    {
-        entry_p *v = c->children;
-        while(*v && *v != end())
-        {
-            if((*v)->type == OPTION &&
-               (*v)->id == t)
-            {
-                return *v; 
-            }
-            v++; 
-        }
-    }
-    return NULL; 
-}
-
-int c_sane(entry_p c, size_t n)
-{
-    if(c && c->children)
-    {
-        for(size_t i = 0; 
-            i < n; i++)
-        {
-            if(c->children[i] == NULL ||
-               c->children[i] == end() ||
-               c->children[i]->parent != c ||
-               (c->type == NATIVE && !c->resolved))
-            {
-                if(c->children[i] == NULL)
-                {
-                    TRACE("c->children[%lu] == NULL\n", i);
-                }
-                if(c->children[i] == end())
-                {
-                    TRACE("c->children[%lu] == end()\n", i);
-                }
-                if(c->children[i]->parent != c)
-                {
-                    TRACE("c->children[%lu]->parent != %p\n", i, (void *) c);
-                }
-                if(c->type == NATIVE && !c->resolved)
-                {
-                    TRACE("c->type == NATIVE && !c->resolved\n"); 
-                }
-                return 0; 
-            } 
-        }
-        return 1; 
-    }
-    return 0; 
-}
-
-int s_sane(entry_p c, size_t n)
-{
-    if(c && c->symbols)
-    {
-        for(size_t i = 0; 
-            i < n; i++)
-        {
-            if(c->symbols[i] == NULL ||
-               c->symbols[i] == end() ||
-               c->symbols[i]->parent != c)
-            {
-                return 0; 
-            } 
-        }
-        return 1; 
-    }
-    return 0; 
-}

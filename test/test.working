@@ -1,2 +1,4 @@
-(working) ; "","Line 1: Implementation missing 'm_working'",""
-(working err) ; "","Line 1: syntax error 'err'",""
+(working) ; "","Line 1: syntax error ')'",""
+(working "doing") ; "","1:Working on installation... doing1",""
+(working "doing" "things") ; "","1:Working on installation... doingthings1",""
+; DISABLED (working "doing" "things" with variables) ; "","1",""

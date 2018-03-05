@@ -3,8 +3,5 @@
 *.ll
 *.plist
 *.swp
-build/lexer.c
-build/parser.c
-build/parser.h
 build/installer
 build/_*

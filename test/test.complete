@@ -1,4 +1,5 @@
 (complete 1) ; "","1",""
 (complete 100) ; "","100",""
+(complete (+ 1 1)) ; "","2",""
 (complete) ; "","Line 1: syntax error ')'",""
 (complete 1 err) ; "","Line 1: syntax error 'err'",""

@@ -1,1 +1,4 @@
-(patmatch "pattern" "string") ; "","Line 1: Implementation missing 'm_patmatch'",""
+(patmatch) ; "","Line 1: syntax error ')'",""
+(patmatch "pattern") ; "","Line 1: syntax error ')'",""
+(patmatch "pattern" "string") ; "","0",""
+(patmatch "pattern" "string" err) ; "","Line 1: syntax error 'err'",""

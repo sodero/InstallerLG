@@ -1,10 +1,34 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-#define VECLEN 4 
-#define NUMLEN 16
-#define MAXDEP 64
+//----------------------------------------------------------------------------
+// Misc constants.
+//----------------------------------------------------------------------------
+#define VECLEN 4        // Default array size
+#define NUMLEN 16       // Max string length of numerical values
+#define MAXDEP 64       // Max recursion depth
 
+//----------------------------------------------------------------------------
+// Data types.
+//----------------------------------------------------------------------------
+typedef enum 
+{
+    NUMBER,
+    STRING, 
+    SYMBOL,
+    SYMREF,
+    NATIVE, 
+    OPTION, 
+    CUSTOM, 
+    CUSREF, 
+    CONTXT,
+    STATUS,
+    DANGLE
+} type_t;
+
+//----------------------------------------------------------------------------
+// Option types, refer to new_option() and parser/opt.
+//----------------------------------------------------------------------------
 typedef enum 
 { 
     OPT_ALL,
@@ -23,6 +47,10 @@ typedef enum
     OPT_FILES,
     OPT_FONTS,
     OPT_FORCE,
+    OPT_GETDEFAULTTOOL,
+    OPT_GETPOSITION,
+    OPT_GETSTACK,
+    OPT_GETTOOLTYPE,
     OPT_HELP,
     OPT_INFOS,
     OPT_INCLUDE,
@@ -39,6 +67,7 @@ typedef enum
     OPT_RANGE, 
     OPT_SAFE,
     OPT_SETDEFAULTTOOL,
+    OPT_SETPOSITION,
     OPT_SETSTACK,
     OPT_SETTOOLTYPE,
     OPT_SOURCE,
@@ -48,36 +77,31 @@ typedef enum
     OPT_OVERRIDE
 } opt_t; 
 
-typedef enum 
-{
-    NUMBER,
-    STRING, 
-    SYMBOL,
-    SYMREF,
-    NATIVE, 
-    OPTION, 
-    CUSTOM, 
-    CUSREF, 
-    CONTXT,
-    STATUS,
-    DANGLE
-} type_t;
-
+//----------------------------------------------------------------------------
+// Types used by the parser and all native functions.
+//----------------------------------------------------------------------------
 typedef struct entry_s * entry_p;
 typedef entry_p (*call_t) (entry_p);
 
 struct entry_s
 {
-    type_t type; 
-    int id; 
-    char *name; 
-    call_t call; 
-    entry_p resolved; 
-    entry_p *children; 
-    entry_p *symbols; 
-    entry_p parent; 
+    type_t type;            // One of type_t above. 
+    int id;                 // Numerical ID. Refer to new_*. 
+    char *name;             // String repr. Refer to new_*(). 
+    call_t call;            // NATIVE function. 
+    entry_p resolved;       // Resolved value. Refer to eval().
+    entry_p *children;      // Subordinate native functions.
+    entry_p *symbols;       // Variables / user defined functions.
+    entry_p parent;         // Self descriptive.  
 }; 
 
 typedef struct entry_s entry_t; 
+
+#ifndef AMIGA
+#   define LONG int
+#   define BOOL int
+#   define TRUE 1
+#   define FALSE 0
+#endif
 
 #endif

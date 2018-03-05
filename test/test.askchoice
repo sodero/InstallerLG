@@ -1,2 +1,7 @@
 (askchoice) ; "","Line 1: syntax error ')'",""
-(askchoice (choices "a" "b" "c")) ; "","1",""
+(askchoice (prompt "p") (help "h") (choices "a" "b" "c")) ; "","0",""
+(askchoice (prompt "p") (help "h") (choices "a")) ; "","0",""
+(askchoice (prompt "p") (help "h") (choices "a" "b" "c") (default 1)) ; "","1",""
+(askchoice (prompt "p") (help "h") (choices "a" "b" "c") (default 4)) ; "","Line 1: No such item '4' 0",""
+(askchoice (prompt "p") (help "h") (choices)) ; "","Line 1: syntax error ')'",""
+(askchoice (prompt) (help "h") (choices "a")) ; "","Line 1: syntax error ')'",""

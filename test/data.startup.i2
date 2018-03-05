@@ -1,7 +1,7 @@
 anticlick
 
-;app
+;BEGIN app
 loadwb ; Load WB
-;app
+;END app
 
 extraclick

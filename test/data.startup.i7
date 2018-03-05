@@ -1,6 +1,6 @@
-;app
+;BEGIN app
 loadwb ;app
-;app
-;app
+;END app
+;BEGIN app
 loadwb ; Load WB
-;app
+;END app

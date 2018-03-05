@@ -1,1 +1,3 @@
-(expandpath "path") ; "","Line 1: Implementation missing 'm_expandpath'",""
+(expandpath) ; "","Line 1: syntax error ')'",""
+(expandpath "path") ; "","",""
+(expandpath "path" err) ; "","Line 1: syntax error 'err'",""

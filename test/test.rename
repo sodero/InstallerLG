@@ -6,3 +6,6 @@
 (rename "_rn_") ; "","Line 1: syntax error ')'",""
 (rename "_rn_" "_rm_") ; "touch _rn_ && touch _rm_","1","rm -f _rm_ _rn_"
 (rename "_rn_" "_rm_") ; "touch _rm_","Line 1: Could not rename file '_rn_' 0","rm -f _rm_"
+(rename "_rn_" "_rm_") ; "touch _rn_","1","test -e _rm_ && test ! -e _rn_ && rm -f _rm_ _rn_"
+(rename "_rn_" "_rm_") ; "touch _rn_ && touch _rm_","1","test -e _rm_ && test ! -e _rn_ && rm -f _rm_ _rn_"
+(rename "_rnd_/_rn_" "_rnd_/_rm_") ; "rm -Rf _rnd_ && mkdir _rnd_ && touch _rnd_/_rn_","1","test -e _rnd_/_rm_ && test ! -e _rnd_/_rn_ && rm -Rf _rnd_"

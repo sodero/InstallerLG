@@ -1,127 +1,240 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include "debug.h"
-#include "util.h"
+//----------------------------------------------------------------------------
+// alloc.c: 
+//
+// Functions for allocation of entry_t data and closely related functions.
+//----------------------------------------------------------------------------
+
 #include "alloc.h"
 #include "error.h"
-#include "native.h"
+#include "procedure.h"
+#include "util.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+//----------------------------------------------------------------------------
+// Name:        new_contxt(void)
+// Description: Allocate CONTXT. 
+// Input:       -
+// Return:      entry_p:    A CONTXT on success, NULL otherwise.
+//----------------------------------------------------------------------------
 entry_p new_contxt(void)
 {
-    entry_p entry = calloc (1, sizeof(entry_t)); 
+    // We rely on everything being set to '0'
+    entry_p entry = calloc(1, sizeof(entry_t)); 
+
     if(entry)
     {
+        // A context contains variables (symbols) 
+        // and functions (children). 
         entry_p *symbols, *children; 
+
+        // Memory for children and symbols, this will
+        // be grown if necessary. Start with VECLEN. 
         symbols = calloc(VECLEN + 1, sizeof(entry_p)); 
         children = calloc(VECLEN + 1, sizeof(entry_p)); 
+
         if(symbols && children)
         {
+            // Type + above.
             entry->type = CONTXT;
             entry->symbols = symbols; 
             entry->children = children; 
+
+            // Set sentinel values.
             entry->symbols[VECLEN] = end(); 
             entry->children[VECLEN] = end(); 
+
+            // Success.
             return entry; 
         }
+
+        // Out of memory.
         free(symbols); 
         free(children); 
     }
+
+    // Out of memory.
     error(PANIC);
     free(entry);
-    return 0;
-}
 
-entry_p new_number(int n)
-{
-    entry_p entry = calloc(1, sizeof(entry_t)); 
-    if(entry)
-    {
-        entry->type = NUMBER;
-        entry->id = n;
-        return entry;
-    }
-    error(PANIC);
+    // Failure.
     return NULL;
 }
 
+//----------------------------------------------------------------------------
+// Name:        new_number(int n) 
+// Description: Allocate NUMBER. 
+// Input:       int n:      The initial value.
+// Return:      entry_p:    A NUMBER on success, NULL otherwise.
+//----------------------------------------------------------------------------
+entry_p new_number(int n)
+{
+    // We rely on everything being set to '0'
+    entry_p entry = calloc(1, sizeof(entry_t)); 
+
+    if(entry)
+    {
+        // The value of a NUMBER
+        // equals its ID. 
+        entry->type = NUMBER;
+        entry->id = n;
+
+        // Success.
+        return entry;
+    }
+    else
+    {
+        // Out of memory.
+        error(PANIC);
+        return NULL;
+    }
+}
+
+//----------------------------------------------------------------------------
+// Name:        new_string(char *n) 
+// Description: Allocate STRING. 
+// Input:       char *n:    A pointer to a null terminated string. The 
+//                          string won't be copied and it will be free:d 
+//                          by kill(...) so it must be allocated by the 
+//                          calling function.
+// Return:      entry_p:    A STRING on success, NULL otherwise.
+//----------------------------------------------------------------------------
 entry_p new_string(char *n) 
 {
     if(n)
     {
+        // We rely on everything being set to '0'
         entry_p entry = calloc(1, sizeof (entry_t)); 
-        if (entry)
+
+        if(entry)
         {
+            // The value of a string
+            // equals its name. 
             entry->type = STRING;
             entry->name = n;
+
+            // Success.
             return entry;
         }
-    }
-    error(PANIC);
-    return NULL; 
-}
-
-/*
-static entry_p new_status(int s)
-{
-    static entry_t status; 
-    status.type = STATUS; 
-    status.id = s; 
-    return &status; 
-}
-
-entry_p new_success(void) 
-{
-    return new_status(1); 
-}
-*/
-
-entry_p new_failure(void) 
-{
-    static entry_t status; 
-    status.type = STATUS; 
-    status.id = 0; 
-    return &status; 
-}
-
-entry_p new_symbol(char *n) //, entry_p e) 
-{
-    if(n) // && e)
-    {
-        entry_p entry = calloc(1, sizeof(entry_t)); 
-        if(entry)
+        else
         {
-            entry->type = SYMBOL; 
-            entry->name = n;
-            entry->resolved = new_dangle();
-       //     entry->expression = e;
-       //     entry->resolved = new_dangle();
-       //     entry->resolved->parent = entry; 
-       //     e->parent = entry; 
-            return entry; 
+            // All or nothing. Since we own 'n',
+            // we need to free it here, or else
+            // it will leak.
+            free(n); 
         }
     }
+
+    // Out of memory /
+    // invalid input
     error(PANIC);
     return NULL; 
 }
 
-entry_p new_custom(char *n, int l, entry_p s, entry_p c) 
+//----------------------------------------------------------------------------
+// ---OBSOLETE---
+// Name:        new_failure(void) 
+// Description: Get STATUS / failure. 
+// Input:       -
+// Return:      entry_p:    A STATUS (failure).
+// ---OBSOLETE---
+//----------------------------------------------------------------------------
+entry_p new_failure(void) 
 {
-    if(n && c)
+    // A static singleton, zero if evaluated using num(...). 
+    static entry_t status = { .type = STATUS, .id = 0 }; 
+
+    return &status; 
+}
+
+//----------------------------------------------------------------------------
+// Name:        new_symbol(char *n) 
+// Description: Allocate SYMBOL. 
+// Input:       char *n:    The name of the symbol. The string won't be 
+//                          copied and it will be free:d by kill(...) so it 
+//                          must be allocated by the calling function.
+// Return:      entry_p:    A SYMBOL on success, NULL otherwise.
+//----------------------------------------------------------------------------
+entry_p new_symbol(char *n) 
+{
+    // All symbols have a name. 
+    if(n) 
     {
+        // We rely on everything being set to '0'
         entry_p entry = calloc(1, sizeof(entry_t)); 
+
         if(entry)
         {
+            // The value of the symbol will 
+            // dangle until the first (set). 
+            entry->resolved = new_dangle();
+            entry->type = SYMBOL; 
+            entry->name = n;
+
+            // Success.
+            return entry; 
+        }
+        else
+        {
+            // All or nothing. Since we own 'n', 
+            // we need to free it here, or else
+            // it will leak.
+            free(n); 
+        }
+    }
+
+    // Out of memory /
+    // invalid input
+    error(PANIC);
+    return NULL; 
+}
+
+//----------------------------------------------------------------------------
+// Name:        new_custom(char *n, int l, entry_p s, entry_p c)
+// Description: Allocate CUSTOM, a user defined procedure / function. 
+// Input:       char *n:    The name of the function. This string won't be 
+//                          copied and it will be free:d by kill(...) so it 
+//                          must be allocated by the calling function.
+//              int l:      The source code line number. 
+//              entry_p s:  A CONTXT with symbols or NULL. 
+//              entry_p c:  A CONTXT with children, functions.
+// Return:      entry_p:    A CUSTOM on success, NULL otherwise.
+//----------------------------------------------------------------------------
+entry_p new_custom(char *n, int l, entry_p s, entry_p c) 
+{
+    // All functions must have a name and
+    // one or more children. 
+    if(n && c)
+    {
+        // We rely on everything being set to '0'
+        entry_p entry = calloc(1, sizeof(entry_t)); 
+
+        if(entry)
+        {
+            // Iter. 
             entry_p *e; 
+
+            // Top level. 
             entry->id = l;
             entry->name = n;
             entry->type = CUSTOM; 
+
+            // If we have symbols, move them to our
+            // new CUSTOM, adopt them and clear the 
+            // 'resolved' status. 
             if(s && s->symbols)
             {
+                // Transfer and kill the input.
                 entry->symbols = s->symbols; 
                 s->symbols = NULL; 
                 kill(s); 
+
+                // Iter.
                 e = entry->symbols; 
+
+                // Adopt and reset symbols. 
                 while(*e && *e != end())
                 {
                     (*e)->parent = entry;
@@ -129,78 +242,170 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
                     e++; 
                 }
             }
+
+            // Transfer and kill the input.
             entry->children = c->children;
             c->children = NULL; 
             kill(c); 
+
+            // Iter.
             e = entry->children; 
+
+            // Adopt all children. 
             while(*e && *e != end())
             {
                 (*e)->parent = entry;
                 e++; 
             }
+
+            // Success. 
             return entry; 
         }
+        else
+        {
+            // All or nothing. Since we own 'n', 
+            // 'c' and 's', we need to free them
+            // here, or else they will leak.
+            free(n); 
+            kill(c); 
+            kill(s); 
+        }
     }
+
+    // Out of memory /
+    // invalid input.
     error(PANIC);
     return NULL; 
 }
 
+//----------------------------------------------------------------------------
+// Name:        new_symref(char *n, int l, entry_p s, entry_p c)
+// Description: Allocate SYMREF, a reference to a symbol / variable. 
+// Input:       char *n:    The name of the referenced symbol. This string 
+//                          won't be copied and it will be free:d by 
+//                          kill(...) so it must be allocated by the calling 
+//                          function.
+//              int l:      The source code line number. 
+// Return:      entry_p:    A SYMREF on success, NULL otherwise.
+//----------------------------------------------------------------------------
 entry_p new_symref(char *n, int l)
 {
+    // All references must have a name and only
+    // real line numbers are tolerated. Line no
+    // is used in error messages when refering 
+    // to a non existent symbol. 
     if(n && (l > 0))
     {
+        // We rely on everything being set to '0'
         entry_p entry = calloc(1, sizeof(entry_t)); 
+
         if(entry)
         {
             entry->type = SYMREF; 
             entry->name = n;
             entry->id = l;
+
+            // Success. 
             return entry; 
         }
+        else
+        {
+            // All or nothing. Since we own 'n', 
+            // we need to free it here, or else
+            // it will leak.
+            free(n); 
+        }
     }
+
+    // Out of memory /
+    // invalid input
     error(PANIC);
     return NULL; 
 }
 
+//----------------------------------------------------------------------------
+// Name:        move_contxt(entry_p dst, entry_p src)
+// Description: Move children and symbols from one context to another. 
+//              The empty source context will be freed afterwards.
+// Input:       entry_p dst:    The destination context. 
+//              entry_p src:    The source context. 
+// Return:      - 
+//----------------------------------------------------------------------------
 static void move_contxt(entry_p dst, entry_p src)
 {
     if(dst && src)
     {
+        // Iter. 
         entry_p *s = dst->symbols = src->symbols,
                 *c = dst->children = src->children; 
+
+        // Reparent children. 
         while(*c && *c != end())
         {
             (*c)->parent = dst; 
             c++; 
         }
+
+        // Reparent symbols. 
         while(*s && *s != end())
         {
             (*s)->parent = dst; 
             s++; 
         }
+
+        // Free the source. 
         src->children = NULL; 
         src->symbols = NULL; 
         kill(src); 
+
+        // Success. 
         return; 
     }
+
+    // Invalid input.
     error(PANIC);
 }
 
+//----------------------------------------------------------------------------
+// Name:        new_native(char *n, int l, entry_p s, entry_p c)
+// Description: Allocate NATIVE, a native, non-user-defined function. 
+// Input:       char *n:        The name of the function. This string won't
+//                              be copied and it will be free:d by kill(...) 
+//                              so it must be allocated by the calling 
+//                              function. It's used for decoration purposes 
+//                              only, it doesn't affect the execution.
+//              int l:          The source code line number. 
+//              call_t call:    A function pointer, the code to be executed.
+//              entry_p e:      The context of the function, if any. 
+//              type_t r:       Default return value data type.  
+// Return:      entry_p:        A NATIVE on success, NULL otherwise.
+//----------------------------------------------------------------------------
 entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
 {
+    // Even though not strictly necessary, we require
+    // a name and a line number. 
     if(call && n && (l > 0))
     {
+        // We rely on everything being set to '0'
         entry_p entry = calloc(1, sizeof (entry_t)); 
-        if (entry)
+
+        if(entry)
         {
+            // ID and name are for debugging purposes
+            // only. 
             entry->id = l;
             entry->call = call;
             entry->type = NATIVE;
             entry->name = n; 
+
+            // Adopt children and symbols if any.
             if(e && e->type == CONTXT)
             {
                 move_contxt(entry, e); 
             }
+
+            // Allocate default return value if we
+            // have a sane return value data type. 
             if(r == NUMBER)
             {
                 entry->resolved = new_number(0); 
@@ -209,86 +414,175 @@ entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
             {
                 entry->resolved = new_string(strdup("")); 
             }
+            else if(r == DANGLE)
+            {
+                entry->resolved = new_dangle(); 
+            }
             else
             {
+                // No resolved value. 
                 return entry;
             }
+
+            // The function is the parent of the
+            // return value. 
             if(entry->resolved)
             {
                 entry->resolved->parent = entry; 
                 return entry;
             }
+
+            // Out of memory. 
             free(entry); 
         }
     }
+
+    // Out of memory / 
+    // invalid input. 
     error(PANIC);
     return NULL;
 }
 
-entry_p new_option (char *n, opt_t t, entry_p e)
+//----------------------------------------------------------------------------
+// Name:        new_option(char *n, opt_t t, entry_p e)
+// Description: Allocate OPTION 
+// Input:       char *n:        The name of the option. This string won't
+//                              be copied and it will be free:d by kill(...) 
+//                              so it must be allocated by the calling 
+//                              function. It's used for decoration purposes 
+//                              only, it doesn't affect the execution.
+//              opt_t t:        The option type. 
+//              entry_p e:      An optional context containing children.
+// Return:      entry_p:        An OPTION on success, NULL otherwise.
+//----------------------------------------------------------------------------
+entry_p new_option(char *n, opt_t t, entry_p e)
 {
+    // Although not strictly necessary, we required
+    // a name of the option. For debugging purposes.
     if(n)
     {
+        // We rely on everything being set to '0'
         entry_p entry = calloc(1, sizeof (entry_t)); 
-        if (entry)
+
+        if(entry)
         {
+            // Let the type be our ID. 
             entry->id = (int) t;
             entry->type = OPTION;
             entry->name = n; 
+
+            // Adopt whatever is in the optional 
+            // CONTXT, if any. 
             if(e && e->type == CONTXT)
             {
+                // This is for options that contain
+                // more information than just 1 / 0. 
+                // E.g delopts and command.
                 move_contxt(entry, e); 
             }
+
+            // Success. 
             return entry;
         }
     }
+
+    // Out of memory / 
+    // invalid input. 
     error(PANIC);
     return NULL;
 }
 
-entry_p new_cusref (char *n, int l, entry_p e)
+//----------------------------------------------------------------------------
+// Name:        new_cusref (char *n, int l, entry_p e)
+// Description: Allocate CUSREF
+// Input:       char *n:        The name of the user-defined function to be 
+//                              invoked. This string won't be copied and 
+//                              it will be free:d by kill(...) so it must 
+//                              be allocated by the calling function. 
+//              int l:          The source code line number. 
+//              entry_p e:      An optional context with function arguments.
+// Return:      entry_p:        a CUSREF on success, NULL otherwise.
+//----------------------------------------------------------------------------
+entry_p new_cusref(char *n, int l, entry_p e)
 {
+    // A real line number is required, used
+    // in error messages when invoking a non
+    // existant procedure. 
     if(n && (l > 0))
     {
-        entry_p entry = calloc (1, sizeof (entry_t)); 
-        if (entry)
+        // We rely on everything being set to '0'
+        entry_p entry = calloc(1, sizeof (entry_t)); 
+
+        if(entry)
         {
+            // The m_gosub function is used 
+            // as a trampoline. 
             entry->id = l; 
             entry->name = n; 
             entry->call = m_gosub;
             entry->type = CUSREF;
+
+            // Adopt function arguments, if any. 
             if(e && e->type == CONTXT)
             {
                 move_contxt(entry, e); 
             }
+
+            // Success. 
             return entry;
         }
     }
+
+    // Out of memory / 
+    // invalid input. 
     error(PANIC);
     return NULL; 
 }
 
+//----------------------------------------------------------------------------
+// Name:        new_dangle(void) 
+// Description: Get DANGLE. 
+// Input:       -
+// Return:      entry_p:    A DANGLE.
+//----------------------------------------------------------------------------
 entry_p new_dangle(void)
 {
-    static entry_t dangle; 
-    dangle.type = DANGLE; 
-    dangle.id = 0; 
+    // Static singleton, zero if evaluated using num(). 
+    static entry_t dangle = { .type = DANGLE, .id = 0 }; 
+
     return &dangle; 
 }
 
+//----------------------------------------------------------------------------
+// Name:        append(entry_p **dst, entry_p e)
+// Description: Append entry to array. Grow array if necessary. 
+// Input:       entry_p **dst:  The array.    
+//              entry_p e:      The entry. 
+// Return:      entry_p:        On success, the entry. On failure, NULL. 
+//----------------------------------------------------------------------------
 entry_p append(entry_p **dst, entry_p e)
 {
     if(dst && *dst)
     {
         size_t n = 0; 
+
+        // Find the first 'free' slot,
+        // if there is one.
         while((*dst)[n] && 
               (*dst)[n] != end())
         {
             n++; 
         }
+
+        // No free slot available. We need 
+        // to allocate more memory.
         if((*dst)[n])
         {
+            // We rely on everything being set to '0'. Make the 
+            // new array twice as big. 
             entry_p *new = calloc((n << 1) + 1, sizeof(entry_p));
+
+            // Move everything to the new array. 
             if(new)
             {
                 new[n << 1] = end(); 
@@ -298,156 +592,200 @@ entry_p append(entry_p **dst, entry_p e)
             }
             else
             {
+                // Out of memory. 
                 error(PANIC);
                 return NULL; 
             }
         }
+
+        // Success. 
         (*dst)[n] = e; 
         return e; 
     }
+
+    // Bad input. 
     error(PANIC);
     return NULL; 
 }
 
+//----------------------------------------------------------------------------
+// Name:        push(entry_p dst, entry_p e)
+// Description: Type aware 'append' working on 'entry_t' level. Takes care of
+//              children and symbols, while avoiding duplicates of the latter. 
+// Input:       entry_p dst:    The destination.    
+//              entry_p src:    The source. 
+// Return:      entry_p:        When successful, the source entry. On failure, 
+//                              NULL. 
+//----------------------------------------------------------------------------
 entry_p push(entry_p dst, entry_p src)
 {
     if(dst && src)
     {
+        // Assume we're dealing with a child.
         size_t u = 0; 
         entry_p **dst_p = &dst->children;
+
+        // Symbols and user-defined procedures
+        // are treated as symbols. 
         if((src->type == SYMBOL || 
             src->type == CUSTOM) &&
             dst->type == CONTXT)
         {
+            // We can't have multiple references
+            // with the same name. 
             while(dst->symbols[u] &&
                   dst->symbols[u] != end())
             {
                 entry_p cur = dst->symbols[u]; 
                 char *old = cur->name, 
                      *new = src->name; 
+
+                // If we have multiple references
+                // with the same name. Just update
+                // the reference, don't create a 
+                // new one. Multiple references
+                // is not OK, multiple referents
+                // is OK. This implies that you can
+                // redefine procedures dynamically, 
+                // refer to @onerror for an example. 
+                // Needless to say, this is ofcourse
+                // also true for normal variables. 
                 if(!strcmp(old, new))
                 {
                     dst->symbols[u] = src;
                     return dst; 
                 }
+
+                // Next symbols / user-defined
+                // procedure. 
                 u++;
             }
+
             dst_p = &dst->symbols; 
         }
+
+        // Whether symbol or child, the procedure
+        // is the same, just append and reparent. 
         if(*dst_p)
         {
-            /*
-            if(src->type == CUSTOM)
-            {
-                while((*dst_p)[u] &&
-                      (*dst_p)[u] != end())
-                {
-                    if((*dst_p)[u]->type == CUSTOM &&
-                       !strcmp(src->name, (*dst_p)[u]->name))
-                    {
-                        error(src->id, "Procedure naming collision", 
-                              src->name); 
-                        kill(src); 
-                        return dst; 
-                    }
-                    u++; 
-                }
-            }
-            */
             if(append(dst_p, src))
             {
                 src->parent = dst; 
                 return dst; 
             }
+
+            // Out of memory.
         }
     }
+
+    // Invalid input or  
+    // out of memory. 
     error(PANIC);
     return dst; 
 }
 
+//----------------------------------------------------------------------------
+// Name:        kill(entry_p entry)
+// Description: Free the memory occupied by 'entry' and all its children. 
+// Input:       entry_p:    The entry_p to be free:d. 
+// Return:      -
+//----------------------------------------------------------------------------
 void kill(entry_p entry)
 {
+    // STATUS and DANGLE entries are
+    // static, no need to free them. 
     if(entry && 
        entry->type != STATUS &&
        entry->type != DANGLE)
     {
+        // All entries might have a
+        // name. Set to NULL to make
+        // pretty_print:ing possible. 
         free(entry->name); 
         entry->name = NULL; 
+
+        // Free symbols, if any. 
         if(entry->symbols)
         {
+            // Iter. 
             entry_p *e = entry->symbols; 
+
+            // Symbols aren't stored in the
+            // root, they are only referenced
+            // from there. If we're further
+            // down (we have a parent), go on.
             if(entry->parent)
             {
                 while(*e && *e != end())
                 {
+                    // Free only the ones we own.
+                    // References can be anywhere. 
                     if((*e)->parent == entry)
                     {
+                        // Recur to free symbol. 
                         kill(*e);
                     }
+
+                    // Next symbol. 
                     e++; 
                 }
             }
+
+            // Free the array itself. 
             free(entry->symbols);
             entry->symbols = NULL; 
         }
+
+        // Free children, if any. 
         if(entry->children)
         {
+            // Iter. 
             entry_p *e = entry->children; 
+
             while(*e && *e != end())
             {
+                // Free only the ones we own.
+                // References can be anywhere. 
                 if((*e)->parent == entry)
                 {
+                    // Recur to free child. 
                     kill(*e);
                 }
+
+                // Next child. 
                 e++; 
             }
+
+            // Free the array itself. 
             free(entry->children);
             entry->children = NULL; 
         }
+
+        // If we have any resolved entries that 
+        // we own, free them. 
         if(entry->resolved &&
            entry->resolved->parent == entry)
         {
             kill(entry->resolved); 
             entry->resolved = NULL; 
         }
-        free(entry); 
-    }
 
-    /*
-    if(entry && 
-       entry->type != STATUS &&
-       entry->type != DANGLE)
-    {
-        if(entry->symbols && (
-           entry->type == NATIVE || 
-           entry->type == CUSTOM ))
-        {
-            entry_p *e = entry->symbols; 
-            while(*e && *e != end())
-            {
-                kill (*e);
-                e++; 
-            }
-        }
-        if(entry->children)
-        {
-            entry_p *e = entry->children; 
-            while(*e && *e != end())
-            {
-                kill (*e);
-                e++; 
-            }
-        }
-        free(entry->name); 
-        free(entry->symbols);
-        free(entry->children);
+        // Nothing but this entry left.  
         free(entry); 
     }
-        */
 }
 
+//----------------------------------------------------------------------------
+// Name:        end(void) 
+// Description: Get entry_p sentinel. 
+// Input:       -
+// Return:      entry_p:    An entry_p which can be used as sentinel.
+//----------------------------------------------------------------------------
 entry_p end(void)
 {
+    // Static singleton. 
     static entry_t snt; 
+
     return &snt; 
 }
+

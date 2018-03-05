@@ -1,6 +1,6 @@
-;app
+;BEGIN app
 loadwb
-;app
-;pap
+;END app
+;BEGIN pap
 loadwb
-;pap
+;END pap

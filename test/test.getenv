@@ -1,4 +1,4 @@
-(getenv "TERM") ; "","xterm",""
+(getenv "EDITOR") ; "","vim",""
 (getenv "_ge_") ; "","",""
-(getenv "TERM" (safe)) ; "","Line 1: syntax error '('",""
+(getenv "EDITOR" (safe)) ; "","Line 1: syntax error '('",""
 (getenv) ; "","Line 1: syntax error ')'",""
