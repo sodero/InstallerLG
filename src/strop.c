@@ -45,7 +45,7 @@ entry_p m_cat(entry_p contxt)
                     free(buf); 
                     REST; 
                 }
-                ln = strlen(s); 
+                ln = strlen(s);
                 if(ln)
                 {
                     l += strlen(s); 
@@ -56,7 +56,7 @@ entry_p m_cat(entry_p contxt)
                         {
                             n = n << 1;  
                         }
-                        tmp = calloc(n + 1, 1);  
+                        tmp = calloc(n + 1, 1);
                         if(tmp && n) 
                         {
                             memcpy(tmp, buf, l - ln + 1); 
@@ -103,7 +103,7 @@ entry_p m_expandpath(entry_p contxt)
         BPTR lock = (BPTR) Lock(str(CARG(1)), ACCESS_READ);
         if(lock)
         {
-            char *buf = calloc(PATH_MAX, 1); 
+            char *buf = calloc(PATH_MAX, 1);
             if(buf)
             {
                 NameFromLock(lock, buf, PATH_MAX); 
@@ -405,7 +405,7 @@ entry_p m_substr(entry_p contxt)
     {
         char *s = str(CARG(1));
         int i = num(CARG(2)),
-            l = strlen(s); 
+            l = (int) strlen(s); 
 
         // Is the number characters limited?
         if(CARG(3) && CARG(3) != end())
@@ -418,7 +418,7 @@ entry_p m_substr(entry_p contxt)
             // CBM installer. 
             if(i < l && j > 0 && i >= 0)
             {
-                char *r = calloc(l + 1, 1); 
+                char *r = calloc((size_t) l + 1, 1); 
                 if(r)
                 {
                     // Cap all values and do the
@@ -439,7 +439,7 @@ entry_p m_substr(entry_p contxt)
                 // Min cap
                 if(i > 0)
                 {
-                    char *r = calloc(l + 1, 1); 
+                    char *r = calloc((size_t) l + 1, 1); 
                     if(r)
                     {
                         // All values are already
