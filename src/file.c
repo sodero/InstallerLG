@@ -25,6 +25,7 @@
 
 #ifdef AMIGA
 #include <dos/dos.h>
+#include <dos/dosextens.h>
 #include <workbench/workbench.h>
 #endif
 
@@ -486,14 +487,38 @@ entry_p m_exists(entry_p contxt)
 {
     if(c_sane(contxt, 1))
     {
+        // Non-existance. 
+        int r = 0; 
+
+        // Supress volume requester?
         if(get_opt(contxt, OPT_NOREQ))
         {
-            /* show mount req */
+            #ifdef AMIGA
+            struct Process *p = (struct Process *) 
+                FindTask(NULL);
+
+            // Save the current window ptr. 
+            APTR w = p->pr_WindowPtr;
+
+            // Disable auto request. 
+            p->pr_WindowPtr = (APTR) -1L; 
+            #endif
+
+            // Get type (file / dir / 0)
+            r = h_exists(str(CARG(1))); 
+
+            #ifdef AMIGA
+            // Restore auto request. 
+            p->pr_WindowPtr = w; 
+            #endif
         }
-        RNUM
-        (
-            h_exists(str(CARG(1))); 
-        ); 
+        else
+        {
+            // Get type (file / dir / 0)
+            r = h_exists(str(CARG(1))); 
+        }
+
+        RNUM(r); 
     }
     else
     {

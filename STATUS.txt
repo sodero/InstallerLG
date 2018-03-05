@@ -67,6 +67,7 @@ Full: * = Tested
 * (iconinfo <parameters>)
 * (getassign <name> <opts>)
 * (getenv <name>)
+* (exists <filename> (noreq))
 
 // VERIFY / COMPARE WITH OS 3.9
 (asknumber (prompt..) (help..) (range..) (default..))
@@ -75,7 +76,6 @@ Full: * = Tested
 (getversion <file> (resident)) VERIFY
 (foreach <dir> <pattern> <statements>) MORE TESTS
 (database <feature> [<checkvalue>])
-(exists <filename> (noreq)) - NOREQ saknas
 (protect <file> [<string of flags to change>] [<dec. mask>] <parameters>)
 (startup (prompt..) (command..))
 

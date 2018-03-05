@@ -229,7 +229,7 @@ entry_p m_getassign(entry_p contxt)
 
        
         // Prepare to walk the device list. 
-	    dl = LockDosList(msk);
+	    dl = (struct DosList *) LockDosList(msk);
 
         if(dl)
         {
@@ -250,7 +250,8 @@ entry_p m_getassign(entry_p contxt)
                 // the doslist. 
                 if(msk & bits[i])
                 {
-                    struct DosList *dc = NextDosEntry(dl, bits[i]); 
+                    struct DosList *dc = (struct DosList *) 
+                        NextDosEntry(dl, bits[i]); 
 
                     while(dc)
                     {
@@ -311,7 +312,8 @@ entry_p m_getassign(entry_p contxt)
                         else
                         {
                             // No match. Next list item.
-                            dc = NextDosEntry(dc, bits[i]);
+                            dc = (struct DosList *) 
+                                NextDosEntry(dc, bits[i]);
                         }
                     }
                 }
@@ -368,11 +370,12 @@ entry_p m_getdevice(entry_p contxt)
 
                     // Search for <path> handler in the
                     // list of devices. 
-                    dl = LockDosList(msk);
+                    dl = (struct DosList *) LockDosList(msk);
 
                     while(dl && mp != dl->dol_Task)
                     {
-                        dl = NextDosEntry(dl, LDF_DEVICES); 
+                        dl = (struct DosList *)
+                            NextDosEntry(dl, LDF_DEVICES); 
                     }
 
                     UnLockDosList(msk);
