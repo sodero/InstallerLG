@@ -50,7 +50,8 @@ static entry_p h_run(entry_p contxt, const char *pre)
             // something that can be translated into
             // a new threshold value...
             if(confirm->children && 
-               confirm->children[0])
+               confirm->children[0] && 
+               confirm->children[0] != end())
             {
                 // ...then do so.
                 th = num(confirm->children[0]);

@@ -1507,22 +1507,86 @@ entry_p m_rename(entry_p contxt)
         entry_p help    = get_opt(CARG(3), OPT_HELP),
                 prompt  = get_opt(CARG(3), OPT_PROMPT), 
                 confirm = get_opt(CARG(3), OPT_CONFIRM), 
+                disk    = get_opt(CARG(3), OPT_DISK), 
                 safe    = get_opt(CARG(3), OPT_SAFE);
 
         const char *fr  = str(CARG(1)), 
                    *to  = str(CARG(2));
 
-        help = prompt = confirm = safe; 
-
-        if(rename(fr, to) == 0)
+        // Do we need confirmation?
+        if(confirm)
         {
-            h_log(contxt, tr(S_FRND), fr, to); 
+            // The default threshold is expert plus one, 
+            // thus everyone should confirm.
+            int level = get_numvar(contxt, "@user-level"); 
+            int th = 2;
+
+            // If the (confirm ...) option contains 
+            // something that can be translated into
+            // a new threshold value...
+            if(confirm->children && 
+               confirm->children[0] && 
+               confirm->children[0] != end())
+            {
+                // ...then do so.
+                th = num(confirm->children[0]);
+            }
+                            
+            // If we are below the threshold value,
+            // don't care about getting confirmation
+            // from the user.
+            if(level < th) 
+            {
+                confirm = NULL; 
+            }
+
+            // Make sure that we have the prompt and
+            // help texts that we need if 'confirm'
+            // is set. It's not strictly necessary 
+            // if 'confirm' is not set, but it's not
+            // valid code so lets fail anyway. OS3.9
+            // isn't this strict though. Relax?
+            if(!prompt || !help)
+            {
+                error(contxt->id, ERR_MISSING_OPTION, 
+                      prompt ? "help" : "prompt"); 
+                RCUR; 
+            }
+        }
+
+        if(confirm && !h_confirm(contxt, "FIX", "ME"))
+        {
             RNUM(1); 
+        }
+
+        // Is this a safe operation or are we not 
+        // running in pretend mode? 
+        if(safe || !get_numvar(contxt, "@pretend"))
+        {
+            if(!disk)
+            {
+                if(!h_exists(to) && !rename(fr, to))
+                {
+                    h_log(contxt, tr(S_FRND), fr, to); 
+                    RNUM(-1); 
+                }
+                else
+                {
+                    error(contxt->id, ERR_RENAME_FILE, fr); 
+                    RNUM(0); 
+                }
+            }
+            else
+            {
+                // RELABEL!
+                RNUM(-1); 
+            }
         }
         else
         {
-            error(contxt->id, ERR_RENAME_FILE, fr); 
-            RNUM(0); 
+            // Non safe in pretend mode
+            // always succeeds. 
+            RNUM(-1); 
         }
     }  
     else
