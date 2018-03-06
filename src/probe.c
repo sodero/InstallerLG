@@ -19,8 +19,9 @@
 #ifdef AMIGA
 #include <dos/dos.h>
 #include <dos/dosextens.h>
-#include <exec/resident.h>
 #include <exec/execbase.h>
+#include <exec/memory.h>
+#include <exec/resident.h>
 #include <workbench/workbench.h>
 #endif
 
@@ -36,82 +37,73 @@ entry_p m_database(entry_p contxt)
     // We need atleast one argument
     if(c_sane(contxt, 1))
     {   
-        // A set of reasonable values? 
-        static const char *db[] = 
-        {   
-            "vblank", "50",
-            "cpu", 
-#ifdef __i386__
+        int memf = -1; 
+        static char buf[NUMLEN]; 
+        const char *feat = str(CARG(1)),
+            *cpu =  
+        #ifdef __i386__
             "x86",
-#elif __amd64__
+        #elif __amd64__
             "x86_64",
-#elif __arm__
+        #elif __arm__
             "ARM",
-#elif __ppc__
+        #elif __ppc__
             "PowerPC",
-#elif __mc68000__
+        #elif __mc68000__
             "68000",
-#elif __mc68010__
+        #elif __mc68010__
             "68010",
-#elif __mc68020__
+        #elif __mc68020__
             "68020",
-#elif __mc68030__
+        #elif __mc68030__
             "68030",
-#elif __mc68040__
+        #elif __mc68040__
             "68040",
-#elif __mc68060__
+        #elif __mc68060__
             "68060",
-#else
+        #else
             "Unknown",
-#endif
-            "fpu", "Unknown", 
-            "graphics-mem", "524288",
-         // "graphics-mem" -> Size of free CHIP RAM (via AvailMem(MEMF_CHIP))
-            "total-mem", "524288",
-         // "total-mem" -> Total size of free RAM (via AvailMem(MEMF_TOTAL))
-            "chiprev", "Unknown", 
-            NULL
-        };
+        #endif
+            *ret = "Unknown";
 
-        // Assume failure.
-        size_t i = 0; 
-        const char *f = str(CARG(1)), 
-                   *r = "0";
-
-        // Find the sought after feature.
-        while(db[i] && strcmp(db[i], f))
-        {
-            // Feature and value come
-            // in pairs.
-            i += 2; 
+        if(!strcmp(feat, "cpu"))
+        {   
+            ret = cpu; 
         }
-        
-        // Did we find it?
-        if(db[i])
-        {
-            // Are we supposed to match a given
-            // value with the values above?
-            if(CARG(2) && CARG(2) != end())
-            {
-                const char *v = str(CARG(2)); 
-                if(!strcmp(v, db[i + 1]))
-                {
-                    // A match.
-                    r = "1"; 
-                }
-            }
-            else
-            {
-                // What we have. And it will
-                // be non zero.
-                r = db[i + 1]; 
-            }
+        else
+        if(!strcmp(feat, "graphics-mem"))
+        {   
+            memf =
+            #ifdef AMIGA
+            AvailMem(MEMF_CHIP);
+            #else
+            524288;
+            #endif
+        }
+        else
+        if(!strcmp(feat, "total-mem"))
+        {   
+            memf =
+            #ifdef AMIGA
+            AvailMem(MEMF_ANY);
+            #else
+            524288;
+            #endif
         }
 
-        // This could be a failure, a success
-        // or a value depending on the path
-        // taken.
-        RSTR(strdup(r));  
+        if(memf != -1)
+        {   
+            ret = buf; 
+            snprintf(buf, sizeof(buf), "%d", memf); 
+        }
+
+        // Are we testing for a specific value?
+        if(CARG(2) && CARG(2) != end())
+        {
+            ret = strcmp(ret, str(CARG(2))) ? "0" : "1";
+        }
+
+        RSTR(strdup(ret));  
     }
     else
     {
