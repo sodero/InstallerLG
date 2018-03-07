@@ -129,7 +129,8 @@ entry_p init(entry_p contxt)
             // All the numerical values.
             strdup("set"), __LINE__, m_set, 
             push(push(push(push(push(push(
-            push(push(push(push(push(push
+            push(push(push(push(push(push(
+            push(push(push(push
             (
                 new_contxt(), 
                 new_symbol(strdup("@user-level"))),
@@ -145,6 +146,12 @@ entry_p init(entry_p contxt)
                 new_number(0)
             ),
                 new_symbol(strdup("@yes"))),
+                new_number(0)
+            ),
+                new_symbol(strdup("@skip"))),
+                new_number(0)
+            ),
+                new_symbol(strdup("@abort"))),
                 new_number(0)
             ),
                 new_symbol(strdup("@each-type"))),

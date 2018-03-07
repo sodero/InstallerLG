@@ -40,7 +40,8 @@ static int h_makedir(entry_p contxt, const char *dst);
 static int h_protect_get(entry_p contxt, const char *file, LONG *mask);
 static int h_protect_set(entry_p contxt, const char *file, LONG mask);
 static int h_readonly(const char *file);
-static int h_confirm(entry_p contxt, const char *msg, const char *nfo);
+static int h_confirm(entry_p contxt, const char *msg, const char *hlp);
+static int h_confirm_obsolete(entry_p contxt, const char *msg, const char *nfo);
 
 //----------------------------------------------------------------------------
 // (copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)
@@ -87,7 +88,7 @@ entry_p m_copyfiles(entry_p contxt)
                        *dst = str(dest); 
 
             if(h_exists(dst) == 2 &&
-               !h_confirm(contxt, tr(S_ODIR), dst))
+               !h_confirm_obsolete(contxt, tr(S_ODIR), dst))
             {
                 error(HALT); 
                 h_log(contxt, tr(S_ACPY), src, dst); 
@@ -407,7 +408,7 @@ entry_p m_delete(entry_p contxt)
                     // Ask the user for confirmation when 
                     // (askuser) is set. 
                     if(!(askuser && 
-                         h_confirm(contxt, tr(S_DWRT), file)))
+                         h_confirm_obsolete(contxt, tr(S_DWRT), file)))
                     {
                         // This will turn into an error if the
                         // user says no. 
@@ -421,7 +422,7 @@ entry_p m_delete(entry_p contxt)
                 // no, then we should not delete. It's not 
                 // an error though.
                 if(confirm && 
-                   !h_confirm(contxt, tr(S_DNRM), file))
+                   !h_confirm_obsolete(contxt, tr(S_DNRM), file))
                 {
                     delete = FALSE; 
                 }
@@ -1554,9 +1555,9 @@ entry_p m_rename(entry_p contxt)
             }
         }
 
-        if(confirm && !h_confirm(contxt, "FIX", "ME"))
+        if(confirm && !h_confirm(contxt, str(prompt), str(help)))
         {
-            RNUM(1); 
+            RNUM(0); 
         }
 
         // Is this a safe operation or are we not 
@@ -1578,7 +1579,16 @@ entry_p m_rename(entry_p contxt)
             }
             else
             {
-                // RELABEL!
+                #ifdef AMIGA
+                // Rename volume.
+                if(!Relabel(fr, to))
+                {
+                    // Failure.
+                    RNUM(0);
+                }
+                #endif
+
+                // Success. 
                 RNUM(-1); 
             }
         }
@@ -2141,7 +2151,7 @@ static int h_readonly(const char *file)
 
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-static int h_confirm(entry_p contxt, 
+static int h_confirm_obsolete(entry_p contxt, 
                      const char *msg, 
                      const char *nfo) 
 {
@@ -2165,5 +2175,53 @@ static int h_confirm(entry_p contxt,
     {
         error(PANIC); 
         return FALSE; 
+    }
+}
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+static int h_confirm(entry_p contxt, 
+                     const char *msg, 
+                     const char *hlp) 
+{
+    if(contxt)
+    {
+        // By setting @yes, @skip or @abort
+        // user behaviour can be simulated.
+        int yes = get_numvar(contxt, "@yes"),
+            skip = get_numvar(contxt, "@skip"),
+            abort = get_numvar(contxt, "@abort"),
+            ret; 
+
+        // If we have any overrides, translate
+        // them to the corresponding gui return 
+        // value. 
+        if(yes || skip || abort)
+        {
+            ret = abort ? -1 : yes; 
+        }
+        // No overrides, get confirmation from 
+        // the user. 
+        else
+        {
+            ret = gui_run(msg, hlp);
+        }
+
+        // On abort, set HALT state. The return
+        // value is that same as skip.
+        if(ret < 0)
+        {
+            error(HALT); 
+            ret = 0; 
+        }
+
+        // True or false.
+        return ret; 
+    }
+    else
+    {
+        // Broken parser. 
+        error(PANIC); 
+        return 0; 
     }
 }

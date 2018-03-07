@@ -71,7 +71,7 @@ Full: * = Tested
 * (database <feature> [<checkvalue>])
 
 // VERIFY / COMPARE WITH OS 3.9
-(rename <old> <new> (help..) (prompt..) (confirm..) (safe))
+-> (rename <old> <new> (help..) (prompt..) (confirm..) (safe))
 (asknumber (prompt..) (help..) (range..) (default..))
 (makeassign <assign> <path> (safe)) VERIFY
 (earlier <file1> <file2>) - VERIFY (dirs are broken)

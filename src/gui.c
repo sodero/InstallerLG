@@ -1235,16 +1235,16 @@ MUIDSP IPTR InstallerGuiRun(Class *cls,
         switch(b)
         {
             case MUIV_InstallerGui_ProceedRun:
-                return 2; 
-            case MUIV_InstallerGui_SkipRun:
                 return 1; 
-            case MUIV_InstallerGui_AbortRun:
+            case MUIV_InstallerGui_SkipRun:
                 return 0; 
+            case MUIV_InstallerGui_AbortRun:
+                return -1; 
         }
     }
 
     GERR(tr(S_UNER)); 
-    return 0; 
+    return -1; 
 }
 
 //----------------------------------------------------------------------------
