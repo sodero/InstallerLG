@@ -376,7 +376,7 @@ entry_p m_getdevice(entry_p contxt)
                     // name of the device. 
                     if(dl)
                     {
-                        const char *n = B_TO_CSTR(dc->dol_Name);
+                        const char *n = B_TO_CSTR(dl->dol_Name);
                         RSTR(strdup(n)); 
                     }
                 }

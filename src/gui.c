@@ -2123,7 +2123,7 @@ int gui_run(const char *msg, const char *hlp)
     return (int) DoMethod(Win, MUIM_InstallerGui_Run, msg, hlp);
     #else
     printf("%s%s\n", msg, hlp);
-    return 2; 
+    return 0; 
     #endif
 }
 

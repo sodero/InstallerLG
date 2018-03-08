@@ -1551,11 +1551,15 @@ entry_p m_rename(entry_p contxt)
             {
                 error(contxt->id, ERR_MISSING_OPTION, 
                       prompt ? "help" : "prompt"); 
-                RCUR; 
+                RNUM(0); 
             }
         }
 
-        if(confirm && !h_confirm(contxt, str(prompt), str(help)))
+        // If we need confirmation and the user skips
+        // or aborts, return. On abort, the HALT will
+        // be set by h_confirm. 
+        if(confirm && 
+           !h_confirm(contxt, str(prompt), str(help)))
         {
             RNUM(0); 
         }
@@ -1564,10 +1568,13 @@ entry_p m_rename(entry_p contxt)
         // running in pretend mode? 
         if(safe || !get_numvar(contxt, "@pretend"))
         {
+            // Are we going to rename a file/dir?
             if(!disk)
             {
+                // Fail if the target exists. 
                 if(!h_exists(to) && !rename(fr, to))
                 {
+                    // Success. 
                     h_log(contxt, tr(S_FRND), fr, to); 
                     RNUM(-1); 
                 }
@@ -1577,6 +1584,7 @@ entry_p m_rename(entry_p contxt)
                     RNUM(0); 
                 }
             }
+            // No, we're going to relabel a volume. 
             else
             {
                 #ifdef AMIGA
@@ -1589,13 +1597,14 @@ entry_p m_rename(entry_p contxt)
                 #endif
 
                 // Success. 
+                h_log(contxt, tr(S_FRND), fr, to); 
                 RNUM(-1); 
             }
         }
         else
         {
-            // Non safe in pretend mode
-            // always succeeds. 
+            // Non safe operations always 
+            // succeed in pretend mode.
             RNUM(-1); 
         }
     }  
