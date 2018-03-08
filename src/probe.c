@@ -247,7 +247,7 @@ entry_p m_getassign(entry_p contxt)
 
                     while(dc)
                     {
-                        const char *n = AROS_BSTR_ADDR(dc->dol_Name); 
+                        const char *n = B_TO_CSTR(dc->dol_Name);
 
                         // Ignore case when looking for match.
                         if(!strcasecmp(asn, n))
@@ -376,7 +376,7 @@ entry_p m_getdevice(entry_p contxt)
                     // name of the device. 
                     if(dl)
                     {
-                        const char *n = AROS_BSTR_ADDR(dl->dol_Name);
+                        const char *n = B_TO_CSTR(dc->dol_Name);
                         RSTR(strdup(n)); 
                     }
                 }

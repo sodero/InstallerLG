@@ -38,6 +38,12 @@ void set_strvar(entry_p c, char *v, char *n);
 #define CARG(X) (contxt->children[X - 1])
 #define CSYM(X) (contxt->symbols[X - 1])
 
+#ifdef __AROS__
+#define B_TO_CSTR(S) AROS_BSTR_ADDR(S)
+#else
+#define B_TO_CSTR(S) (*S ? (((char *) S) + 1) : BADDR(S))
+#endif
+
 // Fixa alla RSTR(strdup(X... strdup gillar inte NULL
 
 #endif
