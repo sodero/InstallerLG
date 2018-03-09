@@ -70,10 +70,10 @@ Full: * = Tested
 * (exists <filename> (noreq))
 * (database <feature> [<checkvalue>])
 * (rename <old> <new> (help..) (prompt..) (confirm..) (safe))
+* (asknumber (prompt..) (help..) (range..) (default..))
 
 // VERIFY / COMPARE WITH OS 3.9
 (makeassign <assign> <path> (safe)) VERIFY
-(asknumber (prompt..) (help..) (range..) (default..))
 (earlier <file1> <file2>) - VERIFY (dirs are broken)
 (getversion <file> (resident)) VERIFY
 (foreach <dir> <pattern> <statements>) MORE TESTS

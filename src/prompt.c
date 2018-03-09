@@ -80,7 +80,8 @@ entry_p m_askbool(entry_p contxt)
             error
             (
                 contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : "help"
+                !prompt ? "prompt" : 
+                "help"
             ); 
         }
     }
@@ -201,7 +202,9 @@ entry_p m_askchoice(entry_p contxt)
             error
             (
                 contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : !help ? "help" : "choices"
+                !prompt ? "prompt" : 
+                !help ? "help" : 
+                "choices"
             ); 
         }
     }
@@ -280,7 +283,8 @@ entry_p m_askdir(entry_p contxt)
             (
                 contxt->id, ERR_MISSING_OPTION, 
                 !prompt ? "prompt" : 
-                !help ? "help" : "default"
+                !help ? "help" : 
+                "default"
             ); 
         }
     }
@@ -423,7 +427,8 @@ entry_p m_askdisk(entry_p contxt)
             (
                 contxt->id, ERR_MISSING_OPTION, 
                 !prompt ? "prompt" : 
-                !help ? "help" : "dest"
+                !help ? "help" : 
+                "dest"
             ); 
         }
     }
@@ -498,7 +503,9 @@ entry_p m_askfile(entry_p contxt)
             error
             (
                 contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : !help ? "help" : "default"
+                !prompt ? "prompt" : 
+                !help ? "help" : 
+                "default"
             ); 
         }
     }
@@ -518,6 +525,11 @@ entry_p m_askfile(entry_p contxt)
 //     ask for a number
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+//
+// NOTE: We do not follow the Installer.guide when it comes to the default
+// range. Instead of all positive values, we use 0 - 100 in order to be
+// able to use a slider instead of a string gadget. This might be a
+// problem. Scrap it?
 //----------------------------------------------------------------------------
 entry_p m_asknumber(entry_p contxt)
 {
@@ -530,10 +542,8 @@ entry_p m_asknumber(entry_p contxt)
 
         if(prompt && help && deflt)
         {
-            // This is not right, you need
-            // some other widget if no range
-            // is given (or a huge one). 
-            int min = 0, max = 10; 
+            // Default range. 
+            int min = 0, max = 100; 
 
             if(range)
             {
@@ -541,6 +551,14 @@ entry_p m_asknumber(entry_p contxt)
                 {
                     min = num(range->children[0]);
                     max = num(range->children[1]);
+
+                    // Use default range when the
+                    // user given range is invalid. 
+                    if(min >= max)
+                    {
+                        max = 100; 
+                        min = 0; 
+                    }
                 }
                 else
                 {
@@ -550,24 +568,47 @@ entry_p m_asknumber(entry_p contxt)
                 }
             }
 
-            RNUM
-            (
-                gui_number
+            // Show requester unless we're executing in
+            // 'novice' mode.
+            if(get_numvar(contxt, "@user-level") > 0)
+            {
+                int hlt = 0; 
+
+                // Prompt user.
+                DNUM = gui_number
                 (
                     str(prompt),
                     str(help),
                     min, 
                     max, 
-                    num(deflt)
-                )
-            );
+                    num(deflt),
+                    &hlt
+                );
+
+                // Halt if abort.
+                if(hlt)
+                {
+                    error(HALT); 
+                }
+            }
+            else
+            {
+                // Use the default value. 
+                DNUM = num(deflt);
+            }
+
+            // Return user or default
+            // value. 
+            RCUR; 
         }
         else
         {
             error
             (
                 contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : !help ? "help" : "default"
+                !prompt ? "prompt" : 
+                !help ? "help" : 
+                "default"
             ); 
         }
     }
@@ -679,7 +720,9 @@ entry_p m_askoptions(entry_p contxt)
             error
             (
                 contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : !help ? "help" : "choices"
+                !prompt ? "prompt" : 
+                !help ? "help" : 
+                "choices"
             );
         }
     }
@@ -724,7 +767,9 @@ entry_p m_askstring(entry_p contxt)
             error
             (
                 contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : !help ? "help" : "default"
+                !prompt ? "prompt" : 
+                !help ? "help" : 
+                "default"
             ); 
         }
     }

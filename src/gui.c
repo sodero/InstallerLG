@@ -199,6 +199,7 @@ struct MUIP_InstallerGui_Number
     ULONG Min;
     ULONG Max;
     ULONG Default; 
+    ULONG Halt; 
 };
 
 struct MUIP_InstallerGui_CheckBoxes
@@ -1060,15 +1061,21 @@ MUIDSP IPTR InstallerGuiNumber(Class *cls,
         set(num, MUIA_Numeric_Max, msg->Max);
         set(num, MUIA_Numeric_Value, msg->Default);
 
-        if(InstallerGuiPageSet(obj, P_NUMBER, B_YES_NO, 
+        if(InstallerGuiPageSet(obj, P_NUMBER, B_PROCEED_ABORT, 
                                msg->Message))
         {
-            ULONG res; 
-
-            InstallerGuiWait(obj, MUIV_InstallerGui_Yes, 2); 
-            get(num, MUIA_Numeric_Value, &res); 
-
-            return res;
+            if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
+               MUIV_InstallerGui_Proceed)
+            {
+                ULONG res; 
+                get(num, MUIA_Numeric_Value, &res); 
+                return res;
+            }
+            else
+            {
+                *((int *) msg->Halt) = 1; 
+                return 0; 
+            }
         }
     }
 
@@ -1896,7 +1903,8 @@ int gui_number(const char *msg,
                const char *hlp,
                int min, 
                int max, 
-               int def)
+               int def, 
+               int *hlt)
 {
     int ret = (int) 
     #ifdef AMIGA
@@ -1908,10 +1916,12 @@ int gui_number(const char *msg,
         hlp, 
         min, 
         max, 
-        def
+        def,
+        hlt
     );
     #else
     def;
+    *hlt = 0; 
     printf("%s%s%d%d\n", msg, hlp, min, max);
     #endif
     return ret;
@@ -2123,7 +2133,7 @@ int gui_run(const char *msg, const char *hlp)
     return (int) DoMethod(Win, MUIM_InstallerGui_Run, msg, hlp);
     #else
     printf("%s%s\n", msg, hlp);
-    return 0; 
+    return 2; 
     #endif
 }
 
