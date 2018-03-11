@@ -71,12 +71,12 @@ Full: * = Tested
 * (database <feature> [<checkvalue>])
 * (rename <old> <new> (help..) (prompt..) (confirm..) (safe))
 * (asknumber (prompt..) (help..) (range..) (default..))
+* (foreach <dir> <pattern> <statements>)
 
 // VERIFY / COMPARE WITH OS 3.9
 (makeassign <assign> <path> (safe)) VERIFY
 (earlier <file1> <file2>) - VERIFY (dirs are broken)
 (getversion <file> (resident)) VERIFY
-(foreach <dir> <pattern> <statements>) MORE TESTS
 (protect <file> [<string of flags to change>] [<dec. mask>] <parameters>)
 (startup (prompt..) (command..))
 
