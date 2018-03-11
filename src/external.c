@@ -41,8 +41,7 @@ static entry_p h_run(entry_p contxt, const char *pre)
         // Find out if we need confirmation...
         if(confirm)
         {
-            // The default threshold is expert plus one, 
-            // thus everyone should confirm.
+            // The default threshold is expert.
             int level = get_numvar(contxt, "@user-level"); 
             int th = 2;
 

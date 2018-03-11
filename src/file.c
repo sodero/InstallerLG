@@ -32,7 +32,7 @@
 //----------------------------------------------------------------------------
 // Helper functions
 //----------------------------------------------------------------------------
-static int h_copyfile(entry_p contxt, const char *src, const char *dst, int info);
+static int h_copyfile(entry_p contxt, const char *src, const char *dst, int info, int nogauge);
 static int h_exists(const char *n);
 static char *h_fileonly(int id, const char *s);
 static pnode_p h_filetree(int id, const char *src, const char *dst, int files);
@@ -58,34 +58,55 @@ entry_p m_copyfiles(entry_p contxt)
     // We need atleast one argument
     if(c_sane(contxt, 1))
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                source   = get_opt(contxt, OPT_SOURCE),
-                dest     = get_opt(contxt, OPT_DEST),
-                newname  = get_opt(contxt, OPT_NEWNAME),
-                choices  = get_opt(contxt, OPT_CHOICES),
-                all      = get_opt(contxt, OPT_ALL),
-                pattern  = get_opt(contxt, OPT_PATTERN),
-                files    = get_opt(contxt, OPT_FILES),
-                infos    = get_opt(contxt, OPT_INFOS),
-                confirm  = get_opt(contxt, OPT_CONFIRM),
-                safe     = get_opt(contxt, OPT_SAFE),
-                optional = get_opt(contxt, OPT_OPTIONAL),
-                delopts  = get_opt(contxt, OPT_DELOPTS),
-                nogauge  = get_opt(contxt, OPT_NOGAUGE);
+        entry_p prompt     = get_opt(contxt, OPT_PROMPT),   // OK
+                help       = get_opt(contxt, OPT_HELP),     // OK
+                source     = get_opt(contxt, OPT_SOURCE),   // OK
+                dest       = get_opt(contxt, OPT_DEST),     // OK
+                newname    = get_opt(contxt, OPT_NEWNAME),  // OK
+                choices    = get_opt(contxt, OPT_CHOICES),
+                all        = get_opt(contxt, OPT_ALL),
+                pattern    = get_opt(contxt, OPT_PATTERN),
+                infos      = get_opt(contxt, OPT_INFOS),
+                files      = get_opt(contxt, OPT_FILES),    // OK
+                confirm    = get_opt(contxt, OPT_CONFIRM),  // OK
+                safe       = get_opt(contxt, OPT_SAFE),     // OK
+                optional   = get_opt(contxt, OPT_OPTIONAL),
+                delopts    = get_opt(contxt, OPT_DELOPTS),  // OK
+                nogauge    = get_opt(contxt, OPT_NOGAUGE),  // OK
+                fonts      = get_opt(contxt, OPT_FONTS),
+                fail       = get_opt(delopts, OPT_FAIL) ?
+                             NULL : get_opt(optional, OPT_FAIL),
+                nofail     = get_opt(delopts, OPT_NOFAIL) ?
+                             NULL : get_opt(optional, OPT_NOFAIL),
+                oknodelete = get_opt(delopts, OPT_OKNODELETE) ?
+                             NULL : get_opt(optional, OPT_OKNODELETE),
+                force      = get_opt(delopts, OPT_FORCE) ?
+                             NULL : get_opt(optional, OPT_FORCE),
+                askuser    = get_opt(delopts, OPT_ASKUSER) ?
+                             NULL : get_opt(optional, OPT_ASKUSER);
+
         DNUM = 0; 
-        help = choices = all = pattern; 
-        confirm = safe = optional; 
-        delopts = nogauge; 
+        choices = all = pattern = fonts = 
+        fail = nofail = oknodelete = force = askuser; 
 /*
- *  ALL krÃ¤vs fÃ¶r att kopiera nÃ¥got annat Ã¤n en fil ? oklart
+ *  ALL krÃ¤vs fÃ¶r att kopiera nÃ¥got annat Ã¤n en fil ?
+ *  ja, om source är en katalog så tycks all krävas. Eller
+ *  pattern / choices? 
+ *
+ *  prompt och help behövs bara om confirm
+ *
+ *  pattern, choices och all är mutex
 */
         if(source && dest) 
         {
             pnode_p tree; 
-            const char *msg = prompt ? str(prompt) : tr(S_CFLS), 
-                       *src = str(source), 
+            const char *src = str(source), 
                        *dst = str(dest); 
+
+            if(get_numvar(contxt, "@pretend") && !safe)
+            {
+                RNUM(1); 
+            }
 
             if(h_exists(dst) == 2 &&
                !h_confirm_obsolete(contxt, tr(S_ODIR), dst))
@@ -98,36 +119,85 @@ entry_p m_copyfiles(entry_p contxt)
             tree = h_filetree(contxt->id, src, dst, files ? 1 : 0); 
             if(tree)
             {
+                int go = 0; 
                 pnode_p cur = tree; 
-                int level = get_numvar(contxt, "@user-level"); 
 
                 if(newname)
                 {
                     // Replace file name if single file and 
                     // the 'newname' option is set
-                    if(cur->next && 
-                       cur->type == 2 &&
-                       cur->next->type == 1 &&
-                       !cur->next->next)
+                    if(cur->next && cur->type == 2 &&
+                       cur->next->type == 1 && !cur->next->next)
                     {
                         free(cur->next->copy); 
                         cur->next->copy = h_tackon(contxt->id, dst, str(newname)); 
                     }
                 }
 
-                if(gui_copyfiles_start(msg, cur, level == 3))
+                // Find out if we need confirmation...
+                if(confirm)
+                {
+                    // The default threshold is expert.
+                    int level = get_numvar(contxt, "@user-level"),
+                        th = 2;
+
+                    // If the (confirm ...) option contains 
+                    // something that can be translated into
+                    // a new threshold value...
+                    if(confirm->children && 
+                       confirm->children[0] && 
+                       confirm->children[0] != end())
+                    {
+                        // ...then do so.
+                        th = num(confirm->children[0]);
+                    }
+                                    
+                    // If we are below the threshold value,
+                    // don't care about getting confirmation
+                    // from the user.
+                    if(level < th) 
+                    {
+                        confirm = NULL; 
+                    }
+
+                    // Make sure that we have the prompt and
+                    // help texts that we need if 'confirm'
+                    // is set. It's not strictly necessary 
+                    // if 'confirm' is not set, but it's not
+                    // valid code so lets fail anyway.
+                    if(!prompt || !help)
+                    {
+                        cur = NULL; 
+                        error(contxt->id, ERR_MISSING_OPTION, 
+                              prompt ? "help" : "prompt"); 
+                    }
+                }
+
+                if(cur)
+                {
+                    go = gui_copyfiles_start
+                    (
+                        prompt ? str(prompt) : NULL, 
+                        confirm ? str(help) : NULL, 
+                        cur, 
+                        confirm != NULL
+                    ); 
+                }
+
+                if(go == 1)
                 {
                     DNUM = 1; 
+
                     for(; cur && DNUM; 
                         cur = cur->next)
                     {
                         LONG prm; 
 
-                        // Copy file / create dir / skip if zero:ed by expert
+                        // Copy file / create dir / skip if zero:ed
                         switch(cur->type)
                         {
                             case 0:  continue; 
-                            case 1:  DNUM = h_copyfile(contxt, cur->name, cur->copy, infos ? 1 : 0); break; 
+                            case 1:  DNUM = h_copyfile(contxt, cur->name, cur->copy, infos ? 1 : 0, nogauge ? 1 : 0); break; 
                             case 2:  DNUM = h_makedir(contxt, cur->copy); break; 
                             default: error(PANIC); DNUM = 0; 
                         }
@@ -145,6 +215,14 @@ entry_p m_copyfiles(entry_p contxt)
                     }
                     gui_copyfiles_end(); 
                 }
+                else
+                {
+                    if(go == -1)
+                    {
+                        error(HALT); 
+                    }
+                }
+
                 cur = tree; 
                 while(cur)
                 {
@@ -158,8 +236,8 @@ entry_p m_copyfiles(entry_p contxt)
         }
         else
         {
-            char *opt = !source ? "source" : "dest"; 
-            error(contxt->id, ERR_MISSING_OPTION, opt); 
+            error(contxt->id, ERR_MISSING_OPTION, 
+                  !source ? "source" : "dest"); 
         }
     }
     else
@@ -278,7 +356,8 @@ entry_p m_copylib(entry_p contxt)
                                 DNUM = h_copyfile
                                 (
                                     contxt, s, f,       
-                                    infos ? 1 : 0
+                                    infos ? 1 : 0,
+                                    1 // nogauge
                                 );
                             }
                             else
@@ -300,7 +379,8 @@ entry_p m_copylib(entry_p contxt)
                                         DNUM = h_copyfile
                                         (
                                             contxt, s, f,       
-                                            infos ? 1 : 0
+                                            infos ? 1 : 0,
+                                            1 // nogauge
                                         );
                                     }
                                     else
@@ -1517,8 +1597,7 @@ entry_p m_rename(entry_p contxt)
         // Do we need confirmation?
         if(confirm)
         {
-            // The default threshold is expert plus one, 
-            // thus everyone should confirm.
+            // The default threshold is expert.
             int level = get_numvar(contxt, "@user-level"); 
             int th = 2;
 
@@ -1622,11 +1701,12 @@ entry_p m_rename(entry_p contxt)
 static int h_copyfile(entry_p contxt, 
                       const char *src, 
                       const char *dst,
-                      int info)
+                      int info, 
+                      int nogauge)
 {
     if(contxt && src && dst)
     { 
-        if(gui_copyfiles_setcur(src))
+        if(gui_copyfiles_setcur(src, nogauge))
         { 
             static char buf[BUFSIZ]; 
             FILE *fs = fopen(src, "r"); 
@@ -1680,7 +1760,7 @@ static int h_copyfile(entry_p contxt,
                                 snprintf(id, sizeof(id), "%s.info", dst); 
 
                                 // Recur without info set. 
-                                return h_copyfile(contxt, is, id, 0); 
+                                return h_copyfile(contxt, is, id, 0, nogauge); 
                             }
                         }
 

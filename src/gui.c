@@ -124,6 +124,7 @@ struct MUIP_InstallerGui_CopyFilesSetCur
 {
     ULONG MethodID;
     ULONG File;
+    ULONG NoGauge;
 };
 
 struct MUIP_InstallerGui_Exit
@@ -598,8 +599,13 @@ MUIDSP IPTR InstallerGuiCopyFilesStart(Class *cls,
         if(prg) 
         {
             DoMethod(_app(obj), MUIM_Application_AddInputHandler, &my->ticker);
+            SetAttrs(prg, MUIA_Gauge_Max, msg->NumberOfFiles,
+                     MUIA_Gauge_Current, 0, TAG_END);
+            /*
             set(prg, MUIA_Gauge_Max, msg->NumberOfFiles);
             set(prg, MUIA_Gauge_Current, 0);
+            */
+
             return (IPTR) TRUE; 
         }
         GERR(tr(S_UNER)); 
@@ -663,10 +669,19 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
                     txt = cut; 
                 }
             }
+
             // Update progress bar. Text and number. 
-            get(prg, MUIA_Gauge_Current, &cur); 
-            SetAttrs(prg, MUIA_Gauge_InfoText, txt,
-                     MUIA_Gauge_Current, ++cur, TAG_END);
+            if(!msg->NoGauge)
+            {
+                get(prg, MUIA_Gauge_Current, &cur); 
+                SetAttrs(prg, MUIA_Gauge_InfoText, txt,
+                         MUIA_Gauge_Current, ++cur, TAG_END);
+            }
+            else
+            {
+                set(prg, MUIA_Gauge_InfoText, txt);
+            }
+
             // Dispose the copy, if any. 
             free(cut); 
         }
@@ -2000,7 +2015,7 @@ const char *gui_askfile(const char *msg,
 // gui_copyfiles_start
 //----------------------------------------------------------------------------
 //
-int gui_copyfiles_start(const char *msg, pnode_p lst, int expert)
+int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
 {
     #ifdef AMIGA
     int n = 0; 
@@ -2009,7 +2024,7 @@ int gui_copyfiles_start(const char *msg, pnode_p lst, int expert)
     {
         if(cur->type == 1)
         {
-            if(expert)
+            if(cnf)
             {
                 DoMethod(Win, MUIM_InstallerGui_CopyFilesAdd, cur->name, cur);
             }
@@ -2017,63 +2032,86 @@ int gui_copyfiles_start(const char *msg, pnode_p lst, int expert)
         }
         cur = cur->next; 
     }
-    if(expert)
+
+    if(cnf)
     {
-        Object *sel = (Object *) DoMethod
-        (
-            Win, MUIM_FindUData, 
-            MUIV_InstallerGui_FileList
-        );
-        if(sel)
+        static Object *sel, *top;
+        
+        if(!sel) 
         {
+            sel = (Object *) DoMethod
+            (
+                Win, MUIM_FindUData, 
+                MUIV_InstallerGui_FileList
+            );
+
+            top = (Object *) DoMethod
+            (
+                Win, MUIM_FindUData, 
+                MUIV_InstallerGui_TopGroup
+            );
+        }
+
+        if(sel && top && InstallerGuiPageSet
+          (Win, P_FILEDEST, B_PROCEED_SKIP_ABORT, (ULONG) msg))
+        {
+            ULONG b; 
             LONG id = MUIV_List_NextSelected_Start; 
 
+            set(top, MUIA_ShortHelp, hlp); 
             DoMethod(sel, MUIM_List_Select, MUIV_List_Select_All,
                           MUIV_List_Select_On, NULL); 
 
-            InstallerGuiPageSet(Win, P_FILEDEST, B_PROCEED_ABORT, 
-                               (ULONG) "");
+            b = InstallerGuiWait(Win, MUIV_InstallerGui_ProceedRun, 3); 
 
-            InstallerGuiWait(Win, MUIV_InstallerGui_Proceed, 1); 
-
-            for(;;) 
+            if(b == MUIV_InstallerGui_ProceedRun)
             {
-                DoMethod(sel, MUIM_List_NextSelected, &id); 
-                if(id != MUIV_List_NextSelected_End)
+                for(;;) 
                 {
-                    char *ent;
-                    DoMethod(sel, MUIM_List_GetEntry, id, &ent); 
-                    if(ent) 
+                    DoMethod(sel, MUIM_List_NextSelected, &id); 
+                    if(id != MUIV_List_NextSelected_End)
                     {
-                        for(cur = lst; cur; 
-                            cur = cur->next)
+                        char *ent = NULL;
+                        DoMethod(sel, MUIM_List_GetEntry, id, &ent); 
+
+                        if(ent) 
                         {
-                            if(cur->type == 1 &&
-                               !strcmp(ent, cur->name))
+                            for(cur = lst; cur; 
+                                cur = cur->next)
                             {
-                                cur->type = -1; 
-                                break; 
+                                if(cur->type == 1 &&
+                                   !strcmp(ent, cur->name))
+                                {
+                                    cur->type = -1; 
+                                    break; 
+                                }
                             }
                         }
                     }
+                    else
+                    {
+                        break; 
+                    }
                 }
-                else
+
+                for(cur = lst; cur; 
+                    cur = cur->next)
                 {
-                    break; 
+                    if(cur->type == 1)
+                    {
+                        n--;
+                        cur->type = 0; 
+                    }
+                    else if(cur->type == -1)
+                    {
+                        cur->type = 1; 
+                    }
                 }
             }
-            for(cur = lst; cur; 
-                cur = cur->next)
+            else
             {
-                if(cur->type == 1)
-                {
-                    n--;
-                    cur->type = 0; 
-                }
-                else if(cur->type == -1)
-                {
-                    cur->type = 1; 
-                }
+                return b == MUIV_InstallerGui_SkipRun ?
+                       0 : -1; 
             }
         }
         else
@@ -2082,22 +2120,23 @@ int gui_copyfiles_start(const char *msg, pnode_p lst, int expert)
             return FALSE; 
         }
     }
+
     return (int) DoMethod(Win, MUIM_InstallerGui_CopyFilesStart, msg, n);
     #else
-    return (lst && msg && (expert == 0 || expert == 1)) ? 1 : 0; 
+    return (lst && (!cnf || (cnf && msg && hlp))) ? 1 : 0; 
     #endif
 }
 
 //----------------------------------------------------------------------------
 // gui_copyfiles_setcur
 //----------------------------------------------------------------------------
-int gui_copyfiles_setcur(const char *cur) 
+int gui_copyfiles_setcur(const char *cur, int nogauge) 
 {
     return (int)
     #ifdef AMIGA
-    DoMethod(Win, MUIM_InstallerGui_CopyFilesSetCur, cur);
+    DoMethod(Win, MUIM_InstallerGui_CopyFilesSetCur, cur, nogauge);
     #else
-    (cur ? 1 : 0);
+    cur ? 1 + nogauge : 0;
     #endif
 }
 
