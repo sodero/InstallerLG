@@ -2136,7 +2136,7 @@ int gui_copyfiles_setcur(const char *cur, int nogauge)
     #ifdef AMIGA
     DoMethod(Win, MUIM_InstallerGui_CopyFilesSetCur, cur, nogauge);
     #else
-    cur ? 1 + nogauge : 0;
+    (cur ? 1 + nogauge : 0);
     #endif
 }
 
