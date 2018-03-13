@@ -35,7 +35,7 @@
 static int h_copyfile(entry_p contxt, const char *src, const char *dst, int info, int nogauge);
 static int h_exists(const char *n);
 static char *h_fileonly(int id, const char *s);
-static pnode_p h_filetree(int id, const char *src, const char *dst, int files);
+static pnode_p h_filetree(int id, const char *src, const char *dst, int files, entry_p choices, entry_p pattern);
 static int h_makedir(entry_p contxt, const char *dst);
 static int h_protect_get(entry_p contxt, const char *file, LONG *mask);
 static int h_protect_set(entry_p contxt, const char *file, LONG mask);
@@ -86,7 +86,7 @@ entry_p m_copyfiles(entry_p contxt)
                              NULL : get_opt(optional, OPT_ASKUSER);
 
         DNUM = 0; 
-        choices = all = pattern = fonts = 
+        all = fonts = 
         fail = nofail = oknodelete = force = askuser; 
 /*
  *  ALL krävs för att kopiera något annat än en fil ?
@@ -116,7 +116,14 @@ entry_p m_copyfiles(entry_p contxt)
                 RCUR; 
             }
 
-            tree = h_filetree(contxt->id, src, dst, files ? 1 : 0); 
+            tree = h_filetree
+            (
+                contxt->id, src, dst, 
+                files ? 1 : 0,
+                choices, 
+                pattern
+            ); 
+
             if(tree)
             {
                 int go = 0; 
@@ -1901,32 +1908,84 @@ static char *h_fileonly(int id,
 
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-static pnode_p h_filetree(int id, const char *src, const char *dst, int files)
+static pnode_p h_filetree(int id, 
+                          const char *src, 
+                          const char *dst, 
+                          int files, 
+                          entry_p choices, 
+                          entry_p pattern)
 {
     char *n_src = NULL,
          *n_dst = NULL; 
+
     if(src && dst)
     {
         int type = h_exists(src); 
+
         if(type == 2)
         {
             DIR *dir = opendir(src);  
+
             if(dir) 
             {
                 pnode_p node = calloc(1, sizeof(struct pnode_t)), head = node; 
+
                 if(node)
                 {
                     struct dirent *entry = readdir(dir); 
+
                     node->name = strdup(src); 
                     node->copy = strdup(dst); 
                     node->type = 2; 
+
                     while(entry)
                     {
                         n_src = h_tackon(id, src, entry->d_name), 
                         n_dst = h_tackon(id, dst, entry->d_name); 
+
                         if(n_src && n_dst)
                         {
-                            type = h_exists(n_src); 
+                            if(choices)
+                            {
+                                // Unless the parser is broken, 
+                                // we will have >= one child. 
+                                entry_p *e = choices->children;
+
+                                // Iterate over all filenames.
+                                while(*e && *e != end())
+                                {
+                                    // Stop when we have a match.
+                                    if(!strcmp(str(*e), entry->d_name))
+                                    {
+                                        break; 
+                                    }
+
+                                    // Next filename.
+                                    e++; 
+                                }
+
+                                // Get proper type if we have a match.
+                                if(*e && *e != end())
+                                {
+                                    type = h_exists(n_src); 
+                                }
+                                // Otherwise clear type, this will make
+                                // m_copyfiles skip it.
+                                else
+                                {
+                                    type = 0; 
+                                }
+                            }
+                            else 
+                            if(pattern)
+                            {
+                                type = h_exists(n_src); 
+                            }
+                            else
+                            {
+                                type = h_exists(n_src); 
+                            }
+
                             if(type == 2)
                             {
                                 if(!files)
@@ -1936,7 +1995,16 @@ static pnode_p h_filetree(int id, const char *src, const char *dst, int files)
                                        strcmp(entry->d_name, ".."))
                                     #endif
                                     {
-                                        node->next = h_filetree(id, n_src, n_dst, files); 
+                                        node->next = h_filetree
+                                        (
+                                            id, 
+                                            n_src, 
+                                            n_dst, 
+                                            files,
+                                            choices,
+                                            pattern
+                                        ); 
+
                                         while(node->next)
                                         {
                                             node = node->next; 
