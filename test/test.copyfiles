@@ -31,3 +31,6 @@
 (copyfiles (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_ && touch _cfd_","Line 1: Could not create directory '_cfd_' 0","rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (compression)) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","1","cmp _cfs_ _cfd_/_cfs_ && rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (compression err)) ; "","Line 1: syntax error 'err'",""
+(copyfiles (choices "1" "2") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ && mkdir _cfs_ && touch _cfs_/1 _cfs_/2 _cfs_/3","1","test -f _cfd_/1 && test -f _cfd_/2 && test ! -f _cfd_/3 && rm -Rf _cfs_ _cfd_"
+(copyfiles (choices "1" "2" "3") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ && mkdir _cfs_ && touch _cfs_/1 _cfs_/2 _cfs_/3","1","test -f _cfd_/1 && test -f _cfd_/2 && test -f _cfd_/3 && rm -Rf _cfs_ _cfd_"
+(copyfiles (choices "1" "2" "4") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ && mkdir _cfs_ && touch _cfs_/1 _cfs_/2 _cfs_/3","Line 1: No such file or directory '_cfs_/4' 0","test ! -f _cfd_/1 && test ! -f _cfd_/2 && test ! -f _cfd_/3 && rm -Rf _cfs_ _cfd_"

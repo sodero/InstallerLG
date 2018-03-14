@@ -1928,7 +1928,43 @@ static pnode_p h_filetree(int id,
 
             if(dir) 
             {
-                pnode_p node = calloc(1, sizeof(struct pnode_t)), head = node; 
+                // If the (choices) option is set we need to
+                // verify that all choices exist (as files).
+                if(choices)
+                {
+                    // Unless the parser is broken, 
+                    // we will have >= one child. 
+                    entry_p *e = choices->children;
+
+                    // Iterate over all filenames.
+                    while(*e && *e != end())
+                    {
+                        // Build path. 
+                        n_src = h_tackon(id, src, str(*e)); 
+
+                        if(n_src)
+                        {
+                            // If it doesn't exist, free everything and
+                            // bail out. 
+                            if(!h_exists(n_src))
+                            {
+                                error(id, ERR_NO_SUCH_FILE_OR_DIR, n_src); 
+                                free(n_src); 
+                                closedir(dir); 
+                                return NULL; 
+                            }
+                            else
+                            {
+                                // Next filename.
+                                free(n_src); 
+                                e++; 
+                            }
+                        }
+                    }
+                }
+
+                pnode_p node = calloc(1, sizeof(struct pnode_t)), 
+                        head = node; 
 
                 if(node)
                 {
