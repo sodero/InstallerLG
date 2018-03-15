@@ -63,9 +63,9 @@ entry_p m_copyfiles(entry_p contxt)
                 source     = get_opt(contxt, OPT_SOURCE),   // OK
                 dest       = get_opt(contxt, OPT_DEST),     // OK
                 newname    = get_opt(contxt, OPT_NEWNAME),  // OK
-                choices    = get_opt(contxt, OPT_CHOICES),
+                choices    = get_opt(contxt, OPT_CHOICES),  // OK
                 all        = get_opt(contxt, OPT_ALL),
-                pattern    = get_opt(contxt, OPT_PATTERN),
+                pattern    = get_opt(contxt, OPT_PATTERN),  // OK
                 infos      = get_opt(contxt, OPT_INFOS),
                 files      = get_opt(contxt, OPT_FILES),    // OK
                 confirm    = get_opt(contxt, OPT_CONFIRM),  // OK
@@ -220,6 +220,7 @@ entry_p m_copyfiles(entry_p contxt)
                             }
                         }
                     }
+
                     gui_copyfiles_end(); 
                 }
                 else
@@ -2015,15 +2016,53 @@ static pnode_p h_filetree(int id,
                             else 
                             if(pattern)
                             {
+                                #ifdef AMIGA
+                                // Use a static buffer, Installer.guide
+                                // restricts pattern length to 64. It 
+                                // seems like MatchPattern can use a lot
+                                // of stack if we use long patterns, so 
+                                // let's not get rid of this limitation. 
+                                static char pat[BUFSIZ]; 
+                                LONG w = ParsePattern(str(pattern), pat, sizeof(pat)); 
+
+                                // Can we parse the pattern?
+                                if(w >= 0)
+                                {
+                                    // Use pattern matching if we have one or more
+                                    // wildcards, otherwise use plain strcmp().
+                                    if((w && MatchPattern(pat, entry->d_name)) ||
+                                       (w && !strcmp(pat, entry->d_name)))
+                                    {
+                                        // Match, get proper type.
+                                        type = h_exists(n_src); 
+                                    }
+                                    else
+                                    {
+                                        // Not a match, skip this.
+                                        type = 0; 
+                                    }
+                                }
+                                else
+                                {
+                                    // We probably had a buffer overflow.
+                                    // No more pattern matching today.
+                                    error(id, ERR_OVERFLOW, str(pattern)); 
+                                    pattern = NULL; 
+                                }
+                                #else
                                 type = h_exists(n_src); 
+                                #endif
                             }
                             else
                             {
+                                // File or directory? 
                                 type = h_exists(n_src); 
                             }
 
+                            // If we have a directory, recur.
                             if(type == 2)
                             {
+                                // Unless the (files) option is set. 
                                 if(!files)
                                 {
                                     #ifndef AMIGA 
@@ -2031,6 +2070,7 @@ static pnode_p h_filetree(int id,
                                        strcmp(entry->d_name, ".."))
                                     #endif
                                     {
+                                        // Get tree of subdirectory.
                                         node->next = h_filetree
                                         (
                                             id, 
@@ -2041,12 +2081,17 @@ static pnode_p h_filetree(int id,
                                             pattern
                                         ); 
 
+                                        // Fast forward to the end of
+                                        // the list.
                                         while(node->next)
                                         {
                                             node = node->next; 
                                         }
                                     }
                                 }
+
+                                // We don't need to store the names
+                                // of directories, release them.
                                 free(n_src); 
                                 free(n_dst); 
                             }
@@ -2062,6 +2107,7 @@ static pnode_p h_filetree(int id,
                                 }
                                 else
                                 {
+                                    error(PANIC); 
                                     break; 
                                 }
                             }
