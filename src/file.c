@@ -64,7 +64,7 @@ entry_p m_copyfiles(entry_p contxt)
                 dest       = get_opt(contxt, OPT_DEST),     // OK
                 newname    = get_opt(contxt, OPT_NEWNAME),  // OK
                 choices    = get_opt(contxt, OPT_CHOICES),  // OK
-                all        = get_opt(contxt, OPT_ALL),
+                all        = get_opt(contxt, OPT_ALL),      // OK
                 pattern    = get_opt(contxt, OPT_PATTERN),  // OK
                 infos      = get_opt(contxt, OPT_INFOS),
                 files      = get_opt(contxt, OPT_FILES),    // OK
@@ -86,22 +86,43 @@ entry_p m_copyfiles(entry_p contxt)
                              NULL : get_opt(optional, OPT_ASKUSER);
 
         DNUM = 0; 
-        all = fonts = 
-        fail = nofail = oknodelete = force = askuser; 
-/*
- *  ALL krÃ¤vs fÃ¶r att kopiera nÃ¥got annat Ã¤n en fil ?
- *  ja, om source är en katalog så tycks all krävas. Eller
- *  pattern / choices? 
- *
- *  prompt och help behövs bara om confirm
- *
- *  pattern, choices och all är mutex
-*/
+        fonts = force = askuser; 
+
+        // The (pattern) (choices) and (all) options
+        // are mutually exclusive. 
+        if((pattern && (choices || all)) ||
+           (choices && (pattern || all)) ||
+           (all && (choices || pattern)))
+        {
+            error(contxt->id, ERR_OPTION_MUTEX, 
+                  "pattern/choices/all"); 
+            RCUR; 
+        }
+
+        // The (fail) (nofail) and (oknodelete) options
+        // are mutually exclusive. 
+        if((fail && (nofail || oknodelete)) ||
+           (nofail && (fail || oknodelete)) ||
+           (oknodelete && (nofail || fail)))
+        {
+            error(contxt->id, ERR_OPTION_MUTEX, 
+                  "fail/nofail/oknodelete"); 
+            RCUR; 
+        }
+
         if(source && dest) 
         {
             pnode_p tree; 
             const char *src = str(source), 
                        *dst = str(dest); 
+
+            if(h_exists(src) == 2 &&
+               !all && !choices && !pattern)
+            {
+                error(contxt->id, ERR_MISSING_OPTION, 
+                      "all/choices/pattern"); 
+                RCUR; 
+            }
 
             if(get_numvar(contxt, "@pretend") && !safe)
             {

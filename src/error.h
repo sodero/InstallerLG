@@ -55,7 +55,8 @@ typedef enum
     ERR_NO_ITEM, 
     ERR_INVALID_APP,
     ERR_INVALID_VOLUME,
-    ERR_INVALID_ASSIGN
+    ERR_INVALID_ASSIGN,
+    ERR_OPTION_MUTEX
 } error_t; 
 
 //----------------------------------------------------------------------------

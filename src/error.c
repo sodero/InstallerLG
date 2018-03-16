@@ -84,7 +84,8 @@ int error(int id, error_t type, const char *info)
         "No such item", 
         "Invalid application name",
         "Invalid name of volume",
-        "Invalid name of assign"
+        "Invalid name of assign",
+        "Options are mutually exclusive"
     };
 
     // Unless ERR_NONE...
