@@ -27,6 +27,7 @@ const char *tr(res_t r)
         "Copying file(s)", 
         "Overwrite existing directory?",
         "Abort copy '%s' to '%s'.\n", 
+        "Could not copy '%s' to '%s'.\n", 
         "Delete write protected file?", 
         "Delete file?", 
         "Deleted '%s'.\n",

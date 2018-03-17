@@ -32,7 +32,8 @@
 //----------------------------------------------------------------------------
 // Helper functions
 //----------------------------------------------------------------------------
-static int h_copyfile(entry_p contxt, const char *src, const char *dst, int info, int nogauge);
+typedef enum { NOFAIL, OKNODELETE, FORCE, ASKUSER } cmode_t; 
+static int h_copyfile(entry_p contxt, const char *src, const char *dst, int info, int nogauge, cmode_t mode);
 static int h_exists(const char *n);
 static char *h_fileonly(int id, const char *s);
 static pnode_p h_filetree(int id, const char *src, const char *dst, int files, entry_p choices, entry_p pattern);
@@ -66,11 +67,11 @@ entry_p m_copyfiles(entry_p contxt)
                 choices    = get_opt(contxt, OPT_CHOICES),  // OK
                 all        = get_opt(contxt, OPT_ALL),      // OK
                 pattern    = get_opt(contxt, OPT_PATTERN),  // OK
-                infos      = get_opt(contxt, OPT_INFOS),
+                infos      = get_opt(contxt, OPT_INFOS),    // OK
                 files      = get_opt(contxt, OPT_FILES),    // OK
                 confirm    = get_opt(contxt, OPT_CONFIRM),  // OK
                 safe       = get_opt(contxt, OPT_SAFE),     // OK
-                optional   = get_opt(contxt, OPT_OPTIONAL),
+                optional   = get_opt(contxt, OPT_OPTIONAL), // OK
                 delopts    = get_opt(contxt, OPT_DELOPTS),  // OK
                 nogauge    = get_opt(contxt, OPT_NOGAUGE),  // OK
                 fonts      = get_opt(contxt, OPT_FONTS),
@@ -225,7 +226,16 @@ entry_p m_copyfiles(entry_p contxt)
                         switch(cur->type)
                         {
                             case 0:  continue; 
-                            case 1:  DNUM = h_copyfile(contxt, cur->name, cur->copy, infos ? 1 : 0, nogauge ? 1 : 0); break; 
+                            case 1:  DNUM = h_copyfile
+                                     (
+                                        contxt, 
+                                        cur->name, 
+                                        cur->copy, 
+                                        infos ? 1 : 0, 
+                                        nogauge ? 1 : 0,
+                                        nofail ? 1 : 0 
+                                     ); 
+                                     break; 
                             case 2:  DNUM = h_makedir(contxt, cur->copy); break; 
                             default: error(PANIC); DNUM = 0; 
                         }
@@ -386,7 +396,8 @@ entry_p m_copylib(entry_p contxt)
                                 (
                                     contxt, s, f,       
                                     infos ? 1 : 0,
-                                    1 // nogauge
+                                    1, // nogauge
+                                    0
                                 );
                             }
                             else
@@ -409,7 +420,8 @@ entry_p m_copylib(entry_p contxt)
                                         (
                                             contxt, s, f,       
                                             infos ? 1 : 0,
-                                            1 // nogauge
+                                            1, // nogauge
+                                            0 
                                         );
                                     }
                                     else
@@ -1731,7 +1743,8 @@ static int h_copyfile(entry_p contxt,
                       const char *src, 
                       const char *dst,
                       int info, 
-                      int nogauge)
+                      int nogauge, 
+                      cmode_t mode)
 {
     if(contxt && src && dst)
     { 
@@ -1739,6 +1752,7 @@ static int h_copyfile(entry_p contxt,
         { 
             static char buf[BUFSIZ]; 
             FILE *fs = fopen(src, "r"); 
+
             if(fs)
             {
                 FILE *fd = fopen(dst, "w"); 
@@ -1766,12 +1780,9 @@ static int h_copyfile(entry_p contxt,
                     // should be zero.
                     if(!n)
                     {
-                        // Write to the log file unless logging
-                        // is disabled. 
-                        if(get_numvar(contxt, "@log"))
-                        {
-                            h_log(contxt, tr(S_CPYD), src, dst); 
-                        }
+                        // Write to the log file (if logging is
+                        // enabled). 
+                        h_log(contxt, tr(S_CPYD), src, dst); 
 
                         // Are we going to copy the icon as well?
                         if(info)
@@ -1789,7 +1800,15 @@ static int h_copyfile(entry_p contxt,
                                 snprintf(id, sizeof(id), "%s.info", dst); 
 
                                 // Recur without info set. 
-                                return h_copyfile(contxt, is, id, 0, nogauge); 
+                                return h_copyfile
+                                (
+                                    contxt, 
+                                    is, 
+                                    id, 
+                                    0, 
+                                    nogauge,
+                                    mode
+                                ); 
                             }
                         }
 
@@ -1800,12 +1819,31 @@ static int h_copyfile(entry_p contxt,
                 else
                 {
                     fclose(fs); 
-                    error(contxt->id, ERR_WRITE_FILE, dst); 
+
+                    if(mode & (1 << NOFAIL))
+                    {
+                        // Ignore failure. 
+                        h_log(contxt, tr(S_NCPY), src, dst); 
+                        return 1;
+                    }
+                    else
+                    {
+                        error(contxt->id, ERR_WRITE_FILE, dst); 
+                    }
                 }
             }
             else
             {
-                error(contxt->id, ERR_READ_FILE, src); 
+                if(mode & (1 << NOFAIL))
+                {
+                    // Ignore failure. 
+                    h_log(contxt, tr(S_NCPY), src, dst); 
+                    return 1;
+                }
+                else
+                {
+                    error(contxt->id, ERR_READ_FILE, src); 
+                }
             }
         }
         else
