@@ -50,6 +50,7 @@ typedef enum
     S_MAPP, /* "Failed creating MUI application" */
     S_FINT, /* "Initialization failed" */
     S_ERRS, /* "Error" */
+    S_SUCC, /* "Success" */
     S_LERR, /* "Line %d: %s '%s'" */
     S_ULNV, /* "Novice User - All Actions Automatic" */
     S_ULIN, /* "Intermediate User - Limited Manual Control" */
@@ -67,6 +68,10 @@ typedef enum
     S_WRKN, /* "Working on installation...\n\n" */
     S_SDIR, /* "Select directory" */
     S_SFLE, /* "Select file" */
+    S_ACRT, /* "Assign '%s' to '%s'" */
+    S_ADEL, /* "Remove assign '%s'" */
+    S_ACRE, /* "Could not assign '%s' to '%s'" */
+    S_ADLE, /* "Could not remove assign '%s'" */
 
     // Out of range.
     S_GONE,

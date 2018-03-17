@@ -59,6 +59,7 @@ const char *tr(res_t r)
         "Failed creating MUI application",
         "Initialization failed",
         "Error",
+        "Success",
         "Line %d: %s '%s'",
         "Novice User - All Actions Automatic",
         "Intermediate User - Limited Manual Control",
@@ -76,6 +77,10 @@ const char *tr(res_t r)
         "Working on installation...\n\n",
         "Select directory",
         "Select file",
+        "Assign '%s' to '%s'\n",
+        "Remove assign '%s'\n",
+        "Could not assign '%s' to '%s'\n",
+        "Could not remove assign '%s'\n",
 
         // Out of range.
         "GONE"

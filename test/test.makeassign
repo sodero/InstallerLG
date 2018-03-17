@@ -5,6 +5,10 @@
 (makeassign "t" "ram:" (safe) (quiet)) ; "","Line 1: syntax error '('",""
 (makeassign "t" (safe) (quiet)) ; "","Line 1: syntax error '('",""
 (makeassign "t" (safe) err) ; "","Line 1: syntax error 'err'",""
+
 (makeassign "t" ) ; "","2",""
 (makeassign "t" (safe)) ; "","2",""
+(set @pretend 1) (makeassign "t" ) ; "","1",""
+(set @pretend 1) (makeassign "t" (safe)) ; "","2",""
+
 (makeassign "t" (safe) err) ; "","Line 1: syntax error 'err'",""

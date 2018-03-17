@@ -911,50 +911,77 @@ entry_p m_foreach(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_makeassign(entry_p contxt)
 {
-    /*
-        AssignLock() to create assignment
-        AssignAdd() to add dir to existing assign.  
-
-        WHAT ABOUT ADDING TO EXISTING ASSIGNS? 
-        HOW DOES THE CBM INSTALLER DO THIS?
-    */
-
-    if(c_sane(contxt, 1)) // WRONG <path> is optional
+    if(c_sane(contxt, 1))
     {
-        // Assume failure..
-        DNUM = 0; 
+        entry_p safe = get_opt(contxt, OPT_SAFE);
 
-        // Are we going to add an assign?
-        if(CARG(2) && CARG(2) != end() &&
-           CARG(2)->type != OPTION)
-        { 
-            #ifdef AMIGA
-            BPTR lock = (BPTR) Lock(str(CARG(2)), ACCESS_READ);
-            if(lock)
-            {
-                // Create the assign. After this,
-                // the lock will be owned by the 
-                // system, do not unlock or use.
-                DNUM = AssignLock(str(CARG(1)), lock) ? 1 : 0; 
+        // Is this a safe operation or are we not 
+        // running in pretend mode? 
+        if(safe || !get_numvar(contxt, "@pretend"))
+        {
+            // The name of the assign. 
+            char *asn = str(CARG(1)); 
+
+            // Assume failure..
+            DNUM = 0; 
+
+            // Are we going to create an assign?
+            if(CARG(2) && CARG(2) != end() &&
+               CARG(2)->type != OPTION)
+            { 
+                // The destination. 
+                char *dst = str(CARG(2)); 
+
+                #ifdef AMIGA
+                BPTR lock = (BPTR) Lock(dst, ACCESS_READ);
+                if(lock)
+                {
+                    // Create the assign. After this,
+                    // the lock will be owned by the 
+                    // system, do not unlock or use.
+                    DNUM = AssignLock(asn, lock) ? 1 : 0; 
+                }
+                #else
+                DNUM = 1;
+                #endif
+                
+                // Log the outcome. 
+                h_log
+                (
+                    contxt, 
+                    DNUM ? tr(S_ACRT) : tr(S_ACRE),
+                    asn, 
+                    dst
+                ); 
             }
-            #else
-            DNUM = 1;
-            #endif
+            else
+            {
+                #ifdef AMIGA
+                // Remove assign.
+                DNUM = AssignLock(str(CARG(1)), NULL) ? 1 : 0; 
+                #else
+                DNUM = 2;
+                #endif
+
+                // Log the outcome. 
+                h_log
+                (
+                    contxt, 
+                    DNUM ? tr(S_ADEL) : tr(S_ADLE),
+                    asn
+                ); 
+            }
+
+            if(!DNUM)
+            {
+                // Could not create / rm assign / get lock. 
+                error(contxt->id, ERR_ASSIGN, str(CARG(1))); 
+            }
         }
         else
         {
-            #ifdef AMIGA
-            // Remove assign.
-            DNUM = AssignLock(str(CARG(1)), NULL) ? 1 : 0; 
-            #else
-            DNUM = 2;
-            #endif
-        }
-
-        if(!DNUM)
-        {
-            // Could not create / rm assign / get lock. 
-            error(contxt->id, ERR_ASSIGN, str(CARG(1))); 
+            // Pretend. 
+            DNUM = 1; 
         }
     }
     else

@@ -72,9 +72,9 @@ Full: * = Tested
 * (rename <old> <new> (help..) (prompt..) (confirm..) (safe))
 * (asknumber (prompt..) (help..) (range..) (default..))
 * (foreach <dir> <pattern> <statements>)
+* (makeassign <assign> <path> (safe))
 
 // VERIFY / COMPARE WITH OS 3.9
-(makeassign <assign> <path> (safe)) VERIFY
 (earlier <file1> <file2>) - VERIFY (dirs are broken)
 (getversion <file> (resident)) VERIFY
 (protect <file> [<string of flags to change>] [<dec. mask>] <parameters>)
