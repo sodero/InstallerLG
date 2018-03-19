@@ -57,7 +57,7 @@
 #define DISPATCH(C) static IPTR C ## Dispatch (DISPATCH_ARGS)    
 #define CLASS_DATA(C) C ## Data
 #define TAGBASE_sTx (TAG_USER | 27<<16)
-#define MUIDSP __attribute__((always_inline)) static 
+#define MUIDSP static inline __attribute__((always_inline)) 
 
 //----------------------------------------------------------------------------
 // Debug and logging macros
@@ -2191,9 +2191,9 @@ int gui_error(int id,
         .es_StructSize = sizeof(struct EasyStruct), 
     };
 
-    es.es_Title = tr(S_ERRS); 
+    es.es_Title = (UBYTE *) tr(S_ERRS); 
     es.es_TextFormat = (UBYTE *) &err; 
-    es.es_GadgetFormat = tr(S_OKEY); 
+    es.es_GadgetFormat = (UBYTE *) tr(S_OKEY); 
     snprintf(err, sizeof(err), tr(S_LERR), id, type, info);
 
     // We don't have any way of knowing

@@ -92,7 +92,7 @@ int arg_init(int argc, char **argv)
 
             if(dob)
             {
-                UBYTE **tt = dob->do_ToolTypes; 
+                char **tt = (char **) dob->do_ToolTypes; 
                 
                 if(tt)
                 {

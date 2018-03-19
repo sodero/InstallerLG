@@ -352,7 +352,7 @@ entry_p m_getdevice(entry_p contxt)
             // Get vol info from file / dir lock.
             if(Info(lock, &id))
             {
-                struct DosList *dl = id.id_VolumeNode;
+                struct DosList *dl = (struct DosList *) id.id_VolumeNode;
                 UnLock(lock);
 
                 if(dl)
