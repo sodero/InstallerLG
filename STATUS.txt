@@ -74,9 +74,9 @@ Full: * = Tested
 * (foreach <dir> <pattern> <statements>)
 * (makeassign <assign> <path> (safe))
 * (earlier <file1> <file2>)
+* (getversion <file> (resident))
 
 // VERIFY / COMPARE WITH OS 3.9
-(getversion <file> (resident)) VERIFY
 (protect <file> [<string of flags to change>] [<dec. mask>] <parameters>)
 (startup (prompt..) (command..))
 

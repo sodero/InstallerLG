@@ -20,4 +20,4 @@
 (getversion "../test/data.copylib.i1.TheBar_2619_Aros_ppc") ; "","1703955",""
 (getversion "../test/data.copylib.i1.TheBar_2619_Aros_x86_64") ; "","1703955",""
 (getversion "../test/data.copylib.i1.TheBar_2619_MorphOS") ; "","1703955",""
-
+(getversion "_gvf_") ; "rm -Rf _gvf_ && touch _gvf_","0","rm -f _gvf_"
