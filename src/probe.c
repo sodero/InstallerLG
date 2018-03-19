@@ -130,16 +130,16 @@ entry_p m_earlier(entry_p contxt)
         // Get information about the first file.
         if(stat(str(CARG(1)), &f1))
         {
-            // Could not read from file. 
-            error(contxt->id, ERR_READ_FILE, str(CARG(1))); 
+            // Could not read from file / dir. 
+            error(contxt->id, ERR_READ, str(CARG(1))); 
             RNUM(0); 
         }
 
         // Get information about the second file.
         if(stat(str(CARG(2)), &f2))
         {
-            // Could not read from file. 
-            error(contxt->id, ERR_READ_FILE, str(CARG(2))); 
+            // Could not read from file / dir. 
+            error(contxt->id, ERR_READ, str(CARG(2))); 
             RNUM(0); 
         }
 
