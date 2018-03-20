@@ -41,7 +41,7 @@ void set_strvar(entry_p c, char *v, char *n);
 #ifdef __AROS__
 #define B_TO_CSTR(S) AROS_BSTR_ADDR(S)
 #else
-#define B_TO_CSTR(S) (*((char *) S) ? (((char *) S) + 1) : ((char *) S)) //(*S ? (((char *) S) + 1) : BADDR(S))
+#define B_TO_CSTR(S) (*((char *) BADDR(S)) ? (((char *) BADDR(S)) + 1) : ((char *) BADDR(S))) //(*S ? (((char *) S) + 1) : BADDR(S))
 #endif
 
 // Fixa alla RSTR(strdup(X... strdup gillar inte NULL
