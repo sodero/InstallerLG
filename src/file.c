@@ -1400,6 +1400,7 @@ entry_p m_startup(entry_p contxt)
 //      create text file from other text files and strings
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+//
 //----------------------------------------------------------------------------
 entry_p m_textfile(entry_p contxt)
 {
@@ -1414,70 +1415,155 @@ entry_p m_textfile(entry_p contxt)
                 confirm  = get_opt(contxt, OPT_CONFIRM),
                 safe     = get_opt(contxt, OPT_SAFE); 
 
-        prompt = help = confirm = safe; 
+        DNUM = 0; 
 
         if(dest)
         {
-            const char *fn = str(dest); 
-            FILE *fp = fopen(fn, "a"); 
-            if(fp)
+            // Find out if we need confirmation...
+            if(confirm)
             {
-                DNUM = 1; 
-                if(include)
+                // The default threshold is expert.
+                int level = get_numvar(contxt, "@user-level"),
+                    th = 2;
+
+                // If the (confirm ...) option contains 
+                // something that can be translated into
+                // a new threshold value...
+                if(confirm->children && 
+                   confirm->children[0] && 
+                   confirm->children[0] != end())
                 {
-                    static char buf[BUFSIZ]; 
-                    FILE *fs = fopen(str(include), "r"); 
-                    if(fs)
-                    {
-                        size_t n = fread(buf, 1, BUFSIZ, fs);
-                        while(n)
-                        {
-                            if(fwrite(buf, 1, n, fp) != n)
-                            {
-                                error(contxt->id, ERR_WRITE_FILE, fn); 
-                                DNUM = 0; 
-                                break; 
-                            }
-                            n = fread(buf, 1, BUFSIZ, fs);
-                        }
-                        fclose(fs); 
-                    }
-                    else
-                    {
-                        error(contxt->id, ERR_READ_FILE, str(include)); 
-                        DNUM = 0;  
-                    }
+                    // ...then do so.
+                    th = num(confirm->children[0]);
                 }
-                if(append && DNUM)
+                                
+                // If we are below the threshold value,
+                // don't care about getting confirmation
+                // from the user.
+                if(level < th) 
                 {
-                    if(fputs(str(append), fp) == EOF)
+                    confirm = NULL; 
+                }
+
+                // Make sure that we have the prompt and
+                // help texts that we need if 'confirm'
+                // is set. It's not strictly necessary 
+                // if 'confirm' is not set, but it's not
+                // valid code so lets fail anyway.
+                if(!prompt || !help)
+                {
+                    error(contxt->id, ERR_MISSING_OPTION, 
+                          prompt ? "help" : "prompt"); 
+                    RCUR; 
+                }
+            }
+
+
+            // If we need confirmation and the user skips
+            // or aborts, return. On abort, the HALT will
+            // be set by h_confirm. 
+            if(confirm && 
+               !h_confirm(contxt, str(prompt), str(help)))
+            {
+                RCUR; 
+            }
+
+            // Is this a safe operation or are we not 
+            // running in pretend mode? 
+            if(safe || !get_numvar(contxt, "@pretend"))
+            {
+                // Overwrite existing file. 
+                const char *fn = str(dest); 
+                FILE *fp = fopen(fn, "w"); 
+
+                if(fp)
+                {
+                    // Assume success. 
+                    DNUM = 1; 
+
+                    // Include before append. 
+                    if(include)
                     {
-                        error(contxt->id, ERR_WRITE_FILE, fn); 
+                        // File to copy. 
+                        const char *fi = str(include); 
+                        FILE *fs = fopen(fi, "r"); 
+
+                        if(fs)
+                        {
+                            static char buf[BUFSIZ]; 
+                            size_t n = fread(buf, 1, BUFSIZ, fs);
+
+                            // Log operation.
+                            h_log(contxt, tr(S_INCL), fi, fn); 
+
+                            // Copy the whole file. 
+                            while(n)
+                            {
+                                if(fwrite(buf, 1, n, fp) != n)
+                                {
+                                    error(contxt->id, ERR_WRITE_FILE, fn); 
+                                    DNUM = 0; 
+                                    break; 
+                                }
+
+                                // More data? 
+                                n = fread(buf, 1, BUFSIZ, fs);
+                            }
+
+                            fclose(fs); 
+                        }
+                    }
+
+                    // Don't append if the include failed. 
+                    if(append && DNUM)
+                    {
+                        // String to append. 
+                        const char *ap = str(append); 
+
+                        // Log operation.
+                        h_log(contxt, tr(S_APND), ap, fn); 
+
+                        if(fputs(ap, fp) == EOF)
+                        {
+                            error(contxt->id, ERR_WRITE_FILE, fn); 
+                            DNUM = 0; 
+                        }
+                    }
+
+                    fclose(fp); 
+
+                    // We must append and / or include,
+                    // or else this doesn't make sense.
+                    if(!append && !include)
+                    {
+                        error(contxt->id, ERR_NOTHING_TO_DO, contxt->name); 
                         DNUM = 0; 
                     }
                 }
-                fclose(fp); 
-                if(append || include)
+                else
                 {
-                    RCUR; 
+                    error(contxt->id, ERR_WRITE_FILE, fn); 
                 }
-                error(contxt->id, ERR_NOTHING_TO_DO, contxt->name); 
-                RNUM(0); 
             }
-            error(contxt->id, ERR_WRITE_FILE, fn); 
+            else
+            {
+                // A non safe operation in pretend
+                // mode always succeeds. 
+                DNUM = 1; 
+            }
         }
         else
         {
             error(contxt->id, ERR_MISSING_OPTION, "dest"); 
-            RCUR; 
         }
-        RNUM(0); 
     }
     else
     {
         error(PANIC); 
-        RCUR; 
     }
+            
+    // Success / failure. 
+    RCUR; 
 }
 
 //----------------------------------------------------------------------------

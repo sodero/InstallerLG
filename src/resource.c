@@ -81,6 +81,8 @@ const char *tr(res_t r)
         "Remove assign '%s'\n",
         "Could not assign '%s' to '%s'\n",
         "Could not remove assign '%s'\n",
+        "Append '%s' to '%s'\n",
+        "Include '%s' in '%s'\n",
 
         // Out of range.
         "GONE"

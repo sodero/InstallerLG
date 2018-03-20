@@ -72,6 +72,8 @@ typedef enum
     S_ADEL, /* "Remove assign '%s'" */
     S_ACRE, /* "Could not assign '%s' to '%s'" */
     S_ADLE, /* "Could not remove assign '%s'" */
+    S_APND, /* "Append '%s' to '%s'\n" */
+    S_INCL, /* "Include '%s' in '%s'\n" */
 
     // Out of range.
     S_GONE,
