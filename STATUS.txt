@@ -76,9 +76,9 @@ Full: * = Tested
 * (earlier <file1> <file2>)
 * (getversion <file> (resident))
 * (textfile (prompt..) (help..) (dest..) (append) (include..) (confirm..) (safe))
+* (makedir <name> (prompt..) (help..) (infos) (confirm..) (safe))
 
 // VERIFY / COMPARE WITH OS 3.9
- (makedir <name> (prompt..) (help..) (infos) (confirm..) (safe))
 (protect <file> [<string of flags to change>] [<dec. mask>] <parameters>)
 (startup (prompt..) (command..))
 

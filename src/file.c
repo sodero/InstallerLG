@@ -1063,17 +1063,47 @@ entry_p m_makedir(entry_p contxt)
         // running in pretend mode? 
         if(safe || !get_numvar(contxt, "@pretend"))
         {
-            DNUM = h_makedir(contxt, str(CARG(1))); 
+            // The name of the directory. 
+            const char *dn = str(CARG(1)); 
 
-            if(infos)
+            // Create the directory. 
+            DNUM = h_makedir(contxt, dn); 
+
+            // Are we supposed to create an icon
+            // as well? 
+            if(infos && DNUM)
             {
                 #ifdef AMIGA
-                /*
-                icon.library/GetDefDiskObject
-                icon.library/PutDiskObject
-                in WORKBENCH_WORKBENCH_H:
-                #define WBDRAWER 2
-                */
+                // Get the default drawer icon from the OS. 
+                struct DiskObject *obj = (struct DiskObject *) 
+                    GetDefDiskObject(WBDRAWER);
+
+                // Assume failure. 
+                DNUM = 0; 
+
+                // If we have a default icon, let our newly
+                // created directory have it.
+                if(obj)
+                {
+                    // Create new .info.
+                    if(PutDiskObject(dn, obj))
+                    {
+                        // Done. 
+                        DNUM = 1; 
+                    }
+
+                    // Free def. icon. 
+                    FreeDiskObject(obj);
+                }
+
+                // If any of the above failed, ioerr 
+                // will be set. Export that value as
+                // a variable.
+                if(!DNUM)
+                {
+                    LONG ioe = IoErr(); 
+                    set_numvar(contxt, "@ioerr", ioe); 
+                }
                 #endif
             }
         }
