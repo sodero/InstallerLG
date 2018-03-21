@@ -78,6 +78,7 @@ Full: * = Tested
 * (textfile (prompt..) (help..) (dest..) (append) (include..) (confirm..) (safe))
 
 // VERIFY / COMPARE WITH OS 3.9
+ (makedir <name> (prompt..) (help..) (infos) (confirm..) (safe))
 (protect <file> [<string of flags to change>] [<dec. mask>] <parameters>)
 (startup (prompt..) (command..))
 
@@ -86,5 +87,4 @@ Partial:
 (copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)
 (copylib (prompt..) (help..) (source..) (dest..) (newname..) (infos)
 (delete file (help..) (prompt..) (confirm..) 
-(makedir <name> (prompt..) (help..) (infos) (confirm..) (safe))
 (tooltype (prompt..) (help..) (dest..) (settooltype..) (setstack..)

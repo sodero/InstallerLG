@@ -1012,7 +1012,6 @@ entry_p m_makedir(entry_p contxt)
                 safe     = get_opt(CARG(2), OPT_SAFE); 
 
         DNUM = 0; 
-        infos = NULL; 
 
         // Find out if we need confirmation...
         if(confirm)
@@ -1065,6 +1064,18 @@ entry_p m_makedir(entry_p contxt)
         if(safe || !get_numvar(contxt, "@pretend"))
         {
             DNUM = h_makedir(contxt, str(CARG(1))); 
+
+            if(infos)
+            {
+                #ifdef AMIGA
+                /*
+                icon.library/GetDefDiskObject
+                icon.library/PutDiskObject
+                in WORKBENCH_WORKBENCH_H:
+                #define WBDRAWER 2
+                */
+                #endif
+            }
         }
         else
         {
