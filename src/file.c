@@ -191,9 +191,7 @@ entry_p m_copyfiles(entry_p contxt)
 
                     // Make sure that we have the prompt and
                     // help texts that we need if 'confirm'
-                    // is set. It's not strictly necessary 
-                    // if 'confirm' is not set, but it's not
-                    // valid code so lets fail anyway.
+                    // is set.
                     if(!prompt || !help)
                     {
                         cur = NULL; 
@@ -1007,22 +1005,82 @@ entry_p m_makedir(entry_p contxt)
     // of the directory to be created.
     if(c_sane(contxt, 1))
     {
-        entry_p opt = contxt->children[1]; 
-        if(opt)
+        entry_p prompt   = get_opt(CARG(2), OPT_PROMPT),
+                help     = get_opt(CARG(2), OPT_HELP),
+                infos    = get_opt(CARG(2), OPT_INFOS),
+                confirm  = get_opt(CARG(2), OPT_CONFIRM),
+                safe     = get_opt(CARG(2), OPT_SAFE); 
+
+        DNUM = 0; 
+        infos = NULL; 
+
+        // Find out if we need confirmation...
+        if(confirm)
         {
-            // handle options
+            // The default threshold is expert.
+            int level = get_numvar(contxt, "@user-level"),
+                th = 2;
+
+            // If the (confirm ...) option contains 
+            // something that can be translated into
+            // a new threshold value...
+            if(confirm->children && 
+               confirm->children[0] && 
+               confirm->children[0] != end())
+            {
+                // ...then do so.
+                th = num(confirm->children[0]);
+            }
+                            
+            // If we are below the threshold value,
+            // don't care about getting confirmation
+            // from the user.
+            if(level < th) 
+            {
+                confirm = NULL; 
+            }
+
+            // Make sure that we have the prompt and
+            // help texts that we need if 'confirm'
+            // is set.
+            if(!prompt || !help)
+            {
+                error(contxt->id, ERR_MISSING_OPTION, 
+                      prompt ? "help" : "prompt"); 
+                RCUR; 
+            }
         }
-        RNUM
-        (
-            h_makedir(contxt, str(CARG(1))); 
-        ); 
+
+        // If we need confirmation and the user skips
+        // or aborts, return. On abort, the HALT will
+        // be set by h_confirm. 
+        if(confirm && 
+           !h_confirm(contxt, str(prompt), str(help)))
+        {
+            RCUR; 
+        }
+
+        // Is this a safe operation or are we not 
+        // running in pretend mode? 
+        if(safe || !get_numvar(contxt, "@pretend"))
+        {
+            DNUM = h_makedir(contxt, str(CARG(1))); 
+        }
+        else
+        {
+            // A non safe operation in pretend
+            // mode always succeeds. 
+            DNUM = 1; 
+        }
     }
     else
     {
         // The parser is broken
         error(PANIC); 
-        RNUM(0);
     }
+    
+    // Success / failure. 
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -1447,9 +1505,7 @@ entry_p m_textfile(entry_p contxt)
 
                 // Make sure that we have the prompt and
                 // help texts that we need if 'confirm'
-                // is set. It's not strictly necessary 
-                // if 'confirm' is not set, but it's not
-                // valid code so lets fail anyway.
+                // is set.
                 if(!prompt || !help)
                 {
                     error(contxt->id, ERR_MISSING_OPTION, 
@@ -1559,6 +1615,7 @@ entry_p m_textfile(entry_p contxt)
     }
     else
     {
+        // The parser is broken
         error(PANIC); 
     }
             
@@ -1776,10 +1833,7 @@ entry_p m_rename(entry_p contxt)
 
             // Make sure that we have the prompt and
             // help texts that we need if 'confirm'
-            // is set. It's not strictly necessary 
-            // if 'confirm' is not set, but it's not
-            // valid code so lets fail anyway. OS3.9
-            // isn't this strict though. Relax?
+            // is set.
             if(!prompt || !help)
             {
                 error(contxt->id, ERR_MISSING_OPTION, 
