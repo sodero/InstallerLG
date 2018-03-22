@@ -1,3 +1,5 @@
+(protect "_pt_") ; "","0",""
+(protect "_pt_" (override $0f)) ; "","15",""
 (protect) ; "","Line 1: syntax error ')'",""
 (protect "_pt_" "+d" err (override $0f)) ; "","Line 1: syntax error 'err'",""
 (protect "_pt_" "+d" (override $0f)) ; "","14",""
@@ -34,3 +36,5 @@
 (protect "_pt_" "240" (override $ff)) ; "","240",""
 (protect "_pt_" %11110000 (override $00)) ; "","240",""
 (protect "_pt_" 128 (override $00)) ; "","128",""
+
+

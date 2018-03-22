@@ -1147,72 +1147,125 @@ entry_p m_makedir(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_protect(entry_p contxt)
 {
-    // We need atleast two arguments
-    if(c_sane(contxt, 2))
+    // A single argument is all we need. 
+    if(c_sane(contxt, 1))
     {
-        LONG r = 0, mask = num(CARG(2)); 
+        LONG r = 0; 
         const char *file = str(CARG(1)); 
-        entry_p override = get_opt(CARG(3), OPT_OVERRIDE),
-                    safe = get_opt(CARG(3), OPT_SAFE); 
 
-        safe = NULL; 
-
-        if(mask)
+        if(CARG(2) && CARG(2) != end())
         {
-            r = mask; 
+            // Get with option.
+            if(CARG(2)->type == CONTXT)
+            {
+                entry_p override = get_opt(CARG(2), OPT_OVERRIDE);
+
+                if(override)
+                {
+                    r = num(override); 
+                }
+                else
+                {
+                    h_protect_get(contxt, file, &r);
+                }
+            }
+            else
+            {
+                LONG mask = num(CARG(2)); 
+                entry_p override = get_opt(CARG(3), OPT_OVERRIDE), 
+                        safe = get_opt(CARG(3), OPT_SAFE); 
+
+                // FIX THIS. 0 IS A VALID MASK. 
+                if(mask)
+                {
+                    r = mask; 
+                }
+                else
+                {
+                    int m = 0; 
+                    const char *flags = str(CARG(2)); 
+                    size_t n = strlen(flags); 
+
+                    if(!override)
+                    {
+                        // Get flags from file. 
+                        if(!h_protect_get(contxt, file, &r))
+                        {
+                            // Helper will set proper error
+                            RNUM(-1); 
+                        }
+                    }
+                    else
+                    {
+                        // Get flags from user. 
+                        r = num(override); 
+                    }
+                    
+                    // Invert 1-4. 
+                    r ^= 0x0f;
+
+                    // For all flags. 
+                    for(size_t i = 0; i < n; i++)
+                    {
+                        int b = 0; 
+
+                        // Which protection bit?
+                        switch(flags[i])
+                        {
+                            case '+': m = 1; break; 
+                            case '-': m = 2; break; 
+                            case 'h': b = 1 << 7; break; 
+                            case 's': b = 1 << 6; break; 
+                            case 'p': b = 1 << 5; break; 
+                            case 'a': b = 1 << 4; break; 
+                            case 'r': b = 1 << 3; break; 
+                            case 'w': b = 1 << 2; break; 
+                            case 'e': b = 1 << 1; break; 
+                            case 'd': b = 1 << 0; break; 
+                        }
+
+                        // Adding or subtracting?
+                        switch(m)
+                        {
+                            case 0: r = b; m = 1; break; 
+                            case 1: r |= b; break; 
+                            case 2: r &= ~b; break; 
+                        }
+                    }
+
+                    // Invert 1-4. 
+                    r ^= 0x0f;
+                }
+
+                if(!override)
+                {
+                    // Is this a safe operation or are we not 
+                    // running in pretend mode? 
+                    if(safe || !get_numvar(contxt, "@pretend"))
+                    {
+                        // Helper will set error on failure.
+                        r = h_protect_set(contxt, file, r);
+                    }
+                    else
+                    {
+                        // A non safe operation in pretend
+                        // mode always succeeds. 
+                        r = 1; 
+                    }
+                }
+                else
+                {
+                    // For testing only. 
+                    r = mask ? mask : r; 
+                }
+            }
         }
         else
         {
-            int m = 0; 
-            const char *flags = str(CARG(2)); 
-            size_t n = strlen(flags); 
-            if(override)
-            {
-                r = num(override); 
-            }
-            else if(!h_protect_get(contxt, file, &r))
-            {
-                // Helper will set proper error
-                RNUM(0); 
-            }
-            r ^= 0x0f; /* invert 1-4 */
-            for(size_t i = 0; i < n; i++)
-            {
-                int b = 0; 
-                switch(flags[i])
-                {
-                    case '+': m = 1; break; 
-                    case '-': m = 2; break; 
-                    case 'h': b = 1 << 7; break; 
-                    case 's': b = 1 << 6; break; 
-                    case 'p': b = 1 << 5; break; 
-                    case 'a': b = 1 << 4; break; 
-                    case 'r': b = 1 << 3; break; 
-                    case 'w': b = 1 << 2; break; 
-                    case 'e': b = 1 << 1; break; 
-                    case 'd': b = 1 << 0; break; 
-                }
-                switch(m)
-                {
-                    case 0: r = b; m = 1; break; 
-                    case 1: r |= b; break; 
-                    case 2: r &= ~b; break; 
-                }
-            }
-            r ^= 0x0f; /* invert 1-4 */
+            // Get without options.
+            h_protect_get(contxt, file, &r);
         }
-        if(!override)
-        {
-            if(!h_protect_set(contxt, file, r))
-            {
-                // Helper will set proper error
-                RNUM(0); 
-            }
-        }
-        else
-        {
-            r = mask ? mask : r; 
-        }
+            
         RNUM(r); 
     }
     else
@@ -2594,18 +2647,19 @@ static int h_protect_get(entry_p contxt,
             if(!done)
             {
                 error(contxt->id, ERR_GET_PERM, file); 
+                *mask = -1; 
             }
 
             h_log(contxt, tr(S_GMSK), file, *mask); 
             return done; 
         }
 #else
-        return TRUE; 
+        return 1; 
 #endif
     }
 
     error(PANIC); 
-    return FALSE; 
+    return 0; 
 }
 
 //----------------------------------------------------------------------------
@@ -2621,16 +2675,16 @@ static int h_protect_set(entry_p contxt,
         if(!SetProtection(file, mask))
         {
             error(contxt->id, ERR_SET_PERM, file); 
-            return FALSE; 
+            return 0; 
         }
 #endif
         h_log(contxt, tr(S_PTCT), file, mask); 
-        return TRUE; 
+        return 1; 
     }
     else
     {
         error(PANIC); 
-        return FALSE; 
+        return 0; 
     }
 }
 
