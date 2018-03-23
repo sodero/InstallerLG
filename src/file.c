@@ -1162,30 +1162,45 @@ entry_p m_protect(entry_p contxt)
 
                 if(override)
                 {
+                    // From user (script). 
                     r = num(override); 
                 }
                 else
                 {
+                    // From file. 
                     h_protect_get(contxt, file, &r);
                 }
             }
+            // Set value. 
             else
             {
-                LONG mask = num(CARG(2)); 
-                entry_p override = get_opt(CARG(3), OPT_OVERRIDE), 
-                        safe = get_opt(CARG(3), OPT_SAFE); 
+                // Assume string operation. 
+                const char *flg = str(CARG(2)); 
+                size_t len = strlen(flg); 
 
-                // FIX THIS. 0 IS A VALID MASK. 
-                if(mask)
+                entry_p safe = get_opt(CARG(3), OPT_SAFE),
+                        override = get_opt(CARG(3), OPT_OVERRIDE);
+
+                // If any numbers are present in the string, 
+                // treat it as an absolute mask instead.
+                for(size_t i = 0; i < len; i++)
                 {
-                    r = mask; 
+                    if(flg[i] < 58 &&
+                       flg[i] > 47)
+                    {
+                        // We no longer have a string.
+                        len = 0; 
+                        break; 
+                    }
                 }
-                else
+                
+                // Do we have a string? 
+                if(len)
                 {
+                    // Mode (+/-). 
                     int m = 0; 
-                    const char *flags = str(CARG(2)); 
-                    size_t n = strlen(flags); 
 
+                    // Use a real file or override? 
                     if(!override)
                     {
                         // Get flags from file. 
@@ -1197,7 +1212,7 @@ entry_p m_protect(entry_p contxt)
                     }
                     else
                     {
-                        // Get flags from user. 
+                        // Get flags from user (script). 
                         r = num(override); 
                     }
                     
@@ -1205,12 +1220,13 @@ entry_p m_protect(entry_p contxt)
                     r ^= 0x0f;
 
                     // For all flags. 
-                    for(size_t i = 0; i < n; i++)
+                    for(size_t i = 0; i < len; i++)
                     {
+                        // Mask.
                         int b = 0; 
 
                         // Which protection bit?
-                        switch(flags[i])
+                        switch(flg[i])
                         {
                             case '+': m = 1; break; 
                             case '-': m = 2; break; 
@@ -1236,6 +1252,11 @@ entry_p m_protect(entry_p contxt)
                     // Invert 1-4. 
                     r ^= 0x0f;
                 }
+                else
+                {
+                    // Use an absolute mask. 
+                    r = num(CARG(2)); 
+                }
 
                 if(!override)
                 {
@@ -1253,11 +1274,6 @@ entry_p m_protect(entry_p contxt)
                         r = 1; 
                     }
                 }
-                else
-                {
-                    // For testing only. 
-                    r = mask ? mask : r; 
-                }
             }
         }
         else
@@ -1266,6 +1282,7 @@ entry_p m_protect(entry_p contxt)
             h_protect_get(contxt, file, &r);
         }
             
+        // Success or failure. 
         RNUM(r); 
     }
     else
