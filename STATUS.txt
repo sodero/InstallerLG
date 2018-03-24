@@ -82,6 +82,8 @@ Full: * = Tested
 // VERIFY / COMPARE WITH OS 3.9
 (startup (prompt..) (command..))
 
+Fokus i askstring. Kolla retur.
+
 Partial:
 ------------------------------------------------------------------------------------
 (copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)

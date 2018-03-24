@@ -753,12 +753,22 @@ entry_p m_askstring(entry_p contxt)
 
         if(prompt && help && deflt)
         {
+            int hlt = 0; 
+
+            // Prompt user.
             const char *res = gui_string
             (
                 str(prompt), 
                 str(help), 
-                str(deflt)
+                str(deflt),
+                &hlt
             );
+
+            // Halt if abort.
+            if(hlt)
+            {
+                error(HALT); 
+            }
 
             RSTR(strdup(res)); 
         }

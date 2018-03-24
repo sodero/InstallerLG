@@ -190,6 +190,7 @@ struct MUIP_InstallerGui_String
     ULONG Message;
     ULONG Help;
     ULONG Default; 
+    ULONG Halt; 
 };
 
 struct MUIP_InstallerGui_Number
@@ -235,8 +236,8 @@ struct MUIP_InstallerGui_AskFile
 #define MUIV_InstallerGui_Tick             (TAGBASE_sTx + 207)
 #define MUIV_InstallerGui_AbortOnly        (TAGBASE_sTx + 208)
 #define MUIV_InstallerGui_ProceedRun       (TAGBASE_sTx + 209)
-#define MUIV_InstallerGui_AbortRun         (TAGBASE_sTx + 210)
-#define MUIV_InstallerGui_SkipRun          (TAGBASE_sTx + 211)
+#define MUIV_InstallerGui_SkipRun          (TAGBASE_sTx + 210)
+#define MUIV_InstallerGui_AbortRun         (TAGBASE_sTx + 211)
 #define MUIV_InstallerGui_ProceedOnly      (TAGBASE_sTx + 212)
 #define MUIV_InstallerGui_LastButton       (TAGBASE_sTx + 212)
 #define MUIV_InstallerGui_TopPager         (TAGBASE_sTx + 218)
@@ -276,28 +277,84 @@ struct MUIP_InstallerGui_AskFile
 //----------------------------------------------------------------------------
 MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
 {
-    ULONG sig, ret; 
+    ULONG sig = 0, 
+          ret = 0, n; 
+
+    // Set cycle chain for all buttons
+    // within the notification range.
+    for(n = 0; n < range; n++)
+    {
+        // Find current button. 
+        Object *but = (Object *) DoMethod
+        (
+            obj, MUIM_FindUData, 
+            notif + n
+        );
+
+        // Don't trust the caller.
+        if(but)
+        {
+            set(but, MUIA_CycleChain, TRUE);
+        }
+        else
+        {
+            // Button doesn't exist. 
+            GERR(tr(S_UNER)); 
+        }
+    }
+
+    // Get MUI input. 
     ret = DoMethod(_app(obj), MUIM_Application_NewInput, &sig);
+
+    // Enter the message loop. 
     while(ret != MUIV_Application_ReturnID_Quit)
     {
-        ULONG n; 
         for(n = 0; n < range; n++)
         {
             if(ret == notif + n)
             {
-                return notif + n; 
+                // Remove buttons within the range
+                // from the cycle chain. 
+                for(n = 0; n < range; n++)
+                {
+                    // Find current button. 
+                    Object *but = (Object *) DoMethod
+                    (
+                        obj, MUIM_FindUData, 
+                        notif + n
+                    );
+
+                    // Don't trust the caller.
+                    if(but)
+                    {
+                        set(but, MUIA_CycleChain, FALSE);
+                    }
+
+                    // No need to reset non 
+                    // existing buttons. 
+                }
+
+                return ret; 
             }
         }
+
+        // It wasn't for us. Go to sleep again. 
         if(sig)
         {
             sig = Wait(sig | SIGBREAKF_CTRL_C);
+
+            // Are we getting killed? 
             if(sig & SIGBREAKF_CTRL_C) 
             {
                 break; 
             }
         }
+
+        // Get new input. 
         ret = DoMethod(_app(obj), MUIM_Application_NewInput, &sig);
     }
+
+    // Quit application. 
     return 0; 
 }
 
@@ -1026,10 +1083,14 @@ MUIDSP IPTR InstallerGuiString(Class *cls,
         if(InstallerGuiPageSet(obj, P_STRING, B_PROCEED_ABORT, 
                                msg->Message))
         {
-            ULONG b = InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2); 
-            if(b == MUIV_InstallerGui_Proceed)
+            if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
+               MUIV_InstallerGui_Proceed)
             {
                 get(str, MUIA_String_Contents, &ret); 
+            }
+            else
+            {
+                *((int *) msg->Halt) = 1; 
             }
         }
     }
@@ -1892,7 +1953,8 @@ int gui_bool(const char *msg,
 //----------------------------------------------------------------------------
 const char * gui_string(const char *msg, 
                         const char *hlp,
-                        const char *def)
+                        const char *def,
+                        int *hlt)
 {
     const char *ret = (const char *)
     #ifdef AMIGA
@@ -1902,10 +1964,12 @@ const char * gui_string(const char *msg,
         MUIM_InstallerGui_String, 
         msg, 
         hlp, 
-        def
+        def,
+        hlt
     );
     #else
     def;
+    *hlt = 0; 
     printf("%s%s%s\n", msg, hlp, def);
     #endif
     return ret;

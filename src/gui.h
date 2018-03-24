@@ -10,7 +10,7 @@ void gui_message(const char *msg, int imm);
 int gui_confirm(const char *msg); 
 int gui_bool(const char *msg, const char *hlp, const char *yes, const char *no); 
 int gui_choice(const char *msg, const char *hlp, const char **nms, int def); 
-const char * gui_string(const char *msg, const char *hlp, const char *def); 
+const char * gui_string(const char *msg, const char *hlp, const char *def, int *hlt); 
 int gui_number(const char *msg, const char *hlp, int min, int max, int def, int *hlt); 
 int gui_options(const char *msg, const char *hlp, const char **nms, int def); 
 int gui_error(int id, const char *type, const char *info);
