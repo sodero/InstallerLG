@@ -1308,35 +1308,50 @@ entry_p m_startup(entry_p contxt)
     if(c_sane(contxt, 2))
     {
         const char *app = str(CARG(1)); 
+
         entry_p command  = get_opt(CARG(2), OPT_COMMAND),
                 help     = get_opt(CARG(2), OPT_HELP),
-                prompt   = get_opt(CARG(2), OPT_PROMPT), 
-                confirm  = get_opt(CARG(2), OPT_CONFIRM), 
-                override = get_opt(CARG(2), OPT_OVERRIDE);
+                prompt   = get_opt(CARG(2), OPT_PROMPT);
 
-        help = prompt = confirm; 
-
-        // We need a command to add. 
-        if(!command) 
+        // We need a command, a prompt and a help text. 
+        if(!command || !prompt || !help) 
         {
-            error(contxt->id, ERR_MISSING_OPTION, "command"); 
+            error(contxt->id, ERR_MISSING_OPTION, 
+                  !command ? "command" : 
+                  !prompt ? "prompt" : 
+                  "help"); 
             RCUR; 
         }
 
-        // And somewhere to put it.  
+        // And somewhere to put the command.  
         if(!strlen(app))
         {
-            error(contxt->id, ERR_INVALID_APP, "NULL"); 
+            error(contxt->id, ERR_INVALID_APP, app); 
             RCUR; 
+        }
+
+        // If we need confirmation and the user skips
+        // or aborts, return. On abort, the HALT will
+        // be set by h_confirm. Confirmation is needed
+        // when user level is not novice or (confirm)
+        // is used.
+        if(get_opt(CARG(2), OPT_CONFIRM) || 
+           get_numvar(contxt, "@user-level") > 0)
+        {
+            if(!h_confirm(contxt, str(prompt), str(help)))
+            {
+                RCUR; 
+            }
         }
 
         if(c_sane(command, 1))
         {
             const char *cmd = str(command->children[0]), 
-                       /* Variable instead of override? */
-                       *fln = override ? str(override) : "s:user-startup";
+                       *fln = get_strvar(contxt, "@user-startup");
+
             const size_t len = strlen(";BEGIN ") + strlen(app), 
                          ins = strlen(cmd) + 2;
+
             char *pre = calloc(len + 1, 1), 
                  *pst = calloc(len + 1, 1), 
                  *buf = NULL;
@@ -1345,6 +1360,22 @@ entry_p m_startup(entry_p contxt)
             {
                 // We don't need to write yet. 
                 FILE *fp = fopen(fln, "r"); 
+
+                // If the file doesn't exist, 
+                // try to create it.
+                if(!fp && !h_exists(fln))
+                {
+                    fp = fopen(fln, "w"); 
+
+                    // If successful, close and
+                    // reopen as read only.
+                    if(fp)
+                    {
+                        fclose(fp); 
+                        fp = fopen(fln, "r"); 
+                    }
+                }
+
                 if(fp)
                 {
                     // Seek to the end so that we
@@ -1363,6 +1394,7 @@ entry_p m_startup(entry_p contxt)
                         // changes that we need to do in 
                         // memory at the same time. 
                         buf = calloc(nsz, 1);
+
                         if(buf)
                         {
                             // Read the whole file in one go. 
@@ -1426,6 +1458,7 @@ entry_p m_startup(entry_p contxt)
                             error(PANIC); 
                         }
                     }
+
                     // Reading done. 
                     fclose(fp); 
                 }
@@ -1483,6 +1516,7 @@ entry_p m_startup(entry_p contxt)
                             // make sure that we have write 
                             // permissions. 
                             fp = fopen(fln, "a"); 
+
                             if(fp)
                             {
                                 // Close it immediately, we're not

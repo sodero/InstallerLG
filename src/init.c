@@ -178,7 +178,7 @@ entry_p init(entry_p contxt)
             push(push(push(push(push(push(push(push(
             push(push(push(push(push(push(push(push(
             push(push(push(push(push(push(push(push(
-            push(push(push(push
+            push(push(push(push(push(push
             (
                 new_contxt(), 
                 new_symbol(strdup("@abort-button"))),
@@ -246,6 +246,9 @@ entry_p init(entry_p contxt)
             ),
                 new_symbol(strdup("@each-name"))),
                 new_string(strdup(""))
+            ),
+                new_symbol(strdup("@user-startup"))),
+                new_string(strdup("s:user-startup"))
             ),
             STRING
         );
