@@ -1344,6 +1344,12 @@ entry_p m_startup(entry_p contxt)
             }
         }
 
+        // We're done if executing in pretend mode.
+        if(get_numvar(contxt, "@pretend"))
+        {
+            RNUM(1); 
+        }
+
         if(c_sane(command, 1))
         {
             const char *cmd = str(command->children[0]), 
