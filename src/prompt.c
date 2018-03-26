@@ -243,11 +243,10 @@ entry_p m_askdir(entry_p contxt)
         if(prompt && help && deflt)
         {
             const char *ret;
-            int level = get_numvar(contxt, "@user-level");
 
             // Show requeter unless we're executing in
             // 'novice' mode.
-            if(level > 0)
+            if(get_numvar(contxt, "@user-level") > 0)
             {
                 ret = gui_askdir
                 (
@@ -294,8 +293,7 @@ entry_p m_askdir(entry_p contxt)
         error(PANIC); 
     }
 
-    // Broken parser / broken
-    // code / user abort. 
+    // Broken parser / code.
     REST; 
 }
 
@@ -465,11 +463,10 @@ entry_p m_askfile(entry_p contxt)
         if(prompt && help && deflt)
         {
             const char *ret;
-            int level = get_numvar(contxt, "@user-level");
 
             // Show file dialog unless we're executing
             // in 'novice' mode.
-            if(level > 0)
+            if(get_numvar(contxt, "@user-level") > 0)
             {
                 ret = gui_askfile
                 (
@@ -515,8 +512,7 @@ entry_p m_askfile(entry_p contxt)
         error(PANIC); 
     }
 
-    // Broken parser / broken
-    // code / user abort. 
+    // Broken parser / code.
     REST; 
 }
 
@@ -753,23 +749,36 @@ entry_p m_askstring(entry_p contxt)
 
         if(prompt && help && deflt)
         {
-            int hlt = 0; 
+            const char *res;
 
-            // Prompt user.
-            const char *res = gui_string
-            (
-                str(prompt), 
-                str(help), 
-                str(deflt),
-                &hlt
-            );
-
-            // Halt if abort.
-            if(hlt)
+            // Show requester unless we're executing in
+            // 'novice' mode.
+            if(get_numvar(contxt, "@user-level") > 0)
             {
-                error(HALT); 
-            }
+                int hlt = 0; 
+                
+                // Prompt user.
+                res = gui_string
+                (
+                    str(prompt), 
+                    str(help), 
+                    str(deflt),
+                    &hlt
+                );
 
+                // Halt if abort.
+                if(hlt)
+                {
+                    error(HALT); 
+                    REST;
+                }
+            }
+            else
+            {
+                // Use the default value.
+                res = str(deflt); 
+            }
+            
             RSTR(strdup(res)); 
         }
         else
@@ -780,7 +789,7 @@ entry_p m_askstring(entry_p contxt)
                 !prompt ? "prompt" : 
                 !help ? "help" : 
                 "default"
-            ); 
+            );
         }
     }
     else
@@ -789,5 +798,6 @@ entry_p m_askstring(entry_p contxt)
         error(PANIC); 
     }
 
+    // Broken parser / code.
     REST; 
 }

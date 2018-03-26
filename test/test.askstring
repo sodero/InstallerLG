@@ -1,1 +1,7 @@
 (askstring) ; "","Line 1: Missing option 'prompt' 0",""
+(askstring (prompt "p") ) ; "","Line 1: Missing option 'help' 0",""
+(askstring (prompt "p") (help "h")) ; "","Line 1: Missing option 'default' 0",""
+(askstring (prompt "p") (help "h") (default "d")) ; "","phd d",""
+(user 0) (askstring (prompt "p") (help "h") (default "d")) ; "","d",""
+(user 1) (askstring (prompt "p") (help "h") (default "d")) ; "","phd d",""
+(user 2) (askstring (prompt "p") (help "h") (default "d")) ; "","phd d",""
