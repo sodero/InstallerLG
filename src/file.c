@@ -32,17 +32,24 @@
 //----------------------------------------------------------------------------
 // Helper functions
 //----------------------------------------------------------------------------
-typedef enum { NOFAIL, OKNODELETE, FORCE, ASKUSER } cmode_t; 
-static int h_copyfile(entry_p contxt, const char *src, const char *dst, int info, int nogauge, cmode_t mode);
+static int h_copyfile(entry_p contxt, const char *src, const char *dst, int mode);
 static int h_exists(const char *n);
 static char *h_fileonly(int id, const char *s);
-static pnode_p h_filetree(int id, const char *src, const char *dst, int files, entry_p choices, entry_p pattern);
+static pnode_p h_filetree(int id, const char *src, const char *dst, entry_p files, entry_p fonts, entry_p choices, entry_p pattern);
 static int h_makedir(entry_p contxt, const char *dst);
 static int h_protect_get(entry_p contxt, const char *file, LONG *mask);
 static int h_protect_set(entry_p contxt, const char *file, LONG mask);
 static int h_readonly(const char *file);
 static int h_confirm(entry_p contxt, const char *msg, const char *hlp);
 static int h_confirm_obsolete(entry_p contxt, const char *msg, const char *nfo);
+
+#define CF_INFOS        (1 << 0)
+#define CF_FONTS        (1 << 1)
+#define CF_NOGAUGE      (1 << 2)
+#define CF_NOFAIL       (1 << 3)
+#define CF_OKNODELETE   (1 << 4)
+#define CF_FORCE        (1 << 5)
+#define CF_ASKUSER      (1 << 6)
 
 //----------------------------------------------------------------------------
 // (copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)
@@ -56,6 +63,10 @@ static int h_confirm_obsolete(entry_p contxt, const char *msg, const char *nfo);
 //----------------------------------------------------------------------------
 entry_p m_copyfiles(entry_p contxt)
 {
+    /*
+    dest RAM: ger varning om overskr!
+    */
+
     // We need atleast one argument
     if(c_sane(contxt, 1))
     {
@@ -74,7 +85,7 @@ entry_p m_copyfiles(entry_p contxt)
                 optional   = get_opt(contxt, OPT_OPTIONAL), // OK
                 delopts    = get_opt(contxt, OPT_DELOPTS),  // OK
                 nogauge    = get_opt(contxt, OPT_NOGAUGE),  // OK
-                fonts      = get_opt(contxt, OPT_FONTS),
+                fonts      = get_opt(contxt, OPT_FONTS),    // OK
                 fail       = get_opt(delopts, OPT_FAIL) ?
                              NULL : get_opt(optional, OPT_FAIL),
                 nofail     = get_opt(delopts, OPT_NOFAIL) ?
@@ -87,7 +98,7 @@ entry_p m_copyfiles(entry_p contxt)
                              NULL : get_opt(optional, OPT_ASKUSER);
 
         DNUM = 0; 
-        fonts = force = askuser; 
+        force = askuser; 
 
         // The (pattern) (choices) and (all) options
         // are mutually exclusive. 
@@ -141,7 +152,8 @@ entry_p m_copyfiles(entry_p contxt)
             tree = h_filetree
             (
                 contxt->id, src, dst, 
-                files ? 1 : 0,
+                files,
+                fonts,
                 choices, 
                 pattern
             ); 
@@ -213,6 +225,14 @@ entry_p m_copyfiles(entry_p contxt)
 
                 if(go == 1)
                 {
+                    int mode = (infos ? CF_INFOS : 0) |
+                               (fonts ? CF_FONTS : 0) |
+                               (nogauge ? CF_NOGAUGE : 0) |
+                               (nofail ? CF_NOFAIL : 0) |
+                               (oknodelete ? CF_OKNODELETE : 0) |
+                               (force ? CF_FORCE : 0) |
+                               (askuser ? CF_ASKUSER : 0);
+
                     DNUM = 1; 
 
                     for(; cur && DNUM; 
@@ -229,9 +249,7 @@ entry_p m_copyfiles(entry_p contxt)
                                         contxt, 
                                         cur->name, 
                                         cur->copy, 
-                                        infos ? 1 : 0, 
-                                        nogauge ? 1 : 0,
-                                        nofail ? 1 : 0 
+                                        mode
                                      ); 
                                      break; 
                             case 2:  DNUM = h_makedir(contxt, cur->copy); break; 
@@ -316,7 +334,7 @@ entry_p m_copylib(entry_p contxt)
                 delopts    = get_opt(contxt, OPT_DELOPTS);
 
         confirm = safe; 
-        noposition = optional = delopts = nogauge; 
+        noposition = optional = delopts;
 
         DNUM = 0; 
 
@@ -383,20 +401,16 @@ entry_p m_copylib(entry_p contxt)
                         if(f) 
                         {
                             // Get type info of f.
-                            int ft = h_exists(f);
+                            int ft = h_exists(f),
+                                md = (infos ? CF_INFOS : 0) |
+                                     (nogauge ? CF_NOGAUGE : 0); 
         
                             // Does it exist?
                             if(!ft)
                             {
-                                // No such file, just copy source file to the
-                                // destination dir. 
-                                DNUM = h_copyfile
-                                (
-                                    contxt, s, f,       
-                                    infos ? 1 : 0,
-                                    1, // nogauge
-                                    0
-                                );
+                                // No such file, just copy source
+                                // file to the destination dir. 
+                                DNUM = h_copyfile(contxt, s, f, md);
                             }
                             else
                             // It's a file.
@@ -414,13 +428,7 @@ entry_p m_copylib(entry_p contxt)
                                     if(vs > vf) 
                                     {
                                         // Yes.
-                                        DNUM = h_copyfile
-                                        (
-                                            contxt, s, f,       
-                                            infos ? 1 : 0,
-                                            1, // nogauge
-                                            0 
-                                        );
+                                        DNUM = h_copyfile(contxt, s, f, md);
                                     }
                                     else
                                     {
@@ -2060,13 +2068,11 @@ entry_p m_rename(entry_p contxt)
 static int h_copyfile(entry_p contxt, 
                       const char *src, 
                       const char *dst,
-                      int info, 
-                      int nogauge, 
-                      cmode_t mode)
+                      int mode)
 {
     if(contxt && src && dst)
     { 
-        if(gui_copyfiles_setcur(src, nogauge))
+        if(gui_copyfiles_setcur(src, mode & CF_NOGAUGE))
         { 
             static char buf[BUFSIZ]; 
             FILE *fs = fopen(src, "r"); 
@@ -2103,7 +2109,7 @@ static int h_copyfile(entry_p contxt,
                         h_log(contxt, tr(S_CPYD), src, dst); 
 
                         // Are we going to copy the icon as well?
-                        if(info)
+                        if(mode & CF_INFOS)
                         {
                             // The source icon. 
                             static char is[PATH_MAX]; 
@@ -2123,9 +2129,10 @@ static int h_copyfile(entry_p contxt,
                                     contxt, 
                                     is, 
                                     id, 
-                                    0, 
+                                    0 /*, 
                                     nogauge,
                                     mode
+                                    */
                                 ); 
                             }
                         }
@@ -2138,7 +2145,7 @@ static int h_copyfile(entry_p contxt,
                 {
                     fclose(fs); 
 
-                    if(mode & (1 << NOFAIL))
+                    if(mode & CF_NOFAIL)
                     {
                         // Ignore failure. 
                         h_log(contxt, tr(S_NCPY), src, dst); 
@@ -2152,7 +2159,7 @@ static int h_copyfile(entry_p contxt,
             }
             else
             {
-                if(mode & (1 << NOFAIL))
+                if(mode & CF_NOFAIL)
                 {
                     // Ignore failure. 
                     h_log(contxt, tr(S_NCPY), src, dst); 
@@ -2289,7 +2296,8 @@ static char *h_fileonly(int id,
 static pnode_p h_filetree(int id, 
                           const char *src, 
                           const char *dst, 
-                          int files, 
+                          entry_p files, 
+                          entry_p fonts, 
                           entry_p choices, 
                           entry_p pattern)
 {
@@ -2381,7 +2389,7 @@ static pnode_p h_filetree(int id,
                                 // Get proper type if we have a match.
                                 if(*e && *e != end())
                                 {
-                                    type = h_exists(n_src); 
+                                    type = h_exists(n_src);
                                 }
                                 // Otherwise clear type, this will make
                                 // m_copyfiles skip it.
@@ -2432,8 +2440,28 @@ static pnode_p h_filetree(int id,
                             }
                             else
                             {
-                                // File or directory? 
-                                type = h_exists(n_src); 
+                                // Filter out fonts?
+                                if(fonts)
+                                {
+                                    static char suf[] = ".font"; 
+                                    char *pos = strstr(n_src, suf); 
+
+                                    if(pos && !strcmp(pos, suf))
+                                    {
+                                        // It's a font. Skip it.
+                                        type = 0; 
+                                    }
+                                    else
+                                    {
+                                        // File or directory? 
+                                        type = h_exists(n_src); 
+                                    }
+                                }
+                                else
+                                {
+                                    // File or directory? 
+                                    type = h_exists(n_src); 
+                                }
                             }
 
                             // If we have a directory, recur.
@@ -2454,6 +2482,7 @@ static pnode_p h_filetree(int id,
                                             n_src, 
                                             n_dst, 
                                             files,
+                                            fonts,
                                             choices,
                                             pattern
                                         ); 
@@ -2475,6 +2504,7 @@ static pnode_p h_filetree(int id,
                             else
                             {
                                 node->next = calloc(1, sizeof(struct pnode_t)); 
+
                                 if(node->next)
                                 {
                                     node->next->type = type; 
