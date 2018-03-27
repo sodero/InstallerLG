@@ -1,4 +1,6 @@
 (copyfiles (all) (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfd_ _cfs_  && mkdir _cfs_ && touch _cfs_/1 _cfs_/1.font","1","test -f _cfd_/1 && test -f _cfd_/1.font && rm -Rf _cfs_ _cfd_"
+(set @pretend 1) (copyfiles (all) (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfd_ _cfs_  && mkdir _cfs_ && touch _cfs_/1 _cfs_/1.font","1","test ! -f _cfd_/1 && test ! -f _cfd_/1.font && rm -Rf _cfs_ _cfd_"
+(set @pretend 1) (copyfiles (safe) (all) (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfd_ _cfs_  && mkdir _cfs_ && touch _cfs_/1 _cfs_/1.font","1","test -f _cfd_/1 && test -f _cfd_/1.font && rm -Rf _cfs_ _cfd_"
 (copyfiles (pattern "1.#?") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfd_ _cfs_  && mkdir _cfs_ && touch _cfs_/1 _cfs_/1.font","1","test -f _cfd_/1 && test -f _cfd_/1.font && rm -Rf _cfs_ _cfd_"
 (copyfiles (choices "1" "1.font") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfd_ _cfs_  && mkdir _cfs_ && touch _cfs_/1 _cfs_/1.font","1","test -f _cfd_/1 && test -f _cfd_/1.font && rm -Rf _cfs_ _cfd_"
 (copyfiles (fonts) (all) (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfd_ _cfs_  && mkdir _cfs_ && touch _cfs_/1 _cfs_/1.font","1","test -f _cfd_/1 && test ! -f _cfd_/1.font && rm -Rf _cfs_ _cfd_"
@@ -56,3 +58,12 @@
 (copyfiles (pattern "#?") (choices "1" "2" "4") (source "_cfs_") (dest "_cfd_") (all)) ; "rm -Rf _cfs_ && mkdir _cfs_ && touch _cfs_/1 _cfs_/2 _cfs_/3","Line 1: Options are mutually exclusive 'pattern/choices/all' 0","rm -Rf _cfs_ _cfd_"
 (copyfiles (pattern "#?") (source "_cfs_") (dest "_cfd_") (all)) ; "rm -Rf _cfs_ && mkdir _cfs_ && touch _cfs_/1 _cfs_/2 _cfs_/3","Line 1: Options are mutually exclusive 'pattern/choices/all' 0","rm -Rf _cfs_ _cfd_"
 (copyfiles (pattern "1") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ && mkdir _cfs_ && touch _cfs_/1","1","test -f _cfd_/1 && rm -Rf _cfs_ _cfd_"
+
+
+
+
+(copyfiles (source "_cfs_") (dest "_cfd_") (all)) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && touch _cfs_/1 && chmod a-r _cfs_","Line 1: Could not read directory '_cfs_' 0","chmod a+r _cfs_ && rm -Rf _cfs_"
+(copyfiles (source "_cfs_") (dest "_cfd_") (newname "")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","Line 1: Could not write to file '_cfd_' 0","rm -Rf _cfs_ _cfd_"
+(copyfiles (source "_cfs_") (dest "")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","Line 1: Could not create directory '' 0","rm -Rf _cfs_ _cfd_"
+(copyfiles (source "_cfs_") (dest "")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","Line 1: Could not create directory '' 0","rm -Rf _cfs_ _cfd_"
+(copyfiles (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_ && touch _cfd_","Line 1: Could not create directory '_cfd_' 0","rm -Rf _cfs_ _cfd_"

@@ -36,7 +36,7 @@ static int h_copyfile(entry_p contxt, const char *src, const char *dst, int mode
 static int h_exists(const char *n);
 static char *h_fileonly(int id, const char *s);
 static pnode_p h_filetree(int id, const char *src, const char *dst, entry_p files, entry_p fonts, entry_p choices, entry_p pattern);
-static int h_makedir(entry_p contxt, const char *dst);
+static int h_makedir(entry_p contxt, const char *dst, int mode);
 static int h_protect_get(entry_p contxt, const char *file, LONG *mask);
 static int h_protect_set(entry_p contxt, const char *file, LONG mask);
 static int h_readonly(const char *file);
@@ -226,13 +226,13 @@ entry_p m_copyfiles(entry_p contxt)
 
                 if(go == 1)
                 {
-                    int mode = (infos ? CF_INFOS : 0) |
-                               (fonts ? CF_FONTS : 0) |
-                               (nogauge ? CF_NOGAUGE : 0) |
-                               (nofail ? CF_NOFAIL : 0) |
-                               (oknodelete ? CF_OKNODELETE : 0) |
-                               (force ? CF_FORCE : 0) |
-                               (askuser ? CF_ASKUSER : 0);
+                    int md = (infos ? CF_INFOS : 0) |
+                             (fonts ? CF_FONTS : 0) |
+                             (nogauge ? CF_NOGAUGE : 0) |
+                             (nofail ? CF_NOFAIL : 0) |
+                             (oknodelete ? CF_OKNODELETE : 0) |
+                             (force ? CF_FORCE : 0) |
+                             (askuser ? CF_ASKUSER : 0);
 
                     DNUM = 1; 
 
@@ -244,17 +244,31 @@ entry_p m_copyfiles(entry_p contxt)
                         // Copy file / create dir / skip if zero:ed
                         switch(cur->type)
                         {
-                            case 0:  continue; 
-                            case 1:  DNUM = h_copyfile
-                                     (
-                                        contxt, 
-                                        cur->name, 
-                                        cur->copy, 
-                                        mode
-                                     ); 
-                                     break; 
-                            case 2:  DNUM = h_makedir(contxt, cur->copy); break; 
-                            default: error(PANIC); DNUM = 0; 
+                            case 0: 
+                                continue; 
+
+                            case 1: 
+                                DNUM = h_copyfile
+                                (
+                                    contxt, 
+                                    cur->name, 
+                                    cur->copy, 
+                                    md
+                                ); 
+                                break; 
+
+                            case 2: 
+                                DNUM = h_makedir
+                                (
+                                    contxt, 
+                                    cur->copy, 
+                                    md
+                                ); 
+                                break; 
+
+                            default: 
+                                error(PANIC); 
+                                DNUM = 0; 
                         }
 
                         // No point setting permissions on failure / user abort.
@@ -1076,7 +1090,7 @@ entry_p m_makedir(entry_p contxt)
             const char *dn = str(CARG(1)); 
 
             // Create the directory. 
-            DNUM = h_makedir(contxt, dn); 
+            DNUM = h_makedir(contxt, dn, 0 /* FIXME */); 
 
             // Are we supposed to create an icon
             // as well? 
@@ -2632,7 +2646,7 @@ int h_log(entry_p contxt, const char *fmt, ...)
 
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-static int h_makedir(entry_p contxt, const char *dst)
+static int h_makedir(entry_p contxt, const char *dst, int mode)
 {
     if(contxt && dst)
     {
@@ -2684,7 +2698,15 @@ static int h_makedir(entry_p contxt, const char *dst)
                     }
                 }
             }
+
             free(dir);
+
+            if(mode)
+            {
+                // FIXME
+                return 1; 
+            }
+
             error(contxt->id, ERR_WRITE_DIR, dst); 
         }
         else
