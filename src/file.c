@@ -193,10 +193,11 @@ entry_p m_copyfiles(entry_p contxt)
                         th = num(confirm->children[0]);
                     }
                                     
-                    // If we are below the threshold value,
-                    // don't care about getting confirmation
-                    // from the user.
-                    if(level < th) 
+                    // If we are below the threshold value, or
+                    // user input has been short-circuited by 
+                    // @yes, skip confirmation.
+                    if(level < th ||
+                       get_numvar(contxt, "@yes")) 
                     {
                         confirm = NULL; 
                     }
@@ -2440,27 +2441,20 @@ static pnode_p h_filetree(int id,
                             }
                             else
                             {
-                                // Filter out fonts?
-                                if(fonts)
-                                {
-                                    static char suf[] = ".font"; 
-                                    char *pos = strstr(n_src, suf); 
+                                // File or directory? 
+                                type = h_exists(n_src); 
+                            }
 
-                                    if(pos && !strcmp(pos, suf))
-                                    {
-                                        // It's a font. Skip it.
-                                        type = 0; 
-                                    }
-                                    else
-                                    {
-                                        // File or directory? 
-                                        type = h_exists(n_src); 
-                                    }
-                                }
-                                else
+                            // Filter out fonts?
+                            if(fonts)
+                            {
+                                static char suf[] = ".font"; 
+                                char *pos = strstr(n_src, suf); 
+
+                                if(pos && !strcmp(pos, suf))
                                 {
-                                    // File or directory? 
-                                    type = h_exists(n_src); 
+                                    // It's a font. Skip it.
+                                    type = 0; 
                                 }
                             }
 

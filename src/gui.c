@@ -2187,7 +2187,7 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
 
     return (int) DoMethod(Win, MUIM_InstallerGui_CopyFilesStart, msg, n);
     #else
-    return (lst && (!cnf || (cnf && msg && hlp))) ? 1 : 0; 
+    return lst ? (cnf ? ((msg && hlp) ? 0 : -1) : 1) : -1;
     #endif
 }
 
