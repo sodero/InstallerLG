@@ -428,7 +428,7 @@ settooltype:    '(' SETTOOLTYPE pp ')'          { $$ = new_option(strdup("settoo
                 '(' SETTOOLTYPE p ')'           { $$ = new_option(strdup("settooltype"), OPT_SETTOOLTYPE, push(new_contxt(), $3)); }; 
 source:         '(' SOURCE p ')'                { $$ = new_option(strdup("source"), OPT_SOURCE, push(new_contxt(), $3)); }; 
 swapcolors:     '(' SWAPCOLORS ')'              { $$ = new_option(strdup("swapcolors"), OPT_SWAPCOLORS, NULL); };
-optional:       '(' OPTIONAL opts ')'           { $$ = new_option(strdup("optional"), OPT_OPTIONAL, $3); }; 
+optional:       '(' OPTIONAL ps ')'             { $$ = new_option(strdup("optional"), OPT_OPTIONAL, $3); }; 
 resident:       '(' RESIDENT ')'                { $$ = new_option(strdup("resident"), OPT_RESIDENT, NULL); };
 override:       '(' OVERRIDE p ')'              { $$ = new_option(strdup("override"), OPT_OVERRIDE, push(new_contxt(), $3)); }; 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
