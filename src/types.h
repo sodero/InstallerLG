@@ -33,7 +33,6 @@ typedef enum
 { 
     OPT_ALL,
     OPT_APPEND,
-    OPT_ASKUSER,
     OPT_ASSIGNS,
     OPT_CHOICES,
     OPT_COMMAND,
@@ -43,10 +42,8 @@ typedef enum
     OPT_DELOPTS, 
     OPT_DEST,
     OPT_DISK,
-    OPT_FAIL,
     OPT_FILES,
     OPT_FONTS,
-    OPT_FORCE,
     OPT_GETDEFAULTTOOL,
     OPT_GETPOSITION,
     OPT_GETSTACK,
@@ -56,11 +53,9 @@ typedef enum
     OPT_INCLUDE,
     OPT_NEWNAME,
     OPT_NEWPATH,
-    OPT_NOFAIL,
     OPT_NOGAUGE,
     OPT_NOPOSITION,
     OPT_NOREQ, 
-    OPT_OKNODELETE,
     OPT_PATTERN,
     OPT_PROMPT,
     OPT_QUIET,
@@ -74,7 +69,12 @@ typedef enum
     OPT_SWAPCOLORS,
     OPT_OPTIONAL,
     OPT_RESIDENT,
-    OPT_OVERRIDE
+    OPT_OVERRIDE,
+    OPT_ASKUSER,
+    OPT_FAIL,
+    OPT_FORCE,
+    OPT_NOFAIL,
+    OPT_OKNODELETE
 } opt_t; 
 
 //----------------------------------------------------------------------------

@@ -112,19 +112,44 @@ entry_p get_opt(entry_p c, opt_t t)
         // And we need children.
         entry_p *v = c->children;
 
-        // Iterate through all of them.
-        while(*v && *v != end())
+        // Real option or (optional)?
+        if(c->type != OPTION)
         {
-            // ID == the type of option.
-            if((*v)->type == OPTION &&
-               ((opt_t) (*v)->id) == t)
+            // Iterate over all options.
+            while(*v && *v != end())
             {
-                // We found something.
-                return *v; 
+                // ID == the type of option.
+                if((*v)->type == OPTION)
+                {
+                    if(((opt_t) (*v)->id) == t)
+                    {
+                        // We found it.
+                        return *v; 
+                    }
+                }
+                
+                // Nope, next. 
+                v++; 
             }
-
-            // Nope, next. 
-            v++; 
+        }
+        // An (optional) string. 
+        else
+        {
+            // Iterate over all strings.
+            while(*v && *v != end())
+            {
+                if((t == OPT_FAIL && !strcmp(str(*v), "fail")) ||
+                   (t == OPT_FORCE && !strcmp(str(*v), "force")) ||
+                   (t == OPT_NOFAIL && !strcmp(str(*v), "nofail")) ||
+                   (t == OPT_ASKUSER && !strcmp(str(*v), "askuser")) ||
+                   (t == OPT_OKNODELETE && !strcmp(str(*v), "oknodelete")))
+                {
+                    return *v;
+                }
+                    
+                // Nope, next. 
+                v++; 
+            }
         }
     }
 
