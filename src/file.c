@@ -70,35 +70,34 @@ entry_p m_copyfiles(entry_p contxt)
     // We need atleast one argument
     if(c_sane(contxt, 1))
     {
-        entry_p prompt     = get_opt(contxt, OPT_PROMPT),   // OK
-                help       = get_opt(contxt, OPT_HELP),     // OK
-                source     = get_opt(contxt, OPT_SOURCE),   // OK
-                dest       = get_opt(contxt, OPT_DEST),     // OK
-                newname    = get_opt(contxt, OPT_NEWNAME),  // OK
-                choices    = get_opt(contxt, OPT_CHOICES),  // OK
-                all        = get_opt(contxt, OPT_ALL),      // OK
-                pattern    = get_opt(contxt, OPT_PATTERN),  // OK
-                infos      = get_opt(contxt, OPT_INFOS),    // OK
-                files      = get_opt(contxt, OPT_FILES),    // OK
-                confirm    = get_opt(contxt, OPT_CONFIRM),  // OK
-                safe       = get_opt(contxt, OPT_SAFE),     // OK
-                optional   = get_opt(contxt, OPT_OPTIONAL), // OK
-                delopts    = get_opt(contxt, OPT_DELOPTS),  // OK
-                nogauge    = get_opt(contxt, OPT_NOGAUGE),  // OK
-                fonts      = get_opt(contxt, OPT_FONTS),    // OK
-                fail       = get_opt(delopts, OPT_FAIL) ?
-                             NULL : get_opt(optional, OPT_FAIL),
-                nofail     = get_opt(delopts, OPT_NOFAIL) ?
-                             NULL : get_opt(optional, OPT_NOFAIL),
-                oknodelete = get_opt(delopts, OPT_OKNODELETE) ?
-                             NULL : get_opt(optional, OPT_OKNODELETE),
-                force      = get_opt(delopts, OPT_FORCE) ?
-                             NULL : get_opt(optional, OPT_FORCE),
-                askuser    = get_opt(delopts, OPT_ASKUSER) ?
-                             NULL : get_opt(optional, OPT_ASKUSER);
+        entry_p prompt     = get_opt(contxt, OPT_PROMPT),               // OK
+                help       = get_opt(contxt, OPT_HELP),                 // OK
+                source     = get_opt(contxt, OPT_SOURCE),               // OK
+                dest       = get_opt(contxt, OPT_DEST),                 // OK
+                newname    = get_opt(contxt, OPT_NEWNAME),              // OK
+                choices    = get_opt(contxt, OPT_CHOICES),              // OK
+                all        = get_opt(contxt, OPT_ALL),                  // OK
+                pattern    = get_opt(contxt, OPT_PATTERN),              // OK
+                infos      = get_opt(contxt, OPT_INFOS),                // OK
+                files      = get_opt(contxt, OPT_FILES),                // OK
+                confirm    = get_opt(contxt, OPT_CONFIRM),              // OK
+                safe       = get_opt(contxt, OPT_SAFE),                 // OK
+                optional   = get_opt(contxt, OPT_OPTIONAL),             // OK
+                delopts    = get_opt(contxt, OPT_DELOPTS),              // OK
+                nogauge    = get_opt(contxt, OPT_NOGAUGE),              // OK
+                fonts      = get_opt(contxt, OPT_FONTS),                // OK
+                fail       = get_opt(delopts, OPT_FAIL) ?               // OK
+                             NULL : get_opt(optional, OPT_FAIL),        // OK
+                nofail     = get_opt(delopts, OPT_NOFAIL) ?             // OK
+                             NULL : get_opt(optional, OPT_NOFAIL),      // OK
+                oknodelete = get_opt(delopts, OPT_OKNODELETE) ?         // OK
+                             NULL : get_opt(optional, OPT_OKNODELETE),  // OK
+                force      = get_opt(delopts, OPT_FORCE) ?              // OK
+                             NULL : get_opt(optional, OPT_FORCE),       // OK
+                askuser    = get_opt(delopts, OPT_ASKUSER) ?            // OK
+                             NULL : get_opt(optional, OPT_ASKUSER);     // OK 
 
         DNUM = 0; 
-        force = askuser; 
 
         // The (pattern) (choices) and (all) options
         // are mutually exclusive. 
@@ -2094,7 +2093,26 @@ static int h_copyfile(entry_p contxt,
 
             if(fs)
             {
+                // Is there an existing destination file
+                // that is write protected?
+                if(h_readonly(dst))
+                {
+                    // Delete the old file and create a new 
+                    // one if (force) is used, or (askuser) 
+                    // is set and the user confirms.
+                    if((mode & CF_FORCE) || 
+                      ((mode & CF_ASKUSER) && h_confirm_obsolete(contxt, tr(S_DWRT), dst)))
+                    {
+                        // No need to bother with the return
+                        // value since errors will be caught
+                        // below.
+                        remove(dst);
+                    }
+                }
+
+                // Create / overwrite file. 
                 FILE *fd = fopen(dst, "w"); 
+
                 if(fd)
                 {
                     size_t n = fread(buf, 1, BUFSIZ, fs);
@@ -2144,10 +2162,7 @@ static int h_copyfile(entry_p contxt,
                                     contxt, 
                                     is, 
                                     id, 
-                                    0 /*, 
-                                    nogauge,
-                                    mode
-                                    */
+                                    mode & ~CF_INFOS
                                 ); 
                             }
                         }
@@ -2160,7 +2175,8 @@ static int h_copyfile(entry_p contxt,
                 {
                     fclose(fs); 
 
-                    if(mode & CF_NOFAIL)
+                    if((mode & CF_NOFAIL) ||
+                       (mode & CF_OKNODELETE))
                     {
                         // Ignore failure. 
                         h_log(contxt, tr(S_NCPY), src, dst); 
