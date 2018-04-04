@@ -25,6 +25,8 @@ entry_p get_opt(entry_p c, opt_t t);
 char *get_strvar(entry_p c, char *v); 
 void set_numvar(entry_p c, char *v, int n); 
 void set_strvar(entry_p c, char *v, char *n); 
+char *get_buf(void);
+size_t buf_size(void);
 
 //----------------------------------------------------------------------------
 // Utility macros.

@@ -39,7 +39,6 @@ static pnode_p h_filetree(int id, const char *src, const char *dst, entry_p file
 static int h_makedir(entry_p contxt, const char *dst, int mode);
 static int h_protect_get(entry_p contxt, const char *file, LONG *mask);
 static int h_protect_set(entry_p contxt, const char *file, LONG mask);
-static int h_readonly(const char *file);
 static int h_confirm(entry_p contxt, const char *msg, const char *hlp);
 static int h_confirm_obsolete(entry_p contxt, const char *msg, const char *nfo);
 
@@ -63,29 +62,36 @@ static int h_confirm_obsolete(entry_p contxt, const char *msg, const char *nfo);
 //----------------------------------------------------------------------------
 entry_p m_copyfiles(entry_p contxt)
 {
+
     /*
-    dest RAM: ger varning om overskr!
+    Fixa:
+
+    - return value should be == dest
+
+kolla choices som är kataloger!
+
+
     */
 
     // We need atleast one argument
     if(c_sane(contxt, 1))
     {
-        entry_p prompt     = get_opt(contxt, OPT_PROMPT),               // OK
-                help       = get_opt(contxt, OPT_HELP),                 // OK
-                source     = get_opt(contxt, OPT_SOURCE),               // OK
-                dest       = get_opt(contxt, OPT_DEST),                 // OK
-                newname    = get_opt(contxt, OPT_NEWNAME),              // OK
-                choices    = get_opt(contxt, OPT_CHOICES),              // OK
-                all        = get_opt(contxt, OPT_ALL),                  // OK
-                pattern    = get_opt(contxt, OPT_PATTERN),              // OK
-                infos      = get_opt(contxt, OPT_INFOS),                // OK
-                files      = get_opt(contxt, OPT_FILES),                // OK
-                confirm    = get_opt(contxt, OPT_CONFIRM),              // OK
-                safe       = get_opt(contxt, OPT_SAFE),                 // OK
-                optional   = get_opt(contxt, OPT_OPTIONAL),             // OK
-                delopts    = get_opt(contxt, OPT_DELOPTS),              // OK
-                nogauge    = get_opt(contxt, OPT_NOGAUGE),              // OK
-                fonts      = get_opt(contxt, OPT_FONTS),                // OK
+        entry_p prompt     = get_opt(contxt, OPT_PROMPT),
+                help       = get_opt(contxt, OPT_HELP),
+                source     = get_opt(contxt, OPT_SOURCE),
+                dest       = get_opt(contxt, OPT_DEST),
+                newname    = get_opt(contxt, OPT_NEWNAME),
+                choices    = get_opt(contxt, OPT_CHOICES),
+                all        = get_opt(contxt, OPT_ALL),
+                pattern    = get_opt(contxt, OPT_PATTERN),
+                infos      = get_opt(contxt, OPT_INFOS),
+                confirm    = get_opt(contxt, OPT_CONFIRM),
+                safe       = get_opt(contxt, OPT_SAFE),
+                nogauge    = get_opt(contxt, OPT_NOGAUGE),
+                fonts      = get_opt(contxt, OPT_FONTS),
+                optional   = get_opt(contxt, OPT_OPTIONAL),
+                delopts    = get_opt(contxt, OPT_DELOPTS),
+                files      = all ? NULL : get_opt(contxt, OPT_FILES),
                 fail       = get_opt(delopts, OPT_FAIL) ?               // OK
                              NULL : get_opt(optional, OPT_FAIL),        // OK
                 nofail     = get_opt(delopts, OPT_NOFAIL) ?             // OK
@@ -94,8 +100,10 @@ entry_p m_copyfiles(entry_p contxt)
                              NULL : get_opt(optional, OPT_OKNODELETE),  // OK
                 force      = get_opt(delopts, OPT_FORCE) ?              // OK
                              NULL : get_opt(optional, OPT_FORCE),       // OK
-                askuser    = get_opt(delopts, OPT_ASKUSER) ?            // OK
-                             NULL : get_opt(optional, OPT_ASKUSER);     // OK 
+                askuser    = get_opt(delopts, OPT_ASKUSER) ?            // NOK
+                             NULL : get_opt(optional, OPT_ASKUSER);     // NOK 
+
+// WRITE:
 
         DNUM = 0; 
 
@@ -121,12 +129,17 @@ entry_p m_copyfiles(entry_p contxt)
             RCUR; 
         }
 
+        // We need a source and a destination dir.
         if(source && dest) 
         {
+            // Tree of source / destination tuples.
             pnode_p tree; 
+
             const char *src = str(source), 
                        *dst = str(dest); 
 
+            // If the source is a directory, (all), 
+            // (choices) or (pattern) must be used.
             if(h_exists(src) == 2 &&
                !all && !choices && !pattern)
             {
@@ -135,19 +148,33 @@ entry_p m_copyfiles(entry_p contxt)
                 RCUR; 
             }
 
+            // A non safe operation in pretend
+            // mode always succeeds. 
             if(get_numvar(contxt, "@pretend") && !safe)
             {
                 RNUM(1); 
             }
 
-            if(h_exists(dst) == 2 &&
-               !h_confirm_obsolete(contxt, tr(S_ODIR), dst))
+            // Does the destination already exist?
+            if(h_exists(dst) == 2)
             {
-                error(HALT); 
-                h_log(contxt, tr(S_ACPY), src, dst); 
-                RCUR; 
+                // Don't trust h_exists, this string
+                // might be empty.
+                size_t dln = strlen(dst); 
+
+                // If it's not a volume, prompt for
+                // confirmation before overwriting.
+                if(dln && dst[dln - 1] != ':' &&
+                   !h_confirm_obsolete(contxt, tr(S_ODIR), dst))
+                {
+                    error(HALT); 
+                    h_log(contxt, tr(S_ACPY), src, dst); 
+                    RCUR; 
+                }
             }
 
+            // Traverse the source directory and create
+            // the corresponding destination strings.
             tree = h_filetree
             (
                 contxt->id, src, dst, 
@@ -157,6 +184,9 @@ entry_p m_copyfiles(entry_p contxt)
                 pattern
             ); 
 
+            // Unless we ran out of memory when traversing
+            // the source directory, we now have a list of
+            // source -> destination tuples.
             if(tree)
             {
                 int go = 0; 
@@ -257,28 +287,21 @@ entry_p m_copyfiles(entry_p contxt)
                                 break; 
 
                             case 2: 
-                                DNUM = h_makedir
-                                (
-                                    contxt, 
-                                    cur->copy, 
-                                    md
-                                ); 
+                                if(h_makedir(contxt, cur->copy, md) &&
+                                   h_protect_get(contxt, cur->name, &prm) &&
+                                   h_protect_set(contxt, cur->copy, prm))
+                                {
+                                    DNUM = 1; 
+                                }
+                                else
+                                {
+                                    DNUM = 0; 
+                                }
                                 break; 
 
                             default: 
                                 error(PANIC); 
                                 DNUM = 0; 
-                        }
-
-                        // No point setting permissions on failure / user abort.
-                        if(DNUM)
-                        {
-                            // Preserve permissions 
-                            if(!h_protect_get(contxt, cur->name, &prm) ||
-                               !h_protect_set(contxt, cur->copy, prm))
-                            {
-                                DNUM = 0; 
-                            }
                         }
                     }
 
@@ -544,7 +567,7 @@ entry_p m_delete(entry_p contxt)
                 // If the file is readonly, this is an error, 
                 // unless we ask and get permission from the
                 // user to force the deletion.
-                if(h_readonly(file))
+                if(access(file, W_OK))
                 {
                     // Ask the user for confirmation when 
                     // (askuser) is set. 
@@ -556,6 +579,17 @@ entry_p m_delete(entry_p contxt)
                         error(contxt->id, ERR_DELETE_FILE, file); 
                         RNUM(0); 
                     }
+                    else
+                    {
+                        // Give permissions so that delete
+                        // can succeed. 
+                        chmod(file, S_IWUSR);
+
+                        // No need to bother with the return
+                        // value since errors will be caught
+                        // below.
+                    }
+
                 }
                 else
                 // If the file is writable, but we ask the
@@ -567,6 +601,16 @@ entry_p m_delete(entry_p contxt)
                 {
                     delete = FALSE; 
                 }
+            }
+            else
+            {
+                // If (force) is used, give permissions 
+                // so that delete can succeed. 
+                chmod(file, S_IWUSR);
+
+                // No need to bother with the return
+                // value since errors will be caught
+                // below.
             }
 
             // Did we go through the hoops above? 
@@ -2089,24 +2133,32 @@ static int h_copyfile(entry_p contxt,
         if(gui_copyfiles_setcur(src, mode & CF_NOGAUGE))
         { 
             static char buf[BUFSIZ]; 
-            FILE *fs = fopen(src, "r"); 
+            FILE *fs = fopen(src, "r");
+            size_t n = fs ? fread(buf, 1, BUFSIZ, fs) : 0; 
+            int err = 
+                #ifdef AMIGA
+                IoErr();
+                #else
+                fs ? ferror(fs) : 0;
+                #endif
 
-            if(fs)
+            if(fs && !err)
             {
-                // Is there an existing destination file
-                // that is write protected?
-                if(h_readonly(dst))
+                // Is there an existing destination
+                // file that is write protected?
+                if(!access(dst, F_OK) && 
+                    access(dst, W_OK))
                 {
-                    // Delete the old file and create a new 
-                    // one if (force) is used, or (askuser) 
-                    // is set and the user confirms.
+                    // Give everyone full permissions if
+                    // (force) is used, or (askuser) is 
+                    // set and the user confirms.
                     if((mode & CF_FORCE) || 
-                      ((mode & CF_ASKUSER) && h_confirm_obsolete(contxt, tr(S_DWRT), dst)))
+                      ((mode & CF_ASKUSER) && h_confirm(contxt, tr(S_DWRT), dst)))
                     {
                         // No need to bother with the return
                         // value since errors will be caught
                         // below.
-                        remove(dst);
+                        chmod(dst, S_IWUSR);
                     }
                 }
 
@@ -2115,7 +2167,6 @@ static int h_copyfile(entry_p contxt,
 
                 if(fd)
                 {
-                    size_t n = fread(buf, 1, BUFSIZ, fs);
 
                     // Read and write until there is nothing more
                     // to read.
@@ -2126,6 +2177,7 @@ static int h_copyfile(entry_p contxt,
                             error(contxt->id, ERR_WRITE_FILE, dst); 
                             break; 
                         }
+
                         n = fread(buf, 1, BUFSIZ, fs);
                     }
 
@@ -2137,6 +2189,9 @@ static int h_copyfile(entry_p contxt,
                     // should be zero.
                     if(!n)
                     {
+                        // Permission mask.
+                        LONG prm; 
+
                         // Write to the log file (if logging is
                         // enabled). 
                         h_log(contxt, tr(S_CPYD), src, dst); 
@@ -2167,12 +2222,33 @@ static int h_copyfile(entry_p contxt,
                             }
                         }
 
+                        // Preserve file permissions. On err,
+                        // code will be set by h_protect_x().
+                        if(h_protect_get(contxt, src, &prm))
+                        {
+                            h_protect_set(contxt, dst, prm);
+                        }
+
+                        // Reset error codes if necessary.
+                        if(did_error())
+                        {
+                            if(mode & CF_NOFAIL)
+                            {
+                                error(RESET);
+                            }
+                            else
+                            {
+                                return 0;
+                            }
+                        }
+
                         // We succeeded.
                         return 1; 
                     }
                 }
                 else
                 {
+                    // The source handle is open.
                     fclose(fs); 
 
                     if((mode & CF_NOFAIL) ||
@@ -2408,7 +2484,7 @@ static pnode_p h_filetree(int id,
                                 while(*e && *e != end())
                                 {
                                     // Stop when we have a match.
-                                    if(!strcmp(str(*e), entry->d_name))
+                                    if(!strcasecmp(str(*e), entry->d_name))
                                     {
                                         break; 
                                     }
@@ -2804,27 +2880,6 @@ static int h_protect_set(entry_p contxt,
     {
         error(PANIC); 
         return 0; 
-    }
-}
-
-//----------------------------------------------------------------------------
-//----------------------------------------------------------------------------
-static int h_readonly(const char *file)
-{
-    if(file)
-    {
-        FILE *fp = fopen(file, "r+"); 
-        if(fp)
-        {
-            fclose(fp); 
-            return FALSE; 
-        }
-        return TRUE; 
-    }
-    else
-    {
-        error(PANIC); 
-        return FALSE; 
     }
 }
 

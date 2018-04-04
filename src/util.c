@@ -578,3 +578,26 @@ void pretty_print(entry_p entry)
     pp_aux(entry, 0); 
 }
 
+//----------------------------------------------------------------------------
+// Name:        get_buf(void)
+// Description: Get pointer to temporary buffer.
+// Input:       - 
+// Return:      char *: Buffer pointer.
+//----------------------------------------------------------------------------
+char *get_buf(void)
+{
+    static char buf[BUFSIZ];
+    return buf; 
+}
+
+//----------------------------------------------------------------------------
+// Name:        buf_size(void)
+// Description: Get size of temporary buffer.
+// Input:       - 
+// Return:      size_t: Buffer size.
+//----------------------------------------------------------------------------
+size_t buf_size(void)
+{
+    return BUFSIZ - 1; 
+}
+

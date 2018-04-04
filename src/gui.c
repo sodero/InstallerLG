@@ -3,6 +3,7 @@
 
 #include "gui.h"
 #include "resource.h"
+#include "util.h"
 
 #ifdef AMIGA
 #include <libraries/asl.h>
@@ -284,22 +285,26 @@ MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
     // within the notification range.
     for(n = 0; n < range; n++)
     {
-        // Find current button. 
-        Object *but = (Object *) DoMethod
-        (
-            obj, MUIM_FindUData, 
-            notif + n
-        );
+        // Filter out ticks.
+        if(notif + n != MUIV_InstallerGui_Tick) 
+        {
+            // Find current button. 
+            Object *but = (Object *) DoMethod
+            (
+                obj, MUIM_FindUData, 
+                notif + n
+            );
 
-        // Don't trust the caller.
-        if(but)
-        {
-            set(but, MUIA_CycleChain, TRUE);
-        }
-        else
-        {
-            // Button doesn't exist. 
-            GERR(tr(S_UNER)); 
+            // Don't trust the caller.
+            if(but)
+            {
+                set(but, MUIA_CycleChain, TRUE);
+            }
+            else
+            {
+                // Button doesn't exist. 
+                GERR(tr(S_UNER)); 
+            }
         }
     }
 
@@ -317,21 +322,22 @@ MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
                 // from the cycle chain. 
                 for(n = 0; n < range; n++)
                 {
-                    // Find current button. 
-                    Object *but = (Object *) DoMethod
-                    (
-                        obj, MUIM_FindUData, 
-                        notif + n
-                    );
-
-                    // Don't trust the caller.
-                    if(but)
+                    // Filter out ticks.
+                    if(notif + n != MUIV_InstallerGui_Tick) 
                     {
-                        set(but, MUIA_CycleChain, FALSE);
-                    }
+                        // Find current button. 
+                        Object *but = (Object *) DoMethod
+                        (
+                            obj, MUIM_FindUData, 
+                            notif + n
+                        );
 
-                    // No need to reset non 
-                    // existing buttons. 
+                        // Don't trust the caller.
+                        if(but)
+                        {
+                            set(but, MUIA_CycleChain, FALSE);
+                        }
+                    }
                 }
 
                 return ret; 
@@ -439,11 +445,15 @@ static ULONG InstallerGuiPageSet(Object *obj,
 
     if(txt && con && but)
     {
-        set(txt, MUIA_ShowMe, FALSE);
-        set(txt, MUIA_Text_Contents, msg);
         set(con, MUIA_Group_ActivePage, top);
         set(but, MUIA_Group_ActivePage, btm);
-        set(txt, MUIA_ShowMe, TRUE);
+
+        if(msg)
+        {
+            set(txt, MUIA_ShowMe, FALSE);
+            set(txt, MUIA_Text_Contents, msg);
+            set(txt, MUIA_ShowMe, TRUE);
+        }
 
         return TRUE; 
     }
@@ -641,10 +651,12 @@ MUIDSP IPTR InstallerGuiCopyFilesStart(Class *cls,
                                        struct MUIP_InstallerGui_CopyFilesStart *msg)
 {
     struct InstallerGuiData *my = INST_DATA(cls,obj);
+
     if(InstallerGuiPageSet(obj, P_COPYFILES, B_ABORT, 
                            msg->Message))
     {
         static Object *prg; 
+
         if(!prg)
         { 
             prg = (Object *) DoMethod
@@ -653,20 +665,19 @@ MUIDSP IPTR InstallerGuiCopyFilesStart(Class *cls,
                 MUIV_InstallerGui_FileProgress
             );
         } 
+
         if(prg) 
         {
             DoMethod(_app(obj), MUIM_Application_AddInputHandler, &my->ticker);
             SetAttrs(prg, MUIA_Gauge_Max, msg->NumberOfFiles,
                      MUIA_Gauge_Current, 0, TAG_END);
-            /*
-            set(prg, MUIA_Gauge_Max, msg->NumberOfFiles);
-            set(prg, MUIA_Gauge_Current, 0);
-            */
 
             return (IPTR) TRUE; 
         }
+
         GERR(tr(S_UNER)); 
     }
+
     return FALSE; 
 }
 
@@ -1311,18 +1322,68 @@ MUIDSP IPTR InstallerGuiRun(Class *cls,
                             Object *obj,
                             struct MUIP_InstallerGui_Run *msg)
 {
-    if(InstallerGuiPageSet(obj, P_MESSAGE, B_PROCEED_SKIP_ABORT, 
-                           msg->Message))
+    static Object *con, *but, *txt; 
+
+    // Initial lookup. 
+    if(!con)
     {
-        ULONG b = InstallerGuiWait(obj, MUIV_InstallerGui_ProceedRun, 3); 
-        switch(b)
+        con = (Object *) DoMethod
+        (
+            obj, MUIM_FindUData, 
+            MUIV_InstallerGui_TopPager
+        );
+
+        but = (Object *) DoMethod
+        (
+            obj, MUIM_FindUData, 
+            MUIV_InstallerGui_BottomPager
+        );
+        
+        txt = (Object *) DoMethod
+        (
+            obj, MUIM_FindUData, 
+            MUIV_InstallerGui_Text
+        );
+    }
+
+    if(con && but && txt)
+    {
+        ULONG top, btm, str; 
+
+        // Save the current state of whatever we're
+        // showing before we ask for confirmation.
+        if(get(con, MUIA_Group_ActivePage, &top) &&
+           get(but, MUIA_Group_ActivePage, &btm) &&
+           get(txt, MUIA_Text_Contents, &str))
         {
-            case MUIV_InstallerGui_ProceedRun:
-                return 1; 
-            case MUIV_InstallerGui_SkipRun:
-                return 0; 
-            case MUIV_InstallerGui_AbortRun:
-                return -1; 
+            // Copy the current message. 
+            memcpy(get_buf(), (void *) str, buf_size()); 
+
+            // Prompt for confirmation. 
+            if(InstallerGuiPageSet(obj, P_MESSAGE, B_PROCEED_SKIP_ABORT, 
+                                   msg->Message))
+            {
+                // Sleep until we get valid input.
+                ULONG b = InstallerGuiWait(obj, MUIV_InstallerGui_ProceedRun, 3); 
+
+                // Restore everything so that things 
+                // look the way they did before the
+                // confirmation dialog was shown.
+                set(con, MUIA_Group_ActivePage, top);
+                set(but, MUIA_Group_ActivePage, btm);
+                set(txt, MUIA_Text_Contents, get_buf());
+
+                // Take care of the user input.
+                switch(b)
+                {
+                    case MUIV_InstallerGui_ProceedRun:
+                        return 1; 
+                    case MUIV_InstallerGui_SkipRun:
+                        return 0; 
+                    case MUIV_InstallerGui_AbortRun:
+                        return -1; 
+                }
+            }
         }
     }
 
