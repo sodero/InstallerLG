@@ -92,18 +92,16 @@ kolla choices som är kataloger!
                 optional   = get_opt(contxt, OPT_OPTIONAL),
                 delopts    = get_opt(contxt, OPT_DELOPTS),
                 files      = all ? NULL : get_opt(contxt, OPT_FILES),
-                fail       = get_opt(delopts, OPT_FAIL) ?               // OK
-                             NULL : get_opt(optional, OPT_FAIL),        // OK
-                nofail     = get_opt(delopts, OPT_NOFAIL) ?             // OK
-                             NULL : get_opt(optional, OPT_NOFAIL),      // OK
-                oknodelete = get_opt(delopts, OPT_OKNODELETE) ?         // OK
-                             NULL : get_opt(optional, OPT_OKNODELETE),  // OK
-                force      = get_opt(delopts, OPT_FORCE) ?              // OK
-                             NULL : get_opt(optional, OPT_FORCE),       // OK
-                askuser    = get_opt(delopts, OPT_ASKUSER) ?            // NOK
-                             NULL : get_opt(optional, OPT_ASKUSER);     // NOK 
-
-// WRITE:
+                fail       = get_opt(delopts, OPT_FAIL) ?
+                             NULL : get_opt(optional, OPT_FAIL),
+                nofail     = get_opt(delopts, OPT_NOFAIL) ?
+                             NULL : get_opt(optional, OPT_NOFAIL),
+                oknodelete = get_opt(delopts, OPT_OKNODELETE) ?
+                             NULL : get_opt(optional, OPT_OKNODELETE),
+                force      = get_opt(delopts, OPT_FORCE) ? 
+                             NULL : get_opt(optional, OPT_FORCE),
+                askuser    = get_opt(delopts, OPT_ASKUSER) ?
+                             NULL : get_opt(optional, OPT_ASKUSER);
 
         DNUM = 0; 
 
@@ -2149,16 +2147,34 @@ static int h_copyfile(entry_p contxt,
                 if(!access(dst, F_OK) && 
                     access(dst, W_OK))
                 {
-                    // Give everyone full permissions if
-                    // (force) is used, or (askuser) is 
-                    // set and the user confirms.
-                    if((mode & CF_FORCE) || 
-                      ((mode & CF_ASKUSER) && h_confirm(contxt, tr(S_DWRT), dst)))
+                    // No need to ask if only (force).
+                    if((mode & CF_FORCE) &&
+                      !(mode & CF_ASKUSER))
                     {
-                        // No need to bother with the return
-                        // value since errors will be caught
-                        // below.
+                        // Unprotect file.
                         chmod(dst, S_IRWXU);
+                    }
+                    else
+                    // Ask for confirmation if (askuser).
+                    if(mode & CF_ASKUSER)
+                    {
+                        // Unless we're running in novice mode
+                        // and use (force) at the same time.
+                        if((mode & CF_FORCE) ||
+                            get_numvar(contxt, "@user-level"))
+                        {
+                            if(h_confirm(contxt, tr(S_DWRT), dst))
+                            {
+                                // Unprotect file.
+                                chmod(dst, S_IRWXU);
+                            }
+                            else
+                            {
+                                // Skip file or abort.
+                                fclose(fs); 
+                                return did_halt() ? 0 : 1; 
+                            }
+                        }
                     }
                 }
 
