@@ -583,7 +583,7 @@ entry_p m_delete(entry_p contxt)
                     {
                         // Give permissions so that delete
                         // can succeed. 
-                        chmod(file, S_IWUSR);
+                        chmod(file, S_IRWXU);
 
                         // No need to bother with the return
                         // value since errors will be caught
@@ -606,7 +606,7 @@ entry_p m_delete(entry_p contxt)
             {
                 // If (force) is used, give permissions 
                 // so that delete can succeed. 
-                chmod(file, S_IWUSR);
+                chmod(file, S_IRWXU);
 
                 // No need to bother with the return
                 // value since errors will be caught
@@ -2158,7 +2158,7 @@ static int h_copyfile(entry_p contxt,
                         // No need to bother with the return
                         // value since errors will be caught
                         // below.
-                        chmod(dst, S_IWUSR);
+                        chmod(dst, S_IRWXU);
                     }
                 }
 
