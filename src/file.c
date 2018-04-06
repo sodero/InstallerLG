@@ -34,7 +34,7 @@
 //----------------------------------------------------------------------------
 static int h_copyfile(entry_p contxt, const char *src, const char *dst, int mode);
 static int h_exists(const char *n);
-static char *h_fileonly(int id, const char *s);
+static const char *h_fileonly(int id, const char *s);
 static pnode_p h_filetree(int id, const char *src, const char *dst, entry_p files, entry_p fonts, entry_p choices, entry_p pattern);
 static int h_makedir(entry_p contxt, const char *dst, int mode);
 static int h_protect_get(entry_p contxt, const char *file, LONG *mask);
@@ -425,9 +425,7 @@ entry_p m_copylib(entry_p contxt)
                         {
                             // No, append the file part of the (possibly)
                             // full source path to the destination path. 
-                            char *o = h_fileonly(contxt->id, s);
-                            f = h_tackon(contxt->id, d, o);
-                            free(o); 
+                            f = h_tackon(contxt->id, d, h_fileonly(contxt->id, s));
                         }
 
                         // If we're not out of memory and destination dir
@@ -722,19 +720,16 @@ entry_p m_fileonly(entry_p contxt)
 {
     if(c_sane(contxt, 1))
     {
-        char *r = h_fileonly(contxt->id, str(CARG(1))); 
-        if(r)
-        {
-            RSTR(r); 
-        }
+        const char *p = str(CARG(1)), 
+                   *f = h_fileonly(contxt->id, p);
+        RSTR(strdup(f)); 
     }
     else
     {
         // The parser is broken
         error(PANIC); 
+        REST; 
     }
-
-    REST; 
 }
 
 //----------------------------------------------------------------------------
@@ -2383,35 +2378,33 @@ static int h_exists(const char *n)
 
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-static char *h_fileonly(int id, 
-                        const char *s)
+static const char *h_fileonly(int id, 
+                              const char *s)
 {
     if(s)
     {
-        size_t l = strlen(s), 
-               i = l - 1;
-        if(l && 
-           s[i] != '/' &&
+        size_t i = strlen(s); 
+
+        if(i-- && 
+           s[i] != '/' && 
            s[i] != ':' )
         {
-            char *r; 
             while(i &&
                   s[i - 1] != '/' && 
                   s[i - 1] != ':' ) i--;
-            r = calloc(l - i + 1, 1); 
-            if(r)
-            {
-                memcpy(r, s + i, l - i); 
-                return r; 
-            }
-            error(PANIC); 
-        }
+            return (s + i); 
+        }   
         else
         {
             error(id, ERR_NOT_A_FILE, s); 
         }   
     }
-    return NULL; 
+    else
+    {
+        error(PANIC);
+    }
+
+    return ""; 
 }
 
 //----------------------------------------------------------------------------
@@ -2662,15 +2655,14 @@ static pnode_p h_filetree(int id,
                 n_dst = strdup(dst); 
                 if(n_src && n_dst)  
                 {
-                    char *tac; 
                     head->type = 2; 
                     head->next = file; 
                     head->name = n_src; 
                     head->copy = n_dst; 
-                    tac = h_fileonly(id, src);
-                    n_dst = h_tackon(id, dst, tac); 
+
+                    n_dst = h_tackon(id, dst, h_fileonly(id, src)); 
                     n_src = strdup(src);
-                    free(tac); 
+
                     if(n_src && n_dst)  
                     {
                         file->type = 1; 
