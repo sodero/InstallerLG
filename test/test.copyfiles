@@ -1,6 +1,5 @@
-
-(copyfiles (source "_cfs_") (dest "_cfd_") (choices "1" "2" "3")) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && mkdir _cfs_/1 _cfs_/2 _cfs_/3 && touch _cfs_/1/1 _cfs_/2/2 _cfs_/3/3","1","test -d _cfd_/1 && sleep 10 &&  rm -Rf _cfs_ _cfd_"
-
+(copyfiles (source "_cfs_") (dest "_cfd_") (choices "1" "2" "3")) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && mkdir _cfs_/1 _cfs_/2 _cfs_/3 && touch _cfs_/1/1 _cfs_/2/2 _cfs_/3/3","1","test -d _cfd_/1 && rm -Rf _cfs_ _cfd_"
+(copyfiles (source "_cfs_") (dest "_cfd_") (choices "1" "2" "3" "4")) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && mkdir _cfs_/1 _cfs_/2 _cfs_/3 && touch _cfs_/1/1 _cfs_/2/2 _cfs_/3/3 _cfs_/4","1","test -d _cfd_/1 && test -f _cfd_/4 &&  rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (files) (pattern "#?")) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && mkdir _cfs_/1 && echo 123 > _cfs_/f1","1","test ! -d _cfd_/1 && cmp _cfs_/f1 _cfd_/f1 && rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (files) (all)) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && mkdir _cfs_/1 && echo 123 > _cfs_/f1","1","test -d _cfd_/1 && cmp _cfs_/f1 _cfd_/f1 && rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (all) (optional "askuser")) (+ 2); "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && touch _cfs_/1 && chmod a-r _cfs_/1","Line 1: Could not read from file '_cfs_/1' 0","chmod a+r _cfs_/1 && rm -Rf _cfs_ _cfd_"

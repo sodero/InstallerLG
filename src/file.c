@@ -62,17 +62,6 @@ static int h_confirm_obsolete(entry_p contxt, const char *msg, const char *nfo);
 //----------------------------------------------------------------------------
 entry_p m_copyfiles(entry_p contxt)
 {
-
-    /*
-    Fixa:
-
-    - return value should be == dest
-
-kolla choices som är kataloger!
-
-
-    */
-
     // We need atleast one argument
     if(c_sane(contxt, 1))
     {
@@ -2585,6 +2574,10 @@ static pnode_p h_filetree(int id,
                                     #endif
                                     {
                                         // Get tree of subdirectory.
+                                        // Don't promote (choices), 
+                                        // dirs will be assumed to 
+                                        // be files and things will
+                                        // break. 
                                         node->next = h_filetree
                                         (
                                             id, 
@@ -2592,7 +2585,7 @@ static pnode_p h_filetree(int id,
                                             n_dst, 
                                             files,
                                             fonts,
-                                            choices,
+                                            NULL,
                                             pattern
                                         ); 
 
