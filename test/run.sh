@@ -25,9 +25,11 @@ run()
         return 1
     else
         l=`mktemp ./err.tmp.XXXXXX`
-        echo $1 > $l
+        echo "; In line $3" > $l
+        echo $1 >> $l
         echo "; Actual result [$o]" >> $l
         echo "; Expected result [$2]" >> $l
+        echo "" >> $l
         return 0
     fi
 }
@@ -45,7 +47,7 @@ evl()
             return 0
         fi
     fi
-    run "$1 ; [$pre ; $pst]" "$inf" 
+    run "$1 ; [$pre ; $pst]" "$inf" "$3"
     ret=$?
     if [ -n "$pst" ]; then 
         o=`eval "$pst" 2>&1`
@@ -65,13 +67,15 @@ nfl=0
 nok=0
 for f in `ls -t $tst/test.*`; 
 do 
+    tno=0
     echo "-> $f"
     while read -r l; 
     do
        p=`echo "$l" | sed -e 's/;.*$//'`
        r=`echo "$l" | sed -e 's/.*;//'`
        if [ ! -z "$p" ]; then 
-           evl "$p" "$r" 
+           tno=$(( $tno + 1 ))
+           evl "$p" "$r" "$tno"
            s=$?
            if [ $s -eq 2 ]; then
                echo "LEAK -> $p" 

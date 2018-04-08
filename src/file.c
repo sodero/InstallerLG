@@ -39,8 +39,7 @@ static pnode_p h_filetree(int id, const char *src, const char *dst, entry_p file
 static int h_makedir(entry_p contxt, const char *dst, int mode);
 static int h_protect_get(entry_p contxt, const char *file, LONG *mask);
 static int h_protect_set(entry_p contxt, const char *file, LONG mask);
-static int h_confirm(entry_p contxt, const char *msg, const char *hlp);
-static int h_confirm_obsolete(entry_p contxt, const char *msg, const char *nfo);
+static int h_confirm(entry_p contxt, const char *hlp, const char *msg, ...);
 
 #define CF_INFOS        (1 << 0)
 #define CF_FONTS        (1 << 1)
@@ -151,12 +150,21 @@ entry_p m_copyfiles(entry_p contxt)
 
                 // If it's not a volume, prompt for
                 // confirmation before overwriting.
-                if(dln && dst[dln - 1] != ':' &&
-                   !h_confirm_obsolete(contxt, tr(S_ODIR), dst))
+                if(dln && dst[dln - 1] != ':')
                 {
-                    error(HALT); 
-                    h_log(contxt, tr(S_ACPY), src, dst); 
-                    RCUR; 
+                    if(!h_confirm(contxt, "", tr(S_ODIR), dst))
+                    {
+                        h_log(contxt, tr(S_ACPY), src, dst); 
+                        RCUR; 
+                    }
+                    else
+                    {
+                        // Give permission so that overwriting
+                        // can succeed. The proper (as in what 
+                        // the source has) permissions are set
+                        // later.
+                        chmod(dst, S_IRWXU);
+                    }
                 }
             }
 
@@ -554,37 +562,42 @@ entry_p m_delete(entry_p contxt)
                 // user to force the deletion.
                 if(access(file, W_OK))
                 {
-                    // Ask the user for confirmation when 
-                    // (askuser) is set. 
-                    if(!(askuser && 
-                         h_confirm_obsolete(contxt, tr(S_DWRT), file)))
+                    // Do we need to ask for confirmation?
+                    if(askuser)
                     {
-                        // This will turn into an error if the
-                        // user says no. 
-                        error(contxt->id, ERR_DELETE_FILE, file); 
-                        RNUM(0); 
+                        if(h_confirm(contxt, "", tr(S_DWRT), file))
+                        {
+                            // Give permissions so that delete
+                            // can succeed. 
+                            chmod(file, S_IRWXU);
+
+                            // No need to bother with the return
+                            // value since errors will be caught
+                            // below.
+                        }
+                        else
+                        {
+                            // Halt will be set by h_confirm. Skip
+                            // will result in nothing.
+                            RNUM(0);
+                        }
                     }
                     else
                     {
-                        // Give permissions so that delete
-                        // can succeed. 
-                        chmod(file, S_IRWXU);
-
-                        // No need to bother with the return
-                        // value since errors will be caught
-                        // below.
+                        // Without confirmation, a write protected
+                        // file is an error.
+                        error(contxt->id, ERR_DELETE_FILE, file); 
+                        RNUM(0); 
                     }
-
                 }
                 else
-                // If the file is writable, but we ask the
-                // user for permission anyway, and we get a
-                // no, then we should not delete. It's not 
-                // an error though.
+                // If the file is writable, but we ask the user for
+                // permission anyway, and we get a no, we should not
+                // delete.
                 if(confirm && 
-                   !h_confirm_obsolete(contxt, tr(S_DNRM), file))
+                   !h_confirm(contxt, "", tr(S_DNRM), file))
                 {
-                    delete = FALSE; 
+                    RNUM(0); 
                 }
             }
             else
@@ -1102,7 +1115,7 @@ entry_p m_makedir(entry_p contxt)
         // or aborts, return. On abort, the HALT will
         // be set by h_confirm. 
         if(confirm && 
-           !h_confirm(contxt, str(prompt), str(help)))
+           !h_confirm(contxt, str(help), str(prompt)))
         {
             RCUR; 
         }
@@ -1386,7 +1399,7 @@ entry_p m_startup(entry_p contxt)
         if(get_opt(CARG(2), OPT_CONFIRM) || 
            get_numvar(contxt, "@user-level") > 0)
         {
-            if(!h_confirm(contxt, str(prompt), str(help)))
+            if(!h_confirm(contxt, str(help), str(prompt)))
             {
                 RCUR; 
             }
@@ -1718,7 +1731,7 @@ entry_p m_textfile(entry_p contxt)
             // or aborts, return. On abort, the HALT will
             // be set by h_confirm. 
             if(confirm && 
-               !h_confirm(contxt, str(prompt), str(help)))
+               !h_confirm(contxt, str(help), str(prompt)))
             {
                 RCUR; 
             }
@@ -2045,7 +2058,7 @@ entry_p m_rename(entry_p contxt)
         // or aborts, return. On abort, the HALT will
         // be set by h_confirm. 
         if(confirm && 
-           !h_confirm(contxt, str(prompt), str(help)))
+           !h_confirm(contxt, str(help), str(prompt)))
         {
             RNUM(0); 
         }
@@ -2147,7 +2160,7 @@ static int h_copyfile(entry_p contxt,
                         if((mode & CF_FORCE) ||
                             get_numvar(contxt, "@user-level"))
                         {
-                            if(h_confirm(contxt, tr(S_DWRT), dst))
+                            if(h_confirm(contxt, "", tr(S_OWRT), dst))
                             {
                                 // Unprotect file.
                                 chmod(dst, S_IRWXU);
@@ -2886,38 +2899,10 @@ static int h_protect_set(entry_p contxt,
 
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-static int h_confirm_obsolete(entry_p contxt, 
-                     const char *msg, 
-                     const char *nfo) 
-{
-    if(contxt)
-    {
-        // Setting @yes can be used to mimic
-        // a user saying yes to all prompts. 
-        if(get_numvar(contxt, "@yes"))
-        {
-            return TRUE; 
-        }
-        else
-        {
-            // Format message and show dialog.
-            static char buf[BUFSIZ]; 
-            snprintf(buf, sizeof(buf), "%s\n\n%s", nfo, msg); 
-            return gui_confirm(buf);
-        }
-    }
-    else
-    {
-        error(PANIC); 
-        return FALSE; 
-    }
-}
-
-//----------------------------------------------------------------------------
-//----------------------------------------------------------------------------
 static int h_confirm(entry_p contxt, 
-                     const char *msg, 
-                     const char *hlp) 
+                     const char *hlp, 
+                     const char *msg,
+                     ...) 
 {
     if(contxt)
     {
@@ -2927,6 +2912,13 @@ static int h_confirm(entry_p contxt,
             skip = get_numvar(contxt, "@skip"),
             abort = get_numvar(contxt, "@abort"),
             ret; 
+
+        va_list ap; 
+
+        // Format messsage string.
+        va_start(ap, msg); 
+        vsnprintf(get_buf(), buf_size(), msg, ap); 
+        va_end(ap); 
 
         // If we have any overrides, translate
         // them to the corresponding gui return 
@@ -2939,7 +2931,7 @@ static int h_confirm(entry_p contxt,
         // the user. 
         else
         {
-            ret = gui_run(msg, hlp);
+            ret = gui_run(get_buf(), hlp);
         }
 
         // On abort, set HALT state. The return

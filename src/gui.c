@@ -3,7 +3,6 @@
 
 #include "gui.h"
 #include "resource.h"
-#include "util.h"
 
 #ifdef AMIGA
 #include <libraries/asl.h>
@@ -1322,7 +1321,7 @@ MUIDSP IPTR InstallerGuiRun(Class *cls,
                             Object *obj,
                             struct MUIP_InstallerGui_Run *msg)
 {
-    static Object *con, *but, *txt; 
+    static Object *con, *but, *txt, *grp; 
 
     // Initial lookup. 
     if(!con)
@@ -1344,11 +1343,20 @@ MUIDSP IPTR InstallerGuiRun(Class *cls,
             obj, MUIM_FindUData, 
             MUIV_InstallerGui_Text
         );
+
+        grp = (Object *) DoMethod
+        (
+            obj, MUIM_FindUData, 
+            MUIV_InstallerGui_TopGroup
+        );
     }
 
-    if(con && but && txt)
+    if(con && but && txt && grp)
     {
         ULONG top, btm, str; 
+
+        // Set help bubble.
+        set(grp, MUIA_ShortHelp, msg->Help); 
 
         // Save the current state of whatever we're
         // showing before we ask for confirmation.
@@ -1356,33 +1364,48 @@ MUIDSP IPTR InstallerGuiRun(Class *cls,
            get(but, MUIA_Group_ActivePage, &btm) &&
            get(txt, MUIA_Text_Contents, &str))
         {
-            // Copy the current message. 
-            memcpy(get_buf(), (void *) str, buf_size()); 
+            // Allocate memory to hold a copy of the
+            // current message.
+            size_t osz = strlen((char *) str) + 1;
+            char *ost = calloc(osz, 1); 
 
-            // Prompt for confirmation. 
-            if(InstallerGuiPageSet(obj, P_MESSAGE, B_PROCEED_SKIP_ABORT, 
-                                   msg->Message))
+            if(ost)
             {
-                // Sleep until we get valid input.
-                ULONG b = InstallerGuiWait(obj, MUIV_InstallerGui_ProceedRun, 3); 
+                // Copy the current message. 
+                memcpy(ost, (void *) str, osz);
 
-                // Restore everything so that things 
-                // look the way they did before the
-                // confirmation dialog was shown.
-                set(con, MUIA_Group_ActivePage, top);
-                set(but, MUIA_Group_ActivePage, btm);
-                set(txt, MUIA_Text_Contents, get_buf());
-
-                // Take care of the user input.
-                switch(b)
+                // Prompt for confirmation. 
+                if(InstallerGuiPageSet(obj, P_MESSAGE, B_PROCEED_SKIP_ABORT, 
+                                       msg->Message))
                 {
-                    case MUIV_InstallerGui_ProceedRun:
-                        return 1; 
-                    case MUIV_InstallerGui_SkipRun:
-                        return 0; 
-                    case MUIV_InstallerGui_AbortRun:
-                        return -1; 
+                    // Sleep until we get valid input.
+                    ULONG b = InstallerGuiWait(obj, MUIV_InstallerGui_ProceedRun, 3); 
+
+                    // Restore everything so that things 
+                    // look the way they did before the
+                    // confirmation dialog was shown.
+                    set(con, MUIA_Group_ActivePage, top);
+                    set(but, MUIA_Group_ActivePage, btm);
+                    set(txt, MUIA_Text_Contents, ost);
+
+                    // We no longer need the old message.
+                    free(ost);
+
+                    // Take care of the user input.
+                    switch(b)
+                    {
+                        case MUIV_InstallerGui_ProceedRun:
+                            return 1; 
+                        case MUIV_InstallerGui_SkipRun:
+                            return 0; 
+                        case MUIV_InstallerGui_AbortRun:
+                            return -1; 
+                    }
                 }
+
+                // We never did show the new message so
+                // we can get rid of the old (current).
+                free(ost);
             }
         }
     }
@@ -2297,7 +2320,8 @@ int gui_run(const char *msg, const char *hlp)
     return (int) DoMethod(Win, MUIM_InstallerGui_Run, msg, hlp);
     #else
     printf("%s%s\n", msg, hlp);
-    return 2; 
+    // Always 'proceed'.
+    return 2;
     #endif
 }
 
