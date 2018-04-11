@@ -48,6 +48,7 @@ static int h_confirm(entry_p contxt, const char *hlp, const char *msg, ...);
 #define CF_OKNODELETE   (1 << 4)
 #define CF_FORCE        (1 << 5)
 #define CF_ASKUSER      (1 << 6)
+#define CF_NOPOSITION   (1 << 7)
 
 //----------------------------------------------------------------------------
 // (copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)
@@ -134,8 +135,8 @@ entry_p m_copyfiles(entry_p contxt)
                 RCUR; 
             }
 
-            // A non safe operation in pretend
-            // mode always succeeds. 
+            // A non safe operation in pretend mode 
+            // always succeeds. 
             if(get_numvar(contxt, "@pretend") && !safe)
             {
                 RNUM(1); 
@@ -250,6 +251,7 @@ entry_p m_copyfiles(entry_p contxt)
 
                 if(go == 1)
                 {
+                    // Set file copy mode.
                     int md = (infos ? CF_INFOS : 0) |
                              (fonts ? CF_FONTS : 0) |
                              (nogauge ? CF_NOGAUGE : 0) |
@@ -354,24 +356,41 @@ entry_p m_copylib(entry_p contxt)
     {   
         entry_p prompt     = get_opt(contxt, OPT_PROMPT),
                 help       = get_opt(contxt, OPT_HELP),
-                confirm    = get_opt(contxt, OPT_CONFIRM),
-                safe       = get_opt(contxt, OPT_SAFE),
                 source     = get_opt(contxt, OPT_SOURCE),
                 dest       = get_opt(contxt, OPT_DEST),
                 newname    = get_opt(contxt, OPT_NEWNAME),
                 infos      = get_opt(contxt, OPT_INFOS),
-                noposition = get_opt(contxt, OPT_NOPOSITION),
+                confirm    = get_opt(contxt, OPT_CONFIRM),
+                safe       = get_opt(contxt, OPT_SAFE),
                 nogauge    = get_opt(contxt, OPT_NOGAUGE),
+                noposition = get_opt(contxt, OPT_NOPOSITION),
                 optional   = get_opt(contxt, OPT_OPTIONAL),
-                delopts    = get_opt(contxt, OPT_DELOPTS);
-
-        confirm = safe; 
-        noposition = optional = delopts;
+                delopts    = get_opt(contxt, OPT_DELOPTS),
+                fail       = get_opt(delopts, OPT_FAIL) ?
+                             NULL : get_opt(optional, OPT_FAIL),
+                nofail     = get_opt(delopts, OPT_NOFAIL) ?
+                             NULL : get_opt(optional, OPT_NOFAIL),
+                oknodelete = get_opt(delopts, OPT_OKNODELETE) ?
+                             NULL : get_opt(optional, OPT_OKNODELETE),
+                force      = get_opt(delopts, OPT_FORCE) ? 
+                             NULL : get_opt(optional, OPT_FORCE),
+                askuser    = get_opt(delopts, OPT_ASKUSER) ?
+                             NULL : get_opt(optional, OPT_ASKUSER);
 
         DNUM = 0; 
 
-        if(prompt && help &&
-           source && dest) 
+        // The (fail) (nofail) and (oknodelete) options
+        // are mutually exclusive. 
+        if((fail && (nofail || oknodelete)) ||
+           (nofail && (fail || oknodelete)) ||
+           (oknodelete && (nofail || fail)))
+        {
+            error(contxt->id, ERR_OPTION_MUTEX, 
+                  "fail/nofail/oknodelete"); 
+            RCUR; 
+        }
+
+        if(source && dest) 
         {
             const char *s = str(source), 
                        *d = str(dest); 
@@ -379,111 +398,172 @@ entry_p m_copylib(entry_p contxt)
             // Does the source file exist?
             if(h_exists(s) == 1)
             {
-                int dt = h_exists(d);
+                // User level.
+                int level = get_numvar(contxt, "@user-level"),
+                // Source file version.
+                vs = h_getversion(contxt, s),
+                // Destination type.
+                dt = h_exists(d);
+                // Destination file. 
+                char *f; 
+
+                // A non safe operation in pretend mode
+                // always succeeds. 
+                if(get_numvar(contxt, "@pretend") && !safe)
+                {
+                    RNUM(1); 
+                }
+
+                if(vs < 0)
+                {
+                    // Could not find version string.
+                    error(contxt->id, ERR_NO_VERSION, s); 
+                    RCUR;
+                }
 
                 if(dt == 1)
                 {
                     // Destination is a file, not a dir. 
                     error(contxt->id, ERR_NOT_A_DIR, d); 
+                    RCUR;
+                }
+
+                // Find out if we need confirmation...
+                if(confirm)
+                {
+                    // The default threshold is expert.
+                    int th = 2; 
+
+                    // If the (confirm ...) option contains 
+                    // something that can be translated into
+                    // a new threshold value...
+                    if(confirm->children && 
+                       confirm->children[0] && 
+                       confirm->children[0] != end())
+                    {
+                        // ...then do so.
+                        th = num(confirm->children[0]);
+                    }
+                                    
+                    // If we are below the threshold value, or
+                    // user input has been short-circuited by 
+                    // @yes, skip confirmation.
+                    if(level < th ||
+                       get_numvar(contxt, "@yes")) 
+                    {
+                        confirm = NULL; 
+                    }
+
+                    // Make sure that we have the prompt and
+                    // help texts that we need if 'confirm'
+                    // is set.
+                    if(!prompt || !help)
+                    {
+                        error(contxt->id, ERR_MISSING_OPTION, 
+                              prompt ? "help" : "prompt"); 
+                    }
+                }
+
+                if(!dt)
+                {
+                    // Directory doesn't exist, create
+                    // it. One level deep only. 
+                    if(!mkdir(d, 0777))
+                    {
+                        // Log the success. 
+                        h_log(contxt, tr(S_CRTD), d); 
+                    }
+                    else
+                    {
+                        // Permission problems or the dir is
+                        // more than 1 level deeper than the
+                        // existing path. 
+                        error(contxt->id, ERR_WRITE_DIR, d); 
+                        RCUR;
+                    }
+                }
+
+                // Are we renaming the file?
+                if(newname)
+                {
+                    // Yes, append the new name to the path.
+                    f = h_tackon(contxt->id, d, str(newname));
                 }
                 else
                 {
-                    if(!dt)
+                    // No, append the file part of the (possibly)
+                    // full source path to the destination path. 
+                    f = h_tackon(contxt->id, d, h_fileonly(contxt->id, s));
+                }
+
+                // If we're not out of memory and destination dir
+                // and / or destination file is non empty, f will
+                // be <> 0. 
+                if(f) 
+                {
+                    // Get f type info and set copy mode.
+                    int ft = h_exists(f),
+                        md = (infos ? CF_INFOS : 0) |
+                             (noposition ? CF_NOPOSITION : 0) |
+                             (nogauge ? CF_NOGAUGE : 0) |
+                             (nofail ? CF_NOFAIL : 0) |
+                             (oknodelete ? CF_OKNODELETE : 0) |
+                             (force ? CF_FORCE : 0) |
+                             (askuser ? CF_ASKUSER : 0);
+
+                    // Does it exist?
+                    if(!ft)
                     {
-                        // Directory doesn't exist, create
-                        // it. One level deep only. 
-                        if(!mkdir(d, 0777))
+                        // No such file, just copy source
+                        // file to the destination dir. 
+                        DNUM = h_copyfile(contxt, s, f, md);
+                    }
+                    else
+                    // It's a file.
+                    if(ft == 1)
+                    {
+                        // Get version of existing file.
+                        int vf = h_getversion(contxt, f);
+                        
+                        // Did we find a version string?
+                        if(vf >= 0)
                         {
-                            // Log the success. 
-                            h_log(contxt, tr(S_CRTD), d); 
-                            dt = 2; 
+                            // Is the source newer than the current file?
+                            if(vs > vf) 
+                            {
+                                // Yes.
+                                if(!confirm || 
+                                   h_confirm(contxt, "", "FIX ME: OW older %s", s))
+                                {
+                                    DNUM = h_copyfile(contxt, s, f, md);
+                                }
+                            }
+                            else
+                            {
+                                // No. 
+                                if(level == 2 && confirm &&
+                                   h_confirm(contxt, "", "FIX ME: OW newer %s", s))
+                                {
+                                    DNUM = h_copyfile(contxt, s, f, md);
+                                }
+                            }
                         }
                         else
                         {
-                            // Permission problems or the dir is
-                            // more than 1 level deeper than the
-                            // existing path. 
-                            error(contxt->id, ERR_WRITE_DIR, d); 
+                            // Could not find version string.
+                            error(contxt->id, ERR_NO_VERSION, f); 
                         }
                     }
-
-                    if(dt)
+                    // It's a dir. 
+                    else
                     {
-                        // The full path to the destination file. 
-                        char *f; 
-
-                        // Are we renaming the file?
-                        if(newname)
-                        {
-                            // Yes, append the new name to the path.
-                            f = h_tackon(contxt->id, d, str(newname));
-                        }
-                        else
-                        {
-                            // No, append the file part of the (possibly)
-                            // full source path to the destination path. 
-                            f = h_tackon(contxt->id, d, h_fileonly(contxt->id, s));
-                        }
-
-                        // If we're not out of memory and destination dir
-                        // and / or destination file is non empty, f will
-                        // be <> 0. 
-                        if(f) 
-                        {
-                            // Get type info of f.
-                            int ft = h_exists(f),
-                                md = (infos ? CF_INFOS : 0) |
-                                     (nogauge ? CF_NOGAUGE : 0); 
-        
-                            // Does it exist?
-                            if(!ft)
-                            {
-                                // No such file, just copy source
-                                // file to the destination dir. 
-                                DNUM = h_copyfile(contxt, s, f, md);
-                            }
-                            else
-                            // It's a file.
-                            if(ft == 1)
-                            {
-                                int vs = h_getversion(contxt, s),
-                                    vf = h_getversion(contxt, f);
-                                
-                                // Did we succeed getting a version
-                                // string from both files? 
-                                if(vs && vf) 
-                                {
-                                    // Is the source newer than the
-                                    // current file?  
-                                    if(vs > vf) 
-                                    {
-                                        // Yes.
-                                        DNUM = h_copyfile(contxt, s, f, md);
-                                    }
-                                    else
-                                    {
-                                        // No. 
-                                        DNUM = 0; 
-                                    }
-                                }
-                                else
-                                {
-                                    // Could not find version string.
-                                    error(contxt->id, ERR_NO_VERSION, vs ? f : s); 
-                                }
-                            }
-                            // It's a dir. 
-                            else
-                            {
-                                // Dest file exists, but is a directory. 
-                                error(contxt->id, ERR_NOT_A_FILE, f); 
-                            }
-
-                            // The h_tackon function allocates memory
-                            // the we need to free.
-                            free(f); 
-                        }
+                        // Dest file exists, but is a directory. 
+                        error(contxt->id, ERR_NOT_A_FILE, f); 
                     }
+
+                    // The h_tackon function allocates memory
+                    // the we need to free.
+                    free(f); 
                 }
             }
             else
