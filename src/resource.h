@@ -75,6 +75,10 @@ typedef enum
     S_ADLE, /* "Could not remove assign '%s'" */
     S_APND, /* "Append '%s' to '%s'\n" */
     S_INCL, /* "Include '%s' in '%s'\n" */
+    S_VINS, /* "Version to install" */
+    S_VCUR, /* "Version currently installed" */
+    S_DDRW, /* "Destination drawer" */
+    S_NINS, /* "There is no currently installed version" */
 
     // Out of range.
     S_GONE,

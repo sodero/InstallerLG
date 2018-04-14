@@ -49,6 +49,7 @@ static int h_confirm(entry_p contxt, const char *hlp, const char *msg, ...);
 #define CF_FORCE        (1 << 5)
 #define CF_ASKUSER      (1 << 6)
 #define CF_NOPOSITION   (1 << 7)
+#define CF_SILENT       (1 << 8)
 
 //----------------------------------------------------------------------------
 // (copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)
@@ -503,7 +504,8 @@ entry_p m_copylib(entry_p contxt)
                 {
                     // Get f type info and set copy mode.
                     int ft = h_exists(f),
-                        md = (infos ? CF_INFOS : 0) |
+                        md = CF_SILENT |
+                             (infos ? CF_INFOS : 0) |
                              (noposition ? CF_NOPOSITION : 0) |
                              (nogauge ? CF_NOGAUGE : 0) |
                              (nofail ? CF_NOFAIL : 0) |
@@ -514,9 +516,26 @@ entry_p m_copylib(entry_p contxt)
                     // Does it exist?
                     if(!ft)
                     {
-                        // No such file, just copy source
-                        // file to the destination dir. 
-                        DNUM = h_copyfile(contxt, s, f, md);
+                        // No such file, copy source to the 
+                        // destination directory. If needed
+                        // get confirmation.
+                        if(!confirm || 
+                            h_confirm
+                            (
+                                contxt, 
+                                "", 
+                                "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
+                                str(prompt), 
+                                tr(S_VINS),
+                                vs >> 16,
+                                vs & 0xffff,
+                                tr(S_NINS),
+                                tr(S_DDRW),
+                                d 
+                            ))
+                        {
+                            DNUM = h_copyfile(contxt, s, f, md);
+                        }
                     }
                     else
                     // It's a file.
@@ -525,24 +544,33 @@ entry_p m_copylib(entry_p contxt)
                         // Get version of existing file.
                         int vf = h_getversion(contxt, f);
                         
-                        // Did we find a version string?
-                        if(vf >= 0)
+                        // Did we find a version not equal to 
+                        // that of the current file?
+                        if(vf >= 0 && vs != vf)
                         {
-                            // Is the source newer than the current file?
-                            if(vs > vf) 
+                            if(vs > vf || level == 2)
                             {
-                                // Yes.
-                                if(!confirm || 
-                                   h_confirm(contxt, "", "FIX ME: OW older %s", s))
+                                if(vs < vf)
                                 {
-                                    DNUM = h_copyfile(contxt, s, f, md);
+                                    confirm = prompt; 
                                 }
-                            }
-                            else
-                            {
-                                // No. 
-                                if(level == 2 && confirm &&
-                                   h_confirm(contxt, "", "FIX ME: OW newer %s", s))
+
+                                if(!confirm || 
+                                    h_confirm
+                                    (
+                                        contxt,
+                                        "", 
+                                        "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
+                                        str(prompt), 
+                                        tr(S_VINS),
+                                        vs >> 16,
+                                        vs & 0xffff,
+                                        tr(S_VCUR),
+                                        vf >> 16,
+                                        vf & 0xffff,
+                                        tr(S_DDRW),
+                                        d
+                                    ))
                                 {
                                     DNUM = h_copyfile(contxt, s, f, md);
                                 }
@@ -561,8 +589,7 @@ entry_p m_copylib(entry_p contxt)
                         error(contxt->id, ERR_NOT_A_FILE, f); 
                     }
 
-                    // The h_tackon function allocates memory
-                    // the we need to free.
+                    // Free memory allocated by h_tackon.
                     free(f); 
                 }
             }
@@ -577,9 +604,7 @@ entry_p m_copylib(entry_p contxt)
             error
             (
                 contxt->id, ERR_MISSING_OPTION, 
-                !source ? "source" : 
-                !dest ? "dest" :
-                !prompt ? "prompt" : "help"
+                !source ? "source" : "dest"
             ); 
         }
     }
@@ -2205,7 +2230,8 @@ static int h_copyfile(entry_p contxt,
 {
     if(contxt && src && dst)
     { 
-        if(gui_copyfiles_setcur(src, mode & CF_NOGAUGE))
+        if((mode & CF_SILENT) ||
+           gui_copyfiles_setcur(src, mode & CF_NOGAUGE))
         { 
             static char buf[BUFSIZ]; 
             FILE *fs = fopen(src, "r");

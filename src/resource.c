@@ -84,6 +84,10 @@ const char *tr(res_t r)
         "Could not remove assign '%s'\n",
         "Append '%s' to '%s'\n",
         "Include '%s' in '%s'\n",
+        "Version to install",
+        "Version currently installed",
+        "Destination drawer",
+        "There is no currently installed version",
 
         // Out of range.
         "GONE"
