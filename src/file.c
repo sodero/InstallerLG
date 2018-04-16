@@ -546,9 +546,9 @@ entry_p m_copylib(entry_p contxt)
                         
                         // Did we find a version not equal to 
                         // that of the current file?
-                        if(vf >= 0 && vs != vf)
+                        if(vf >= 0)
                         {
-                            if(vs > vf || level == 2)
+                            if(vs != vf && (vs > vf || level == 2))
                             {
                                 if(vs < vf)
                                 {
@@ -2286,7 +2286,6 @@ static int h_copyfile(entry_p contxt,
 
                 if(fd)
                 {
-
                     // Read and write until there is nothing more
                     // to read.
                     while(n)
@@ -2308,9 +2307,6 @@ static int h_copyfile(entry_p contxt,
                     // should be zero.
                     if(!n)
                     {
-                        // Permission mask.
-                        LONG prm; 
-
                         // Write to the log file (if logging is
                         // enabled). 
                         h_log(contxt, tr(S_CPYD), src, dst); 
@@ -2326,23 +2322,46 @@ static int h_copyfile(entry_p contxt,
                             // if it's missing.
                             if(h_exists(is) == 1)
                             {
-                                // The destination icon. 
                                 static char id[PATH_MAX]; 
+
+                                // The destination icon. 
                                 snprintf(id, sizeof(id), "%s.info", dst); 
 
-                                // Recur without info set. 
-                                return h_copyfile
-                                (
-                                    contxt, 
-                                    is, 
-                                    id, 
-                                    mode & ~CF_INFOS
-                                ); 
+                                // Recur without info set.
+                                if(h_copyfile(contxt, is, id, mode & ~CF_INFOS))
+                                {
+                                    // Reset icon position?
+                                    if(mode & CF_NOPOSITION)
+                                    {
+                                        #ifdef AMIGA
+                                        struct DiskObject *obj = (struct DiskObject *) 
+                                            GetDiskObject(dst);
+
+                                        if(obj)
+                                        {
+                                            // Reset icon position.
+                                            obj->do_CurrentX = NO_ICON_POSITION;
+                                            obj->do_CurrentY = NO_ICON_POSITION;
+
+                                            // Save the changes to the .info file. 
+                                            if(!PutDiskObject(dst, obj))
+                                            {
+                                                // We failed for some unknown reason.
+                                                error(contxt->id, ERR_WRITE_FILE, id); 
+                                            }
+
+                                            FreeDiskObject(obj);
+                                        }
+                                        #endif
+                                    }
+                                }
                             }
                         }
 
                         // Preserve file permissions. On err,
                         // code will be set by h_protect_x().
+                        LONG prm; 
+
                         if(h_protect_get(contxt, src, &prm))
                         {
                             h_protect_set(contxt, dst, prm);
