@@ -1983,13 +1983,16 @@ entry_p m_tooltype(entry_p contxt)
                 dest            = get_opt(contxt, OPT_DEST),
                 settooltype     = get_opt(contxt, OPT_SETTOOLTYPE),
                 setdefaulttool  = get_opt(contxt, OPT_SETDEFAULTTOOL),
+                setstack        = get_opt(contxt, OPT_SETSTACK),
+                noposition      = get_opt(contxt, OPT_NOPOSITION),
                 setposition     = get_opt(contxt, OPT_SETPOSITION),
                 swapcolors      = get_opt(contxt, OPT_SWAPCOLORS),
                 confirm         = get_opt(contxt, OPT_CONFIRM),
                 safe            = get_opt(contxt, OPT_SAFE);
 
-        help = prompt = settooltype = setposition = 
-        swapcolors = confirm = safe; 
+        help = prompt = settooltype = noposition = 
+        setposition = setstack = swapcolors = confirm = safe; 
+
         DNUM = 0; 
 
         // We need something to work with. 
