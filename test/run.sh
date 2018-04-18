@@ -52,7 +52,7 @@ evl()
     if [ -n "$pst" ]; then 
         o=`eval "$pst" 2>&1`
         if [ $? -ne 0 ]; then
-            echo "FAIL/ERR:$o"
+            echo "In line $3 FAIL/ERR:$o"
             if [ $ret -eq 1 ]; then
                 ret=0
             fi

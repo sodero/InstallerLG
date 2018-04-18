@@ -391,7 +391,15 @@ entry_p m_copylib(entry_p contxt)
             RCUR; 
         }
 
-        if(source && dest) 
+        // We always need a prompt and help since trying
+        // to overwrite new files with older ones will 
+        // force a confirm if we're in expert mode. The
+        // CBM installer doesn't behave this way, but the 
+        // Installer guide says so, and it makes sense, so
+        // let's do it this way until we know for sure that
+        // this will break existing scripts.
+        if(source && dest && 
+           prompt && help) 
         {
             const char *s = str(source), 
                        *d = str(dest); 
@@ -453,15 +461,6 @@ entry_p m_copylib(entry_p contxt)
                        get_numvar(contxt, "@yes")) 
                     {
                         confirm = NULL; 
-                    }
-
-                    // Make sure that we have the prompt and
-                    // help texts that we need if 'confirm'
-                    // is set.
-                    if(!prompt || !help)
-                    {
-                        error(contxt->id, ERR_MISSING_OPTION, 
-                              prompt ? "help" : "prompt"); 
                     }
                 }
 
@@ -548,16 +547,11 @@ entry_p m_copylib(entry_p contxt)
                         // that of the current file?
                         if(vf >= 0)
                         {
-                            if(vs != vf && (vs > vf || level == 2))
+                            if(vs != vf)
                             {
-                                if(vs < vf)
+                                if(confirm)
                                 {
-                                    confirm = prompt; 
-                                }
-
-                                if(!confirm || 
-                                    h_confirm
-                                    (
+                                    if(h_confirm(
                                         contxt,
                                         "", 
                                         "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
@@ -569,10 +563,39 @@ entry_p m_copylib(entry_p contxt)
                                         vf >> 16,
                                         vf & 0xffff,
                                         tr(S_DDRW),
-                                        d
-                                    ))
+                                        d))
+                                    {
+                                        DNUM = h_copyfile(contxt, s, f, md);
+                                    }
+                                }
+                                else
                                 {
-                                    DNUM = h_copyfile(contxt, s, f, md);
+                                    if(vs > vf)
+                                    {
+                                        DNUM = h_copyfile(contxt, s, f, md);
+                                    }
+                                    else
+                                    {
+                                        if(level == 2)
+                                        {
+                                            if(h_confirm(
+                                                contxt,
+                                                "", 
+                                                "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
+                                                str(prompt), 
+                                                tr(S_VINS),
+                                                vs >> 16,
+                                                vs & 0xffff,
+                                                tr(S_VCUR),
+                                                vf >> 16,
+                                                vf & 0xffff,
+                                                tr(S_DDRW),
+                                                d))
+                                            {
+                                                DNUM = h_copyfile(contxt, s, f, md);
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -604,7 +627,9 @@ entry_p m_copylib(entry_p contxt)
             error
             (
                 contxt->id, ERR_MISSING_OPTION, 
-                !source ? "source" : "dest"
+                !source ? "source" : 
+                !dest ? "dest" :
+                !prompt ? "prompt" : "help"
             ); 
         }
     }
