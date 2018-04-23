@@ -15,8 +15,8 @@
 #include "util.h"
 
 #include <string.h>
-  
-static char version[] __attribute__((used)) = "\0$VER: Installer 3.11 for Workgroups";
+
+static char version[] __attribute__((used)) = "\0$VER: InstallerLG 43.3 [ALPHA1]";
 
 //----------------------------------------------------------------------------
 // Name:        init(entry_p contxt)
