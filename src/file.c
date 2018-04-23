@@ -1986,12 +1986,8 @@ entry_p m_tooltype(entry_p contxt)
                 setstack        = get_opt(contxt, OPT_SETSTACK),
                 noposition      = get_opt(contxt, OPT_NOPOSITION),
                 setposition     = get_opt(contxt, OPT_SETPOSITION),
-                swapcolors      = get_opt(contxt, OPT_SWAPCOLORS),
                 confirm         = get_opt(contxt, OPT_CONFIRM),
                 safe            = get_opt(contxt, OPT_SAFE);
-
-        help = prompt = settooltype = noposition = 
-        setposition = setstack = swapcolors = confirm = safe; 
 
         DNUM = 0; 
 
@@ -2001,44 +1997,239 @@ entry_p m_tooltype(entry_p contxt)
             // Something is 'dest'.info 
             const char *file = str(dest);
 
-            #ifdef AMIGA
-            // Get icon information. 
-            struct DiskObject *obj = (struct DiskObject *) 
-                GetDiskObject(file);
-
-            if(obj)
+            // Find out if we need confirmation...
+            if(confirm)
             {
-                // Do we want to change the default tool of 
-                // this 'project'?
-                if(setdefaulttool)
+                // The default threshold is expert.
+                int level = get_numvar(contxt, "@user-level"),
+                    th = 2;
+
+                // If the (confirm ...) option contains 
+                // something that can be translated into
+                // a new threshold value...
+                if(confirm->children && 
+                   confirm->children[0] && 
+                   confirm->children[0] != end())
                 {
-                    // We need to save the current value. 
-                    const char *new = str(setdefaulttool),
-                               *old = obj->do_DefaultTool;
+                    // ...then do so.
+                    th = num(confirm->children[0]);
+                }
+                                
+                // If we are below the threshold value,
+                // don't care about getting confirmation
+                // from the user.
+                if(level < th) 
+                {
+                    confirm = NULL; 
+                }
 
-                    // Should we perhaps check the length
-                    // of this string? Or is a length of
-                    // zero a reasonable way of removing
-                    // a tool? 
-                    obj->do_DefaultTool = (char *) new; 
+                // Make sure that we have the prompt and
+                // help texts that we need if 'confirm'
+                // is set.
+                if(!prompt || !help)
+                {
+                    error(contxt->id, ERR_MISSING_OPTION, 
+                          prompt ? "help" : "prompt"); 
+                    RCUR; 
+                }
+            }
 
-                    // Nope:
-/*
- `(settooltype <tooltype> <value>)'
-     Used to modify a tooltype to a certain value.  If the tooltype
-     does not exist it will be created; if the `<value>' parameter is
-     omitted, the tooltype will be deleted.  A tooltype without a value
-     may be added in the following manner:
+            // The (noposition) and (setposition)
+            // options are mutually exclusive. 
+            if(noposition && setposition)
+            {
+                error(contxt->id, ERR_OPTION_MUTEX, 
+                      "noposition/setposition"); 
+                RCUR; 
+            }
 
-          (settooltype <tooltype-string> "")
+            // A non safe operation in pretend mode 
+            // always succeeds. 
+            if(get_numvar(contxt, "@pretend") && !safe)
+            {
+                RNUM(1); 
+            }
 
-     Remember that `(tooltype <tooltype-string>)' deletes the tooltype
-     given.
-*/
-                    // Save the changes to the .info file. 
+            // Get confirmation if necessary.
+            if(!confirm ||
+               h_confirm(contxt, str(help), str(prompt)))
+            {
+                #ifdef AMIGA
+                // Get icon information. 
+                struct DiskObject *obj = (struct DiskObject *) 
+                    GetDiskObject(file);
+
+                if(obj)
+                {
+                    // We need to save the current value
+                    // of the tool type and default tool
+                    // members in order to not trash mem
+                    // when free:ing the diskobject.
+                    char *odt = obj->do_DefaultTool;
+                    char **tts = (char **) obj->do_ToolTypes; 
+
+                    // If we're going to set tooltypes the option
+                    // must have one or two children.
+                    if(settooltype &&
+                       c_sane(settooltype, 1))
+                    { 
+                        // The number of tooltypes.
+                        size_t n = 0; 
+
+                        // Get tooltype and current value (if it exists).
+                        const char *t = str(settooltype->children[0]),
+                                   *o = FindToolType(obj->do_ToolTypes, t);
+
+                        // Get size of tooltype array.
+                        while(*(tts + n++));
+
+                        // Set value or create tooltype?
+                        if(settooltype->children[1] && 
+                           settooltype->children[1] != end())
+                        {
+                            // Resolve tooltype value. 
+                            const char *v = str(settooltype->children[1]);
+
+                            // If it already exists, we will replace the old
+                            // value with the new one.
+                            if(o)
+                            {
+                                // Allocate memory for a new temporary array.
+                                obj->do_ToolTypes = calloc(n, sizeof(char *)); 
+
+                                if(obj->do_ToolTypes)
+                                {
+                                    char **nts = (char **) obj->do_ToolTypes;
+
+                                    // Copy the current set of tooltypes.
+                                    memcpy(nts, tts, n  * sizeof(char **)); 
+
+                                    // Iterate over the current set.
+                                    while(*nts)
+                                    {
+                                        // Is the found value is within the
+                                        // bounds of the current string?
+                                        if(o >= *nts &&
+                                           o <= (*nts + strlen(*nts)))
+                                        {
+                                            // Create either a new key -> value pair, or a
+                                            // naked key. 
+                                            if(strlen(v))
+                                            {
+                                                // Tooltype with value.
+                                                snprintf(get_buf(), buf_size(), "%s=%s", t, v); 
+                                            }
+                                            else
+                                            {
+                                                // Naked tooltype.
+                                                snprintf(get_buf(), buf_size(), "%s", t); 
+                                            }
+
+                                            // Overwrite the old tooltype.
+                                            *nts = get_buf(); 
+                                            break; 
+                                        }
+
+                                        // Next tooltype.
+                                        nts++;
+                                    }
+                                }
+                            }
+                            // It doesn't exist, append new tooltype.
+                            else
+                            {
+                                // Allocate memory for a new temporary array.
+                                obj->do_ToolTypes = calloc(n + 1, sizeof(char *)); 
+
+                                if(obj->do_ToolTypes)
+                                {
+                                    char **nts = (char **) obj->do_ToolTypes;
+
+                                    // Copy the current set of tooltypes.
+                                    memcpy(nts, tts, n * sizeof(char **)); 
+
+                                    if(strlen(v))
+                                    {
+                                        // Tooltype with value.
+                                        snprintf(get_buf(), buf_size(), "%s=%s", t, v); 
+                                    }
+                                    else
+                                    {
+                                        // Naked tooltype.
+                                        snprintf(get_buf(), buf_size(), "%s", t); 
+                                    }
+
+                                    // Append tooltype.
+                                    *(nts + n - 1) = get_buf(); 
+                                }
+                            }
+                        }
+                        // Delete tooltype.
+                        else
+                        {
+                            // Is there anything to delete?
+                            if(o && n > 1)
+                            {
+                                // Allocate memory for a new temporary array.
+                                obj->do_ToolTypes = calloc(n, sizeof(char *)); 
+
+                                if(obj->do_ToolTypes)
+                                {
+                                    char **nts = (char **) obj->do_ToolTypes,
+                                         **ots = tts;
+
+                                    // Delete tooltype by copying everything
+                                    // except the tooltype to the new array.
+                                    while(*ots)
+                                    {
+                                        if((o < *ots) ||
+                                           (o > (*ots + strlen(*ots))))
+                                        {
+                                            *nts = *ots; 
+                                            nts++;
+                                        }
+
+                                        ots++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Change the default tool of project?
+                    if(setdefaulttool)
+                    {
+                        // Set temporary string.
+                        obj->do_DefaultTool = (char *)
+                            str(setdefaulttool);
+                    }
+                       
+                    // Set tool stacksize?
+                    if(setstack)
+                    { 
+                        // Is a minimum value a good idea?
+                        obj->do_StackSize = num(setstack); 
+                    }
+
+                    // Reset icon position?
+                    if(noposition)
+                    { 
+                        obj->do_CurrentX = NO_ICON_POSITION;
+                        obj->do_CurrentY = NO_ICON_POSITION;
+                    }
+
+                    // Set icon position?
+                    if(setposition &&
+                       c_sane(setposition, 2))
+                    { 
+                        obj->do_CurrentX = num(setposition->children[0]); 
+                        obj->do_CurrentY = num(setposition->children[1]); 
+                    }
+                    
+                    // Save all changes to the .info file. 
                     if(PutDiskObject(file, obj))
                     {
-                        // Success.
+                        // Done.
                         DNUM = 1; 
                     }
                     else
@@ -2047,29 +2238,49 @@ entry_p m_tooltype(entry_p contxt)
                         error(contxt->id, ERR_WRITE_FILE, file); 
                     }
 
-                    // Restore the old value, otherwise memory
+                    // Restore DiskObject, otherwise memory
                     // will be lost / trashed. Refer to the 
                     // icon.library documentation. 
-                    obj->do_DefaultTool = (char *) old; 
-                }
 
-                // Free the DiskObject after restoring it to
-                // the state it was in before our changes. 
-                FreeDiskObject(obj);
+                    // If we have a new tooltype array, free
+                    // it and reinstate the old one.
+                    if(obj->do_ToolTypes != tts)
+                    {
+                        free(obj->do_ToolTypes);
+                        obj->do_ToolTypes = tts;
+                    }
+
+                    // No need to free the current string,
+                    // just overwrite what we have.
+                    obj->do_DefaultTool = odt; 
+
+                    // Free the DiskObject after restoring it to
+                    // the state it was in before our changes. 
+                    FreeDiskObject(obj);
+                }
+                else
+                {
+                    // More information? IoErr() is nice.  
+                    error(contxt->id, ERR_READ_FILE, file); 
+                }
+                #else
+                // On non-Amiga systems we always succeed.
+                DNUM = 1; 
+
+                // Remove warnings
+                settooltype = setstack = setdefaulttool;
+                file = NULL; 
+                #endif
             }
             else
             {
-                // More information? IoErr() is nice.  
-                error(contxt->id, ERR_READ_FILE, file); 
+                // The user did not confirm.
+                DNUM = 0; 
             }
-            #else
-            setdefaulttool = NULL; 
-            file = NULL; 
-            DNUM = 1; 
-            #endif
         }
         else
         {
+            // We need an icon.
             error(contxt->id, ERR_MISSING_OPTION, "dest"); 
         }
     }

@@ -81,8 +81,8 @@ Full: * = Tested
 * (startup (prompt..) (command..))
 * (copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)
 * (copylib (prompt..) (help..) (source..) (dest..) (newname..) (infos)
+* (tooltype (prompt..) (help..) (dest..) (settooltype..) (setstack..)
 
 Partial:
 ------------------------------------------------------------------------------------
 (delete file (help..) (prompt..) (confirm..) 
-(tooltype (prompt..) (help..) (dest..) (settooltype..) (setstack..)
