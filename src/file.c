@@ -40,6 +40,9 @@ static int h_makedir(entry_p contxt, const char *dst, int mode);
 static int h_protect_get(entry_p contxt, const char *file, LONG *mask);
 static int h_protect_set(entry_p contxt, const char *file, LONG mask);
 static int h_confirm(entry_p contxt, const char *hlp, const char *msg, ...);
+static int h_delete_dir(entry_p contxt, const char *dir);
+static int h_delete_file(entry_p contxt, const char *file);
+static int h_delete_pattern(entry_p contxt, const char *pat);
 
 #define CF_INFOS        (1 << 0)
 #define CF_FONTS        (1 << 1)
@@ -651,7 +654,272 @@ entry_p m_copylib(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //----------------------------------------------------------------------------
+static int h_delete_dir(entry_p contxt, const char *dir)
+{
+    if(dir)
+    {
+        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
+                optional = get_opt(CARG(2), OPT_OPTIONAL), 
+                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
+                all      = get_opt(CARG(2), OPT_ALL), 
+                force    = get_opt(delopts, OPT_FORCE) ? NULL :
+                           get_opt(optional, OPT_FORCE),
+                askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
+                           get_opt(optional, OPT_ASKUSER);
+        return 1;
+    }
+    else
+    {
+        // Unknown error.
+        error(PANIC); 
+        return 0;
+    }
+}
+
+static int h_delete_pattern(entry_p contxt, const char *pat)
+{
+    if(pat)
+    {
+        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
+                optional = get_opt(CARG(2), OPT_OPTIONAL), 
+                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
+                all      = get_opt(CARG(2), OPT_ALL), 
+                force    = get_opt(delopts, OPT_FORCE) ? NULL :
+                           get_opt(optional, OPT_FORCE),
+                askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
+                           get_opt(optional, OPT_ASKUSER);
+        return 1;
+    }
+    else
+    {
+        // Unknown error.
+        error(PANIC); 
+        return 0;
+    }
+}
+
+static int h_delete_file(entry_p contxt, const char *file)
+{
+    if(file)
+    {
+        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
+                optional = get_opt(CARG(2), OPT_OPTIONAL), 
+                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
+                force    = get_opt(delopts, OPT_FORCE) ? NULL :
+                           get_opt(optional, OPT_FORCE),
+                askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
+                           get_opt(optional, OPT_ASKUSER);
+
+        // If (force) is used, give permissions 
+        // so that delete can succeed. 
+        if(force)
+        {
+            // No need to bother with the return
+            // value since errors will be caught
+            // below.
+            chmod(file, S_IRWXU);
+        }
+        else
+        {
+            if(access(file, W_OK))
+            {
+                // Do we need to ask for confirmation?
+                if(askuser)
+                {
+                    if(h_confirm(contxt, "", tr(S_DWRT), file))
+                    {
+                        // Give permissions so that delete
+                        // can succeed. No need to bother with
+                        // the return value since errors will
+                        // be caught below.
+                        chmod(file, S_IRWXU);
+                    }
+                    else
+                    {
+                        // Halt will be set by h_confirm. Skip
+                        // will result in nothing.
+                        return 0;
+                    }
+                }
+                else
+                {
+                    // Without confirmation, a write protected
+                    // file is an error.
+                    error(contxt->id, ERR_DELETE_FILE, file); 
+                    return 0;
+                }
+            }
+        }
+
+        // If yes, this must succeed, otherwise we
+        // will abort with an error. 
+        if(!remove(file))
+        {
+            // The file has been deleted. 
+            h_log(contxt, tr(S_DLTD), file); 
+
+            // Shall we delete the info file as well? 
+            if(infos)
+            {
+                // Info = file + .info. 
+                char *info = get_buf(); 
+                snprintf(info, buf_size(), "%s.info", file); 
+
+                if(h_exists(info) == 1)
+                {
+                    // Set permissions so that delete can
+                    // succeed. 
+                    chmod(info, S_IRWXU);
+
+                    // Delete the info file.
+                    if(!remove(info))
+                    {
+                        // The info file has been deleted. 
+                        h_log(contxt, tr(S_DLTD), info); 
+                    }
+                    else
+                    {
+                        error(contxt->id, ERR_DELETE_FILE, info); 
+                        return 0;
+                    }
+                }
+            }
+
+            // All done.
+            return 1;
+        }
+        else
+        {
+            error(contxt->id, ERR_DELETE_FILE, file); 
+            return 0;
+        }
+    }
+    else
+    {
+        // Unknown error.
+        error(PANIC); 
+        return 0;
+    }
+}
+
 entry_p m_delete(entry_p contxt)
+{
+    // We need atleast one argument
+    if(c_sane(contxt, 1))
+    {
+        int wc = 0; 
+        const char *w = str(CARG(1));
+
+        #ifdef AMIGA
+        wc = ParsePattern(w, get_buf(), buf_size());
+        #endif
+
+        if(wc >= 0)
+        {
+            entry_p help     = get_opt(CARG(2), OPT_HELP),
+                    prompt   = get_opt(CARG(2), OPT_PROMPT), 
+                    confirm  = get_opt(CARG(2), OPT_CONFIRM), 
+                    safe     = get_opt(CARG(2), OPT_SAFE);
+
+            // Find out if we need confirmation...
+            if(confirm)
+            {
+                // The default threshold is expert.
+                int level = get_numvar(contxt, "@user-level"),
+                    th = 2;
+
+                // If the (confirm ...) option contains 
+                // something that can be translated into
+                // a new threshold value...
+                if(confirm->children && 
+                   confirm->children[0] && 
+                   confirm->children[0] != end())
+                {
+                    // ...then do so.
+                    th = num(confirm->children[0]);
+                }
+                                
+                // If we are below the threshold value,
+                // don't care about getting confirmation
+                // from the user.
+                if(level < th) 
+                {
+                    confirm = NULL; 
+                }
+
+                // Make sure that we have the prompt and
+                // help texts that we need if 'confirm'
+                // is set.
+                if(!prompt || !help)
+                {
+                    error(contxt->id, ERR_MISSING_OPTION, 
+                          prompt ? "help" : "prompt"); 
+                    RCUR; 
+                }
+            }
+
+            // If we need confirmation and the user skips
+            // or aborts, return. On abort, the HALT will
+            // be set by h_confirm. 
+            if(confirm && 
+               !h_confirm(contxt, str(help), str(prompt)))
+            {
+                RCUR; 
+            }
+
+            // Is this a safe operation or are we not 
+            // running in pretend mode? 
+            if(safe || !get_numvar(contxt, "@pretend"))
+            {
+                DNUM = 0; 
+                help = prompt = confirm; 
+
+                if(wc)        
+                {
+                    DNUM = h_delete_pattern(contxt, get_buf()); 
+                }
+                else
+                {
+                    switch(h_exists(w))
+                    {
+                        case 2:
+                            DNUM = h_delete_dir(contxt, w); 
+                            break;
+
+                        case 1:
+                            DNUM = h_delete_file(contxt, w); 
+                            break;
+
+                        case 0:
+                            h_log(contxt, tr(S_NSFL), w); 
+                            DNUM = 1;
+                    }
+                }
+            }
+            else
+            {
+                // A non safe operation in pretend
+                // mode always succeeds. 
+                DNUM = 1; 
+            }
+        }
+        else
+        {
+            // We probably had a buffer overflow. 
+            error(contxt->id, ERR_OVERFLOW, w); 
+        }
+    }
+    else
+    {
+        // The parser is broken
+        error(PANIC); 
+    }
+
+    RCUR; 
+}
+ 
+entry_p _m_delete(entry_p contxt);
+entry_p _m_delete(entry_p contxt)
 {
     // We need atleast one argument
     if(c_sane(contxt, 1))
