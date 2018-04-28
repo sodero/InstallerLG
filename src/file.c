@@ -814,6 +814,9 @@ entry_p m_delete(entry_p contxt)
         wc = ParsePattern(w, get_buf(), buf_size());
         #endif
 
+        // Assume failure.
+        DNUM = 0; 
+
         if(wc >= 0)
         {
             entry_p help     = get_opt(CARG(2), OPT_HELP),
@@ -871,9 +874,6 @@ entry_p m_delete(entry_p contxt)
             // running in pretend mode? 
             if(safe || !get_numvar(contxt, "@pretend"))
             {
-                DNUM = 0; 
-                help = prompt = confirm; 
-
                 if(wc)        
                 {
                     DNUM = h_delete_pattern(contxt, get_buf()); 

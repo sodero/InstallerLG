@@ -83,4 +83,3 @@
 (delete "_dl_" (optional "force") (delopts "force") (infos)) ; "touch _dl_ && touch _dl_.info","1","[ ! -e _dl_ ] && [ ! -e _dl_.info ] && rm -f _dl_ && rm -f _dl_.info"
 (set @yes 1) (delete "_dl_" (prompt "p") (help "h")  (confirm) (optional "askuser") (infos)) ; "touch _dl_ && touch _dl_.info","1","[ ! -e _dl_ ] && [ ! -e _dl_.info ] && rm -f _dl_ && rm -f _dl_.info"
 (set @yes 1) (delete "_dl_" (prompt "p") (help "h")  (confirm) (optional "askuser") (delopts "askuser") (infos)) ; "touch _dl_ && touch _dl_.info","1","[ ! -e _dl_ ] && [ ! -e _dl_.info ] && rm -f _dl_ && rm -f _dl_.info"
-(debug 1) ; "sleep 10","",""
