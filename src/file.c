@@ -22,6 +22,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
 
 #ifdef AMIGA
 #include <dos/dos.h>
@@ -654,6 +655,21 @@ entry_p m_copylib(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //----------------------------------------------------------------------------
+/*
+skrivrattigheter:
+delete tomt dir : lyckas tyst. 
+delete icke-tomt dir : misslyckas tyst. 
+delete icke-tomt dir med "force": misslyckas tyst. 
+
+utan skrivrattigheter:
+delete tomt dir : misslyckas tyst 
+delete tomt dir med "force": lyckas tyst 
+osv...
+
+- funkar precis som med filer, fast kraver tomt dir om INTE (all), 
+om (all) recur med filer och dirs. 
+        */
+
 static int h_delete_dir(entry_p contxt, const char *dir)
 {
     if(dir)
@@ -666,14 +682,129 @@ static int h_delete_dir(entry_p contxt, const char *dir)
                            get_opt(optional, OPT_FORCE),
                 askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
                            get_opt(optional, OPT_ASKUSER);
-        return 1;
+
+        if(!force && access(dir, W_OK))
+        {
+            // Do we need to ask for confirmation?
+            if(askuser)
+            {
+                if(!h_confirm(contxt, "", tr(S_DWRT), dir))
+                {
+                    // Halt will be set by h_confirm. Skip
+                    // will result in nothing.
+                    return 0;
+                }
+            }
+            else
+            {
+                // Without confirmation, a write protected
+                // file is an error.
+                error(contxt->id, ERR_DELETE_FILE, dir); 
+                return 0;
+            }
+        }
+
+        // MAKE SURE THAT rmdir deletes write protected
+        // dirs on amiga !FAIAIAIAIAI!!!
+        if(rmdir(dir))
+        {
+            if(errno == EEXIST ||
+               errno == ENOTEMPTY)
+            {
+                if(all)
+                {
+                    DIR *d = opendir(dir);  
+
+                    // Permission to read? 
+                    if(d) 
+                    {
+                        char *w; 
+                        struct dirent *e = readdir(d); 
+
+                        // Find all files in the directory.
+                        while(e)
+                        {
+                            // Create full path.
+                            w = h_tackon(contxt->id, dir, e->d_name); 
+
+                            // Is it a file? 
+                            if(w && h_exists(w) == 1)
+                            {
+                                // Delete it.
+                                h_delete_file(contxt, w); 
+                            }
+
+                            // Free full path.
+                            free(w); 
+
+                            // Get next entry. 
+                            e = readdir(d); 
+                        }
+
+                        // Restart from the beginning.
+                        rewinddir(d); 
+                        e = readdir(d); 
+
+                        // Find all subdirectories in the
+                        // directory.
+                        while(e)
+                        {
+                            #ifndef AMIGA
+                            // Filter out the magic on non-Amigas.
+                            if(strcmp(e->d_name, ".") &&
+                               strcmp(e->d_name, ".."))
+                            #endif
+                            {
+                                // Create full path.
+                                w = h_tackon(contxt->id, dir, e->d_name); 
+
+                                // Is it a directory? 
+                                if(w && h_exists(w) == 2)
+                                {
+                                    // Recur into subdirectory.
+                                    h_delete_dir(contxt, w); 
+                                }
+
+                                // Free full path.
+                                free(w); 
+                            }
+
+                            // Get next entry. 
+                            e = readdir(d); 
+                        }
+
+                        // Close the (by now, hopefully) empty dir.
+                        closedir(d); 
+                    }
+
+                    if(!rmdir(dir))
+                    {
+                        // Root dir gone.
+                        return 1;
+                    }
+                    else
+                    {
+                        // If one or more subdirs / files are still
+                        // present error will already have been set 
+                        // by h_delete_file() or h_delete_dir().
+                        error(contxt->id, ERR_DELETE_FILE, dir); 
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Deleted empty directory.
+            return 1;
+        }
     }
     else
     {
         // Unknown error.
         error(PANIC); 
-        return 0;
     }
+
+    return 0;
 }
 
 static int h_delete_pattern(entry_p contxt, const char *pat)
