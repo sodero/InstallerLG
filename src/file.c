@@ -668,7 +668,9 @@ osv...
 
 - funkar precis som med filer, fast kraver tomt dir om INTE (all), 
 om (all) recur med filer och dirs. 
-        */
+
+patterns inte enl 3.9, a/#?/b/#? inte ok.
+*/
 
 static int h_delete_dir(entry_p contxt, const char *dir)
 {
@@ -809,35 +811,79 @@ static int h_delete_dir(entry_p contxt, const char *dir)
 
 static int h_delete_pattern(entry_p contxt, const char *pat)
 {
+    // REPLACE WITH MATCHFIRST / MATCHNEXT
+
     if(pat)
     {
-        DIR *d = opendir(".");  
+        size_t i = strlen(pat); 
+        const char *p = pat; 
+        char *f = NULL;
+        DIR *d; 
 
-        // Permission to read? 
+        // Split pattern and path.
+        while(i--) 
+        {
+            // Do we have a delimiter?
+            if(p[i] == '/' ||
+               p[i] == ':' )
+            {
+                f = calloc(i + 2, 1); 
+
+                // Yes, copy the path part and
+                // set pattern position.
+                if(f)
+                {
+                    memcpy(f, p, i + 1); 
+                    p += i + 1; 
+                }
+                else
+                {
+                    // Out of memory.
+                    error(PANIC); 
+                    return 0; 
+                }
+            }
+        }
+       
+        // Open path or current dir and free
+        // path string. 
+        d = opendir(f ? f : ".");  
+        free(f);             
+
+        // Are we allowed / can we read the dir?
         if(d) 
         {
-            char *w; 
+            // Get first directory entry.
             struct dirent *e = readdir(d); 
 
+            // Iterate over all directory entries.
             while(e)
             {
-                printf("d_name:%s\n", e->d_name); 
+                #ifndef AMIGA 
+                // Filter out the magic on non-Amigas.
+                if(strcmp(e->d_name, ".") &&
+                   strcmp(e->d_name, ".."))
+                #endif
+                {
+                    printf("path:%s\n", f); 
+                    printf("pattern:%s\n", p); 
+                    printf("file/dir:%s\n\n", e->d_name); 
+                }
 
                 // Get next entry. 
                 e = readdir(d); 
             }
 
+            // Done. 
             closedir(d); 
         }
 
         return 1;
     }
-    else
-    {
-        // Unknown error.
-        error(PANIC); 
-        return 0;
-    }
+        
+    // Unknown error.
+    error(PANIC); 
+    return 0;
 }
 
 static int h_delete_file(entry_p contxt, const char *file)
@@ -1018,7 +1064,7 @@ entry_p m_delete(entry_p contxt)
             {
                 if(1 /* wc */)        
                 {
-                    DNUM = h_delete_pattern(contxt, get_buf()); 
+                    DNUM = h_delete_pattern(contxt, w/*get_buf()*/); 
                 }
                 else
                 {
