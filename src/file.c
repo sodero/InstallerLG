@@ -811,14 +811,25 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
 {
     if(pat)
     {
-        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
-                optional = get_opt(CARG(2), OPT_OPTIONAL), 
-                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
-                all      = get_opt(CARG(2), OPT_ALL), 
-                force    = get_opt(delopts, OPT_FORCE) ? NULL :
-                           get_opt(optional, OPT_FORCE),
-                askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
-                           get_opt(optional, OPT_ASKUSER);
+        DIR *d = opendir(".");  
+
+        // Permission to read? 
+        if(d) 
+        {
+            char *w; 
+            struct dirent *e = readdir(d); 
+
+            while(e)
+            {
+                printf("d_name:%s\n", e->d_name); 
+
+                // Get next entry. 
+                e = readdir(d); 
+            }
+
+            closedir(d); 
+        }
+
         return 1;
     }
     else
@@ -1005,7 +1016,7 @@ entry_p m_delete(entry_p contxt)
             // running in pretend mode? 
             if(safe || !get_numvar(contxt, "@pretend"))
             {
-                if(wc)        
+                if(1 /* wc */)        
                 {
                     DNUM = h_delete_pattern(contxt, get_buf()); 
                 }
