@@ -26,6 +26,7 @@
 
 #ifdef AMIGA
 #include <dos/dos.h>
+#include <dos/dosasl.h>
 #include <dos/dosextens.h>
 #include <workbench/workbench.h>
 #endif
@@ -811,74 +812,70 @@ static int h_delete_dir(entry_p contxt, const char *dir)
 
 static int h_delete_pattern(entry_p contxt, const char *pat)
 {
-    // REPLACE WITH MATCHFIRST / MATCHNEXT
-
-    if(pat)
+    if(contxt && pat)
     {
-        size_t i = strlen(pat); 
-        const char *p = pat; 
-        char *f = NULL;
-        DIR *d; 
+        // Pattern matching is only done on Amiga like OS:es
+        #ifdef AMIGA
+        struct AnchorPath *ap = 
+            calloc(1, sizeof(struct AnchorPath) + PATH_MAX); 
 
-        // Split pattern and path.
-        while(i--) 
+        if(ap)
         {
-            // Do we have a delimiter?
-            if(p[i] == '/' ||
-               p[i] == ':' )
-            {
-                f = calloc(i + 2, 1); 
+            int err; 
+            ap->ap_Strlen = PATH_MAX; 
 
-                // Yes, copy the path part and
-                // set pattern position.
-                if(f)
+            // For all matches, invoke the appropriate
+            // function for deletion.
+            for(err = MatchFirst(pat, ap); !err;
+                err = MatchNext(ap))
+            {
+                // ST_FILE         -3
+                // ST_LINKFILE     -4
+                if(ap->ap_Info.fib_DirEntryType < 0)
                 {
-                    memcpy(f, p, i + 1); 
-                    p += i + 1; 
+                    if(!h_delete_file(contxt, ap->ap_Buf))
+                    {
+                        // Break out on trouble / user
+                        // abort.
+                        break;
+                    }
                 }
                 else
+                // ST_ROOT          1
+                // ST_USERDIR       2
+                // ST_SOFTLINK      3 
+                // ST_LINKDIR       4
+                if(ap->ap_Info.fib_DirEntryType > 0)
                 {
-                    // Out of memory.
-                    error(PANIC); 
-                    return 0; 
+                    if(!h_delete_dir(contxt, ap->ap_Buf))
+                    {
+                        // Break out on trouble / user
+                        // abort.
+                        break;
+                    }
                 }
             }
-        }
-       
-        // Open path or current dir and free
-        // path string. 
-        d = opendir(f ? f : ".");  
-        free(f);             
 
-        // Are we allowed / can we read the dir?
-        if(d) 
-        {
-            // Get first directory entry.
-            struct dirent *e = readdir(d); 
+            // Free all resources.
+            MatchEnd(ap);
+            free(ap); 
 
-            // Iterate over all directory entries.
-            while(e)
+            // Is there nothing left?
+            if(err == ERROR_NO_MORE_ENTRIES)
             {
-                #ifndef AMIGA 
-                // Filter out the magic on non-Amigas.
-                if(strcmp(e->d_name, ".") &&
-                   strcmp(e->d_name, ".."))
-                #endif
-                {
-                    printf("path:%s\n", f); 
-                    printf("pattern:%s\n", p); 
-                    printf("file/dir:%s\n\n", e->d_name); 
-                }
-
-                // Get next entry. 
-                e = readdir(d); 
+                // Done.
+                return 1;
             }
-
-            // Done. 
-            closedir(d); 
+            else
+            {
+                // Please note that 'breaks' will take us
+                // here, so will MatchFirst / MatchNext()
+                // problems.
+                error(contxt->id, ERR_DELETE_FILE, pat); 
+                return 0;
+            }
         }
-
-        return 1;
+        #endif
     }
         
     // Unknown error.
@@ -1062,9 +1059,9 @@ entry_p m_delete(entry_p contxt)
             // running in pretend mode? 
             if(safe || !get_numvar(contxt, "@pretend"))
             {
-                if(1 /* wc */)        
+                if(wc)        
                 {
-                    DNUM = h_delete_pattern(contxt, w/*get_buf()*/); 
+                    DNUM = h_delete_pattern(contxt, w); 
                 }
                 else
                 {
