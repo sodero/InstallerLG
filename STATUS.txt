@@ -82,7 +82,4 @@ Full: * = Tested
 * (copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)
 * (copylib (prompt..) (help..) (source..) (dest..) (newname..) (infos)
 * (tooltype (prompt..) (help..) (dest..) (settooltype..) (setstack..)
-
-Partial:
-------------------------------------------------------------------------------------
-(delete file (help..) (prompt..) (confirm..) 
+* (delete file (help..) (prompt..) (confirm..) 

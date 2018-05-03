@@ -20,6 +20,7 @@ typedef enum
     S_ACPY, /* "Abort copy '%s' to '%s'.\n" */
     S_NCPY, /* "Could not copy '%s' to '%s'.\n" */
     S_DWRT, /* "Delete write protected file? '%s'" */
+    S_DWRD, /* "Delete write protected directory? '%s'" */
     S_OWRT, /* "Overwrite write protected file '%s'?" */
     S_DNRM, /* "Delete file '%s'?" */
     S_DLTD, /* "Deleted '%s'.\n" */

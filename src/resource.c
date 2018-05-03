@@ -29,6 +29,7 @@ const char *tr(res_t r)
         "Abort copy '%s' to '%s'.\n", 
         "Could not copy '%s' to '%s'.\n", 
         "Delete write protected file '%s'?", 
+        "Delete write protected directory '%s'?", 
         "Overwrite write protected file '%s'?", 
         "Delete file '%s'?", 
         "Deleted '%s'.\n",

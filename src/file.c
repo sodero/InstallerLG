@@ -656,23 +656,6 @@ entry_p m_copylib(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //----------------------------------------------------------------------------
-/*
-skrivrattigheter:
-delete tomt dir : lyckas tyst. 
-delete icke-tomt dir : misslyckas tyst. 
-delete icke-tomt dir med "force": misslyckas tyst. 
-
-utan skrivrattigheter:
-delete tomt dir : misslyckas tyst 
-delete tomt dir med "force": lyckas tyst 
-osv...
-
-- funkar precis som med filer, fast kraver tomt dir om INTE (all), 
-om (all) recur med filer och dirs. 
-
-patterns inte enl 3.9, a/#?/b/#? inte ok.
-*/
-
 static int h_delete_dir(entry_p contxt, const char *dir)
 {
     if(dir)
@@ -691,7 +674,11 @@ static int h_delete_dir(entry_p contxt, const char *dir)
             // Do we need to ask for confirmation?
             if(askuser)
             {
-                if(!h_confirm(contxt, "", tr(S_DWRT), dir))
+
+                // Only ask for confirmation if we're not
+                // running in novice mode. 
+                if(!get_numvar(contxt, "@user-level") ||
+                   !h_confirm(contxt, "", tr(S_DWRD), dir))
                 {
                     // Halt will be set by h_confirm. Skip
                     // will result in nothing.
@@ -700,98 +687,110 @@ static int h_delete_dir(entry_p contxt, const char *dir)
             }
             else
             {
-                // Without confirmation, a write protected
-                // file is an error.
-                error(contxt->id, ERR_DELETE_FILE, dir); 
+                // Fail silently just like the original.
                 return 0;
             }
         }
 
-        // MAKE SURE THAT rmdir deletes write protected
-        // dirs on amiga !FAIAIAIAIAI!!!
+        // Give permissions so that delete can succeed. 
+        // No need to bother with the return value since
+        // errors will be caught below.
+        chmod(dir, S_IRWXU);
+
         if(rmdir(dir))
         {
-            if(errno == EEXIST ||
-               errno == ENOTEMPTY)
+            if(all)
             {
-                if(all)
+                DIR *d = opendir(dir);  
+
+                // Permission to read? 
+                if(d) 
                 {
-                    DIR *d = opendir(dir);  
+                    char *w; 
+                    struct dirent *e = readdir(d); 
 
-                    // Permission to read? 
-                    if(d) 
+                    // Find all files in the directory.
+                    while(e)
                     {
-                        char *w; 
-                        struct dirent *e = readdir(d); 
+                        // Create full path.
+                        w = h_tackon(contxt->id, dir, e->d_name); 
 
-                        // Find all files in the directory.
-                        while(e)
+                        // Is it a file? 
+                        if(w && h_exists(w) == 1)
+                        {
+                            // Delete it.
+                            h_delete_file(contxt, w); 
+                        }
+
+                        // Free full path.
+                        free(w); 
+
+                        // Get next entry. 
+                        e = readdir(d); 
+                    }
+
+                    // Restart from the beginning.
+                    rewinddir(d); 
+                    e = readdir(d); 
+
+                    // Find all subdirectories in the
+                    // directory.
+                    while(e)
+                    {
+                        #ifndef AMIGA
+                        // Filter out the magic on non-Amigas.
+                        if(strcmp(e->d_name, ".") &&
+                           strcmp(e->d_name, ".."))
+                        #endif
                         {
                             // Create full path.
                             w = h_tackon(contxt->id, dir, e->d_name); 
 
-                            // Is it a file? 
-                            if(w && h_exists(w) == 1)
+                            // Is it a directory? 
+                            if(w && h_exists(w) == 2)
                             {
-                                // Delete it.
-                                h_delete_file(contxt, w); 
+                                // Recur into subdirectory.
+                                h_delete_dir(contxt, w); 
                             }
 
                             // Free full path.
                             free(w); 
-
-                            // Get next entry. 
-                            e = readdir(d); 
                         }
 
-                        // Restart from the beginning.
-                        rewinddir(d); 
+                        // Get next entry. 
                         e = readdir(d); 
+                    }
 
-                        // Find all subdirectories in the
-                        // directory.
-                        while(e)
+                    // Close the (by now, hopefully) empty dir.
+                    closedir(d); 
+                }
+
+                if(!rmdir(dir))
+                {
+                    // Shall we delete the info file as well? 
+                    if(infos)
+                    {
+                        // Info = file + .info. 
+                        char *info = get_buf(); 
+                        snprintf(info, buf_size(), "%s.info", dir); 
+
+                        if(h_exists(info) == 1)
                         {
-                            #ifndef AMIGA
-                            // Filter out the magic on non-Amigas.
-                            if(strcmp(e->d_name, ".") &&
-                               strcmp(e->d_name, ".."))
-                            #endif
+                            // Set permissions so that delete can
+                            // succeed. 
+                            chmod(info, S_IRWXU);
+
+                            // Delete the info file.
+                            if(!remove(info))
                             {
-                                // Create full path.
-                                w = h_tackon(contxt->id, dir, e->d_name); 
-
-                                // Is it a directory? 
-                                if(w && h_exists(w) == 2)
-                                {
-                                    // Recur into subdirectory.
-                                    h_delete_dir(contxt, w); 
-                                }
-
-                                // Free full path.
-                                free(w); 
+                                // The info file has been deleted. 
+                                h_log(contxt, tr(S_DLTD), info); 
                             }
-
-                            // Get next entry. 
-                            e = readdir(d); 
                         }
-
-                        // Close the (by now, hopefully) empty dir.
-                        closedir(d); 
                     }
 
-                    if(!rmdir(dir))
-                    {
-                        // Root dir gone.
-                        return 1;
-                    }
-                    else
-                    {
-                        // If one or more subdirs / files are still
-                        // present error will already have been set 
-                        // by h_delete_file() or h_delete_dir().
-                        error(contxt->id, ERR_DELETE_FILE, dir); 
-                    }
+                    // Root dir gone.
+                    return 1;
                 }
             }
         }
@@ -807,6 +806,7 @@ static int h_delete_dir(entry_p contxt, const char *dir)
         error(PANIC); 
     }
 
+    // Fail silently just like the original.
     return 0;
 }
 
@@ -911,7 +911,10 @@ static int h_delete_file(entry_p contxt, const char *file)
                 // Do we need to ask for confirmation?
                 if(askuser)
                 {
-                    if(h_confirm(contxt, "", tr(S_DWRT), file))
+                    // Only ask for confirmation if we're not
+                    // running in novice mode. 
+                    if(get_numvar(contxt, "@user-level") &&
+                       h_confirm(contxt, "", tr(S_DWRT), file))
                     {
                         // Give permissions so that delete
                         // can succeed. No need to bother with
@@ -928,9 +931,7 @@ static int h_delete_file(entry_p contxt, const char *file)
                 }
                 else
                 {
-                    // Without confirmation, a write protected
-                    // file is an error.
-                    error(contxt->id, ERR_DELETE_FILE, file); 
+                    // Fail silently just like the original.
                     return 0;
                 }
             }
@@ -1101,147 +1102,6 @@ entry_p m_delete(entry_p contxt)
     }
 
     RCUR; 
-}
- 
-entry_p _m_delete(entry_p contxt);
-entry_p _m_delete(entry_p contxt)
-{
-    // We need atleast one argument
-    if(c_sane(contxt, 1))
-    {
-        const char *file = str(CARG(1));
-
-        // HOW DO WE TREAT DIRS? And (all) + pattern match?
-        if(h_exists(file))
-        {
-            BOOL delete = TRUE; 
-            entry_p help     = get_opt(CARG(2), OPT_HELP),
-                    prompt   = get_opt(CARG(2), OPT_PROMPT), 
-                    confirm  = get_opt(CARG(2), OPT_CONFIRM), 
-                    infos    = get_opt(CARG(2), OPT_INFOS), 
-                    optional = get_opt(CARG(2), OPT_OPTIONAL), 
-                    all      = get_opt(CARG(2), OPT_ALL), 
-                    delopts  = get_opt(CARG(2), OPT_DELOPTS), 
-                    safe     = get_opt(CARG(2), OPT_SAFE),
-                    force    = get_opt(delopts, OPT_FORCE) ? 
-                               NULL : get_opt(optional, OPT_FORCE),
-                    askuser  = get_opt(delopts, OPT_ASKUSER) ? 
-                               NULL : get_opt(optional, OPT_ASKUSER);
-
-            all = help = prompt; 
-
-            // We should no delete the file if we're in
-            // pretend mode unless it's (safe)
-            if(get_numvar(contxt, "@pretend") && !safe)
-            {
-                delete = FALSE; 
-            }
-            else
-            // When using (force), we should always delete. 
-            if(!force)
-            {
-                // If the file is readonly, this is an error, 
-                // unless we ask and get permission from the
-                // user to force the deletion.
-                if(access(file, W_OK))
-                {
-                    // Do we need to ask for confirmation?
-                    if(askuser)
-                    {
-                        if(h_confirm(contxt, "", tr(S_DWRT), file))
-                        {
-                            // Give permissions so that delete
-                            // can succeed. 
-                            chmod(file, S_IRWXU);
-
-                            // No need to bother with the return
-                            // value since errors will be caught
-                            // below.
-                        }
-                        else
-                        {
-                            // Halt will be set by h_confirm. Skip
-                            // will result in nothing.
-                            RNUM(0);
-                        }
-                    }
-                    else
-                    {
-                        // Without confirmation, a write protected
-                        // file is an error.
-                        error(contxt->id, ERR_DELETE_FILE, file); 
-                        RNUM(0); 
-                    }
-                }
-                else
-                // If the file is writable, but we ask the user for
-                // permission anyway, and we get a no, we should not
-                // delete.
-                if(confirm && 
-                   !h_confirm(contxt, "", tr(S_DNRM), file))
-                {
-                    RNUM(0); 
-                }
-            }
-            else
-            {
-                // If (force) is used, give permissions 
-                // so that delete can succeed. 
-                chmod(file, S_IRWXU);
-
-                // No need to bother with the return
-                // value since errors will be caught
-                // below.
-            }
-
-            // Did we go through the hoops above? 
-            if(delete)
-            {
-                // If yes, this must succeed, otherwise we
-                // will abort with an error. 
-                if(!remove(file))
-                {
-                    // The file has been deleted. 
-                    h_log(contxt, tr(S_DLTD), file); 
-
-                    // Shall we delete the info file as well? 
-                    if(infos)
-                    {
-                        // Info file = file + .info. 
-                        char info[PATH_MAX]; 
-                        snprintf(info, PATH_MAX, "%s.info", file); 
-
-                        // Delete the info file, if there is any. 
-                        if(!remove(info))
-                        {
-                            // The info file has been deleted. 
-                            h_log(contxt, tr(S_DLTD), info); 
-                        }
-                    }
-                }
-                else
-                {
-                    error(contxt->id, ERR_DELETE_FILE, file); 
-                    RNUM(0); 
-                }
-            }
-        }
-        else
-        {
-            // We have nothing to do. 
-            h_log(contxt, tr(S_NSFL), file); 
-        }
-
-        // We succeeded, please note that non-existing files 
-        // can take us here as well. 
-        RNUM(1); 
-    }  
-    else
-    {
-        // The parser is broken
-        error(PANIC); 
-        RCUR; 
-    }
 }
 
 //----------------------------------------------------------------------------
