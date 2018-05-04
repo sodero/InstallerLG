@@ -32,6 +32,7 @@ entry_p m_abort(entry_p contxt)
         entry_p *cur = contxt->children; 
         while(*cur && *cur != end())
         {
+            // FIXME
             /* show message */
             cur++; 
         }

@@ -1,0 +1,5 @@
+- kommentarer och stadning
+- alla statiska buffrar spridda over nejden maste bort
+- snurran fran guide:n maste testas
+- kolla sa att MUI-biten inte lacker minne
+- FIXME:s

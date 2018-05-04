@@ -287,11 +287,13 @@ entry_p m_xor(entry_p contxt)
         RNUM
         (
             (
-                num(CARG(1)) && !num(CARG(2))
+                num(CARG(1)) &&
+                !num(CARG(2))
             ) 
             || 
             (
-                num(CARG(2)) && !num(CARG(1))
+                num(CARG(2)) &&
+                !num(CARG(1))
             ) 
         );
     }

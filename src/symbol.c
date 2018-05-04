@@ -217,6 +217,7 @@ entry_p m_symbolval(entry_p contxt)
     {
         entry_p r; 
         entry_t e; 
+        // FIXME
         e.type = SYMREF; 
         e.parent = contxt; 
         e.id = contxt->id; 

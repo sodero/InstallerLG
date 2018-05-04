@@ -112,6 +112,7 @@ static entry_p h_run(entry_p contxt, const char *pre)
                 LONG ioe; 
                 char *cmd = str(CARG(1)); 
 
+                // DOS / Arexx script?
                 if(pre)
                 {
                     size_t cl = strlen(cmd) + strlen(pre) + 2;
@@ -124,13 +125,14 @@ static entry_p h_run(entry_p contxt, const char *pre)
                     }
                     else
                     {
-                        // Out of memory
-                        error(PANIC); 
-
                         // Necessary? 
                         Close(inp); 
                         Close(out); 
 
+                        // Out of memory
+                        error(PANIC); 
+
+                        // Bail.
                         RCUR; 
                     }
                 } 
@@ -144,7 +146,9 @@ static entry_p h_run(entry_p contxt, const char *pre)
                     TAG_END
                 ); 
 
-
+                // We have memory allocated for the commandline
+                // that we need to free if we're running a DOS
+                // or Arexx script.
                 if(pre)
                 {
                     free(cmd); 
@@ -171,6 +175,7 @@ static entry_p h_run(entry_p contxt, const char *pre)
                 RCUR;  
             }
             #else
+            // Avoid compiler warning.
             pre = NULL; 
             #endif
         }
@@ -189,8 +194,6 @@ static entry_p h_run(entry_p contxt, const char *pre)
     // a success or a failure.
     RCUR;  
 }
-
-
 
 //----------------------------------------------------------------------------
 // (execute <arg> (help..) (prompt..) (confirm) (safe))
