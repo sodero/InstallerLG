@@ -25,21 +25,33 @@ entry_p m_set(entry_p contxt)
     // Symbol destination. 
     entry_p dst = global(contxt);
 
+    // We need atleast one symbol and one value.
     if(c_sane(contxt, 1) &&
        s_sane(contxt, 1) && dst)
     {
         entry_p *sym = contxt->symbols, 
                 *val = contxt->children; 
 
+        // Iterate over all symbol -> value tuples
         while(*sym && *sym != end() &&
               *val && *val != end())
         {
+            // We need to resolve the right hand side
+            // before setting the symbol value.
             entry_p rhs = resolve(*val);
+
+            // If we manage to resolve the right hand
+            // side, create a copy of its contents.
             if(!did_error())
             {
                 entry_p res = malloc(sizeof(entry_t)); 
+
                 if(res)
                 {
+                    // Do a deep copy, reparent the value
+                    // and free the old resolved value if
+                    // any. Also, create a reference from
+                    // the global context to the symbo.
                     memmove(res, rhs, sizeof(entry_t)); 
                     res->name = res->name ? strdup(res->name) : NULL; 
                     res->parent = *sym; 
@@ -53,16 +65,17 @@ entry_p m_set(entry_p contxt)
                     // Out of memory. 
                     break; 
                 }
+
+                // Do we have any more tuples?
                 if(*(++sym) == *(++val))
                 {
-                    // We're at the end of the list
-                    // of tuples. 
+                    // We're at the end of the list.
                     return res; 
                 }
             }
             else
             {
-                // Unresolvable right-hand side.
+                // Unresolvable rhs.
                 break; 
             }
         }
@@ -73,6 +86,7 @@ entry_p m_set(entry_p contxt)
         error(PANIC);
     }
 
+    // FIXME
     return new_failure(); 
 }
 
@@ -215,18 +229,27 @@ entry_p m_symbolval(entry_p contxt)
     // of the symbol.
     if(c_sane(contxt, 1))
     {
+        static entry_t e = { .type = SYMREF }; 
         entry_p r; 
-        entry_t e; 
-        e.type = SYMREF; 
+
+        // Initialize and resolve dummy.
         e.parent = contxt; 
         e.id = contxt->id; 
         e.name = str(CARG(1)); 
+
         r = resolve(&e); 
+
+        // Return the resolved value if
+        // the symbol could be found.
         if(!did_error())
         {
             return r; 
         }
-        RNUM(0);
+        else
+        {
+            // Symbol not found.
+            RNUM(0);
+        }
     }
     else
     {

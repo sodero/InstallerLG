@@ -35,12 +35,13 @@ entry_p init(entry_p contxt)
         entry_p e = NULL; 
 
         // Only on Amiga, otherwise tests will break, they don't
-        // expect any default (welcome) or (exist):s.
+        // expect any default (welcome) or (exit):s.
         #ifdef AMIGA 
         // Search for a 'welcome' in the root, if there is one
         // (or two) in one of the children then so be it, then 
         // they are probably there for a reason. 
         entry_p *c = contxt->children; 
+
         while(*c && *c != end())
         {
             // Match function pointer rather than function name
@@ -51,6 +52,7 @@ entry_p init(entry_p contxt)
                 e = *c; 
                 break; 
             }
+
             c++; 
         }
 
@@ -279,6 +281,7 @@ entry_p init(entry_p contxt)
                 e = *c; 
                 break; 
             }
+
             c++; 
         }
 
@@ -303,10 +306,5 @@ entry_p init(entry_p contxt)
     }
 
     return contxt; 
-/*
-3369 `@each-name'
-3370 `@each-type'
-3371      used in @{"`foreach'" Link "cs_foreach"}.
-*/
 }
 

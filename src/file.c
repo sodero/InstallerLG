@@ -3509,7 +3509,18 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
 }
 
 //----------------------------------------------------------------------------
-// m_protect get helper
+// Name:        h_protect_get(entry_p contxt, 
+//                            const char *file, 
+//                            LONG *mask)
+//
+// Description: Utility function used by m_protect and m_copyfiles to get
+//              file / dir protection bits. 
+//
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   File / dir.
+//              LONG *mask:         Pointer to the LONG to hold the result.
+//
+// Return:      int:                On success '1', else '0'. 
 //----------------------------------------------------------------------------
 static int h_protect_get(entry_p contxt, 
                          const char *file,
@@ -3517,16 +3528,21 @@ static int h_protect_get(entry_p contxt,
 {
     if(contxt && mask && file)
     {
+        // On non Amiga systems, this is a stub.
 #ifdef AMIGA
-        struct FileInfoBlock *fib = (struct FileInfoBlock *) AllocDosObject(DOS_FIB, NULL); 
+        struct FileInfoBlock *fib = (struct FileInfoBlock *) 
+            AllocDosObject(DOS_FIB, NULL); 
 
         if(fib)
         {
+            // Attempt to lock file / dir.
             BOOL done = FALSE; 
             BPTR lock = (BPTR) Lock(file, ACCESS_READ);
 
+            // Did we obtain a lock?
             if(lock)
             {
+                // Fill up FIB and get bits.
                 if(Examine(lock, fib))
                 {
                     *mask = fib->fib_Protection; 
@@ -3538,26 +3554,44 @@ static int h_protect_get(entry_p contxt,
 
             FreeDosObject(DOS_FIB, fib); 
 
+            // Did everything above succeed?
             if(!done)
             {
+                // No, fail and set impossible mask.
                 error(contxt->id, ERR_GET_PERM, file); 
                 *mask = -1; 
             }
 
+            // If enabled, write to log file.
             h_log(contxt, tr(S_GMSK), file, *mask); 
+
+            // MASK or -1.
             return done; 
         }
 #else
+        // Always succeed.
         return 1; 
 #endif
     }
 
+    // Out of memory.
     error(PANIC); 
     return 0; 
 }
 
 //----------------------------------------------------------------------------
-// m_protect set helper
+// Name:        h_protect_set(entry_p contxt, 
+//                            const char *file, 
+//                            LONG mask)
+//
+// Description: Utility function used by m_protect and m_copyfiles to set
+//              file / dir protection bits. 
+//
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   File / dir.
+//              LONG mask:          Protection bits
+//
+// Return:      int:                On success '1', else '0'. 
 //----------------------------------------------------------------------------
 static int h_protect_set(entry_p contxt, 
                          const char *file, 
@@ -3566,12 +3600,14 @@ static int h_protect_set(entry_p contxt,
     if(contxt && file)
     {
 #ifdef AMIGA
+        // On non Amiga systems this is a stub.
         if(!SetProtection(file, mask))
         {
             error(contxt->id, ERR_SET_PERM, file); 
             return 0; 
         }
 #endif
+        // If logging is enabled, write to log.
         h_log(contxt, tr(S_PTCT), file, mask); 
         return 1; 
     }
@@ -3583,6 +3619,20 @@ static int h_protect_set(entry_p contxt,
 }
 
 //----------------------------------------------------------------------------
+// Name:        h_confirm(entry_p contxt, 
+//                        const char *hlp, 
+//                        const char *msg,
+//                        ...)
+//
+// Description: Ask user for confirmation (proceed / skip / abort). 
+//
+// Input:       entry_p contxt:     The execution context.
+//              const char *hlp:    Help text.
+//              const char *msg:    A format string to be shown.
+//              ...:                Format string varargs.
+//
+// Return:      int:                If confirmed '1', else '0'. Both skip and
+//                                  abort will return a value of '0'.
 //----------------------------------------------------------------------------
 static int h_confirm(entry_p contxt, 
                      const char *hlp, 

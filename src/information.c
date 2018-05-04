@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------
 // information.h: 
 //
-// Functions informing the user
+// Functions for informing the user
 //
 //----------------------------------------------------------------------------
 
@@ -58,6 +58,8 @@ entry_p m_debug(entry_p contxt)
     // needed though. 
     //
     // REALLY? 
+    //
+    // FIXME
     //
     // More problems, you should be able to 
     // handle missing symbols, they should 
@@ -204,7 +206,7 @@ entry_p m_message(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_welcome(entry_p contxt)
 {
-    if(c_sane(contxt, 1)) /* Wrong, merge all children */
+    if(c_sane(contxt, 1)) /* FIXME? Wrong, merge all children */
     {
         size_t mln = 0; 
         entry_p *cur = contxt->children; 

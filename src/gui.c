@@ -270,7 +270,7 @@ struct MUIP_InstallerGui_AskFile
 #define P_ASKFILE                          7
 
 //----------------------------------------------------------------------------
-// InstallerGuiWait - Private: Wait for notification(s)
+// InstallerGuiWait - PRIVATE: Wait for notification(s)
 // Input:             notif - Start notification value 
 //                    range - Number of values to check for
 // Return:            Notifcation val. / zero on return id quit 
@@ -372,31 +372,45 @@ MUIDSP IPTR InstallerGuiInit(Class *cls,
                              Object *obj)
 {
     static unsigned int init; 
+
+    // Make sure that we execute this once only.
     if(!init && obj && _app(obj))
     {
         // Exit upon close request
-        DoMethod(obj, MUIM_Notify, 
-                 MUIA_Window_CloseRequest, TRUE, _app(obj), 2, 
-                 MUIM_Application_ReturnID, 
-                 MUIV_Application_ReturnID_Quit);
+        DoMethod
+        (
+            obj, MUIM_Notify, 
+            MUIA_Window_CloseRequest, TRUE, _app(obj), 2, 
+            MUIM_Application_ReturnID, 
+            MUIV_Application_ReturnID_Quit
+        );
 
+        // Set up notifications for all buttons.
         for(init = MUIV_InstallerGui_FirstButton; 
             init <= MUIV_InstallerGui_LastButton; 
             init++)
         {
-            Object *cur = (Object *) DoMethod(obj, MUIM_FindUData, init);
+            // Locate button.
+            Object *cur = (Object *) DoMethod
+            (
+                obj, MUIM_FindUData,
+                init
+            );
 
-            if(!cur)
+            // Don't assume that the button exists.
+            if(cur)
             {
-                continue; 
+                DoMethod
+                (
+                    cur, MUIM_Notify, 
+                    MUIA_Pressed, FALSE, 
+                    _app(obj), 2, 
+                    MUIM_Application_ReturnID, init
+                ); 
             }
-
-            DoMethod(cur, MUIM_Notify, 
-                     MUIA_Pressed, FALSE, 
-                     _app(obj), 2, 
-                     MUIM_Application_ReturnID, init); 
         }
 
+        // Done.
         return TRUE; 
     }
     else
@@ -482,9 +496,11 @@ MUIDSP IPTR InstallerGuiWelcome(Class *cls,
                            msg->Message))
     {
         ULONG b = InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2); 
+
         if(b == MUIV_InstallerGui_Proceed)
         {
             ULONG pat; 
+
             Object *user = (Object *) DoMethod
             (
                 obj, MUIM_FindUData, 

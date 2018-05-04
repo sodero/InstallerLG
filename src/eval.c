@@ -82,6 +82,7 @@ entry_p find_symbol(entry_p entry)
 //----------------------------------------------------------------------------
 entry_p resolve(entry_p entry)
 {
+    // Is there anything to resolve?
     if(entry && 
        entry != end())
     {
@@ -125,6 +126,7 @@ entry_p resolve(entry_p entry)
 //----------------------------------------------------------------------------
 int num(entry_p entry)
 {
+    // Is there anything to resolve?
     if(entry && 
        entry != end())
     {
@@ -177,6 +179,7 @@ int num(entry_p entry)
 //----------------------------------------------------------------------------
 char *str(entry_p entry)
 {
+    // Is there anything to resolve?
     if(entry && 
        entry != end())
     {
@@ -210,6 +213,7 @@ char *str(entry_p entry)
                         );
                     case OPT_HELP: 
                     case OPT_PROMPT: 
+                        // FIXME
                         /* Wrong! All children shall be merged */
                         return str
                         (
@@ -331,6 +335,8 @@ entry_p invoke(entry_p entry)
 //----------------------------------------------------------------------------
 void run(entry_p entry)
 {
+    // Initialize GUI before starting
+    // the execution.
     if(gui_init())
     {
         // Execute the script. 

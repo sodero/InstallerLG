@@ -91,7 +91,8 @@ entry_p m_askbool(entry_p contxt)
         error(PANIC); 
     }
 
-    // 
+    // We could be in any
+    // state here.
     RCUR; 
 }
 
@@ -436,6 +437,8 @@ entry_p m_askdisk(entry_p contxt)
         error(PANIC); 
     }
 
+    // We could be in any
+    // state here.
     RCUR; 
 }
 
@@ -524,8 +527,8 @@ entry_p m_askfile(entry_p contxt)
 //
 // NOTE: We do not follow the Installer.guide when it comes to the default
 // range. Instead of all positive values, we use 0 - 100 in order to be
-// able to use a slider instead of a string gadget. This might be a
-// problem. Scrap it?
+// able to use a slider instead of a string gadget. This might be a problem.
+// Scrap it?
 //----------------------------------------------------------------------------
 entry_p m_asknumber(entry_p contxt)
 {

@@ -218,7 +218,6 @@ entry_p m_getassign(entry_p contxt)
         {
             msk |= LDF_ASSIGNS;
         }
-
        
         // Prepare to walk the device list. 
 	    dl = (struct DosList *) LockDosList(msk);
@@ -268,6 +267,7 @@ entry_p m_getassign(entry_p contxt)
                                 if(bits[i] == LDF_ASSIGNS)
                                 {
                                     BPTR l = (BPTR) Lock(r, ACCESS_READ);
+
                                     if(l)
                                     {
                                         NameFromLock(l, r, PATH_MAX); 
@@ -484,6 +484,7 @@ entry_p m_getenv(entry_p contxt)
         // Is there such an environment
         // variable? 
         char *e = getenv(str(CARG(1))); 
+
         if(e)
         {
             // Return what we found. 
