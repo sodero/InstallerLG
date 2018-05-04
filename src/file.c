@@ -687,7 +687,7 @@ static int h_delete_dir(entry_p contxt, const char *dir)
             }
             else
             {
-                // Fail silently just like the original.
+                // Exit silently.
                 return 0;
             }
         }
@@ -765,40 +765,48 @@ static int h_delete_dir(entry_p contxt, const char *dir)
                     closedir(d); 
                 }
 
-                if(!rmdir(dir))
+                if(rmdir(dir))
                 {
-                    // Shall we delete the info file as well? 
-                    if(infos)
-                    {
-                        // Info = file + .info. 
-                        char *info = get_buf(); 
-                        snprintf(info, buf_size(), "%s.info", dir); 
+                    // Fail silently.
+                    return 0;
+                }
+            }
+            else
+            {
+                // Fail silently.
+                return 0;
+            }
+        }
 
-                        if(h_exists(info) == 1)
-                        {
-                            // Set permissions so that delete can
-                            // succeed. 
-                            chmod(info, S_IRWXU);
+        // Shall we delete the info file as well? 
+        if(infos)
+        {
+            // Info = file + .info. 
+            char *info = get_buf(); 
+            snprintf(info, buf_size(), "%s.info", dir); 
 
-                            // Delete the info file.
-                            if(!remove(info))
-                            {
-                                // The info file has been deleted. 
-                                h_log(contxt, tr(S_DLTD), info); 
-                            }
-                        }
-                    }
+            if(h_exists(info) == 1)
+            {
+                // Set permissions so that delete can
+                // succeed. 
+                chmod(info, S_IRWXU);
 
-                    // Root dir gone.
-                    return 1;
+                // Delete the info file.
+                if(!remove(info))
+                {
+                    // The info file has been deleted. 
+                    h_log(contxt, tr(S_DLTD), info); 
+                }
+                else
+                {
+                    // Fail silently.
+                    return 0;
                 }
             }
         }
-        else
-        {
-            // Deleted empty directory.
-            return 1;
-        }
+
+        // Done.
+        return 1;
     }
     else
     {
@@ -806,7 +814,7 @@ static int h_delete_dir(entry_p contxt, const char *dir)
         error(PANIC); 
     }
 
-    // Fail silently just like the original.
+    // Fail silently.
     return 0;
 }
 
@@ -1078,7 +1086,7 @@ entry_p m_delete(entry_p contxt)
 
                         case 0:
                             h_log(contxt, tr(S_NSFL), w); 
-                            DNUM = 1;
+                            DNUM = 0;
                     }
                 }
             }
