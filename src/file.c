@@ -3552,6 +3552,7 @@ static int h_protect_get(entry_p contxt,
                 UnLock(lock); 
             }
 
+            // Free FIB memory.
             FreeDosObject(DOS_FIB, fib); 
 
             // Did everything above succeed?
