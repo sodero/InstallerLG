@@ -3,7 +3,7 @@
 (asknumber (prompt "p") (help "h")) ; "","Line 1: Missing option 'default' 0",""
 (asknumber (prompt "p") (help "h") (default 2)) ; "","ph0100 2",""
 (asknumber (prompt "p") (help "h") (default -2)) ; "","ph0100 -2",""
-(asknumber (prompt "p") (help "h") (default 2) (range 1)) ; "","Line 1: syntax error ')'",""
+(asknumber (prompt "p") (help "h") (default 2) (range 1)) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (asknumber (prompt "p") (help "h") (default 2) (range 1 10)) ; "","ph110 2",""
 (asknumber (prompt "p") (help "h") (default 2) (range 11 10)) ; "","ph0100 2",""
 (user 0) (asknumber (prompt "p") (help "h") (default 2) (range 11 10)) ; "","2",""

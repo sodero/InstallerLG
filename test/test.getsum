@@ -1,5 +1,5 @@
-(getsum) ; "","Line 1: syntax error ')'",""
-(getsum "_ne_" err) ; "rm -f _ne_","Line 1: syntax error 'err'",""
+(getsum) ; "","Line 1: syntax error, unexpected ')' ')'",""
+(getsum "_ne_" err) ; "rm -f _ne_","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
 (getsum "_ne_") ; "rm -f _ne_","Line 1: Could not read from file '_ne_' 0",""
 (getsum "_gs_") ; "echo '0' > _gs_","-107","rm -f _gs_"
 (getsum "_gs_") ; "echo '00' > _gs_","-299","rm -f _gs_"

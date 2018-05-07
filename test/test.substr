@@ -1,5 +1,5 @@
-(substr "abc") ; "","Line 1: syntax error ')'",""
-(substr "abc" 1 2 err) ; "","Line 1: syntax error 'err'",""
+(substr "abc") ; "","Line 1: syntax error, unexpected ')' ')'",""
+(substr "abc" 1 2 err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
 (substr "abc" 1 l ) ; "","Line 1: Undefined variable 'l' 0",""
 (substr "abc" s l ) ; "","Line 1: Undefined variable 's' Line 1: Undefined variable 'l' 0",""
 (substr s i l ) ; "","Line 1: Undefined variable 's' Line 1: Undefined variable 'i' Line 1: Undefined variable 'l' 0",""

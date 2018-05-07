@@ -1,5 +1,5 @@
-(getsize) ; "","Line 1: syntax error ')'",""
-(getsize "_ne_" err) ; "","Line 1: syntax error 'err'",""
+(getsize) ; "","Line 1: syntax error, unexpected ')' ')'",""
+(getsize "_ne_" err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
 (getsize "_ne_") ; "","Line 1: Could not read from file '_ne_' 0",""
 (getsize "_gs_") ; "echo '123' > _gs_","4","rm -f _gs_"
 (getsize "_gs_") ; "touch _gs_","0","rm -f _gs_"

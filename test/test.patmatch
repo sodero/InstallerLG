@@ -1,4 +1,4 @@
-(patmatch) ; "","Line 1: syntax error ')'",""
-(patmatch "pattern") ; "","Line 1: syntax error ')'",""
+(patmatch) ; "","Line 1: syntax error, unexpected ')' ')'",""
+(patmatch "pattern") ; "","Line 1: syntax error, unexpected ')' ')'",""
 (patmatch "pattern" "string") ; "","0",""
-(patmatch "pattern" "string" err) ; "","Line 1: syntax error 'err'",""
+(patmatch "pattern" "string" err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""

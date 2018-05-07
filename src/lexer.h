@@ -16,6 +16,6 @@ typedef union
 
 int yyget_lineno(yyscan_t yyscanner);
 int yylex(YYSTYPE * yylval_param ,yyscan_t yyscanner);
-int yyerror(yyscan_t scanner, char *err);
+int yyerror(yyscan_t scanner, const char *err);
 
 #endif

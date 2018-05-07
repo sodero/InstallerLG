@@ -1,5 +1,5 @@
-(makedir) ; "","Line 1: syntax error ')'",""
-(makedir (safe)) ; "","Line 1: syntax error 'safe'",""
+(makedir) ; "","Line 1: syntax error, unexpected ')' ')'",""
+(makedir (safe)) ; "","Line 1: syntax error, unexpected SAFE 'safe'",""
 (makedir "_md_") ; "rm -Rf _md_","1","test -d _md_ && rm -Rf _md_"
 (makedir "_md_") ; "rm -Rf _md_ && touch _md_","Line 1: Could not create directory '_md_' 0","rm -Rf _md_"
 (makedir "_md_/_md_/_md_") ; "rm -Rf _md_","1","ls _md_/_md_/_md_ && rm -Rf _md_"

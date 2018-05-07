@@ -9,5 +9,5 @@
 (pathonly "TMP:/file") ; "","TMP:/",""
 (pathonly "TMP://file") ; "","TMP://",""
 (pathonly ":") ; "",":",""
-(pathonly) ; "","Line 1: syntax error ')'",""
-(pathonly "path" err) ; "","Line 1: syntax error 'err'",""
+(pathonly) ; "","Line 1: syntax error, unexpected ')' ')'",""
+(pathonly "path" err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""

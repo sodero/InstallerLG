@@ -1,4 +1,4 @@
 (getenv "EDITOR") ; "","vim",""
 (getenv "_ge_") ; "","",""
-(getenv "EDITOR" (safe)) ; "","Line 1: syntax error '('",""
-(getenv) ; "","Line 1: syntax error ')'",""
+(getenv "EDITOR" (safe)) ; "","Line 1: syntax error, unexpected '(', expecting ')' '('",""
+(getenv) ; "","Line 1: syntax error, unexpected ')' ')'",""
