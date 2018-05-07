@@ -48,12 +48,30 @@ entry_p m_gosub(entry_p contxt)
                 entry_p ret; 
                 entry_p *arg = (*cus)->symbols, 
                         *ina = contxt->children;
+
+                // Copy parameter values to procedure context.
                 if(arg && ina)
                 {
+                    // From the Installer.guide:
+                    //
+                    // If you leave out any arguments at the end,
+                    // the corresponding variables will retain 
+                    // their previous value. An example:
+                    // 
+                    // (procedure P_ADDMUL arg1 arg2 arg3
+                    //     (* (+ arg1 arg2) arg3)
+                    // )
+                    //
+                    // (message (P_ADDMUL 1 2 3)) ; shows 9
+                    // (message (P_ADDMUL 4 5))   ; shows 27
+
                     while(*arg && *arg != end() &&
                           *ina && *ina != end())
                     {
                         entry_p res = malloc(sizeof(entry_t)); 
+
+                        // Do a deep copy and free the resources from
+                        // the last invocation, if any.
                         if(res)
                         {
                             memmove(res, resolve(*ina), sizeof(entry_t)); 
@@ -68,10 +86,17 @@ entry_p m_gosub(entry_p contxt)
                             error(PANIC);
                             return new_failure(); 
                         }
+
+                        // Continue until we have no more arguments from the
+                        // caller or that the procedure doesn't take any more
+                        // arguments.
                         arg++; 
                         ina++;
                     }
                 }
+
+                // Keep track of the recursion depth. Do not 
+                // invoke if we're beyond MAXDEP.
                 if(dep++ < MAXDEP)
                 {
                     ret = invoke(*cus); 
@@ -81,11 +106,15 @@ entry_p m_gosub(entry_p contxt)
                 else
                 {
                     error(contxt->id, ERR_MAX_DEPTH, contxt->name); 
-                    return new_failure(); 
+                    return new_failure(); // FIXME
                 }
             }
+
+            // Next function.
             cus++; 
         }
+
+        // No match found.
         error(contxt->id, ERR_UNDEF_FNC, contxt->name); 
     }
     else
@@ -93,6 +122,8 @@ entry_p m_gosub(entry_p contxt)
         // The parser is broken
         error(PANIC);
     }
+    
+    // FIXME
     return new_failure(); 
 }
 
