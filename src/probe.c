@@ -166,8 +166,10 @@ entry_p m_earlier(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_getassign(entry_p contxt)
 {
-    if(c_sane(contxt, 1))  // <-- <opts> ska vara valfri!
+    // We need one or more arguments.
+    if(c_sane(contxt, 1))
     {
+        // On non Amiga systems this is a stub.
         #ifdef AMIGA
 	    struct DosList *dl;
         const char *asn = str(CARG(1)); 
@@ -551,18 +553,21 @@ entry_p m_getsize(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_getsum(entry_p contxt)
 {
+    // We need a filename.
     if(c_sane(contxt, 1))
     {
         const char *fn = str(CARG(1));
         FILE *f = fopen(fn, "r"); 
-
-        DNUM = 0; 
 
         if(f)
         {
             int c = getc(f), 
                 n = 1; 
 
+            DNUM = 0; 
+
+            // Generate silly checksum. Replace
+            // this with something else.
             while(c != EOF)
             {
                 DNUM -= (c + n);
@@ -571,19 +576,20 @@ entry_p m_getsum(entry_p contxt)
             }
 
             fclose(f); 
+            RCUR; 
         }
         else
         {
             error(contxt->id, ERR_READ_FILE, fn); 
+            RNUM(0);
         }
     }
     else
     {
         // The parser is broken
         error(PANIC);
+        RCUR; 
     }
-
-    RCUR; 
 }
 
 //----------------------------------------------------------------------------
@@ -762,6 +768,7 @@ entry_p m_getversion(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_iconinfo(entry_p contxt)
 {
+    // We need one or more arguments.
     if(c_sane(contxt, 1))
     {
         entry_p dst   =   get_opt(contxt, OPT_DEST);
