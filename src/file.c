@@ -57,6 +57,45 @@ static int h_delete_pattern(entry_p contxt, const char *pat);
 #define CF_SILENT       (1 << 8)
 
 //----------------------------------------------------------------------------
+// (expandpath <path>)
+//     Expands a short path to its full path equivalent
+//
+// Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+//----------------------------------------------------------------------------
+entry_p m_expandpath(entry_p contxt)
+{
+    // We need one argument, a short path.
+    if(c_sane(contxt, 1))
+    {
+        // On non Amiga systems, this is a dummy.
+        #ifdef AMIGA
+        BPTR lock = (BPTR) Lock(str(CARG(1)), ACCESS_READ);
+        if(lock)
+        {
+            char *buf = calloc(PATH_MAX, 1);
+
+            if(buf)
+            {
+                NameFromLock(lock, buf, PATH_MAX); 
+                UnLock(lock); 
+                RSTR(buf);
+            }
+
+            UnLock(lock); 
+        }
+        #endif
+    }
+    else
+    {
+        // Broken parser
+        error(PANIC); 
+    }
+
+    // Return empty string.
+    REST;
+}
+
+//----------------------------------------------------------------------------
 // (copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)
 //     (all) (pattern..) (files) (infos) (confirm..) (safe) (optional
 //     <option> <option> ...) (delopts <option> <option> ...) (nogauge))
@@ -3688,3 +3727,4 @@ static int h_confirm(entry_p contxt,
         return 0; 
     }
 }
+

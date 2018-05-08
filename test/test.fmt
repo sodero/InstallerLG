@@ -1,3 +1,4 @@
+(""); "","",""
 ("%s"); "","Line 1: Missing format string arguments '%s' 0",""
 ("%ld"); "","Line 1: Missing format string arguments '%ld' 0",""
 ("prefix-%ld-postfix" 1) ; "","prefix-1-postfix",""

@@ -28,35 +28,58 @@
 //----------------------------------------------------------------------------
 entry_p m_cat(entry_p contxt)
 {
+    // We need atleast one string.
     if(c_sane(contxt, 1))
     {
+        // Start with a string length of 64.
         size_t n = 64; 
         char *buf = calloc(n + 1, 1);  
+
         if(buf)
         {
             size_t l = 0, i = 0; 
+
+            // Iterate over all arguments.
             while(contxt->children[i] && 
                   contxt->children[i] != end()) 
             {
-                size_t ln; 
+                // Resolve and get a string representation
+                // of the current argument.
                 const char *s = str(contxt->children[i++]); 
+                size_t ln; 
+
+                // If we couldn't resolve the current argument, 
+                // return an empty string. 
                 if(did_error())
                 {
                     free(buf); 
                     REST; 
                 }
+
+                // Get length of the current argument.
                 ln = strlen(s);
+
+                // If the length is > 0, append to the result.
                 if(ln)
                 {
                     l += strlen(s); 
+
+                    // If we're about to exceed the current buffer,
+                    // allocate a new one big enough.
                     if(l > n) 
                     {
                         char *tmp; 
+
+                        // Double up until we have enough.
                         while(n && n < l)
                         {
                             n = n << 1;  
                         }
+
                         tmp = calloc(n + 1, 1);
+
+                        // Copy the contents to the new buffer
+                        // and free the old one.
                         if(tmp && n) 
                         {
                             memcpy(tmp, buf, l - ln + 1); 
@@ -64,13 +87,15 @@ entry_p m_cat(entry_p contxt)
                             buf = tmp; 
                         }
                         else
+                        // If we're out of memory, bail out.
                         {
                             free(tmp); 
                             free(buf); 
-                            buf = NULL; 
-                            break; 
+                            REST;
                         }
                     }
+
+                    // By now we're ready to append.
                     strncat(buf, s, n); 
                 }
             } 
@@ -87,43 +112,6 @@ entry_p m_cat(entry_p contxt)
     error(PANIC);
     RCUR;
 }
-//----------------------------------------------------------------------------
-// !!!MOVE THIS TO FILE.C!!!
-//
-// (expandpath <path>)
-//     Expands a short path to its full path equivalent
-//
-// Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
-entry_p m_expandpath(entry_p contxt)
-{
-    if(c_sane(contxt, 1))
-    {
-        #ifdef AMIGA
-        BPTR lock = (BPTR) Lock(str(CARG(1)), ACCESS_READ);
-        if(lock)
-        {
-            char *buf = calloc(PATH_MAX, 1);
-            if(buf)
-            {
-                NameFromLock(lock, buf, PATH_MAX); 
-                UnLock(lock); 
-                RSTR(buf);
-            }
-
-            UnLock(lock); 
-        }
-        #endif
-    }
-    else
-    {
-        // Broken parser
-        error(PANIC); 
-    }
-
-    // Return empty string.
-    REST;
-}
 
 //----------------------------------------------------------------------------
 // ("<fmt>" <expr1> <expr2>)
@@ -133,24 +121,36 @@ entry_p m_expandpath(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_fmt(entry_p contxt)
 {
+    // The format string is in the name of this contxt. It will hold
+    // a maximum of length / 2 of specifiers. 
     char *ret = NULL, *fmt = contxt->name; 
     char **sct = calloc((strlen(fmt) >> 1) + 1, sizeof(char *));
+
     if(contxt && fmt && sct)
     {
         size_t i = 0, j = 0, k = 0, l = 0; 
         entry_p *arg = contxt->children; 
+
+        // Scan the format string.
         for(; fmt[i]; i++)
         {
+            // If we have a specifier,
             if(fmt[i] == '%')
             {
+                // that's not preceeded by an escape.
                 if(!i || (i && fmt[i - 1] != '\\'))
                 {
                     i++; 
+
+                    // If this is a specifier that we recognize, 
+                    // then allocate a new string with just this
+                    // specifier, nothing else.
                     if(fmt[i] == 's' || (
                        fmt[i++] == 'l' &&
                        fmt[i] && fmt[i] == 'd'))
                     {
                         sct[k] = calloc(i - j + 2, 1); 
+
                         if(sct[k])
                         {
                             memcpy(sct[k], fmt + j, i - j + 1);
@@ -171,6 +171,9 @@ entry_p m_fmt(entry_p contxt)
                 }
             }
         }
+
+        // Iterate over all format specifiers and arguments and do 
+        // the appropriate conversions and formating.
         if(k)
         {
             for(k = 0; sct[k]; k++)
@@ -180,14 +183,20 @@ entry_p m_fmt(entry_p contxt)
                 {
                     size_t oln = strlen(sct[k]);  
                     entry_p cur = resolve(*arg); 
+
+                    // Format string.
                     if(sct[k][oln - 1] == 's' &&
                        cur->type == STRING)
                     {
                         size_t nln = oln + strlen(cur->name);  
                         char *new = calloc(nln + 1, 1); 
+
+                        // Replace the current format string with
+                        // the corresponding formated string.
                         if(new)
                         {
                             int n = snprintf(new, nln, sct[k], cur->name); 
+
                             l += n > 0 ? (size_t) n : 0; 
                             free(sct[k]); 
                             sct[k] = new; 
@@ -198,15 +207,19 @@ entry_p m_fmt(entry_p contxt)
                             error(PANIC);
                         }
                     }
-                    else
-                    if(sct[k][oln - 1] == 'd' &&
-                       cur->type == NUMBER)
+                    // Format numeric value.
+                    else if(sct[k][oln - 1] == 'd' &&
+                            cur->type == NUMBER)
                     {
                         size_t nln = oln + NUMLEN;  
                         char *new = calloc(nln + 1, 1); 
+
+                        // Replace the current format string with
+                        // the corresponding formated string.
                         if(new)
                         {
                             int n = snprintf(new, nln, sct[k], cur->id);  
+
                             l += n > 0 ? (size_t) n : 0; 
                             free(sct[k]); 
                             sct[k] = new; 
@@ -219,8 +232,12 @@ entry_p m_fmt(entry_p contxt)
                     }
                     else
                     {
+                        // Fail on argument -> specifier mismatch.
                         error(contxt->id, ERR_FMT_MISMATCH, contxt->name); 
                     }
+
+                    // Bail out if we didn't manage to resolve
+                    // all arguments.
                     if(did_error())
                     {
                         arg = NULL; 
@@ -228,26 +245,36 @@ entry_p m_fmt(entry_p contxt)
                     }
                     else
                     {
+                        // Next specifier -> argument.
                         arg++; 
                     }
                 }
                 else 
                 {
+                    // Fail if the number of arguments and the number
+                    // of specifiers don't match.
                     error(contxt->id, ERR_FMT_MISSING, contxt->name); 
                     break; 
                 }
             }
         }
+
+        // Concatenate all formated strings.
         if(k)
         {
+            // Allocate memory to hold all of them.
             l += strlen(fmt + j); 
             ret = calloc(l + 1, 1); 
+
             if(ret)
             {
+                // All format strings.
                 for(k = 0; sct[k]; k++)
                 {
                     strcat(ret, sct[k]); 
                 }
+
+                // Suffix.
                 strcat(ret, fmt + j); 
             }
             else
@@ -256,11 +283,17 @@ entry_p m_fmt(entry_p contxt)
                 error(PANIC);
             }
         }
+
+        // Free all temporary format strings.
         for(k = 0; sct[k]; k++)
         {
             free(sct[k]);
         }
+
         free(sct);
+
+        // Fail if the number of arguments and the number
+        // of specifiers don't match.
         if(arg && *arg && 
            *arg != end())
         {
@@ -268,6 +301,7 @@ entry_p m_fmt(entry_p contxt)
         }
         else if(ret)
         {
+            // Success.
             RSTR(ret); 
         }
     }
@@ -278,6 +312,7 @@ entry_p m_fmt(entry_p contxt)
         error(PANIC);
         free(sct);
     }
+
     free(ret);
     REST; 
 }
@@ -295,29 +330,41 @@ entry_p m_pathonly(entry_p contxt)
     {
         const char *s = str(CARG(1)); 
         size_t i = strlen(s); 
+
+        // Scan backwards.
         while(i--) 
         {
+            // If we find a delimiter, then
+            // we have the path to the left
+            // of it.
             if(s[i] == '/' ||
                s[i] == ':' )
             {
-                char *r; 
-                r = calloc(i + 2, 1); 
+                // Get termination for free.
+                char *r = calloc(i + 2, 1); 
+
                 if(r)
                 {
+                    // Copy and return path.
                     memcpy(r, s, i + 1); 
                     RSTR(r); 
                 }
-                error(PANIC); 
+                else
+                {
+                    // Out of memory.
+                    error(PANIC); 
+                }
             }
         }
-        REST; 
     }
     else
     {
         // The parser is broken
         error(PANIC);
-        RCUR; 
     }
+    
+    // Nothing.
+    REST; 
 }
 
 //----------------------------------------------------------------------------
@@ -419,6 +466,7 @@ entry_p m_substr(entry_p contxt)
             if(i < l && j > 0 && i >= 0)
             {
                 char *r = calloc((size_t) l + 1, 1); 
+
                 if(r)
                 {
                     // Cap all values and do the
@@ -430,8 +478,8 @@ entry_p m_substr(entry_p contxt)
                 }
             }
         }
-        // No, copy until the end of the string. 
         else
+        // No, copy until the end of the string. 
         {
             // Max cap
             if(i < l)
@@ -440,6 +488,7 @@ entry_p m_substr(entry_p contxt)
                 if(i > 0)
                 {
                     char *r = calloc((size_t) l + 1, 1); 
+
                     if(r)
                     {
                         // All values are already
@@ -460,7 +509,7 @@ entry_p m_substr(entry_p contxt)
     }
 
     // The parser isn't necessarily broken 
-    // if we end up here. We could alse be
+    // if we end up here. We could also be
     // out of memory.
     error(PANIC);
     RCUR; 
@@ -478,8 +527,8 @@ entry_p m_tackon(entry_p contxt)
     // and a file.
     if(c_sane(contxt, 2))
     {
-        const char *d = str(CARG(1)), *f = str(CARG(2));
-        char *r = h_tackon(contxt->id, d, f); 
+        char *r = h_tackon(contxt->id, str(CARG(1)), str(CARG(2))); 
+
         if(r)
         {
             RSTR(r); 
@@ -500,38 +549,50 @@ char *h_tackon(int id,
                const char *p, 
                const char *f)
 {
+    // We need a path and a file.
     if(p && f)
     {
         size_t lp = strlen(p), 
                lf = strlen(f); 
+
+        // No point doing this if both
+        // strings are empty.
         if(lp || lf)
         {
             char *r = NULL; 
 
+            // If the path is empty, the result
+            // equals the filename.
             if(!lp) 
             {
                 r = strdup(f); 
 
                 if(!r)
                 {
+                    // Out of memory.
                     error(PANIC); 
                 }
 
                 return r;
             }
 
+            // If the filename is empty, the result
+            // equals the path.
             if(!lf) 
             {
                 r = strdup(p); 
 
                 if(!r)
                 {
+                    // Out of memory.
                     error(PANIC); 
                 }
 
                 return r;
             }
 
+            // If the filename ends with a delimiter,
+            // it's not a valid filename.
             if(f[lf - 1] == '/' ||
                f[lf - 1] == ':') 
             {
@@ -539,11 +600,16 @@ char *h_tackon(int id,
                 return NULL; 
             }
 
+            // Allocate memory to hold path, filename,
+            // delimiter and termination.
             r = calloc(lp + lf + 2, 1); 
 
             if(r)
             {
+                // Copy the path.
                 memcpy(r, p, lp); 
+
+                // Remove double delimiters if any.
                 if(p[lp - 1] == '/' ||
                    p[lp - 1] == ':') 
                 {
@@ -554,6 +620,7 @@ char *h_tackon(int id,
                     }
                 }
                 else
+                // Insert delimiter if none exist.
                 {
                     if(f[0] != '/' && 
                        f[0] != ':') 
@@ -562,11 +629,13 @@ char *h_tackon(int id,
                     }
                 }
 
+                // Concatenate the result.
                 strcat(r, f); 
                 return r; 
             }
             else
             {
+                // Out of memory.
                 error(PANIC); 
             }
         }

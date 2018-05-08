@@ -11,7 +11,6 @@
 #include "types.h"
 
 entry_p m_cat(entry_p contxt);
-entry_p m_expandpath(entry_p contxt);
 entry_p m_fmt(entry_p contxt);
 entry_p m_pathonly(entry_p contxt);
 entry_p m_patmatch(entry_p contxt);
