@@ -1,5 +1,12 @@
-/*
- */
+//----------------------------------------------------------------------------
+// gui.c: 
+//
+// MUI based GUI
+//
+// On non Amiga systems this is mostly (except for some stdout prints to aid
+// testing) a stub.
+//
+//----------------------------------------------------------------------------
 
 #include "gui.h"
 #include "resource.h"
@@ -807,7 +814,7 @@ MUIDSP IPTR InstallerGuiCopyFilesEnd(Class *cls,
 {
     struct InstallerGuiData *my = INST_DATA (cls,obj);
 
-    DoMethod (_app (obj), MUIM_Application_RemInputHandler, &my->ticker);
+    DoMethod(_app (obj), MUIM_Application_RemInputHandler, &my->ticker);
 
     return (IPTR) TRUE; 
 }
@@ -831,6 +838,7 @@ MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,
             MUIV_InstallerGui_FileList
         );
     } 
+
     if(lst) 
     {
         DoMethod(lst, MUIM_List_Insert, &(msg->File), 1, MUIV_List_Insert_Bottom); 
@@ -840,6 +848,7 @@ MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,
     {
         GERR(tr(S_UNER)); 
     }
+
     return (IPTR) FALSE; 
 }
 
@@ -1314,6 +1323,7 @@ MUIDSP IPTR InstallerGuiComplete(Class *cls,
         obj, MUIM_FindUData, 
         MUIV_InstallerGui_Progress
     );
+
     if(prg)
     {
         int p = msg->Progress > 100 ? 100 : msg->Progress;
@@ -1748,11 +1758,12 @@ MUIDSP IPTR InstallerGuiSetup(Class *cls,
                               struct MUI_RenderInfo *msg)
 {
     // Let our parent set itself up first  
-    if (!DoSuperMethodA (cls, obj, (Msg) msg) )
+    if(!DoSuperMethodA (cls, obj, (Msg) msg))
     {
         GERR(tr(S_STFL)); 
         return FALSE;
     }
+
     return TRUE;
 }
 
@@ -1770,8 +1781,8 @@ MUIDSP IPTR InstallerGuiDispose (Class *cls,
 
 //----------------------------------------------------------------------------
 // InstallerGuiCleanup - Overloading MUIM_Cleanup
-// Input:          See MUI docs
-// Return:         See MUI docs
+// Input:                See MUI docs
+// Return:               See MUI docs
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiCleanup (Class *cls,
                                  Object *obj,
@@ -2150,8 +2161,6 @@ const char *gui_askdir(const char *msg,
     return ret;
 }
 
-const char *gui_askfile(const char *msg, const char *hlp, int pth, int dsk, const char *def);
-
 //----------------------------------------------------------------------------
 // gui_askfile
 //----------------------------------------------------------------------------
@@ -2178,7 +2187,6 @@ const char *gui_askfile(const char *msg,
 //----------------------------------------------------------------------------
 // gui_copyfiles_start
 //----------------------------------------------------------------------------
-//
 int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
 {
     #ifdef AMIGA
@@ -2192,8 +2200,10 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
             {
                 DoMethod(Win, MUIM_InstallerGui_CopyFilesAdd, cur->name, cur);
             }
+
             n++; 
         }
+
         cur = cur->next; 
     }
 
