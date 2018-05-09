@@ -72,10 +72,12 @@ entry_p m_expandpath(entry_p contxt)
         BPTR lock = (BPTR) Lock(str(CARG(1)), ACCESS_READ);
         if(lock)
         {
+            // Allocate enough to hold any valid path.
             char *buf = calloc(PATH_MAX, 1);
 
             if(buf)
             {
+                // FIXME - error handling
                 NameFromLock(lock, buf, PATH_MAX); 
                 UnLock(lock); 
                 RSTR(buf);
@@ -283,6 +285,8 @@ entry_p m_copyfiles(entry_p contxt)
                     }
                 }
 
+                // Initialize GUI, set up file lists, events,
+                // and so on.
                 if(cur)
                 {
                     go = gui_copyfiles_start
@@ -294,6 +298,7 @@ entry_p m_copyfiles(entry_p contxt)
                     ); 
                 }
 
+                // Start copy unless user canceled / aborted.
                 if(go == 1)
                 {
                     // Set file copy mode.
@@ -307,6 +312,7 @@ entry_p m_copyfiles(entry_p contxt)
 
                     DNUM = 1; 
 
+                    // For all files / dirs in list, copy / create.
                     for(; cur && DNUM; 
                         cur = cur->next)
                     {
@@ -347,10 +353,13 @@ entry_p m_copyfiles(entry_p contxt)
                         }
                     }
 
+                    // GUI teardown.
                     gui_copyfiles_end(); 
                 }
                 else
                 {
+                    //  '0' == skip.
+                    // '-1' == halt.
                     if(go == -1)
                     {
                         error(HALT); 
@@ -358,6 +367,8 @@ entry_p m_copyfiles(entry_p contxt)
                 }
 
                 cur = tree; 
+
+                // Free list of files / dirs.
                 while(cur)
                 {
                     tree = cur; 
@@ -1214,6 +1225,7 @@ entry_p m_fileonly(entry_p contxt)
     {
         const char *p = str(CARG(1)), 
                    *f = h_fileonly(contxt->id, p);
+
         RSTR(strdup(f)); 
     }
     else
@@ -3490,10 +3502,12 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
         }
 
         dir = strdup(dst); 
+
         if(dir)
         {
             int d = 1, 
                 l = (int) strlen(dir);
+
             for(int i = 0; i < l; i++)
             {
                 if(dir[i] == '/')
@@ -3501,6 +3515,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
                     d++;  
                 }
             }
+
             while(d--)
             {
                 for(int i = l; i >= 0; i--)
@@ -3509,15 +3524,19 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
                        dir[i] == '\0')
                     {
                         char c = dir[i]; 
+
                         dir[i] = '\0'; 
+
                         if(mkdir(dir, 0777) == 0)
                         {
                             if(i == l)
                             {
                                 free(dir);
                                 h_log(contxt, tr(S_CRTD), dst); 
+
                                 return 1; 
                             }
+
                             dir[i] = c; 
                             break; 
                         }
@@ -3544,6 +3563,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
             error(PANIC); 
         }
     }
+
     return 0; 
 }
 
@@ -3568,7 +3588,7 @@ static int h_protect_get(entry_p contxt,
     if(contxt && mask && file)
     {
         // On non Amiga systems, this is a stub.
-#ifdef AMIGA
+        #ifdef AMIGA
         struct FileInfoBlock *fib = (struct FileInfoBlock *) 
             AllocDosObject(DOS_FIB, NULL); 
 
@@ -3608,10 +3628,10 @@ static int h_protect_get(entry_p contxt,
             // MASK or -1.
             return done; 
         }
-#else
-        // Always succeed.
+        #else
+        // Always succeed on non Amiga systems.
         return 1; 
-#endif
+        #endif
     }
 
     // Out of memory.
@@ -3639,14 +3659,14 @@ static int h_protect_set(entry_p contxt,
 {
     if(contxt && file)
     {
-#ifdef AMIGA
         // On non Amiga systems this is a stub.
+        #ifdef AMIGA
         if(!SetProtection(file, mask))
         {
             error(contxt->id, ERR_SET_PERM, file); 
             return 0; 
         }
-#endif
+        #endif
         // If logging is enabled, write to log.
         h_log(contxt, tr(S_PTCT), file, mask); 
         return 1; 

@@ -28,6 +28,9 @@ entry_p m_rename(entry_p contxt);
 
 int h_log(entry_p contxt, const char *fmt, ...);
 
+//----------------------------------------------------------------------------
+// Exchange (GUI) datatypes
+//----------------------------------------------------------------------------
 struct pnode_t
 {
     struct pnode_t *next; 
