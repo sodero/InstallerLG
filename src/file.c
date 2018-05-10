@@ -335,6 +335,8 @@ entry_p m_copyfiles(entry_p contxt)
                                 break; 
 
                             case 2: 
+                                // Make directory and make sure the protection
+                                // bits the new one matches the old.
                                 if(h_makedir(contxt, cur->copy, md) &&
                                    h_protect_get(contxt, cur->name, &prm) &&
                                    h_protect_set(contxt, cur->copy, prm))
@@ -604,6 +606,9 @@ entry_p m_copylib(entry_p contxt)
                         {
                             if(vs != vf)
                             {
+                                // If we ask for confirmation and get it, copy
+                                // the file no matter what version it (and the
+                                // existing destination file) has.
                                 if(confirm)
                                 {
                                     if(h_confirm(
@@ -625,12 +630,18 @@ entry_p m_copylib(entry_p contxt)
                                 }
                                 else
                                 {
+                                    // If the file to be copied has a higher version
+                                    // number than the existing one, overwrite. 
                                     if(vs > vf)
                                     {
                                         DNUM = h_copyfile(contxt, s, f, md);
                                     }
                                     else
                                     {
+                                        // If the file to be copied has a lower version
+                                        // number than the existing one, and we're in
+                                        // expert mode, ask the user to confirm. If we
+                                        // get a confirmation, overwrite.
                                         if(level == 2)
                                         {
                                             if(h_confirm(
@@ -694,6 +705,7 @@ entry_p m_copylib(entry_p contxt)
         error(PANIC);
     }
 
+    // Success or failure.
     RCUR; 
 }
 
@@ -706,346 +718,6 @@ entry_p m_copylib(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //----------------------------------------------------------------------------
-static int h_delete_dir(entry_p contxt, const char *dir)
-{
-    if(dir)
-    {
-        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
-                optional = get_opt(CARG(2), OPT_OPTIONAL), 
-                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
-                all      = get_opt(CARG(2), OPT_ALL), 
-                force    = get_opt(delopts, OPT_FORCE) ? NULL :
-                           get_opt(optional, OPT_FORCE),
-                askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
-                           get_opt(optional, OPT_ASKUSER);
-
-        if(!force && access(dir, W_OK))
-        {
-            // Do we need to ask for confirmation?
-            if(askuser)
-            {
-
-                // Only ask for confirmation if we're not
-                // running in novice mode. 
-                if(!get_numvar(contxt, "@user-level") ||
-                   !h_confirm(contxt, "", tr(S_DWRD), dir))
-                {
-                    // Halt will be set by h_confirm. Skip
-                    // will result in nothing.
-                    return 0;
-                }
-            }
-            else
-            {
-                // Exit silently.
-                return 0;
-            }
-        }
-
-        // Give permissions so that delete can succeed. 
-        // No need to bother with the return value since
-        // errors will be caught below.
-        chmod(dir, S_IRWXU);
-
-        if(rmdir(dir))
-        {
-            if(all)
-            {
-                DIR *d = opendir(dir);  
-
-                // Permission to read? 
-                if(d) 
-                {
-                    char *w; 
-                    struct dirent *e = readdir(d); 
-
-                    // Find all files in the directory.
-                    while(e)
-                    {
-                        // Create full path.
-                        w = h_tackon(contxt->id, dir, e->d_name); 
-
-                        // Is it a file? 
-                        if(w && h_exists(w) == 1)
-                        {
-                            // Delete it.
-                            h_delete_file(contxt, w); 
-                        }
-
-                        // Free full path.
-                        free(w); 
-
-                        // Get next entry. 
-                        e = readdir(d); 
-                    }
-
-                    // Restart from the beginning.
-                    rewinddir(d); 
-                    e = readdir(d); 
-
-                    // Find all subdirectories in the
-                    // directory.
-                    while(e)
-                    {
-                        #ifndef AMIGA
-                        // Filter out the magic on non-Amigas.
-                        if(strcmp(e->d_name, ".") &&
-                           strcmp(e->d_name, ".."))
-                        #endif
-                        {
-                            // Create full path.
-                            w = h_tackon(contxt->id, dir, e->d_name); 
-
-                            // Is it a directory? 
-                            if(w && h_exists(w) == 2)
-                            {
-                                // Recur into subdirectory.
-                                h_delete_dir(contxt, w); 
-                            }
-
-                            // Free full path.
-                            free(w); 
-                        }
-
-                        // Get next entry. 
-                        e = readdir(d); 
-                    }
-
-                    // Close the (by now, hopefully) empty dir.
-                    closedir(d); 
-                }
-
-                if(rmdir(dir))
-                {
-                    // Fail silently.
-                    return 0;
-                }
-            }
-            else
-            {
-                // Fail silently.
-                return 0;
-            }
-        }
-
-        // Shall we delete the info file as well? 
-        if(infos)
-        {
-            // Info = file + .info. 
-            char *info = get_buf(); 
-            snprintf(info, buf_size(), "%s.info", dir); 
-
-            if(h_exists(info) == 1)
-            {
-                // Set permissions so that delete can
-                // succeed. 
-                chmod(info, S_IRWXU);
-
-                // Delete the info file.
-                if(!remove(info))
-                {
-                    // The info file has been deleted. 
-                    h_log(contxt, tr(S_DLTD), info); 
-                }
-                else
-                {
-                    // Fail silently.
-                    return 0;
-                }
-            }
-        }
-
-        // Done.
-        return 1;
-    }
-    else
-    {
-        // Unknown error.
-        error(PANIC); 
-    }
-
-    // Fail silently.
-    return 0;
-}
-
-static int h_delete_pattern(entry_p contxt, const char *pat)
-{
-    if(contxt && pat)
-    {
-        // Pattern matching is only done on Amiga like OS:es
-        #ifdef AMIGA
-        struct AnchorPath *ap = 
-            calloc(1, sizeof(struct AnchorPath) + PATH_MAX); 
-
-        if(ap)
-        {
-            int err; 
-            ap->ap_Strlen = PATH_MAX; 
-
-            // For all matches, invoke the appropriate
-            // function for deletion.
-            for(err = MatchFirst(pat, ap); !err;
-                err = MatchNext(ap))
-            {
-                // ST_FILE         -3
-                // ST_LINKFILE     -4
-                if(ap->ap_Info.fib_DirEntryType < 0)
-                {
-                    if(!h_delete_file(contxt, ap->ap_Buf))
-                    {
-                        // Break out on trouble / user
-                        // abort.
-                        break;
-                    }
-                }
-                else
-                // ST_ROOT          1
-                // ST_USERDIR       2
-                // ST_SOFTLINK      3 
-                // ST_LINKDIR       4
-                if(ap->ap_Info.fib_DirEntryType > 0)
-                {
-                    if(!h_delete_dir(contxt, ap->ap_Buf))
-                    {
-                        // Break out on trouble / user
-                        // abort.
-                        break;
-                    }
-                }
-            }
-
-            // Free all resources.
-            MatchEnd(ap);
-            free(ap); 
-
-            // Is there nothing left?
-            if(err == ERROR_NO_MORE_ENTRIES)
-            {
-                // Done.
-                return 1;
-            }
-            else
-            {
-                // Please note that 'breaks' will take us
-                // here, so will MatchFirst / MatchNext()
-                // problems.
-                error(contxt->id, ERR_DELETE_FILE, pat); 
-                return 0;
-            }
-        }
-        #endif
-    }
-        
-    // Unknown error.
-    error(PANIC); 
-    return 0;
-}
-
-static int h_delete_file(entry_p contxt, const char *file)
-{
-    if(file)
-    {
-        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
-                optional = get_opt(CARG(2), OPT_OPTIONAL), 
-                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
-                force    = get_opt(delopts, OPT_FORCE) ? NULL :
-                           get_opt(optional, OPT_FORCE),
-                askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
-                           get_opt(optional, OPT_ASKUSER);
-
-        // If (force) is used, give permissions 
-        // so that delete can succeed. 
-        if(force)
-        {
-            // No need to bother with the return
-            // value since errors will be caught
-            // below.
-            chmod(file, S_IRWXU);
-        }
-        else
-        {
-            if(access(file, W_OK))
-            {
-                // Do we need to ask for confirmation?
-                if(askuser)
-                {
-                    // Only ask for confirmation if we're not
-                    // running in novice mode. 
-                    if(get_numvar(contxt, "@user-level") &&
-                       h_confirm(contxt, "", tr(S_DWRT), file))
-                    {
-                        // Give permissions so that delete
-                        // can succeed. No need to bother with
-                        // the return value since errors will
-                        // be caught below.
-                        chmod(file, S_IRWXU);
-                    }
-                    else
-                    {
-                        // Halt will be set by h_confirm. Skip
-                        // will result in nothing.
-                        return 0;
-                    }
-                }
-                else
-                {
-                    // Fail silently just like the original.
-                    return 0;
-                }
-            }
-        }
-
-        // If yes, this must succeed, otherwise we
-        // will abort with an error. 
-        if(!remove(file))
-        {
-            // The file has been deleted. 
-            h_log(contxt, tr(S_DLTD), file); 
-
-            // Shall we delete the info file as well? 
-            if(infos)
-            {
-                // Info = file + .info. 
-                char *info = get_buf(); 
-                snprintf(info, buf_size(), "%s.info", file); 
-
-                if(h_exists(info) == 1)
-                {
-                    // Set permissions so that delete can
-                    // succeed. 
-                    chmod(info, S_IRWXU);
-
-                    // Delete the info file.
-                    if(!remove(info))
-                    {
-                        // The info file has been deleted. 
-                        h_log(contxt, tr(S_DLTD), info); 
-                    }
-                    else
-                    {
-                        error(contxt->id, ERR_DELETE_FILE, info); 
-                        return 0;
-                    }
-                }
-            }
-
-            // All done.
-            return 1;
-        }
-        else
-        {
-            error(contxt->id, ERR_DELETE_FILE, file); 
-            return 0;
-        }
-    }
-    else
-    {
-        // Unknown error.
-        error(PANIC); 
-        return 0;
-    }
-}
-
 entry_p m_delete(entry_p contxt)
 {
     // We need atleast one argument
@@ -1864,9 +1536,6 @@ entry_p m_protect(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_startup(entry_p contxt)
 {
-    // Expect failure. 
-    DNUM = 0; 
-
     // We need atleast two arguments
     if(c_sane(contxt, 2))
     {
@@ -1875,6 +1544,9 @@ entry_p m_startup(entry_p contxt)
         entry_p command  = get_opt(CARG(2), OPT_COMMAND),
                 help     = get_opt(CARG(2), OPT_HELP),
                 prompt   = get_opt(CARG(2), OPT_PROMPT);
+
+        // Expect failure. 
+        DNUM = 0; 
 
         // We need a command, a prompt and a help text. 
         if(!command || !prompt || !help) 
@@ -2068,6 +1740,8 @@ entry_p m_startup(entry_p contxt)
                     tmp = mktemp(tmp); 
                     #endif
 
+                    // When using C2011 we should replace this 
+                    // with "wx" in case 'tmp' already exists.
                     FILE *fp = fopen(tmp, "w"); 
 
                     if(fp)  
@@ -2680,6 +2354,8 @@ entry_p m_transcript(entry_p contxt)
     if(c_sane(contxt, 1))
     {
         size_t len = 0; 
+
+        // Sum up the length of all children.
         for(entry_p *e = contxt->children; 
             *e && *e != end(); e++)
         {
@@ -2688,9 +2364,14 @@ entry_p m_transcript(entry_p contxt)
                 len += strlen(str(*e)); 
             }
         }
+
+        // Allocate enough memory to hold the
+        // concatenation of all children.
         char *buf = calloc(len + 2, 1);
+
         if(buf)
         {
+            // Concatenate all children.
             for(entry_p *e = contxt->children; 
                 *e && *e != end(); e++)
             {
@@ -2700,6 +2381,8 @@ entry_p m_transcript(entry_p contxt)
                 }
             }
 
+            // If logging is enabled, write the result
+            // to the log file.
             DNUM = h_log(contxt, "%s\n", buf) ? 1 : 0; 
             free(buf); 
             RCUR; 
@@ -2707,7 +2390,7 @@ entry_p m_transcript(entry_p contxt)
     }
 
     // The parser isn't necessarily broken 
-    // if we end up here. We could alse be
+    // if we end up here. We could also be
     // out of memory.
     error(PANIC); 
     RCUR; 
@@ -2832,7 +2515,392 @@ entry_p m_rename(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
-// copyfiles / copylib helper function
+// Name:        h_delete_dir(entry_p contxt, 
+//                           const char *dir)
+//
+// Description: Delete directory. Helper used by m_delete.
+//
+// Input:       entry_p contxt:     The execution context.
+//              const char *dir:    Directory to delete.
+//
+// Return:      int:                On success '1', else '0'.
+//----------------------------------------------------------------------------
+static int h_delete_dir(entry_p contxt, const char *dir)
+{
+    if(dir)
+    {
+        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
+                optional = get_opt(CARG(2), OPT_OPTIONAL), 
+                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
+                all      = get_opt(CARG(2), OPT_ALL), 
+                force    = get_opt(delopts, OPT_FORCE) ? NULL :
+                           get_opt(optional, OPT_FORCE),
+                askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
+                           get_opt(optional, OPT_ASKUSER);
+
+        if(!force && access(dir, W_OK))
+        {
+            // Do we need to ask for confirmation?
+            if(askuser)
+            {
+
+                // Only ask for confirmation if we're not
+                // running in novice mode. 
+                if(!get_numvar(contxt, "@user-level") ||
+                   !h_confirm(contxt, "", tr(S_DWRD), dir))
+                {
+                    // Halt will be set by h_confirm. Skip
+                    // will result in nothing.
+                    return 0;
+                }
+            }
+            else
+            {
+                // Exit silently.
+                return 0;
+            }
+        }
+
+        // Give permissions so that delete can succeed. 
+        // No need to bother with the return value since
+        // errors will be caught below.
+        chmod(dir, S_IRWXU);
+
+        if(rmdir(dir))
+        {
+            if(all)
+            {
+                DIR *d = opendir(dir);  
+
+                // Permission to read? 
+                if(d) 
+                {
+                    char *w; 
+                    struct dirent *e = readdir(d); 
+
+                    // Find all files in the directory.
+                    while(e)
+                    {
+                        // Create full path.
+                        w = h_tackon(contxt->id, dir, e->d_name); 
+
+                        // Is it a file? 
+                        if(w && h_exists(w) == 1)
+                        {
+                            // Delete it.
+                            h_delete_file(contxt, w); 
+                        }
+
+                        // Free full path.
+                        free(w); 
+
+                        // Get next entry. 
+                        e = readdir(d); 
+                    }
+
+                    // Restart from the beginning.
+                    rewinddir(d); 
+                    e = readdir(d); 
+
+                    // Find all subdirectories in the
+                    // directory.
+                    while(e)
+                    {
+                        #ifndef AMIGA
+                        // Filter out the magic on non-Amigas.
+                        if(strcmp(e->d_name, ".") &&
+                           strcmp(e->d_name, ".."))
+                        #endif
+                        {
+                            // Create full path.
+                            w = h_tackon(contxt->id, dir, e->d_name); 
+
+                            // Is it a directory? 
+                            if(w && h_exists(w) == 2)
+                            {
+                                // Recur into subdirectory.
+                                h_delete_dir(contxt, w); 
+                            }
+
+                            // Free full path.
+                            free(w); 
+                        }
+
+                        // Get next entry. 
+                        e = readdir(d); 
+                    }
+
+                    // Close the (by now, hopefully) empty dir.
+                    closedir(d); 
+                }
+
+                if(rmdir(dir))
+                {
+                    // Fail silently.
+                    return 0;
+                }
+            }
+            else
+            {
+                // Fail silently.
+                return 0;
+            }
+        }
+
+        // Shall we delete the info file as well? 
+        if(infos)
+        {
+            // Info = file + .info. 
+            char *info = get_buf(); 
+            snprintf(info, buf_size(), "%s.info", dir); 
+
+            if(h_exists(info) == 1)
+            {
+                // Set permissions so that delete can
+                // succeed. 
+                chmod(info, S_IRWXU);
+
+                // Delete the info file.
+                if(!remove(info))
+                {
+                    // The info file has been deleted. 
+                    h_log(contxt, tr(S_DLTD), info); 
+                }
+                else
+                {
+                    // Fail silently.
+                    return 0;
+                }
+            }
+        }
+
+        // Done.
+        return 1;
+    }
+    else
+    {
+        // Unknown error.
+        error(PANIC); 
+    }
+
+    // Fail silently.
+    return 0;
+}
+
+//----------------------------------------------------------------------------
+// Name:        h_delete_pattern(entry_p contxt, 
+//                               const char *pat)
+//
+// Description: Delete file / dir matching pattern. Helper used by m_delete.
+//
+// Input:       entry_p contxt:     The execution context.
+//              const char *pat:    Pattern.
+//
+// Return:      int:                On success '1', else '0'.
+//----------------------------------------------------------------------------
+static int h_delete_pattern(entry_p contxt, const char *pat)
+{
+    if(contxt && pat)
+    {
+        // Pattern matching is only done on Amiga like OS:es
+        #ifdef AMIGA
+        struct AnchorPath *ap = 
+            calloc(1, sizeof(struct AnchorPath) + PATH_MAX); 
+
+        if(ap)
+        {
+            int err; 
+            ap->ap_Strlen = PATH_MAX; 
+
+            // For all matches, invoke the appropriate
+            // function for deletion.
+            for(err = MatchFirst(pat, ap); !err;
+                err = MatchNext(ap))
+            {
+                // ST_FILE         -3
+                // ST_LINKFILE     -4
+                if(ap->ap_Info.fib_DirEntryType < 0)
+                {
+                    if(!h_delete_file(contxt, ap->ap_Buf))
+                    {
+                        // Break out on trouble / user
+                        // abort.
+                        break;
+                    }
+                }
+                else
+                // ST_ROOT          1
+                // ST_USERDIR       2
+                // ST_SOFTLINK      3 
+                // ST_LINKDIR       4
+                if(ap->ap_Info.fib_DirEntryType > 0)
+                {
+                    if(!h_delete_dir(contxt, ap->ap_Buf))
+                    {
+                        // Break out on trouble / user
+                        // abort.
+                        break;
+                    }
+                }
+            }
+
+            // Free all resources.
+            MatchEnd(ap);
+            free(ap); 
+
+            // Is there nothing left?
+            if(err == ERROR_NO_MORE_ENTRIES)
+            {
+                // Done.
+                return 1;
+            }
+            else
+            {
+                // Please note that 'breaks' will take us
+                // here, so will MatchFirst / MatchNext()
+                // problems.
+                error(contxt->id, ERR_DELETE_FILE, pat); 
+                return 0;
+            }
+        }
+        #endif
+    }
+        
+    // Unknown error.
+    error(PANIC); 
+    return 0;
+}
+
+//----------------------------------------------------------------------------
+// Name:        h_delete_file(entry_p contxt, 
+//                            const char *file)
+//
+// Description: Delete file. Helper used by m_delete.
+//
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   File to delete.
+//
+// Return:      int:                On success '1', else '0'.
+//----------------------------------------------------------------------------
+static int h_delete_file(entry_p contxt, const char *file)
+{
+    if(file)
+    {
+        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
+                optional = get_opt(CARG(2), OPT_OPTIONAL), 
+                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
+                force    = get_opt(delopts, OPT_FORCE) ? NULL :
+                           get_opt(optional, OPT_FORCE),
+                askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
+                           get_opt(optional, OPT_ASKUSER);
+
+        // If (force) is used, give permissions 
+        // so that delete can succeed. 
+        if(force)
+        {
+            // No need to bother with the return
+            // value since errors will be caught
+            // below.
+            chmod(file, S_IRWXU);
+        }
+        else
+        {
+            if(access(file, W_OK))
+            {
+                // Do we need to ask for confirmation?
+                if(askuser)
+                {
+                    // Only ask for confirmation if we're not
+                    // running in novice mode. 
+                    if(get_numvar(contxt, "@user-level") &&
+                       h_confirm(contxt, "", tr(S_DWRT), file))
+                    {
+                        // Give permissions so that delete
+                        // can succeed. No need to bother with
+                        // the return value since errors will
+                        // be caught below.
+                        chmod(file, S_IRWXU);
+                    }
+                    else
+                    {
+                        // Halt will be set by h_confirm. Skip
+                        // will result in nothing.
+                        return 0;
+                    }
+                }
+                else
+                {
+                    // Fail silently just like the original.
+                    return 0;
+                }
+            }
+        }
+
+        // If yes, this must succeed, otherwise we
+        // will abort with an error. 
+        if(!remove(file))
+        {
+            // The file has been deleted. 
+            h_log(contxt, tr(S_DLTD), file); 
+
+            // Shall we delete the info file as well? 
+            if(infos)
+            {
+                // Info = file + .info. 
+                char *info = get_buf(); 
+                snprintf(info, buf_size(), "%s.info", file); 
+
+                if(h_exists(info) == 1)
+                {
+                    // Set permissions so that delete can
+                    // succeed. 
+                    chmod(info, S_IRWXU);
+
+                    // Delete the info file.
+                    if(!remove(info))
+                    {
+                        // The info file has been deleted. 
+                        h_log(contxt, tr(S_DLTD), info); 
+                    }
+                    else
+                    {
+                        error(contxt->id, ERR_DELETE_FILE, info); 
+                        return 0;
+                    }
+                }
+            }
+
+            // All done.
+            return 1;
+        }
+        else
+        {
+            error(contxt->id, ERR_DELETE_FILE, file); 
+            return 0;
+        }
+    }
+    else
+    {
+        // Unknown error.
+        error(PANIC); 
+        return 0;
+    }
+}
+
+//----------------------------------------------------------------------------
+// Name:        h_copyfile(entry_p contxt, 
+//                         const char *hlp, 
+//                         const char *msg,
+//                         int mode)
+//
+// Description: Copy file. Helper used by m_copyfiles and m_copylib.
+//
+// Input:       entry_p contxt:     The execution context.
+//              const char *src:    Source file.
+//              const char *dst:    Destination file.
+//              int mode:           Copy mode, see CF_*.
+//
+// Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
 static int h_copyfile(entry_p contxt, 
                       const char *src, 
@@ -2841,6 +2909,8 @@ static int h_copyfile(entry_p contxt,
 {
     if(contxt && src && dst)
     { 
+        // Prepare GUI unless we're in silent mode
+        // as used by copylib. 
         if((mode & CF_SILENT) ||
            gui_copyfiles_setcur(src, mode & CF_NOGAUGE))
         { 
@@ -3039,6 +3109,14 @@ static int h_copyfile(entry_p contxt,
 }
 
 //----------------------------------------------------------------------------
+// Name:        h_exists(const char *n)
+//
+// Description: Get file / dir info.
+//
+// Input:       entry_p contxt:     The execution context.
+//              const char *n:      Path to file / dir.
+//
+// Return:      int:                Dir = '2', file = '1' else '0'.
 //----------------------------------------------------------------------------
 static int h_exists(const char *n)
 {
@@ -3050,9 +3128,11 @@ static int h_exists(const char *n)
         int r = 0; 
         struct FileInfoBlock *fib = (struct FileInfoBlock *) 
                AllocDosObject(DOS_FIB, NULL); 
+
         if(fib)
         {
             BPTR lock = (BPTR) Lock(n, ACCESS_READ);
+
             if(lock)
             {
                 if(Examine(lock, fib))
@@ -3082,10 +3162,13 @@ static int h_exists(const char *n)
                     // Return values according to the 
                     // CBM installer documentation.
                 }
+
                 UnLock(lock); 
             }
+
             FreeDosObject(DOS_FIB, fib); 
         }
+
         return r; 
         #else
         // This implementation doesn't work on MorphOS.
@@ -3115,6 +3198,16 @@ static int h_exists(const char *n)
 }
 
 //----------------------------------------------------------------------------
+// Name:        h_fileonly(int id,
+//                         const char *n)
+//
+// Description: Get file part from full path.
+//
+// Input:       int id:             The ID of the execution context.
+//              const char *n:      Path to file.
+//
+// Return:      const char *:       On success, file part of path, otherwise
+//                                  empty string.
 //----------------------------------------------------------------------------
 static const char *h_fileonly(int id, 
                               const char *s)
@@ -3130,6 +3223,7 @@ static const char *h_fileonly(int id,
             while(i &&
                   s[i - 1] != '/' && 
                   s[i - 1] != ':' ) i--;
+
             return (s + i); 
         }   
         else
@@ -3374,10 +3468,13 @@ static pnode_p h_filetree(int id,
                         {
                             break; 
                         }
+
                         entry = readdir(dir); 
                     }
                 }
+
                 closedir(dir); 
+
                 return head; 
             }
             else
@@ -3391,10 +3488,12 @@ static pnode_p h_filetree(int id,
         {
             pnode_p file = calloc(1, sizeof(struct pnode_t)),
                     head = calloc(1, sizeof(struct pnode_t)); 
+
             if(head && file)
             {
                 n_src = strdup(src); 
                 n_dst = strdup(dst); 
+
                 if(n_src && n_dst)  
                 {
                     head->type = 2; 
@@ -3410,6 +3509,7 @@ static pnode_p h_filetree(int id,
                         file->type = 1; 
                         file->name = n_src; 
                         file->copy = n_dst; 
+
                         return head; 
                     }
                     else
@@ -3418,6 +3518,7 @@ static pnode_p h_filetree(int id,
                         free(head->copy); 
                     }
                 }
+
                 free(head); 
                 free(file); 
             }
@@ -3428,13 +3529,28 @@ static pnode_p h_filetree(int id,
             return NULL; 
         }
     }
+
     error(PANIC); 
     free(n_src); 
     free(n_dst); 
+
     return NULL; 
 }
 
 //----------------------------------------------------------------------------
+// Name:        h_log(entry_p contxt, 
+//                    const char *fmt, 
+//                    ...)
+//
+// Description: Write formatted message to log file. 
+//
+// Input:       entry_p contxt:     The execution context.
+//              const char *fmt:    Message format string.
+//              ...:                Format string varargs.
+//
+// Return:      int:                Number of characters written to log file
+//                                  if logging is enabled. If logging is 
+//                                  disabled, '1' will always be returned.
 //----------------------------------------------------------------------------
 int h_log(entry_p contxt, const char *fmt, ...)
 {
@@ -3455,8 +3571,10 @@ int h_log(entry_p contxt, const char *fmt, ...)
 
             if(fp)
             {
+                // Line number and function name as prefix.
                 n = fprintf(fp, "[%d:%s] ", contxt->id, contxt->name);  
 
+                // Append formatted string.
                 if(n > 0)
                 {
                     va_start(ap, fmt); 
@@ -3487,6 +3605,17 @@ int h_log(entry_p contxt, const char *fmt, ...)
 }
 
 //----------------------------------------------------------------------------
+// Name:        h_makedir(entry_p contxt, 
+//                        const char *dst,
+//                        int mode)
+//
+// Description: Create directory / tree of directories.
+//
+// Input:       entry_p contxt:     The execution context.
+//              const char *dst:    The directory.
+//              int mode:           FIXME.
+//
+// Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
 static int h_makedir(entry_p contxt, const char *dst, int mode)
 {
@@ -3494,6 +3623,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
     {
         char *dir; 
 
+        // Return immediately if directory exists.
         if(h_exists(dst) == 2)
         {
             // Nothing to do.
@@ -3501,6 +3631,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
             return 1; 
         }
 
+        // Create working copy.
         dir = strdup(dst); 
 
         if(dir)
@@ -3508,6 +3639,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
             int d = 1, 
                 l = (int) strlen(dir);
 
+            // Get directory depth.
             for(int i = 0; i < l; i++)
             {
                 if(dir[i] == '/')
@@ -3516,38 +3648,52 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
                 }
             }
 
+            // Maximum number of retries == depth.
             while(d--)
             {
+                // Shrink scope until mkdir works.
                 for(int i = l; i >= 0; i--)
                 {
+                    // Is the current char a delimiter?
                     if(dir[i] == '/' ||
                        dir[i] == '\0')
                     {
+                        // Save delimiter.
                         char c = dir[i]; 
 
+                        // Truncate string.
                         dir[i] = '\0'; 
 
+                        // Attempt to create path.
                         if(mkdir(dir, 0777) == 0)
                         {
+                            // Is this the full path?
                             if(i == l)
                             {
                                 free(dir);
                                 h_log(contxt, tr(S_CRTD), dst); 
 
+                                // Yes, we're done.
                                 return 1; 
                             }
 
+                            // Not the full path, reinstate 
+                            // delimiter and start all over
+                            // with the full path.
                             dir[i] = c; 
                             break; 
                         }
                         else
                         {
+                            // Reinstate delimiter and shrink
+                            // scope.
                             dir[i] = c; 
                         }
                     }
                 }
             }
 
+            // Free working copy.
             free(dir);
 
             if(mode)
@@ -3556,14 +3702,18 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
                 return 1; 
             }
 
+            // For some unknown reason, we can't 
+            // create the directory.
             error(contxt->id, ERR_WRITE_DIR, dst); 
         }
         else
         {
+            // Out of memory.
             error(PANIC); 
         }
     }
 
+    // Unknown error.
     return 0; 
 }
 
@@ -3667,6 +3817,7 @@ static int h_protect_set(entry_p contxt,
             return 0; 
         }
         #endif
+
         // If logging is enabled, write to log.
         h_log(contxt, tr(S_PTCT), file, mask); 
         return 1; 
@@ -3688,7 +3839,7 @@ static int h_protect_set(entry_p contxt,
 //
 // Input:       entry_p contxt:     The execution context.
 //              const char *hlp:    Help text.
-//              const char *msg:    A format string to be shown.
+//              const char *msg:    Message format string.
 //              ...:                Format string varargs.
 //
 // Return:      int:                If confirmed '1', else '0'. Both skip and

@@ -2,7 +2,7 @@
 (makedir (safe)) ; "","Line 1: syntax error, unexpected SAFE 'safe'",""
 (makedir "_md_") ; "rm -Rf _md_","1","test -d _md_ && rm -Rf _md_"
 (makedir "_md_") ; "rm -Rf _md_ && touch _md_","Line 1: Could not create directory '_md_' 0","rm -Rf _md_"
-(makedir "_md_/_md_/_md_") ; "rm -Rf _md_","1","ls _md_/_md_/_md_ && rm -Rf _md_"
+(makedir "_md_/_md_/_md_") ; "rm -Rf _md_","1","test -d _md_/_md_/_md_ && rm -Rf _md_"
 (set @pretend 1) (makedir "_md_") ; "rm -Rf _md_","1","test ! -d _md_ && rm -Rf _md_"
 (set @pretend 1) (makedir "_md_" (safe)) ; "rm -Rf _md_","1","test -d _md_ && rm -Rf _md_"
 (makedir "_md_" (confirm)) ; "","Line 1: Missing option 'prompt' 0",""
