@@ -33,7 +33,7 @@ entry_p m_cat(entry_p contxt)
     {
         // Start with a string length of 64.
         size_t n = 64; 
-        char *buf = calloc(n + 1, 1);  
+        char *buf = ALLOC(n + 1, 1);  
 
         if(buf)
         {

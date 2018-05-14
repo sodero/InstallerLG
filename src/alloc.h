@@ -32,4 +32,14 @@ entry_p append(entry_p **dst, entry_p e);
 entry_p push(entry_p dst, entry_p src);
 entry_p end(void); 
 
+//----------------------------------------------------------------------------
+// Macros. 
+//----------------------------------------------------------------------------
+
+#ifdef OOM
+#define ALLOC(N,S) NULL
+#else
+#define ALLOC(N,S) calloc((N),(S)) 
+#endif
+
 #endif
