@@ -47,7 +47,7 @@ evl()
             return 0
         fi
     fi
-    run "$1 ; [$pre ; $pst]" "$inf" "$3"
+    run "$1 ; [$pre ; $pst]" "$inf" "$3" "$4"
     ret=$?
     if [ -n "$pst" ]; then 
         o=`eval "$pst" 2>&1`
@@ -63,8 +63,10 @@ evl()
 
 prg=$1
 tst=$2
+oom=$3
 nfl=0
 nok=0
+
 for f in `ls -t $tst/test.*`; 
 do 
     tno=0
@@ -84,8 +86,13 @@ do
                echo "OK -> $p" 
                nok=$(( $nok + 1 ))
            elif [ $s -eq 0 ]; then
-               echo "FAIL -> $p"
-               nfl=$(( $nfl + 1 ))
+               if [ ! -z "$oom" ]; then
+                   echo "IGNORE -> $p" 
+                   nok=$(( $nok + 1 ))
+               else
+                   echo "FAIL -> $p"
+                   nfl=$(( $nfl + 1 ))
+               fi
            fi
        fi
     done < $f

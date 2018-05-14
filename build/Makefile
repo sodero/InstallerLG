@@ -72,10 +72,15 @@ gui.o: gui.c gui.h
 .PHONY: test
 test: installer
 ifneq ($(AMIGA),true)
-	@sh ../test/run.sh ./$(EXE) ../test
+	@sh ../test/run.sh ./$(EXE) ../test $(REXTRA)
 else
-	@echo "[SKIPPED] @sh ../test/run.sh ./$(EXE) ../test"
+	@echo "[SKIPPED] @sh ../test/run.sh ./$(EXE) ../test $(REXTRA)"
 endif
+
+.PHONY: oom
+oom: CFLAGS += -DOOM
+oom: REXTRA := oom
+oom: test
 
 .PHONY: clean
 clean: 
