@@ -149,7 +149,7 @@ entry_p m_message(entry_p contxt)
             // Do we have anything to show? 
             if(mln)
             {
-                char *con = calloc(mln + 1, 1);
+                char *con = ALLOC(mln + 1, 1);
 
                 if(con)
                 {
@@ -224,7 +224,7 @@ entry_p m_welcome(entry_p contxt)
         // Do we have anything to show? 
         if(mln)
         {
-            char *con = calloc(mln + 1, 1);
+            char *con = ALLOC(mln + 1, 1);
 
             if(con)
             {
@@ -301,7 +301,7 @@ entry_p m_working(entry_p contxt)
 
         // Allocate enough to hold the standard
         // header and all children + term zero. 
-        con = calloc(strlen(pre) + mln + 1, 1);
+        con = ALLOC(strlen(pre) + mln + 1, 1);
 
         if(con)
         {

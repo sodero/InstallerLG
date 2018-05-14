@@ -255,7 +255,7 @@ entry_p m_getassign(entry_p contxt)
                         {
                             // Unlock doslist and allocate enough 
                             // memory to hold any path. 
-                            char *r = calloc(PATH_MAX, 1); 
+                            char *r = ALLOC(PATH_MAX, 1); 
 	                        UnLockDosList(msk);
 
                             if(r)

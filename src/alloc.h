@@ -38,8 +38,10 @@ entry_p end(void);
 
 #ifdef OOM
 #define ALLOC(N,S) NULL
+#define STRDUP(S) NULL
 #else
 #define ALLOC(N,S) calloc((N),(S)) 
+#define STRDUP(S) strdup((S))
 #endif
 
 #endif

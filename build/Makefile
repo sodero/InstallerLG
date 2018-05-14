@@ -11,14 +11,14 @@ EXE := installer
 #---------------------------------------------------------------------------------#
 
 ifeq ($(OS),Linux)
-CWRN = -Wall -Wno-unused-but-set-variable -Wno-empty-translation-unit
+CWRN = -Wall -Wno-unused-but-set-variable
 CGEN = -g -std=c99
 CDEF = -D_POSIX_SOURCE -D_DEFAULT_SOURCE
 else
 ifeq ($(OS),Darwin)
 CGEN = -std=c99
 CWRN = -Weverything -Wno-format-nonliteral -Wno-switch-enum 
-CWRN += -Wno-format-security -Werror -Wno-empty-translation-unit
+CWRN += -Wno-format-security -Werror
 else
 CC := gcc
 AMIGA = true
@@ -79,6 +79,7 @@ endif
 
 .PHONY: oom
 oom: CFLAGS += -DOOM
+oom: CWRN += -Wno-unused-variable
 oom: REXTRA := oom
 oom: test
 

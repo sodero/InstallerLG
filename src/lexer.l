@@ -313,6 +313,7 @@ static char *strduptr(const char *str)
     if(out)
     {
         int io = 0; 
+
         for(int i = 1; i < len - 1; i++)
         {
             char cr = str[i];
