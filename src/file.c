@@ -2679,7 +2679,7 @@ static int h_delete_dir(entry_p contxt, const char *dir)
     }
     else
     {
-        // Unknown error.
+        // Bad input.
         error(PANIC); 
     }
 
@@ -2763,12 +2763,17 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
                 return 0;
             }
         }
+        #else
+        // On non Amiga systems this is a stub.
+        return 1;
         #endif
     }
-        
-    // Unknown error.
-    error(PANIC); 
-    return 0;
+    else
+    { 
+        // Bad input.
+        error(PANIC); 
+        return 0;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -3216,30 +3221,58 @@ static const char *h_fileonly(int id,
     {
         size_t i = strlen(s); 
 
+        // Do we have a string that doesn't
+        // look like a directory / volume?
         if(i-- && 
            s[i] != '/' && 
            s[i] != ':' )
         {
+            // Go backwards until we find a
+            // delimiter or the beginning of
+            // the string.
             while(i &&
                   s[i - 1] != '/' && 
                   s[i - 1] != ':' ) i--;
 
+            // Return the new offset.
             return (s + i); 
         }   
         else
         {
+            // Empty string or dir / vol.
             error(id, ERR_NOT_A_FILE, s); 
         }   
     }
     else
     {
+        // Bad input.
         error(PANIC);
     }
 
+    // Always return a valid string pointer.
     return ""; 
 }
 
 //----------------------------------------------------------------------------
+// Name:        h_filetree(int id, 
+//                         const char *src, 
+//                         const char *dst, 
+//                         entry_p files, 
+//                         entry_p fonts, 
+//                         entry_p choices, 
+//                         entry_p pattern)
+//
+// Description: FIXME
+//
+// Input:       int id:             The ID of the execution context.
+//              const char *src:    -
+//              const char *dst:    -
+//              entry_p files:      -
+//              entry_p fonts:      -
+//              entry_p choices:    -
+//              entry_p pattern:    -
+//
+// Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
 static pnode_p h_filetree(int id, 
                           const char *src, 
@@ -3824,6 +3857,7 @@ static int h_protect_set(entry_p contxt,
     }
     else
     {
+        // Bad input.
         error(PANIC); 
         return 0; 
     }
