@@ -103,7 +103,7 @@ entry_p m_database(entry_p contxt)
             ret = strcmp(ret, str(CARG(2))) ? "0" : "1";
         }
 
-        RSTR(strdup(ret));  
+        RSTR(STRDUP(ret));  
     }
     else
     {
@@ -255,7 +255,7 @@ entry_p m_getassign(entry_p contxt)
                         {
                             // Unlock doslist and allocate enough 
                             // memory to hold any path. 
-                            char *r = ALLOC(PATH_MAX, 1); 
+                            char *r = CALLOC(PATH_MAX, 1); 
 	                        UnLockDosList(msk);
 
                             if(r)
@@ -379,7 +379,7 @@ entry_p m_getdevice(entry_p contxt)
                     if(dl)
                     {
                         const char *n = B_TO_CSTR(dl->dol_Name);
-                        RSTR(strdup(n)); 
+                        RSTR(STRDUP(n)); 
                     }
                 }
             }
@@ -490,7 +490,7 @@ entry_p m_getenv(entry_p contxt)
         if(e)
         {
             // Return what we found. 
-            RSTR(strdup(e)); 
+            RSTR(STRDUP(e)); 
         }
     }
     else
@@ -856,7 +856,7 @@ entry_p m_iconinfo(entry_p contxt)
                                 #endif
 
                                 // Always create a valid value (string). 
-                                val = new_string(strdup(svl ? svl : "")); 
+                                val = new_string(STRDUP(svl ? svl : "")); 
 
                                 if(val)
                                 {
@@ -889,7 +889,7 @@ entry_p m_iconinfo(entry_p contxt)
                                     // context. 
                                     if(val)
                                     {
-                                        entry_p sym = new_symbol(strdup(n)); 
+                                        entry_p sym = new_symbol(STRDUP(n)); 
 
                                         if(sym)
                                         {

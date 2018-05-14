@@ -48,7 +48,7 @@ entry_p m_expandpath(entry_p contxt)
         if(lock)
         {
             // Allocate enough to hold any valid path.
-            char *buf = ALLOC(PATH_MAX, 1);
+            char *buf = CALLOC(PATH_MAX, 1);
 
             if(buf)
             {
@@ -358,7 +358,7 @@ static pnode_p h_filetree(int id,
                     }
                 }
 
-                pnode_p node = ALLOC(1, sizeof(struct pnode_t)), 
+                pnode_p node = CALLOC(1, sizeof(struct pnode_t)), 
                         head = node; 
 
                 if(node)
@@ -509,7 +509,7 @@ static pnode_p h_filetree(int id,
                             }
                             else
                             {
-                                node->next = ALLOC(1, sizeof(struct pnode_t)); 
+                                node->next = CALLOC(1, sizeof(struct pnode_t)); 
 
                                 if(node->next)
                                 {
@@ -547,8 +547,8 @@ static pnode_p h_filetree(int id,
         else
         if(type == 1)
         {
-            pnode_p file = ALLOC(1, sizeof(struct pnode_t)),
-                    head = ALLOC(1, sizeof(struct pnode_t)); 
+            pnode_p file = CALLOC(1, sizeof(struct pnode_t)),
+                    head = CALLOC(1, sizeof(struct pnode_t)); 
 
             if(head && file)
             {
@@ -1974,7 +1974,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
         // Pattern matching is only done on Amiga like OS:es
         #ifdef AMIGA
         struct AnchorPath *ap = 
-            ALLOC(1, sizeof(struct AnchorPath) + PATH_MAX); 
+            CALLOC(1, sizeof(struct AnchorPath) + PATH_MAX); 
 
         if(ap)
         {
@@ -2280,7 +2280,7 @@ entry_p m_foreach(entry_p contxt)
                 {
                     // Allocate memory for the start node. 
                     pnode_p cur; 
-                    top = ALLOC(1, sizeof(struct pnode_t)); 
+                    top = CALLOC(1, sizeof(struct pnode_t)); 
 
                     #ifdef AMIGA
                     // This file info block will be used for all files
@@ -2367,7 +2367,7 @@ entry_p m_foreach(entry_p contxt)
                         // would get entries without names. 
                         if(ent && cur->name)
                         {
-                            cur->next = ALLOC(1, sizeof(struct pnode_t));
+                            cur->next = CALLOC(1, sizeof(struct pnode_t));
                             cur = cur->next;
                         }
                     }
@@ -2929,8 +2929,8 @@ entry_p m_startup(entry_p contxt)
             const size_t len = strlen(";BEGIN ") + strlen(app), 
                          ins = strlen(cmd) + 2;
 
-            char *pre = ALLOC(len + 1, 1), 
-                 *pst = ALLOC(len + 1, 1), 
+            char *pre = CALLOC(len + 1, 1), 
+                 *pst = CALLOC(len + 1, 1), 
                  *buf = NULL;
 
             if(pre && pst)
@@ -2970,7 +2970,7 @@ entry_p m_startup(entry_p contxt)
                         // we can keep the old file + any
                         // changes that we need to do in 
                         // memory at the same time. 
-                        buf = ALLOC(nsz, 1);
+                        buf = CALLOC(nsz, 1);
 
                         if(buf)
                         {
@@ -3060,7 +3060,7 @@ entry_p m_startup(entry_p contxt)
                 // becomes a problem, the system crashes, the 
                 // power is lost and so on and so forth. 
                 size_t tln = strlen(fln) + sizeof(".XXXXXX\0");
-                char *tmp = ALLOC(tln, 1); 
+                char *tmp = CALLOC(tln, 1); 
 
                 if(tmp)
                 {
@@ -3477,7 +3477,7 @@ entry_p m_tooltype(entry_p contxt)
                             if(o)
                             {
                                 // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = ALLOC(n, sizeof(char *)); 
+                                obj->do_ToolTypes = CALLOC(n, sizeof(char *)); 
 
                                 if(obj->do_ToolTypes)
                                 {
@@ -3521,7 +3521,7 @@ entry_p m_tooltype(entry_p contxt)
                             else
                             {
                                 // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = ALLOC(n + 1, sizeof(char *)); 
+                                obj->do_ToolTypes = CALLOC(n + 1, sizeof(char *)); 
 
                                 if(obj->do_ToolTypes)
                                 {
@@ -3553,7 +3553,7 @@ entry_p m_tooltype(entry_p contxt)
                             if(o && n > 1)
                             {
                                 // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = ALLOC(n, sizeof(char *)); 
+                                obj->do_ToolTypes = CALLOC(n, sizeof(char *)); 
 
                                 if(obj->do_ToolTypes)
                                 {
@@ -3703,7 +3703,7 @@ entry_p m_transcript(entry_p contxt)
 
         // Allocate enough memory to hold the
         // concatenation of all children.
-        char *buf = ALLOC(len + 2, 1);
+        char *buf = CALLOC(len + 2, 1);
 
         if(buf)
         {

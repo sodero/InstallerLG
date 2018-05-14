@@ -83,7 +83,7 @@ entry_p m_exit(entry_p contxt)
             // Do we have anything to show? 
             if(mln)
             {
-                char *con = ALLOC(mln + 1, 1);
+                char *con = CALLOC(mln + 1, 1);
 
                 if(con)
                 {

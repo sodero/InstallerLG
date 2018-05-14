@@ -37,10 +37,12 @@ entry_p end(void);
 //----------------------------------------------------------------------------
 
 #ifdef OOM
-#define ALLOC(N,S) NULL
+#define CALLOC(N,S) NULL
+#define MALLOC(N) NULL
 #define STRDUP(S) NULL
 #else
-#define ALLOC(N,S) calloc((N),(S)) 
+#define CALLOC(N,S) calloc((N),(S)) 
+#define MALLOC(N) malloc((N))
 #define STRDUP(S) strdup((S))
 #endif
 

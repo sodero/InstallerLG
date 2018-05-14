@@ -44,7 +44,7 @@ entry_p m_set(entry_p contxt)
             // side, create a copy of its contents.
             if(!did_error())
             {
-                entry_p res = malloc(sizeof(entry_t)); 
+                entry_p res = MALLOC(sizeof(entry_t)); 
 
                 if(res)
                 {
@@ -53,7 +53,7 @@ entry_p m_set(entry_p contxt)
                     // any. Also, create a reference from
                     // the global context to the symbo.
                     memmove(res, rhs, sizeof(entry_t)); 
-                    res->name = res->name ? strdup(res->name) : NULL; 
+                    res->name = res->name ? STRDUP(res->name) : NULL; 
                     res->parent = *sym; 
                     kill((*sym)->resolved); 
                     (*sym)->resolved = res; 
@@ -120,7 +120,7 @@ entry_p m_symbolset(entry_p contxt)
             if(!did_error())
             {
                 // Create a copy of the evaluated rhs. 
-                entry_p res = malloc(sizeof(entry_t)); 
+                entry_p res = MALLOC(sizeof(entry_t)); 
 
                 if(res)
                 {
@@ -130,7 +130,7 @@ entry_p m_symbolset(entry_p contxt)
                     // Do a deep copy if necessary. 
                     if(res->name)
                     {
-                        res->name = strdup(res->name); 
+                        res->name = STRDUP(res->name); 
                     }
 
                     // Do we already have a symbol 
@@ -157,7 +157,7 @@ entry_p m_symbolset(entry_p contxt)
                     // Is this is a new symbol?
                     if(ret != res)
                     {
-                        entry_p nsm = new_symbol(strdup(lhs)); 
+                        entry_p nsm = new_symbol(STRDUP(lhs)); 
 
                         if(nsm)
                         {

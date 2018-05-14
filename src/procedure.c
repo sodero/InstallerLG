@@ -68,14 +68,14 @@ entry_p m_gosub(entry_p contxt)
                     while(*arg && *arg != end() &&
                           *ina && *ina != end())
                     {
-                        entry_p res = malloc(sizeof(entry_t)); 
+                        entry_p res = MALLOC(sizeof(entry_t)); 
 
                         // Do a deep copy and free the resources from
                         // the last invocation, if any.
                         if(res)
                         {
                             memmove(res, resolve(*ina), sizeof(entry_t)); 
-                            res->name = res->name ? strdup(res->name) : NULL; 
+                            res->name = res->name ? STRDUP(res->name) : NULL; 
                             res->parent = *arg; 
                             kill((*arg)->resolved); 
                             (*arg)->resolved = res; 
