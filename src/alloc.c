@@ -118,17 +118,14 @@ entry_p new_string(char *n)
             // Success.
             return entry;
         }
-        else
-        {
-            // All or nothing. Since we own 'n',
-            // we need to free it here, or else
-            // it will leak.
-            free(n); 
-        }
     }
 
-    // Out of memory /
-    // invalid input
+    // All or nothing. Since we own 'n',
+    // we need to free it here, or else
+    // it will leak when OOM.
+    free(n); 
+
+    // Out of memory / bad input.
     error(PANIC);
     return NULL; 
 }
@@ -176,17 +173,14 @@ entry_p new_symbol(char *n)
             // Success.
             return entry; 
         }
-        else
-        {
-            // All or nothing. Since we own 'n', 
-            // we need to free it here, or else
-            // it will leak.
-            free(n); 
-        }
     }
 
-    // Out of memory /
-    // invalid input
+    // All or nothing. Since we own 'n', 
+    // we need to free it here, or else
+    // it will leak when OOM.
+    free(n); 
+
+    // Out of memory / bad input.
     error(PANIC);
     return NULL; 
 }
@@ -220,6 +214,9 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
             entry->id = l;
             entry->name = n;
             entry->type = CUSTOM; 
+
+            // Enable OOM GC. Refer to kill().
+            entry->parent = end(); 
 
             // If we have symbols, move them to our
             // new CUSTOM, adopt them and clear the 
@@ -261,19 +258,17 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
             // Success. 
             return entry; 
         }
-        else
-        {
-            // All or nothing. Since we own 'n', 
-            // 'c' and 's', we need to free them
-            // here, or else they will leak.
-            free(n); 
-            kill(c); 
-            kill(s); 
-        }
     }
 
-    // Out of memory /
-    // invalid input.
+    // All or nothing. Since we own 'n', 
+    // 'c' and 's', we need to free them
+    // here, or else they will leak when
+    // OOM.
+    free(n); 
+    kill(c); 
+    kill(s); 
+            
+    // Out of memory / bad input.
     error(PANIC);
     return NULL; 
 }
@@ -308,17 +303,14 @@ entry_p new_symref(char *n, int l)
             // Success. 
             return entry; 
         }
-        else
-        {
-            // All or nothing. Since we own 'n', 
-            // we need to free it here, or else
-            // it will leak.
-            free(n); 
-        }
     }
 
-    // Out of memory /
-    // invalid input
+    // All or nothing. Since we own 'n', 
+    // we need to free it here, or else
+    // it will leak when OOM.
+    free(n);
+
+    // Out of memory / bad input.
     error(PANIC);
     return NULL; 
 }
@@ -398,6 +390,9 @@ entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
             entry->type = NATIVE;
             entry->name = n; 
 
+            // Enable OOM GC. Refer to kill().
+            entry->parent = end(); 
+
             // Adopt children and symbols if any.
             if(e && e->type == CONTXT)
             {
@@ -437,8 +432,13 @@ entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
         }
     }
 
-    // Out of memory / 
-    // invalid input. 
+    // All or nothing. Since we own 'n' and,
+    // 'e' we need to free them, or else we
+    // will leak when OOM.
+    free(n);
+    kill(e); 
+
+    // Out of memory / bad input.
     error(PANIC);
     return NULL;
 }
@@ -673,13 +673,15 @@ entry_p push(entry_p dst, entry_p src)
                 src->parent = dst; 
                 return dst; 
             }
-
-            // Out of memory.
         }
     }
 
-    // Invalid input or  
-    // out of memory. 
+    // All or nothing. Since we own 'src',
+    // we need to free it, or else we will
+    // leak when OOM.
+    kill(src); 
+
+    // Out of memory / bad input.
     error(PANIC);
     return dst; 
 }

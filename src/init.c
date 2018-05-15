@@ -73,8 +73,11 @@ entry_p init(entry_p contxt)
             );
 
             // Add to the root and reparent. 
-            append(&contxt->children, e); 
-            e->parent = contxt; 
+            if(e)
+            {
+                append(&contxt->children, e); 
+                e->parent = contxt; 
+            }
 
             // Rotate right to make it end up on top. 
             ror(contxt->children);
@@ -117,8 +120,11 @@ entry_p init(entry_p contxt)
         );
 
         // Add to the root and reparent. 
-        append(&contxt->children, e); 
-        e->parent = contxt; 
+        if(e)
+        {
+            append(&contxt->children, e); 
+            e->parent = contxt; 
+        }
 
         // Rotate right to make it end up on top. 
         ror(contxt->children);
@@ -163,8 +169,11 @@ entry_p init(entry_p contxt)
         );
 
         // Add to the root and reparent. 
-        append(&contxt->children, e); 
-        e->parent = contxt; 
+        if(e)
+        {
+            append(&contxt->children, e); 
+            e->parent = contxt; 
+        }
 
         // Rotate right to make it end up on top. 
         // We need these to be set before any user
@@ -256,8 +265,11 @@ entry_p init(entry_p contxt)
         );
 
         // Add to the root and reparent. 
-        append(&contxt->children, e); 
-        e->parent = contxt; 
+        if(e)
+        {
+            append(&contxt->children, e); 
+            e->parent = contxt; 
+        }
 
         // Rotate right to make it end up on top. 
         // We need these to be set before any user
@@ -297,8 +309,11 @@ entry_p init(entry_p contxt)
             );
 
             // Add to the root and reparent. 
-            append(&contxt->children, e); 
-            e->parent = contxt; 
+            if(e)
+            {
+                append(&contxt->children, e); 
+                e->parent = contxt; 
+            }
 
             // No rotation. 
         }

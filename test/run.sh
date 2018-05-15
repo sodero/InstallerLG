@@ -82,6 +82,7 @@ do
            if [ $s -eq 2 ]; then
                echo "LEAK -> $p" 
                nok=$(( $nok + 1 ))
+               exit 1
            elif [ $s -eq 1 ]; then
                echo "OK -> $p" 
                nok=$(( $nok + 1 ))
