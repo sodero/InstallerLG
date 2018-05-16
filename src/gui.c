@@ -752,7 +752,10 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
             if(max < len)
             {
                 // Modify a copy ot the string. 
-                cut = strdup(txt); 
+                cut = strdup(txt);  
+
+                // FIXME: txt always != NULL?
+
                 if(cut)
                 {
                     cut[max] = '\0';

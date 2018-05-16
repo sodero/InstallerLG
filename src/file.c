@@ -374,8 +374,8 @@ static pnode_p h_filetree(int id,
 
                     // We already know the type of the
                     // first element; it's a directory.
-                    node->name = strdup(src); 
-                    node->copy = strdup(dst); 
+                    node->name = STRDUP(src); 
+                    node->copy = STRDUP(dst); 
                     node->type = 2; 
 
                     // Iterate over all entries in the source
@@ -569,8 +569,8 @@ static pnode_p h_filetree(int id,
 
             if(head && file)
             {
-                n_src = strdup(src); 
-                n_dst = strdup(dst); 
+                n_src = STRDUP(src); 
+                n_dst = STRDUP(dst); 
 
                 if(n_src && n_dst)  
                 {
@@ -585,7 +585,7 @@ static pnode_p h_filetree(int id,
 
                     // Create destination file path.
                     n_dst = h_tackon(id, dst, h_fileonly(id, src)); 
-                    n_src = strdup(src);
+                    n_src = STRDUP(src);
 
                     if(n_src && n_dst)  
                     {
@@ -1006,7 +1006,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
         }
 
         // Create working copy.
-        dir = strdup(dst); 
+        dir = STRDUP(dst); 
 
         if(dir)
         {
@@ -2277,7 +2277,7 @@ entry_p m_fileonly(entry_p contxt)
         const char *p = str(CARG(1)), 
                    *f = h_fileonly(contxt->id, p);
 
-        RSTR(strdup(f)); 
+        RSTR(STRDUP(f));
     }
     else
     {
@@ -2372,7 +2372,7 @@ entry_p m_foreach(entry_p contxt)
                                     // lock and examine cur->name will
                                     // be NULL.
                                     cur->type = fib->fib_DirEntryType;
-                                    cur->name = strdup(fn); 
+                                    cur->name = STRDUP(fn); 
 
                                     // We're probably good. PANIC:s will 
                                     // be caught further down. 
@@ -2383,7 +2383,7 @@ entry_p m_foreach(entry_p contxt)
                             }
                             #else
                             cur->type = h_exists(fn);
-                            cur->name = strdup(fn); 
+                            cur->name = STRDUP(fn); 
                             #endif
 
                             // An empty name indicates a PANIC only if

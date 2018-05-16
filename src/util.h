@@ -46,6 +46,4 @@ size_t buf_size(void);
 #define B_TO_CSTR(S) (*((char *) BADDR(S)) ? (((char *) BADDR(S)) + 1) : ((char *) BADDR(S))) //(*S ? (((char *) S) + 1) : BADDR(S))
 #endif
 
-// FIXME Fixa alla RSTR(strdup(X... strdup gillar inte NULL
-
 #endif
