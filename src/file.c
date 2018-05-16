@@ -200,7 +200,9 @@ static int h_exists(const char *n)
         return r; 
         #else
         // This implementation doesn't work on MorphOS.
-        // I have no clue why, it works on AROS.  
+        // I have no clue why, it works on AROS. Let's
+        // use the implementation above on all Amiga
+        // like systems for now.
         struct stat fs; 
         if(!stat(n, &fs))
         {
@@ -285,15 +287,18 @@ static const char *h_fileonly(int id,
 //                         entry_p choices, 
 //                         entry_p pattern)
 //
-// Description: FIXME
+// Description: Generate a complete file / directory tree with source and
+//              destination tuples. Used by m_copyfiles.
 //
 // Input:       int id:             The ID of the execution context.
-//              const char *src:    -
-//              const char *dst:    -
-//              entry_p files:      -
-//              entry_p fonts:      -
-//              entry_p choices:    -
-//              entry_p pattern:    -
+//              const char *src:    Source directory / file.
+//              const char *dst:    Destination directory.
+//              entry_p files:      * Files only.
+//              entry_p fonts:      * Skip fonts.
+//              entry_p choices:    * List of files.
+//              entry_p pattern:    * File / dir pattern.
+//
+//              * Refer to the Istaller.guide.
 //
 // Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
@@ -312,6 +317,7 @@ static pnode_p h_filetree(int id,
     {
         int type = h_exists(src); 
 
+        // Is source a directory?
         if(type == 2)
         {
             DIR *dir = opendir(src);  
@@ -358,6 +364,7 @@ static pnode_p h_filetree(int id,
                     }
                 }
 
+                // Create head node.
                 pnode_p node = CALLOC(1, sizeof(struct pnode_t)), 
                         head = node; 
 
@@ -365,12 +372,17 @@ static pnode_p h_filetree(int id,
                 {
                     struct dirent *entry = readdir(dir); 
 
+                    // We already know the type of the
+                    // first element; it's a directory.
                     node->name = strdup(src); 
                     node->copy = strdup(dst); 
                     node->type = 2; 
 
+                    // Iterate over all entries in the source
+                    // directory.
                     while(entry)
                     {
+                        // Create the source destination tuple
                         n_src = h_tackon(id, src, entry->d_name), 
                         n_dst = h_tackon(id, dst, entry->d_name); 
 
@@ -527,15 +539,19 @@ static pnode_p h_filetree(int id,
                         }
                         else
                         {
+                            // Out of memory.
                             break; 
                         }
 
+                        // Get next entry.
                         entry = readdir(dir); 
                     }
                 }
 
+                // No more entries.
                 closedir(dir); 
 
+                // The list is complete.
                 return head; 
             }
             else
@@ -545,6 +561,7 @@ static pnode_p h_filetree(int id,
             }
         }
         else
+        // Is source a file? 
         if(type == 1)
         {
             pnode_p file = CALLOC(1, sizeof(struct pnode_t)),
@@ -557,41 +574,56 @@ static pnode_p h_filetree(int id,
 
                 if(n_src && n_dst)  
                 {
+                    // The destination of the head element
+                    // will be a directory even though the
+                    // source is a file. We need somewhere
+                    // to put the file.
                     head->type = 2; 
                     head->next = file; 
                     head->name = n_src; 
                     head->copy = n_dst; 
 
+                    // Create destination file path.
                     n_dst = h_tackon(id, dst, h_fileonly(id, src)); 
                     n_src = strdup(src);
 
                     if(n_src && n_dst)  
                     {
+                        // The second element in the list
+                        // will be the file.
                         file->type = 1; 
                         file->name = n_src; 
                         file->copy = n_dst; 
 
+                        // The list is complete.
                         return head; 
                     }
                     else
                     {
+                        // Out of memory.
                         free(head->name); 
                         free(head->copy); 
                     }
                 }
 
+                // Out of memory.
                 free(head); 
                 free(file); 
             }
         }
         else
+        // It's neither a directory or a file.
         {
             error(id, ERR_NO_SUCH_FILE_OR_DIR, src); 
             return NULL; 
         }
     }
 
+    // Out of memory.
     error(PANIC); 
+
+    // These might leak when OOM
+    // if we don't free them.
     free(n_src); 
     free(n_dst); 
 
@@ -887,10 +919,12 @@ static int h_copyfile(entry_p contxt,
                         {
                             if(mode & CF_NOFAIL)
                             {
+                                // Forget all errors.
                                 error(RESET);
                             }
                             else
                             {
+                                // Fail for real.
                                 return 0;
                             }
                         }
@@ -913,6 +947,7 @@ static int h_copyfile(entry_p contxt,
                     }
                     else
                     {
+                        // Fail for real.
                         error(contxt->id, ERR_WRITE_FILE, dst); 
                     }
                 }
@@ -927,6 +962,7 @@ static int h_copyfile(entry_p contxt,
                 }
                 else
                 {
+                    // Fail for real.
                     error(contxt->id, ERR_READ_FILE, src); 
                 }
             }
@@ -1205,7 +1241,7 @@ entry_p m_copyfiles(entry_p contxt)
                     }
                 }
 
-                // Find out if we need confirmation...
+                // Do we need confirmation?
                 if(confirm)
                 {
                     // The default threshold is expert.
@@ -1452,7 +1488,7 @@ entry_p m_copylib(entry_p contxt)
                     RCUR;
                 }
 
-                // Find out if we need confirmation...
+                // Do we need confirmation?
                 if(confirm)
                 {
                     // The default threshold is expert.
@@ -2069,6 +2105,7 @@ entry_p m_delete(entry_p contxt)
         // Assume failure.
         DNUM = 0; 
 
+        // Can we parse the input string? 
         if(wc >= 0)
         {
             entry_p help     = get_opt(CARG(2), OPT_HELP),
@@ -2076,7 +2113,7 @@ entry_p m_delete(entry_p contxt)
                     confirm  = get_opt(CARG(2), OPT_CONFIRM), 
                     safe     = get_opt(CARG(2), OPT_SAFE);
 
-            // Find out if we need confirmation...
+            // Do we need confirmation?
             if(confirm)
             {
                 // The default threshold is expert.
@@ -2126,11 +2163,17 @@ entry_p m_delete(entry_p contxt)
             // running in pretend mode? 
             if(safe || !get_numvar(contxt, "@pretend"))
             {
+                // Did the input string contain any 
+                // wildcards?
                 if(wc)        
                 {
+                    // Delete everything matching the
+                    // wildcard pattern.
                     DNUM = h_delete_pattern(contxt, w); 
                 }
                 else
+                // No wildcards, delete directory, file
+                // or something that doesn't exist.
                 {
                     switch(h_exists(w))
                     {
@@ -2584,7 +2627,7 @@ entry_p m_makedir(entry_p contxt)
 
         DNUM = 0; 
 
-        // Find out if we need confirmation...
+        // Do we need confirmation?
         if(confirm)
         {
             // The default threshold is expert.
@@ -3201,7 +3244,7 @@ entry_p m_textfile(entry_p contxt)
 
         if(dest)
         {
-            // Find out if we need confirmation...
+            // Do we need confirmation?
             if(confirm)
             {
                 // The default threshold is expert.
@@ -3379,7 +3422,7 @@ entry_p m_tooltype(entry_p contxt)
             // Something is 'dest'.info 
             const char *file = str(dest);
 
-            // Find out if we need confirmation...
+            // Do we need confirmation?
             if(confirm)
             {
                 // The default threshold is expert.
@@ -3695,6 +3738,8 @@ entry_p m_transcript(entry_p contxt)
         for(entry_p *e = contxt->children; 
             *e && *e != end(); e++)
         {
+            // Make it possible to mix override
+            // options and strings.
             if((*e)->type != OPTION)
             {
                 len += strlen(str(*e)); 
@@ -3711,6 +3756,8 @@ entry_p m_transcript(entry_p contxt)
             for(entry_p *e = contxt->children; 
                 *e && *e != end(); e++)
             {
+                // Make it possible to mix override
+                // options and strings.
                 if((*e)->type != OPTION)
                 {
                     strcat(buf, str(*e)); 
