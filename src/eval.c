@@ -254,6 +254,7 @@ char *str(entry_p entry)
                 {
                     entry->name = malloc(NUMLEN); 
                 }
+
                 if(entry->name)
                 {
                     snprintf(entry->name, NUMLEN, "%d", entry->id); 

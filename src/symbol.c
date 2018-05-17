@@ -48,12 +48,27 @@ entry_p m_set(entry_p contxt)
 
                 if(res)
                 {
-                    // Do a deep copy, reparent the value
-                    // and free the old resolved value if
-                    // any. Also, create a reference from
-                    // the global context to the symbo.
+                    // Do a deep copy of the value.
                     memmove(res, rhs, sizeof(entry_t)); 
-                    res->name = res->name ? strdup(res->name) : NULL; 
+
+                    // Copy name string if such exists.
+                    if(res->name)
+                    {
+                        res->name = strdup(res->name); 
+
+                        if(!res->name)
+                        {
+                            // Out of memory. 
+                            error(PANIC);
+                            free(res); 
+                            break; 
+                        }
+                    }
+
+                    // Reparent the value and free the old 
+                    // resolved value if any. Also, create 
+                    // a reference from the global context
+                    // to the symbol.
                     res->parent = *sym; 
                     kill((*sym)->resolved); 
                     (*sym)->resolved = res; 
@@ -63,6 +78,7 @@ entry_p m_set(entry_p contxt)
                 else
                 {
                     // Out of memory. 
+                    error(PANIC);
                     break; 
                 }
 
@@ -131,6 +147,14 @@ entry_p m_symbolset(entry_p contxt)
                     if(res->name)
                     {
                         res->name = strdup(res->name); 
+
+                        if(!res->name)
+                        {
+                            // Out of memory. 
+                            error(PANIC);
+                            free(res); 
+                            break; 
+                        }
                     }
 
                     // Do we already have a symbol 

@@ -379,7 +379,17 @@ entry_p m_getdevice(entry_p contxt)
                     if(dl)
                     {
                         const char *n = B_TO_CSTR(dl->dol_Name);
-                        RSTR(strdup(n)); 
+
+                        // strdup(NULL) is undefined.
+                        if(n)
+                        {
+                            RSTR(strdup(n)); 
+                        }
+                        else
+                        {
+                            // Unknown error.
+                            error(PANIC);
+                        }
                     }
                 }
             }

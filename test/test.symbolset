@@ -1,4 +1,5 @@
 (symbolset "a" 1) (+ a 1) ; "","2",""
+(symbolset "a" "1") (+ a 1) ; "","2",""
 (symbolset "a" b) (+ a 1) ; "","Line 1: Undefined variable 'b' 0",""
 (symbolset "a" 1) (set b 2) (+ a b) ; "","3",""
 (symbolset "a" 1) (symbolset "a" 2) (+ a 1) ; "","3",""

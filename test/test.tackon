@@ -11,6 +11,7 @@
 (tackon "dh0:dir/" "/file") ; "","dh0:dir/file",""
 (tackon ":" "file") ; "",":file",""
 (tackon "" "file") ; "","file",""
+(tackon "file" "") ; "","file",""
 (tackon "/" "file") ; "","/file",""
 (tackon "//" "file") ; "","//file",""
 (tackon "://" "file") ; "","://file",""

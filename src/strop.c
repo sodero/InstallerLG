@@ -87,8 +87,9 @@ entry_p m_cat(entry_p contxt)
                             buf = tmp; 
                         }
                         else
-                        // If we're out of memory, bail out.
                         {
+                            // Out of memory.
+                            error(PANIC);
                             free(tmp); 
                             free(buf); 
                             REST;
@@ -476,6 +477,12 @@ entry_p m_substr(entry_p contxt)
                     memcpy(r, s + i, l); 
                     RSTR(r); 
                 }
+                else
+                {
+                    // Out of memory.
+                    error(PANIC);
+                    REST;
+                }
             }
         }
         else
@@ -495,6 +502,12 @@ entry_p m_substr(entry_p contxt)
                         // capped, just copy. 
                         memcpy(r, s + i, l - i); 
                         RSTR(r); 
+                    }
+                    else
+                    {
+                        // Out of memory.
+                        error(PANIC);
+                        REST;
                     }
                 }
 

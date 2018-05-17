@@ -3,3 +3,8 @@
 - snurran fran guide:n maste testas
 - kolla sa att MUI-biten inte lacker minne
 - FIXME:s
+
+OOM check:
+alloc.c
+file.c
+init.c
