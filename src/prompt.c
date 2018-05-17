@@ -275,7 +275,7 @@ entry_p m_askdir(entry_p contxt)
             }
 
             // We have a file.
-            RSTR(STRDUP(ret)); 
+            RSTR(strdup(ret)); 
         }
         else
         {
@@ -496,7 +496,7 @@ entry_p m_askfile(entry_p contxt)
             }
 
             // We have a file.
-            RSTR(STRDUP(ret)); 
+            RSTR(strdup(ret)); 
         }
         else
         {
@@ -782,7 +782,7 @@ entry_p m_askstring(entry_p contxt)
                 res = str(deflt); 
             }
             
-            RSTR(STRDUP(res)); 
+            RSTR(strdup(res)); 
         }
         else
         {

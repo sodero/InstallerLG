@@ -48,7 +48,7 @@ entry_p m_expandpath(entry_p contxt)
         if(lock)
         {
             // Allocate enough to hold any valid path.
-            char *buf = CALLOC(PATH_MAX, 1);
+            char *buf = calloc(PATH_MAX, 1);
 
             if(buf)
             {
@@ -365,7 +365,7 @@ static pnode_p h_filetree(int id,
                 }
 
                 // Create head node.
-                pnode_p node = CALLOC(1, sizeof(struct pnode_t)), 
+                pnode_p node = calloc(1, sizeof(struct pnode_t)), 
                         head = node; 
 
                 if(node)
@@ -374,8 +374,8 @@ static pnode_p h_filetree(int id,
 
                     // We already know the type of the
                     // first element; it's a directory.
-                    node->name = STRDUP(src); 
-                    node->copy = STRDUP(dst); 
+                    node->name = strdup(src); 
+                    node->copy = strdup(dst); 
                     node->type = 2; 
 
                     // Iterate over all entries in the source
@@ -521,7 +521,7 @@ static pnode_p h_filetree(int id,
                             }
                             else
                             {
-                                node->next = CALLOC(1, sizeof(struct pnode_t)); 
+                                node->next = calloc(1, sizeof(struct pnode_t)); 
 
                                 if(node->next)
                                 {
@@ -564,13 +564,13 @@ static pnode_p h_filetree(int id,
         // Is source a file? 
         if(type == 1)
         {
-            pnode_p file = CALLOC(1, sizeof(struct pnode_t)),
-                    head = CALLOC(1, sizeof(struct pnode_t)); 
+            pnode_p file = calloc(1, sizeof(struct pnode_t)),
+                    head = calloc(1, sizeof(struct pnode_t)); 
 
             if(head && file)
             {
-                n_src = STRDUP(src); 
-                n_dst = STRDUP(dst); 
+                n_src = strdup(src); 
+                n_dst = strdup(dst); 
 
                 if(n_src && n_dst)  
                 {
@@ -585,7 +585,7 @@ static pnode_p h_filetree(int id,
 
                     // Create destination file path.
                     n_dst = h_tackon(id, dst, h_fileonly(id, src)); 
-                    n_src = STRDUP(src);
+                    n_src = strdup(src);
 
                     if(n_src && n_dst)  
                     {
@@ -1006,7 +1006,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
         }
 
         // Create working copy.
-        dir = STRDUP(dst); 
+        dir = strdup(dst); 
 
         if(dir)
         {
@@ -2010,7 +2010,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
         // Pattern matching is only done on Amiga like OS:es
         #ifdef AMIGA
         struct AnchorPath *ap = 
-            CALLOC(1, sizeof(struct AnchorPath) + PATH_MAX); 
+            calloc(1, sizeof(struct AnchorPath) + PATH_MAX); 
 
         if(ap)
         {
@@ -2277,7 +2277,7 @@ entry_p m_fileonly(entry_p contxt)
         const char *p = str(CARG(1)), 
                    *f = h_fileonly(contxt->id, p);
 
-        RSTR(STRDUP(f));
+        RSTR(strdup(f));
     }
     else
     {
@@ -2323,7 +2323,7 @@ entry_p m_foreach(entry_p contxt)
                 {
                     // Allocate memory for the start node. 
                     pnode_p cur; 
-                    top = CALLOC(1, sizeof(struct pnode_t)); 
+                    top = calloc(1, sizeof(struct pnode_t)); 
 
                     #ifdef AMIGA
                     // This file info block will be used for all files
@@ -2372,7 +2372,7 @@ entry_p m_foreach(entry_p contxt)
                                     // lock and examine cur->name will
                                     // be NULL.
                                     cur->type = fib->fib_DirEntryType;
-                                    cur->name = STRDUP(fn); 
+                                    cur->name = strdup(fn); 
 
                                     // We're probably good. PANIC:s will 
                                     // be caught further down. 
@@ -2383,7 +2383,7 @@ entry_p m_foreach(entry_p contxt)
                             }
                             #else
                             cur->type = h_exists(fn);
-                            cur->name = STRDUP(fn); 
+                            cur->name = strdup(fn); 
                             #endif
 
                             // An empty name indicates a PANIC only if
@@ -2410,7 +2410,7 @@ entry_p m_foreach(entry_p contxt)
                         // would get entries without names. 
                         if(ent && cur->name)
                         {
-                            cur->next = CALLOC(1, sizeof(struct pnode_t));
+                            cur->next = calloc(1, sizeof(struct pnode_t));
                             cur = cur->next;
                         }
                     }
@@ -2972,8 +2972,8 @@ entry_p m_startup(entry_p contxt)
             const size_t len = strlen(";BEGIN ") + strlen(app), 
                          ins = strlen(cmd) + 2;
 
-            char *pre = CALLOC(len + 1, 1), 
-                 *pst = CALLOC(len + 1, 1), 
+            char *pre = calloc(len + 1, 1), 
+                 *pst = calloc(len + 1, 1), 
                  *buf = NULL;
 
             if(pre && pst)
@@ -3013,7 +3013,7 @@ entry_p m_startup(entry_p contxt)
                         // we can keep the old file + any
                         // changes that we need to do in 
                         // memory at the same time. 
-                        buf = CALLOC(nsz, 1);
+                        buf = calloc(nsz, 1);
 
                         if(buf)
                         {
@@ -3103,7 +3103,7 @@ entry_p m_startup(entry_p contxt)
                 // becomes a problem, the system crashes, the 
                 // power is lost and so on and so forth. 
                 size_t tln = strlen(fln) + sizeof(".XXXXXX\0");
-                char *tmp = CALLOC(tln, 1); 
+                char *tmp = calloc(tln, 1); 
 
                 if(tmp)
                 {
@@ -3520,7 +3520,7 @@ entry_p m_tooltype(entry_p contxt)
                             if(o)
                             {
                                 // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = CALLOC(n, sizeof(char *)); 
+                                obj->do_ToolTypes = calloc(n, sizeof(char *)); 
 
                                 if(obj->do_ToolTypes)
                                 {
@@ -3564,7 +3564,7 @@ entry_p m_tooltype(entry_p contxt)
                             else
                             {
                                 // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = CALLOC(n + 1, sizeof(char *)); 
+                                obj->do_ToolTypes = calloc(n + 1, sizeof(char *)); 
 
                                 if(obj->do_ToolTypes)
                                 {
@@ -3596,7 +3596,7 @@ entry_p m_tooltype(entry_p contxt)
                             if(o && n > 1)
                             {
                                 // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = CALLOC(n, sizeof(char *)); 
+                                obj->do_ToolTypes = calloc(n, sizeof(char *)); 
 
                                 if(obj->do_ToolTypes)
                                 {
@@ -3748,7 +3748,7 @@ entry_p m_transcript(entry_p contxt)
 
         // Allocate enough memory to hold the
         // concatenation of all children.
-        char *buf = CALLOC(len + 2, 1);
+        char *buf = calloc(len + 2, 1);
 
         if(buf)
         {

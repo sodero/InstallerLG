@@ -63,11 +63,11 @@ entry_p init(entry_p contxt)
             // purposes only. 
             e = new_native
             (
-                STRDUP("welcome"), __LINE__, m_welcome, 
+                strdup("welcome"), __LINE__, m_welcome, 
                 push
                 (
                     new_contxt(), 
-                    new_string(STRDUP("Welcome"))
+                    new_string(strdup("Welcome"))
                 ),
                 NUMBER
             );
@@ -87,19 +87,19 @@ entry_p init(entry_p contxt)
         // without doing anything.
         e = new_native
         (
-            STRDUP("onerror"), __LINE__, m_procedure, 
+            strdup("onerror"), __LINE__, m_procedure, 
             push
             (
                 new_contxt(), 
                 new_custom
                 (
-                    STRDUP("@onerror"), __LINE__, NULL, 
+                    strdup("@onerror"), __LINE__, NULL, 
                     push
                     (
                         new_contxt(),
                         new_native
                         (
-                            STRDUP("select"), __LINE__, m_select,
+                            strdup("select"), __LINE__, m_select,
                             push(push
                             (
                                 new_contxt(),
@@ -135,34 +135,34 @@ entry_p init(entry_p contxt)
         e = new_native
         (
             // All the numerical values.
-            STRDUP("set"), __LINE__, m_set, 
+            strdup("set"), __LINE__, m_set, 
             push(push(push(push(push(push(
             push(push(push(push(push(push(
             push(push(push(push
             (
                 new_contxt(), 
-                new_symbol(STRDUP("@user-level"))),
+                new_symbol(strdup("@user-level"))),
                 new_number(2)
             ),
-                new_symbol(STRDUP("@pretend"))),
+                new_symbol(strdup("@pretend"))),
                 new_number(0)
             ),
-                new_symbol(STRDUP("@ioerr"))),
+                new_symbol(strdup("@ioerr"))),
                 new_number(0)
             ),
-                new_symbol(STRDUP("@log"))),
+                new_symbol(strdup("@log"))),
                 new_number(0)
             ),
-                new_symbol(STRDUP("@yes"))),
+                new_symbol(strdup("@yes"))),
                 new_number(0)
             ),
-                new_symbol(STRDUP("@skip"))),
+                new_symbol(strdup("@skip"))),
                 new_number(0)
             ),
-                new_symbol(STRDUP("@abort"))),
+                new_symbol(strdup("@abort"))),
                 new_number(0)
             ),
-                new_symbol(STRDUP("@each-type"))),
+                new_symbol(strdup("@each-type"))),
                 new_number(0)
             ),
             NUMBER
@@ -183,7 +183,7 @@ entry_p init(entry_p contxt)
         e = new_native
         (
             // All the string values.
-            STRDUP("set"), __LINE__, m_set,
+            strdup("set"), __LINE__, m_set,
             push(push(push(push(push(push(push(push(
             push(push(push(push(push(push(push(push(
             push(push(push(push(push(push(push(push(
@@ -192,74 +192,74 @@ entry_p init(entry_p contxt)
             push(push(push(push(push(push
             (
                 new_contxt(), 
-                new_symbol(STRDUP("@abort-button"))),
-                new_string(STRDUP("Abort"))
+                new_symbol(strdup("@abort-button"))),
+                new_string(strdup("Abort"))
             ),
-                new_symbol(STRDUP("@app-name"))),
-                new_string(STRDUP(arg_get(ARG_APPNAME)))
+                new_symbol(strdup("@app-name"))),
+                new_string(strdup(arg_get(ARG_APPNAME)))
             ),
-                new_symbol(STRDUP("@askoptions-help"))),
-                new_string(STRDUP("Help (askoptions)"))
+                new_symbol(strdup("@askoptions-help"))),
+                new_string(strdup("Help (askoptions)"))
             ),
-                new_symbol(STRDUP("@askchoice-help"))),
-                new_string(STRDUP("Help (askchoice)"))
+                new_symbol(strdup("@askchoice-help"))),
+                new_string(strdup("Help (askchoice)"))
             ),
-                new_symbol(STRDUP("@asknumber-help"))),
-                new_string(STRDUP("Help (asknumber)"))
+                new_symbol(strdup("@asknumber-help"))),
+                new_string(strdup("Help (asknumber)"))
             ),
-                new_symbol(STRDUP("@askstring-help"))),
-                new_string(STRDUP("Help (askstring)"))
+                new_symbol(strdup("@askstring-help"))),
+                new_string(strdup("Help (askstring)"))
             ),
-                new_symbol(STRDUP("@askdisk-help"))),
-                new_string(STRDUP("Help (askdisk)"))
+                new_symbol(strdup("@askdisk-help"))),
+                new_string(strdup("Help (askdisk)"))
             ),
-                new_symbol(STRDUP("@askfile-help"))),
-                new_string(STRDUP("Help (askfile)"))
+                new_symbol(strdup("@askfile-help"))),
+                new_string(strdup("Help (askfile)"))
             ),
-                new_symbol(STRDUP("@askdir-help"))),
-                new_string(STRDUP("Help (askdir)"))
+                new_symbol(strdup("@askdir-help"))),
+                new_string(strdup("Help (askdir)"))
             ),
-                new_symbol(STRDUP("@copylib-help"))),
-                new_string(STRDUP("Help (copylib)"))
+                new_symbol(strdup("@copylib-help"))),
+                new_string(strdup("Help (copylib)"))
             ),
-                new_symbol(STRDUP("@copyfiles-help"))),
-                new_string(STRDUP("Help (copyfiles)"))
+                new_symbol(strdup("@copyfiles-help"))),
+                new_string(strdup("Help (copyfiles)"))
             ),
-                new_symbol(STRDUP("@makedir-help"))),
-                new_string(STRDUP("Help (makedir)"))
+                new_symbol(strdup("@makedir-help"))),
+                new_string(strdup("Help (makedir)"))
             ),
-                new_symbol(STRDUP("@startup-help"))),
-                new_string(STRDUP("Help (startup)"))
+                new_symbol(strdup("@startup-help"))),
+                new_string(strdup("Help (startup)"))
             ),
-                new_symbol(STRDUP("@default-dest"))),
-                new_string(STRDUP("Work:"))
+                new_symbol(strdup("@default-dest"))),
+                new_string(strdup("Work:"))
             ),
-                new_symbol(STRDUP("@error-msg"))),
-                new_string(STRDUP("Help (error-msg)"))
+                new_symbol(strdup("@error-msg"))),
+                new_string(strdup("Help (error-msg)"))
             ),
-                new_symbol(STRDUP("@execute-dir"))),
-                new_string(STRDUP("Help (execute-dir)"))
+                new_symbol(strdup("@execute-dir"))),
+                new_string(strdup("Help (execute-dir)"))
             ),
-                new_symbol(STRDUP("@icon"))),
-                new_string(STRDUP("Help (icon)"))
+                new_symbol(strdup("@icon"))),
+                new_string(strdup("Help (icon)"))
             ),
-                new_symbol(STRDUP("@installer-version"))),
-                new_string(STRDUP("Help (installer-version)"))
+                new_symbol(strdup("@installer-version"))),
+                new_string(strdup("Help (installer-version)"))
             ),
-                new_symbol(STRDUP("@language"))),
-                new_string(STRDUP("english"))
+                new_symbol(strdup("@language"))),
+                new_string(strdup("english"))
             ),
-                new_symbol(STRDUP("@special-msg"))),
-                new_string(STRDUP("Help (special-msg)"))
+                new_symbol(strdup("@special-msg"))),
+                new_string(strdup("Help (special-msg)"))
             ),
-                new_symbol(STRDUP("@log-file"))),
-                new_string(STRDUP("install_log_file"))
+                new_symbol(strdup("@log-file"))),
+                new_string(strdup("install_log_file"))
             ),
-                new_symbol(STRDUP("@each-name"))),
-                new_string(STRDUP(""))
+                new_symbol(strdup("@each-name"))),
+                new_string(strdup(""))
             ),
-                new_symbol(STRDUP("@user-startup"))),
-                new_string(STRDUP("s:user-startup"))
+                new_symbol(strdup("@user-startup"))),
+                new_string(strdup("s:user-startup"))
             ),
             STRING
         );
@@ -304,7 +304,7 @@ entry_p init(entry_p contxt)
             // purposes only. 
             e = new_native
             (
-                STRDUP("exit"), __LINE__, 
+                strdup("exit"), __LINE__, 
                 m_exit, NULL, NUMBER
             );
 

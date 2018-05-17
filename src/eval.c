@@ -252,7 +252,7 @@ char *str(entry_p entry)
             case NUMBER:
                 if(!entry->name)
                 {
-                    entry->name = MALLOC(NUMLEN); 
+                    entry->name = malloc(NUMLEN); 
                 }
                 if(entry->name)
                 {

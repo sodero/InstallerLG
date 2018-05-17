@@ -33,7 +33,7 @@ entry_p m_cat(entry_p contxt)
     {
         // Start with a string length of 64.
         size_t n = 64; 
-        char *buf = CALLOC(n + 1, 1);  
+        char *buf = calloc(n + 1, 1);  
 
         if(buf)
         {
@@ -76,7 +76,7 @@ entry_p m_cat(entry_p contxt)
                             n = n << 1;  
                         }
 
-                        tmp = CALLOC(n + 1, 1);
+                        tmp = calloc(n + 1, 1);
 
                         // Copy the contents to the new buffer
                         // and free the old one.
@@ -124,7 +124,7 @@ entry_p m_fmt(entry_p contxt)
     // The format string is in the name of this contxt. It will hold
     // a maximum of length / 2 of specifiers. 
     char *ret = NULL, *fmt = contxt->name; 
-    char **sct = CALLOC((strlen(fmt) >> 1) + 1, sizeof(char *));
+    char **sct = calloc((strlen(fmt) >> 1) + 1, sizeof(char *));
 
     if(contxt && fmt && sct)
     {
@@ -149,7 +149,7 @@ entry_p m_fmt(entry_p contxt)
                        fmt[i++] == 'l' &&
                        fmt[i] && fmt[i] == 'd'))
                     {
-                        sct[k] = CALLOC(i - j + 2, 1); 
+                        sct[k] = calloc(i - j + 2, 1); 
 
                         if(sct[k])
                         {
@@ -189,7 +189,7 @@ entry_p m_fmt(entry_p contxt)
                        cur->type == STRING)
                     {
                         size_t nln = oln + strlen(cur->name);  
-                        char *new = CALLOC(nln + 1, 1); 
+                        char *new = calloc(nln + 1, 1); 
 
                         // Replace the current format string with
                         // the corresponding formated string.
@@ -212,7 +212,7 @@ entry_p m_fmt(entry_p contxt)
                             cur->type == NUMBER)
                     {
                         size_t nln = oln + NUMLEN;  
-                        char *new = CALLOC(nln + 1, 1); 
+                        char *new = calloc(nln + 1, 1); 
 
                         // Replace the current format string with
                         // the corresponding formated string.
@@ -264,7 +264,7 @@ entry_p m_fmt(entry_p contxt)
         {
             // Allocate memory to hold all of them.
             l += strlen(fmt + j); 
-            ret = CALLOC(l + 1, 1); 
+            ret = calloc(l + 1, 1); 
 
             if(ret)
             {
@@ -341,7 +341,7 @@ entry_p m_pathonly(entry_p contxt)
                s[i] == ':' )
             {
                 // Get termination for free.
-                char *r = CALLOC(i + 2, 1); 
+                char *r = calloc(i + 2, 1); 
 
                 if(r)
                 {
@@ -465,7 +465,7 @@ entry_p m_substr(entry_p contxt)
             // CBM installer. 
             if(i < l && j > 0 && i >= 0)
             {
-                char *r = CALLOC((size_t) l + 1, 1); 
+                char *r = calloc((size_t) l + 1, 1); 
 
                 if(r)
                 {
@@ -487,7 +487,7 @@ entry_p m_substr(entry_p contxt)
                 // Min cap
                 if(i > 0)
                 {
-                    char *r = CALLOC((size_t) l + 1, 1); 
+                    char *r = calloc((size_t) l + 1, 1); 
 
                     if(r)
                     {
@@ -565,7 +565,7 @@ char *h_tackon(int id,
             // equals the filename.
             if(!lp) 
             {
-                r = STRDUP(f); 
+                r = strdup(f); 
 
                 if(!r)
                 {
@@ -580,7 +580,7 @@ char *h_tackon(int id,
             // equals the path.
             if(!lf) 
             {
-                r = STRDUP(p); 
+                r = strdup(p); 
 
                 if(!r)
                 {
@@ -602,7 +602,7 @@ char *h_tackon(int id,
 
             // Allocate memory to hold path, filename,
             // delimiter and termination.
-            r = CALLOC(lp + lf + 2, 1); 
+            r = calloc(lp + lf + 2, 1); 
 
             if(r)
             {
