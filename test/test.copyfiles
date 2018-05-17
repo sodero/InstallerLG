@@ -1,3 +1,4 @@
+(set @yes 1) (copyfiles (confirm) (prompt "p") (help "h") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","1","test -f _cfd_/_cfs_ && rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (choices "1" "2" "3")) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && mkdir _cfs_/1 _cfs_/2 _cfs_/3 && touch _cfs_/1/1 _cfs_/2/2 _cfs_/3/3","1","test -d _cfd_/1 && rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (choices "1" "2" "3" "4")) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && mkdir _cfs_/1 _cfs_/2 _cfs_/3 && touch _cfs_/1/1 _cfs_/2/2 _cfs_/3/3 _cfs_/4","1","test -d _cfd_/1 && test -f _cfd_/4 &&  rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (files) (pattern "#?")) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && mkdir _cfs_/1 && echo 123 > _cfs_/f1","1","test ! -d _cfd_/1 && cmp _cfs_/f1 _cfd_/f1 && rm -Rf _cfs_ _cfd_"
@@ -38,7 +39,6 @@
 (set @yes 1) (copyfiles (source "_cfs_") (dest "_cfd_") (all) (optional "nofail") (delopts "nofail")) (+ 2) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ _cfd_ && echo abc > _cfs_/1 && echo def > _cfs_/2 && echo def > _cfd_/1 && chmod a-w _cfd_/1","Line 1: Could not write to file '_cfd_/1' 0","test -d _cfd_ && chmod a+w _cfd_/1 && rm -Rf _cfs_ _cfd_"
 (set @pretend 1) (copyfiles (all) (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfd_ _cfs_  && mkdir _cfs_ && touch _cfs_/1 _cfs_/1.font","1","test ! -f _cfd_/1 && test ! -f _cfd_/1.font && rm -Rf _cfs_ _cfd_"
 (set @pretend 1) (copyfiles (safe) (all) (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfd_ _cfs_  && mkdir _cfs_ && touch _cfs_/1 _cfs_/1.font","1","test -f _cfd_/1 && test -f _cfd_/1.font && rm -Rf _cfs_ _cfd_"
-(set @yes 1) (copyfiles (confirm) (prompt "p") (help "h") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","1","test -f _cfd_/_cfs_ && rm -Rf _cfs_ _cfd_"
 (copyfiles (confirm) (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","Line 1: Missing option 'prompt' 0","test ! -f _cfd_ && rm -Rf _cfs_ _cfd_"
 (copyfiles (confirm) (prompt "p") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","Line 1: Missing option 'help' 0","test ! -f _cfd_ && rm -Rf _cfs_ _cfd_"
 (copyfiles (confirm) (prompt "p") (help "h") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","0","test ! -f _cfd_/cfs_ && test ! -d _cfd_ && rm -Rf _cfs_ _cfd_"

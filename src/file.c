@@ -57,6 +57,11 @@ entry_p m_expandpath(entry_p contxt)
                 UnLock(lock); 
                 RSTR(buf);
             }
+            else
+            {
+                // Out of memory.
+                error(PANIC); 
+            }
 
             UnLock(lock); 
         }
@@ -532,7 +537,10 @@ static pnode_p h_filetree(int id,
                                 }
                                 else
                                 {
+                                    // Out of memory.
                                     error(PANIC); 
+                                    free(n_src); 
+                                    free(n_dst); 
                                     break; 
                                 }
                             }
@@ -605,11 +613,11 @@ static pnode_p h_filetree(int id,
                         free(head->copy); 
                     }
                 }
-
-                // Out of memory.
-                free(head); 
-                free(file); 
             }
+
+            // Out of memory.
+            free(head); 
+            free(file); 
         }
         else
         // It's neither a directory or a file.
@@ -2065,7 +2073,6 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
                 // here, so will MatchFirst / MatchNext()
                 // problems.
                 error(contxt->id, ERR_DELETE_FILE, pat); 
-                return 0;
             }
         }
         #else
@@ -2073,12 +2080,10 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
         return 1;
         #endif
     }
-    else
-    { 
-        // Bad input.
-        error(PANIC); 
-        return 0;
-    }
+
+    // Bad input.
+    error(PANIC); 
+    return 0;
 }
 
 //----------------------------------------------------------------------------
@@ -3559,6 +3564,11 @@ entry_p m_tooltype(entry_p contxt)
                                         nts++;
                                     }
                                 }
+                                else
+                                {
+                                    // Out of memory.
+                                    error(PANIC); 
+                                }
                             }
                             // It doesn't exist, append new tooltype.
                             else
@@ -3586,6 +3596,11 @@ entry_p m_tooltype(entry_p contxt)
 
                                     // Append tooltype.
                                     *(nts + n - 1) = get_buf(); 
+                                }
+                                else
+                                {
+                                    // Out of memory.
+                                    error(PANIC); 
                                 }
                             }
                         }
@@ -3616,6 +3631,11 @@ entry_p m_tooltype(entry_p contxt)
 
                                         ots++;
                                     }
+                                }
+                                else
+                                {
+                                    // Out of memory.
+                                    error(PANIC); 
                                 }
                             }
                         }
