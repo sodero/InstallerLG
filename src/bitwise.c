@@ -176,6 +176,7 @@ entry_p m_in(entry_p contxt)
         // of the second argument, create the
         // corresponding bitmask. 
         entry_p *cur = CARG(2)->children; 
+
         while(*cur && *cur != end())
         {
             DNUM += 1 << num(*cur);

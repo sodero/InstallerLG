@@ -34,17 +34,16 @@ entry_p m_add (entry_p contxt)
             DNUM += num(*cur);
             cur++; 
         }
-
-        // Return the resolved value of this
-        // function / context.
-        RCUR; 
     }
     else
     {
         // The parser is broken.
         error(PANIC);
-        RCUR; 
     }
+
+    // Success or broken 
+    // parser.
+    RCUR; 
 }
 
 //----------------------------------------------------------------------------
@@ -60,6 +59,7 @@ entry_p m_div(entry_p contxt)
     {
         // Let's not divide by zero.
         DNUM = num(CARG(2)); 
+
         if(DNUM)
         {
             RNUM
@@ -70,17 +70,20 @@ entry_p m_div(entry_p contxt)
         }
         else
         {
-            // Fail and return undefined value. 
-            error(contxt->id, ERR_DIV_BY_ZERO, contxt->name); 
-            RCUR; 
+            // Division by zero.
+            error(contxt->id, ERR_DIV_BY_ZERO, 
+                  contxt->name); 
         }
     }
     else
     {
         // The parser is broken
         error(PANIC);
-        RCUR; 
     }
+
+    // Division by zero or 
+    // broken parser.
+    RCUR; 
 }
 
 //----------------------------------------------------------------------------
@@ -99,22 +102,22 @@ entry_p m_mul(entry_p contxt)
         // Multiply all children. The first
         // is multiplied by 1.
         entry_p *cur = contxt->children; 
+
         while(*cur && *cur != end())
         {
             DNUM *= num(*cur);
             cur++; 
         }
-
-        // Return whatever we have in DNUM
-        // at this point. 
-        RCUR; 
     }
     else
     {
         // The parser is broken
         error(PANIC);
-        RCUR; 
     }
+
+    // Success or broken 
+    // parser.
+    RCUR; 
 }
 
 //----------------------------------------------------------------------------

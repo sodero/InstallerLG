@@ -91,8 +91,8 @@ entry_p m_askbool(entry_p contxt)
         error(PANIC); 
     }
 
-    // We could be in any
-    // state here.
+    // Success, failure or
+    // broken parser. 
     RCUR; 
 }
 
@@ -215,8 +215,8 @@ entry_p m_askchoice(entry_p contxt)
         error(PANIC); 
     }
 
-    // We could be in any
-    // state here.
+    // Success, failure or
+    // broken parser. 
     RCUR; 
 }
 
@@ -287,15 +287,17 @@ entry_p m_askdir(entry_p contxt)
                 "default"
             ); 
         }
+
+        // Return empty string
+        // on failure.
+        REST;
     }
     else
     {
         // Broken parser.
         error(PANIC); 
+        RCUR;
     }
-
-    // Broken parser / code.
-    REST; 
 }
 
 //----------------------------------------------------------------------------
@@ -437,8 +439,8 @@ entry_p m_askdisk(entry_p contxt)
         error(PANIC); 
     }
 
-    // We could be in any
-    // state here.
+    // Success, failure or
+    // broken parser. 
     RCUR; 
 }
 
@@ -508,15 +510,17 @@ entry_p m_askfile(entry_p contxt)
                 "default"
             ); 
         }
+
+        // Return empty string
+        // on failure.
+        REST;
     }
     else
     {
         // Broken parser.
         error(PANIC); 
+        RCUR;
     }
-
-    // Broken parser / code.
-    REST; 
 }
 
 //----------------------------------------------------------------------------
@@ -538,6 +542,8 @@ entry_p m_asknumber(entry_p contxt)
                 help     = get_opt(contxt, OPT_HELP),
                 range    = get_opt(contxt, OPT_RANGE),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
+
+        DNUM = 0;
 
         if(prompt && help && deflt)
         {
@@ -595,10 +601,6 @@ entry_p m_asknumber(entry_p contxt)
                 // Use the default value. 
                 DNUM = num(deflt);
             }
-
-            // Return user or default
-            // value. 
-            RCUR; 
         }
         else
         {
@@ -617,7 +619,9 @@ entry_p m_asknumber(entry_p contxt)
         error(PANIC); 
     }
 
-    RNUM(0); 
+    // Success, failure or
+    // broken parser. 
+    RCUR; 
 }
 
 //----------------------------------------------------------------------------
@@ -731,8 +735,8 @@ entry_p m_askoptions(entry_p contxt)
         error(PANIC); 
     }
 
-    // We could be in any
-    // state here.
+    // Success, failure or
+    // broken parser. 
     RCUR; 
 }
 
@@ -794,13 +798,15 @@ entry_p m_askstring(entry_p contxt)
                 "default"
             );
         }
+
+        // Return empty string
+        // on failure.
+        REST;
     }
     else
     {
         // The parser is broken
         error(PANIC); 
+        RCUR;
     }
-
-    // Broken parser / code.
-    REST; 
 }

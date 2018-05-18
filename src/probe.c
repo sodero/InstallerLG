@@ -325,11 +325,16 @@ entry_p m_getassign(entry_p contxt)
             error(contxt->id, ERR_READ, asn); 
         }
         #endif
-    }
 
-    // Return empty string
-    // on failure. 
-    REST;
+        // Return empty string
+        // on failure. 
+        REST;
+    }
+    else
+    {
+        // Broken parser.
+        RCUR;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -402,15 +407,17 @@ entry_p m_getdevice(entry_p contxt)
         // Could not get information about <path>.
         error(contxt->id, ERR_READ, str(CARG(1))); 
         #endif
+
+        // Return empty string
+        // on failure. 
+        REST;
     }
     else
     {
         // The parser is broken.
         error(PANIC);
+        RCUR;
     }
-
-    // Return empty string.
-    REST;
 }
 
 //----------------------------------------------------------------------------
@@ -470,16 +477,16 @@ entry_p m_getdiskspace(entry_p contxt)
         // from the lock.
         error(contxt->id, ERR_READ, n); 
         #endif
+
+        // Failure.
+        RNUM(-1); 
     }
     else
     {
         // The parser is broken.
         error(PANIC);
+        RCUR;
     }
-
-    // Failure, catastrophic
-    // or just very very bad. 
-    RNUM(-1); 
 }
 
 //----------------------------------------------------------------------------
@@ -502,15 +509,17 @@ entry_p m_getenv(entry_p contxt)
             // Return what we found. 
             RSTR(strdup(e)); 
         }
+
+        // Nothing found, return empty
+        // string.
+        REST; 
     }
     else
     {
         // The parser is broken.
         error(PANIC);
+        RCUR;
     }
-
-    // Return empty string.
-    REST; 
 }
 
 //----------------------------------------------------------------------------
@@ -526,6 +535,7 @@ entry_p m_getsize(entry_p contxt)
     {
         // Open the file in read only mode.
         FILE *f = fopen(str(CARG(1)), "r"); 
+
         if(f)
         {
             // Seek to the end of the file.
@@ -541,7 +551,7 @@ entry_p m_getsize(entry_p contxt)
         {
             // We could not open the file. 
             error(contxt->id, ERR_READ_FILE, str(CARG(1))); 
-            RNUM(0); 
+            DNUM = 0;
         }
     }
     else
@@ -550,8 +560,8 @@ entry_p m_getsize(entry_p contxt)
         error(PANIC);
     }
     
-    // Return whatever we have
-    // at this point. 
+    // Success, failure or
+    // broken parser. 
     RCUR; 
 }
 
@@ -586,20 +596,22 @@ entry_p m_getsum(entry_p contxt)
             }
 
             fclose(f); 
-            RCUR; 
         }
         else
         {
             error(contxt->id, ERR_READ_FILE, fn); 
-            RNUM(0);
+            DNUM = 0;
         }
     }
     else
     {
         // The parser is broken
         error(PANIC);
-        RCUR; 
     }
+
+    // Success, failure or
+    // broken parser. 
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -685,12 +697,12 @@ int h_getversion(entry_p contxt, const char *file)
 //----------------------------------------------------------------------------
 entry_p m_getversion(entry_p contxt)
 {
-    // Unknown version.
-    DNUM = 0; 
-
     // All we need is a context. 
     if(contxt)
     {
+        // Unknown version.
+        DNUM = 0; 
+
         // Any arguments given? 
         if(contxt->children &&
            c_sane(contxt, 1))

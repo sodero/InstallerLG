@@ -312,8 +312,11 @@ entry_p m_fmt(entry_p contxt)
         // broken or we're out of memory
         error(PANIC);
         free(sct);
+        RCUR;
     }
 
+    // Return empty string
+    // on failure.
     free(ret);
     REST; 
 }
@@ -357,15 +360,17 @@ entry_p m_pathonly(entry_p contxt)
                 }
             }
         }
+
+        // Return empty string
+        // on failure.
+        REST;
     }
     else
     {
         // The parser is broken
         error(PANIC);
+        RCUR;
     }
-    
-    // Nothing.
-    REST; 
 }
 
 //----------------------------------------------------------------------------
@@ -546,14 +551,17 @@ entry_p m_tackon(entry_p contxt)
         {
             RSTR(r); 
         }
+
+        // Return empty string
+        // on failure.
+        REST;
     }
     else
     {
         // The parser is broken
         error(PANIC); 
+        RCUR;
     }
-
-    REST; 
 }
 
 //----------------------------------------------------------------------------

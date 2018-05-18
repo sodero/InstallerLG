@@ -45,6 +45,7 @@ entry_p m_expandpath(entry_p contxt)
         // On non Amiga systems, this is a dummy.
         #ifdef AMIGA
         BPTR lock = (BPTR) Lock(str(CARG(1)), ACCESS_READ);
+
         if(lock)
         {
             // Allocate enough to hold any valid path.
@@ -66,15 +67,17 @@ entry_p m_expandpath(entry_p contxt)
             UnLock(lock); 
         }
         #endif
+
+        // Return empty string
+        // on failure.
+        REST;
     }
     else
     {
         // Broken parser
         error(PANIC); 
+        RCUR;
     }
-
-    // Return empty string.
-    REST;
 }
 
 //----------------------------------------------------------------------------
@@ -211,14 +214,14 @@ static int h_exists(const char *n)
         struct stat fs; 
         if(!stat(n, &fs))
         {
-            // A file ...
+            // A file?
             if(S_ISREG(fs.st_mode))
             {
                 // Value according to the CBM 
                 // installer documentation.
                 return 1; 
             }
-            // ... or a directory ...
+            // A directory?
             if(S_ISDIR(fs.st_mode))
             {
                 // Ibid.
@@ -279,7 +282,8 @@ static const char *h_fileonly(int id,
         error(PANIC);
     }
 
-    // Always return a valid string pointer.
+    // Always return a valid
+    // string pointer.
     return ""; 
 }
 
@@ -2215,6 +2219,8 @@ entry_p m_delete(entry_p contxt)
         error(PANIC); 
     }
 
+    // Success or broken 
+    // parser.
     RCUR; 
 }
 
@@ -2228,9 +2234,6 @@ entry_p m_exists(entry_p contxt)
 {
     if(c_sane(contxt, 1))
     {
-        // Non-existance. 
-        int r = 0; 
-
         // Supress volume requester?
         if(get_opt(contxt, OPT_NOREQ))
         {
@@ -2246,7 +2249,8 @@ entry_p m_exists(entry_p contxt)
             #endif
 
             // Get type (file / dir / 0)
-            r = h_exists(str(CARG(1))); 
+            //r = h_exists(str(CARG(1))); 
+            DNUM = h_exists(str(CARG(1))); 
 
             #ifdef AMIGA
             // Restore auto request. 
@@ -2256,17 +2260,18 @@ entry_p m_exists(entry_p contxt)
         else
         {
             // Get type (file / dir / 0)
-            r = h_exists(str(CARG(1))); 
+            DNUM = h_exists(str(CARG(1))); 
         }
-
-        RNUM(r); 
     }
     else
     {
         // The parser is broken
         error(PANIC);
-        RCUR; 
     }
+
+    // Success or broken 
+    // parser.
+    RCUR; 
 }
 
 //----------------------------------------------------------------------------
@@ -2288,7 +2293,7 @@ entry_p m_fileonly(entry_p contxt)
     {
         // The parser is broken
         error(PANIC); 
-        REST; 
+        RCUR; 
     }
 }
 
@@ -2507,17 +2512,18 @@ entry_p m_foreach(entry_p contxt)
             free(old); 
         }
         
-        RNUM
-        (
-            err ? 0 : 1
-        ); 
+        // Set return value.
+        DNUM = err ? 0 : 1;
     }
     else
     {
         // The parser is broken
         error(PANIC); 
-        RNUM(0); 
     }
+
+    // Success or broken 
+    // parser.
+    RCUR; 
 }
 
 //----------------------------------------------------------------------------
@@ -2739,7 +2745,8 @@ entry_p m_makedir(entry_p contxt)
         error(PANIC); 
     }
     
-    // Success / failure. 
+    // Success, failure or
+    // broken parser. 
     RCUR;
 }
 
@@ -2769,8 +2776,8 @@ entry_p m_protect(entry_p contxt)
     // A single argument is all we need. 
     if(c_sane(contxt, 1))
     {
-        LONG r = 0; 
         const char *file = str(CARG(1)); 
+        DNUM = 0;
 
         if(CARG(2) && CARG(2) != end())
         {
@@ -2782,12 +2789,12 @@ entry_p m_protect(entry_p contxt)
                 if(override)
                 {
                     // From user (script). 
-                    r = num(override); 
+                    DNUM = num(override); 
                 }
                 else
                 {
                     // From file. 
-                    h_protect_get(contxt, file, &r);
+                    h_protect_get(contxt, file, &DNUM);
                 }
             }
             // Set value. 
@@ -2823,7 +2830,7 @@ entry_p m_protect(entry_p contxt)
                     if(!override)
                     {
                         // Get flags from file. 
-                        if(!h_protect_get(contxt, file, &r))
+                        if(!h_protect_get(contxt, file, &DNUM))
                         {
                             // Helper will set proper error
                             RNUM(-1); 
@@ -2832,11 +2839,11 @@ entry_p m_protect(entry_p contxt)
                     else
                     {
                         // Get flags from user (script). 
-                        r = num(override); 
+                        DNUM = num(override); 
                     }
                     
                     // Invert 1-4. 
-                    r ^= 0x0f;
+                    DNUM ^= 0x0f;
 
                     // For all flags. 
                     for(size_t i = 0; i < len; i++)
@@ -2862,19 +2869,19 @@ entry_p m_protect(entry_p contxt)
                         // Adding or subtracting?
                         switch(m)
                         {
-                            case 0: r = b; m = 1; break; 
-                            case 1: r |= b; break; 
-                            case 2: r &= ~b; break; 
+                            case 0: DNUM = b; m = 1; break; 
+                            case 1: DNUM |= b; break; 
+                            case 2: DNUM &= ~b; break; 
                         }
                     }
 
                     // Invert 1-4. 
-                    r ^= 0x0f;
+                    DNUM ^= 0x0f;
                 }
                 else
                 {
                     // Use an absolute mask. 
-                    r = num(CARG(2)); 
+                    DNUM = num(CARG(2)); 
                 }
 
                 if(!override)
@@ -2884,13 +2891,13 @@ entry_p m_protect(entry_p contxt)
                     if(safe || !get_numvar(contxt, "@pretend"))
                     {
                         // Helper will set error on failure.
-                        r = h_protect_set(contxt, file, r);
+                        DNUM = h_protect_set(contxt, file, DNUM);
                     }
                     else
                     {
                         // A non safe operation in pretend
                         // mode always succeeds. 
-                        r = 1; 
+                        DNUM = 1; 
                     }
                 }
             }
@@ -2898,18 +2905,18 @@ entry_p m_protect(entry_p contxt)
         else
         {
             // Get without options.
-            h_protect_get(contxt, file, &r);
+            h_protect_get(contxt, file, &DNUM);
         }
-            
-        // Success or failure. 
-        RNUM(r); 
     }
     else
     {
         // The parser is broken
         error(PANIC); 
-        RCUR; 
     }
+
+    // Success, failure or
+    // broken parser. 
+    RCUR; 
 }
 
 //----------------------------------------------------------------------------
@@ -3220,8 +3227,8 @@ entry_p m_startup(entry_p contxt)
         error(PANIC); 
     }
 
-    // Return whatever we
-    // have at this point. 
+    // Success, failure or
+    // broken parser. 
     RCUR; 
 }
 
@@ -3391,7 +3398,8 @@ entry_p m_textfile(entry_p contxt)
         error(PANIC); 
     }
             
-    // Success / failure. 
+    // Success, failure or
+    // broken parser. 
     RCUR; 
 }
 
@@ -3735,8 +3743,8 @@ entry_p m_tooltype(entry_p contxt)
         error(PANIC); 
     }
 
-    // We don't know if we're successsful, 
-    // at this point, return what we have. 
+    // Success, failure or
+    // broken parser. 
     RCUR; 
 }
 
@@ -3788,14 +3796,21 @@ entry_p m_transcript(entry_p contxt)
             // to the log file.
             DNUM = h_log(contxt, "%s\n", buf) ? 1 : 0; 
             free(buf); 
-            RCUR; 
+        }
+        else
+        {
+            // Out of memory.
+            error(PANIC);
         }
     }
+    else
+    {
+        // The parser is broken.
+        error(PANIC);
+    }
 
-    // The parser isn't necessarily broken 
-    // if we end up here. We could also be
-    // out of memory.
-    error(PANIC); 
+    // Success, failure or
+    // broken parser. 
     RCUR; 
 }
 
@@ -3983,4 +3998,3 @@ int h_log(entry_p contxt, const char *fmt, ...)
     // We failed.
     return 0; 
 }
-
