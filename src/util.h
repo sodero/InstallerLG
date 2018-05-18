@@ -33,7 +33,7 @@ size_t buf_size(void);
 //----------------------------------------------------------------------------
 #define DCUR    contxt->resolved
 #define DNUM    contxt->resolved->id
-#define RCUR    do { return contxt->resolved; } while(0)
+#define RCUR    do { return contxt ? contxt->resolved : NULL; } while(0)
 #define RNUM(X) do { contxt->resolved->id = X; return contxt->resolved; } while(0)
 #define RSTR(X) do { char *rstr = X; if(rstr) { free(contxt->resolved->name); contxt->resolved->name = rstr;} else { error(PANIC); contxt->resolved->name[0] = '\0'; }; return contxt->resolved; } while(0)
 #define REST    do { if(contxt->resolved->name) contxt->resolved->name[0] = '\0'; return contxt->resolved; } while(0)

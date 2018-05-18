@@ -380,19 +380,6 @@ entry_p new_native(char *n, int l, call_t call, entry_p e, type_t r)
 
         if(entry)
         {
-            // ID and name are for debugging purposes
-            // only. 
-            entry->id = l;
-            entry->call = call;
-            entry->type = NATIVE;
-            entry->name = n; 
-
-            // Adopt children and symbols if any.
-            if(e && e->type == CONTXT)
-            {
-                move_contxt(entry, e); 
-            }
-
             // Allocate default return value if we
             // have a sane return value data type. 
             if(r == NUMBER)
@@ -407,16 +394,25 @@ entry_p new_native(char *n, int l, call_t call, entry_p e, type_t r)
             {
                 entry->resolved = new_dangle(); 
             }
-            else
-            {
-                // No resolved value. 
-                return entry;
-            }
 
-            // The function is the parent of the
-            // return value. 
+            // Do we have a valid default return type?
             if(entry->resolved)
             {
+                // ID and name are for debugging purposes
+                // only. 
+                entry->id = l;
+                entry->call = call;
+                entry->type = NATIVE;
+                entry->name = n; 
+
+                // Adopt children and symbols if any.
+                if(e && e->type == CONTXT)
+                {
+                    move_contxt(entry, e); 
+                }
+
+                // The function is the parent of the
+                // return value. 
                 entry->resolved->parent = entry; 
                 return entry;
             }
@@ -480,6 +476,12 @@ entry_p new_option(char *n, opt_t t, entry_p e)
             return entry;
         }
     }
+ 
+    // All or nothing. Since we own 'n' and,
+    // 'e' we need to free them, or else we
+    // will leak when OOM.
+    free(n);
+    kill(e);
 
     // Out of memory / 
     // invalid input. 
@@ -527,6 +529,12 @@ entry_p new_cusref(char *n, int l, entry_p e)
             return entry;
         }
     }
+
+    // All or nothing. Since we own 'n' and,
+    // 'e' we need to free them, or else we
+    // will leak when OOM.
+    free(n);
+    kill(e);
 
     // Out of memory / 
     // invalid input. 
