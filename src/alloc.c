@@ -595,9 +595,15 @@ entry_p append(entry_p **dst, entry_p e)
             }
             else
             {
-                // Out of memory. 
+                // Out of memory. This is a very rude
+                // way of not leaking memory when OOM.
+                // Simply overwrite previous elements 
+                // after killing them of.
+                kill((*dst)[0]);
+                (*dst)[0] = e; 
+
                 error(PANIC);
-                return NULL; 
+                return e; 
             }
         }
 
