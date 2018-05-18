@@ -6,4 +6,3 @@
 
 OOM check:
 alloc.c
-init.c

@@ -215,9 +215,6 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
             entry->name = n;
             entry->type = CUSTOM; 
 
-            // Enable OOM GC. Refer to kill().
-            entry->parent = end(); 
-
             // If we have symbols, move them to our
             // new CUSTOM, adopt them and clear the 
             // 'resolved' status. 
@@ -372,7 +369,7 @@ static void move_contxt(entry_p dst, entry_p src)
 //              type_t r:       Default return value data type.  
 // Return:      entry_p:        A NATIVE on success, NULL otherwise.
 //----------------------------------------------------------------------------
-entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
+entry_p new_native(char *n, int l, call_t call, entry_p e, type_t r)
 {
     // Even though not strictly necessary, we require
     // a name and a line number. 
@@ -389,9 +386,6 @@ entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
             entry->call = call;
             entry->type = NATIVE;
             entry->name = n; 
-
-            // Enable OOM GC. Refer to kill().
-            entry->parent = end(); 
 
             // Adopt children and symbols if any.
             if(e && e->type == CONTXT)
@@ -428,6 +422,7 @@ entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
             }
 
             // Out of memory. 
+            error(PANIC); 
             free(entry); 
         }
     }
@@ -438,7 +433,7 @@ entry_p new_native (char *n, int l, call_t call, entry_p e, type_t r)
     free(n);
     kill(e); 
 
-    // Out of memory / bad input.
+    // Bad input.
     error(PANIC);
     return NULL;
 }
@@ -712,25 +707,18 @@ void kill(entry_p entry)
             // Iter. 
             entry_p *e = entry->symbols; 
 
-            // Symbols aren't stored in the
-            // root, they are only referenced
-            // from there. If we're further
-            // down (we have a parent), go on.
-            if(entry->parent)
+            while(*e && *e != end())
             {
-                while(*e && *e != end())
+                // Free only the ones we own.
+                // References can be anywhere. 
+                if((*e)->parent == entry)
                 {
-                    // Free only the ones we own.
-                    // References can be anywhere. 
-                    if((*e)->parent == entry)
-                    {
-                        // Recur to free symbol. 
-                        kill(*e);
-                    }
-
-                    // Next symbol. 
-                    e++; 
+                    // Recur to free symbol. 
+                    kill(*e);
                 }
+
+                // Next symbol. 
+                e++; 
             }
 
             // Free the array itself. 
