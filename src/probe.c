@@ -38,7 +38,6 @@ entry_p m_database(entry_p contxt)
     if(c_sane(contxt, 1))
     {   
         int memf = -1; 
-        static char buf[NUMLEN]; 
         const char *feat = str(CARG(1)),
             *cpu =  
         #ifdef __i386__
@@ -93,8 +92,8 @@ entry_p m_database(entry_p contxt)
 
         if(memf != -1)
         {   
-            ret = buf; 
-            snprintf(buf, sizeof(buf), "%d", memf); 
+            ret = get_buf(); 
+            snprintf(get_buf(), buf_size(), "%d", memf); 
         }
 
         // Are we testing for a specific value?
@@ -644,11 +643,9 @@ int h_getversion(entry_p contxt, const char *file)
         // the terminating 0, ergo found a match.
         if(!vk[i])
         {
-            static char buf[BUFSIZ]; 
-
             // Fill up buffer with enough data to 
             // hold any realistic version string.
-            fread(buf, 1, sizeof(buf), fp); 
+            fread(get_buf(), 1, buf_size(), fp); 
 
             // Do we have data in the buffer? 
             if(!ferror(fp))
@@ -659,7 +656,7 @@ int h_getversion(entry_p contxt, const char *file)
                 const char *p = "%*[^0123456789]%d.%d%*[^\0]";
 
                 // Try to find version string.
-                if(sscanf(buf, p, &v, &r) == 2)
+                if(sscanf(get_buf(), p, &v, &r) == 2)
                 {
                     // We found something.
                     ver = (v << 16) | r;
@@ -837,7 +834,6 @@ entry_p m_iconinfo(entry_p contxt)
                             // character long.
                             if(strlen(n))
                             {
-                                static char tmp[NUMLEN]; 
                                 char *svl = NULL;
                                 entry_p val;
 
@@ -855,8 +851,8 @@ entry_p m_iconinfo(entry_p contxt)
                                         obj->do_CurrentY
                                     );
 
-                                    snprintf(tmp, sizeof(tmp), "%d", v); 
-                                    svl = tmp; 
+                                    snprintf(get_buf(), buf_size(), "%d", v); 
+                                    svl = get_buf(); 
                                 }
                                 else
                                 if(t == OPT_GETDEFAULTTOOL &&
@@ -873,8 +869,8 @@ entry_p m_iconinfo(entry_p contxt)
                                 }
                                 #else
                                 // Testing purposes only.
-                                snprintf(tmp, sizeof(tmp), "%d:%zu", t, j); 
-                                svl = tmp; 
+                                snprintf(get_buf(), buf_size(), "%d:%zu", t, j); 
+                                svl = get_buf(); 
                                 #endif
 
                                 // Always create a valid value (string). 

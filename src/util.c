@@ -586,7 +586,7 @@ void pretty_print(entry_p entry)
 //----------------------------------------------------------------------------
 char *get_buf(void)
 {
-    static char buf[BUFSIZ];
+    static char buf[BUFSIZ + 1];
     return buf; 
 }
 
@@ -598,6 +598,6 @@ char *get_buf(void)
 //----------------------------------------------------------------------------
 size_t buf_size(void)
 {
-    return BUFSIZ - 1; 
+    return BUFSIZ; 
 }
 

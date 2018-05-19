@@ -122,13 +122,12 @@ entry_p m_exit(entry_p contxt)
             // if we know the name and location of the application.
             if(strlen(app) && strlen(dst))
             {
-                static char buf[BUFSIZ]; 
-                snprintf(buf, sizeof(buf), 
+                snprintf(get_buf(), buf_size(), 
                          tr(S_CBFI), tr(S_ICPL), 
                          app, dst);
 
                 // Display the full message.
-                gui_message(buf, 0);  
+                gui_message(get_buf(), 0);  
             }
             else
             {

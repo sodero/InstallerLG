@@ -2,8 +2,9 @@
 - alla statiska buffrar spridda over nejden maste bort
 - snurran fran guide:n maste testas
 - kolla sa att MUI-biten inte lacker minne
-- testa snabbt om protect pa aros.
-- FIXME:s
 
-VI KAN ALDRIG GÖRA NÅGOT ANNAT ÄN RCUR om !c_sane()!
+- testa snabbt om protect pa aros.
+- testa snabbt om iconinfo pa aros.
+
+- FIXME:s
 
