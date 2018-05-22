@@ -8,6 +8,7 @@
 #include "eval.h"
 #include "util.h"
 
+#include <limits.h> 
 #include <stdio.h>
 #include <string.h>
 
@@ -578,6 +579,8 @@ void pretty_print(entry_p entry)
     pp_aux(entry, 0); 
 }
 
+#define LG_BUFSIZ ((BUFSIZ > PATH_MAX ? BUFSIZ : PATH_MAX) + 1)
+
 //----------------------------------------------------------------------------
 // Name:        get_buf(void)
 // Description: Get pointer to temporary buffer.
@@ -586,7 +589,7 @@ void pretty_print(entry_p entry)
 //----------------------------------------------------------------------------
 char *get_buf(void)
 {
-    static char buf[BUFSIZ + 1];
+    static char buf[LG_BUFSIZ];
     return buf; 
 }
 
@@ -598,6 +601,6 @@ char *get_buf(void)
 //----------------------------------------------------------------------------
 size_t buf_size(void)
 {
-    return BUFSIZ; 
+    return LG_BUFSIZ - 1; 
 }
 

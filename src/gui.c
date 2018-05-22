@@ -109,17 +109,26 @@ CLASS_DEF(InstallerGui)
 #define MUIM_InstallerGui_CheckBoxes       (TAGBASE_sTx + 118)
 #define MUIM_InstallerGui_AskFile          (TAGBASE_sTx + 119)
 
+//----------------------------------------------------------------------------
+// InstallerGui - Init parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_Init
 {
     ULONG MethodID;
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - Welcome parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_Welcome
 {
     ULONG MethodID;
     ULONG Message;
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - CopyFilesStart parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_CopyFilesStart
 {
     ULONG MethodID;
@@ -127,6 +136,9 @@ struct MUIP_InstallerGui_CopyFilesStart
     ULONG NumberOfFiles;
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - CopyFilesSetCur parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_CopyFilesSetCur
 {
     ULONG MethodID;
@@ -134,18 +146,27 @@ struct MUIP_InstallerGui_CopyFilesSetCur
     ULONG NoGauge;
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - Exit parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_Exit
 {
     ULONG MethodID;
     ULONG Message;
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - Complete parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_Complete
 {
     ULONG MethodID;
     ULONG Progress;
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - CopyFilesAdd parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_CopyFilesAdd
 {
     ULONG MethodID;
@@ -153,6 +174,9 @@ struct MUIP_InstallerGui_CopyFilesAdd
     ULONG ID;
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - Run parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_Run
 {
     ULONG MethodID;
@@ -160,6 +184,9 @@ struct MUIP_InstallerGui_Run
     ULONG Help;
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - Message parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_Message
 {
     ULONG MethodID;
@@ -167,12 +194,18 @@ struct MUIP_InstallerGui_Message
     ULONG Immediate;
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - Confirm parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_Confirm
 {
     ULONG MethodID;
     ULONG Message;
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - Radio parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_Radio
 {
     ULONG MethodID;
@@ -182,6 +215,9 @@ struct MUIP_InstallerGui_Radio
     ULONG Default; 
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - Bool parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_Bool
 {
     ULONG MethodID;
@@ -191,6 +227,9 @@ struct MUIP_InstallerGui_Bool
     ULONG No;
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - String parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_String
 {
     ULONG MethodID;
@@ -200,6 +239,9 @@ struct MUIP_InstallerGui_String
     ULONG Halt; 
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - Number parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_Number
 {
     ULONG MethodID;
@@ -211,6 +253,9 @@ struct MUIP_InstallerGui_Number
     ULONG Halt; 
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - CheckBoxes parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_CheckBoxes
 {
     ULONG MethodID;
@@ -220,6 +265,9 @@ struct MUIP_InstallerGui_CheckBoxes
     ULONG Default; 
 };
 
+//----------------------------------------------------------------------------
+// InstallerGui - AskFile parameters
+//----------------------------------------------------------------------------
 struct MUIP_InstallerGui_AskFile
 {
     ULONG MethodID;
@@ -346,6 +394,7 @@ MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
                     }
                 }
 
+                // Return notifier value.
                 return ret; 
             }
         }
@@ -417,11 +466,12 @@ MUIDSP IPTR InstallerGuiInit(Class *cls,
             }
         }
 
-        // Done.
+        // All done.
         return TRUE; 
     }
     else
     {
+        // Unknown error.
         GERR(tr(S_UNER)); 
         return FALSE; 
     }
@@ -463,11 +513,14 @@ static ULONG InstallerGuiPageSet(Object *obj,
         );
     }
 
+    // Sanity check.
     if(txt && con && but)
     {
+        // Select top and buttons.
         set(con, MUIA_Group_ActivePage, top);
         set(but, MUIA_Group_ActivePage, btm);
 
+        // Show the message if we have one.
         if(msg)
         {
             set(txt, MUIA_ShowMe, FALSE);
@@ -477,9 +530,12 @@ static ULONG InstallerGuiPageSet(Object *obj,
 
         return TRUE; 
     }
-
-    GERR(tr(S_UNER)); 
-    return FALSE; 
+    else
+    {
+        // Unknown error.
+        GERR(tr(S_UNER)); 
+        return FALSE; 
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -499,83 +555,92 @@ MUIDSP IPTR InstallerGuiWelcome(Class *cls,
                                 Object *obj,
                                 struct MUIP_InstallerGui_Welcome *msg)
 {
+    // Show welcome page.
     if(InstallerGuiPageSet(obj, P_WELCOME, B_PROCEED_ABORT, 
                            msg->Message))
     {
-        ULONG b = InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2); 
-
-        if(b == MUIV_InstallerGui_Proceed)
+        // Wait for proceed or abort.
+        if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
+           MUIV_InstallerGui_Proceed)
         {
-            ULONG pat; 
+            static Object *usr, *prt, *lgf;
 
-            Object *user = (Object *) DoMethod
-            (
-                obj, MUIM_FindUData, 
-                MUIV_InstallerGui_UserLevel
-            );
-
-            if(user)
+            // Initial lookup. 
+            if(!usr)
             {
-                // Novice, Intermediate, Expert. 
-                get(user, MUIA_Radio_Active, &pat); 
+                usr = (Object *) DoMethod
+                (
+                    obj, MUIM_FindUData, 
+                    MUIV_InstallerGui_UserLevel
+                );
 
-                // MUI is one step behind, fix that
+                prt = (Object *) DoMethod
+                (
+                    obj, MUIM_FindUData, 
+                    MUIV_InstallerGui_Pretend
+                );
+
+                lgf = (Object *) DoMethod
+                (
+                    obj, MUIM_FindUData, 
+                    MUIV_InstallerGui_Logging
+                );
+            }
+
+            if(usr && prt && lgf)
+            {
+                ULONG pat; 
+
+                // Novice, Intermediate, Expert. 
+                get(usr, MUIA_Radio_Active, &pat); 
+
+                // MUI is one step behind, fix that.
                 pat++; 
                 
                 // Don't show logging and pretend mode
                 // settings to 'Novice' users.
                 if(pat > 1)
                 {
-                    if(InstallerGuiPageSet(obj, P_PRETEND_LOG, B_PROCEED_ABORT, 
-                                          (ULONG) ""))
+                    // Show pretend / log page.
+                    if(InstallerGuiPageSet(obj, P_PRETEND_LOG, B_PROCEED_ABORT, (ULONG) ""))
                     {
-                        b = InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2); 
-
-                        if(b == MUIV_InstallerGui_Proceed)
+                        // Wait for proceed or abort.
+                        if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
+                           MUIV_InstallerGui_Proceed)
                         {
-                            Object *prt = (Object *) DoMethod
-                            (
-                                obj, MUIM_FindUData, 
-                                MUIV_InstallerGui_Pretend
-                            );
+                            ULONG prp, lgp; 
 
-                            Object *lgf = (Object *) DoMethod
-                            (
-                                obj, MUIM_FindUData, 
-                                MUIV_InstallerGui_Logging
-                            );
-                            
-                            if(prt && lgf)
-                            {
-                                ULONG prp, lgp; 
+                            get(prt, MUIA_Radio_Active, &prp); 
+                            get(lgf, MUIA_Radio_Active, &lgp); 
 
-                                get(prt, MUIA_Radio_Active, &prp); 
-                                get(lgf, MUIA_Radio_Active, &lgp); 
+                            pat |= ((lgp << 2) | (prp << 3));
 
-                                pat |= ((lgp << 2) | (prp << 3));
-
-                                return pat; 
-                            }
+                            // Intermediate or expert.
+                            return pat; 
                         }
                         else
                         {
+                            // User abort.
                             return 0; 
                         }
                     }
                 }
                 else
                 {
+                    // Novice user.
                     return pat; 
                 }
             }
+            // Unknown error.
         }
         else
         {
+            // User abort.
             return 0; 
         }
     }
 
-    // We have a MUI problem
+    // Unknown error.
     GERR(tr(S_UNER)); 
     return 0; 
 }
@@ -590,11 +655,13 @@ MUIDSP IPTR InstallerGuiAskFile(Class *cls,
                                 Object *obj,
                                 struct MUIP_InstallerGui_AskFile *msg)
 {
+    // Show file requester page.
     if(InstallerGuiPageSet(obj, P_ASKFILE, B_PROCEED_ABORT, 
                            msg->Message))
     {
         static Object *ask, *top; 
 
+        // Initial lookup. 
         if(!ask)
         {
             ask = (Object *) DoMethod
@@ -612,6 +679,7 @@ MUIDSP IPTR InstallerGuiAskFile(Class *cls,
 
         if(ask && top)
         { 
+            // Create ASL file requester
             Object *str, *pop = (Object *) MUI_NewObject
             (
                 MUIC_Popasl, 
@@ -624,40 +692,78 @@ MUIDSP IPTR InstallerGuiAskFile(Class *cls,
                 TAG_END
             );
 
+            // Open the requester after adding it
+            // to the current group.
             if(pop)
             {
-                static char buf[PATH_MAX]; 
-
                 set(top, MUIA_ShortHelp, msg->Help); 
                 set(str, MUIA_String_Contents, msg->Default); 
 
+                // Prepare before adding requester.
                 if(DoMethod(ask, MUIM_Group_InitChange))
                 {
+                    char *ret = NULL;
+                    static char buf[PATH_MAX];
+
+                    // Add pop up requester.
                     DoMethod(ask, OM_ADDMEMBER, pop); 
+
+                    // We're done adding things.
                     DoMethod(ask, MUIM_Group_ExitChange);
 
+                    // Wait for proceed or abort.
                     if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) 
                        == MUIV_InstallerGui_Proceed)
                     {
-                        char *f = NULL; 
-                        get(str, MUIA_String_Contents, &f); 
-                        snprintf(buf, sizeof(buf), "%s", f ? f : "NULL"); 
+                        // Get filename from requester.
+                        get(str, MUIA_String_Contents, &ret); 
+
+                        if(ret)
+                        {
+                            // We need to create a copy of the filename
+                            // string since we're about to free the pop
+                            // up requester.
+                            int n = snprintf(buf, sizeof(buf), "%s", ret); 
+
+                            // Make sure that we succeded in creating a
+                            // copy of the filename.
+                            if(n >= 0 && n < sizeof(buf))
+                            {
+                                ret = buf;
+                            }
+                        }
+
+                        if(!ret)
+                        {
+                            // Unknown error.
+                            GERR(tr(S_UNER)); 
+                        }
                     }
 
+                    // Prepare before removing requester.
                     if(DoMethod(ask, MUIM_Group_InitChange))
                     {
+                        // Remove pop up requester.
                         DoMethod(ask, OM_REMMEMBER, pop); 
+
+                        // We're done removing things.
                         DoMethod(ask, MUIM_Group_ExitChange);
+
+                        // Free ASL requester.
                         MUI_DisposeObject(pop);
-                        return (IPTR) buf; 
+
+                        // Return filename.
+                        return (IPTR) ret;
                     }
                 }
 
+                // Free ASL requester.
                 MUI_DisposeObject(pop);
             }
         }
     }
 
+    // Unknown error.
     GERR(tr(S_UNER)); 
     return (IPTR) NULL; 
 }
@@ -672,13 +778,12 @@ MUIDSP IPTR InstallerGuiCopyFilesStart(Class *cls,
                                        Object *obj,
                                        struct MUIP_InstallerGui_CopyFilesStart *msg)
 {
-    struct InstallerGuiData *my = INST_DATA(cls,obj);
-
     if(InstallerGuiPageSet(obj, P_COPYFILES, B_ABORT, 
                            msg->Message))
     {
         static Object *prg; 
 
+        // Initial lookup. 
         if(!prg)
         { 
             prg = (Object *) DoMethod
@@ -688,18 +793,25 @@ MUIDSP IPTR InstallerGuiCopyFilesStart(Class *cls,
             );
         } 
 
+        // Sanity check.
         if(prg) 
         {
+            struct InstallerGuiData *my = INST_DATA(cls, obj);
+
+            // Install a timer to create a time slice
+            // where the user has a chance to abort.
             DoMethod(_app(obj), MUIM_Application_AddInputHandler, &my->ticker);
+
+            // Configure gauge so that one tick == one file.
             SetAttrs(prg, MUIA_Gauge_Max, msg->NumberOfFiles,
                      MUIA_Gauge_Current, 0, TAG_END);
 
             return (IPTR) TRUE; 
         }
-
-        GERR(tr(S_UNER)); 
     }
 
+    // Unknown error.
+    GERR(tr(S_UNER)); 
     return FALSE; 
 }
 
@@ -724,7 +836,7 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
         );
     } 
 
-    // Something's really wrong if !prg. 
+    // Sanity check.
     if(prg) 
     {
         struct timeval tv; 
@@ -741,6 +853,8 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
         {
             char *cut = NULL; 
             struct TextExtent e; 
+
+            // Get rendered size of file string.
             ULONG cur, len = strlen(txt), 
                   w = _width(prg), h = _height(prg),
                   max = TextFit(_rp(prg), txt, len, 
@@ -754,24 +868,35 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
                 // Modify a copy ot the string. 
                 cut = strdup(txt);  
 
-                // FIXME: txt always != NULL?
-
                 if(cut)
                 {
+                    // Truncate copy and let the copy
+                    // replace the current string
                     cut[max] = '\0';
                     txt = cut; 
+                }
+                else
+                {
+                    // Out of memory.
+                    GERR(tr(S_UNER)); 
+                    return (IPTR) FALSE; 
                 }
             }
 
             // Update progress bar. Text and number. 
             if(!msg->NoGauge)
             {
+                // Get current progress.
                 get(prg, MUIA_Gauge_Current, &cur); 
+
+                // Add another file on top of the current
+                // progress (one file = one tick).
                 SetAttrs(prg, MUIA_Gauge_InfoText, txt,
                          MUIA_Gauge_Current, ++cur, TAG_END);
             }
             else
             {
+                // Update text only, ignore the gauge.
                 set(prg, MUIA_Gauge_InfoText, txt);
             }
 
@@ -815,7 +940,7 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
 MUIDSP IPTR InstallerGuiCopyFilesEnd(Class *cls,
                                      Object *obj) 
 {
-    struct InstallerGuiData *my = INST_DATA (cls,obj);
+    struct InstallerGuiData *my = INST_DATA(cls, obj);
 
     DoMethod(_app (obj), MUIM_Application_RemInputHandler, &my->ticker);
 
@@ -833,6 +958,8 @@ MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,
                                      struct MUIP_InstallerGui_CopyFilesAdd *msg)
 {
     static Object *lst; 
+
+    // Initial lookup. 
     if(!lst)
     { 
         lst = (Object *) DoMethod
@@ -842,16 +969,20 @@ MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,
         );
     } 
 
+    // Sanity check.
     if(lst) 
     {
-        DoMethod(lst, MUIM_List_Insert, &(msg->File), 1, MUIV_List_Insert_Bottom); 
+        DoMethod
+        (
+            lst, MUIM_List_Insert,
+            &(msg->File), 1, 
+            MUIV_List_Insert_Bottom
+        ); 
+
         set(lst, MUIA_ShowMe, TRUE);
     }
-    else
-    {
-        GERR(tr(S_UNER)); 
-    }
 
+    GERR(tr(S_UNER)); 
     return (IPTR) FALSE; 
 }
 
@@ -872,7 +1003,7 @@ MUIDSP IPTR InstallerGuiExit(Class *cls,
 //----------------------------------------------------------------------------
 // InstallerGuiMessage - Show message
 // Input:                Message 
-// Return:               TRUE
+// Return:               FIXME
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiMessage(Class *cls,
                                 Object *obj,
@@ -885,18 +1016,17 @@ MUIDSP IPTR InstallerGuiMessage(Class *cls,
         // Wait for user input unless we're in immediate mode.
         if(!msg->Immediate)
         {
-            // Proceed and proceed only. 
+            // Wait for proceed and proceed only.
             InstallerGuiWait(obj, MUIV_InstallerGui_ProceedOnly, 1); 
         }
-    }
-    else
-    {
-        // GUI's broken. 
-        GERR(tr(S_UNER)); 
+
+        // Always. 
+        return TRUE;
     }
 
-    // Always. 
-    return TRUE;
+    // Unknown error.
+    GERR(tr(S_UNER)); 
+    return FALSE;
 }
 
 //----------------------------------------------------------------------------
@@ -911,6 +1041,7 @@ MUIDSP IPTR InstallerGuiConfirm(Class *cls,
     if(InstallerGuiPageSet(obj, P_MESSAGE, B_PROCEED_ABORT, 
                            msg->Message))
     {
+        // Wait for proceed or abort.
         if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
            MUIV_InstallerGui_Proceed)
         {
@@ -919,6 +1050,7 @@ MUIDSP IPTR InstallerGuiConfirm(Class *cls,
     }
     else
     {
+        // Unknown error.
         GERR(tr(S_UNER)); 
     }
 
@@ -957,6 +1089,7 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
         );
     } 
 
+    // Sanity check.
     if(top && grp && cs &&
        InstallerGuiPageSet(obj, P_MESSAGE, B_PROCEED_ABORT, 
                            msg->Message))
@@ -993,6 +1126,7 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
                 DoMethod(grp, OM_ADDMEMBER, r); 
                 DoMethod(grp, MUIM_Group_ExitChange);
 
+                // Wait for proceed or abort.
                 if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
                    MUIV_InstallerGui_Proceed)
                 {
@@ -1014,6 +1148,7 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
 
     if(err)
     {
+        // Unknown error.
         GERR(tr(S_UNER)); 
     }
 
@@ -1054,6 +1189,7 @@ MUIDSP IPTR InstallerGuiBool(Class *cls,
         );
     } 
 
+    // Sanity check.
     if(yes && no && top)
     {
         set(yes, MUIA_Text_Contents, msg->Yes);
@@ -1063,6 +1199,7 @@ MUIDSP IPTR InstallerGuiBool(Class *cls,
         if(InstallerGuiPageSet(obj, P_MESSAGE, B_YES_NO, 
                                msg->Message))
         {
+            // Wait for yes or no.
             ULONG b = InstallerGuiWait(obj, MUIV_InstallerGui_Yes, 2); 
             switch(b)
             {
@@ -1076,6 +1213,7 @@ MUIDSP IPTR InstallerGuiBool(Class *cls,
         }
     }
 
+    // Unknown error.
     GERR(tr(S_UNER)); 
     return -1;
 }
@@ -1113,6 +1251,7 @@ MUIDSP IPTR InstallerGuiString(Class *cls,
                  MUIM_Application_ReturnID, MUIV_InstallerGui_Proceed); 
     } 
 
+    // Sanity check.
     if(str && top)
     {
         set(top, MUIA_ShortHelp, msg->Help); 
@@ -1121,6 +1260,7 @@ MUIDSP IPTR InstallerGuiString(Class *cls,
         if(InstallerGuiPageSet(obj, P_STRING, B_PROCEED_ABORT, 
                                msg->Message))
         {
+            // Wait for proceed or abort.
             if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
                MUIV_InstallerGui_Proceed)
             {
@@ -1134,6 +1274,7 @@ MUIDSP IPTR InstallerGuiString(Class *cls,
     }
     else
     {
+        // Unknown error.
         GERR(tr(S_UNER)); 
     }
 
@@ -1168,6 +1309,7 @@ MUIDSP IPTR InstallerGuiNumber(Class *cls,
         );
     } 
 
+    // Sanity check.
     if(num)
     {
         set(top, MUIA_ShortHelp, msg->Help); 
@@ -1178,6 +1320,7 @@ MUIDSP IPTR InstallerGuiNumber(Class *cls,
         if(InstallerGuiPageSet(obj, P_NUMBER, B_PROCEED_ABORT, 
                                msg->Message))
         {
+            // Wait for proceed or abort.
             if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
                MUIV_InstallerGui_Proceed)
             {
@@ -1193,6 +1336,7 @@ MUIDSP IPTR InstallerGuiNumber(Class *cls,
         }
     }
 
+    // Unknown error.
     GERR(tr(S_UNER)); 
     return 0; 
 }
@@ -1225,6 +1369,7 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
         );
     } 
 
+    // Sanity check.
     if(grp && top &&
        InstallerGuiPageSet(obj, P_MESSAGE, B_PROCEED_ABORT, 
                            msg->Message))
@@ -1288,6 +1433,7 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
             DoMethod(grp, MUIM_Group_ExitChange);
             set(top, MUIA_ShortHelp, msg->Help); 
 
+            // Wait for proceed or abort.
             id = InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2);
 
             if(DoMethod(grp, MUIM_Group_InitChange))
@@ -1308,6 +1454,7 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
         }
     }
 
+    // Unknown error.
     GERR(tr(S_UNER)); 
     return 0;
 }
@@ -1336,6 +1483,7 @@ MUIDSP IPTR InstallerGuiComplete(Class *cls,
     }
     else
     {
+        // Unknown error.
         GERR(tr(S_UNER)); 
         return FALSE; 
     }
@@ -1380,6 +1528,7 @@ MUIDSP IPTR InstallerGuiRun(Class *cls,
         );
     }
 
+    // Sanity check.
     if(con && but && txt && grp)
     {
         ULONG top, btm, str; 
@@ -1439,6 +1588,7 @@ MUIDSP IPTR InstallerGuiRun(Class *cls,
         }
     }
 
+    // Unknown error.
     GERR(tr(S_UNER)); 
     return -1; 
 }
@@ -2293,6 +2443,7 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
         }
         else
         {
+            // Unknown error.
             GERR(tr(S_UNER)); 
             return FALSE; 
         }
