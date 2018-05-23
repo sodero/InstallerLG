@@ -1,7 +1,7 @@
 InstallerLG
 ===============
 
-A reimplementation of the LISP based 'Installer' scripting language developed by
+A re-implementation of the LISP based 'Installer' scripting language developed by
 Commodore International for the Amiga platform. InstallerLG aims to be completely
 compatible with the original as described in the V43.3 documentation. Most of the
 resource related limitations of the Commodore implementation are gone and the GUI

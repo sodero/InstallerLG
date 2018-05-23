@@ -436,7 +436,8 @@ MUIDSP IPTR InstallerGuiInit(Class *cls,
         DoMethod
         (
             obj, MUIM_Notify, 
-            MUIA_Window_CloseRequest, TRUE, _app(obj), 2, 
+            MUIA_Window_CloseRequest, TRUE,
+            _app(obj), 2, 
             MUIM_Application_ReturnID, 
             MUIV_Application_ReturnID_Quit
         );
@@ -2029,7 +2030,7 @@ DISPATCH(InstallerGui)
 #endif /* AMIGA */
 
 //----------------------------------------------------------------------------
-// gui_mch_init - Initialise the Gui
+// gui_init - Initialise the Gui
 //----------------------------------------------------------------------------
 int gui_init(void)
 {
@@ -2081,9 +2082,8 @@ int gui_init(void)
     #endif
 }
 
-
 //----------------------------------------------------------------------------
-// gui_mch_exit
+// gui_exit
 //----------------------------------------------------------------------------
 void gui_exit(void)
 {
@@ -2099,7 +2099,6 @@ void gui_exit(void)
     }
     #endif
 }
-
 
 //----------------------------------------------------------------------------
 // gui_message
@@ -2285,6 +2284,7 @@ void gui_welcome(const char *msg,
     1;
     printf("%s\n", msg);
     #endif
+
     *lvl = pat & 3; 
     *lgf = pat & 4 ? 1 : 0; 
     *prt = pat >> 3; 
@@ -2311,11 +2311,26 @@ const char *gui_askdir(const char *msg,
     def;
     printf("%s%s%d%d%d%s\n", msg, hlp, pth, dsk, asn, def);
     #endif
+
     return ret;
 }
 
 //----------------------------------------------------------------------------
-// gui_askfile
+// Name:        gui_askfile(const char *msg, 
+//                          const char *hlp,
+//                          int pth,
+//                          int dsk,
+//                          const char *def)
+//
+// Description: Get filename from user.
+//
+// Input:       const char *msg:    Message shown to the user. 
+//              const char *hlp:    Help text.
+//              int pth:            FIXME
+//              int dsk:            FIXME
+//              const char *def:    Default value.
+//
+// Return:      const char*:        FIXME
 //----------------------------------------------------------------------------
 const char *gui_askfile(const char *msg, 
                         const char *hlp,
@@ -2334,6 +2349,7 @@ const char *gui_askfile(const char *msg,
     def;
     printf("%s%s%d%d\n", msg, hlp, pth, dsk);
     #endif
+
     return ret;
 }
 
@@ -2345,6 +2361,7 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
     #ifdef AMIGA
     int n = 0; 
     pnode_p cur = lst; 
+
     while(cur)
     {
         if(cur->type == 1)
