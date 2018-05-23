@@ -2509,7 +2509,15 @@ int gui_complete(int com)
 }
 
 //----------------------------------------------------------------------------
-// gui_run
+// Name:        gui_run(const char *msg, 
+//                      const char *hlp)
+//
+// Description: FIXME
+//
+// Input:       const char *msg:    Message shown to the user. 
+//              const char *hlp:    Help text.
+//
+// Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_run(const char *msg, const char *hlp)
 {
@@ -2523,7 +2531,17 @@ int gui_run(const char *msg, const char *hlp)
 }
 
 //----------------------------------------------------------------------------
-// gui_error
+// Name:        gui_error(int id,
+//                        const char *type, 
+//                        const char *info)
+//
+// Description: FIXME
+//
+// Input:       int id:             FIXME 
+//              const char *type:   FIXME
+//              const char *info:   FIXME 
+//
+// Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_error(int id, 
               const char *type, 
