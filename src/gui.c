@@ -1493,7 +1493,7 @@ MUIDSP IPTR InstallerGuiComplete(Class *cls,
 //----------------------------------------------------------------------------
 // InstallerGuiRun - Get user confirmation before running shell command
 // Input:            Message - The prompt 
-// Return:           '2' = proceed, '1' = skip, '0' = abort
+// Return:           '1' = proceed, '0' = skip, '-1' = abort
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiRun(Class *cls,
                             Object *obj,
@@ -2104,6 +2104,7 @@ int gui_init(void)
 
     return TRUE;
     #else
+    // Testing purposes.
     return 1;
     #endif
 }
@@ -2148,6 +2149,7 @@ void gui_message(const char *msg, int imm)
     #ifdef AMIGA
     DoMethod(Win, MUIM_InstallerGui_Message, msg, imm);
     #else
+    // Testing purposes.
     if(imm)
     {
         printf("%d:%s", imm, msg); 
@@ -2175,6 +2177,7 @@ int gui_confirm(const char *msg)
     DoMethod(Win, MUIM_InstallerGui_Confirm, msg);
     #else
     0;
+    // Avoid compiler warning.
     msg = NULL; 
     #endif
     return ret; 
@@ -2212,6 +2215,7 @@ int gui_choice(const char *msg,
         def
     );
     #else
+    // Testing purposes.
     (msg && hlp && nms) ? def : ~def;
     #endif
 
@@ -2250,8 +2254,10 @@ int gui_options(const char *msg,
         def
     );
     #else
+    // Testing purposes.
     (msg && hlp && nms) ? def : ~def;
     #endif
+
     return ret;
 }
 
@@ -2288,6 +2294,7 @@ int gui_bool(const char *msg,
     );
     #else
     0; 
+    // Testing purposes.
     printf("%s%s%s%s\n", msg, hlp, yes, no);
     #endif
     return ret;
@@ -2327,6 +2334,7 @@ const char * gui_string(const char *msg,
     #else
     def;
     *hlt = 0; 
+    // Testing purposes.
     printf("%s%s%s\n", msg, hlp, def);
     #endif
     return ret;
@@ -2374,6 +2382,7 @@ int gui_number(const char *msg,
     #else
     def;
     *hlt = 0; 
+    // Testing purposes.
     printf("%s%s%d%d\n", msg, hlp, min, max);
     #endif
     return ret;
@@ -2385,12 +2394,13 @@ int gui_number(const char *msg,
 //                          int *lgf, 
 //                          int *prt)
 //
-// Description: FIXME
+// Description: Show welcome message and prompt for user level / installer
+//              mode.
 //
-// Input:       const char *msg:    FIXME
-//              int *lvl:           FIXME
-//              int *lgf:           FIXME
-//              int *prt:           FIXME
+// Input:       const char *msg:    Welcome message.
+//              int *lvl:           User level return value.
+//              int *lgf:           Log settings return value.
+//              int *prt:           Pretend mode return value.
 //
 // Return:      -
 //----------------------------------------------------------------------------
@@ -2404,6 +2414,7 @@ void gui_welcome(const char *msg,
     DoMethod(Win, MUIM_InstallerGui_Welcome, msg);
     #else
     1;
+    // Testing purposes.
     printf("%s\n", msg);
     #endif
 
@@ -2420,16 +2431,16 @@ void gui_welcome(const char *msg,
 //                         int asn, 
 //                         const char *def)
 //
-// Description: FIXME
+// Description: Get directory name from user.
 //
-// Input:       const char *msg:    FIXME
-//              const char *hlp:    FIXME
-//              int pth:            FIXME
-//              int dsk:            FIXME
+// Input:       const char *msg:    Message shown to the user. 
+//              const char *hlp:    Help text.
+//              int pth:            Allow non-existing default.
+//              int dsk:            Show drive list first.
 //              int asn:            FIXME
-//              const char *def:    FIXME
+//              const char *def:    Default value.
 //
-// Return:      const char*:        FIXME
+// Return:      const char*:        Directory name.
 //----------------------------------------------------------------------------
 const char *gui_askdir(const char *msg, 
                        const char *hlp,
@@ -2447,6 +2458,7 @@ const char *gui_askdir(const char *msg,
     );
     #else
     def;
+    // Testing purposes.
     printf("%s%s%d%d%d%s\n", msg, hlp, pth, dsk, asn, def);
     #endif
 
@@ -2460,15 +2472,15 @@ const char *gui_askdir(const char *msg,
 //                          int dsk,
 //                          const char *def)
 //
-// Description: Get filename from user.
+// Description: Get file or directory name from user.
 //
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
-//              int pth:            FIXME
-//              int dsk:            FIXME
+//              int pth:            Allow non-existing default.
+//              int dsk:            Show drive list first.
 //              const char *def:    Default value.
 //
-// Return:      const char*:        FIXME
+// Return:      const char*:        File or directory name.
 //----------------------------------------------------------------------------
 const char *gui_askfile(const char *msg, 
                         const char *hlp,
@@ -2485,6 +2497,7 @@ const char *gui_askfile(const char *msg,
     );
     #else
     def;
+    // Testing purposes.
     printf("%s%s%d%d\n", msg, hlp, pth, dsk);
     #endif
 
@@ -2492,12 +2505,17 @@ const char *gui_askfile(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// gui_copyfiles_start
-// Name:        gui_complete(int com)
+// Name:        gui_copyfiles_start(const char *msg, 
+//                                  const char *hlp,
+//                                  pnode_p lst,
+//                                  int cnf)
 //
 // Description: FIXME
 //
-// Input:       int com:            FIXME
+// Input:       const char *msg:    FIXME
+//              const char *hlp:    FIXME
+//              pnode_p lst:        FIXME
+//              int cnf:            FIXME
 //
 // Return:      int:                FIXME
 //----------------------------------------------------------------------------
@@ -2613,19 +2631,21 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
 
     return (int) DoMethod(Win, MUIM_InstallerGui_CopyFilesStart, msg, n);
     #else
+    // Testing purposes.
     return lst ? (cnf ? ((msg && hlp) ? 0 : -1) : 1) : -1;
     #endif
 }
 
 //----------------------------------------------------------------------------
-// gui_copyfiles_setcur
-// Name:        gui_complete(int com)
+// Name:        gui_copyfiles_setcur(const char *cur, 
+//                                   int nogauge) 
 //
-// Description: FIXME
+// Description: Update progress gauge and show current filename.
 //
-// Input:       int com:            FIXME
+// Input:       const char *cur:    Filename.
+//              int nogauge:        Hide gauge.
 //
-// Return:      int:                FIXME
+// Return:      int:                TRUE on success, FALSE otherwise.
 //----------------------------------------------------------------------------
 int gui_copyfiles_setcur(const char *cur, int nogauge) 
 {
@@ -2633,6 +2653,7 @@ int gui_copyfiles_setcur(const char *cur, int nogauge)
     #ifdef AMIGA
     DoMethod(Win, MUIM_InstallerGui_CopyFilesSetCur, cur, nogauge);
     #else
+    // Testing purposes.
     (cur ? 1 + nogauge : 0);
     #endif
 }
@@ -2640,7 +2661,7 @@ int gui_copyfiles_setcur(const char *cur, int nogauge)
 //----------------------------------------------------------------------------
 // Name:        gui_copyfiles_end(void)
 //
-// Description: FIXME
+// Description: End file copy. Must be invoked after gui_copyfiles_start().
 //
 // Input:       -
 //
@@ -2656,11 +2677,11 @@ void gui_copyfiles_end(void)
 //----------------------------------------------------------------------------
 // Name:        gui_complete(int com)
 //
-// Description: FIXME
+// Description: Show progress gauge.
 //
-// Input:       int com:            FIXME
+// Input:       int com:            Progress in percent.
 //
-// Return:      int:                FIXME
+// Return:      int:                TRUE on success, FALSE otherwise.
 //----------------------------------------------------------------------------
 int gui_complete(int com)
 {
@@ -2668,6 +2689,7 @@ int gui_complete(int com)
     #ifdef AMIGA
     DoMethod(Win, MUIM_InstallerGui_Complete, com);
     #else
+    // Testing purposes.
     com; 
     #endif
 }
@@ -2676,21 +2698,24 @@ int gui_complete(int com)
 // Name:        gui_run(const char *msg, 
 //                      const char *hlp)
 //
-// Description: FIXME
+// Description: Show confirmation dialogue.
 //
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
 //
-// Return:      int:                FIXME
+// Return:      int:                '1' = proceed, '0' = skip, 
+//                                  '-1' = abort
 //----------------------------------------------------------------------------
 int gui_run(const char *msg, const char *hlp)
 {
     #ifdef AMIGA
     return (int) DoMethod(Win, MUIM_InstallerGui_Run, msg, hlp);
     #else
+    // Testing purposes.
     printf("%s%s\n", msg, hlp);
+
     // Always 'proceed'.
-    return 2;
+    return 1;
     #endif
 }
 
@@ -2699,13 +2724,13 @@ int gui_run(const char *msg, const char *hlp)
 //                        const char *type, 
 //                        const char *info)
 //
-// Description: FIXME
+// Description: Show error message to the user.
 //
-// Input:       int id:             FIXME 
-//              const char *type:   FIXME
-//              const char *info:   FIXME 
+// Input:       int id:             Line number.
+//              const char *type:   Error description.
+//              const char *info:   Details, e.g. filename.
 //
-// Return:      int:                FIXME
+// Return:      int:                1
 //----------------------------------------------------------------------------
 int gui_error(int id, 
               const char *type, 
@@ -2728,8 +2753,10 @@ int gui_error(int id,
     // whether this really works out...
     EasyRequest(NULL, &es, &flags);
 
+    // Ignore the user feedback.
     return 1; 
     #else
+    // Testing purposes.
     return (id && type && info) ? 0 : 1;
     #endif
 }

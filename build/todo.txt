@@ -5,6 +5,9 @@
 
 - testa snabbt om protect pa aros.
 - testa snabbt om iconinfo pa aros.
+- testa confirm av (execute) pa aros.
+- testa h_confirm pa aros.
+
 
 - FIXME:s
 

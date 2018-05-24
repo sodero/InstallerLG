@@ -83,13 +83,13 @@ static entry_p h_run(entry_p contxt, const char *pre)
             int c = gui_run(str(prompt), str(help));
 
             // HALT if abort
-            if(c == 0)
+            if(c == -1)
             {
                 error(HALT); 
             } 
 
             // Abort or skip
-            if(c != 2)
+            if(c != 1)
             {
                 RCUR; 
             }
