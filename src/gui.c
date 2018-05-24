@@ -2030,7 +2030,33 @@ DISPATCH(InstallerGui)
 #endif /* AMIGA */
 
 //----------------------------------------------------------------------------
-// gui_init - Initialise the Gui
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//----------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------
+// Name:        gui_init(void)
+//
+// Description: Initialize GUI
+//
+// Input:       -
+//
+// Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_init(void)
 {
@@ -2083,7 +2109,13 @@ int gui_init(void)
 }
 
 //----------------------------------------------------------------------------
-// gui_exit
+// Name:        gui_exit(void)
+//
+// Description: FIXME
+//
+// Input:       -
+//
+// Return:      -
 //----------------------------------------------------------------------------
 void gui_exit(void)
 {
@@ -2101,7 +2133,15 @@ void gui_exit(void)
 }
 
 //----------------------------------------------------------------------------
-// gui_message
+// Name:        gui_message(const char *msg,
+//                          int imm)
+//
+// Description: FIXME
+//
+// Input:       const char *msg:    FIXME
+//              int imm:            FIXME
+//
+// Return:      -
 //----------------------------------------------------------------------------
 void gui_message(const char *msg, int imm)
 {
@@ -2120,7 +2160,13 @@ void gui_message(const char *msg, int imm)
 }
 
 //----------------------------------------------------------------------------
-// gui_confirm
+// Name:        gui_confirm(const char *msg)
+//
+// Description: FIXME
+//
+// Input:       const char *msg:    FIXME
+//
+// Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_confirm(const char *msg)
 {
@@ -2135,7 +2181,19 @@ int gui_confirm(const char *msg)
 }
 
 //----------------------------------------------------------------------------
-// gui_choice
+// Name:        gui_choice(const char *msg, 
+//                         const char *hlp,
+//                         const char **nms, 
+//                         int def)
+//
+// Description: FIXME
+//
+// Input:       const char *msg:    FIXME
+//              const char *hlp:    FIXME
+//              const char **nms:   FIXME
+//              int def:            FIXME
+//
+// Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_choice(const char *msg, 
                const char *hlp,
@@ -2161,7 +2219,19 @@ int gui_choice(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// gui_options
+// Name:        gui_options(const char *msg, 
+//                          const char *hlp,
+//                          const char **nms, 
+//                          int def)
+//
+// Description: FIXME
+//
+// Input:       const char *msg:    FIXME
+//              const char *hlp:    FIXME
+//              const char **nms:   FIXME
+//              int def:            FIXME
+//
+// Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_options(const char *msg, 
                 const char *hlp,
@@ -2186,7 +2256,19 @@ int gui_options(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// gui_bool
+// Name:        gui_bool(const char *msg,
+//                       const char *hlp,
+//                       const char *yes,
+//                       const char *no)
+//
+// Description: FIXME
+//
+// Input:       const char *msg:    FIXME
+//              const char *hlp:    FIXME
+//              const char *yes:    FIXME
+//              const char *no:     FIXME
+//
+// Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_bool(const char *msg,
              const char *hlp,
@@ -2212,7 +2294,19 @@ int gui_bool(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// gui_string
+// Name:        gui_string(const char *msg, 
+//                         const char *hlp,
+//                         const char *def,
+//                         int *hlt)
+//
+// Description: FIXME
+//
+// Input:       const char *msg:    FIXME
+//              const char *hlp:    FIXME
+//              const char *def:    FIXME
+//              int *hlt:           FIXME
+//
+// Return:      const char *:       FIXME
 //----------------------------------------------------------------------------
 const char * gui_string(const char *msg, 
                         const char *hlp,
@@ -2239,7 +2333,23 @@ const char * gui_string(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// gui_number
+// Name:        gui_number(const char *msg, 
+//                         const char *hlp,
+//                         int min, 
+//                         int max, 
+//                         int def, 
+//                         int *hlt)
+//
+// Description: FIXME
+//
+// Input:       const char *msg:    FIXME
+//              const char *hlp:    FIXME
+//              int min:            FIXME
+//              int max:            FIXME
+//              int def:            FIXME
+//              int *hlt:           FIXME
+//
+// Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_number(const char *msg, 
                const char *hlp,
@@ -2270,7 +2380,19 @@ int gui_number(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// gui_welcome
+// Name:        gui_welcome(const char *msg, 
+//                          int *lvl, 
+//                          int *lgf, 
+//                          int *prt)
+//
+// Description: FIXME
+//
+// Input:       const char *msg:    FIXME
+//              int *lvl:           FIXME
+//              int *lgf:           FIXME
+//              int *prt:           FIXME
+//
+// Return:      -
 //----------------------------------------------------------------------------
 void gui_welcome(const char *msg, 
                  int *lvl, 
@@ -2291,7 +2413,23 @@ void gui_welcome(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// gui_askdir
+// Name:        gui_askdir(const char *msg, 
+//                         const char *hlp,
+//                         int pth,
+//                         int dsk,
+//                         int asn, 
+//                         const char *def)
+//
+// Description: FIXME
+//
+// Input:       const char *msg:    FIXME
+//              const char *hlp:    FIXME
+//              int pth:            FIXME
+//              int dsk:            FIXME
+//              int asn:            FIXME
+//              const char *def:    FIXME
+//
+// Return:      const char*:        FIXME
 //----------------------------------------------------------------------------
 const char *gui_askdir(const char *msg, 
                        const char *hlp,
@@ -2355,6 +2493,13 @@ const char *gui_askfile(const char *msg,
 
 //----------------------------------------------------------------------------
 // gui_copyfiles_start
+// Name:        gui_complete(int com)
+//
+// Description: FIXME
+//
+// Input:       int com:            FIXME
+//
+// Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
 {
@@ -2474,6 +2619,13 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
 
 //----------------------------------------------------------------------------
 // gui_copyfiles_setcur
+// Name:        gui_complete(int com)
+//
+// Description: FIXME
+//
+// Input:       int com:            FIXME
+//
+// Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_copyfiles_setcur(const char *cur, int nogauge) 
 {
@@ -2486,7 +2638,13 @@ int gui_copyfiles_setcur(const char *cur, int nogauge)
 }
 
 //----------------------------------------------------------------------------
-// gui_copyfiles_end
+// Name:        gui_copyfiles_end(void)
+//
+// Description: FIXME
+//
+// Input:       -
+//
+// Return:      -
 //----------------------------------------------------------------------------
 void gui_copyfiles_end(void) 
 {
@@ -2496,7 +2654,13 @@ void gui_copyfiles_end(void)
 }
 
 //----------------------------------------------------------------------------
-// gui_complete
+// Name:        gui_complete(int com)
+//
+// Description: FIXME
+//
+// Input:       int com:            FIXME
+//
+// Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_complete(int com)
 {
