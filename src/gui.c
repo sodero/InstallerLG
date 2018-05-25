@@ -2510,7 +2510,8 @@ const char *gui_askfile(const char *msg,
 //                                  pnode_p lst,
 //                                  int cnf)
 //
-// Description: FIXME
+// Description: Show file copy confirmation requester with a populated file
+//              list. 
 //
 // Input:       const char *msg:    FIXME
 //              const char *hlp:    FIXME
@@ -2525,25 +2526,35 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
     int n = 0; 
     pnode_p cur = lst; 
 
+    // For all files and directories to be copied; count 
+    // the files, and if confirmation is needed, add them
+    // to the selection / deselection list.
     while(cur)
     {
+        // Is this a file?
         if(cur->type == 1)
         {
+            // Do we need confirmation?
             if(cnf)
             {
+                // Add file to the selection / deselection list.
                 DoMethod(Win, MUIM_InstallerGui_CopyFilesAdd, cur->name, cur);
             }
 
+            // Increase the total file count.
             n++; 
         }
 
+        // Next file / directory.
         cur = cur->next; 
     }
 
+    // Do we need confirmation?
     if(cnf)
     {
         static Object *sel, *top;
         
+        // Initial lookup.
         if(!sel) 
         {
             sel = (Object *) DoMethod
@@ -2559,33 +2570,49 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
             );
         }
 
+        // Show the file selection page.
         if(sel && top && InstallerGuiPageSet
           (Win, P_FILEDEST, B_PROCEED_SKIP_ABORT, (ULONG) msg))
         {
             ULONG b; 
             LONG id = MUIV_List_NextSelected_Start; 
 
+            // Set help text.
             set(top, MUIA_ShortHelp, hlp); 
+
+            // The default is to copy all files.
             DoMethod(sel, MUIM_List_Select, MUIV_List_Select_All,
                           MUIV_List_Select_On, NULL); 
 
+            // Wait for confirmation / skip / abort.
             b = InstallerGuiWait(Win, MUIV_InstallerGui_ProceedRun, 3); 
 
+            // Did the user confirm?
             if(b == MUIV_InstallerGui_ProceedRun)
             {
+                // For all files in the selection / deselection
+                // list, tag the ones that we're going to copy.
                 for(;;) 
                 {
+                    // Get the first element in the list.
                     DoMethod(sel, MUIM_List_NextSelected, &id); 
+
+                    // Are we done with all of the files?
                     if(id != MUIV_List_NextSelected_End)
                     {
+                        // Get name of current file?
                         char *ent = NULL;
                         DoMethod(sel, MUIM_List_GetEntry, id, &ent); 
 
                         if(ent) 
                         {
+                            // Find the corresponding file node
+                            // in 'our' list.
                             for(cur = lst; cur; 
                                 cur = cur->next)
                             {
+                                // If we find it, and it's a file,
+                                // give it a 'copy' tag.
                                 if(cur->type == 1 &&
                                    !strcmp(ent, cur->name))
                                 {
@@ -2597,26 +2624,40 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
                     }
                     else
                     {
+                        // We're done with all files in the
+                        // selection / deselection list.
                         break; 
                     }
                 }
 
+                // Iterate over nodes in 'our' list and tag
+                // everything that we're NOT going to copy.
                 for(cur = lst; cur; 
                     cur = cur->next)
                 {
+                    // Is this a file that's not going to be
+                    // copied?
                     if(cur->type == 1)
                     {
+                        // Give it an 'ignore' tag and decrease
+                        // the number of files to be copied.
                         n--;
                         cur->type = 0; 
                     }
+                    // Is this a file that's going to be copied?
                     else if(cur->type == -1)
                     {
+                        // Restore the file type so that the 
+                        // rest of the world understands that
+                        // this is a file.
                         cur->type = 1; 
                     }
                 }
             }
             else
             {
+                // Are we going to skip the file copy or are
+                // we going to abort?
                 return b == MUIV_InstallerGui_SkipRun ?
                        0 : -1; 
             }
@@ -2629,6 +2670,7 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
         }
     }
 
+    // Set up the file copy progress page.
     return (int) DoMethod(Win, MUIM_InstallerGui_CopyFilesStart, msg, n);
     #else
     // Testing purposes.
@@ -2728,7 +2770,7 @@ int gui_run(const char *msg, const char *hlp)
 //
 // Input:       int id:             Line number.
 //              const char *type:   Error description.
-//              const char *info:   Details, e.g. filename.
+//              const char *info:   Extra info, e.g. filename.
 //
 // Return:      int:                1
 //----------------------------------------------------------------------------
