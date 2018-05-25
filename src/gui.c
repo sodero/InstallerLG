@@ -2139,7 +2139,7 @@ void gui_exit(void)
 //
 // Description: FIXME
 //
-// Input:       const char *msg:    FIXME
+// Input:       const char *msg:    Message shown to the user. 
 //              int imm:            FIXME
 //
 // Return:      -
@@ -2166,7 +2166,7 @@ void gui_message(const char *msg, int imm)
 //
 // Description: FIXME
 //
-// Input:       const char *msg:    FIXME
+// Input:       const char *msg:    Message shown to the user. 
 //
 // Return:      int:                FIXME
 //----------------------------------------------------------------------------
@@ -2191,8 +2191,8 @@ int gui_confirm(const char *msg)
 //
 // Description: FIXME
 //
-// Input:       const char *msg:    FIXME
-//              const char *hlp:    FIXME
+// Input:       const char *msg:    Message shown to the user. 
+//              const char *hlp:    Help text.
 //              const char **nms:   FIXME
 //              int def:            FIXME
 //
@@ -2230,8 +2230,8 @@ int gui_choice(const char *msg,
 //
 // Description: FIXME
 //
-// Input:       const char *msg:    FIXME
-//              const char *hlp:    FIXME
+// Input:       const char *msg:    Message shown to the user. 
+//              const char *hlp:    Help text.
 //              const char **nms:   FIXME
 //              int def:            FIXME
 //
@@ -2267,14 +2267,14 @@ int gui_options(const char *msg,
 //                       const char *yes,
 //                       const char *no)
 //
-// Description: FIXME
+// Description: Get boolean value from user, e.g 'Yes' / 'No'.
 //
-// Input:       const char *msg:    FIXME
-//              const char *hlp:    FIXME
-//              const char *yes:    FIXME
-//              const char *no:     FIXME
+// Input:       const char *msg:    Message shown to the user. 
+//              const char *hlp:    Help text.
+//              const char *yes:    True string. 
+//              const char *no:     False string.
 //
-// Return:      int:                FIXME
+// Return:      int:                '1' or '0'.
 //----------------------------------------------------------------------------
 int gui_bool(const char *msg,
              const char *hlp,
@@ -2306,14 +2306,14 @@ int gui_bool(const char *msg,
 //                         const char *def,
 //                         int *hlt)
 //
-// Description: FIXME
+// Description: Get string value from user.
 //
-// Input:       const char *msg:    FIXME
-//              const char *hlp:    FIXME
-//              const char *def:    FIXME
-//              int *hlt:           FIXME
+// Input:       const char *msg:    Message shown to the user. 
+//              const char *hlp:    Help text.
+//              const char *def:    Default string value.
+//              int *hlt:           Halt return value.
 //
-// Return:      const char *:       FIXME
+// Return:      const char *:       String value from user.
 //----------------------------------------------------------------------------
 const char * gui_string(const char *msg, 
                         const char *hlp,
@@ -2333,6 +2333,7 @@ const char * gui_string(const char *msg,
     );
     #else
     def;
+    // Don't halt on non Amiga systems.
     *hlt = 0; 
     // Testing purposes.
     printf("%s%s%s\n", msg, hlp, def);
@@ -2348,16 +2349,16 @@ const char * gui_string(const char *msg,
 //                         int def, 
 //                         int *hlt)
 //
-// Description: FIXME
+// Description: Get numerical value from user.
 //
-// Input:       const char *msg:    FIXME
-//              const char *hlp:    FIXME
-//              int min:            FIXME
-//              int max:            FIXME
-//              int def:            FIXME
-//              int *hlt:           FIXME
+// Input:       const char *msg:    Message shown to the user. 
+//              const char *hlp:    Help text.
+//              int min:            Minimum value.
+//              int max:            Maximum value.
+//              int def:            Default value.
+//              int *hlt:           Halt return value.
 //
-// Return:      int:                FIXME
+// Return:      int:                Numerical value from user.
 //----------------------------------------------------------------------------
 int gui_number(const char *msg, 
                const char *hlp,
@@ -2381,6 +2382,7 @@ int gui_number(const char *msg,
     );
     #else
     def;
+    // Don't halt on non Amiga systems.
     *hlt = 0; 
     // Testing purposes.
     printf("%s%s%d%d\n", msg, hlp, min, max);
@@ -2418,6 +2420,7 @@ void gui_welcome(const char *msg,
     printf("%s\n", msg);
     #endif
 
+    // Turn the bit pattern into booleans.
     *lvl = pat & 3; 
     *lgf = pat & 4 ? 1 : 0; 
     *prt = pat >> 3; 
@@ -2437,10 +2440,10 @@ void gui_welcome(const char *msg,
 //              const char *hlp:    Help text.
 //              int pth:            Allow non-existing default.
 //              int dsk:            Show drive list first.
-//              int asn:            FIXME
+//              int asn:            Assigns can satisfy the request as well.
 //              const char *def:    Default value.
 //
-// Return:      const char*:        Directory name.
+// Return:      const char*:        Directory name on success, NULL otherwise.
 //----------------------------------------------------------------------------
 const char *gui_askdir(const char *msg, 
                        const char *hlp,
@@ -2472,7 +2475,7 @@ const char *gui_askdir(const char *msg,
 //                          int dsk,
 //                          const char *def)
 //
-// Description: Get file or directory name from user.
+// Description: Get filename from user.
 //
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
@@ -2480,7 +2483,7 @@ const char *gui_askdir(const char *msg,
 //              int dsk:            Show drive list first.
 //              const char *def:    Default value.
 //
-// Return:      const char*:        File or directory name.
+// Return:      const char*:        Filename on success, NULL otherwise.
 //----------------------------------------------------------------------------
 const char *gui_askfile(const char *msg, 
                         const char *hlp,
@@ -2513,12 +2516,13 @@ const char *gui_askfile(const char *msg,
 // Description: Show file copy confirmation requester with a populated file
 //              list. 
 //
-// Input:       const char *msg:    FIXME
-//              const char *hlp:    FIXME
-//              pnode_p lst:        FIXME
-//              int cnf:            FIXME
+// Input:       const char *msg:    Message to be shown.
+//              const char *hlp:    Help text.
+//              pnode_p lst:        List of files / directories.
+//              int cnf:            Confirmation.
 //
-// Return:      int:                FIXME
+// Return:      int:                '1' - go ahead and copy, '0' - skip, 
+//                                  '-1' abort.
 //----------------------------------------------------------------------------
 int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
 {
