@@ -5,7 +5,6 @@
 //
 // On non Amiga systems this is mostly (except for some stdout prints to aid
 // testing) a stub.
-//
 //----------------------------------------------------------------------------
 
 #include "gui.h"
@@ -299,6 +298,7 @@ struct MUIP_InstallerGui_AskFile
 #define MUIV_InstallerGui_Number           (TAGBASE_sTx + 232)
 #define MUIV_InstallerGui_AskFile          (TAGBASE_sTx + 233)
 #define MUIV_InstallerGui_TopGroup         (TAGBASE_sTx + 234)
+
 #define B_PROCEED_ABORT                    0
 #define B_YES_NO                           1
 #define B_ABORT                            2
@@ -315,7 +315,7 @@ struct MUIP_InstallerGui_AskFile
 #define P_ASKFILE                          7
 
 //----------------------------------------------------------------------------
-// InstallerGuiWait - PRIVATE: Wait for notification(s)
+// InstallerGuiWait - Wait for notification(s)
 // Input:             notif - Start notification value 
 //                    range - Number of values to check for
 // Return:            Notifcation val. / zero on return id quit 
@@ -469,7 +469,7 @@ MUIDSP IPTR InstallerGuiInit(Class *cls,
 }
 
 //----------------------------------------------------------------------------
-// InstallerGuiPageSet - PRIVATE: Set page / buttons and display text
+// InstallerGuiPageSet - Set page / buttons and display text
 // Input:                Top page 
 //                       Button page 
 //                       Top text message
@@ -941,7 +941,7 @@ MUIDSP IPTR InstallerGuiCopyFilesEnd(Class *cls,
 //----------------------------------------------------------------------------
 // InstallerGuiCopyFilesAdd - Add files to (expert) file (de)selector
 // Input:                     File - Name of file (or dir)
-//                            ID - File / dir ID                               // REMOVE, NOT USED
+//                            ID - File / dir ID           // FIXME - NOT USED
 // Return:                    TRUE on success, FALSE otherwise
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,

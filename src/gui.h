@@ -14,7 +14,6 @@ int gui_init(void);
 void gui_exit(void);
 void gui_welcome(const char *msg, int *lvl, int *lgf, int *prt);
 void gui_message(const char *msg, int imm); 
-int gui_confirm(const char *msg); 
 int gui_bool(const char *msg, const char *hlp, const char *yes, const char *no); 
 int gui_choice(const char *msg, const char *hlp, const char **nms, int def); 
 const char * gui_string(const char *msg, const char *hlp, const char *def, int *hlt); 
@@ -27,6 +26,6 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf);
 int gui_copyfiles_setcur(const char *cur, int nogauge); 
 void gui_copyfiles_end(void); 
 int gui_complete(int com); 
-int gui_run(const char *msg, const char *hlp); 
+int gui_confirm(const char *msg, const char *hlp); 
 
 #endif
