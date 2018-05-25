@@ -19,7 +19,7 @@
 static char version[] __attribute__((used)) = "\0$VER: InstallerLG 43.3 [ALPHA1]";
 
 //----------------------------------------------------------------------------
-// Name:        init(entry_p contxt)
+// Name:        init
 // Description: Prepend / append startup and shutdown code.
 // Input:       entry_p contxt:  The start symbol, refer to the parser. 
 // Return:      entry_p:         Start + startup / shutdown additions.

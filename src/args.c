@@ -24,7 +24,7 @@ static struct DiskObject *dob;
 static char *args[ARG_NUMBER_OF];
 
 //----------------------------------------------------------------------------
-// Name:        arg_init(int argc, char **argv)
+// Name:        arg_init
 // Description: Initialization. Must be invoked before arg_get(). This will
 //              allocate resources that must be free:d by calling arg_done(). 
 // Input:       int argc:       From main(), the number of arguments.
@@ -155,7 +155,7 @@ int arg_init(int argc, char **argv)
 }
 
 //----------------------------------------------------------------------------
-// Name:        arg_get(int ndx)
+// Name:        arg_get
 // Description: Get argument. 
 // Input:       int ndx:    Argument index. Refer to ARG_* enum in arg.h. 
 // Return:      char *:     Argument as null terminated string if argument
@@ -171,7 +171,7 @@ char *arg_get(int ndx)
 }
 
 //----------------------------------------------------------------------------
-// Name:        arg_argc(int argc)
+// Name:        arg_argc
 // Description: Get / set argument count. 
 // Input:       int argc:   Positive values to set the number of arguments, 
 //                          negative values to get the number of arguments.
@@ -194,7 +194,7 @@ int arg_argc(int argc)
 }
 
 //----------------------------------------------------------------------------
-// Name:        arg_done(void)
+// Name:        arg_done
 // Description: Free resources allocated by arg_init(). 
 // Input:       - 
 // Return:      - 

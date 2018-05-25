@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 //----------------------------------------------------------------------------
-// Name:        did_error(void)
+// Name:        did_error
 // Description: Function used to determine whether or not we have erred.
 // Input:       -
 // Return:      int:    '1' if we have erred, '0' otherwise.
@@ -22,7 +22,7 @@ int did_error(void)
 }
 
 //----------------------------------------------------------------------------
-// Name:        did_halt(void)
+// Name:        did_halt
 // Description: Function used to determine whether or not we should halt.
 // Input:       -
 // Return:      int:    '1' if we should halt execution, '0' otherwise.
@@ -34,7 +34,7 @@ int did_halt(void)
 }
 
 //----------------------------------------------------------------------------
-// Name:        error(int id, error_t type, const char *info)
+// Name:        error
 // Description: Function used to set / get / communicate errors.
 // Input:       int id:             A numerical identifier aiding debugging. 
 //                                  In most cases this will be a line number. 

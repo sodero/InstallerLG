@@ -17,7 +17,7 @@
 #include <string.h>
 
 //----------------------------------------------------------------------------
-// Name:        find_symbol(entry_p entry)
+// Name:        find_symbol
 // Description: Find the referent of a symbolic reference. 
 // Input:       entry_p entry:  A symbolic reference, SYMREF.
 // Return:      entry_p:        A symbol, SYMBOL, matching the symbolic
@@ -74,7 +74,7 @@ entry_p find_symbol(entry_p entry)
 }
 
 //----------------------------------------------------------------------------
-// Name:        resolve(entry_p entry)
+// Name:        resolve
 // Description: Derive primitive from a complex type, something that can be
 //              directly evaluated as a string or numerical value. 
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
@@ -118,7 +118,7 @@ entry_p resolve(entry_p entry)
 }
 
 //----------------------------------------------------------------------------
-// Name:        num(entry_p entry)
+// Name:        num
 // Description: Get integer representation of an entry. This implies resolving 
 //              it, and, if necessary, converting it. 
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
@@ -171,7 +171,7 @@ int num(entry_p entry)
 }
 
 //----------------------------------------------------------------------------
-// Name:        str(entry_p entry)
+// Name:        str
 // Description: Get string representation of an entry. This implies resolving 
 //              it, and, if necessary, converting it. 
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
@@ -271,7 +271,7 @@ char *str(entry_p entry)
 }
 
 //----------------------------------------------------------------------------
-// Name:        invoke(entry_p entry)
+// Name:        invoke
 // Description: Execute all (executable) children of a CONTXT and return the 
 //              the return value of the last executed function. If any of the
 //              functions in the CONTXT fails, the execution will be aborted.
@@ -329,7 +329,7 @@ entry_p invoke(entry_p entry)
 }
 
 //----------------------------------------------------------------------------
-// Name:        run(entry_p entry)
+// Name:        run
 // Description: Run script. Setup and teardown of everything, GUI included.
 // Input:       entry_p entry:  The start symbol, refer to the parser. 
 // Return:      - 

@@ -20,7 +20,7 @@
 #endif
 
 //----------------------------------------------------------------------------
-// Name:        ror(entry_p *e)
+// Name:        ror
 // Description: Rotate array of entries to the right.
 // Input:       entry_p *e: Array of entries.
 // Return:      -
@@ -59,7 +59,7 @@ void ror(entry_p *e)
 }
 
 //----------------------------------------------------------------------------
-// Name:        local(entry_p e)
+// Name:        local
 // Description: Find the next context going upwards in the tree.
 // Input:       entry_p e:  The starting point.
 // Return:      entry_p:    The closest context found, or 
@@ -79,7 +79,7 @@ entry_p local(entry_p e)
 }
 
 //----------------------------------------------------------------------------
-// Name:        global(entry_p e)
+// Name:        global
 // Description: Find the root context. 
 // Input:       entry_p e:  The starting point.
 // Return:      entry_p:    The root context, or NULL
@@ -98,7 +98,7 @@ entry_p global(entry_p e)
 }
 
 //----------------------------------------------------------------------------
-// Name:        get_opt(entry_p c, opt_t t)
+// Name:        get_opt
 // Description: Find option of a given type in a context.
 // Input:       entry_p c:  The context to search in. 
 //              opt_t t:    The type of option to search for.
@@ -159,7 +159,7 @@ entry_p get_opt(entry_p c, opt_t t)
 }
 
 //----------------------------------------------------------------------------
-// Name:        c_sane(entry_p c, size_t n)
+// Name:        c_sane
 // Description: Context sanity check used by the NATIVE functions to verify
 //              that we have atleast the number of children needed and that 
 //              these are valid. If this fails, it typically, but not always,
@@ -235,7 +235,7 @@ int c_sane(entry_p c, size_t n)
 }
 
 //----------------------------------------------------------------------------
-// Name:        s_sane(entry_p c, size_t n)
+// Name:        s_sane
 // Description: Context sanity check used by the NATIVE functions to verify
 //              that we have atleast the number of symbols needed and that 
 //              these are valid. If this fails it typically, but not always,
@@ -294,7 +294,7 @@ int s_sane(entry_p c, size_t n)
 }
 
 //----------------------------------------------------------------------------
-// Name:        set_numvar(entry_p c, char *v, int n)
+// Name:        set_numvar
 // Description: Give an existing numerical variable a new value. Please note
 //              that the variable must exist and that the current resolved
 //              value must be a NUMBER, if not, this function will silently
@@ -340,7 +340,7 @@ void set_numvar(entry_p c, char *v, int n)
 }
 
 //----------------------------------------------------------------------------
-// Name:        get_numvar(entry_p c, char *v)
+// Name:        get_numvar
 // Description: Get the value of an existing numerical variable. Please note
 //              that the variable must exist and that the current resolved
 //              value must be a NUMBER.
@@ -385,7 +385,7 @@ int get_numvar(entry_p c, char *v)
 }
 
 //----------------------------------------------------------------------------
-// Name:        get_strvar(entry_p c, char *v)
+// Name:        get_strvar
 // Description: Get the value of an existing string variable. Please note
 //              that the variable must exist and that the current resolved
 //              value must be a STRING.
@@ -431,7 +431,7 @@ char *get_strvar(entry_p c, char *v)
 }
 
 //----------------------------------------------------------------------------
-// Name:        set_strvar(entry_p c, char *v, char *n)
+// Name:        set_strvar
 // Description: Give an existing string variable a new value. Please note
 //              that the variable must exist and that the current resolved
 //              value must be a STRING, if not, this function will silently
@@ -475,7 +475,7 @@ void set_strvar(entry_p c, char *v, char *n)
 }
 
 //----------------------------------------------------------------------------
-// Name:        pp_aux(entry_p entry, int indent)
+// Name:        pp_aux
 // Description: Refer to pretty_print below. 
 // Input:       entry_p entry:  The tree to print.  
 //              int indent:     Indentation level.
@@ -568,7 +568,7 @@ static void pp_aux(entry_p entry, int indent)
 }
 
 //----------------------------------------------------------------------------
-// Name:        pretty_print(entry_p entry)
+// Name:        pretty_print
 // Description: Pretty print the complete tree in 'entry'.
 // Input:       entry_p entry:  The tree to print.  
 // Return:      -
@@ -582,7 +582,7 @@ void pretty_print(entry_p entry)
 #define LG_BUFSIZ ((BUFSIZ > PATH_MAX ? BUFSIZ : PATH_MAX) + 1)
 
 //----------------------------------------------------------------------------
-// Name:        get_buf(void)
+// Name:        get_buf
 // Description: Get pointer to temporary buffer.
 // Input:       - 
 // Return:      char *: Buffer pointer.
@@ -594,7 +594,7 @@ char *get_buf(void)
 }
 
 //----------------------------------------------------------------------------
-// Name:        buf_size(void)
+// Name:        buf_size
 // Description: Get size of temporary buffer.
 // Input:       - 
 // Return:      size_t: Buffer size.

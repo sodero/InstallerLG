@@ -81,18 +81,12 @@ entry_p m_expandpath(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_confirm(entry_p contxt, 
-//                        const char *hlp, 
-//                        const char *msg,
-//                        ...)
-//
+// Name:        h_confirm
 // Description: Ask user for confirmation (proceed / skip / abort). 
-//
 // Input:       entry_p contxt:     The execution context.
 //              const char *hlp:    Help text.
 //              const char *msg:    Message format string.
 //              ...:                Format string varargs.
-//
 // Return:      int:                If confirmed '1', else '0'. Both skip and
 //                                  abort will return a value of '0'.
 //----------------------------------------------------------------------------
@@ -128,7 +122,7 @@ static int h_confirm(entry_p contxt,
         // the user. 
         else
         {
-            ret = gui_run(get_buf(), hlp);
+            ret = gui_confirm(get_buf(), hlp);
         }
 
         // On abort, set HALT state. The return
@@ -151,13 +145,10 @@ static int h_confirm(entry_p contxt,
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_exists(const char *n)
-//
+// Name:        h_exists
 // Description: Get file / dir info.
-//
 // Input:       entry_p contxt:     The execution context.
 //              const char *n:      Path to file / dir.
-//
 // Return:      int:                Dir = '2', file = '1' else '0'.
 //----------------------------------------------------------------------------
 static int h_exists(const char *n)
@@ -236,14 +227,10 @@ static int h_exists(const char *n)
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_fileonly(int id,
-//                         const char *n)
-//
+// Name:        h_fileonly
 // Description: Get file part from full path.
-//
 // Input:       int id:             The ID of the execution context.
 //              const char *n:      Path to file.
-//
 // Return:      const char *:       On success, file part of path, otherwise
 //                                  empty string.
 //----------------------------------------------------------------------------
@@ -288,17 +275,9 @@ static const char *h_fileonly(int id,
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_filetree(int id, 
-//                         const char *src, 
-//                         const char *dst, 
-//                         entry_p files, 
-//                         entry_p fonts, 
-//                         entry_p choices, 
-//                         entry_p pattern)
-//
+// Name:        h_filetree
 // Description: Generate a complete file / directory tree with source and
 //              destination tuples. Used by m_copyfiles.
-//
 // Input:       int id:             The ID of the execution context.
 //              const char *src:    Source directory / file.
 //              const char *dst:    Destination directory.
@@ -306,9 +285,7 @@ static const char *h_fileonly(int id,
 //              entry_p fonts:      * Skip fonts.
 //              entry_p choices:    * List of files.
 //              entry_p pattern:    * File / dir pattern.
-//
 //              * Refer to the Istaller.guide.
-//
 // Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
 static pnode_p h_filetree(int id, 
@@ -643,17 +620,12 @@ static pnode_p h_filetree(int id,
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_protect_get(entry_p contxt, 
-//                            const char *file, 
-//                            LONG *mask)
-//
+// Name:        h_protect_get
 // Description: Utility function used by m_protect and m_copyfiles to get
 //              file / dir protection bits. 
-//
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
 //              LONG *mask:         Pointer to the LONG to hold the result.
-//
 // Return:      int:                On success '1', else '0'. 
 //----------------------------------------------------------------------------
 static int h_protect_get(entry_p contxt, 
@@ -715,17 +687,12 @@ static int h_protect_get(entry_p contxt,
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_protect_set(entry_p contxt, 
-//                            const char *file, 
-//                            LONG mask)
-//
+// Name:        h_protect_set
 // Description: Utility function used by m_protect and m_copyfiles to set
 //              file / dir protection bits. 
-//
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
 //              LONG mask:          Protection bits
-//
 // Return:      int:                On success '1', else '0'. 
 //----------------------------------------------------------------------------
 static int h_protect_set(entry_p contxt, 
@@ -766,18 +733,12 @@ static int h_protect_set(entry_p contxt,
 #define CF_SILENT       (1 << 8)
 
 //----------------------------------------------------------------------------
-// Name:        h_copyfile(entry_p contxt, 
-//                         const char *hlp, 
-//                         const char *msg,
-//                         int mode)
-//
+// Name:        h_copyfile
 // Description: Copy file. Helper used by m_copyfiles and m_copylib.
-//
 // Input:       entry_p contxt:     The execution context.
 //              const char *src:    Source file.
 //              const char *dst:    Destination file.
 //              int mode:           Copy mode, see CF_*.
-//
 // Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
 static int h_copyfile(entry_p contxt, 
@@ -991,16 +952,11 @@ static int h_copyfile(entry_p contxt,
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_makedir(entry_p contxt, 
-//                        const char *dst,
-//                        int mode)
-//
+// Name:        h_makedir
 // Description: Create directory / tree of directories.
-//
 // Input:       entry_p contxt:     The execution context.
 //              const char *dst:    The directory.
 //              int mode:           FIXME.
-//
 // Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
 static int h_makedir(entry_p contxt, const char *dst, int mode)
@@ -1716,14 +1672,10 @@ entry_p m_copylib(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_delete_file(entry_p contxt, 
-//                            const char *file)
-//
+// Name:        h_delete_file
 // Description: Delete file. Helper used by m_delete.
-//
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File to delete.
-//
 // Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
 static int h_delete_file(entry_p contxt, const char *file)
@@ -1832,14 +1784,10 @@ static int h_delete_file(entry_p contxt, const char *file)
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_delete_dir(entry_p contxt, 
-//                           const char *dir)
-//
+// Name:        h_delete_dir
 // Description: Delete directory. Helper used by m_delete.
-//
 // Input:       entry_p contxt:     The execution context.
 //              const char *dir:    Directory to delete.
-//
 // Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
 static int h_delete_dir(entry_p contxt, const char *dir)
@@ -2005,14 +1953,10 @@ static int h_delete_dir(entry_p contxt, const char *dir)
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_delete_pattern(entry_p contxt, 
-//                               const char *pat)
-//
+// Name:        h_delete_pattern
 // Description: Delete file / dir matching pattern. Helper used by m_delete.
-//
 // Input:       entry_p contxt:     The execution context.
 //              const char *pat:    Pattern.
-//
 // Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
 static int h_delete_pattern(entry_p contxt, const char *pat)
@@ -3933,16 +3877,11 @@ entry_p m_rename(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_log(entry_p contxt, 
-//                    const char *fmt, 
-//                    ...)
-//
+// Name:        h_log
 // Description: Write formatted message to log file. 
-//
 // Input:       entry_p contxt:     The execution context.
 //              const char *fmt:    Message format string.
 //              ...:                Format string varargs.
-//
 // Return:      int:                Number of characters written to log file
 //                                  if logging is enabled. If logging is 
 //                                  disabled, '1' will always be returned.

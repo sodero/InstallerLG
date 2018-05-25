@@ -8,7 +8,7 @@
 #include "resource.h"
 
 //----------------------------------------------------------------------------
-// Name:        tr(res_t r)
+// Name:        tr
 // Description: Get string from string ID. 
 // Input:       A res_t string ID. 
 // Return:      The string corresponding to the string ID. 

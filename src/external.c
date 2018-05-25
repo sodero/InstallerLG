@@ -80,7 +80,7 @@ static entry_p h_run(entry_p contxt, const char *pre)
         // Did we need it? (confirmation)
         if(confirm)
         {
-            int c = gui_run(str(prompt), str(help));
+            int c = gui_confirm(str(prompt), str(help));
 
             // HALT if abort
             if(c == -1)

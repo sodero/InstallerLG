@@ -14,7 +14,7 @@
 #include <string.h>
 
 //----------------------------------------------------------------------------
-// Name:        new_contxt(void)
+// Name:        new_contxt
 // Description: Allocate CONTXT. 
 // Input:       -
 // Return:      entry_p:    A CONTXT on success, NULL otherwise.
@@ -64,7 +64,7 @@ entry_p new_contxt(void)
 }
 
 //----------------------------------------------------------------------------
-// Name:        new_number(int n) 
+// Name:        new_number
 // Description: Allocate NUMBER. 
 // Input:       int n:      The initial value.
 // Return:      entry_p:    A NUMBER on success, NULL otherwise.
@@ -93,7 +93,7 @@ entry_p new_number(int n)
 }
 
 //----------------------------------------------------------------------------
-// Name:        new_string(char *n) 
+// Name:        new_string
 // Description: Allocate STRING. 
 // Input:       char *n:    A pointer to a null terminated string. The 
 //                          string won't be copied and it will be free:d 
@@ -132,7 +132,7 @@ entry_p new_string(char *n)
 
 //----------------------------------------------------------------------------
 // ---OBSOLETE---
-// Name:        new_failure(void) 
+// Name:        new_failure
 // Description: Get STATUS / failure. 
 // Input:       -
 // Return:      entry_p:    A STATUS (failure).
@@ -147,7 +147,7 @@ entry_p new_failure(void)
 }
 
 //----------------------------------------------------------------------------
-// Name:        new_symbol(char *n) 
+// Name:        new_symbol
 // Description: Allocate SYMBOL. 
 // Input:       char *n:    The name of the symbol. The string won't be 
 //                          copied and it will be free:d by kill(...) so it 
@@ -186,7 +186,7 @@ entry_p new_symbol(char *n)
 }
 
 //----------------------------------------------------------------------------
-// Name:        new_custom(char *n, int l, entry_p s, entry_p c)
+// Name:        new_custom
 // Description: Allocate CUSTOM, a user defined procedure / function. 
 // Input:       char *n:    The name of the function. This string won't be 
 //                          copied and it will be free:d by kill(...) so it 
@@ -271,7 +271,7 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
 }
 
 //----------------------------------------------------------------------------
-// Name:        new_symref(char *n, int l, entry_p s, entry_p c)
+// Name:        new_symref
 // Description: Allocate SYMREF, a reference to a symbol / variable. 
 // Input:       char *n:    The name of the referenced symbol. This string 
 //                          won't be copied and it will be free:d by 
@@ -313,7 +313,7 @@ entry_p new_symref(char *n, int l)
 }
 
 //----------------------------------------------------------------------------
-// Name:        move_contxt(entry_p dst, entry_p src)
+// Name:        move_contxt
 // Description: Move children and symbols from one context to another. 
 //              The empty source context will be freed afterwards.
 // Input:       entry_p dst:    The destination context. 
@@ -356,7 +356,7 @@ static void move_contxt(entry_p dst, entry_p src)
 }
 
 //----------------------------------------------------------------------------
-// Name:        new_native(char *n, int l, entry_p s, entry_p c)
+// Name:        new_native
 // Description: Allocate NATIVE, a native, non-user-defined function. 
 // Input:       char *n:        The name of the function. This string won't
 //                              be copied and it will be free:d by kill(...) 
@@ -435,7 +435,7 @@ entry_p new_native(char *n, int l, call_t call, entry_p e, type_t r)
 }
 
 //----------------------------------------------------------------------------
-// Name:        new_option(char *n, opt_t t, entry_p e)
+// Name:        new_option
 // Description: Allocate OPTION 
 // Input:       char *n:        The name of the option. This string won't
 //                              be copied and it will be free:d by kill(...) 
@@ -490,7 +490,7 @@ entry_p new_option(char *n, opt_t t, entry_p e)
 }
 
 //----------------------------------------------------------------------------
-// Name:        new_cusref (char *n, int l, entry_p e)
+// Name:        new_cusref
 // Description: Allocate CUSREF
 // Input:       char *n:        The name of the user-defined function to be 
 //                              invoked. This string won't be copied and 
@@ -543,7 +543,7 @@ entry_p new_cusref(char *n, int l, entry_p e)
 }
 
 //----------------------------------------------------------------------------
-// Name:        new_dangle(void) 
+// Name:        new_dangle
 // Description: Get DANGLE. 
 // Input:       -
 // Return:      entry_p:    A DANGLE.
@@ -557,7 +557,7 @@ entry_p new_dangle(void)
 }
 
 //----------------------------------------------------------------------------
-// Name:        append(entry_p **dst, entry_p e)
+// Name:        append
 // Description: Append entry to array. Grow array if necessary. 
 // Input:       entry_p **dst:  The array.    
 //              entry_p e:      The entry. 
@@ -618,7 +618,7 @@ entry_p append(entry_p **dst, entry_p e)
 }
 
 //----------------------------------------------------------------------------
-// Name:        push(entry_p dst, entry_p e)
+// Name:        push
 // Description: Type aware 'append' working on 'entry_t' level. Takes care of
 //              children and symbols, while avoiding duplicates of the latter. 
 // Input:       entry_p dst:    The destination.    
@@ -696,7 +696,7 @@ entry_p push(entry_p dst, entry_p src)
 }
 
 //----------------------------------------------------------------------------
-// Name:        kill(entry_p entry)
+// Name:        kill
 // Description: Free the memory occupied by 'entry' and all its children. 
 // Input:       entry_p:    The entry_p to be free:d. 
 // Return:      -
@@ -780,7 +780,7 @@ void kill(entry_p entry)
 }
 
 //----------------------------------------------------------------------------
-// Name:        end(void) 
+// Name:        end
 // Description: Get entry_p sentinel. 
 // Input:       -
 // Return:      entry_p:    An entry_p which can be used as sentinel.

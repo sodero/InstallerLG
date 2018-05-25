@@ -99,9 +99,8 @@ CLASS_DEF(InstallerGui)
 #define MUIM_InstallerGui_Complete         (TAGBASE_sTx + 108)
 #define MUIM_InstallerGui_Ticker           (TAGBASE_sTx + 109)
 #define MUIM_InstallerGui_CopyFilesAdd     (TAGBASE_sTx + 110)
-#define MUIM_InstallerGui_Run              (TAGBASE_sTx + 111)
+#define MUIM_InstallerGui_Confirm          (TAGBASE_sTx + 111)
 #define MUIM_InstallerGui_Message          (TAGBASE_sTx + 112)
-#define MUIM_InstallerGui_Confirm          (TAGBASE_sTx + 113)
 #define MUIM_InstallerGui_Radio            (TAGBASE_sTx + 114)
 #define MUIM_InstallerGui_Bool             (TAGBASE_sTx + 115)
 #define MUIM_InstallerGui_String           (TAGBASE_sTx + 116)
@@ -177,7 +176,7 @@ struct MUIP_InstallerGui_CopyFilesAdd
 //----------------------------------------------------------------------------
 // InstallerGui - Run parameters
 //----------------------------------------------------------------------------
-struct MUIP_InstallerGui_Run
+struct MUIP_InstallerGui_Confirm
 {
     ULONG MethodID;
     ULONG Message;
@@ -192,15 +191,6 @@ struct MUIP_InstallerGui_Message
     ULONG MethodID;
     ULONG Message;
     ULONG Immediate;
-};
-
-//----------------------------------------------------------------------------
-// InstallerGui - Confirm parameters
-//----------------------------------------------------------------------------
-struct MUIP_InstallerGui_Confirm
-{
-    ULONG MethodID;
-    ULONG Message;
 };
 
 //----------------------------------------------------------------------------
@@ -1031,34 +1021,6 @@ MUIDSP IPTR InstallerGuiMessage(Class *cls,
 }
 
 //----------------------------------------------------------------------------
-// InstallerGuiConfirm - XXXXXXX
-// Input:                Message
-// Return:               TRUE
-//----------------------------------------------------------------------------
-MUIDSP IPTR InstallerGuiConfirm(Class *cls,
-                                Object *obj,
-                                struct MUIP_InstallerGui_Confirm *msg)
-{
-    if(InstallerGuiPageSet(obj, P_MESSAGE, B_PROCEED_ABORT, 
-                           msg->Message))
-    {
-        // Wait for proceed or abort.
-        if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
-           MUIV_InstallerGui_Proceed)
-        {
-            return TRUE;
-        }
-    }
-    else
-    {
-        // Unknown error.
-        GERR(tr(S_UNER)); 
-    }
-
-    return FALSE;
-}
-
-//----------------------------------------------------------------------------
 // InstallerGuiRadio - XXXXXXX 
 // Input:              Message 
 //                     Help
@@ -1491,13 +1453,13 @@ MUIDSP IPTR InstallerGuiComplete(Class *cls,
 }
 
 //----------------------------------------------------------------------------
-// InstallerGuiRun - Get user confirmation before running shell command
-// Input:            Message - The prompt 
-// Return:           '1' = proceed, '0' = skip, '-1' = abort
+// InstallerGuiConfirm - Get user confirmation before running shell command
+// Input:                Message - The prompt 
+// Return:               '1' = proceed, '0' = skip, '-1' = abort
 //----------------------------------------------------------------------------
-MUIDSP IPTR InstallerGuiRun(Class *cls,
-                            Object *obj,
-                            struct MUIP_InstallerGui_Run *msg)
+MUIDSP IPTR InstallerGuiConfirm(Class *cls,
+                                Object *obj,
+                                struct MUIP_InstallerGui_Confirm *msg)
 {
     static Object *con, *but, *txt, *grp; 
 
@@ -1996,9 +1958,6 @@ DISPATCH(InstallerGui)
         case MUIM_InstallerGui_Message:
             return InstallerGuiMessage(cls, obj, (struct MUIP_InstallerGui_Message *) msg);
 
-        case MUIM_InstallerGui_Confirm:
-            return InstallerGuiConfirm(cls, obj, (struct MUIP_InstallerGui_Confirm *) msg);
-
         case MUIM_InstallerGui_Radio:
             return InstallerGuiRadio(cls, obj, (struct MUIP_InstallerGui_Radio *) msg);
 
@@ -2020,8 +1979,8 @@ DISPATCH(InstallerGui)
         case MUIM_InstallerGui_Ticker:
             return DoMethod(_app(obj), MUIM_Application_ReturnID, MUIV_InstallerGui_Tick); 
 
-        case MUIM_InstallerGui_Run:
-            return InstallerGuiRun(cls, obj, (struct MUIP_InstallerGui_Run *) msg);
+        case MUIM_InstallerGui_Confirm:
+            return InstallerGuiConfirm(cls, obj, (struct MUIP_InstallerGui_Confirm *) msg);
     }
 
     // Unknown method, promote to parent.
@@ -2050,12 +2009,9 @@ DISPATCH(InstallerGui)
 //----------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------
-// Name:        gui_init(void)
-//
+// Name:        gui_init
 // Description: Initialize GUI
-//
 // Input:       -
-//
 // Return:      int:                FIXME
 //----------------------------------------------------------------------------
 int gui_init(void)
@@ -2110,12 +2066,9 @@ int gui_init(void)
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_exit(void)
-//
+// Name:        gui_exit
 // Description: FIXME
-//
 // Input:       -
-//
 // Return:      -
 //----------------------------------------------------------------------------
 void gui_exit(void)
@@ -2134,14 +2087,10 @@ void gui_exit(void)
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_message(const char *msg,
-//                          int imm)
-//
+// Name:        gui_message
 // Description: FIXME
-//
 // Input:       const char *msg:    Message shown to the user. 
 //              int imm:            FIXME
-//
 // Return:      -
 //----------------------------------------------------------------------------
 void gui_message(const char *msg, int imm)
@@ -2162,41 +2111,13 @@ void gui_message(const char *msg, int imm)
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_confirm(const char *msg)
-//
-// Description: FIXME
-//
-// Input:       const char *msg:    Message shown to the user. 
-//
-// Return:      int:                FIXME
-//----------------------------------------------------------------------------
-int gui_confirm(const char *msg)
-{
-    int ret = (int)
-    #ifdef AMIGA
-    DoMethod(Win, MUIM_InstallerGui_Confirm, msg);
-    #else
-    0;
-    // Avoid compiler warning.
-    msg = NULL; 
-    #endif
-    return ret; 
-}
-
-//----------------------------------------------------------------------------
-// Name:        gui_choice(const char *msg, 
-//                         const char *hlp,
-//                         const char **nms, 
-//                         int def)
-//
-// Description: FIXME
-//
+// Name:        gui_choice
+// Description: Get user selecton of a single string out of a list of strings.
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
-//              const char **nms:   FIXME
-//              int def:            FIXME
-//
-// Return:      int:                FIXME
+//              const char **nms:   List of strings.
+//              int def:            Default choice (0-index)
+// Return:      int:                The choice (0-index).
 //----------------------------------------------------------------------------
 int gui_choice(const char *msg, 
                const char *hlp,
@@ -2223,19 +2144,14 @@ int gui_choice(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_options(const char *msg, 
-//                          const char *hlp,
-//                          const char **nms, 
-//                          int def)
-//
-// Description: FIXME
-//
+// Name:        gui_options
+// Description: Get user selection of any number / combination of strings
+//              from a list.
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
-//              const char **nms:   FIXME
-//              int def:            FIXME
-//
-// Return:      int:                FIXME
+//              const char **nms:   List of strings from which to choose.
+//              int def:            Default bitmap.
+// Return:      int:                A bitmap representing the selection.
 //----------------------------------------------------------------------------
 int gui_options(const char *msg, 
                 const char *hlp,
@@ -2262,18 +2178,12 @@ int gui_options(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_bool(const char *msg,
-//                       const char *hlp,
-//                       const char *yes,
-//                       const char *no)
-//
+// Name:        gui_bool
 // Description: Get boolean value from user, e.g 'Yes' / 'No'.
-//
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
 //              const char *yes:    True string. 
 //              const char *no:     False string.
-//
 // Return:      int:                '1' or '0'.
 //----------------------------------------------------------------------------
 int gui_bool(const char *msg,
@@ -2301,18 +2211,12 @@ int gui_bool(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_string(const char *msg, 
-//                         const char *hlp,
-//                         const char *def,
-//                         int *hlt)
-//
+// Name:        gui_string
 // Description: Get string value from user.
-//
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
 //              const char *def:    Default string value.
 //              int *hlt:           Halt return value.
-//
 // Return:      const char *:       String value from user.
 //----------------------------------------------------------------------------
 const char * gui_string(const char *msg, 
@@ -2342,22 +2246,14 @@ const char * gui_string(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_number(const char *msg, 
-//                         const char *hlp,
-//                         int min, 
-//                         int max, 
-//                         int def, 
-//                         int *hlt)
-//
+// Name:        gui_number
 // Description: Get numerical value from user.
-//
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
 //              int min:            Minimum value.
 //              int max:            Maximum value.
 //              int def:            Default value.
 //              int *hlt:           Halt return value.
-//
 // Return:      int:                Numerical value from user.
 //----------------------------------------------------------------------------
 int gui_number(const char *msg, 
@@ -2391,19 +2287,13 @@ int gui_number(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_welcome(const char *msg, 
-//                          int *lvl, 
-//                          int *lgf, 
-//                          int *prt)
-//
+// Name:        gui_welcome
 // Description: Show welcome message and prompt for user level / installer
 //              mode.
-//
 // Input:       const char *msg:    Welcome message.
 //              int *lvl:           User level return value.
 //              int *lgf:           Log settings return value.
 //              int *prt:           Pretend mode return value.
-//
 // Return:      -
 //----------------------------------------------------------------------------
 void gui_welcome(const char *msg, 
@@ -2427,22 +2317,14 @@ void gui_welcome(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_askdir(const char *msg, 
-//                         const char *hlp,
-//                         int pth,
-//                         int dsk,
-//                         int asn, 
-//                         const char *def)
-//
+// Name:        gui_askdir
 // Description: Get directory name from user.
-//
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
 //              int pth:            Allow non-existing default.
 //              int dsk:            Show drive list first.
 //              int asn:            Assigns can satisfy the request as well.
 //              const char *def:    Default value.
-//
 // Return:      const char*:        Directory name on success, NULL otherwise.
 //----------------------------------------------------------------------------
 const char *gui_askdir(const char *msg, 
@@ -2469,20 +2351,13 @@ const char *gui_askdir(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_askfile(const char *msg, 
-//                          const char *hlp,
-//                          int pth,
-//                          int dsk,
-//                          const char *def)
-//
+// Name:        gui_askfile
 // Description: Get filename from user.
-//
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
 //              int pth:            Allow non-existing default.
 //              int dsk:            Show drive list first.
 //              const char *def:    Default value.
-//
 // Return:      const char*:        Filename on success, NULL otherwise.
 //----------------------------------------------------------------------------
 const char *gui_askfile(const char *msg, 
@@ -2508,19 +2383,13 @@ const char *gui_askfile(const char *msg,
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_copyfiles_start(const char *msg, 
-//                                  const char *hlp,
-//                                  pnode_p lst,
-//                                  int cnf)
-//
+// Name:        gui_copyfiles_start
 // Description: Show file copy confirmation requester with a populated file
 //              list. 
-//
 // Input:       const char *msg:    Message to be shown.
 //              const char *hlp:    Help text.
 //              pnode_p lst:        List of files / directories.
 //              int cnf:            Confirmation.
-//
 // Return:      int:                '1' - go ahead and copy, '0' - skip, 
 //                                  '-1' abort.
 //----------------------------------------------------------------------------
@@ -2683,14 +2552,10 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_copyfiles_setcur(const char *cur, 
-//                                   int nogauge) 
-//
+// Name:        gui_copyfiles_setcur
 // Description: Update progress gauge and show current filename.
-//
 // Input:       const char *cur:    Filename.
 //              int nogauge:        Hide gauge.
-//
 // Return:      int:                TRUE on success, FALSE otherwise.
 //----------------------------------------------------------------------------
 int gui_copyfiles_setcur(const char *cur, int nogauge) 
@@ -2705,12 +2570,9 @@ int gui_copyfiles_setcur(const char *cur, int nogauge)
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_copyfiles_end(void)
-//
+// Name:        gui_copyfiles_end
 // Description: End file copy. Must be invoked after gui_copyfiles_start().
-//
 // Input:       -
-//
 // Return:      -
 //----------------------------------------------------------------------------
 void gui_copyfiles_end(void) 
@@ -2721,12 +2583,9 @@ void gui_copyfiles_end(void)
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_complete(int com)
-//
+// Name:        gui_complete
 // Description: Show progress gauge.
-//
 // Input:       int com:            Progress in percent.
-//
 // Return:      int:                TRUE on success, FALSE otherwise.
 //----------------------------------------------------------------------------
 int gui_complete(int com)
@@ -2741,21 +2600,17 @@ int gui_complete(int com)
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_run(const char *msg, 
-//                      const char *hlp)
-//
-// Description: Show confirmation dialogue.
-//
+// Name:        gui_confirm
+// Description: Get user confirmation.
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
-//
 // Return:      int:                '1' = proceed, '0' = skip, 
 //                                  '-1' = abort
 //----------------------------------------------------------------------------
-int gui_run(const char *msg, const char *hlp)
+int gui_confirm(const char *msg, const char *hlp)
 {
     #ifdef AMIGA
-    return (int) DoMethod(Win, MUIM_InstallerGui_Run, msg, hlp);
+    return (int) DoMethod(Win, MUIM_InstallerGui_Confirm, msg, hlp);
     #else
     // Testing purposes.
     printf("%s%s\n", msg, hlp);
@@ -2766,16 +2621,11 @@ int gui_run(const char *msg, const char *hlp)
 }
 
 //----------------------------------------------------------------------------
-// Name:        gui_error(int id,
-//                        const char *type, 
-//                        const char *info)
-//
-// Description: Show error message to the user.
-//
+// Name:        gui_error
+// Description: Show error message.
 // Input:       int id:             Line number.
 //              const char *type:   Error description.
 //              const char *info:   Extra info, e.g. filename.
-//
 // Return:      int:                1
 //----------------------------------------------------------------------------
 int gui_error(int id, 
