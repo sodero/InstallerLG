@@ -1988,29 +1988,33 @@ DISPATCH(InstallerGui)
 }
 #endif /* AMIGA */
 
-//----------------------------------------------------------------------------
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//----------------------------------------------------------------------------
+
+//____________________________________________________________________________
+//############################################################################
+//############################################################################
+//############################################################################
+//****************************************************************************
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+//............................................................................
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+//.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  .
+// The gui_* functions below serve as glue between the platform independent
+// parts of InstallerNG and the Amiga specific Zune / MUI parts. On non Amiga
+// systems, arguments are typically written to stdout to facilitate testing.
+//.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  .
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//****************************************************************************
+//############################################################################
+//############################################################################
+//############################################################################
+
 
 //----------------------------------------------------------------------------
 // Name:        gui_init
-// Description: Initialize GUI
+// Description: Initialize and show GUI.
 // Input:       -
 // Return:      int:                FIXME
 //----------------------------------------------------------------------------
@@ -2019,6 +2023,7 @@ int gui_init(void)
     #ifdef AMIGA
     Object *App; 
 
+    // Create our GUI class.
     InstallerGuiClass = (struct MUI_CustomClass *) MUI_CreateCustomClass
     (
 	    NULL, MUIC_Window, NULL,
@@ -2026,12 +2031,14 @@ int gui_init(void)
         (APTR) DISPATCH_GATE (InstallerGui)
     );
 
+    // Bail out on error.
     if (!InstallerGuiClass)
     {
         GERR(tr(S_FMCC)); 
         return FALSE;
     }
 
+    // Create application using our newly created class.
     App = (Object *) MUI_NewObject(
         MUIC_Application,
         MUIA_Application_Title, tr(S_INST),
@@ -2041,16 +2048,20 @@ int gui_init(void)
         TAG_END
     ); 
 
+    // Bail out on error.
     if(!App)
     {
         GERR(tr(S_MAPP));
         return FALSE;
     }
 
+    // Internal initialization.
     if(!DoMethod(Win, MUIM_InstallerGui_Init))
     {
+        // Bail out on error.
         GERR(tr(S_FINT));
         gui_exit(); 
+
         return FALSE;
     }
 
@@ -2067,7 +2078,7 @@ int gui_init(void)
 
 //----------------------------------------------------------------------------
 // Name:        gui_exit
-// Description: FIXME
+// Description: Close GUI and free GUI resources.
 // Input:       -
 // Return:      -
 //----------------------------------------------------------------------------
@@ -2088,9 +2099,9 @@ void gui_exit(void)
 
 //----------------------------------------------------------------------------
 // Name:        gui_message
-// Description: FIXME
+// Description: Show message.
 // Input:       const char *msg:    Message shown to the user. 
-//              int imm:            FIXME
+//              int imm:            Immediate - no proceed button.
 // Return:      -
 //----------------------------------------------------------------------------
 void gui_message(const char *msg, int imm)
@@ -2325,7 +2336,7 @@ void gui_welcome(const char *msg,
 //              int dsk:            Show drive list first.
 //              int asn:            Assigns can satisfy the request as well.
 //              const char *def:    Default value.
-// Return:      const char*:        Directory name on success, NULL otherwise.
+// Return:      const char*:        Dir name on success, NULL otherwise.
 //----------------------------------------------------------------------------
 const char *gui_askdir(const char *msg, 
                        const char *hlp,
@@ -2390,8 +2401,7 @@ const char *gui_askfile(const char *msg,
 //              const char *hlp:    Help text.
 //              pnode_p lst:        List of files / directories.
 //              int cnf:            Confirmation.
-// Return:      int:                '1' - go ahead and copy, '0' - skip, 
-//                                  '-1' abort.
+// Return:      int:                '1' - proceed, '0' - skip, '-1' abort.
 //----------------------------------------------------------------------------
 int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
 {
@@ -2604,8 +2614,7 @@ int gui_complete(int com)
 // Description: Get user confirmation.
 // Input:       const char *msg:    Message shown to the user. 
 //              const char *hlp:    Help text.
-// Return:      int:                '1' = proceed, '0' = skip, 
-//                                  '-1' = abort
+// Return:      int:                '1' = proceed, '0' = skip, '-1' = abort
 //----------------------------------------------------------------------------
 int gui_confirm(const char *msg, const char *hlp)
 {
