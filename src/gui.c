@@ -1,10 +1,8 @@
 //----------------------------------------------------------------------------
 // gui.c: 
 //
-// MUI based GUI
-//
-// On non Amiga systems this is mostly (except for some stdout prints to aid
-// testing) a stub.
+// MUI based GUI. On non Amiga systems this is, except for some stdout prints
+// to aid testing, a stub.
 //----------------------------------------------------------------------------
 
 #include "gui.h"
@@ -913,7 +911,8 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
                 return (IPTR) FALSE; 
             }
         }
-        // Go on. Next file.  
+
+        // Next file (if any).  
         return (IPTR) TRUE; 
     }
     else
@@ -933,8 +932,18 @@ MUIDSP IPTR InstallerGuiCopyFilesEnd(Class *cls,
 {
     struct InstallerGuiData *my = INST_DATA(cls, obj);
 
-    DoMethod(_app (obj), MUIM_Application_RemInputHandler, &my->ticker);
+    // Uninstall timer created to establish a time
+    // slice where the user has a chance to abort
+    // file copy operations. Things will continue
+    // to work even if we don't, but by doing it 
+    // this way we make less noise.
+    DoMethod
+    (
+        _app (obj), 
+        MUIM_Application_RemInputHandler, &my->ticker
+    );
 
+    // Always. 
     return (IPTR) TRUE; 
 }
 
@@ -970,11 +979,17 @@ MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,
             MUIV_List_Insert_Bottom
         ); 
 
+        // The lister must be visible. 
         set(lst, MUIA_ShowMe, TRUE);
-    }
 
-    GERR(tr(S_UNER)); 
-    return (IPTR) FALSE; 
+        // Always. 
+        return (IPTR) TRUE; 
+    }
+    else
+    {
+        GERR(tr(S_UNER)); 
+        return (IPTR) FALSE; 
+    }
 }
 
 
@@ -987,14 +1002,14 @@ MUIDSP IPTR InstallerGuiExit(Class *cls,
                              Object *obj,
                              struct MUIP_InstallerGui_Exit *msg)
 {
-    // Do nothing
+    // Do nothing.
     return TRUE;
 }
 
 //----------------------------------------------------------------------------
 // InstallerGuiMessage - Show message
 // Input:                Message 
-// Return:               FIXME
+// Return:               TRUE on success, FALSE otherwise
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiMessage(Class *cls,
                                 Object *obj,
@@ -1014,10 +1029,12 @@ MUIDSP IPTR InstallerGuiMessage(Class *cls,
         // Always. 
         return TRUE;
     }
-
-    // Unknown error.
-    GERR(tr(S_UNER)); 
-    return FALSE;
+    else
+    {
+        // Unknown error.
+        GERR(tr(S_UNER)); 
+        return FALSE;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1164,12 +1181,15 @@ MUIDSP IPTR InstallerGuiBool(Class *cls,
         {
             // Wait for yes or no.
             ULONG b = InstallerGuiWait(obj, MUIV_InstallerGui_Yes, 2); 
+
             switch(b)
             {
                 case MUIV_InstallerGui_Yes:
                     return 1; 
+
                 case MUIV_InstallerGui_No:
                     return 0; 
+
                 default:
                     return -1; 
             }
@@ -1412,7 +1432,9 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
                 }
 
                 DoMethod(grp, MUIM_Group_ExitChange);
-                return id == MUIV_InstallerGui_Proceed ? ret : 0; 
+
+                return id == MUIV_InstallerGui_Proceed ?
+                       ret : 0; 
             }
         }
     }
@@ -1431,17 +1453,29 @@ MUIDSP IPTR InstallerGuiComplete(Class *cls,
                                  Object *obj,
                                  struct MUIP_InstallerGui_Complete *msg)
 {
-    Object *prg = (Object *) DoMethod
-    (
-        obj, MUIM_FindUData, 
-        MUIV_InstallerGui_Progress
-    );
+    static Object *prg; 
 
+    // Initial lookup. 
+    if(!prg)
+    {
+        prg = (Object *) DoMethod
+        (
+            obj, MUIM_FindUData, 
+            MUIV_InstallerGui_Progress
+        );
+    }
+
+    // Sanity check.
     if(prg)
     {
+        // Cap value at 100%.
         int p = msg->Progress > 100 ? 100 : msg->Progress;
+
+        // Set value and make sure that 
+        // the gauge is shown.
         set(prg, MUIA_Gauge_Current, p);
         set(prg, MUIA_ShowMe, TRUE);
+
         return TRUE; 
     }
     else
@@ -1537,8 +1571,10 @@ MUIDSP IPTR InstallerGuiConfirm(Class *cls,
                     {
                         case MUIV_InstallerGui_ProceedRun:
                             return 1; 
+
                         case MUIV_InstallerGui_SkipRun:
                             return 0; 
+
                         case MUIV_InstallerGui_AbortRun:
                             return -1; 
                     }
@@ -1576,6 +1612,10 @@ MUIDSP IPTR InstallerGuiNew (Class *cls,
     log[0] = tr(S_NOLG); // No logging
     log[1] = tr(S_SILG); // Log to file
 
+    // The GUI is, as far as possible, a static 
+    // construct. We're not constructing things
+    // on the fly, instead we use paging to let
+    // widgets become visible / disappear.
     obj = (Object *) DoSuperNew
     (
         cls, obj, 
@@ -1855,6 +1895,7 @@ MUIDSP IPTR InstallerGuiNew (Class *cls,
         TAG_END
     );
     
+    // Initialize timer struct.
     my = INST_DATA(cls, obj);
     my->ticker.ihn_Object = obj;
     my->ticker.ihn_Flags = MUIIHNF_TIMER;
@@ -1999,9 +2040,13 @@ DISPATCH(InstallerGui)
 //............................................................................
 //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 //.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  .
+//
+//
 // The gui_* functions below serve as glue between the platform independent
 // parts of InstallerNG and the Amiga specific Zune / MUI parts. On non Amiga
 // systems, arguments are typically written to stdout to facilitate testing.
+//
+//
 //.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  .
 //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
