@@ -685,7 +685,9 @@ MUIDSP IPTR InstallerGuiAskFile(Class *cls,
             // to the current group.
             if(pop)
             {
+                // Set help bubble.
                 set(top, MUIA_ShortHelp, msg->Help); 
+
                 set(str, MUIA_String_Contents, msg->Default); 
 
                 // Prepare before adding requester.
@@ -1174,6 +1176,8 @@ MUIDSP IPTR InstallerGuiBool(Class *cls,
     {
         set(yes, MUIA_Text_Contents, msg->Yes);
         set(no, MUIA_Text_Contents, msg->No);
+
+        // Set help bubble.
         set(top, MUIA_ShortHelp, msg->Help); 
 
         if(InstallerGuiPageSet(obj, P_MESSAGE, B_YES_NO, 
@@ -1202,10 +1206,12 @@ MUIDSP IPTR InstallerGuiBool(Class *cls,
 }
 
 //----------------------------------------------------------------------------
-// InstallerGuiString - XXXXXXX 
+// InstallerGuiString - Get string value from user.
 // Input:               Message
+//                      Help
 //                      Default
-// Return:              A bitmask representing the selected button(s)
+//                      Halt
+// Return:              A string value
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiString(Class *cls,
                                Object *obj,
@@ -1237,9 +1243,13 @@ MUIDSP IPTR InstallerGuiString(Class *cls,
     // Sanity check.
     if(str && top)
     {
+        // Set help bubble.
         set(top, MUIA_ShortHelp, msg->Help); 
+
+        // Set initial value of string.
         set(str, MUIA_String_Contents, msg->Default);
 
+        // Show string widget page.
         if(InstallerGuiPageSet(obj, P_STRING, B_PROCEED_ABORT, 
                                msg->Message))
         {
@@ -1247,10 +1257,12 @@ MUIDSP IPTR InstallerGuiString(Class *cls,
             if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
                MUIV_InstallerGui_Proceed)
             {
+                // On proceed get string value.
                 get(str, MUIA_String_Contents, &ret); 
             }
             else
             {
+                // On abort return HALT.
                 *((int *) msg->Halt) = 1; 
             }
         }
@@ -1261,14 +1273,19 @@ MUIDSP IPTR InstallerGuiString(Class *cls,
         GERR(tr(S_UNER)); 
     }
 
+    // Always return a valid string.
     return (ULONG) (ret ? ret : ""); 
 }
 
 //----------------------------------------------------------------------------
-// InstallerGuiNumber - XXXXXXX 
+// InstallerGuiNumber - Get numerical value from user
 // Input:               Message
+//                      Help
+//                      Min
+//                      Max
 //                      Default
-// Return:              A bitmask representing the selected button(s)
+//                      Halt
+// Return:              Numerical value
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiNumber(Class *cls,
                                Object *obj,
@@ -1295,11 +1312,15 @@ MUIDSP IPTR InstallerGuiNumber(Class *cls,
     // Sanity check.
     if(num)
     {
+        // Set help bubble.
         set(top, MUIA_ShortHelp, msg->Help); 
+
+        // Set min, max and default value.
         set(num, MUIA_Numeric_Min, msg->Min);
         set(num, MUIA_Numeric_Max, msg->Max);
         set(num, MUIA_Numeric_Value, msg->Default);
 
+        // Show slider.
         if(InstallerGuiPageSet(obj, P_NUMBER, B_PROCEED_ABORT, 
                                msg->Message))
         {
@@ -1307,12 +1328,15 @@ MUIDSP IPTR InstallerGuiNumber(Class *cls,
             if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
                MUIV_InstallerGui_Proceed)
             {
-                ULONG res; 
+                // On proceed get and return
+                // numerical value.
+                ULONG res = 0; 
                 get(num, MUIA_Numeric_Value, &res); 
                 return res;
             }
             else
             {
+                // On abort return HALT.
                 *((int *) msg->Halt) = 1; 
                 return 0; 
             }
@@ -1325,10 +1349,12 @@ MUIDSP IPTR InstallerGuiNumber(Class *cls,
 }
 
 //----------------------------------------------------------------------------
-// InstallerGuiCheckBoxes - XXXXXXX 
-// Input:              Names
-//                     Default
-// Return:             A bitmask representing the selected button(s)
+// InstallerGuiCheckBoxes - Show list of radiobuttons
+// Input:                   Message
+//                          Help
+//                          Names of choices
+//                          Default bitmask
+// Return:                  A bitmask representing the selected button(s)
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
                                    Object *obj,
@@ -1357,6 +1383,9 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
        InstallerGuiPageSet(obj, P_MESSAGE, B_PROCEED_ABORT, 
                            msg->Message))
     {
+        // Unlike most other pages, this one is
+        // partly generated on the fly, we have
+        // no choice.
         if(DoMethod(grp, MUIM_Group_InitChange))
         {
             IPTR ret; 
@@ -1365,8 +1394,11 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
             static Object * cb[33]; 
             const char **cs = (const char **) msg->Names; 
 
+            // The maximum number of choices is 32.
             while(*cs && i < 32)
             {
+                // Create new checkbox with the default
+                // value set.
                 Object *c = (Object *) MUI_NewObject
                 (
                     MUIC_Group,
@@ -1389,6 +1421,8 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
                     TAG_END
                 );
 
+                // On success, add it to the group and
+                // save the adress.
                 if(c)
                 {
                     DoMethod(grp, OM_ADDMEMBER, c); 
@@ -1397,6 +1431,8 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
                 } 
                 else
                 {
+                    // On error, free all the previous ones
+                    // and bail out.
                     GERR(tr(S_UNER)); 
 
                     while(i--)
@@ -1405,6 +1441,7 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
                         MUI_DisposeObject(cb[i]);
                     }
 
+                    // We're done modifying the group.
                     DoMethod(grp, MUIM_Group_ExitChange);
                     return 0; 
                 }
@@ -1413,7 +1450,10 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
             // Mask out non-existing options from -1. 
             ret = msg->Default & ((1 << i) - 1); 
 
+            // We're done modifying the group.
             DoMethod(grp, MUIM_Group_ExitChange);
+
+            // Set help bubble.
             set(top, MUIA_ShortHelp, msg->Help); 
 
             // Wait for proceed or abort.
@@ -1434,7 +1474,7 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
                 DoMethod(grp, MUIM_Group_ExitChange);
 
                 return id == MUIV_InstallerGui_Proceed ?
-                       ret : 0; 
+                       ret : 0;
             }
         }
     }
@@ -1469,7 +1509,8 @@ MUIDSP IPTR InstallerGuiComplete(Class *cls,
     if(prg)
     {
         // Cap value at 100%.
-        int p = msg->Progress > 100 ? 100 : msg->Progress;
+        int p = msg->Progress > 100 ? 
+                100 : msg->Progress;
 
         // Set value and make sure that 
         // the gauge is shown.
