@@ -167,7 +167,6 @@ struct MUIP_InstallerGui_CopyFilesAdd
 {
     ULONG MethodID;
     ULONG File;
-    ULONG ID;
 };
 
 //----------------------------------------------------------------------------
@@ -297,12 +296,7 @@ struct MUIP_InstallerGui_AskFile
 #define MUIV_InstallerGui_AskFile          (TAGBASE_sTx + 233)
 #define MUIV_InstallerGui_TopGroup         (TAGBASE_sTx + 234)
 
-#define B_PROCEED_ABORT                    0
-#define B_YES_NO                           1
-#define B_ABORT                            2
-#define B_PROCEED_SKIP_ABORT               3
-#define B_PROCEED                          4
-#define B_NONE                             5
+// Pages
 #define P_WELCOME                          0
 #define P_COPYFILES                        1
 #define P_FILEDEST                         2
@@ -312,10 +306,18 @@ struct MUIP_InstallerGui_AskFile
 #define P_NUMBER                           6
 #define P_ASKFILE                          7
 
+// Buttons
+#define B_PROCEED_ABORT                    0
+#define B_YES_NO                           1
+#define B_ABORT                            2
+#define B_PROCEED_SKIP_ABORT               3
+#define B_PROCEED                          4
+#define B_NONE                             5
+
 //----------------------------------------------------------------------------
-// InstallerGuiWait - Wait for notification(s)
-// Input:             notif - Start notification value 
-//                    range - Number of values to check for
+// InstallerGuiWait - [PRIVATE] Wait for notification(s)
+// Input:             ULONG notif:  Start notification value 
+//                    ULONG range:  Number of values to check for
 // Return:            Notifcation val. / zero on return id quit 
 //----------------------------------------------------------------------------
 MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
@@ -340,6 +342,7 @@ MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
             // Don't trust the caller.
             if(but)
             {
+                // Add button to cycle chain.
                 set(but, MUIA_CycleChain, TRUE);
             }
             else
@@ -356,8 +359,11 @@ MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
     // Enter the message loop. 
     while(ret != MUIV_Application_ReturnID_Quit)
     {
+        // Iterate over all signals that we're 
+        // waiting for.
         for(n = 0; n < range; n++)
         {
+            // Did we get what we're waiting for?
             if(ret == notif + n)
             {
                 // Remove buttons within the range
@@ -410,7 +416,7 @@ MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
 //----------------------------------------------------------------------------
 // InstallerGuiInit - Initialize all the things 
 // Input:             -
-// Return:            TRUE 
+// Return:            On success TRUE, FALSE otherwise.
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiInit(Class *cls,
                              Object *obj)
@@ -467,10 +473,10 @@ MUIDSP IPTR InstallerGuiInit(Class *cls,
 }
 
 //----------------------------------------------------------------------------
-// InstallerGuiPageSet - Set page / buttons and display text
-// Input:                Top page 
-//                       Button page 
-//                       Top text message
+// InstallerGuiPageSet - [PRIVATE] Set page / buttons and display text
+// Input:                int top:   Top page 
+//                       int btm:   Button page 
+//                       ULONG msg: Top text message
 // Return:               TRUE on success, FALSE otherwise
 //----------------------------------------------------------------------------
 static ULONG InstallerGuiPageSet(Object *obj, 
@@ -517,6 +523,7 @@ static ULONG InstallerGuiPageSet(Object *obj,
             set(txt, MUIA_ShowMe, TRUE);
         }
 
+        // Always.
         return TRUE; 
     }
     else
@@ -576,6 +583,7 @@ MUIDSP IPTR InstallerGuiWelcome(Class *cls,
                 );
             }
 
+            // Sanity check.
             if(usr && prt && lgf)
             {
                 ULONG pat; 
@@ -599,9 +607,11 @@ MUIDSP IPTR InstallerGuiWelcome(Class *cls,
                         {
                             ULONG prp, lgp; 
 
+                            // Get pretend and log settings.
                             get(prt, MUIA_Radio_Active, &prp); 
                             get(lgf, MUIA_Radio_Active, &lgp); 
 
+                            // Transform settings into bitmap.
                             pat |= ((lgp << 2) | (prp << 3));
 
                             // Intermediate or expert.
@@ -620,7 +630,6 @@ MUIDSP IPTR InstallerGuiWelcome(Class *cls,
                     return pat; 
                 }
             }
-            // Unknown error.
         }
         else
         {
@@ -636,8 +645,13 @@ MUIDSP IPTR InstallerGuiWelcome(Class *cls,
 
 //----------------------------------------------------------------------------
 // InstallerGuiAskFile - Show file / directory requester 
-// Input:                Message - Top text 
+// Input:                Message - The prompt
+//                       Help - Help text
+//                       NewPath - Allow non-existent defaults
+//                       Disk - Show drive list first
+//                       Assign - Logical assign OK as dir
 //                       Default - Default file / directory
+//                       Dir - Ask for directory
 // Return:               File / directory name or NULL
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiAskFile(Class *cls,
@@ -666,6 +680,7 @@ MUIDSP IPTR InstallerGuiAskFile(Class *cls,
             );
         }
 
+        // Sanity check.
         if(ask && top)
         { 
             // Create ASL file requester
@@ -688,6 +703,7 @@ MUIDSP IPTR InstallerGuiAskFile(Class *cls,
                 // Set help bubble.
                 set(top, MUIA_ShortHelp, msg->Help); 
 
+                // Set default file / dir.
                 set(str, MUIA_String_Contents, msg->Default); 
 
                 // Prepare before adding requester.
@@ -761,14 +777,15 @@ MUIDSP IPTR InstallerGuiAskFile(Class *cls,
 
 //----------------------------------------------------------------------------
 // InstallerGuiCopyFilesStart - Show file copy requester
-// Input:                       Message - Top text 
-//                              NumberOfFiles - Num. of files / dirs to copy
+// Input:                       Message - The prompt
+//                              NumberOfFiles - Number of files to copy
 // Return:                      TRUE to start copy, FALSE to cancel
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiCopyFilesStart(Class *cls,
                                        Object *obj,
                                        struct MUIP_InstallerGui_CopyFilesStart *msg)
 {
+    // Show file copy page.
     if(InstallerGuiPageSet(obj, P_COPYFILES, B_ABORT, 
                            msg->Message))
     {
@@ -797,6 +814,7 @@ MUIDSP IPTR InstallerGuiCopyFilesStart(Class *cls,
             SetAttrs(prg, MUIA_Gauge_Max, msg->NumberOfFiles,
                      MUIA_Gauge_Current, 0, TAG_END);
 
+            // Always true. 
             return (IPTR) TRUE; 
         }
     }
@@ -809,6 +827,7 @@ MUIDSP IPTR InstallerGuiCopyFilesStart(Class *cls,
 //----------------------------------------------------------------------------
 // InstallerGuiCopyFilesSetCur - Show current file
 // Input:                        File - filename
+//                               NoGauge - Hide file gauge
 // Return:                       TRUE to continue, FALSE to abort 
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
@@ -919,13 +938,14 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
     }
     else
     {
+        // Unknown error.
         GERR(tr(S_UNER)); 
         return (IPTR) FALSE; 
     }
 }
 
 //----------------------------------------------------------------------------
-// InstallerGuiCopyFilesEnd - All files copied
+// InstallerGuiCopyFilesEnd - End of file copy
 // Input:                     -   
 // Return:                    TRUE 
 //----------------------------------------------------------------------------
@@ -945,14 +965,13 @@ MUIDSP IPTR InstallerGuiCopyFilesEnd(Class *cls,
         MUIM_Application_RemInputHandler, &my->ticker
     );
 
-    // Always. 
+    // Always true. 
     return (IPTR) TRUE; 
 }
 
 //----------------------------------------------------------------------------
 // InstallerGuiCopyFilesAdd - Add files to (expert) file (de)selector
 // Input:                     File - Name of file (or dir)
-//                            ID - File / dir ID           // FIXME - NOT USED
 // Return:                    TRUE on success, FALSE otherwise
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,
@@ -985,11 +1004,12 @@ MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,
         // The lister must be visible. 
         set(lst, MUIA_ShowMe, TRUE);
 
-        // Always. 
+        // Always true. 
         return (IPTR) TRUE; 
     }
     else
     {
+        // Unknown error.
         GERR(tr(S_UNER)); 
         return (IPTR) FALSE; 
     }
@@ -997,8 +1017,8 @@ MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,
 
 
 //----------------------------------------------------------------------------
-// InstallerGuiExit - Close GUI
-// Input:             Message 
+// InstallerGuiExit - Say goodbye and close GUI
+// Input:             Message - The prompt
 // Return:            TRUE
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiExit(Class *cls,
@@ -1011,7 +1031,8 @@ MUIDSP IPTR InstallerGuiExit(Class *cls,
 
 //----------------------------------------------------------------------------
 // InstallerGuiMessage - Show message
-// Input:                Message 
+// Input:                Message - The prompt
+//                       Immediate - No button
 // Return:               TRUE on success, FALSE otherwise
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiMessage(Class *cls,
@@ -1042,10 +1063,10 @@ MUIDSP IPTR InstallerGuiMessage(Class *cls,
 
 //----------------------------------------------------------------------------
 // InstallerGuiRadio - Show radio buttons
-// Input:              Message 
-//                     Help
-//                     Names
-//                     Default
+// Input:              Message - The prompt 
+//                     Help - Help text
+//                     Names - Array of choices (strings)
+//                     Default - Default selection
 // Return:             Zero index representing the selected button
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiRadio(Class *cls,
@@ -1072,7 +1093,7 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
         );
     } 
 
-    // Sanity check.
+    // Sanity check and set the correct page.
     if(top && grp && cs &&
        InstallerGuiPageSet(obj, P_MESSAGE, B_PROCEED_ABORT, 
                            msg->Message))
@@ -1153,10 +1174,12 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
 }
 
 //----------------------------------------------------------------------------
-// InstallerGuiBool - XXXXXXX 
-// Input:              Yes
-//                     No
-// Return:             0 = no, 1 = yes
+// InstallerGuiBool - Get boolean value from user 
+// Input:             Message - The prompt 
+//                    Help - Help text
+//                    Yes - True string value
+//                    No - False string value
+// Return:            0 = no, 1 = yes
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiBool(Class *cls,
                              Object *obj,
@@ -1189,6 +1212,7 @@ MUIDSP IPTR InstallerGuiBool(Class *cls,
     // Sanity check.
     if(yes && no && top)
     {
+        // Set values of true and false.
         set(yes, MUIA_Text_Contents, msg->Yes);
         set(no, MUIA_Text_Contents, msg->No);
 
@@ -1222,10 +1246,10 @@ MUIDSP IPTR InstallerGuiBool(Class *cls,
 
 //----------------------------------------------------------------------------
 // InstallerGuiString - Get string value from user.
-// Input:               Message
-//                      Help
-//                      Default
-//                      Halt
+// Input:               Message - The prompt 
+//                      Help - Help text
+//                      Default - Default string value
+//                      Halt - Halt return value
 // Return:              A string value
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiString(Class *cls,
@@ -1250,6 +1274,7 @@ MUIDSP IPTR InstallerGuiString(Class *cls,
             MUIV_InstallerGui_TopGroup
         );
 
+        // Enter in string gadget = proceed.
         DoMethod(str, MUIM_Notify, MUIA_String_Acknowledge, 
                  MUIV_EveryTime, _app(obj), 2, 
                  MUIM_Application_ReturnID, MUIV_InstallerGui_Proceed); 
@@ -1294,12 +1319,12 @@ MUIDSP IPTR InstallerGuiString(Class *cls,
 
 //----------------------------------------------------------------------------
 // InstallerGuiNumber - Get numerical value from user
-// Input:               Message
-//                      Help
-//                      Min
-//                      Max
-//                      Default
-//                      Halt
+// Input:               Message - The prompt 
+//                      Help - Help text
+//                      Min - Minimum allowed value
+//                      Max - Maximum allowed value
+//                      Default - Default value
+//                      Halt - Halt return value
 // Return:              Numerical value
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiNumber(Class *cls,
@@ -1343,9 +1368,10 @@ MUIDSP IPTR InstallerGuiNumber(Class *cls,
             if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
                MUIV_InstallerGui_Proceed)
             {
+                ULONG res = 0; 
+
                 // On proceed get and return
                 // numerical value.
-                ULONG res = 0; 
                 get(num, MUIA_Numeric_Value, &res); 
                 return res;
             }
@@ -1365,10 +1391,10 @@ MUIDSP IPTR InstallerGuiNumber(Class *cls,
 
 //----------------------------------------------------------------------------
 // InstallerGuiCheckBoxes - Show list of radiobuttons
-// Input:                   Message
-//                          Help
-//                          Names of choices
-//                          Default bitmask
+// Input:                   Message - The prompt 
+//                          Help - Help text
+//                          Names - Array of choices (strings)
+//                          Default - Default bitmask
 // Return:                  A bitmask representing the selected button(s)
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
@@ -1393,7 +1419,7 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
         );
     } 
 
-    // Sanity check.
+    // Sanity check and set the correct page.
     if(grp && top &&
        InstallerGuiPageSet(obj, P_MESSAGE, B_PROCEED_ABORT, 
                            msg->Message))
@@ -1501,8 +1527,8 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
 
 //----------------------------------------------------------------------------
 // InstallerGuiComplete - Show progress
-// Input:                 Progress in %
-// Return:                TRUE
+// Input:                 Progress - Installer progress in %
+// Return:                On success TRUE, FALSE otherwise.
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiComplete(Class *cls,
                                  Object *obj,
@@ -1545,6 +1571,7 @@ MUIDSP IPTR InstallerGuiComplete(Class *cls,
 //----------------------------------------------------------------------------
 // InstallerGuiConfirm - Get user confirmation before running shell command
 // Input:                Message - The prompt 
+//                       Help - Help text
 // Return:               '1' = proceed, '0' = skip, '-1' = abort
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiConfirm(Class *cls,
@@ -1653,9 +1680,9 @@ MUIDSP IPTR InstallerGuiConfirm(Class *cls,
 // Input:            See BOOPSI docs
 // Return:           See BOOPSI docs
 //----------------------------------------------------------------------------
-MUIDSP IPTR InstallerGuiNew (Class *cls,
-			                 Object *obj,
-			                 struct opSet *msg)
+MUIDSP IPTR InstallerGuiNew(Class *cls,
+			                Object *obj,
+			                struct opSet *msg)
 {
     struct InstallerGuiData *my;
     static const char *lev[4], *pre[3], *log[3]; 
@@ -2117,7 +2144,7 @@ DISPATCH(InstallerGui)
 // Name:        gui_init
 // Description: Initialize and show GUI.
 // Input:       -
-// Return:      int:                FIXME
+// Return:      int:    TRUE on success, FALSE otherwise. 
 //----------------------------------------------------------------------------
 int gui_init(void)
 {
@@ -2202,7 +2229,7 @@ void gui_exit(void)
 // Name:        gui_message
 // Description: Show message.
 // Input:       const char *msg:    Message shown to the user. 
-//              int imm:            Immediate - no proceed button.
+//              int imm:            No proceed button.
 // Return:      -
 //----------------------------------------------------------------------------
 void gui_message(const char *msg, int imm)
@@ -2522,7 +2549,7 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
             if(cnf)
             {
                 // Add file to the selection / deselection list.
-                DoMethod(Win, MUIM_InstallerGui_CopyFilesAdd, cur->name, cur);
+                DoMethod(Win, MUIM_InstallerGui_CopyFilesAdd, cur->name);
             }
 
             // Increase the total file count.
