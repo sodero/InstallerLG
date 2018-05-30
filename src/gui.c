@@ -974,6 +974,7 @@ MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,
     // Sanity check.
     if(lst) 
     {
+        // Insert filename.
         DoMethod
         (
             lst, MUIM_List_Insert,
@@ -996,7 +997,7 @@ MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,
 
 
 //----------------------------------------------------------------------------
-// InstallerGuiExit - Say goodbye, we're done
+// InstallerGuiExit - Close GUI
 // Input:             Message 
 // Return:            TRUE
 //----------------------------------------------------------------------------
@@ -1040,7 +1041,7 @@ MUIDSP IPTR InstallerGuiMessage(Class *cls,
 }
 
 //----------------------------------------------------------------------------
-// InstallerGuiRadio - XXXXXXX 
+// InstallerGuiRadio - Show radio buttons
 // Input:              Message 
 //                     Help
 //                     Names
@@ -1081,6 +1082,9 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
         unsigned int i = 0;
         Object *r;
 
+        // Make sure that the default value is a 
+        // valid choice. Don't fail if it isn't,
+        // use a fallback of 0 instead.
         while(*cs && i < 32)
         {
             c[i++] = *cs;
@@ -1090,6 +1094,9 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
         i = msg->Default < i ? 
             msg->Default : 0; 
 
+        // Unlike most other pages, this one is
+        // partly generated on the fly, we have
+        // no choice.
         r = (Object *) MUI_NewObject
         (
             MUIC_Radio,
@@ -1103,9 +1110,13 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
             // Set bubble help. 
             set(top, MUIA_ShortHelp, msg->Help); 
 
+            // Prepare before adding radio buttons.
             if(DoMethod(grp, MUIM_Group_InitChange))
             {
+                // Add radio buttons.
                 DoMethod(grp, OM_ADDMEMBER, r); 
+
+                // We're done adding things.
                 DoMethod(grp, MUIM_Group_ExitChange);
 
                 // Wait for proceed or abort.
@@ -1115,9 +1126,13 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
                     ret = TRUE;
                 }
 
+                // Prepare before removing radio buttons.
                 if(DoMethod(grp, MUIM_Group_InitChange))
                 {
+                    // Remove radio buttons.
                     DoMethod(grp, OM_REMMEMBER, r); 
+
+                    // We're done removing things.
                     DoMethod(grp, MUIM_Group_ExitChange);
                     err = FALSE; 
                 }

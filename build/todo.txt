@@ -3,6 +3,8 @@
 - snurran fran guide:n maste testas
 - kolla sa att MUI-biten inte lacker minne
 
+* FUNKAR VERKLIGEN ABORT + RADIOBUTTONS?
+
 - testa snabbt om protect pa aros.
 - testa snabbt om iconinfo pa aros.
 - testa confirm av (execute) pa aros.
