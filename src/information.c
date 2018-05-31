@@ -163,9 +163,14 @@ entry_p m_message(entry_p contxt)
                         cur++; 
                     }
 
-                    // Show the result of the concatenation
+                    // If we could resolve all our children,
+                    // show the result of the concatenation
                     // and free the temporary buffer.
-                    gui_message(con, 0);  
+                    if(!did_error())
+                    {
+                        gui_message(con, 0);  
+                    }
+
                     free(con); 
                 }
                 else
@@ -318,11 +323,15 @@ entry_p m_working(entry_p contxt)
                 cur++; 
             }
 
-            // Show the result of the concatenation
-            // and free the temporary buffer. We will
-            // return immediately. No waiting for any
-            // events will take place. 
-            gui_message(con, 1);  
+            // If we could resolve our children, show
+            // the result of the concatenation and free
+            // the temporary buffer. We will return 
+            // immediately. No waiting for any events.
+            if(!did_error())
+            {
+                gui_message(con, 1);  
+            }
+
             free(con); 
         }
         else

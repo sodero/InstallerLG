@@ -185,6 +185,14 @@ entry_p m_fmt(entry_p contxt)
                     size_t oln = strlen(sct[k]);  
                     entry_p cur = resolve(*arg); 
 
+                    // Bail out if we didn't manage to
+                    // resolve the current argument.
+                    if(did_error())
+                    {
+                        arg = NULL; 
+                        break;
+                    }
+
                     // Format string.
                     if(sct[k][oln - 1] == 's' &&
                        cur->type == STRING)
@@ -237,18 +245,8 @@ entry_p m_fmt(entry_p contxt)
                         error(contxt->id, ERR_FMT_MISMATCH, contxt->name); 
                     }
 
-                    // Bail out if we didn't manage to resolve
-                    // all arguments.
-                    if(did_error())
-                    {
-                        arg = NULL; 
-                        break;
-                    }
-                    else
-                    {
-                        // Next specifier -> argument.
-                        arg++; 
-                    }
+                    // Next specifier -> argument.
+                    arg++; 
                 }
                 else 
                 {

@@ -199,6 +199,7 @@ struct MUIP_InstallerGui_Radio
     ULONG Help;
     ULONG Names;
     ULONG Default; 
+    ULONG Halt; 
 };
 
 //----------------------------------------------------------------------------
@@ -1067,6 +1068,7 @@ MUIDSP IPTR InstallerGuiMessage(Class *cls,
 //                     Help - Help text
 //                     Names - Array of choices (strings)
 //                     Default - Default selection
+//                     Halt - Halt return value
 // Return:             Zero index representing the selected button
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiRadio(Class *cls,
@@ -1141,10 +1143,11 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
                 DoMethod(grp, MUIM_Group_ExitChange);
 
                 // Wait for proceed or abort.
-                if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
+                if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) !=
                    MUIV_InstallerGui_Proceed)
                 {
-                    ret = TRUE;
+                    // On abort return HALT.
+                    *((int *) msg->Halt) = 1; 
                 }
 
                 // Prepare before removing radio buttons.
@@ -1159,6 +1162,8 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
                 }
             }
 
+            // Get value from buttons and then kill them.
+            // A halt above will not make any difference.
             GetAttr(MUIA_Radio_Active, r, (IPTR *) &ret); 
             MUI_DisposeObject(r);
         }
@@ -2256,12 +2261,14 @@ void gui_message(const char *msg, int imm)
 //              const char *hlp:    Help text.
 //              const char **nms:   List of strings.
 //              int def:            Default choice (0-index)
+//              int *hlt:           Halt return value.
 // Return:      int:                The choice (0-index).
 //----------------------------------------------------------------------------
 int gui_choice(const char *msg, 
                const char *hlp,
                const char **nms, 
-               int def)
+               int def, 
+               int *hlt)
 {
     int ret = (int)
     #ifdef AMIGA
@@ -2272,11 +2279,12 @@ int gui_choice(const char *msg,
         msg, 
         hlp, 
         nms, 
-        def
+        def,
+        hlt
     );
     #else
     // Testing purposes.
-    (msg && hlp && nms) ? def : ~def;
+    (msg && hlp && nms && hlt) ? def : ~def;
     #endif
 
     return ret; 

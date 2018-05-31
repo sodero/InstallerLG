@@ -184,14 +184,23 @@ entry_p m_askchoice(entry_p contxt)
             // 'novice' mode.
             if(get_numvar(contxt, "@user-level") > 0)
             {
-                // The GUI part will do the rest. 
+                int hlt = 0; 
+
+                // Prompt user.
                 DNUM = gui_choice
                 (
                     str(prompt), 
                     str(help),
                     (const char **) chs, 
-                    i
+                    i,
+                    &hlt
                 ); 
+
+                // Halt if abort.
+                if(hlt)
+                {
+                    error(HALT); 
+                }
             }
             else
             {
