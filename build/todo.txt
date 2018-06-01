@@ -1,4 +1,55 @@
 - nagra statiska arosbuffrar maste bort
-- snurran fran guide:n maste testas
+- Dina fördefinierade variabler är inte helt ok, t.ex installer-version.
 - kolla sa att MUI-biten inte lacker minne
 - FIXME:s
+
+Gör tester av följande:
+
+((set #var1 5) (set #var2 6) (set #var3 7))
+
+(set #flag (if #flag 0 1))  ; a Boolean NOT
+
+(if #flag                               ; conditional test
+    (message "'flag' was non-zero\n")   ; "then" clause.
+    (message "'flag' was zero\n")       ; "else" clause.
+) ; if                                  ; closing parenthesis
+
+     (if (= #a 2)                   ; conditional test
+         (message "a is 2\n")       ; "then" clause
+         (message "a is not 2\n")   ; "else" clause
+     ) ; if                         ; closing parenthesis
+
+     (if (= #a 2)                          ; conditional test
+       (                                   ; "then" clause
+         (message "a is 2\n")
+       )
+       (                                   ; "else" compound statement
+         (message "a is not 2\n")
+         (set #a 2)
+         (message "but it is now!\n")
+       )                                   ; end of compound statement
+     ) ; if                                ; end of if
+
+     (set #n 0)
+     (while (set thisfile (select #n "file1" "file2" "file3" ""))
+       (
+         (set #n (+ #n 1))
+         (... your stuff involving this file ...)
+       )
+     ) ; while
+     ((...) (...) (...))
+
+     (procedure P_ADDMUL arg1 arg2 arg3
+         (* (+ arg1 arg2) arg3)
+     )
+     
+     (message (P_ADDMUL 1 2 3))    ; shows 9
+     (message (P_ADDMUL 4 5))      ; shows 27 as arg3 stays the same
+
+
+   Execute a sequence of statements.  The statements in the parentheses
+will be executed in order. This is not needed at topmost level. If the
+sequence of statements is an argument to a statement or function, the
+value of the sequence will be the value of the last statement executed
+in the sequence.
+
