@@ -43,8 +43,8 @@
        /*                */ RESIDENT OVERRIDE
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- token type information ---------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start s p pp ps pps vp vps opt opts vpb np sps par cv cvv add sub div mul lt 
-       /*                */ lte neq gt gte eq set cus dcl fmt if while until and or xor not bitand bitor 
+%type<e> /* all nodes    */ start s p pp ps pps vp vps opt opts vpb xpb np sps par cv cvv add sub div mul
+       /*                */ lt lte neq gt gte eq set cus dcl fmt if while until and or xor not bitand bitor 
        /*                */ bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring 
        /*                */ asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier 
        /*                */ fileonly getassign getdefaulttool getposition getstack gettooltype getdevice 
@@ -66,8 +66,8 @@
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function */
 /* found in alloc.c                                  */
-%destructor { kill($$); }   s p pp ps pps vp vps opt opts vpb np sps par cv cvv add sub div mul lt lte neq gt gte 
-                            eq set cus dcl fmt if while until and or xor not bitand bitor bitxor bitnot 
+%destructor { kill($$); }   s p pp ps pps vp vps opt opts vpb xpb np sps par cv cvv add sub div mul lt lte neq gt
+                            gte eq set cus dcl fmt if while until and or xor not bitand bitor bitxor bitnot 
                             shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice 
                             askoptions askbool askdisk cat exists expandpath earlier fileonly getassign 
                             getdefaulttool getposition getstack gettooltype optional resident override source
@@ -99,6 +99,8 @@ opts:           opts opt                        { $$ = push($1, $2); } |
                 opt                             { $$ = push(new_contxt(), $1); };
 vpb:            '(' vps ')'                     { $$ = $2; } |
                 vp                              { $$ = push(new_contxt(), $1); };
+xpb:            vpb                             { $$ = $1; } |
+                np                              { $$ = $1; };
 np:             INT                             { $$ = new_number($1); } |
                 HEX                             { $$ = new_number($1); } |
                 BIN                             { $$ = new_number($1); } |
@@ -108,8 +110,8 @@ sps:            sps SYM p                       { $$ = push(push($1, new_symbol(
                 SYM p                           { $$ = push(push(new_contxt(), new_symbol($1)), $2); };
 par:            par SYM                         { $$ = push($1, new_symbol($2)); } |
                 SYM                             { $$ = push(new_contxt(), new_symbol($1)); };
-cv:             p vpb                           { $$ = push(push(new_contxt(), $1), $2); };
-cvv:            p vpb vpb                       { $$ = push(push(push(new_contxt(), $1), $2), $3); };
+cv:             p xpb                           { $$ = push(push(new_contxt(), $1), $2); };
+cvv:            p xpb xpb                       { $$ = push(push(push(new_contxt(), $1), $2), $3); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- modifiers ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 opt:            all                             |            
