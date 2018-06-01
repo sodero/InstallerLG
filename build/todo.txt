@@ -4,16 +4,6 @@
 - FIXME:s
 
 Gör tester av följande:
-
-((set #var1 5) (set #var2 6) (set #var3 7))
-
-(set #flag (if #flag 0 1))  ; a Boolean NOT
-
-(if #flag                               ; conditional test
-    (message "'flag' was non-zero\n")   ; "then" clause.
-    (message "'flag' was zero\n")       ; "else" clause.
-) ; if                                  ; closing parenthesis
-
      (if (= #a 2)                   ; conditional test
          (message "a is 2\n")       ; "then" clause
          (message "a is not 2\n")   ; "else" clause
