@@ -36,25 +36,8 @@ entry_p m_if(entry_p contxt)
             RNUM(0); 
         }
 
-        // Branches could be either compound statements,
-        // CONTXT or ...
-        if(p->type == CONTXT)
-        {
-            // The return value is the return value of the 
-            // last function in the compound statement. 
-            return invoke(p);
-        }
-        // a single function, NATIVE, or a user procedure, 
-        // CUSREF.
-        else 
-        if((p->type == NATIVE ||
-            p->type == CUSREF) &&
-            p->call)
-        {
-            // The return value is the return value of the 
-            // function / user procedure. 
-            return p->call(p); 
-        }
+        // We execute the branch by resolving it.
+        return resolve(p);
     }
 
     // The parser is broken, either the context
