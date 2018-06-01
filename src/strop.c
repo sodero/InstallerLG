@@ -259,7 +259,7 @@ entry_p m_fmt(entry_p contxt)
         }
 
         // Concatenate all formated strings.
-        if(k)
+        if(k && l)
         {
             // Allocate memory to hold all of them.
             l += strlen(fmt + j); 
