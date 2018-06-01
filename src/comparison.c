@@ -19,6 +19,12 @@
 //----------------------------------------------------------------------------
 static int h_cmp(entry_p a, entry_p b)
 {
+    // Resolve both arguments. We don't need
+    // to check for failures; we will always
+    // get something to compare.
+    a = resolve(a);
+    b = resolve(b);
+
     // If both arguments are strings then use
     // string comparison.
     if(a->type == STRING &&
@@ -87,7 +93,7 @@ entry_p m_gt(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
-// (<= <expr1> <expr2>)
+// (>= <expr1> <expr2>)
 //     greater than or equal test (returns 0 or 1)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
