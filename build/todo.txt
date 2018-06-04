@@ -2,6 +2,8 @@
 - Dina fördefinierade variabler är inte helt ok, t.ex installer-version.
 - kolla sa att MUI-biten inte lacker minne
 - FIXME:s
+- kolla om (select) är 0-indexerad
+- kolla hur strängar evalueras som numeriska värden
 
 Gör tester av följande:
      (if (= #a 2)                   ; conditional test
@@ -29,17 +31,4 @@ Gör tester av följande:
      ) ; while
      ((...) (...) (...))
 
-     (procedure P_ADDMUL arg1 arg2 arg3
-         (* (+ arg1 arg2) arg3)
-     )
-     
-     (message (P_ADDMUL 1 2 3))    ; shows 9
-     (message (P_ADDMUL 4 5))      ; shows 27 as arg3 stays the same
-
-
-   Execute a sequence of statements.  The statements in the parentheses
-will be executed in order. This is not needed at topmost level. If the
-sequence of statements is an argument to a statement or function, the
-value of the sequence will be the value of the last statement executed
-in the sequence.
 

@@ -23,3 +23,4 @@
 (procedure f1 (+ 1 2)) (procedure f1 (+ 2 (f1))) (f1); "","Line 1: Max recursion depth exceeded 'f1' 0",""
 (procedure f1 a (if (< a 65) (f1 (+ a 1)) (+ 0))) (f1 1); "","Line 1: Max recursion depth exceeded 'f1' 0",""
 (procedure f1 a (if (< a 64) (f1 (+ a 1)) (+ 0))) (f1 1); "","0",""
+(procedure P_ADDMUL arg1 arg2 arg3 (* (+ arg1 arg2) arg3)) (P_ADDMUL 1 2 3) (P_ADDMUL 4 5); "","28",""
