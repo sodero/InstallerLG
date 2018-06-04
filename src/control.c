@@ -24,7 +24,7 @@ entry_p m_if(entry_p contxt)
     if(c_sane(contxt, 2))
     {
         // Let p be the branch that will be executed.
-        entry_p p = num(CARG(1)) ? CARG(2) : CARG(3); 
+        entry_p p = tru(CARG(1)) ? CARG(2) : CARG(3); 
 
         // If the expression is FALSE and we don't have
         // any FALSE branch, p will be either NULL if 
@@ -59,10 +59,10 @@ entry_p m_select(entry_p contxt)
     // and the non-empty list of items.
     if(c_sane(contxt, 2))
     {
-        int i = 0, j = num(CARG(1)) - 1; 
+        int i = 0, j = num(CARG(1));
 
-        // Find the n:th item, go one step at a time
-        // in case no such item exist.
+        // Find the n:th (0-indexed) item, go one step
+        // at a time in case no such item exist.
         while(CARG(2)->children[i] && 
               CARG(2)->children[i] != end())
         {
@@ -110,7 +110,7 @@ static entry_p h_whunt(entry_p contxt, int m)
 
         // Use XOR to support both 'while' and 'until'. Break 
         // the loop if something goes wrong inside.
-        while((m ^ num(CARG(1))) && 
+        while((m ^ tru(CARG(1))) && 
               !did_error())
         {
             // Save the return value of the last function

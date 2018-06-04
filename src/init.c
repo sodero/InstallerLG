@@ -103,7 +103,7 @@ entry_p init(entry_p contxt)
                             push(push
                             (
                                 new_contxt(),
-                                new_number(1)
+                                new_number(0)
                             ),
                                 push
                                 (

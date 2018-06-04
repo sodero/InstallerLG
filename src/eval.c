@@ -171,6 +171,45 @@ int num(entry_p entry)
 }
 
 //----------------------------------------------------------------------------
+// Name:        tru
+// Description: Get truth value of an entry. This implies resolving it, and,
+//              if necessary, converting it. Non empty strings and non zero
+//              numerical values are considered true, everythings else false.
+// Input:       entry_p entry:  An entry_t pointer to an object of any type.
+// Return:      int:            The truth value of the input. 
+//----------------------------------------------------------------------------
+int tru(entry_p entry)
+{
+    // Is there nything to resolve?
+    if(entry && 
+       entry != end())
+    {
+        // Attempt to resolve it.
+        entry_p e = resolve(entry); 
+
+        // Evaluate on success.
+        if(!did_error())
+        {
+            // Only numerical values and strings
+            // can be true.
+            if((e->type == NUMBER && e->id) ||
+               (e->type == STRING && strlen(e->name)))
+            {
+                return 1; 
+            }
+        }
+    }
+    else
+    {
+        // Bad input. 
+        error(PANIC);
+    }
+
+    // False.
+    return 0; 
+}
+
+//----------------------------------------------------------------------------
 // Name:        str
 // Description: Get string representation of an entry. This implies resolving 
 //              it, and, if necessary, converting it. 

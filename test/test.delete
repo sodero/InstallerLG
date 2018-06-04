@@ -1,3 +1,4 @@
+(set i 0) (while (set f (select i "_d1_" "_d2_" "_d3_" "")) ((set i (+ i 1)) (delete f))); "rm -Rf _d1_ _d2_ _d3_ && touch _d1_ _d2_ _d3_","1","test ! -f _d1_ && test ! -f _d2_ && test ! -f _d3_"
 (delete "_dl_") ; "touch _dl_","1","test ! -f _dl_"
 (delete "_dl_") ; "rm -Rf _dl_","0",""
 (delete "_dl_" (safe)) ; "touch _dl_","1","test ! -f _dl_"

@@ -20,5 +20,5 @@
 (database "chiprev" "AGNUS") ; "","0",""
 (+ (database "chiprev" "ECS")) ; "","0",""
 (+ (database "chiprev" "Unknown")) ; "","1",""
-(if (database "chiprev" "ECS") (+1) (+2)) ; "","2",""
-(if (database "chiprev" "Unknown") (+1) (+2)) ; "","1",""
+(if (= "1" (database "chiprev" "ECS")) (+1) (+2)) ; "","2",""
+(if (= "1" (database "chiprev" "Unknown")) (+1) (+2)) ; "","1",""
