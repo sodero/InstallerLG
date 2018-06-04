@@ -14,6 +14,7 @@
 %define api.pure full                                                                                            
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
+%expect 1
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- primitives ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %token<s> /* string pri. */ SYM STR 
@@ -43,7 +44,7 @@
        /*                */ RESIDENT OVERRIDE
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- token type information ---------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start s p pp ps pps vp vps opt opts vpb xpb np sps par cv cvv add sub div mul
+%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps opt opts vpb xpb np sps par cv cvv add sub div mul
        /*                */ lt lte neq gt gte eq set cus dcl fmt if while until and or xor not bitand bitor 
        /*                */ bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring 
        /*                */ asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier 
@@ -66,8 +67,8 @@
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function */
 /* found in alloc.c                                  */
-%destructor { kill($$); }   s p pp ps pps vp vps opt opts vpb xpb np sps par cv cvv add sub div mul lt lte neq gt
-                            gte eq set cus dcl fmt if while until and or xor not bitand bitor bitxor bitnot 
+%destructor { kill($$); }   s p pp ps pps ivp vp vps opt opts vpb xpb np sps par cv cvv add sub div mul lt lte neq
+                            gt gte eq set cus dcl fmt if while until and or xor not bitand bitor bitxor bitnot 
                             shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice 
                             askoptions askbool askdisk cat exists expandpath earlier fileonly getassign 
                             getdefaulttool getposition getstack gettooltype optional resident override source
@@ -92,15 +93,18 @@ pp:             p p                             { $$ = push(push(new_contxt(), $
 ps:             ps p                            { $$ = push($1, $2); } |
                 p                               { $$ = push(new_contxt(), $1); };
 pps:            pps p p                         { $$ = push(push($1, $2), $3); } |
-                pp                              { $$ = $1; };
+                pp                              ;
+vp:             ivp                             |
+                '(' vp ')'                      { $$ = $2; };
 vps:            vps vp                          { $$ = push($1, $2); } |
-                vp                              { $$ = push(new_contxt(), $1); };
+                vp                              { $$ = push(new_contxt(), $1); } |
+                '(' vps ')'                     { $$ = $2; };
 opts:           opts opt                        { $$ = push($1, $2); } |
                 opt                             { $$ = push(new_contxt(), $1); };
 vpb:            '(' vps ')'                     { $$ = $2; } |
                 vp                              { $$ = push(new_contxt(), $1); };
-xpb:            vpb                             { $$ = $1; } |
-                np                              { $$ = $1; };
+xpb:            vpb                             |
+                np                              ;
 np:             INT                             { $$ = new_number($1); } |
                 HEX                             { $$ = new_number($1); } |
                 BIN                             { $$ = new_number($1); } |
@@ -160,7 +164,7 @@ opt:            all                             |
                 resident                        ;
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- functions ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-vp:             add       /* arithmetic.c|h */  |
+ivp:            add       /* arithmetic.c|h */  |
                 div                             |
                 mul                             |
                 sub                             |

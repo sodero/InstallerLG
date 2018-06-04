@@ -2,3 +2,4 @@
 (set a 1) (while (<= a 100) (set a (+ a 1))) ; "","101",""
 (set a 1) (set b 2) (while (< a b) ((set a (+ a 1)) (set b (- b a)))) ; "","0",""
 (set a 1) (set b 100) (while (< a b) ((set a (+ a 1)) (set b (- b 1)))) ; "","50",""
+(set a 1) (set b 100) (while (< a b) (((set a (+ a 1))) (set b (- b 1)))) ; "","50",""

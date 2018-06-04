@@ -22,3 +22,4 @@
 (set #flag 0) (set #flag (if #flag ((+ 0)) ((+ 1)))) (+ #flag) ; "","1",""
 ((set #var1 5) (set #var2 6) (set #var3 7)) (+ #var1 #var2 #var3) ; "","18",""
 ((set #var1 5) (set #var2 6) (set #var3 7) (+ #var1 #var2 #var3)) ; "","18",""
+(set #var1 5) (set #var2 6) (set #var3 7) ((+ #var1 #var2 #var3)) ; "","18",""
