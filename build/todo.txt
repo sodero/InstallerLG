@@ -4,24 +4,11 @@
 - FIXME:s
 - kolla om (select) är 0-indexerad
 - kolla hur strängar evalueras som numeriska värden
+@{B}NOTE:@{UB} Strings can be used as the result of a test expression.
+An empty string is considered a FALSE value, all others are considered
+TRUE.
 
 Gör tester av följande:
-     (if (= #a 2)                   ; conditional test
-         (message "a is 2\n")       ; "then" clause
-         (message "a is not 2\n")   ; "else" clause
-     ) ; if                         ; closing parenthesis
-
-     (if (= #a 2)                          ; conditional test
-       (                                   ; "then" clause
-         (message "a is 2\n")
-       )
-       (                                   ; "else" compound statement
-         (message "a is not 2\n")
-         (set #a 2)
-         (message "but it is now!\n")
-       )                                   ; end of compound statement
-     ) ; if                                ; end of if
-
      (set #n 0)
      (while (set thisfile (select #n "file1" "file2" "file3" ""))
        (
