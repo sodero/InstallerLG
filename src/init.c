@@ -138,32 +138,64 @@ entry_p init(entry_p contxt)
             strdup("set"), __LINE__, m_set, 
             push(push(push(push(push(push(
             push(push(push(push(push(push(
-            push(push(push(push
+            push(push(push(push(push(push
             (
                 new_contxt(), 
                 new_symbol(strdup("@user-level"))),
                 new_number(2)
+                /*
+                User level, 0 = novice, 1 = average,
+                2 = expert.
+                */
             ),
                 new_symbol(strdup("@pretend"))),
                 new_number(0)
+                /*
+                Pretend mode, 1 = on, 0 = off.
+                */
+            ),
+                new_symbol(strdup("@installer-version"))),
+                new_number((43 << 16) | 3)
+                /*
+                The version of Installer.
+                */
             ),
                 new_symbol(strdup("@ioerr"))),
                 new_number(0)
+                /*
+                The value of the last DOS error.
+                */
             ),
                 new_symbol(strdup("@log"))),
                 new_number(0)
+                /*
+                Logging enabled = 1, disabled = 0.
+                */
             ),
                 new_symbol(strdup("@yes"))),
+                /*
+                Mock user input. 1 = always yes.
+                */
                 new_number(0)
             ),
                 new_symbol(strdup("@skip"))),
                 new_number(0)
+                /*
+                Mock user input. 1 = always skip.
+                */
             ),
                 new_symbol(strdup("@abort"))),
                 new_number(0)
+                /*
+                Mock user input. 1 = abort.
+                */
             ),
                 new_symbol(strdup("@each-type"))),
                 new_number(0)
+                /*
+                When using (foreach), @each-name and @each-type
+                will contain the filename and the object type.
+                */
             ),
             NUMBER
         );
@@ -189,77 +221,143 @@ entry_p init(entry_p contxt)
             push(push(push(push(push(push(push(push(
             push(push(push(push(push(push(push(push(
             push(push(push(push(push(push(push(push(
-            push(push(push(push(push(push
+            push(push(push(push
             (
                 new_contxt(), 
                 new_symbol(strdup("@abort-button"))),
-                new_string(strdup("Abort"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@app-name"))),
                 new_string(strdup(arg_get(ARG_APPNAME)))
+                /*
+                The `APPNAME' value given at startup.
+                */
             ),
                 new_symbol(strdup("@askoptions-help"))),
-                new_string(strdup("Help (askoptions)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@askchoice-help"))),
-                new_string(strdup("Help (askchoice)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@asknumber-help"))),
-                new_string(strdup("Help (asknumber)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@askstring-help"))),
-                new_string(strdup("Help (askstring)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@askdisk-help"))),
-                new_string(strdup("Help (askdisk)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@askfile-help"))),
-                new_string(strdup("Help (askfile)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@askdir-help"))),
-                new_string(strdup("Help (askdir)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@copylib-help"))),
-                new_string(strdup("Help (copylib)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@copyfiles-help"))),
-                new_string(strdup("Help (copyfiles)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@makedir-help"))),
-                new_string(strdup("Help (makedir)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@startup-help"))),
-                new_string(strdup("Help (startup)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@default-dest"))),
                 new_string(strdup("Work:"))
+                /*
+                Suggested location for installing 
+                an application.
+                */
             ),
                 new_symbol(strdup("@error-msg"))),
-                new_string(strdup("Help (error-msg)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@execute-dir"))),
-                new_string(strdup("Help (execute-dir)"))
+                new_string(strdup(""))
+                /*
+                NOT USED. FIXME.
+                */
             ),
                 new_symbol(strdup("@icon"))),
-                new_string(strdup("Help (icon)"))
-            ),
-                new_symbol(strdup("@installer-version"))),
-                new_string(strdup("Help (installer-version)"))
+                new_string(strdup(""))
+                /*
+                NOT USED. FIXME.
+                */
             ),
                 new_symbol(strdup("@language"))),
                 new_string(strdup("english"))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@special-msg"))),
-                new_string(strdup("Help (special-msg)"))
+                new_string(strdup(""))
+                /*
+                NOT USED.
+                */
             ),
                 new_symbol(strdup("@log-file"))),
                 new_string(strdup("install_log_file"))
+                /*
+                The default log file.
+                */
             ),
                 new_symbol(strdup("@each-name"))),
                 new_string(strdup(""))
+                /*
+                When using (foreach), @each-name and
+                @each-type will contain the filename
+                and the object type.
+                */
             ),
                 new_symbol(strdup("@user-startup"))),
                 new_string(strdup("s:user-startup"))
+                /*
+                The default file used by (startup).
+                */
             ),
             STRING
         );
@@ -276,8 +374,9 @@ entry_p init(entry_p contxt)
         // code is executed.
         ror(contxt->children);
        
-        // Only on Amiga, otherwise tests will break, they don't
-        // expect any default (welcome) or (exist):s.
+        // Only on Amiga, otherwise tests will break,
+        // they don't expect any default (welcome) or
+        // (exit):s.
         #ifdef AMIGA 
         e = NULL; 
         c = contxt->children; 
@@ -285,8 +384,7 @@ entry_p init(entry_p contxt)
         // Search for an (exit) in the root.
         while(*c && *c != end())
         {
-            // Match function pointer rather than function name
-            // since the latter can lie to us (and is slower). 
+            // Match function pointer.
             if((*c)->type == NATIVE &&
                (*c)->call == m_exit)
             {
