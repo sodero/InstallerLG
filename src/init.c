@@ -16,7 +16,21 @@
 
 #include <string.h>
 
-static char version[] __attribute__((used)) = "\0$VER: InstallerLG 43.3 [ALPHA1]";
+//----------------------------------------------------------------------------
+// Stringification
+//----------------------------------------------------------------------------
+#define STR(X) #X
+#define VER(X) STR(X)
+
+//----------------------------------------------------------------------------
+// InstallerNG version information
+//----------------------------------------------------------------------------
+#define MAJOR 43
+#define MINOR 3
+
+static char version[] __attribute__((used)) = "\0$VER: InstallerLG " 
+                                               VER(MAJOR) "." VER(MINOR) 
+                                              " [ALPHA1]";
 
 //----------------------------------------------------------------------------
 // Name:        init
@@ -155,7 +169,7 @@ entry_p init(entry_p contxt)
                 */
             ),
                 new_symbol(strdup("@installer-version"))),
-                new_number((43 << 16) | 3)
+                new_number((MAJOR << 16) | MINOR)
                 /*
                 The version of Installer.
                 */
