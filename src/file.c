@@ -151,7 +151,7 @@ static int h_confirm(entry_p contxt,
 //              const char *n:      Path to file / dir.
 // Return:      int:                Dir = '2', file = '1' else '0'.
 //----------------------------------------------------------------------------
-static int h_exists(const char *n)
+int h_exists(const char *n)
 {
     // NULL is a valid argument but
     // this 'file' doesn't exist.
@@ -2384,8 +2384,7 @@ entry_p m_foreach(entry_p contxt)
                         err = 1;
                     }
 
-                    // Go back the directory where
-                    // we started. 
+                    // Go back where we started. 
                     chdir(cwd); 
                 }
             }

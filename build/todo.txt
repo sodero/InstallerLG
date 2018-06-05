@@ -1,4 +1,3 @@
 - nagra statiska arosbuffrar maste bort
-- Dina fördefinierade variabler är inte helt ok, t.ex installer-version.
 - kolla sa att MUI-biten inte lacker minne
 - FIXME:s

@@ -26,7 +26,7 @@
 //----------------------------------------------------------------------------
 // h_run - m_run / m_execute / m_rexx helper
 //----------------------------------------------------------------------------
-static entry_p h_run(entry_p contxt, const char *pre)
+static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 {
     // We need atleast one argument
     if(c_sane(contxt, 1))
@@ -109,8 +109,30 @@ static entry_p h_run(entry_p contxt, const char *pre)
             // Can this not be true? 
             if(inp && out)
             {
-                LONG ioe; 
-                char *cmd = str(CARG(1)); 
+                char *cwd = NULL,
+                     *cmd = str(CARG(1));
+
+                // If we have a valid destination dir,
+                // change to that directory. We're not
+                // treating errors as such. 
+                if(dir && strlen(dir) &&
+                   h_exists(dir))
+                {
+                    // Use the global buffer.
+                    char *buf = get_buf();
+
+                    // Try to get current working dir.
+                    if(getcwd(buf, buf_size()) == buf)
+                    {
+                        // Try to change to the new dir
+                        // and save the old one so that
+                        // we can go back afterwards.
+                        if(!chdir(dir))
+                        {
+                            cwd = buf;
+                        }
+                    }
+                }
 
                 // DOS / Arexx script?
                 if(pre)
@@ -146,6 +168,13 @@ static entry_p h_run(entry_p contxt, const char *pre)
                     TAG_END
                 ); 
 
+                // Have we changed the working dir?
+                if(cwd)
+                {
+                    // Go back to where we started. 
+                    chdir(cwd); 
+                }
+
                 // We have memory allocated for the commandline
                 // that we need to free if we're running a DOS
                 // or Arexx script.
@@ -155,7 +184,7 @@ static entry_p h_run(entry_p contxt, const char *pre)
                 } 
 
                 // Get and set secondary status. 
-                ioe = IoErr(); 
+                LONG ioe = IoErr(); 
                 set_numvar(contxt, "@ioerr", ioe); 
 
                 // Necessary? 
@@ -176,7 +205,7 @@ static entry_p h_run(entry_p contxt, const char *pre)
             }
             #else
             // Avoid compiler warning.
-            pre = NULL; 
+            dir = pre = NULL; 
             #endif
         }
 
@@ -203,7 +232,11 @@ static entry_p h_run(entry_p contxt, const char *pre)
 //----------------------------------------------------------------------------
 entry_p m_execute(entry_p contxt)
 {
-    return h_run(contxt, "execute"); 
+    return h_run
+    (
+        contxt, "execute",
+        get_strvar(contxt, "@execute-dir")
+    );
 }
 
 //----------------------------------------------------------------------------
@@ -214,7 +247,7 @@ entry_p m_execute(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_rexx(entry_p contxt)
 {
-    return h_run(contxt, "rx"); 
+    return h_run(contxt, "rx", NULL); 
 }
 
 //----------------------------------------------------------------------------
@@ -225,5 +258,9 @@ entry_p m_rexx(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_run(entry_p contxt)
 {
-    return h_run(contxt, NULL); 
+    return h_run
+    (
+        contxt, NULL,
+        get_strvar(contxt, "@execute-dir")
+    );
 }

@@ -332,13 +332,14 @@ entry_p init(entry_p contxt)
                 new_symbol(strdup("@execute-dir"))),
                 new_string(strdup(""))
                 /*
-                NOT USED. FIXME.
+                The Installer will change to this directory
+                whenever (run) or (execute) are performed.
                 */
             ),
                 new_symbol(strdup("@icon"))),
-                new_string(strdup(""))
+                new_string(strdup(arg_get(ARG_SCRIPT)))
                 /*
-                NOT USED. FIXME.
+                Installer icon path.
                 */
             ),
                 new_symbol(strdup("@language"))),

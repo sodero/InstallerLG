@@ -26,6 +26,7 @@ entry_p m_tooltype(entry_p contxt);
 entry_p m_transcript(entry_p contxt);
 entry_p m_rename(entry_p contxt);
 
+int h_exists(const char *n);
 int h_log(entry_p contxt, const char *fmt, ...);
 
 //----------------------------------------------------------------------------

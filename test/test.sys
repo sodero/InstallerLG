@@ -15,7 +15,7 @@
 ("%s" @startup-help) ; "","",""
 ("%s" @error-msg) ; "","",""
 ("%s" @execute-dir) ; "","",""
-("%s" @icon) ; "","",""
+(< 0 (strlen @icon)) ; "","1",""
 ("%s" @language) ; "","english",""
 ("%ld" @pretend) ; "","0",""
 ("%ld" @yes) ; "","0",""
