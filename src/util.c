@@ -484,17 +484,17 @@ void set_strvar(entry_p c, char *v, char *n)
 static void pp_aux(entry_p entry, int indent)
 {
     // Indentation galore. 
-    static char t[16] = "\t\t\t\t"
-                        "\t\t\t\t"
-                        "\t\t\t\t"
-                        "\t\t\t\0"; 
+    char t[16] = "\t\t\t\t"
+                 "\t\t\t\t"
+                 "\t\t\t\t"
+                 "\t\t\t\0"; 
     
     // Going backwards to go forward. 
     char *ts = t + sizeof(t) - 1 - indent; 
     ts = ts < t ? t : ts; 
 
     // Data type descriptions. 
-    static char *tps[] = 
+    char *tps[] = 
     {
         "NUMBER",
         "STRING", 
