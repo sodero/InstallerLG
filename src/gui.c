@@ -2778,7 +2778,7 @@ int gui_error(int id,
               const char *info)
 {
     #ifdef AMIGA
-    static ULONG flags; 
+    ULONG flags; 
     static char err[BUFSIZ]; 
     static struct EasyStruct es = 
     {

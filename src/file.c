@@ -2266,11 +2266,12 @@ entry_p m_foreach(entry_p contxt)
         // Permission to read? 
         if(dir) 
         {
-            static char cwd[PATH_MAX];
+            // Use global buffer.
+            char *cwd = get_buf();
             struct dirent *ent = readdir(dir); 
 
             // Save the current working directory. 
-            if(getcwd(cwd, PATH_MAX) == cwd)
+            if(getcwd(cwd, buf_size()) == cwd)
             {
                 // Enter the directory <drawer name>
                 if(!chdir(dn))
@@ -2415,10 +2416,11 @@ entry_p m_foreach(entry_p contxt)
                 #ifdef AMIGA
                 if(!err)
                 {
-                    static char buf[BUFSIZ]; 
+                    // Use global buffer.
+                    char *buf = get_buf();
 
                     // Parse pattern. 
-                    switch(ParsePattern(pt, buf, sizeof(buf)))
+                    switch(ParsePattern(pt, buf, buf_size()))
                     {
                         // If we have any wildcards, try to match. 
                         case 1: 
@@ -3268,8 +3270,10 @@ entry_p m_textfile(entry_p contxt)
 
                         if(fs)
                         {
-                            static char buf[BUFSIZ]; 
-                            size_t n = fread(buf, 1, BUFSIZ, fs);
+                            // Use the global buffer.
+                            char *buf = get_buf(); 
+                            size_t siz = buf_size(),
+                                   n = fread(buf, 1, siz, fs);
 
                             // Log operation.
                             h_log(contxt, tr(S_INCL), fi, fn); 
@@ -3285,7 +3289,7 @@ entry_p m_textfile(entry_p contxt)
                                 }
 
                                 // More data? 
-                                n = fread(buf, 1, BUFSIZ, fs);
+                                n = fread(buf, 1, siz, fs);
                             }
 
                             fclose(fs); 

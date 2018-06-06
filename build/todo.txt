@@ -1,11 +1,9 @@
-- nagra statiska buffrar maste bort
-  - m_textfile
-  - m_foreach
-
 - nagra statiska arosbuffrar maste bort
   - m_patmatch
-  - m_foreach
   - InstallerGuiAsFile
+
+- Ar (textfile) verkligen OK? 
+- Verifiera foreach på Aros
 
 - kolla sa att MUI-biten inte lacker minne
 - FIXME:s
