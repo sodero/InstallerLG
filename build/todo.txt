@@ -1,8 +1,8 @@
 - nagra statiska arosbuffrar maste bort
   - m_patmatch
-  - InstallerGuiAsFile
 
 - Ar (textfile) verkligen OK? 
+- Kan du verkl. inte plocka statiken fran h_copyfile?
 - Verifiera foreach på Aros
 
 - kolla sa att MUI-biten inte lacker minne
