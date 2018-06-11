@@ -3261,8 +3261,26 @@ entry_p m_textfile(entry_p contxt)
                     // Assume success. 
                     DNUM = 1; 
 
-                    // Include before append. 
-                    if(include)
+                    // Append to empty file. This is strange
+                    // but it's how the CBM installer works.
+                    if(append)
+                    {
+                        // String to append. 
+                        const char *ap = str(append); 
+
+                        // Log operation.
+                        h_log(contxt, tr(S_APND), ap, fn); 
+
+                        if(fputs(ap, fp) == EOF)
+                        {
+                            error(contxt->id, ERR_WRITE_FILE, fn); 
+                            DNUM = 0; 
+                        }
+                    }
+
+                    // Are we going to include a file at the
+                    // end of the new file (append proper)?
+                    if(include && DNUM)
                     {
                         // File to copy. 
                         const char *fi = str(include); 
@@ -3281,6 +3299,7 @@ entry_p m_textfile(entry_p contxt)
                             // Copy the whole file. 
                             while(n)
                             {
+                                // Write to destination file.
                                 if(fwrite(buf, 1, n, fp) != n)
                                 {
                                     error(contxt->id, ERR_WRITE_FILE, fn); 
@@ -3288,30 +3307,18 @@ entry_p m_textfile(entry_p contxt)
                                     break; 
                                 }
 
-                                // More data? 
+                                // Do we have more data? 
                                 n = fread(buf, 1, siz, fs);
                             }
-
+            
+                            // We're done reading from 
+                            // the include file.
                             fclose(fs); 
                         }
                     }
 
-                    // Don't append if the include failed. 
-                    if(append && DNUM)
-                    {
-                        // String to append. 
-                        const char *ap = str(append); 
-
-                        // Log operation.
-                        h_log(contxt, tr(S_APND), ap, fn); 
-
-                        if(fputs(ap, fp) == EOF)
-                        {
-                            error(contxt->id, ERR_WRITE_FILE, fn); 
-                            DNUM = 0; 
-                        }
-                    }
-
+                    // We're done writing to the newly
+                    // created file.
                     fclose(fp); 
 
                     // We must append and / or include,
