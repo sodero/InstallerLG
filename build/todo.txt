@@ -1,5 +1,2 @@
-- Verifiera foreach på Aros
-- Verifiera patmatch pp Aros
-
 - kolla sa att MUI-biten inte lacker minne
 - FIXME:s
