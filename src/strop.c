@@ -383,16 +383,12 @@ entry_p m_patmatch(entry_p contxt)
     if(c_sane(contxt, 2))
     {
         #ifdef AMIGA
-        // Use a static buffer, Installer.guide
-        // restricts pattern length to 64. It 
-        // seems like MatchPattern can use a lot
-        // of stack if we use long patterns, so 
-        // let's not get rid of this limitation. 
-        static char buf[BUFSIZ]; 
+        // Use the global buffer.
+        char *buf = get_buf();
 
         // Create pattern. 
         const char *p = str(CARG(1)), *m = str(CARG(2));
-        LONG w = ParsePattern(p, buf, sizeof(buf)); 
+        LONG w = ParsePattern(p, buf, buf_size()); 
 
         // Can we parse the pattern?
         if(w >= 0)

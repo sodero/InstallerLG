@@ -1,9 +1,5 @@
-- nagra statiska arosbuffrar maste bort
-  - m_patmatch
-
-- Ar (textfile) verkligen OK? 
-- Kan du verkl. inte plocka statiken fran h_copyfile?
 - Verifiera foreach på Aros
+- Verifiera patmatch pp Aros
 
 - kolla sa att MUI-biten inte lacker minne
 - FIXME:s
