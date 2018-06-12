@@ -1,2 +1,3 @@
+- kolla alla stallen dar vi gor multipla evals, t.ex message. bieffekter uppkommer flera ganger.
 - kolla sa att MUI-biten inte lacker minne
 - FIXME:s

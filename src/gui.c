@@ -2284,7 +2284,9 @@ int gui_choice(const char *msg,
     );
     #else
     // Testing purposes.
-    (msg && hlp && nms && hlt) ? def : ~def;
+    printf("%s%s%s%d\n", msg, hlp, *nms, def) ? def : 0;
+    // Don't halt on non Amiga systems.
+    *hlt = 0; 
     #endif
 
     return ret; 
@@ -2318,7 +2320,7 @@ int gui_options(const char *msg,
     );
     #else
     // Testing purposes.
-    (msg && hlp && nms) ? def : ~def;
+    printf("%s%s%s%d\n", msg, hlp, *nms, def) ? def : 0;
     #endif
 
     return ret;
@@ -2350,9 +2352,8 @@ int gui_bool(const char *msg,
         no 
     );
     #else
-    0; 
     // Testing purposes.
-    printf("%s%s%s%s\n", msg, hlp, yes, no);
+    printf("%s%s%s%s\n", msg, hlp, yes, no) ? 1 : 0;
     #endif
     return ret;
 }
@@ -2383,11 +2384,11 @@ const char * gui_string(const char *msg,
         hlt
     );
     #else
-    def;
+    // Testing purposes.
+    (printf("%s%s%s\n", msg, hlp, def) ? def : "");
+
     // Don't halt on non Amiga systems.
     *hlt = 0; 
-    // Testing purposes.
-    printf("%s%s%s\n", msg, hlp, def);
     #endif
     return ret;
 }
@@ -2424,11 +2425,11 @@ int gui_number(const char *msg,
         hlt
     );
     #else
-    def;
+    // Testing purposes.
+    (printf("%s%s%d%d\n", msg, hlp, min, max) ? def : 0);
+
     // Don't halt on non Amiga systems.
     *hlt = 0; 
-    // Testing purposes.
-    printf("%s%s%d%d\n", msg, hlp, min, max);
     #endif
     return ret;
 }
@@ -2489,9 +2490,8 @@ const char *gui_askdir(const char *msg,
         msg, hlp, pth, dsk, asn, def, TRUE
     );
     #else
-    def;
     // Testing purposes.
-    printf("%s%s%d%d%d%s\n", msg, hlp, pth, dsk, asn, def);
+    (printf("%s%s%d%d%d%s\n", msg, hlp, pth, dsk, asn, def) ? def : "");
     #endif
 
     return ret;
@@ -2521,9 +2521,8 @@ const char *gui_askfile(const char *msg,
         msg, hlp, pth, dsk, FALSE, def, FALSE
     );
     #else
-    def;
     // Testing purposes.
-    printf("%s%s%d%d\n", msg, hlp, pth, dsk);
+    (printf("%s%s%d%d\n", msg, hlp, pth, dsk) ? def : "");
     #endif
 
     return ret;
@@ -2754,14 +2753,12 @@ int gui_complete(int com)
 //----------------------------------------------------------------------------
 int gui_confirm(const char *msg, const char *hlp)
 {
+    return (int)
     #ifdef AMIGA
-    return (int) DoMethod(Win, MUIM_InstallerGui_Confirm, msg, hlp);
+    DoMethod(Win, MUIM_InstallerGui_Confirm, msg, hlp);
     #else
     // Testing purposes.
-    printf("%s%s\n", msg, hlp);
-
-    // Always 'proceed'.
-    return 1;
+    printf("%s%s\n", msg, hlp) ? 1 : 0;
     #endif
 }
 
