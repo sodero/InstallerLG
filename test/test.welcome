@@ -1,3 +1,6 @@
 (welcome "Welcome") ; "","Welcome 1",""
 (welcome "Welcome" "Wilkommen") ; "","WelcomeWilkommen 1",""
+(welcome (askstring (prompt "p") (help "h") (default "d")) "Welcome" "Wilkommen") ; "","phd dWelcomeWilkommen 1",""
+(welcome (askstring (prompt "p") (help "h") (default "d")) "Welcome" "Wilkommen") ; "","phd dWelcomeWilkommen 1",""
+(procedure d ((askstring (prompt "p") (help "h") (default "d")))) (welcome (d) "Welcome" "Wilkommen") ; "","phd dWelcomeWilkommen 1",""
 (welcome) ; "","Line 1: syntax error, unexpected ')' ')'",""
