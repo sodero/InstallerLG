@@ -431,6 +431,91 @@ char *get_strvar(entry_p c, char *v)
 }
 
 //----------------------------------------------------------------------------
+// Name:        get_chlst
+// Description: Concatenate the string representations of all children of a 
+//              context. 
+// Input:       entry_p c:  The context.
+// Return:      char *:     The concatenation of the string representations 
+//                          of all children of 'c'.
+//----------------------------------------------------------------------------
+char *get_chlstr(entry_p c)
+{
+    // Concatenation.
+    char *r = NULL;
+
+    // We don't really need anything to
+    // concatenate but we expect a sane
+    // contxt.
+    if(c_sane(c, 0))
+    {
+        size_t n = 0; 
+        entry_p *e = c->children;
+
+        // Count the number of children.
+        while(*e && *e != end())
+        {
+            n++;
+            e++;
+        }
+
+        if(n)
+        {
+            // Allocate memory to hold a string pointer
+            // for each child.
+            char **v = calloc(n + 1, sizeof(char *));
+
+            if(v)
+            {
+                size_t l = 0; 
+
+                // Save all string pointers so that we
+                // don't evaluate children twice and 
+                // thereby set of side effects more
+                // than once.
+                while(n > 0)
+                {
+                    v[--n] = str(*(--e));
+                    l += strlen(v[n]);
+                }
+
+                // If the total length is non zero, we
+                // will concatenate all children.
+                if(l)
+                {
+                    // Allocate memory to hold the full
+                    // concatenated string.
+                    r = calloc(l + 1, 1);
+
+                    if(r)
+                    {
+                        // The actual concatenation. The
+                        // 'v' array is null terminated.
+                        while(v[n])
+                        {
+                            strcat(r, v[n]); 
+                            n++;
+                        }
+                    }
+                }
+                else
+                {
+                    // Nothing to concatenate.
+                    r = strdup("");
+                }
+
+                // Free the references before
+                // returning.
+                free(v);
+            }
+        }
+    }
+
+    // We could be in any state
+    // here, success or panic. 
+    return r;
+}
+
+//----------------------------------------------------------------------------
 // Name:        set_strvar
 // Description: Give an existing string variable a new value. Please note
 //              that the variable must exist and that the current resolved

@@ -1,3 +1,4 @@
 - kolla alla stallen dar vi gor multipla evals, t.ex message. bieffekter uppkommer flera ganger.
+- kolla att t.ex message beter sig nar variabler ar odefinierade
 - kolla sa att MUI-biten inte lacker minne
 - FIXME:s

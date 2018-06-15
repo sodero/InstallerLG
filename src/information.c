@@ -136,49 +136,26 @@ entry_p m_message(entry_p contxt)
         // Non novice or override using (all)?
         if(level > 0 || all)
         {
-            size_t mln = 0; 
-            entry_p *cur = contxt->children; 
+            char *msg = get_chlstr(contxt);
 
-            // Sum up the size of all children
-            while(*cur && *cur != end())
+            // Did we manaage to concatenate something?
+            if(msg)
             {
-                mln += strlen(str(*cur)); 
-                cur++; 
+                // If we could resolve all our children,
+                // show the result of the concatenation.
+                if(!did_error())
+                {
+                    gui_message(msg, 0);  
+                }
+
+                // Free the temporary buffer.
+                free(msg);
             }
-
-            // Do we have anything to show? 
-            if(mln)
+            else
             {
-                char *con = calloc(mln + 1, 1);
-
-                if(con)
-                {
-                    // Concatenate the string representation
-                    // of all children.
-                    cur = contxt->children; 
-
-                    while(*cur && *cur != end())
-                    {
-                        strcat(con, str(*cur)); 
-                        cur++; 
-                    }
-
-                    // If we could resolve all our children,
-                    // show the result of the concatenation
-                    // and free the temporary buffer.
-                    if(!did_error())
-                    {
-                        gui_message(con, 0);  
-                    }
-
-                    free(con); 
-                }
-                else
-                {
-                    // Out of memory
-                    error(PANIC);
-                    RCUR;
-                }
+                // Out of memory
+                error(PANIC);
+                RCUR;
             }
         }
 
