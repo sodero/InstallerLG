@@ -2,4 +2,6 @@
 (working "doing") ; "","1:Working on installation... doing1",""
 (working "doing" "things") ; "","1:Working on installation... doingthings1",""
 (working (askstring (prompt "p") (help "h") (default "doing")) "things") ; "","phdoing 1:Working on installation... doingthings1",""
-; DISABLED FIXME (working "doing" "things" with variables) ; "","1",""
+(working "doing" "things" with variables) ; "","Line 1: Undefined variable 'variables' Line 1: Undefined variable 'with' 0",""
+(set with "1") (set variables "2") (working "doing" "things" with variables) ; "","1:Working on installation... doingthings121",""
+(set with nothing) (set variables "2") (working "doing" "things" with variables) ; "","Line 1: Undefined variable 'nothing' 0",""

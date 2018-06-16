@@ -1,4 +1,5 @@
-- kolla alla stallen dar vi gor multipla evals, t.ex message. bieffekter uppkommer flera ganger.
-- kolla att t.ex message beter sig nar variabler ar odefinierade
+- testa om alla funktioner dar get_chlstr nu anvands, inkl odekl, nomem
+- testa om ask*, inkl odekl.
+- kolla odekl. i allm.
 - kolla sa att MUI-biten inte lacker minne
 - FIXME:s

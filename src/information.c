@@ -125,7 +125,7 @@ entry_p m_debug(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_message(entry_p contxt)
 {
-    // We need atleast one argument
+    // We need atleast one argument.
     if(c_sane(contxt, 1))
     {
         // Get information needed to determine 
@@ -136,9 +136,10 @@ entry_p m_message(entry_p contxt)
         // Non novice or override using (all)?
         if(level > 0 || all)
         {
+            // Concatenate all children.
             char *msg = get_chlstr(contxt);
 
-            // Did we manaage to concatenate something?
+            // Did we manage to concatenate something?
             if(msg)
             {
                 // If we could resolve all our children,
@@ -153,7 +154,7 @@ entry_p m_message(entry_p contxt)
             }
             else
             {
-                // Out of memory
+                // Out of memory.
                 error(PANIC);
                 RCUR;
             }
@@ -164,7 +165,7 @@ entry_p m_message(entry_p contxt)
     }
     else
     {
-        // The parser is broken
+        // The parser is broken.
         error(PANIC); 
         RCUR; 
     }
@@ -190,73 +191,46 @@ entry_p m_welcome(entry_p contxt)
 {
     if(c_sane(contxt, 1))
     {
-        size_t mln = 0; 
-        entry_p *cur = contxt->children; 
+        // Installer settings.
         int lvl = 0, 
             lgf = 0, 
             prt = 0; 
 
-        // Sum up the size of all children
-        while(*cur && *cur != end())
-        {
-            mln += strlen(str(*cur)); 
-            cur++; 
-        }
+        // Concatenate all children.
+        char *msg = get_chlstr(contxt);
 
-        // Do we have anything to show? 
-        if(mln)
+        // Did we manaage to concatenate something?
+        if(msg)
         {
-            char *con = calloc(mln + 1, 1);
-
-            if(con)
+            // If we could resolve all our children,
+            // show the result of the concatenation.
+            if(!did_error())
             {
-                // Concatenate the string representation
-                // of all children.
-                cur = contxt->children; 
+                gui_welcome(msg, &lvl, &lgf, &prt); 
+            }
 
-                while(*cur && *cur != end())
-                {
-                    strcat(con, str(*cur)); 
-                    cur++; 
-                }
+            // Free the temporary buffer.
+            free(msg);
 
-                // Show the result of the concatenation
-                // and free the temporary buffer.
-                gui_welcome(con, &lvl, &lgf, &prt); 
-                free(con); 
+            // User level 0 = abort
+            if(lvl > 0)
+            {
+                set_numvar(contxt, "@user-level", lvl - 1); 
+                set_numvar(contxt, "@pretend", prt); 
+                set_numvar(contxt, "@log", lgf); 
+                RNUM(1);
             }
             else
             {
-                // Out of memory
-                error(PANIC);
-                RCUR;
+                error(HALT); 
+                RNUM(0); 
             }
         }
-        else
-        {
-            gui_welcome("", &lvl, &lgf, &prt); 
-        }
-
-        // User level 0 = abort
-        if(lvl > 0)
-        {
-            set_numvar(contxt, "@user-level", lvl - 1); 
-            set_numvar(contxt, "@pretend", prt); 
-            set_numvar(contxt, "@log", lgf); 
-            RNUM(1);
-        }
-        else
-        {
-            error(HALT); 
-            RNUM(0); 
-        }
     }
-    else
-    {
-        // The parser is broken
-        error(PANIC);
-        RCUR; 
-    }
+        
+    // OOM / broken parser.
+    error(PANIC);
+    RCUR; 
 }
 
 //----------------------------------------------------------------------------
@@ -269,62 +243,59 @@ entry_p m_working(entry_p contxt)
 {
     if(c_sane(contxt, 1)) 
     {
-        size_t mln = 0; 
-        entry_p *cur = contxt->children; 
-        const char *pre = tr(S_WRKN); 
-        char *con; 
+        // Concatenate all children.
+        char *msg = get_chlstr(contxt); 
 
-        // Sum up the size of all children
-        while(*cur && *cur != end())
+        // Did we manage to concatenate something?
+        if(msg)
         {
-            mln += strlen(str(*cur)); 
-            cur++; 
-        }
-
-        // Allocate enough to hold the standard
-        // header and all children + term zero. 
-        con = calloc(strlen(pre) + mln + 1, 1);
-
-        if(con)
-        {
-            // Standard part.
-            strcat(con, pre); 
-
-            // Concatenate the string representation
-            // of all children.
-            cur = contxt->children; 
-
-            while(*cur && *cur != end())
-            {
-                strcat(con, str(*cur)); 
-                cur++; 
-            }
-
-            // If we could resolve our children, show
-            // the result of the concatenation and free
-            // the temporary buffer. We will return 
-            // immediately. No waiting for any events.
+            // Only proceed if we could resolve all
+            // our children.
             if(!did_error())
             {
-                gui_message(con, 1);  
+                // Standard prefix.
+                const char *pre = tr(S_WRKN); 
+                size_t len = strlen(pre) + 
+                             strlen(msg) + 1;
+
+                // Memory to hold prefix and children.
+                char *con = calloc(len, 1);
+
+                if(con)
+                {
+                    // Concatenate prefix and children.
+                    snprintf(con, len, "%s%s", pre, msg); 
+
+                    // Free the children buffer.
+                    free(msg);
+
+                    // Show the result. Return immediately.
+                    // No waiting for any events.
+                    gui_message(con, 1);  
+
+                    // Free the final message buffer.
+                    free(con);
+
+                    // Success.
+                    RNUM(1); 
+                }
+                else
+                {
+                    // Free the children buffer.
+                    free(msg);
+                }
             }
-
-            free(con); 
+            else
+            {
+                // Could not resolve children.
+                free(msg);
+                RNUM(0); 
+            }
         }
-        else
-        {
-            // Out of memory
-            error(PANIC);
-            RCUR;
-        }
-
-        // Success.
-        RNUM(1); 
     }
-    else
-    {
-        // The parser is broken
-        error(PANIC);
-        RCUR; 
-    }
+        
+    // Broken parser /
+    // out of memory.
+    error(PANIC);
+    RCUR; 
 }

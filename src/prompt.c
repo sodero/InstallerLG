@@ -765,27 +765,37 @@ entry_p m_askstring(entry_p contxt)
 
         if(prompt && help && deflt)
         {
-            const char *res;
+            const char *res = NULL;
 
             // Show requester unless we're executing in
             // 'novice' mode.
             if(get_numvar(contxt, "@user-level") > 0)
             {
-                int hlt = 0; 
+                const char *p = str(prompt),
+                           *h = str(help),
+                           *d = str(deflt);  
                 
-                // Prompt user.
-                res = gui_string
-                (
-                    str(prompt), 
-                    str(help), 
-                    str(deflt),
-                    &hlt
-                );
-
-                // Halt if abort.
-                if(hlt)
+                // Only show requester if we could
+                // resolve all options.
+                if(!did_error())
                 {
-                    error(HALT); 
+                    int hlt = 0; 
+
+                    // Prompt user.
+                    res = gui_string(p, h, d, &hlt);
+
+                    // Halt if abort.
+                    if(hlt)
+                    {
+                        error(HALT); 
+                        REST;
+                    }
+                }
+                else
+                {
+                    // Could not resolve all
+                    // options. Error set by
+                    // str().
                     REST;
                 }
             }

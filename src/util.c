@@ -499,7 +499,7 @@ char *get_chlstr(entry_p c)
                 }
                 else
                 {
-                    // Nothing to concatenate.
+                    // No data to concatenate.
                     r = strdup("");
                 }
 
@@ -507,6 +507,11 @@ char *get_chlstr(entry_p c)
                 // returning.
                 free(v);
             }
+        }
+        else
+        {
+            // No children to concatenate.
+            r = strdup("");
         }
     }
 
