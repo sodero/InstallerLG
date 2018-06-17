@@ -29,25 +29,32 @@ entry_p m_abort(entry_p contxt)
     // are optional though.
     if(c_sane(contxt, 0))
     {
-        entry_p *cur = contxt->children; 
-        while(*cur && *cur != end())
+        // Concatenate all children.
+        char *msg = get_chlstr(contxt);
+
+        // Did we manage to concatenate something?
+        if(msg)
         {
-            // FIXME
-            /* show message */
-            cur++; 
+            // If we could resolve all our children,
+            // show the result of the concatenation.
+            if(!did_error())
+            {
+                gui_message(msg, 0);  
+            }
+
+            // Free the temporary buffer.
+            free(msg);
+
+            // Set abort state. Will make 
+            // invoke() halt. 
+            error(-3, ERR_ABORT, __func__); 
+            RNUM(0);
         }
-        
-        // Set abort state. Will make 
-        // invoke() halt. 
-        error(-3, ERR_ABORT, __func__); 
-        RNUM(0);
     }
-    else
-    {
-        // The parser is broken
-        error(PANIC); 
-        RCUR; 
-    }
+
+    // Broken parser / OOM
+    error(PANIC); 
+    RCUR; 
 }
 
 //----------------------------------------------------------------------------
