@@ -3714,57 +3714,32 @@ entry_p m_transcript(entry_p contxt)
     // more strings to put into the log file.
     if(c_sane(contxt, 1))
     {
-        size_t len = 0; 
+        // Concatenate all children.
+        char *msg = get_chlstr(contxt);
 
-        // Sum up the length of all children.
-        for(entry_p *e = contxt->children; 
-            *e && *e != end(); e++)
+        // Assume failure.
+        DNUM = 0;
+
+        // Did we manage to concatenate something?
+        if(msg)
         {
-            // Make it possible to mix override
-            // options and strings.
-            if((*e)->type != OPTION)
+            // If we could resolve all our children,
+            // write the result of the concatenation
+            // to the log file (unless logging is
+            // disabled).
+            if(!did_error())
             {
-                len += strlen(str(*e)); 
-            }
-        }
-
-        // Allocate enough memory to hold the
-        // concatenation of all children.
-        char *buf = calloc(len + 2, 1);
-
-        if(buf)
-        {
-            // Concatenate all children.
-            for(entry_p *e = contxt->children; 
-                *e && *e != end(); e++)
-            {
-                // Make it possible to mix override
-                // options and strings.
-                if((*e)->type != OPTION)
-                {
-                    strcat(buf, str(*e)); 
-                }
+                DNUM = h_log(contxt, "%s\n", msg) ? 1 : 0; 
             }
 
-            // If logging is enabled, write the result
-            // to the log file.
-            DNUM = h_log(contxt, "%s\n", buf) ? 1 : 0; 
-            free(buf); 
+            // Free the temporary buffer and exit.
+            free(msg);
+            RCUR;
         }
-        else
-        {
-            // Out of memory.
-            error(PANIC);
-        }
-    }
-    else
-    {
-        // The parser is broken.
-        error(PANIC);
     }
 
-    // Success, failure or
-    // broken parser. 
+    // OOM / broken parser.
+    error(PANIC);
     RCUR; 
 }
 
