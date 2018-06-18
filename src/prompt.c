@@ -68,13 +68,16 @@ entry_p m_askbool(entry_p contxt)
             // 'novice' mode.
             if(get_numvar(contxt, "@user-level") > 0)
             {
-                DNUM = gui_bool
-                (
-                    str(prompt), 
-                    str(help), 
-                    yes, 
-                    no
-                );
+                const char *p = str(prompt),
+                           *h = str(help);
+
+                // Only show requester if we could
+                // resolve all options.
+                if(!did_error())
+                {
+                    // Prompt user.
+                    DNUM = gui_bool(p, h, yes, no);
+                }
             }
         }
         else
