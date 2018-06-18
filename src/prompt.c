@@ -189,22 +189,23 @@ entry_p m_askchoice(entry_p contxt)
             // 'novice' mode.
             if(get_numvar(contxt, "@user-level") > 0)
             {
-                int hlt = 0; 
+                const char *p = str(prompt),
+                           *h = str(help);
 
-                // Prompt user.
-                DNUM = gui_choice
-                (
-                    str(prompt), 
-                    str(help),
-                    (const char **) chs, 
-                    i,
-                    &hlt
-                ); 
-
-                // Halt if abort.
-                if(hlt)
+                // Only show requester if we could
+                // resolve all options.
+                if(!did_error())
                 {
-                    error(HALT); 
+                    int hlt = 0; 
+
+                    // Prompt user.
+                    DNUM = gui_choice(p, h, chs, i, &hlt); 
+
+                    // Halt if abort.
+                    if(hlt)
+                    {
+                        error(HALT); 
+                    }
                 }
             }
             else
