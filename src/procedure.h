@@ -2,7 +2,9 @@
 // procedure.h: 
 //
 // Management of user defined procedures
-//
+//----------------------------------------------------------------------------
+// Copyright (C) 2018, Ola Soder. All rights reserved.
+// Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //----------------------------------------------------------------------------
 
 #ifndef PROCEDURE_H_

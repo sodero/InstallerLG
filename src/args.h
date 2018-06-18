@@ -4,6 +4,9 @@
 // Functions and data types for handling command line arguments and workbench 
 // tooltypes. 
 //----------------------------------------------------------------------------
+// Copyright (C) 2018, Ola Soder. All rights reserved.
+// Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
+//----------------------------------------------------------------------------
 
 #ifndef ARGS_H_
 #define ARGS_H_

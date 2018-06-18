@@ -3,6 +3,9 @@
 //
 // Functions for setting, getting and communicating errors.
 //----------------------------------------------------------------------------
+// Copyright (C) 2018, Ola Soder. All rights reserved.
+// Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
+//----------------------------------------------------------------------------
 
 #ifndef ERROR_H_
 #define ERROR_H_

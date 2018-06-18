@@ -2,7 +2,9 @@
 // arithmetic.h: 
 //
 // Arithmetic operations 
-//
+//----------------------------------------------------------------------------
+// Copyright (C) 2018, Ola Soder. All rights reserved.
+// Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //----------------------------------------------------------------------------
 
 #ifndef ARITHMETIC_H_

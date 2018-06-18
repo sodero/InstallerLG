@@ -3,6 +3,9 @@
 //
 // Initilization by means of prepending and appending code.
 //----------------------------------------------------------------------------
+// Copyright (C) 2018, Ola Soder. All rights reserved.
+// Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
+//----------------------------------------------------------------------------
 
 #include "alloc.h"
 #include "args.h"

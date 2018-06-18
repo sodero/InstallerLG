@@ -3,6 +3,9 @@
 //
 // Functions for evaluation of entry_t objects. 
 //----------------------------------------------------------------------------
+// Copyright (C) 2018, Ola Soder. All rights reserved.
+// Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
+//----------------------------------------------------------------------------
 
 #ifndef EVAL_H_
 #define EVAL_H_

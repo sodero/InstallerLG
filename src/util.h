@@ -3,6 +3,9 @@
 //
 // Misc utility functions primarily used by the 'native' methods.
 //----------------------------------------------------------------------------
+// Copyright (C) 2018, Ola Soder. All rights reserved.
+// Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
+//----------------------------------------------------------------------------
 
 #ifndef UTIL_H_
 #define UTIL_H_

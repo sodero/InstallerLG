@@ -3,6 +3,9 @@
 //
 // Encapsulation of resources that we might want to localize later on.
 //----------------------------------------------------------------------------
+// Copyright (C) 2018, Ola Soder. All rights reserved.
+// Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
+//----------------------------------------------------------------------------
 
 #include "error.h"
 #include "resource.h"
