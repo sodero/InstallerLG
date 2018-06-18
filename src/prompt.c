@@ -264,22 +264,38 @@ entry_p m_askdir(entry_p contxt)
             // 'novice' mode.
             if(get_numvar(contxt, "@user-level") > 0)
             {
-                ret = gui_askdir
-                (
-                    str(prompt),
-                    str(help),
-                    newpath ? 1 : 0, 
-                    disk ? 1 : 0, 
-                    assigns ? 1 : 0, 
-                    str(deflt)
-                ); 
+                const char *p = str(prompt),
+                           *h = str(help),
+                           *d = str(deflt);
 
-                // Return empty string and
-                // halt if user aborted.
-                if(!ret)
+                // Only show requester if we could
+                // resolve all options.
+                if(!did_error())
                 {
-                    error(HALT); 
-                    REST; 
+                    // Prompt user.
+                    ret = gui_askdir
+                    (
+                        p,
+                        h,
+                        newpath ? 1 : 0, 
+                        disk ? 1 : 0, 
+                        assigns ? 1 : 0, 
+                        d
+                    ); 
+
+                    // Return empty string and
+                    // halt if user aborted.
+                    if(!ret)
+                    {
+                        error(HALT); 
+                        REST; 
+                    }
+                }
+                else
+                {
+                    // Could not resolve one
+                    // or more options.
+                    REST;
                 }
             }
             else

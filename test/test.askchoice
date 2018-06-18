@@ -7,11 +7,8 @@
 (askchoice (prompt) (help "h") (choices "a")) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (message (askchoice (prompt "p") (help "h") (choices "a" "b" "c") (default 2))) ; "","pha2 21",""
 (debug (askchoice (prompt "p") (help "h") (choices "a" "b" "c") (default 2))) ; "","pha2 2 1",""
-
-
 (askchoice (prompt "p") (help "h") (choices "a" "b" "c") (default 1)) ; "","pha1 1",""
 (askchoice (prompt "p") (help "h") (choices "b" "c" "d") (default 2)) ; "","phb2 2",""
-
 (askchoice (prompt p) (help "h") (choices "b" "c" "d") (default 2)) ; "","Line 1: Undefined variable 'p' 0",""
 (askchoice (prompt "p") (help h) (choices "b" "c" "d") (default 2)) ; "","Line 1: Undefined variable 'h' 0",""
 (askchoice (prompt "p") (help "h") (choices b "c" "d") (default 2)) ; "","Line 1: Undefined variable 'b' Line 1: No such item '2' 0",""
