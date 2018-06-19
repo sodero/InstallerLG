@@ -744,14 +744,16 @@ entry_p m_askoptions(entry_p contxt)
             // 'novice' mode.
             if(get_numvar(contxt, "@user-level") > 0)
             {
-                // The GUI part will do the rest. 
-                DNUM = gui_options
-                (
-                    str(prompt), 
-                    str(help), 
-                    (const char **) chs, 
-                    i
-                ); 
+                const char *p = str(prompt),
+                           *h = str(help);
+
+                // Only show requester if we could
+                // resolve all options.
+                if(!did_error())
+                {
+                    // Prompt user.
+                    DNUM = gui_options(p, h, chs, i); 
+                }
             }
             else
             {
