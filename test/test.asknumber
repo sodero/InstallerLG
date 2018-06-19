@@ -9,3 +9,6 @@
 (user 0) (asknumber (prompt "p") (help "h") (default 2) (range 11 10)) ; "","2",""
 (user 1) (asknumber (prompt "p") (help "h") (default 2) (range 11 10)) ; "","ph0100 2",""
 (user 2) (asknumber (prompt "p") (help "h") (default 2) (range 11 10)) ; "","ph0100 2",""
+(asknumber (prompt p) (help "h") (default 2)) ; "","Line 1: Undefined variable 'p' 0",""
+(asknumber (prompt "p") (help h) (default 2)) ; "","Line 1: Undefined variable 'h' 0",""
+(asknumber (prompt "p") (help "h") (default d)) ; "","Line 1: Undefined variable 'd' 0",""

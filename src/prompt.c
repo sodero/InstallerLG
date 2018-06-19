@@ -272,16 +272,12 @@ entry_p m_askdir(entry_p contxt)
                 // resolve all options.
                 if(!did_error())
                 {
+                    int np = newpath ? 1 : 0,
+                        dk = disk ? 1 : 0,
+                        as = assigns ? 1 : 0;
+
                     // Prompt user.
-                    ret = gui_askdir
-                    (
-                        p,
-                        h,
-                        newpath ? 1 : 0, 
-                        disk ? 1 : 0, 
-                        assigns ? 1 : 0, 
-                        d
-                    ); 
+                    ret = gui_askdir(p, h, np, dk, as, d); 
 
                     // Return empty string and
                     // halt if user aborted.
@@ -504,21 +500,33 @@ entry_p m_askfile(entry_p contxt)
             // in 'novice' mode.
             if(get_numvar(contxt, "@user-level") > 0)
             {
-                ret = gui_askfile
-                (
-                    str(prompt),
-                    str(help),
-                    newpath ? 1 : 0, 
-                    disk ? 1 : 0, 
-                    str(deflt)
-                ); 
+                const char *p = str(prompt),
+                           *h = str(help),
+                           *d = str(deflt);
 
-                // Return empty string and
-                // halt if user aborted.
-                if(!ret)
+                // Only show requester if we could
+                // resolve all options.
+                if(!did_error())
                 {
-                    error(HALT); 
-                    REST; 
+                    int np = newpath ? 1 : 0,
+                        dk = disk ? 1 : 0;
+
+                    // Prompt user.
+                    ret = gui_askfile(p, h, np, dk, d); 
+
+                    // Return empty string and
+                    // halt if user aborted.
+                    if(!ret)
+                    {
+                        error(HALT); 
+                        REST; 
+                    }
+                }
+                else
+                {
+                    // Could not resolve one
+                    // or more options.
+                    REST;
                 }
             }
             else
@@ -608,23 +616,24 @@ entry_p m_asknumber(entry_p contxt)
             // 'novice' mode.
             if(get_numvar(contxt, "@user-level") > 0)
             {
-                int hlt = 0; 
+                int d = num(deflt);
+                const char *p = str(prompt),
+                           *h = str(help);
 
-                // Prompt user.
-                DNUM = gui_number
-                (
-                    str(prompt),
-                    str(help),
-                    min, 
-                    max, 
-                    num(deflt),
-                    &hlt
-                );
-
-                // Halt if abort.
-                if(hlt)
+                // Only show requester if we could
+                // resolve all options.
+                if(!did_error())
                 {
-                    error(HALT); 
+                    int hlt = 0; 
+
+                    // Prompt user.
+                    DNUM = gui_number(p, h, min, max, d, &hlt);
+
+                    // Halt if abort.
+                    if(hlt)
+                    {
+                        error(HALT); 
+                    }
                 }
             }
             else
