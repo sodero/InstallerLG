@@ -379,19 +379,24 @@ entry_p m_askdisk(entry_p contxt)
                                *bt1 = tr(S_RTRY),
                                *bt2 = tr(S_ABRT); 
 
-                    // Retry until we can get a lock or the
-                    // user aborts. 
-                    while(!l)
+                    // Only show requester if we could
+                    // resolve all options.
+                    if(!did_error())
                     {
-                        // Probe user, retry or abort?  
-                        if(gui_bool(msg, hlp, bt1, bt2))
+                        // Retry until we can get a lock or the
+                        // user aborts. 
+                        while(!l)
                         {
-                            l = (BPTR) Lock(n, ACCESS_READ);
-                        }
-                        else
-                        {
-                            // User abort. 
-                            break; 
+                            // Probe user, retry or abort?  
+                            if(gui_bool(msg, hlp, bt1, bt2))
+                            {
+                                l = (BPTR) Lock(n, ACCESS_READ);
+                            }
+                            else
+                            {
+                                // User abort. 
+                                break; 
+                            }
                         }
                     }
                 }
@@ -425,6 +430,7 @@ entry_p m_askdisk(entry_p contxt)
                         {
                             // An assign must contain at least one character. 
                             error(contxt->id, ERR_INVALID_ASSIGN, nn); 
+                            UnLock(l); 
                         }
                     }
                     else
