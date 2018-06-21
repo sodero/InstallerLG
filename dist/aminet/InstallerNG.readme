@@ -1,6 +1,6 @@
 Short:        Commodore Installer replacement
-Author:       Ola Soder
-Uploader:     rolfkopman@gmail.com (Ola Soder)
+Author:       Ola Söder
+Uploader:     rolfkopman@gmail.com (Ola Söder)
 Type:         util/sys
 Architecture: i386-aros
 Requires:     MUI 3.8
