@@ -1,0 +1,17 @@
+Short:        Commodore Installer replacement
+Author:       Ola Soder
+Uploader:     rolfkopman@gmail.com (Ola Soder)
+Type:         util/sys
+Architecture: i386-aros
+Requires:     MUI 3.8
+Version:      __VER__
+Distribution: Aminet
+
+InstallerLG
+===========
+
+A re-implementation of the LISP based 'Installer' scripting language developed by
+Commodore International for the Amiga platform. InstallerLG aims to be completely
+compatible with the original as described in the V43.3 documentation. Most of the
+resource related limitations of the Commodore implementation are gone and the GUI
+has been replaced by a less outdated MUI / Zune based one.
