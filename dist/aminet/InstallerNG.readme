@@ -1,10 +1,10 @@
 Short:        Commodore Installer replacement
 Author:       Ola Söder
-Uploader:     rolfkopman@gmail.com (Ola Söder)
+Uploader:     rolfkopman@gmail.com (Ola S�der)
 Type:         util/sys
 Architecture: i386-aros
 Requires:     MUI 3.8
-Version:      __VER__
+Version:      0.1.0-alpha.1
 Distribution: Aminet
 
 InstallerLG
