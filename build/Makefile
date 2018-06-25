@@ -24,7 +24,7 @@ CC := gcc
 AMIGA = true
 CWRN = -Wall -Wno-pointer-sign -Wno-unused-but-set-variable
 CWRN += -Wno-implicit-function-declaration
-CGEN = -O0 -std=c99 -DAMIGA
+CGEN = -Os -std=c99 -DAMIGA
 LDFLAGS = -ldebug
 ifeq ($(OS),MorphOS)
 LDFLAGS += -noixemul
