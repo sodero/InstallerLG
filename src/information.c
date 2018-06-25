@@ -236,7 +236,7 @@ entry_p m_welcome(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
-// (working)
+// (working <string> <string> ...)
 //     indicate to user that Installer is busy doing things
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG

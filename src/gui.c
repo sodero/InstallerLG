@@ -1437,7 +1437,6 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
         // no choice.
         if(DoMethod(grp, MUIM_Group_InitChange))
         {
-            IPTR ret; 
             ULONG id; 
             size_t i = 0; 
             static Object * cb[33]; 
@@ -1446,13 +1445,16 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
             // The maximum number of choices is 32.
             while(*cs && i < 32)
             {
-                // Create new checkbox with the default
-                // value set.
+                // Default selection.
+                LONG sel = (msg->Default & (1 << i)) ? TRUE : FALSE;
+
+                // New checkbox with default selection.
                 Object *c = (Object *) MUI_NewObject
                 (
                     MUIC_Group,
                     MUIA_Group_Horiz, TRUE,
                     MUIA_InputMode, MUIV_InputMode_Toggle,
+                    MUIA_Selected, sel, 
                     MUIA_Group_Child, (Object *) MUI_NewObject(
                         MUIC_Image,
                         MUIA_Frame, MUIV_Frame_ImageButton,
@@ -1460,7 +1462,7 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
                         MUIA_Background, MUII_ButtonBack,
                         MUIA_Image_FreeVert, TRUE,
                         MUIA_ShowSelState, FALSE,
-                        MUIA_Selected, (msg->Default & (1 << i)) ? TRUE : FALSE,
+                        MUIA_Selected, sel, 
                         MUIA_Weight, 0,
                         TAG_END),
                     MUIA_Group_Child, (Object *) MUI_NewObject(
@@ -1496,9 +1498,6 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
                 }
             }
 
-            // Mask out non-existing options from -1. 
-            ret = msg->Default & ((1 << i) - 1); 
-
             // We're done modifying the group.
             DoMethod(grp, MUIM_Group_ExitChange);
 
@@ -1510,6 +1509,9 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
 
             if(DoMethod(grp, MUIM_Group_InitChange))
             {
+                // Bitmask.
+                IPTR ret = 0; 
+
                 while(i--)
                 {
                     ULONG sel; 
@@ -2778,21 +2780,20 @@ int gui_error(int id,
               const char *info)
 {
     #ifdef AMIGA
-    ULONG flags; 
     static char err[BUFSIZ]; 
     static struct EasyStruct es = 
     {
+        .es_TextFormat = (UBYTE *) &err,
         .es_StructSize = sizeof(struct EasyStruct), 
     };
 
     es.es_Title = (UBYTE *) tr(S_ERRS); 
-    es.es_TextFormat = (UBYTE *) &err; 
     es.es_GadgetFormat = (UBYTE *) tr(S_OKEY); 
     snprintf(err, sizeof(err), tr(S_LERR), id, type, info);
 
     // We don't have any way of knowing
     // whether this really works out...
-    EasyRequest(NULL, &es, &flags);
+    EasyRequest(NULL, &es, NULL);
 
     // Ignore the user feedback.
     return 1; 

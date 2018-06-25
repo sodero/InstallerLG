@@ -1,5 +1,4 @@
-- testa om alla funktioner dar get_chlstr nu anvands, inkl odekl, nomem
-- testa om ask*, inkl odekl.
 - testa (abort), jmf m 3.9
 - kolla sa att MUI-biten inte lacker minne
 - FIXME:s
+
