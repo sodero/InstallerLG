@@ -9,7 +9,6 @@ EXE := installer
 #---------------------------------------------------------------------------------#
 # OS
 #---------------------------------------------------------------------------------#
-
 ifeq ($(OS),Linux)
 CWRN = -Wall -Wno-unused-but-set-variable
 CGEN = -g -std=c99
@@ -76,12 +75,6 @@ ifneq ($(AMIGA),true)
 else
 	@echo "[SKIPPED] @sh ../test/run.sh ./$(EXE) ../test $(REXTRA)"
 endif
-
-.PHONY: oom
-oom: CFLAGS += -DOOM
-oom: CWRN += -Wno-unused-variable
-oom: REXTRA := oom
-oom: test
 
 .PHONY: clean
 clean: 

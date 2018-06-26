@@ -5,6 +5,7 @@ EXE := installer
 LHA := aminet/InstallerLG.lha
 BIN := ../build
 OS := $(shell uname)
+FILES := $(EXE) 'InstallerNG installer' 'InstallerNG installer.info'
 
 #---------------------------------------------------------------------------------#
 # OS
@@ -20,11 +21,6 @@ endif
 endif
 endif
 endif
-
-#---------------------------------------------------------------------------------#
-# Targets
-#---------------------------------------------------------------------------------#
-FILES := 'installer' 'InstallerNG installer' 'InstallerNG installer.info'
 
 #---------------------------------------------------------------------------------#
 # Targets
