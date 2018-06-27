@@ -1,1 +1,8 @@
--
+0.1.0-alpha.1:
+==============
+- Initial dump
+
+0.1.0-alpha.2:
+==============
+- Made lexer case insensitive (YAM)
+- Filenames ending with '/' are now accepted by tackon (YAM)

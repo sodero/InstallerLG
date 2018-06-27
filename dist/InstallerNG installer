@@ -1,5 +1,5 @@
 ; InstallerNG
-; $VER: InstallerNG 0.1.0-alpha.1
+; $VER: InstallerNG 0.1.0-alpha.2
 
 (set #app-bin "installer")
 (set @app-name "InstallerNG")
