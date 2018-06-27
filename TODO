@@ -1,1 +1,3 @@
+- Consider doing something with yyerror so that syntax problems 
+  are visible when running from WB as well.
 - FIXME:s
