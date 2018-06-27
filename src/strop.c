@@ -610,8 +610,7 @@ char *h_tackon(int id,
 
             // If the filename ends with a delimiter,
             // it's not a valid filename.
-            if(f[lf - 1] == '/' ||
-               f[lf - 1] == ':') 
+            if(f[lf - 1] == ':') 
             {
                 error(id, ERR_NOT_A_FILE, f); 
                 return NULL; 
