@@ -28,7 +28,7 @@ static char *strduptr(const char *str);
     /* because we want to, but because it will */
     /* will leak memory otherwise.             */
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
-%option noyywrap reentrant bison-bridge
+%option noyywrap reentrant bison-bridge caseless
 
 %%
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
