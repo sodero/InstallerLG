@@ -6,3 +6,9 @@
 ==============
 - Made lexer case insensitive (YAM)
 - Filenames ending with '/' are now accepted by tackon (YAM)
+
+0.1.0-alpha.3:
+==============
+- (optional) quirks 'fixed' (YAM).
+- (while) and (until) naked blocks allowed (YAM). 
+- (exit (QUIET)) is now (always) totally silent.
