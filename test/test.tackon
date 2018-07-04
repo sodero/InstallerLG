@@ -1,8 +1,5 @@
 (tackon "dir" "file") ; "","dir/file",""
 (tackon "dir" "file:") ; "","Line 1: Not a file 'file:' 0",""
-(tackon "dir" "file/") ; "","dir/file/",""
-(tackon "dir" "file//") ; "","dir/file//",""
-(tackon "dir/" "file/") ; "","dir/file/",""
 (tackon "dir/" "file") ; "","dir/file",""
 (tackon "dir/" "sub/file") ; "","dir/sub/file",""
 (tackon "dir/" "/file") ; "","dir/file",""
