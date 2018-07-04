@@ -38,8 +38,9 @@ entry_p m_abort(entry_p contxt)
         if(msg)
         {
             // If we could resolve all our children,
-            // show the result of the concatenation.
-            if(!did_error())
+            // show the result of the concatenation
+            // unless we have an empty string.
+            if(strlen(msg) && !did_error())
             {
                 gui_message(msg, 0);  
             }
@@ -86,8 +87,9 @@ entry_p m_exit(entry_p contxt)
             if(msg)
             {
                 // If we could resolve all our children,
-                // show the result of the concatenation.
-                if(!did_error())
+                // show the result of the concatenation
+                // unless we have an empty string.
+                if(strlen(msg) && !did_error())
                 {
                     gui_message(msg, 0);  
                 }

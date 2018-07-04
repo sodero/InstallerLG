@@ -283,8 +283,8 @@ neq:            '(' NEQ pp ')'                  { $$ = new_native(strdup("<>"), 
 if:             '(' IF cvv ')'                  { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); } |
                 '(' IF cv ')'                   { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); };
 select:         '(' SELECT p ps ')'             { $$ = new_native(strdup("select"), LINE, m_select, push(push(new_contxt(), $3), $4), NUMBER); }; 
-until:          '(' UNTIL cv ')'                { $$ = new_native(strdup("until"), LINE, m_until, $3, NUMBER); };
-while:          '(' WHILE cv ')'                { $$ = new_native(strdup("while"), LINE, m_while, $3, NUMBER); };
+until:          '(' UNTIL p vps ')'             { $$ = new_native(strdup("until"), LINE, m_until, push(push(new_contxt(), $3), $4), NUMBER); };
+while:          '(' WHILE p vps ')'             { $$ = new_native(strdup("while"), LINE, m_while, push(push(new_contxt(), $3), $4), NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h --------------------------------------------------------------------------------------------------------------------------------------------------------*/
 execute:        '(' EXECUTE p opts')'           { $$ = new_native(strdup("execute"), LINE, m_execute, push(push(new_contxt(), $3), $4), NUMBER); } | 
