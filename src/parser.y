@@ -45,10 +45,10 @@
 %token /* prompt.c|h     */ ASKBOOL ASKCHOICE ASKDIR ASKDISK ASKFILE ASKNUMBER ASKOPTIONS ASKSTRING
 %token /* strop.c|h      */ CAT EXPANDPATH FMT PATHONLY PATMATCH STRLEN SUBSTR TACKON
 %token /* symbol.c|h     */ SET SYMBOLSET SYMBOLVAL
-%token /* options        */ ALL APPEND ASKUSER ASSIGNS CHOICES COMMAND COMPRESSION CONFIRM DEFAULT 
-       /*                */ DELOPTS DEST DISK FAIL FILES FONTS FORCE GETDEFAULTTOOL GETPOSITION 
-       /*                */ GETSTACK GETTOOLTYPE HELP INFOS INCLUDE NEWNAME NEWPATH NOFAIL NOGAUGE
-       /*                */ NOPOSITION NOREQ OKNODELETE PATTERN PROMPT QUIET RANGE SAFE 
+%token /* options        */ ALL APPEND ASSIGNS CHOICES COMMAND COMPRESSION CONFIRM DEFAULT 
+       /*                */ DELOPTS DEST DISK FILES FONTS GETDEFAULTTOOL GETPOSITION 
+       /*                */ GETSTACK GETTOOLTYPE HELP INFOS INCLUDE NEWNAME NEWPATH NOGAUGE
+       /*                */ NOPOSITION NOREQ PATTERN PROMPT QUIET RANGE SAFE 
        /*                */ SETDEFAULTTOOL SETPOSITION SETSTACK SETTOOLTYPE SOURCE SWAPCOLORS OPTIONAL 
        /*                */ RESIDENT OVERRIDE
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -62,9 +62,9 @@
        /*                */ select symbolset symbolval tackon transcript complete user working welcome 
        /*                */ abort copyfiles copylib database debug delete execute exit foreach makeassign 
        /*                */ makedir message onerror protect rename rexx run startup textfile tooltype
-       /*                */ trap all append askuser assigns choices command compression confirm default
-       /*                */ delopts dest disk fail files fonts force help infos include newname newpath 
-       /*                */ nofail nogauge noposition noreq oknodelete pattern prompt quiet range safe
+       /*                */ trap all append assigns choices command compression confirm default
+       /*                */ delopts dest disk files fonts help infos include newname newpath 
+       /*                */ nogauge noposition noreq pattern prompt quiet range safe
        /*                */ setdefaulttool setposition setstack settooltype source swapcolors optional 
        /*                */ resident override
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -85,9 +85,9 @@
                             select symbolset symbolval tackon transcript complete user working welcome abort 
                             copyfiles copylib database debug delete execute exit foreach makeassign makedir 
                             message onerror protect rename rexx run startup textfile tooltype trap all append 
-                            askuser assigns choices command compression confirm default delopts dest disk fail 
-                            files fonts force help infos include newname newpath nofail nogauge noposition 
-                            noreq oknodelete pattern prompt quiet range safe setdefaulttool setposition setstack 
+                            assigns choices command compression confirm default delopts dest disk 
+                            files fonts help infos include newname newpath nogauge noposition 
+                            noreq pattern prompt quiet range safe setdefaulttool setposition setstack 
                             settooltype swapcolors
 %%
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -129,7 +129,6 @@ cvv:            p xpb xpb                       { $$ = push(push(push(new_contxt
 /*- modifiers ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 opt:            all                             |            
                 append                          |         
-                askuser                         |         
                 assigns                         |        
                 choices                         |        
                 command                         |        
@@ -139,10 +138,8 @@ opt:            all                             |
                 delopts                         |        
                 dest                            |           
                 disk                            |           
-                fail                            |           
                 files                           |          
                 fonts                           |          
-                force                           |          
                 getdefaulttool                  |
                 getposition                     |
                 getstack                        |
@@ -152,11 +149,9 @@ opt:            all                             |
                 infos                           |          
                 newname                         |        
                 newpath                         |        
-                nofail                          |        
                 nogauge                         |        
                 noposition                      |     
                 noreq                           |     
-                oknodelete                      |        
                 optional                        |       
                 override                        |
                 pattern                         |        
@@ -402,7 +397,6 @@ symbolval:      '(' SYMBOLVAL p ')'             { $$ = new_native(strdup("symbol
 /*- options ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 all:            '(' ALL ')'                     { $$ = new_option(strdup("all"), OPT_ALL, NULL); };
 append:         '(' APPEND p ')'                { $$ = new_option(strdup("append"), OPT_APPEND, push(new_contxt(), $3)); }; 
-askuser:        '(' ASKUSER ')'                 { $$ = new_option(strdup("askuser"), OPT_ASKUSER, NULL); };
 assigns:        '(' ASSIGNS ')'                 { $$ = new_option(strdup("assigns"), OPT_ASSIGNS, NULL); };
 choices:        '(' CHOICES ps ')'              { $$ = new_option(strdup("choices"), OPT_CHOICES, $3); }; 
 command:        '(' COMMAND ps ')'              { $$ = new_option(strdup("command"), OPT_COMMAND, $3); }; 
@@ -413,10 +407,8 @@ default:        '(' DEFAULT p ')'               { $$ = new_option(strdup("defaul
 delopts:        '(' DELOPTS ps ')'              { $$ = new_option(strdup("delopts"), OPT_DELOPTS, $3); }; 
 dest:           '(' DEST p ')'                  { $$ = new_option(strdup("dest"), OPT_DEST, push(new_contxt(), $3)); }; 
 disk:           '(' DISK ')'                    { $$ = new_option(strdup("disk"), OPT_DISK, NULL); };
-fail:           '(' FAIL ')'                    { $$ = new_option(strdup("fail"), OPT_FAIL, NULL); };
 files:          '(' FILES ')'                   { $$ = new_option(strdup("files"), OPT_FILES, NULL); };
 fonts:          '(' FONTS ')'                   { $$ = new_option(strdup("fonts"), OPT_FONTS, NULL); };
-force:          '(' FORCE ')'                   { $$ = new_option(strdup("force"), OPT_FORCE, NULL); };
 getdefaulttool: '(' GETDEFAULTTOOL p ')'        { $$ = new_option(strdup("getdefaulttool"), OPT_GETDEFAULTTOOL, push(new_contxt(), $3)); };
 getposition:    '(' GETPOSITION pp ')'          { $$ = new_option(strdup("getposition"), OPT_GETPOSITION, $3); }; 
 getstack:       '(' GETSTACK p ')'              { $$ = new_option(strdup("getstack"), OPT_GETSTACK, push(new_contxt(), $3)); };
@@ -426,11 +418,9 @@ infos:          '(' INFOS ')'                   { $$ = new_option(strdup("infos"
 include:        '(' INCLUDE p ')'               { $$ = new_option(strdup("include"), OPT_INCLUDE, push(new_contxt(), $3)); }; 
 newname:        '(' NEWNAME p ')'               { $$ = new_option(strdup("newname"), OPT_NEWNAME, push(new_contxt(), $3)); }; 
 newpath:        '(' NEWPATH ')'                 { $$ = new_option(strdup("newpath"), OPT_NEWPATH, NULL); };
-nofail:         '(' NOFAIL ')'                  { $$ = new_option(strdup("nofail"), OPT_NOFAIL, NULL); };
 nogauge:        '(' NOGAUGE ')'                 { $$ = new_option(strdup("nogauge"), OPT_NOGAUGE, NULL); };
 noposition:     '(' NOPOSITION ')'              { $$ = new_option(strdup("noposition"), OPT_NOPOSITION, NULL); };
 noreq:          '(' NOREQ ')'                   { $$ = new_option(strdup("noreq"), OPT_NOREQ, NULL); };
-oknodelete:     '(' OKNODELETE ')'              { $$ = new_option(strdup("oknodelete"), OPT_OKNODELETE, NULL); };
 pattern:        '(' PATTERN p ')'               { $$ = new_option(strdup("pattern"), OPT_PATTERN, push(new_contxt(), $3)); }; 
 prompt:         '(' PROMPT ps ')'               { $$ = new_option(strdup("prompt"), OPT_PROMPT, $3); }; 
 quiet:          '(' QUIET ')'                   { $$ = new_option(strdup("quiet"), OPT_QUIET, NULL); };

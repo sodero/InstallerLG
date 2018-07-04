@@ -238,7 +238,8 @@ entry_p init(entry_p contxt)
             push(push(push(push(push(push(push(push(
             push(push(push(push(push(push(push(push(
             push(push(push(push(push(push(push(push(
-            push(push(push(push
+            push(push(push(push(push(push(push(push(
+            push(push(push(push(push(push
             (
                 new_contxt(), 
                 new_symbol(strdup("@abort-button"))),
@@ -375,6 +376,36 @@ entry_p init(entry_p contxt)
                 new_string(strdup("s:user-startup"))
                 /*
                 The default file used by (startup).
+                */
+            ),
+                new_symbol(strdup("fail"))),
+                new_string(strdup("fail"))
+                /*
+                Hack to deal with (optional) quirks.
+                */
+            ),
+                new_symbol(strdup("nofail"))),
+                new_string(strdup("nofail"))
+                /*
+                Hack to deal with (optional) quirks.
+                */
+            ),
+                new_symbol(strdup("oknodelete"))),
+                new_string(strdup("oknodelete"))
+                /*
+                Hack to deal with (optional) quirks.
+                */
+            ),
+                new_symbol(strdup("force"))),
+                new_string(strdup("force"))
+                /*
+                Hack to deal with (optional) quirks.
+                */
+            ),
+                new_symbol(strdup("askuser"))),
+                new_string(strdup("askuser"))
+                /*
+                Hack to deal with (optional) quirks.
                 */
             ),
             STRING

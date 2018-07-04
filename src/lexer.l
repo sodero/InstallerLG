@@ -148,7 +148,6 @@ static char *strduptr(const char *str);
 "trap"                  { return TRAP;           }
 "all"                   { return ALL;            }
 "append"                { return APPEND;         }
-"askuser"               { return ASKUSER;        }
 "assigns"               { return ASSIGNS;        }
 "choices"               { return CHOICES;        }
 "command"               { return COMMAND;        }
@@ -158,10 +157,8 @@ static char *strduptr(const char *str);
 "delopts"               { return DELOPTS;        }
 "dest"                  { return DEST;           }
 "disk"                  { return DISK;           }
-"fail"                  { return FAIL;           }
 "files"                 { return FILES;          }
 "fonts"                 { return FONTS;          }
-"force"                 { return FORCE;          }
 "getdefaulttool"        { return GETDEFAULTTOOL; }
 "getposition"           { return GETPOSITION;    }
 "getstack"              { return GETSTACK;       }
@@ -171,11 +168,9 @@ static char *strduptr(const char *str);
 "include"               { return INCLUDE;        }
 "newname"               { return NEWNAME;        }
 "newpath"               { return NEWPATH;        }
-"nofail"                { return NOFAIL;         }
 "nogauge"               { return NOGAUGE;        }
 "noposition"            { return NOPOSITION;     } 
 "noreq"                 { return NOREQ;          } 
-"oknodelete"            { return OKNODELETE;     } 
 "pattern"               { return PATTERN;        }
 "prompt"                { return PROMPT;         }
 "quiet"                 { return QUIET;          }
