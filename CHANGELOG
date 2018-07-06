@@ -14,3 +14,6 @@
 - (exit (QUIET)) is now (always) totally silent.
 - WB invocation fixed (project / tool / SCRIPT tooltype).
 - Graphical parser feedback when invoked from WB.
+
+0.1.0-alpha.4:
+==============
