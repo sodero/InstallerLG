@@ -3168,11 +3168,29 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 int yyerror(yyscan_t scanner, const char *err)
 {
-    // Behave like the default yyerror(), 
-    // return the number of bytes printed 
-    return fprintf(stderr, tr(S_SYNT), 
-                   yyget_lineno(scanner), err, 
-                   yyget_text(scanner));
+    // Get line number and error info.
+    int line = yyget_lineno(scanner);
+    const char *info = yyget_text(scanner);
+
+    // Print to stderr if we're executing
+    // from shell, show dialogue if we're
+    // executing from WB.
+    if(arg_argc(-1))
+    {
+        // All details to stderr.
+        fprintf(stderr, tr(S_SYNT), line, err, info);
+    }
+    else
+    {
+        // A slightly less detailed
+        // graphical error report.
+        error(line, ERR_ABORT, err);
+    }
+
+    // Return a bogus value, not the
+    // number of bytes printed, like
+    // the default yyerror function.
+    return line;
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
