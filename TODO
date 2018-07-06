@@ -1,4 +1,3 @@
-- We have no (optional) test coverage on (copylib)
-- Consider doing something with yyerror so that syntax problems 
-  are visible when running from WB as well.
+- We have no (optional) test coverage on (copylib).
+- The GUI is all over the place.
 - FIXME:s

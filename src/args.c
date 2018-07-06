@@ -22,6 +22,7 @@
 #ifdef AMIGA
 static struct RDArgs *rda; 
 static struct DiskObject *dob; 
+static LONG owd;
 #endif
 
 static char *args[ARG_NUMBER_OF];
@@ -70,26 +71,23 @@ int arg_init(int argc, char **argv)
         {
             arg = wb->sm_ArgList;
         }
-
         // Invoked using a 'project'?
         else if(wb->sm_NumArgs == 2)
         {
+            // We're after the 'next' argument,
+            // where the information about the
+            // script is to be found.
             arg = wb->sm_ArgList + 1;
             args[ARG_SCRIPT] = arg->wa_Name; 
         }
 
+        // Make the directory of the script the
+        // current working directory.
+        owd = CurrentDir(arg->wa_Lock);
+
         // Do we have something we can handle?
         if(arg)
         {
-            LONG owd = -1; 
-
-            // Change current directory if necessary. 
-            if(arg->wa_Lock)
-            {
-                // Save the old directory. 
-                owd = CurrentDir(arg->wa_Lock); 
-            }
-
             // Read information from icon. 
             dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
 
@@ -122,13 +120,6 @@ int arg_init(int argc, char **argv)
                     FreeDiskObject(dob); 
                     dob = NULL; 
                 }
-            }
-
-            // If we did change directory before, change 
-            // back to the old one. 
-            if(owd != -1)
-            {
-                CurrentDir(owd); 
             }
         }
     }
@@ -214,6 +205,14 @@ void arg_done(void)
     {
         FreeDiskObject(dob); 
         dob = NULL; 
+
+        if(owd)
+        {
+            // Go back to the dir
+            // we started from.
+            CurrentDir(owd);
+            owd = NULL;
+        }
     }
 
     // From Shell. 

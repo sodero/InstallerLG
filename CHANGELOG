@@ -12,3 +12,5 @@
 - (optional) quirks 'fixed' (YAM).
 - (while) and (until) naked blocks allowed (YAM). 
 - (exit (QUIET)) is now (always) totally silent.
+- WB invocation fixed (project / tool / SCRIPT tooltype).
+- Graphical parser feedback when invoked from WB.

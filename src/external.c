@@ -106,7 +106,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             // make sure that we're not getting something
             // we don't want / expect.
             BPTR inp = (BPTR) Open("NIL:", MODE_OLDFILE),
-                 out = (BPTR) Open("NIL:", MODE_NEWFILE); 
+                 out = (BPTR) Open("NIL:", MODE_OLDFILE);
 
             // Can this not be true? 
             if(inp && out)
