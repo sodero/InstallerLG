@@ -1,21 +1,21 @@
-; InstallerNG
-; $VER: InstallerNG 0.1.0-alpha.4
+; InstallerLG
+; $VER: InstallerLG 0.1.0-alpha.4
 
 (set #app-bin "installer")
-(set @app-name "InstallerNG")
+(set @app-name "InstallerLG")
 (set @default-dest "RAM:")
 
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 ; Welcome 
 ;---------------------------------------------------------------------------------------------------------------------------------------------
-(welcome "Welcome to the InstallerNG installer\n")
+(welcome "Welcome to the InstallerLG installer\n")
 
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 ; Choose destination 
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 (set @default-dest
   (askdir
-    (prompt "Please choose a location for installing InstallerNG")
+    (prompt "Please choose a location for installing InstallerLG")
     (help "-")
     (default @default-dest)
   )
