@@ -321,7 +321,7 @@ entry_p init(entry_p contxt)
                 */
             ),
                 new_symbol(strdup("@default-dest"))),
-                new_string(strdup("Work:"))
+                new_string(strdup("T:"))
                 /*
                 Suggested location for installing 
                 an application.

@@ -1,4 +1,4 @@
-("%s" @default-dest) ; "","Work:",""
+("%s" @default-dest) ; "","T:",""
 ("%s" @abort-button) ; "","",""
 (fileonly @app-name) ; "","installer",""
 ("%ld" @ioerr) ; "","0",""

@@ -705,10 +705,16 @@ static int h_protect_set(entry_p contxt,
     {
         // On non Amiga systems this is a stub.
         #ifdef AMIGA
-        if(!SetProtection(file, mask))
+        size_t len = strlen(file); 
+
+        // Filter out volumes.
+        if(len && file[len - 1] != ':')
         {
-            error(contxt->id, ERR_SET_PERM, file); 
-            return 0; 
+            if(!SetProtection(file, mask))
+            {
+                error(contxt->id, ERR_SET_PERM, file); 
+                return 0; 
+            }
         }
         #endif
 
@@ -1160,23 +1166,11 @@ entry_p m_copyfiles(entry_p contxt)
                 // might be empty.
                 size_t dln = strlen(dst); 
 
-                // If it's not a volume, prompt for
-                // confirmation before overwriting.
+                // If it's not a volume, set permission
+                // so that overwriting can succeed.
                 if(dln && dst[dln - 1] != ':')
                 {
-                    if(!h_confirm(contxt, "", tr(S_ODIR), dst))
-                    {
-                        h_log(contxt, tr(S_ACPY), src, dst); 
-                        RCUR; 
-                    }
-                    else
-                    {
-                        // Give permission so that overwriting
-                        // can succeed. The proper (as in what 
-                        // the source has) permissions are set
-                        // later.
-                        chmod(dst, S_IRWXU);
-                    }
+                    chmod(dst, S_IRWXU);
                 }
             }
 
