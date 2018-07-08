@@ -5,3 +5,5 @@
 (working "doing" "things" with variables) ; "","Line 1: Undefined variable 'variables' Line 1: Undefined variable 'with' 0",""
 (set with "1") (set variables "2") (working "doing" "things" with variables) ; "","1:Working on installation... doingthings121",""
 (set with nothing) (set variables "2") (working "doing" "things" with variables) ; "","Line 1: Undefined variable 'nothing' 0",""
+(set @strict 0) (working "doing" "things" with variables) ; "","1:Working on installation... doingthings1",""
+(set @strict 0) (set with nothing) (set variables "2") (working "doing" "things" with variables) ; "","1:Working on installation... doingthings21",""

@@ -18,3 +18,7 @@
 0.1.0-alpha.4:
 ==============
 - WB invocation fix fixed.
+
+0.1.0-alpha.5:
+==============
+- Strict mode toggle (@strict 0/1) 

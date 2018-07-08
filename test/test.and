@@ -4,3 +4,5 @@
 (AND -1 1) ; "","1",""
 (AND 0 0) ; "","0",""
 (AND "a" "b") ; "","0",""
+(AND "1" a) ; "","Line 1: Undefined variable 'a' 0",""
+(set @strict 0) (AND "1" a) ; "","0",""

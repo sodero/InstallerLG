@@ -20,3 +20,5 @@
 (message "1" "2" (all) (safe)) ; "","Line 1: syntax error, unexpected '(', expecting ')' '('",""
 (message (all)) ; "","Line 1: syntax error, unexpected ALL 'all'",""
 (message "1" (safe)) ; "","Line 1: syntax error, unexpected SAFE 'safe'",""
+(set @strict 0) (message undef (all)) ; "","1",""
+(set @strict 0) (set def "1") (message def "" "" undef (all)) ; "","11",""

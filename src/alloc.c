@@ -134,17 +134,20 @@ entry_p new_string(char *n)
 }
 
 //----------------------------------------------------------------------------
-// ---OBSOLETE---
 // Name:        new_failure
 // Description: Get STATUS / failure. 
 // Input:       -
 // Return:      entry_p:    A STATUS (failure).
-// ---OBSOLETE---
 //----------------------------------------------------------------------------
 entry_p new_failure(void) 
 {
-    // A static singleton, zero if evaluated using num(...). 
-    static entry_t status = { .type = STATUS, .id = 0 }; 
+    // Zero / empty string.
+    static entry_t status = 
+    { 
+        .type = STATUS,
+        .id = 0,
+        .name = "" 
+    }; 
 
     return &status; 
 }

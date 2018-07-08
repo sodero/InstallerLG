@@ -33,7 +33,7 @@
 
 static char version[] __attribute__((used)) = "\0$VER: InstallerLG " 
                                                VER(MAJOR) "." VER(MINOR) 
-                                              " [ALPHA4]";
+                                              " [ALPHA5]";
 
 //----------------------------------------------------------------------------
 // Name:        init
@@ -155,7 +155,8 @@ entry_p init(entry_p contxt)
             strdup("set"), __LINE__, m_set, 
             push(push(push(push(push(push(
             push(push(push(push(push(push(
-            push(push(push(push(push(push
+            push(push(push(push(push(push(
+            push(push
             (
                 new_contxt(), 
                 new_symbol(strdup("@user-level"))),
@@ -214,6 +215,17 @@ entry_p init(entry_p contxt)
                 will contain the filename and the object type.
                 */
             ),
+                new_symbol(strdup("@strict"))),
+                #ifdef AMIGA
+                new_number(0)
+                #else
+                new_number(1)
+                #endif
+                /*
+                Toggle 'strict' mode.
+                */
+            ),
+
             NUMBER
         );
 

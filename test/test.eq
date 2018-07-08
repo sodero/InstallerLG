@@ -31,3 +31,7 @@
 (= "no" a); "","Line 1: Undefined variable 'a' 0",""
 (= a yes); "","Line 1: Undefined variable 'a' Line 1: Undefined variable 'yes' 0",""
 (= a no); "","Line 1: Undefined variable 'a' Line 1: Undefined variable 'no' 0",""
+(set @strict 0) (= "yes" a); "","1",""
+(set @strict 0) (= "no" a); "","1",""
+(set @strict 0) (= a yes); "","1",""
+(set @strict 0) (= a no); "","1",""

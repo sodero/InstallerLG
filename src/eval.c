@@ -63,9 +63,13 @@ entry_p find_symbol(entry_p entry)
         }
         while(con);
 
-        // We found nothing. 
-        error(entry->id, ERR_UNDEF_VAR, 
-              entry->name); 
+        // Only fail if we're in 'strict' mode.
+        if(get_numvar(global(entry), "@strict"))
+        {
+            // We found nothing. 
+            error(entry->id, ERR_UNDEF_VAR, 
+                  entry->name); 
+        }
     }
     else
     {
@@ -73,6 +77,8 @@ entry_p find_symbol(entry_p entry)
         error(PANIC);
     }
 
+    // A failure will be evaluated as
+    // as a zero or an empty string.
     return new_failure();
 }
 

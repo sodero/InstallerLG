@@ -11,3 +11,7 @@
 (askoptions (prompt "p") (help h) (choices "a" "b" "c") (default 1)) ; "","Line 1: Undefined variable 'h' 0",""
 (askoptions (prompt "p") (help "h") (choices a "b" "c") (default 1)) ; "","Line 1: Undefined variable 'a' 0",""
 (askoptions (prompt "p") (help "h") (choices "a" "b" "c") (default d)) ; "","Line 1: Undefined variable 'd' 0",""
+(set @strict 0) (askoptions (prompt p) (help "h") (choices "a" "b" "c") (default 1)) ; "","ha1 1",""
+(set @strict 0) (askoptions (prompt "p") (help h) (choices "a" "b" "c") (default 1)) ; "","pa1 1",""
+(set @strict 0) (askoptions (prompt "p") (help "h") (choices a "b" "c") (default 1)) ; "","phb1 1",""
+(set @strict 0) (askoptions (prompt "p") (help "h") (choices "a" "b" "c") (default d)) ; "","pha0 0",""

@@ -8,6 +8,7 @@
 (exit "1" (quiet)) ; "","10",""
 (exit "1" "2" "3") ; "","123Installation complete ./installer can be found in T:0",""
 (exit "1" "2" undef) ; "","Line 1: Undefined variable 'undef' 0",""
+(set @strict 0) (exit "1" "2" undef) ; "","12Installation complete ./installer can be found in T:0",""
 (exit 1 2 3) ; "","123Installation complete ./installer can be found in T:0",""
 (exit "1" "2" "3" (quiet)) ; "","1230",""
 (exit "1" "2" "3" (quiet) (safe)) ; "","Line 1: syntax error, unexpected '(', expecting ')' '('",""

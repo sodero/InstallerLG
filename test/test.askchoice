@@ -13,3 +13,7 @@
 (askchoice (prompt "p") (help h) (choices "b" "c" "d") (default 2)) ; "","Line 1: Undefined variable 'h' 0",""
 (askchoice (prompt "p") (help "h") (choices b "c" "d") (default 2)) ; "","Line 1: Undefined variable 'b' Line 1: No such item '2' 0",""
 (askchoice (prompt "p") (help "h") (choices "b" "c" "d") (default d)) ; "","Line 1: Undefined variable 'd' 0",""
+(set @strict 0) (askchoice (prompt p) (help "h") (choices "b" "c" "d") (default 2)) ; "","hb2 2",""
+(set @strict 0) (askchoice (prompt "p") (help h) (choices "b" "c" "d") (default 2)) ; "","pb2 2",""
+(set @strict 0) (askchoice (prompt "p") (help "h") (choices b "c" "d") (default 2)) ; "","Line 1: No such item '2' 0",""
+(set @strict 0) (askchoice (prompt "p") (help "h") (choices "b" "c" "d") (default d)) ; "","phb0 0",""

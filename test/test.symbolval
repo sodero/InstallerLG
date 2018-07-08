@@ -1,5 +1,6 @@
 (set a 1) (symbolval "a") ; "","1",""
 (set a 1) (symbolval "b") ; "","Line 1: Undefined variable 'b' 0",""
+(set @strict 0) (set a 1) (symbolval "b") ; "","",""
 (set a1 1) (symbolval ("a%ld" 1)) ; "","1",""
 (set a2 1) (symbolval ("a%ld" (+ 1 1))) ; "","1",""
 (set a2 (+ 1 1)) (symbolval ("a%ld" (+ 1 1))) ; "","2",""

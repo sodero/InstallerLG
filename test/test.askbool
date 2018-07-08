@@ -19,3 +19,8 @@
 (user 2) (askbool (prompt "p") (help "h") (default 0) (choices a "")) ; "","Line 1: Undefined variable 'a' 0",""
 (user 2) (askbool (prompt "p") (help "h") (default 0) (choices "" b)) ; "","Line 1: Undefined variable 'b' 0",""
 (user 2) (askbool (prompt "p") (help "h") (default d) (choices "" "")) ; "","Line 1: Undefined variable 'd' 0",""
+(set @strict 0) (user 1) (askbool (prompt p) (help "h")) ; "","hYesNo 1",""
+(set @strict 0) (user 1) (askbool (prompt "p") (help h) (default 0)) ; "","pYesNo 1",""
+(set @strict 0) (user 2) (askbool (prompt "p") (help "h") (default 0) (choices a "")) ; "","ph 1",""
+(set @strict 0) (user 2) (askbool (prompt "p") (help "h") (default 0) (choices "" b)) ; "","ph 1",""
+(set @strict 0) (user 2) (askbool (prompt "p") (help "h") (default d) (choices "" "")) ; "","ph 1",""

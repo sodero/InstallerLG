@@ -8,6 +8,7 @@
 (set a (+ "1")) ("%ld" a); "","1",""
 (set a (+ "1")) ("%s" a); "","Line 1: Format string type mismatch '%s' 0",""
 (set a 1 b b) (+ a b) ; "","Line 1: Undefined variable 'b' 0",""
+(set @strict 0) (set a 1 b b) (+ a b) ; "","1",""
 (set a 1 b a) (+ a b) ; "","2",""
 (set a 1 b a) (+ (set a (+ a 1)) b) ; "","3",""
 (set a "1" b a) (+ (set a (+ a 1)) b) ; "","3",""

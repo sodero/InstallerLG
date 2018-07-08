@@ -13,3 +13,6 @@
 (askdir (prompt p) (help "h") (default "d")) ; "","Line 1: Undefined variable 'p' 0",""
 (askdir (prompt "p") (help h) (default "d")) ; "","Line 1: Undefined variable 'h' 0",""
 (askdir (prompt "p") (help "h") (default d)) ; "","Line 1: Undefined variable 'd' 0",""
+(set @strict 0) (askdir (prompt p) (help "h") (default "d")) ; "","h000d d",""
+(set @strict 0) (askdir (prompt "p") (help h) (default "d")) ; "","p000d d",""
+(set @strict 0) (askdir (prompt "p") (help "h") (default d)) ; "","ph000",""
