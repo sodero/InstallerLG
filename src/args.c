@@ -16,13 +16,13 @@
 #include <workbench/workbench.h>
 #endif
 
+#include <limits.h>
 #include <stdio.h>
 
 // Argument / tooltype support.
 #ifdef AMIGA
 static struct RDArgs *rda; 
 static struct DiskObject *dob; 
-static LONG owd;
 #endif
 
 static char *args[ARG_NUMBER_OF];
@@ -78,16 +78,40 @@ int arg_init(int argc, char **argv)
             // where the information about the
             // script is to be found.
             arg = wb->sm_ArgList + 1;
-            args[ARG_SCRIPT] = arg->wa_Name; 
-        }
 
-        // Make the directory of the script the
-        // current working directory.
-        owd = CurrentDir(arg->wa_Lock);
+            // Sanity check.
+            if(arg->wa_Name && arg->wa_Lock)
+            {
+                // Change directory to that of
+                // the script.
+                static char wd[PATH_MAX];
+                BPTR owd = (BPTR) CurrentDir(arg->wa_Lock);
+
+                // Get the name of the script
+                // and the directory.
+                if(NameFromLock(arg->wa_Lock, wd, sizeof(wd)))
+                {
+                    args[ARG_SCRIPT] = arg->wa_Name; 
+                    args[ARG_WORKDIR] = wd;
+                }
+
+                // Go back.
+                CurrentDir(owd); 
+            }
+        }
 
         // Do we have something we can handle?
         if(arg)
         {
+            BPTR owd = (BPTR) -1; 
+
+            // Change current directory if necessary. 
+            if(arg->wa_Lock)
+            {
+                // Save the old directory. 
+                owd = CurrentDir(arg->wa_Lock); 
+            }
+
             // Read information from icon. 
             dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
 
@@ -121,6 +145,24 @@ int arg_init(int argc, char **argv)
                     dob = NULL; 
                 }
             }
+
+            // If we did change directory before,
+            // change back to the old one. 
+            if(owd != -1)
+            {
+                CurrentDir(owd); 
+            }
+        }
+    }
+
+    // Change working dir if started
+    // from a 'project'. 
+    if(args[ARG_WORKDIR])
+    {
+        if(chdir(args[ARG_WORKDIR]))
+        {
+            // Fail.
+            return 0;
         }
     }
 
@@ -205,14 +247,6 @@ void arg_done(void)
     {
         FreeDiskObject(dob); 
         dob = NULL; 
-
-        if(owd)
-        {
-            // Go back to the dir
-            // we started from.
-            CurrentDir(owd);
-            owd = NULL;
-        }
     }
 
     // From Shell. 

@@ -20,6 +20,7 @@ enum
     ARG_LOGFILE,
     ARG_NOLOG, 
     ARG_NOPRETEND,
+    ARG_WORKDIR,
     ARG_NUMBER_OF 
 };
 
