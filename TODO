@@ -1,5 +1,4 @@
-- Plenty of overwrite this and that when installing YAM. Why?
-- When installing YAM in novice mode we seem to have a permission problem.
+- All project tooltypes must be promoted to variables in init().
 - We have no (optional) test coverage on (copylib).
 - The GUI is all over the place.
 - FIXME:s
