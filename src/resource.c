@@ -90,6 +90,7 @@ const char *tr(res_t r)
         "Include '%s' in '%s'\n",
         "Version to install",
         "Version currently installed",
+        "Unknown version",
         "Destination drawer",
         "There is no currently installed version",
 

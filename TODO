@@ -1,5 +1,6 @@
 - All project tooltypes must be promoted to variables in init().
 - We have no (optional) test coverage on (copylib).
+- We need more @strict = 0 testing on (copylib).
 - (onerror) and (trap) should likely accept naked blocks just list (while), (until) and (foreach)
 - The GUI is all over the place.
 - FIXME:s

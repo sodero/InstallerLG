@@ -1440,9 +1440,13 @@ entry_p m_copylib(entry_p contxt)
 
                 if(vs < 0)
                 {
-                    // Could not find version string.
-                    error(contxt->id, ERR_NO_VERSION, s); 
-                    RCUR;
+                    // Only fail if we're in 'strict' mode.
+                    if(get_numvar(contxt, "@strict"))
+                    {
+                        // Could not find version string.
+                        error(contxt->id, ERR_NO_VERSION, s); 
+                        RCUR;
+                    }
                 }
 
                 if(dt == 1)
@@ -1527,27 +1531,55 @@ entry_p m_copylib(entry_p contxt)
                              (force ? CF_FORCE : 0) |
                              (askuser ? CF_ASKUSER : 0);
 
-                    // Does it exist?
+                    // Are we overwriting a file?
                     if(!ft)
                     {
                         // No such file, copy source to the 
                         // destination directory. If needed
                         // get confirmation.
-                        if(!confirm || 
-                            h_confirm
-                            (
-                                contxt, 
-                                "", 
-                                "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
-                                str(prompt), 
-                                tr(S_VINS),
-                                vs >> 16,
-                                vs & 0xffff,
-                                tr(S_NINS),
-                                tr(S_DDRW),
-                                d 
-                            ))
+                        if(confirm)
                         {
+                            // Is the version of the source file
+                            // unknown?
+                            if(vs < 0)
+                            {
+                                if(h_confirm(
+                                    contxt, 
+                                    "", 
+                                    "%s\n\n%s: %s\n%s\n\n%s: %s",
+                                    str(prompt), 
+                                    tr(S_VINS),
+                                    tr(S_VUNK),
+                                    tr(S_NINS),
+                                    tr(S_DDRW),
+                                    d))
+                                {
+                                    DNUM = h_copyfile(contxt, s, f, md);
+                                }
+                            }
+                            // The version of the source file
+                            // is known.
+                            else
+                            {
+                                if(h_confirm(
+                                    contxt, 
+                                    "", 
+                                    "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
+                                    str(prompt), 
+                                    tr(S_VINS),
+                                    vs >> 16,
+                                    vs & 0xffff,
+                                    tr(S_NINS),
+                                    tr(S_DDRW),
+                                    d))
+                                {
+                                    DNUM = h_copyfile(contxt, s, f, md);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // No confirmation needed.
                             DNUM = h_copyfile(contxt, s, f, md);
                         }
                     }
@@ -1558,75 +1590,161 @@ entry_p m_copylib(entry_p contxt)
                         // Get version of existing file.
                         int vf = h_getversion(contxt, f);
                         
-                        // Did we find a version not equal to 
-                        // that of the current file?
-                        if(vf >= 0)
+                        // Is the version of the existing file
+                        // unknown?
+                        if(vf < 0)
                         {
-                            if(vs != vf)
+                            // Only fail if we're in 'strict' mode.
+                            if(get_numvar(contxt, "@strict"))
                             {
-                                // If we ask for confirmation and get it, copy
-                                // the file no matter what version it (and the
-                                // existing destination file) has.
-                                if(confirm)
+                                // Could not find version string.
+                                error(contxt->id, ERR_NO_VERSION, f); 
+                                vs = vf;
+                            }
+                            else
+                            {
+                                // Is the version of the source
+                                // file unknown?
+                                if(vs < 0)
                                 {
+                                    // Both target and source file
+                                    // have an unknown version.
                                     if(h_confirm(
                                         contxt,
                                         "", 
-                                        "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
+                                        "%s\n\n%s: %s\n%s: %s\n\n%s: %s",
+                                        str(prompt), 
+                                        tr(S_VINS),
+                                        tr(S_VUNK),
+                                        tr(S_VCUR),
+                                        tr(S_VUNK),
+                                        tr(S_DDRW),
+                                        d))
+                                    {
+                                        vs = vf + 1;
+                                    }
+                                    else
+                                    {
+                                        vs = vf;
+                                    }
+                                }
+                                else
+                                {
+                                    // The version of the source
+                                    // file is known, the target
+                                    // version is unknown.
+                                    if(h_confirm(
+                                        contxt,
+                                        "", 
+                                        "%s\n\n%s: %d.%d\n%s: %s\n\n%s: %s",
                                         str(prompt), 
                                         tr(S_VINS),
                                         vs >> 16,
                                         vs & 0xffff,
                                         tr(S_VCUR),
-                                        vf >> 16,
-                                        vf & 0xffff,
+                                        tr(S_VUNK),
                                         tr(S_DDRW),
                                         d))
                                     {
-                                        DNUM = h_copyfile(contxt, s, f, md);
-                                    }
-                                }
-                                else
-                                {
-                                    // If the file to be copied has a higher version
-                                    // number than the existing one, overwrite. 
-                                    if(vs > vf)
-                                    {
-                                        DNUM = h_copyfile(contxt, s, f, md);
+                                        vs = vf + 1;
                                     }
                                     else
                                     {
-                                        // If the file to be copied has a lower version
-                                        // number than the existing one, and we're in
-                                        // expert mode, ask the user to confirm. If we
-                                        // get a confirmation, overwrite.
-                                        if(level == 2)
+                                        vs = vf;
+                                    }
+                                }
+
+                                if(vs > vf)
+                                {
+                                    confirm = NULL;
+                                }
+                            }
+                        }
+                        // The target file version is
+                        // known.
+                        else
+                        {
+                            // Is the version of the source
+                            // file unknown?
+                            if(vs < 0 && h_confirm(
+                                contxt,
+                                "", 
+                                "%s\n\n%s: %s\n%s: %d.%d\n\n%s: %s",
+                                str(prompt), 
+                                tr(S_VINS),
+                                tr(S_VUNK),
+                                tr(S_VCUR),
+                                vf >> 16,
+                                vf & 0xffff,
+                                tr(S_DDRW),
+                                d))
+                            {
+                                vs = vf + 1;
+                                confirm = NULL;
+                            }
+                        }
+
+                        // Did we find a version not equal to 
+                        // that of the current file?
+                        if(vs != vf)
+                        {
+                            // If we ask for confirmation and get it, copy
+                            // the file no matter what version it (and the
+                            // existing destination file) has.
+                            if(confirm)
+                            {
+                                if(h_confirm(
+                                    contxt,
+                                    "", 
+                                    "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
+                                    str(prompt), 
+                                    tr(S_VINS),
+                                    vs >> 16,
+                                    vs & 0xffff,
+                                    tr(S_VCUR),
+                                    vf >> 16,
+                                    vf & 0xffff,
+                                    tr(S_DDRW),
+                                    d))
+                                {
+                                    DNUM = h_copyfile(contxt, s, f, md);
+                                }
+                            }
+                            else
+                            {
+                                // If the file to be copied has a higher version
+                                // number than the existing one, overwrite. 
+                                if(vs > vf)
+                                {
+                                    DNUM = h_copyfile(contxt, s, f, md);
+                                }
+                                else
+                                {
+                                    // If the file to be copied has a lower version
+                                    // number than the existing one, and we're in
+                                    // expert mode, ask the user to confirm. If we
+                                    // get a confirmation, overwrite.
+                                    if(level == 2)
+                                    {
+                                        if(h_confirm(
+                                            contxt,
+                                            "", 
+                                            "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
+                                            str(prompt), 
+                                            tr(S_VINS),
+                                            vs >> 16,
+                                            vs & 0xffff,
+                                            tr(S_VCUR),
+                                            vf >> 16,
+                                            vf & 0xffff,
+                                            tr(S_DDRW),
+                                            d))
                                         {
-                                            if(h_confirm(
-                                                contxt,
-                                                "", 
-                                                "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
-                                                str(prompt), 
-                                                tr(S_VINS),
-                                                vs >> 16,
-                                                vs & 0xffff,
-                                                tr(S_VCUR),
-                                                vf >> 16,
-                                                vf & 0xffff,
-                                                tr(S_DDRW),
-                                                d))
-                                            {
-                                                DNUM = h_copyfile(contxt, s, f, md);
-                                            }
+                                            DNUM = h_copyfile(contxt, s, f, md);
                                         }
                                     }
                                 }
                             }
-                        }
-                        else
-                        {
-                            // Could not find version string.
-                            error(contxt->id, ERR_NO_VERSION, f); 
                         }
                     }
                     // It's a dir. 

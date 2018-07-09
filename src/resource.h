@@ -81,6 +81,7 @@ typedef enum
     S_INCL, /* "Include '%s' in '%s'\n" */
     S_VINS, /* "Version to install" */
     S_VCUR, /* "Version currently installed" */
+    S_VUNK, /* "Unknown version" */
     S_DDRW, /* "Destination drawer" */
     S_NINS, /* "There is no currently installed version" */
 
