@@ -337,7 +337,8 @@ message:        '(' MESSAGE ps all ')'          { $$ = new_native(strdup("messag
                 '(' MESSAGE ps ')'              { $$ = new_native(strdup("message"), LINE, m_message, $3, NUMBER); };
 user:           '(' USER INT ')'                { $$ = new_native(strdup("user"), LINE, m_set, push(push(new_contxt(), 
                                                        new_symbol(strdup("@user-level"))), new_number($3)), DANGLE); }; 
-welcome:        '(' WELCOME ps ')'              { $$ = new_native(strdup("welcome"), LINE, m_welcome, $3, NUMBER); }; 
+welcome:        '(' WELCOME ps ')'              { $$ = new_native(strdup("welcome"), LINE, m_welcome, $3, NUMBER); } |
+                '(' WELCOME ')'                 { $$ = new_native(strdup("welcome"), LINE, m_welcome, NULL, NUMBER); }; 
 working:        '(' WORKING ps ')'              { $$ = new_native(strdup("working"), LINE, m_working, $3, NUMBER); }; 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* probe.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------------*/

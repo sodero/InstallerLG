@@ -191,15 +191,23 @@ entry_p m_message(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_welcome(entry_p contxt)
 {
-    if(c_sane(contxt, 1))
+    if(contxt)
     {
+        // Fallback message.
+        char *msg = "";
+
         // Installer settings.
         int lvl = 0, 
             lgf = 0, 
             prt = 0; 
 
-        // Concatenate all children.
-        char *msg = get_chlstr(contxt);
+        // Do we have any arguments?
+        if(contxt->children &&
+           c_sane(contxt, 1))
+        {
+            // Concatenate all children.
+            msg = get_chlstr(contxt);
+        }
 
         // Did we manaage to concatenate something?
         if(msg)
@@ -211,8 +219,13 @@ entry_p m_welcome(entry_p contxt)
                 gui_welcome(msg, &lvl, &lgf, &prt); 
             }
 
-            // Free the temporary buffer.
-            free(msg);
+            // If we have children, then we also
+            // have an alloc:ed string.
+            if(contxt->children)
+            {
+                // Free the temporary buffer.
+                free(msg);
+            }
 
             // User level 0 = abort
             if(lvl > 0)
