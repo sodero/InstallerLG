@@ -21,3 +21,6 @@
 (tackon err) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (tackon "dir" "file" err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
 (tackon "" "") ; "","",""
+(tackon "dir" "file/") ; "","dir/file/",""
+(tackon "dir" "file//") ; "","dir/file//",""
+(tackon "dir/" "file/") ; "","dir/file/",""

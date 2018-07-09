@@ -67,6 +67,18 @@ entry_p m_set(entry_p contxt)
                         }
                     }
 
+                    // In non strict mode we might have a
+                    // STATUS on the right hand side if a
+                    // bogus resolve was done. To prevent
+                    // leaks we need to typecast the rhs.
+                    if(res->type == STATUS)
+                    {
+                        // Typecast to string. The string
+                        // will be empty. If evaluated as
+                        // a number, it will be zero.
+                        res->type = STRING;
+                    }
+
                     // Reparent the value and free the old 
                     // resolved value if any. Also, create 
                     // a reference from the global context
@@ -157,6 +169,18 @@ entry_p m_symbolset(entry_p contxt)
                             free(res); 
                             break; 
                         }
+                    }
+
+                    // In non strict mode we might have a
+                    // STATUS on the right hand side if a
+                    // bogus resolve was done. To prevent
+                    // leaks we need to typecast the rhs.
+                    if(res->type == STATUS)
+                    {
+                        // Typecast to string. The string
+                        // will be empty. If evaluated as
+                        // a number, it will be zero.
+                        res->type = STRING;
                     }
 
                     // Do we already have a symbol 
