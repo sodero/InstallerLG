@@ -22,3 +22,5 @@
 (set @user-startup "_st_") (startup "" (prompt "p") (help "h") (command "")) ; "cp ../test/data.startup.i11 _st_","Line 1: Invalid application name '' 0","rm -f _st_"
 (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "")) ; "cp ../test/data.startup.i12 _st_","ph 1","cmp _st_ ../test/data.startup.o11 && rm -f _st_"
 (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "","ph 1","test -f _st_ && rm _st_"
+(set @user-startup "_st_") (startup (prompt "p") "app" (help "h") (command "loadwb")) ; "rm -f _st_","ph 1","test -f _st_ && rm _st_"
+(set @user-startup "_st_") (startup (prompt "p") (help "h") (command "loadwb") "app") ; "rm -f _st_","ph 1","test -f _st_ && rm _st_"
