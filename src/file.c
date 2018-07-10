@@ -1796,9 +1796,9 @@ static int h_delete_file(entry_p contxt, const char *file)
 {
     if(file)
     {
-        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
-                optional = get_opt(CARG(2), OPT_OPTIONAL), 
-                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
+        entry_p infos    = get_opt_va(OPT_INFOS, CARG(2), CARG(3), NULL), 
+                optional = get_opt_va(OPT_OPTIONAL, CARG(2), CARG(3), NULL), 
+                delopts  = get_opt_va(OPT_DELOPTS, CARG(2), CARG(3), NULL), 
                 force    = get_opt(delopts, OPT_FORCE) ? NULL :
                            get_opt(optional, OPT_FORCE),
                 askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
@@ -1908,10 +1908,10 @@ static int h_delete_dir(entry_p contxt, const char *dir)
 {
     if(dir)
     {
-        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
-                optional = get_opt(CARG(2), OPT_OPTIONAL), 
-                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
-                all      = get_opt(CARG(2), OPT_ALL), 
+        entry_p infos    = get_opt_va(OPT_INFOS, CARG(2), CARG(3), NULL), 
+                optional = get_opt_va(OPT_OPTIONAL, CARG(2), CARG(3), NULL), 
+                delopts  = get_opt_va(OPT_DELOPTS, CARG(2), CARG(3), NULL), 
+                all      = get_opt_va(OPT_ALL, CARG(2), CARG(3), NULL), 
                 force    = get_opt(delopts, OPT_FORCE) ? NULL :
                            get_opt(optional, OPT_FORCE),
                 askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
@@ -2175,10 +2175,10 @@ entry_p m_delete(entry_p contxt)
         // Can we parse the input string? 
         if(wc >= 0)
         {
-            entry_p help     = get_opt(CARG(2), OPT_HELP),
-                    prompt   = get_opt(CARG(2), OPT_PROMPT), 
-                    confirm  = get_opt(CARG(2), OPT_CONFIRM), 
-                    safe     = get_opt(CARG(2), OPT_SAFE);
+            entry_p help     = get_opt_va(OPT_HELP, CARG(2), CARG(3), NULL),
+                    prompt   = get_opt_va(OPT_PROMPT, CARG(2), CARG(3), NULL), 
+                    confirm  = get_opt_va(OPT_CONFIRM, CARG(2), CARG(3), NULL), 
+                    safe     = get_opt_va(OPT_SAFE, CARG(2), CARG(3), NULL);
 
             // Do we need confirmation?
             if(confirm)
@@ -2689,11 +2689,11 @@ entry_p m_makedir(entry_p contxt)
     // of the directory to be created.
     if(c_sane(contxt, 1))
     {
-        entry_p prompt   = get_opt(CARG(2), OPT_PROMPT),
-                help     = get_opt(CARG(2), OPT_HELP),
-                infos    = get_opt(CARG(2), OPT_INFOS),
-                confirm  = get_opt(CARG(2), OPT_CONFIRM),
-                safe     = get_opt(CARG(2), OPT_SAFE); 
+        entry_p prompt   = get_opt_va(OPT_PROMPT, CARG(2), CARG(3), NULL),
+                help     = get_opt_va(OPT_HELP, CARG(2), CARG(3), NULL),
+                infos    = get_opt_va(OPT_INFOS, CARG(2), CARG(3), NULL),
+                confirm  = get_opt_va(OPT_CONFIRM, CARG(2), CARG(3), NULL),
+                safe     = get_opt_va(OPT_SAFE, CARG(2), CARG(3), NULL); 
 
         DNUM = 0; 
 
