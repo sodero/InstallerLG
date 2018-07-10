@@ -25,23 +25,23 @@ Tested:
 * http://aminet.net/dev/hwood/HWP_TIFF.lha
 * http://aminet.net/dev/hwood/HWP_VectorGfx.lha
 * http://aminet.net/dev/hwood/HWP_XAD.lha
-
+* http://aminet.net/dev/hwood/HWP_RapaGUI.lha
+* http://aminet.net/dev/hwood/HWP_Polybios.lha
+* http://aminet.net/dev/hwood/HWP_MUIRoyale.lha
+* http://aminet.net/dev/hwood/HWP_Malibu.lha
+* http://aminet.net/dev/hwood/HWP_HTTPStreamer.lha
+* http://aminet.net/dev/hwood/HWP_GLGalore.lha
+* http://aminet.net/dev/hwood/HWP_JPEG2000.lha
+* http://aminet.net/dev/hwood/HWP_FLICAnim.lha
+* http://aminet.net/dev/hwood/HWP_AVCodec.lha
+* http://aminet.net/dev/hwood/HWP_DigiBooster.lha
+* http://aminet.net/dev/hwood/HWP_AHX.lha
+* http://aminet.net/dev/hwood/HWP_AIFF.lha
+* http://aminet.net/dev/hwood/HWP_APNG.lha
+ 
 Not tested
 ==========================================================================================
 AROS i386:
-http://aminet.net/dev/hwood/HWP_AHX.lha
-http://aminet.net/dev/hwood/HWP_AIFF.lha
-http://aminet.net/dev/hwood/HWP_APNG.lha
-http://aminet.net/dev/hwood/HWP_AVCodec.lha
-http://aminet.net/dev/hwood/HWP_DigiBooster.lha
-http://aminet.net/dev/hwood/HWP_FLICAnim.lha
-http://aminet.net/dev/hwood/HWP_GLGalore.lha
-http://aminet.net/dev/hwood/HWP_HTTPStreamer.lha
-http://aminet.net/dev/hwood/HWP_JPEG2000.lha
-http://aminet.net/dev/hwood/HWP_Malibu.lha
-http://aminet.net/dev/hwood/HWP_MUIRoyale.lha
-http://aminet.net/dev/hwood/HWP_Polybios.lha
-http://aminet.net/dev/hwood/HWP_RapaGUI.lha
 
 Other:
 https://www.ibrowse-dev.net/resources/IBrowse2.4-020+.lha
