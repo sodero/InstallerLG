@@ -33,10 +33,10 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
     // We need atleast one argument
     if(c_sane(contxt, 1))
     {
-        entry_p prompt   = get_opt(CARG(2), OPT_PROMPT),
-                help     = get_opt(CARG(2), OPT_HELP),
-                confirm  = get_opt(CARG(2), OPT_CONFIRM),
-                safe     = get_opt(CARG(2), OPT_SAFE); 
+        entry_p prompt   = get_opt_va(OPT_PROMPT, CARG(2), CARG(3), NULL),
+                help     = get_opt_va(OPT_HELP, CARG(2), CARG(3), NULL),
+                confirm  = get_opt_va(OPT_CONFIRM, CARG(2), CARG(3), NULL),
+                safe     = get_opt_va(OPT_SAFE, CARG(2), CARG(3), NULL); 
 
         DNUM = 0; 
 

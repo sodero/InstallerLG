@@ -3,6 +3,8 @@
 (run "script" (confirm)); "","Line 1: Missing option 'prompt' 0",""
 (run "script" (confirm) (prompt "p")); "","Line 1: Missing option 'help' 0",""
 (run "script" (confirm) (prompt "p") (help "h")); "","ph 0",""
+(run (confirm) (prompt "p") (help "h") "script"); "","ph 0",""
+(run (confirm) (help "h") "script" (prompt "p")); "","ph 0",""
 (user 2) (run "script" (confirm) (prompt "p") (help "h")); "","ph 0",""
 (run "script" (confirm) (prompt "p") (help "h")); "","ph 0",""
 (user 1) (run "script" (confirm 1) (prompt "p") (help "h")); "","ph 0",""

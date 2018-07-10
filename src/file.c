@@ -2991,9 +2991,9 @@ entry_p m_startup(entry_p contxt)
     {
         const char *app = str(CARG(1)); 
 
-        entry_p command  = get_opt(CARG(2), OPT_COMMAND),
-                help     = get_opt(CARG(2), OPT_HELP),
-                prompt   = get_opt(CARG(2), OPT_PROMPT);
+        entry_p command  = get_opt_va(OPT_COMMAND, CARG(2), CARG(3), NULL),
+                help     = get_opt_va(OPT_HELP, CARG(2), CARG(3), NULL),
+                prompt   = get_opt_va(OPT_PROMPT, CARG(2), CARG(3), NULL);
 
         // Expect failure. 
         DNUM = 0; 

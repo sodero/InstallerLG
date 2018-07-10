@@ -12,6 +12,7 @@
 #include "util.h"
 
 #include <limits.h> 
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -98,6 +99,45 @@ entry_p global(entry_p e)
 
     // Something or NULL: 
     return e; 
+}
+
+
+//----------------------------------------------------------------------------
+// Name:        get_opt_va
+// Description: Find option of a given type in one or more contexts.
+// Input:       opt_t t:    The type of option to search for.
+//              ...         Any number of entry_p contexts to search in.
+//              NULL        Terminating NULL
+// Return:      entry_p:    An OPTION entry if found, NULL otherwise.
+//----------------------------------------------------------------------------
+entry_p get_opt_va(opt_t t, ...)
+{
+    // Init VA.
+    entry_p cur;
+    va_list ap;
+    va_start(ap, t);
+
+    // For all arguments following the
+    // type, treat them as contxts and
+    // search for the option therein.
+    for(cur = va_arg(ap, entry_p);
+        cur; cur = va_arg(ap, entry_p))
+    {
+        // Search for option.
+        cur = get_opt(cur, t);
+
+        if(cur)
+        {
+            // We found it.
+            break;
+        }
+    }
+
+    // End VA.
+    va_end(ap);
+
+    // Option or NULL.
+    return cur;
 }
 
 //----------------------------------------------------------------------------
