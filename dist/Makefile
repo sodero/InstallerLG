@@ -23,6 +23,8 @@ dist: $(LHA) $(README)
 flat:
 	cp $(SRC)/*.c $(FLT)
 	cp $(SRC)/*.h $(FLT)
+	cp $(BIN)/*.c $(FLT)
+	cp $(BIN)/*.h $(FLT)
 
 .PHONY: clean
 clean:
