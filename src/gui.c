@@ -2243,7 +2243,7 @@ void gui_message(const char *msg, int imm)
     }
     else
     {
-        printf(msg); 
+        fputs(msg, stdout); 
     }
     #endif
 }

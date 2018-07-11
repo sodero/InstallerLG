@@ -181,7 +181,7 @@ int arg_init(int argc, char **argv)
     else
     {
         // Missing argument(s)
-        fprintf(stderr, tr(S_RQMS)); 
+        fputs(tr(S_RQMS), stderr);
     }
 
     // Something is really wrong if we

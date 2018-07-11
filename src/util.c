@@ -230,21 +230,21 @@ int c_sane(entry_p c, size_t n)
             // Make sure that something exists.
             if(c->children[i] == NULL)
             {
-                DBG("c->children[%lu] == NULL\n", i);
+                DBG("c->children[%u] == NULL\n", i);
                 break;
             }
 
             // Make sure that it's not a sentinel.
             if(c->children[i] == end())
             {
-                DBG("c->children[%lu] == end()\n", i);
+                DBG("c->children[%u] == end()\n", i);
                 break;
             }
 
             // Make sure that it belongs to us. 
             if(c->children[i]->parent != c)
             {
-                DBG("c->children[%lu]->parent != %p\n", i, (void *) c);
+                DBG("c->children[%u]->parent != %p\n", i, (void *) c);
                 break;
             }
 
@@ -304,21 +304,21 @@ int s_sane(entry_p c, size_t n)
             // Make sure that somethings exists.
             if(c->symbols[i] == NULL)
             {
-                DBG("c->symbols[%lu] == NULL\n", i);
+                DBG("c->symbols[%u] == NULL\n", i);
                 break;
             }
 
             // Make sure that it's not a sentinel.
             if(c->symbols[i] == end())
             {
-                DBG("c->symbols[%lu] == end()\n", i);
+                DBG("c->symbols[%u] == end()\n", i);
                 break;
             }
 
             // Make sure that it belongs to us. 
             if(c->symbols[i]->parent != c)
             {
-                DBG("c->symbols[%lu]->parent != %p\n", i, (void *) c);
+                DBG("c->symbols[%u]->parent != %p\n", i, (void *) c);
                 break;
             }
 
