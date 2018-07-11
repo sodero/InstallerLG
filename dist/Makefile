@@ -1,7 +1,9 @@
 #---------------------------------------------------------------------------------#
 # Configuration
 #---------------------------------------------------------------------------------#
+FLT := flat
 DIR := aminet
+SRC := ../src
 BIN := ../build
 EXE := installer
 NAME := InstallerLG
@@ -14,8 +16,13 @@ FILES := $(EXE) 'InstallerLG installer' 'InstallerLG installer.info'
 #---------------------------------------------------------------------------------#
 # Targets
 #---------------------------------------------------------------------------------#
-.PHONY: dist
+.PHONY: dist flat
 dist: $(LHA) $(README)
+
+.PHONY: flat
+flat:
+	cp $(SRC)/*.c $(FLT)
+	cp $(SRC)/*.h $(FLT)
 
 .PHONY: clean
 clean:
@@ -23,6 +30,7 @@ clean:
 	$(RM) $(EXE)
 	$(RM) $(LHA)
 	$(RM) $(README)
+	$(RM) $(FLT)/*.c $(FLT)/*.h
 
 $(LHA): $(EXE)
 	lha a $@ $(FILES)
