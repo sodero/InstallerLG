@@ -1,0 +1,19 @@
+# InstallerLG Makefile
+#
+
+include $(SRCDIR)/config/aros.cfg
+
+FILES := $(filter-out gui, $(subst .c,,$(wildcard *.c)))
+USER_CFLAGS := -std=c99 -w
+EXEDIR := $(AROSDIR)/Utilities
+
+#MM- workbench-utilities : workbench-utilities-installerlg
+#MM workbench-utilities-installerlg : includes linklibs linklib-installerlggui
+
+%build_prog mmake=workbench-utilities-installerlg \
+    progname=Installer targetdir=$(EXEDIR) \
+    files=$(FILES) uselibs="installerlggui debug"
+
+%build_linklib mmake=linklib-installerlggui libname=installerlggui cflags="-w" files="gui"
+
+%common
