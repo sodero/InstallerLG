@@ -21,12 +21,12 @@ CWRN += -Wno-format-security -Werror
 else
 CC := gcc
 AMIGA = true
-CWRN = -Wall -Wno-pointer-sign -Wno-unused-but-set-variable
+CWRN = -Wall -Wno-pointer-sign
 CWRN += -Wno-implicit-function-declaration
 CGEN = -Os -std=c99 -DAMIGA
-LDFLAGS = -ldebug
+LDLIBS = -ldebug
 ifeq ($(OS),MorphOS)
-LDFLAGS += -noixemul
+LDLIBS += -noixemul
 endif
 endif
 endif
@@ -38,7 +38,7 @@ CFLAGS += $(CINC) $(CGEN) $(CWRN) $(CDEF)
 # Targets
 #---------------------------------------------------------------------------------#
 $(EXE): $(OBJ) parser.o lexer.o
-	$(CC) $^ -o $@ $(LDFLAGS)
+	$(CC) $^ -o $@ $(LDLIBS)
 
 parser.o: parser.c
 	$(CC) $(CINC) $(CDEF) $(CGEN) -c $< -DYYERROR_VERBOSE

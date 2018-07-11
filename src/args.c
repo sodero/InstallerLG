@@ -109,7 +109,7 @@ int arg_init(int argc, char **argv)
             if(arg->wa_Lock)
             {
                 // Save the old directory. 
-                owd = CurrentDir(arg->wa_Lock); 
+                owd = (BPTR) CurrentDir(arg->wa_Lock); 
             }
 
             // Read information from icon. 
@@ -148,7 +148,7 @@ int arg_init(int argc, char **argv)
 
             // If we did change directory before,
             // change back to the old one. 
-            if(owd != -1)
+            if(owd != (BPTR) -1)
             {
                 CurrentDir(owd); 
             }

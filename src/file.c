@@ -3584,7 +3584,8 @@ entry_p m_tooltype(entry_p contxt)
 
                         // Get tooltype and current value (if it exists).
                         const char *t = str(settooltype->children[0]),
-                                   *o = FindToolType(obj->do_ToolTypes, t);
+                                   *o = (const char *)
+                                        FindToolType(obj->do_ToolTypes, t);
 
                         // Get size of tooltype array.
                         while(*(tts + n++));

@@ -13,19 +13,8 @@
 
 #ifdef AMIGA
 #include <libraries/asl.h>
-#include <libraries/gadtools.h>
-#include <mui/TheBar_mcc.h> 
-#include <graphics/rpattr.h>
-#include <proto/icon.h>
-#include <proto/iffparse.h>
-#include <proto/graphics.h>
-#include <proto/cybergraphics.h>
-#include <proto/keymap.h>
+#include <libraries/mui.h> 
 #include <proto/muimaster.h>
-#include <cybergraphx/cybergraphics.h>
-#include <devices/rawkeycodes.h>
-#include <clib/debug_protos.h>
-#include <clib/alib_protos.h>
 #endif /* AMIGA */
 
 #include <stdio.h>
