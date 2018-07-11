@@ -14,6 +14,11 @@
 #ifdef AMIGA
 #include <libraries/asl.h>
 #include <libraries/mui.h> 
+#include <proto/alib.h>
+#include <proto/debug.h>
+#include <proto/exec.h>
+#include <proto/graphics.h>
+#include <proto/intuition.h>
 #include <proto/muimaster.h>
 #endif /* AMIGA */
 
@@ -579,7 +584,7 @@ MUIDSP IPTR InstallerGuiWelcome(Class *cls,
             // Sanity check.
             if(usr && prt && lgf)
             {
-                ULONG pat; 
+                ULONG pat = 0; 
 
                 // Novice, Intermediate, Expert. 
                 get(usr, MUIA_Radio_Active, &pat); 
@@ -598,7 +603,8 @@ MUIDSP IPTR InstallerGuiWelcome(Class *cls,
                         if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
                            MUIV_InstallerGui_Proceed)
                         {
-                            ULONG prp, lgp; 
+                            ULONG prp = 0, 
+                                  lgp = 0; 
 
                             // Get pretend and log settings.
                             get(prt, MUIA_Radio_Active, &prp); 
@@ -858,7 +864,7 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
             struct TextExtent e; 
 
             // Get rendered size of file string.
-            ULONG cur, len = strlen(txt), 
+            ULONG cur = 0, len = strlen(txt), 
                   w = _width(prg), h = _height(prg),
                   max = TextFit(_rp(prg), txt, len, 
                                 &e, NULL, 1, w, h); 
@@ -1503,7 +1509,8 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
 
                 while(i--)
                 {
-                    ULONG sel; 
+                    ULONG sel = 0; 
+
                     get(cb[i], MUIA_Selected, &sel); 
                     ret |= (sel ? (1 << i) : 0);
 
@@ -1610,7 +1617,9 @@ MUIDSP IPTR InstallerGuiConfirm(Class *cls,
     // Sanity check.
     if(con && but && txt && grp)
     {
-        ULONG top, btm, str; 
+        ULONG top = 0,
+              btm = 0,
+              str = 0; 
 
         // Set help bubble.
         set(grp, MUIA_ShortHelp, msg->Help); 

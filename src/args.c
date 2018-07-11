@@ -12,12 +12,15 @@
 
 #ifdef AMIGA
 #include <dos/dos.h>
+#include <proto/dos.h>
+#include <proto/icon.h>
 #include <workbench/startup.h>
 #include <workbench/workbench.h>
 #endif
 
 #include <limits.h>
 #include <stdio.h>
+#include <unistd.h>
 
 // Argument / tooltype support.
 #ifdef AMIGA
@@ -56,7 +59,7 @@ int arg_init(int argc, char **argv)
             "LOGFILE/K,"
             "NOLOG/S,"
             "NOPRETEND/S",
-            args, 
+            (IPTR *) args, 
             NULL
         ); 
     }
@@ -125,17 +128,24 @@ int arg_init(int argc, char **argv)
                     // the invocation was done using a 'project'
                     if(!args[ARG_SCRIPT])
                     {
-                        args[ARG_SCRIPT] = (char *) FindToolType(tt, "SCRIPT"); 
+                        args[ARG_SCRIPT] = (char *) 
+                            FindToolType ((STRPTR *) tt, "SCRIPT"); 
                     }
 
                     // The rest of the 'tooltypes' are handled 
                     // the same way for 'projects' and 'tools'.
-                    args[ARG_APPNAME] = (char *) FindToolType(tt, "APPNAME"); 
-                    args[ARG_MINUSER] = (char *) FindToolType(tt, "MINUSER"); 
-                    args[ARG_DEFUSER] = (char *) FindToolType(tt, "DEFUSER"); 
-                    args[ARG_LOGFILE] = (char *) FindToolType(tt, "LOGFILE"); 
-                    args[ARG_NOLOG] = (char *) FindToolType(tt, "NOLOG"); 
-                    args[ARG_NOPRETEND] = (char *) FindToolType(tt, "NOPRETEND"); 
+                    args[ARG_APPNAME] = (char *) 
+                        FindToolType((STRPTR *) tt, "APPNAME"); 
+                    args[ARG_MINUSER] = (char *) 
+                        FindToolType((STRPTR *) tt, "MINUSER"); 
+                    args[ARG_DEFUSER] = (char *) 
+                        FindToolType((STRPTR *) tt, "DEFUSER"); 
+                    args[ARG_LOGFILE] = (char *) 
+                        FindToolType((STRPTR *) tt, "LOGFILE"); 
+                    args[ARG_NOLOG] = (char *) 
+                        FindToolType((STRPTR *) tt, "NOLOG"); 
+                    args[ARG_NOPRETEND] = (char *) 
+                        FindToolType((STRPTR *) tt, "NOPRETEND"); 
                 }
                 else
                 {

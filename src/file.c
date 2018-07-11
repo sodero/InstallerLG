@@ -30,6 +30,9 @@
 #include <dos/dos.h>
 #include <dos/dosasl.h>
 #include <dos/dosextens.h>
+#include <proto/dos.h>
+#include <proto/exec.h>
+#include <proto/icon.h>
 #include <workbench/workbench.h>
 #endif
 
@@ -3583,9 +3586,8 @@ entry_p m_tooltype(entry_p contxt)
                         size_t n = 0; 
 
                         // Get tooltype and current value (if it exists).
-                        const char *t = str(settooltype->children[0]),
-                                   *o = (const char *)
-                                        FindToolType(obj->do_ToolTypes, t);
+                        char *t = str(settooltype->children[0]),
+                             *o = FindToolType(obj->do_ToolTypes, t);
 
                         // Get size of tooltype array.
                         while(*(tts + n++));

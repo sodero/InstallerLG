@@ -17,10 +17,12 @@
 #include "util.h"
 
 #include <stdio.h>
+#include <unistd.h>
 
 #ifdef AMIGA
 #include <dos/dos.h>
 #include <dos/dostags.h>
+#include <proto/dos.h>
 #endif
 
 #include <string.h>

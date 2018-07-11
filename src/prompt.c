@@ -22,6 +22,8 @@
 #ifdef AMIGA
 #include <dos/dos.h>
 #include <dos/dosextens.h>
+#include <proto/dos.h>
+#include <proto/exec.h>
 #endif
 
 //----------------------------------------------------------------------------

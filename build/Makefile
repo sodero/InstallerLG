@@ -22,8 +22,7 @@ else
 CC := gcc
 AMIGA = true
 CWRN = -Wall -Wno-pointer-sign
-CWRN += -Wno-implicit-function-declaration
-CGEN = -Os -std=c99 -DAMIGA
+CGEN = -Os -std=gnu99 -DAMIGA
 LDLIBS = -ldebug
 ifeq ($(OS),MorphOS)
 LDLIBS += -noixemul
@@ -63,7 +62,7 @@ else
 endif
 
 gui.o: gui.c gui.h
-	$(CC) -O0 -c $< -DLLVL=2 $(CWRN)
+	$(CC) -Os -c $< -DLLVL=2 $(CWRN)
 
 #---------------------------------------------------------------------------------#
 # Misc

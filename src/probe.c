@@ -24,6 +24,9 @@
 #include <exec/execbase.h>
 #include <exec/memory.h>
 #include <exec/resident.h>
+#include <proto/dos.h>
+#include <proto/exec.h>
+#include <proto/icon.h>
 #include <workbench/workbench.h>
 #endif
 
@@ -830,7 +833,7 @@ entry_p m_iconinfo(entry_p contxt)
                         {
                             // Get variable name and option type. 
                             int t = tt[i]->id; 
-                            const char *n = str(tt[i]->children[j]);
+                            char *n = str(tt[i]->children[j]);
 
                             // Variable names must be atleast one
                             // character long.
