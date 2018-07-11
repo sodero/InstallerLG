@@ -1,7 +1,7 @@
 #---------------------------------------------------------------------------------#
 # Configuration
 #---------------------------------------------------------------------------------#
-FLT := flat
+FLT := aros
 DIR := aminet
 SRC := ../src
 BIN := ../build
@@ -16,11 +16,11 @@ FILES := $(EXE) 'InstallerLG installer' 'InstallerLG installer.info'
 #---------------------------------------------------------------------------------#
 # Targets
 #---------------------------------------------------------------------------------#
-.PHONY: dist flat
+.PHONY: dist aros
 dist: $(LHA) $(README)
 
-.PHONY: flat
-flat:
+.PHONY: aros
+aros:
 	cp $(SRC)/*.c $(FLT)
 	cp $(SRC)/*.h $(FLT)
 	cp $(BIN)/*.c $(FLT)
