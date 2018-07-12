@@ -1,3 +1,6 @@
+(set @strict 0) (textfile (dest "_tf_") (append "a") (confirm)) ; "rm -f _tf_","1","cmp _tf_ ../test/data.textfile.o1 && rm -Rf _tf_"
+(set @strict 0) (textfile (dest "_tf_") (append "a") (confirm) (help "h")) ; "rm -f _tf_","h 1","cmp _tf_ ../test/data.textfile.o1 && rm -Rf _tf_"
+(set @strict 0) (textfile (dest "_tf_") (append "a") (confirm) (prompt "p")) ; "rm -f _tf_","p 1","cmp _tf_ ../test/data.textfile.o1 && rm -Rf _tf_"
 (textfile) ; "","Line 1: syntax error, unexpected ')', expecting '(' ')'",""
 (textfile (safe)) ; "","Line 1: Missing option 'dest' 0",""
 (textfile (safe) (quiet)) ; "","Line 1: Missing option 'dest' 0",""

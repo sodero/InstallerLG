@@ -1,3 +1,6 @@
+(set @strict 0) (rename "_rn_" "_rm_" (safe) (confirm 1)) ; "rm -Rf _rm_ && touch _rn_","-1","rm -Rf _rm_"
+(set @strict 0) (rename "_rn_" "_rm_" (safe) (confirm 1) (prompt "p")) ; "rm -Rf _rm_ && touch _rn_","p -1","rm -Rf _rm_"
+(set @strict 0) (rename "_rn_" "_rm_" (safe) (confirm 1) (help "h")) ; "rm -Rf _rm_ && touch _rn_","h -1","rm -Rf _rm_"
 (rename "_rn_" "_rm_") ; "rm -Rf _rm_ && touch _rn_","-1","rm -Rf _rm_ _rn_"
 (rename "_rn_" "_rm_") ; "rm -Rf _rm_ _rn_ && mkdir _rn_","-1","test -d _rm_ && rm -Rf _rm_ _rn_"
 (rename "_rn_" "_rm_") ; "rm -Rf _rm_ _rn_ && touch _rn_ && mkdir _rm_","Line 1: Could not rename file '_rn_' 0","test -f _rn_ && test -d _rm_ && rm -Rf _rm_ _rn_"

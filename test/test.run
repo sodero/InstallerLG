@@ -1,3 +1,6 @@
+(set @strict 0) (run "script" (confirm)); "","0",""
+(set @strict 0) (run "script" (confirm) (prompt "p")); "","p 0",""
+(set @strict 0) (run "script" (confirm) (help "h")); "","h 0",""
 (run "script") ; "","0",""
 (run "script" x) ; "","Line 1: syntax error, unexpected SYM, expecting '(' or ')' 'x'",""
 (run "script" (confirm)); "","Line 1: Missing option 'prompt' 0",""

@@ -6,6 +6,7 @@
 (exit (quiet)) ; "","0",""
 (exit "1") ; "","1Installation complete ./installer can be found in T:0",""
 (exit "1" (quiet)) ; "","10",""
+(exit (quiet) "1") ; "","10",""
 (exit "1" "2" "3") ; "","123Installation complete ./installer can be found in T:0",""
 (exit "1" "2" undef) ; "","Line 1: Undefined variable 'undef' 0",""
 (set @strict 0) (exit "1" "2" undef) ; "","12Installation complete ./installer can be found in T:0",""

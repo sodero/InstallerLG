@@ -32,3 +32,8 @@
 0.1.0-alpha.7:
 ==============
 - Single argument / multiple options permutations allowed (HWP_*)
+
+0.1.0-alpha.8:
+==============
+- (exit) option permutations (MetalWeb)
+- ?

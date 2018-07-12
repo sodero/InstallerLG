@@ -101,53 +101,14 @@ entry_p global(entry_p e)
     return e; 
 }
 
-
 //----------------------------------------------------------------------------
-// Name:        get_opt_va
-// Description: Find option of a given type in one or more contexts.
-// Input:       opt_t t:    The type of option to search for.
-//              ...         Any number of entry_p contexts to search in.
-//              NULL        Terminating NULL
-// Return:      entry_p:    An OPTION entry if found, NULL otherwise.
-//----------------------------------------------------------------------------
-entry_p get_opt_va(opt_t t, ...)
-{
-    // Init VA.
-    entry_p cur;
-    va_list ap;
-    va_start(ap, t);
-
-    // For all arguments following the
-    // type, treat them as contxts and
-    // search for the option therein.
-    for(cur = va_arg(ap, entry_p);
-        cur; cur = va_arg(ap, entry_p))
-    {
-        // Search for option.
-        cur = get_opt(cur, t);
-
-        if(cur)
-        {
-            // We found it.
-            break;
-        }
-    }
-
-    // End VA.
-    va_end(ap);
-
-    // Option or NULL.
-    return cur;
-}
-
-//----------------------------------------------------------------------------
-// Name:        get_opt
+// Name:        get_opt_aux
 // Description: Find option of a given type in a context.
 // Input:       entry_p c:  The context to search in. 
 //              opt_t t:    The type of option to search for.
 // Return:      entry_p:    An OPTION entry if found, NULL otherwise.
 //----------------------------------------------------------------------------
-entry_p get_opt(entry_p c, opt_t t)
+static entry_p get_opt_aux(entry_p c, opt_t t)
 {
     // We need a context. 
     if(c && c != end() &&
@@ -199,6 +160,63 @@ entry_p get_opt(entry_p c, opt_t t)
 
     // Nothing found.
     return NULL; 
+}
+
+//----------------------------------------------------------------------------
+// Name:        get_opt_va
+// Description: Find option of a given type in one or more contexts.
+// Input:       opt_t t:    The type of option to search for.
+//              ...         Any number of entry_p contexts to search in.
+//              NULL        Terminating NULL
+// Return:      entry_p:    An OPTION entry if found, NULL otherwise.
+//----------------------------------------------------------------------------
+entry_p get_opt_va(opt_t t, ...)
+{
+    // Init VA.
+    va_list ap;
+    entry_p cur, top;
+
+    va_start(ap, t);
+    top = cur = va_arg(ap, entry_p);
+
+    // For all arguments following the
+    // type, treat them as contxts and
+    // search for the option therein.
+    while(cur)
+    {
+        // Search for option.
+        cur = get_opt_aux(cur, t);
+
+        if(cur)
+        {
+            // We found it.
+            break;
+        }
+        else
+        {
+            // Next argument.
+            cur = va_arg(ap, entry_p);
+        }
+    }
+
+    // End VA.
+    va_end(ap);
+
+    // If in non strict mode, allow the absense
+    // of (prompt) and (help).
+    if(!cur && top &&
+       !get_numvar(top, "@strict"))
+    {
+        if(t == OPT_PROMPT || t == OPT_HELP)
+        {
+            // This will be resolved as an
+            // emtpy string.
+            return new_failure();
+        }
+    }
+
+    // Option or NULL.
+    return cur;
 }
 
 //----------------------------------------------------------------------------

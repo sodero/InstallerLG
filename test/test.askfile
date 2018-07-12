@@ -16,3 +16,8 @@
 (set @strict 0) (askfile (prompt p) (help "h") (default "d")) ; "","h00 d",""
 (set @strict 0) (askfile (prompt "p") (help h) (default "d")) ; "","p00 d",""
 (set @strict 0) (askfile (prompt "p") (help "h") (default d)) ; "","ph00",""
+(set @strict 0) (user 0) (askfile (default "d")) ; "","d",""
+(set @strict 0) (user 1) (askfile (default "d")) ; "","00 d",""
+(set @strict 0) (user 1) (askfile (prompt "p")(default "d")) ; "","p00 d",""
+(set @strict 0) (user 2) (askfile (help "h") (default "d")) ; "","h00 d",""
+(set @strict 0) (user 2) (askfile (default "d") (help "h")) ; "","h00 d",""
