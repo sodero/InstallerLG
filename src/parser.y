@@ -303,6 +303,7 @@ run:            '(' RUN p opts ')'              { $$ = new_native(strdup("run"),
 /* exit.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 abort:          '(' ABORT ps ')'                { $$ = new_native(strdup("abort"), LINE, m_abort, $3, NUMBER); }; 
 exit:           '(' EXIT ps quiet ')'           { $$ = new_native(strdup("exit"), LINE, m_exit, push($3, $4), NUMBER); } | 
+                '(' EXIT quiet ps ')'           { $$ = new_native(strdup("exit"), LINE, m_exit, push($4, $3), NUMBER); } | 
                 '(' EXIT quiet')'               { $$ = new_native(strdup("exit"), LINE, m_exit, push(new_contxt(), $3), NUMBER); } |
                 '(' EXIT ps ')'                 { $$ = new_native(strdup("exit"), LINE, m_exit, $3, NUMBER); } |
                 '(' EXIT ')'                    { $$ = new_native(strdup("exit"), LINE, m_exit, NULL, NUMBER); }; 
