@@ -1,6 +1,8 @@
 - All project tooltypes must be promoted to variables in init().
 - We have no (optional) test coverage on (copylib).
+- We have no (confirm) test coverage on (startup).
 - We need more @strict = 0 testing on (copylib).
+- We need (confirm) test feedback from (copyfiles).
 - We have 32 / 64 bit problem. Look at test.bitnot on Linux 32.
 - (onerror) and (trap) should likely accept naked blocks just list (while), (until) and (foreach)
 - The GUI is all over the place.

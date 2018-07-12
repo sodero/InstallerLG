@@ -37,10 +37,10 @@ entry_p m_askbool(entry_p contxt)
     if(contxt)
     {
         const char *yes = tr(S_AYES), *no = tr(S_NONO); 
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                deflt    = get_opt(contxt, OPT_DEFAULT),
-                choices  = get_opt(contxt, OPT_CHOICES);
+        entry_p prompt   = get_opt_va(OPT_PROMPT, contxt, NULL),
+                help     = get_opt_va(OPT_HELP, contxt, NULL),
+                deflt    = get_opt_va(OPT_DEFAULT, contxt, NULL),
+                choices  = get_opt_va(OPT_CHOICES, contxt, NULL);
 
         // Default = 'no'.
         DNUM = 0; 
@@ -118,10 +118,10 @@ entry_p m_askchoice(entry_p contxt)
 {
     if(contxt)
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                choices  = get_opt(contxt, OPT_CHOICES),
-                deflt    = get_opt(contxt, OPT_DEFAULT);
+        entry_p prompt   = get_opt_va(OPT_PROMPT, contxt, NULL),
+                help     = get_opt_va(OPT_HELP, contxt, NULL),
+                choices  = get_opt_va(OPT_CHOICES, contxt, NULL),
+                deflt    = get_opt_va(OPT_DEFAULT, contxt, NULL);
 
         DNUM = 0; 
 
@@ -250,12 +250,12 @@ entry_p m_askdir(entry_p contxt)
 {
     if(contxt)
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                deflt    = get_opt(contxt, OPT_DEFAULT),
-                newpath  = get_opt(contxt, OPT_NEWPATH),
-                disk     = get_opt(contxt, OPT_DISK),
-                assigns  = get_opt(contxt, OPT_ASSIGNS);
+        entry_p prompt   = get_opt_va(OPT_PROMPT, contxt, NULL),
+                help     = get_opt_va(OPT_HELP, contxt, NULL),
+                deflt    = get_opt_va(OPT_DEFAULT, contxt, NULL),
+                newpath  = get_opt_va(OPT_NEWPATH, contxt, NULL),
+                disk     = get_opt_va(OPT_DISK, contxt, NULL),
+                assigns  = get_opt_va(OPT_ASSIGNS, contxt, NULL);
 
         // Are all mandatory options (!?) present?
         if(prompt && help && deflt)
@@ -343,10 +343,10 @@ entry_p m_askdisk(entry_p contxt)
 {
     if(contxt)
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                dest     = get_opt(contxt, OPT_DEST),
-                newname  = get_opt(contxt, OPT_NEWNAME); 
+        entry_p prompt   = get_opt_va(OPT_PROMPT, contxt, NULL),
+                help     = get_opt_va(OPT_HELP, contxt, NULL),
+                dest     = get_opt_va(OPT_DEST, contxt, NULL),
+                newname  = get_opt_va(OPT_NEWNAME, contxt, NULL); 
 
         DNUM = 0; 
 
@@ -493,11 +493,11 @@ entry_p m_askfile(entry_p contxt)
 {
     if(contxt)
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                newpath  = get_opt(contxt, OPT_NEWPATH),
-                disk     = get_opt(contxt, OPT_DISK),
-                deflt    = get_opt(contxt, OPT_DEFAULT);
+        entry_p prompt   = get_opt_va(OPT_PROMPT, contxt, NULL),
+                help     = get_opt_va(OPT_HELP, contxt, NULL),
+                newpath  = get_opt_va(OPT_NEWPATH, contxt, NULL),
+                disk     = get_opt_va(OPT_DISK, contxt, NULL),
+                deflt    = get_opt_va(OPT_DEFAULT, contxt, NULL);
 
         // Are all mandatory options (!?) present?
         if(prompt && help && deflt)
@@ -585,10 +585,10 @@ entry_p m_asknumber(entry_p contxt)
 {
     if(contxt)
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                range    = get_opt(contxt, OPT_RANGE),
-                deflt    = get_opt(contxt, OPT_DEFAULT);
+        entry_p prompt   = get_opt_va(OPT_PROMPT, contxt, NULL),
+                help     = get_opt_va(OPT_HELP, contxt, NULL),
+                range    = get_opt_va(OPT_RANGE, contxt, NULL),
+                deflt    = get_opt_va(OPT_DEFAULT, contxt, NULL);
 
         DNUM = 0;
 
@@ -682,10 +682,10 @@ entry_p m_askoptions(entry_p contxt)
 {
     if(contxt)
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                choices  = get_opt(contxt, OPT_CHOICES),
-                deflt    = get_opt(contxt, OPT_DEFAULT);
+        entry_p prompt   = get_opt_va(OPT_PROMPT, contxt, NULL),
+                help     = get_opt_va(OPT_HELP, contxt, NULL),
+                choices  = get_opt_va(OPT_CHOICES, contxt, NULL),
+                deflt    = get_opt_va(OPT_DEFAULT, contxt, NULL);
 
         DNUM = -1; 
 
@@ -800,9 +800,9 @@ entry_p m_askstring(entry_p contxt)
 {
     if(contxt)
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                deflt    = get_opt(contxt, OPT_DEFAULT);
+        entry_p prompt   = get_opt_va(OPT_PROMPT, contxt, NULL),
+                help     = get_opt_va(OPT_HELP, contxt, NULL),
+                deflt    = get_opt_va(OPT_DEFAULT, contxt, NULL);
 
         if(prompt && help && deflt)
         {

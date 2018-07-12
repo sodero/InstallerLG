@@ -1,3 +1,6 @@
+(set @strict 0) (tooltype (dest "dest") (confirm)) ; "","1",""
+(set @strict 0) (tooltype (help "h") (dest "dest") (confirm)) ; "","h 1",""
+(set @strict 0) (tooltype (prompt "p") (dest "dest") (confirm)) ; "","p 1",""
 (tooltype) ; "","Line 1: syntax error, unexpected ')', expecting '(' ')'",""
 (tooltype (safe)) ; "","Line 1: Missing option 'dest' 0",""
 (tooltype (safe) (quiet)) ; "","Line 1: Missing option 'dest' 0",""

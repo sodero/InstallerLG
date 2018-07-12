@@ -1,3 +1,7 @@
+(set @strict 0) (set @yes 1) (copyfiles (confirm) (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","1","test -f _cfd_/_cfs_ && rm -Rf _cfs_ _cfd_"
+(set @strict 0) (copyfiles (confirm) (prompt "p") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","0","test ! -f _cfd_/cfs_ && test ! -d _cfd_ && rm -Rf _cfs_ _cfd_"
+(set @strict 0) (user 0) (copyfiles (confirm) (source "_cfs_") (dest "_cfd_") (prompt "p")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","1","test -f _cfd_/_cfs_ && rm -Rf _cfs_ _cfd_"
+(set @strict 0) (user 2) (copyfiles (confirm) (help "h") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","0","test ! -f _cfd_/_cfs_ && rm -Rf _cfs_ _cfd_"
 (set @yes 1) (copyfiles (confirm) (prompt "p") (help "h") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","1","test -f _cfd_/_cfs_ && rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (choices "1" "2" "3")) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && mkdir _cfs_/1 _cfs_/2 _cfs_/3 && touch _cfs_/1/1 _cfs_/2/2 _cfs_/3/3","1","test -d _cfd_/1 && rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (choices "1" "2" "3" "4")) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && mkdir _cfs_/1 _cfs_/2 _cfs_/3 && touch _cfs_/1/1 _cfs_/2/2 _cfs_/3/3 _cfs_/4","1","test -d _cfd_/1 && test -f _cfd_/4 &&  rm -Rf _cfs_ _cfd_"

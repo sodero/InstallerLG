@@ -15,3 +15,7 @@
 (set @strict 0) (asknumber (prompt p) (help "h") (default 2)) ; "","h0100 2",""
 (set @strict 0) (asknumber (prompt "p") (help h) (default 2)) ; "","p0100 2",""
 (set @strict 0) (asknumber (prompt "p") (help "h") (default d)) ; "","ph0100 0",""
+(set @strict 0) (user 0) (asknumber (default 2) (range 11 10)) ; "","2",""
+(set @strict 0) (user 1) (asknumber (prompt "p") (default 2) (range 11 10)) ; "","p0100 2",""
+(set @strict 0) (user 2) (asknumber (help "h") (default 2) (range 11 10)) ; "","h0100 2",""
+(set @strict 0) (user 2) (asknumber (default 2) (range 11 10) (help "h")) ; "","h0100 2",""

@@ -1,3 +1,7 @@
+(set @strict 0) (makedir "_md_" (confirm)) ; "rm -Rf _md_","1","test -d _md_ && rm -Rf _md_"
+(set @strict 0) (makedir "_md_" (confirm) (help "h")) ; "rm -Rf _md_","h 1","test -d _md_ && rm -Rf _md_"
+(set @strict 0) (makedir "_md_" (confirm) (prompt "p")) ; "rm -Rf _md_","p 1","test -d _md_ && rm -Rf _md_"
+(set @strict 0) (makedir  (prompt "p") "_md_" (confirm)) ; "rm -Rf _md_","p 1","test -d _md_ && rm -Rf _md_"
 (makedir) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (makedir (safe)) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (makedir "_md_") ; "rm -Rf _md_","1","test -d _md_ && rm -Rf _md_"

@@ -24,3 +24,8 @@
 (set @strict 0) (user 2) (askbool (prompt "p") (help "h") (default 0) (choices a "")) ; "","ph 1",""
 (set @strict 0) (user 2) (askbool (prompt "p") (help "h") (default 0) (choices "" b)) ; "","ph 1",""
 (set @strict 0) (user 2) (askbool (prompt "p") (help "h") (default d) (choices "" "")) ; "","ph 1",""
+(set @strict 0) (user 2) (askbool (default 0) (choices "Ja")) ; "","JaNo 1",""
+(set @strict 0) (user 2) (askbool (help "h") (default 0) (choices "Ja")) ; "","hJaNo 1",""
+(set @strict 0) (user 2) (askbool (prompt "p") (default 0) (choices "Ja" "Nej")) ; "","pJaNej 1",""
+(set @strict 0) (user 2) (askbool (default 0) (choices "Ja" "Nej") (prompt "p")) ; "","pJaNej 1",""
+(set @strict 0) (user 2) (askbool (default 0) (help "h") (choices "Ja" "Nej")) ; "","hJaNej 1",""
