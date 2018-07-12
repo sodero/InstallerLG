@@ -1,7 +1,7 @@
+- The GUI is all over the place. It should be in one place.
 - All project tooltypes must be promoted to variables in init().
+- We need @strict = 0 testing on the gui parts. What is shown when we have nothing to show?
 - We have no (optional) test coverage on (copylib).
 - We need more @strict = 0 testing on (copylib).
-- We have 32 / 64 bit problem. Look at test.bitnot on Linux 32.
+- We have a 32 / 64 bit problem. Look at test.bitnot on Linux 32.
 - (onerror) and (trap) should likely accept naked blocks just list (while), (until) and (foreach)
-- The GUI is all over the place.
-- FIXME:s
