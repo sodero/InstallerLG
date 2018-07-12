@@ -683,8 +683,18 @@ int h_getversion(entry_p contxt, const char *file)
     }
     else
     {
-        // Could not read from file. 
-        error(contxt->id, ERR_READ_FILE, file); 
+        // Only fail if we're in 'strict' mode.
+        if(get_numvar(contxt, "@strict"))
+        {
+            // Could not read from file. 
+            error(contxt->id, ERR_READ_FILE, file); 
+        }
+        else
+        {
+            // In non strict mode a non existing
+            // file has version 0.
+            ver = 0;
+        }
     }
 
     // Version or -1. 
