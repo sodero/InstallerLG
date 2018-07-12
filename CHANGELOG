@@ -36,4 +36,6 @@
 0.1.0-alpha.8:
 ==============
 - (exit) option permutations (MetalWeb)
-- ?
+- (prompt) and (help) non strict mode (MetalWeb).
+- (getversion) non strict mode (MetalWeb).
+- (run) non strict mode (MetalWeb).

@@ -195,10 +195,17 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 Close(inp); 
                 Close(out); 
 
-                // We should have nothing but zeroes
+                // We should have all zeroes
                 if(DNUM || ioe)
                 {
-                    error(contxt->id, ERR_EXEC, cmd); 
+                    // Give IoErr priority.
+                    DNUM = ioe ? ioe : DNUM;
+
+                    // Only fail if we're in 'strict' mode.
+                    if(get_numvar(contxt, "@strict"))
+                    {
+                        error(contxt->id, ERR_EXEC, cmd); 
+                    }
                 } 
             } 
             else
