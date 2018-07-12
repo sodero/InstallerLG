@@ -3768,10 +3768,10 @@ entry_p m_tooltype(entry_p contxt)
 
                     // If we have a new tooltype array, free
                     // it and reinstate the old one.
-                    if(obj->do_ToolTypes != tts)
+                    if(tts != (char **) obj->do_ToolTypes)
                     {
                         free(obj->do_ToolTypes);
-                        obj->do_ToolTypes = tts;
+                        obj->do_ToolTypes = (STRPTR *) tts;
                     }
 
                     // No need to free the current string,

@@ -3,17 +3,15 @@
 
 include $(SRCDIR)/config/aros.cfg
 
-FILES := $(filter-out gui, $(subst .c,,$(wildcard *.c)))
-USER_CFLAGS := -std=c99 -w
 EXEDIR := $(AROSDIR)/Utilities
+FILES := $(subst .c,,$(wildcard *.c))
+USER_CFLAGS := -std=gnu99 -Wno-unused-function
 
 #MM- workbench-utilities : workbench-utilities-installerlg
-#MM workbench-utilities-installerlg : includes linklibs linklib-installerlggui
+#MM workbench-utilities-installerlg : includes linklibs
 
 %build_prog mmake=workbench-utilities-installerlg \
     progname=Installer targetdir=$(EXEDIR) \
-    files=$(FILES) uselibs="installerlggui debug"
-
-%build_linklib mmake=linklib-installerlggui libname=installerlggui cflags="-w" files="gui"
+    files=$(FILES) uselibs="debug"
 
 %common
