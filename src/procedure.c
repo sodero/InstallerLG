@@ -11,6 +11,7 @@
 #include "error.h"
 #include "eval.h"
 #include "procedure.h"
+#include "strop.h"
 #include "util.h"
 
 #include <string.h>
@@ -114,6 +115,48 @@ entry_p m_gosub(entry_p contxt)
 
             // Next function.
             cus++; 
+        }
+
+        // In non strict mode, transform the syntax of a
+        // function call such as (f1 arg1 arg2 ...) into
+        // a format string expression ("%s%ld.." ...) if
+        // the function is not defined and a symbol that
+        // can be resolved into a format string exists.
+        if(!get_numvar(contxt, "@strict"))
+        {
+            // The name of the function is taken to be a
+            // name of a variable with the format string.
+            char *fmt = get_strvar(contxt, contxt->name);
+
+            // The format string is stored as the name of
+            // native function.
+            free(contxt->name);
+            kill(contxt->resolved);
+            contxt->name = strdup(fmt);
+
+            if(contxt->name)
+            {
+                // We need a resolved dummy. See new_*.
+                contxt->resolved = new_string(strdup(""));
+
+                if(contxt->resolved)
+                {
+                    // Make the current contxt a parent
+                    // of the dummy, otherwise kill(..)
+                    // won't free the dummy. Set proper
+                    // type and callback function.
+                    contxt->call = m_fmt;
+                    contxt->type = NATIVE;
+                    contxt->resolved->parent = contxt;
+
+                    // Return the resolved value of the
+                    // things we've stitched together.
+                    return resolve(contxt);
+                }
+            }
+
+            // Out of memory.
+            error(PANIC);
         }
 
         // No match found.

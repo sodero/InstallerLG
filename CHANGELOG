@@ -44,4 +44,5 @@
 ==============
 - (fileonly) non strict mode (amrss).
 - (copylib) non strict mode (amrss).
+- Ambiguous function call / format string allowed in non string mode (amrss).
 

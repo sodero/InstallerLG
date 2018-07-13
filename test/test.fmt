@@ -1,3 +1,10 @@
+(set a "1" b 2) ("prefix-%s-postfix-%ld" a b) ; "","prefix-1-postfix-2",""
+(set a "1" b 2) (format a b) ; "","Line 1: Undefined function 'format' 0",""
+(set format "prefix-%s-postfix-%ld!") (set a "1" b 2) (format a b) ; "","Line 1: Undefined function 'format' 0",""
+(set @strict 0) (set a "1" b 2) (format a b) ; "","",""
+(set @strict 0) (set format "prefix-%s-postfix-%ld") (set a "1" b 2) (format a b) ; "","prefix-1-postfix-2",""
+(set a "1" b 2) (format a b) ; "","Line 1: Undefined function 'format' 0",""
+(set format "prefix-%s-postfix-%ld!") (set a "1" b 2) (format a b) ; "","Line 1: Undefined function 'format' 0",""
 (""); "","",""
 ("%s"); "","Line 1: Missing format string arguments '%s' 0",""
 ("%ld"); "","Line 1: Missing format string arguments '%ld' 0",""
@@ -5,6 +12,7 @@
 ("prefix-%ld-postfix" %00001) ; "","prefix-1-postfix",""
 ("prefix-%ld-postfix" $ff) ; "","prefix-255-postfix",""
 ("prefix-%ld-postfix" 1 1) ; "","Line 1: Unused format string arguments 'prefix-%ld-postfix' 0",""
+(set @strict 0) ("prefix-%ld-postfix" 1 1) ; "","prefix-1-postfix",""
 ("prefix-%ld-postfix" "1") ; "","Line 1: Format string type mismatch 'prefix-%ld-postfix' 0",""
 ("prefix-%s-postfix" "1") ; "","prefix-1-postfix",""
 ("prefix-%ld-postfix" (+ -1 2)) ; "","prefix-1-postfix",""
@@ -14,3 +22,5 @@
 (set a 1) ("prefix-%s-postfix" a) ; "","Line 1: Format string type mismatch 'prefix-%s-postfix' 0",""
 ("%s" ("prefix-%ld-postfix" 1)) ; "","prefix-1-postfix",""
 (set i 1) (set i (+ 1 i)) ("%ld" i) ; "","2",""
+
+

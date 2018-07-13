@@ -2,6 +2,7 @@
 (set @log 1) (set @log-file "_ts_") (transcript undef) ; "","Line 1: Undefined variable 'undef' 0",""
 (set @log 1) (set @log-file "_ts_") (transcript 1 (undef)) ; "","Line 1: Undefined function 'undef' 0",""
 (set @log 1) (set @log-file "_ts_") (transcript 1 2 3) ; "rm -Rf _ts_","1","cmp _ts_ ../test/data.transcript.o1 && rm -f _ts_"
+(set fmt "%ld" @log 1 @strict 0 @log-file "_ts_") (transcript (fmt 1) (fmt 2) (fmt 3)) ; "rm -Rf _ts_","1","cmp _ts_ ../test/data.transcript.o1 && rm -f _ts_"
 (set @log 1) (set @log-file "_ts_") (transcript 1 %10 %11) ; "rm -Rf _ts_","1","cmp _ts_ ../test/data.transcript.o1 && rm -f _ts_"
 (set @log 1) (set @log-file "_ts_") (transcript "1" "2" "3") ; "rm -Rf _ts_","1","cmp _ts_ ../test/data.transcript.o1 && rm -f _ts_"
 (set @log 1) (set @log-file "_ts_") (transcript (askstring (prompt "p") (help "h") (default "d")) "1" "2" "3") ; "rm -Rf _ts_","phd 1","cmp _ts_ ../test/data.transcript.o4 && rm -f _ts_"

@@ -675,6 +675,12 @@ static void pp_aux(entry_p entry, int indent)
             DBG("%sName:\t%s\n", ts, entry->name);
         }
 
+         // Natives and cusrefs have callbacks.
+        if(entry->call)
+        {
+            DBG("%sCall:\t%p\n", ts, (void *) entry->call);
+        }
+
         // Functions / symbols can be 'resolved'.
         if(entry->resolved) 
         {

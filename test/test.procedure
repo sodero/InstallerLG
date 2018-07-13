@@ -2,7 +2,7 @@
 (procedure f1 (+ 1 2)) (procedure f1 (+ 1 1)); "","f1",""
 (procedure f1 (+ 1 2)) (procedure f2 (+ 1 1)); "","f2",""
 (f1); "","Line 1: Undefined function 'f1' 0",""
-(set @strict 0) (f1); "","Line 1: Undefined function 'f1' 0",""
+(set @strict 0) (f1); "","",""
 (procedure f1 (+ 1 (+ 1 1))) (f1); "","3",""
 (procedure f1 (+ 1 1)) (procedure f2 (+ (f1) (f1))) (f2); "","4",""
 (procedure f1 (+ 1 1)) (procedure f2 (+ f1 f1)) (f2); "","Line 1: Undefined variable 'f1' Line 1: Undefined variable 'f1' 0",""

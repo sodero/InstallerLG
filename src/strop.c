@@ -295,9 +295,10 @@ entry_p m_fmt(entry_p contxt)
         free(sct);
 
         // Fail if the number of arguments and the number
-        // of specifiers don't match.
-        if(arg && *arg && 
-           *arg != end())
+        // of specifiers don't match, and we're in strict
+        // mode.
+        if(arg && *arg && *arg != end() &&
+           get_numvar(contxt, "@strict"))
         {
             error(contxt->id, ERR_FMT_UNUSED, contxt->name); 
         }
