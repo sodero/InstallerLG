@@ -264,8 +264,12 @@ static const char *h_fileonly(entry_p contxt,
         }   
         else
         {
-            // Empty string or dir / vol.
-            error(contxt->id, ERR_NOT_A_FILE, s); 
+            // Only fail if we're in 'strict' mode.
+            if(get_numvar(contxt, "@strict"))
+            {
+                // Empty string or dir / vol.
+                error(contxt->id, ERR_NOT_A_FILE, s); 
+            }
         }   
     }
     else
@@ -1456,9 +1460,13 @@ entry_p m_copylib(entry_p contxt)
 
                 if(dt == 1)
                 {
-                    // Destination is a file, not a dir. 
-                    error(contxt->id, ERR_NOT_A_DIR, d); 
-                    RCUR;
+                    // Only fail if we're in 'strict' mode.
+                    if(get_numvar(contxt, "@strict"))
+                    {
+                        // Destination is a file, not a dir. 
+                        error(contxt->id, ERR_NOT_A_DIR, d); 
+                        RCUR;
+                    }
                 }
 
                 // Do we need confirmation?
@@ -1755,8 +1763,12 @@ entry_p m_copylib(entry_p contxt)
                     // It's a dir. 
                     else
                     {
-                        // Dest file exists, but is a directory. 
-                        error(contxt->id, ERR_NOT_A_FILE, f); 
+                        // Only fail if we're in 'strict' mode.
+                        if(get_numvar(contxt, "@strict"))
+                        {
+                            // Dest file exists, but is a directory. 
+                            error(contxt->id, ERR_NOT_A_FILE, f); 
+                        }
                     }
 
                     // Free memory allocated by h_tackon.
@@ -1765,8 +1777,12 @@ entry_p m_copylib(entry_p contxt)
             }
             else
             {
-                // No file, doesn't exist or is dir. 
-                error(contxt->id, ERR_NOT_A_FILE, s); 
+                // Only fail if we're in 'strict' mode.
+                if(get_numvar(contxt, "@strict"))
+                {
+                    // No file, doesn't exist or is dir. 
+                    error(contxt->id, ERR_NOT_A_FILE, s); 
+                }
             }
         }
         else

@@ -42,5 +42,6 @@
 
 0.1.0-alpha.9:
 ==============
-- ?
+- (fileonly) non strict mode (amrss).
+- (copylib) non strict mode (amrss).
 
