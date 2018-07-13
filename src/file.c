@@ -443,7 +443,7 @@ static pnode_p h_filetree(entry_p contxt,
                                 {
                                     // We probably had a buffer overflow.
                                     // No more pattern matching today.
-                                    error(id, ERR_OVERFLOW, str(pattern)); 
+                                    error(contxt->id, ERR_OVERFLOW, str(pattern)); 
                                     pattern = NULL; 
                                 }
                                 #else
