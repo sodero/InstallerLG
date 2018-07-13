@@ -23,6 +23,6 @@ entry_p m_tackon(entry_p contxt);
 //----------------------------------------------------------------------------
 // Helper functions
 //----------------------------------------------------------------------------
-char *h_tackon(int id, const char *p, const char *f);
+char *h_tackon(entry_p contxt, const char *p, const char *f);
 
 #endif

@@ -234,12 +234,12 @@ int h_exists(const char *n)
 //----------------------------------------------------------------------------
 // Name:        h_fileonly
 // Description: Get file part from full path.
-// Input:       int id:             The ID of the execution context.
+// Input:       entry_p contxt:     The execution context.
 //              const char *n:      Path to file.
 // Return:      const char *:       On success, file part of path, otherwise
 //                                  empty string.
 //----------------------------------------------------------------------------
-static const char *h_fileonly(int id, 
+static const char *h_fileonly(entry_p contxt,
                               const char *s)
 {
     if(s)
@@ -265,7 +265,7 @@ static const char *h_fileonly(int id,
         else
         {
             // Empty string or dir / vol.
-            error(id, ERR_NOT_A_FILE, s); 
+            error(contxt->id, ERR_NOT_A_FILE, s); 
         }   
     }
     else
@@ -283,7 +283,7 @@ static const char *h_fileonly(int id,
 // Name:        h_filetree
 // Description: Generate a complete file / directory tree with source and
 //              destination tuples. Used by m_copyfiles.
-// Input:       int id:             The ID of the execution context.
+// Input:       entry_p contxt:     The execution context.
 //              const char *src:    Source directory / file.
 //              const char *dst:    Destination directory.
 //              entry_p files:      * Files only.
@@ -293,7 +293,7 @@ static const char *h_fileonly(int id,
 //              * Refer to the Istaller.guide.
 // Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
-static pnode_p h_filetree(int id, 
+static pnode_p h_filetree(entry_p contxt,
                           const char *src, 
                           const char *dst, 
                           entry_p files, 
@@ -327,7 +327,7 @@ static pnode_p h_filetree(int id,
                     while(*e && *e != end())
                     {
                         // Build path. 
-                        n_src = h_tackon(id, src, str(*e)); 
+                        n_src = h_tackon(contxt, src, str(*e)); 
 
                         if(n_src)
                         {
@@ -335,7 +335,7 @@ static pnode_p h_filetree(int id,
                             // bail out. 
                             if(!h_exists(n_src))
                             {
-                                error(id, ERR_NO_SUCH_FILE_OR_DIR, n_src); 
+                                error(contxt->id, ERR_NO_SUCH_FILE_OR_DIR, n_src); 
                                 free(n_src); 
                                 closedir(dir); 
                                 return NULL; 
@@ -374,8 +374,8 @@ static pnode_p h_filetree(int id,
                     while(entry)
                     {
                         // Create the source destination tuple
-                        n_src = h_tackon(id, src, entry->d_name), 
-                        n_dst = h_tackon(id, dst, entry->d_name); 
+                        n_src = h_tackon(contxt, src, entry->d_name), 
+                        n_dst = h_tackon(contxt, dst, entry->d_name); 
 
                         if(n_src && n_dst)
                         {
@@ -487,7 +487,7 @@ static pnode_p h_filetree(int id,
                                         // break. 
                                         node->next = h_filetree
                                         (
-                                            id, 
+                                            contxt, 
                                             n_src, 
                                             n_dst, 
                                             files,
@@ -550,7 +550,7 @@ static pnode_p h_filetree(int id,
             }
             else
             {
-                error(id, ERR_READ_DIR, src); 
+                error(contxt->id, ERR_READ_DIR, src); 
                 return NULL; 
             }
         }
@@ -578,7 +578,7 @@ static pnode_p h_filetree(int id,
                     head->copy = n_dst; 
 
                     // Create destination file path.
-                    n_dst = h_tackon(id, dst, h_fileonly(id, src)); 
+                    n_dst = h_tackon(contxt, dst, h_fileonly(contxt, src)); 
                     n_src = strdup(src);
 
                     if(n_src && n_dst)  
@@ -608,7 +608,7 @@ static pnode_p h_filetree(int id,
         else
         // It's neither a directory or a file.
         {
-            error(id, ERR_NO_SUCH_FILE_OR_DIR, src); 
+            error(contxt->id, ERR_NO_SUCH_FILE_OR_DIR, src); 
             return NULL; 
         }
     }
@@ -1181,7 +1181,9 @@ entry_p m_copyfiles(entry_p contxt)
             // the corresponding destination strings.
             tree = h_filetree
             (
-                contxt->id, src, dst, 
+                contxt,
+                src,
+                dst, 
                 files,
                 fonts,
                 choices, 
@@ -1204,7 +1206,7 @@ entry_p m_copyfiles(entry_p contxt)
                        cur->next->type == 1 && !cur->next->next)
                     {
                         free(cur->next->copy); 
-                        cur->next->copy = h_tackon(contxt->id, dst, str(newname)); 
+                        cur->next->copy = h_tackon(contxt, dst, str(newname)); 
                     }
                 }
 
@@ -1509,13 +1511,13 @@ entry_p m_copylib(entry_p contxt)
                 if(newname)
                 {
                     // Yes, append the new name to the path.
-                    f = h_tackon(contxt->id, d, str(newname));
+                    f = h_tackon(contxt, d, str(newname));
                 }
                 else
                 {
                     // No, append the file part of the (possibly)
                     // full source path to the destination path. 
-                    f = h_tackon(contxt->id, d, h_fileonly(contxt->id, s));
+                    f = h_tackon(contxt, d, h_fileonly(contxt, s));
                 }
 
                 // If we're not out of memory and destination dir
@@ -1964,7 +1966,7 @@ static int h_delete_dir(entry_p contxt, const char *dir)
                     while(e)
                     {
                         // Create full path.
-                        w = h_tackon(contxt->id, dir, e->d_name); 
+                        w = h_tackon(contxt, dir, e->d_name); 
 
                         // Is it a file? 
                         if(w && h_exists(w) == 1)
@@ -1995,7 +1997,7 @@ static int h_delete_dir(entry_p contxt, const char *dir)
                         #endif
                         {
                             // Create full path.
-                            w = h_tackon(contxt->id, dir, e->d_name); 
+                            w = h_tackon(contxt, dir, e->d_name); 
 
                             // Is it a directory? 
                             if(w && h_exists(w) == 2)
@@ -2346,7 +2348,7 @@ entry_p m_fileonly(entry_p contxt)
     if(c_sane(contxt, 1))
     {
         const char *p = str(CARG(1)), 
-                   *f = h_fileonly(contxt->id, p);
+                   *f = h_fileonly(contxt, p);
 
         RSTR(strdup(f));
     }

@@ -542,7 +542,7 @@ entry_p m_tackon(entry_p contxt)
     // and a file.
     if(c_sane(contxt, 2))
     {
-        char *r = h_tackon(contxt->id, str(CARG(1)), str(CARG(2))); 
+        char *r = h_tackon(contxt, str(CARG(1)), str(CARG(2))); 
 
         if(r)
         {
@@ -562,8 +562,14 @@ entry_p m_tackon(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
+// Name:        h_tackon
+// Description: Concatenate directory and file strings
+// Input:       entry_p contxt:     The execution context.
+//              const char *p:      The directory.
+//              const char *f:      The file.
+// Return:      const char *:       The dir/file concatenation.
 //----------------------------------------------------------------------------
-char *h_tackon(int id, 
+char *h_tackon(entry_p contxt, 
                const char *p, 
                const char *f)
 {
@@ -611,10 +617,15 @@ char *h_tackon(int id,
 
             // If the filename ends with a delimiter,
             // it's not a valid filename.
-            if(f[lf - 1] == ':') 
+            if(f[lf - 1] == '/' ||
+               f[lf - 1] == ':')
             {
-                error(id, ERR_NOT_A_FILE, f); 
-                return NULL; 
+                 // Only fail if we're in 'strict' mode.
+                if(get_numvar(contxt, "@strict"))
+                {
+                    error(contxt->id, ERR_NOT_A_FILE, f); 
+                    return NULL; 
+                }
             }
 
             // Allocate memory to hold path, filename,
