@@ -17,7 +17,7 @@ else
 ifeq ($(OS),Darwin)
 CGEN = -g -std=c99
 CWRN = -Weverything -Wno-format-nonliteral -Wno-switch-enum 
-CWRN += -Wno-format-security -Werror
+CWRN += -Wno-format-security -Wno-vla -Werror
 else
 CC := gcc
 AMIGA = true
