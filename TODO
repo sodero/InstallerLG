@@ -7,3 +7,4 @@
 - We need (confirm) test feedback from (copyfiles).
 - amrss - when in expert mode you get garbage in one of the file lister.
 - (onerror) and (trap) should likely accept naked blocks just list (while), (until) and (foreach)
+- The multiple (command) allowed in (startup) should maybe be OK in other places as well? (textfile) + (append) ?
