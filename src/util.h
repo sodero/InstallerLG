@@ -26,6 +26,7 @@ void pretty_print(entry_p entry);
 int get_numvar(entry_p c, char *v); 
 entry_p get_opt_va(opt_t t, ...);
 char *get_strvar(entry_p c, char *v); 
+char *get_optstr_va(opt_t t, ...);
 char *get_chlstr(entry_p c); 
 void set_numvar(entry_p c, char *v, int n); 
 void set_strvar(entry_p c, char *v, char *n); 

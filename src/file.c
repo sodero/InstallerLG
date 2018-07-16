@@ -3010,7 +3010,8 @@ entry_p m_startup(entry_p contxt)
     // We need atleast two arguments
     if(c_sane(contxt, 2))
     {
-        const char *app = str(CARG(1)); 
+        char *cmd = NULL;
+        const char *app = str(CARG(1));
 
         entry_p command  = get_opt_va(OPT_COMMAND, CARG(2), CARG(3), NULL),
                 help     = get_opt_va(OPT_HELP, CARG(2), CARG(3), NULL),
@@ -3041,7 +3042,7 @@ entry_p m_startup(entry_p contxt)
         // be set by h_confirm. Confirmation is needed
         // when user level is not novice or (confirm)
         // is used.
-        if(get_opt_va(OPT_CONFIRM, CARG(2), NULL) || 
+        if(get_opt_va(OPT_CONFIRM, CARG(2), CARG(3), NULL) ||
            get_numvar(contxt, "@user-level") > 0)
         {
             if(!h_confirm(contxt, str(help), str(prompt)))
@@ -3056,11 +3057,12 @@ entry_p m_startup(entry_p contxt)
             RNUM(1); 
         }
 
-        if(c_sane(command, 1))
-        {
-            const char *cmd = str(command->children[0]), 
-                       *fln = get_strvar(contxt, "@user-startup");
+        // Gather and merge all (command) strings.
+        cmd = get_optstr_va(OPT_COMMAND, CARG(2), CARG(3), NULL);
 
+        if(cmd)
+        {
+            const char *fln = get_strvar(contxt, "@user-startup");
             const size_t len = strlen(";BEGIN ") + strlen(app), 
                          ins = strlen(cmd) + 2;
 
@@ -3181,10 +3183,11 @@ entry_p m_startup(entry_p contxt)
                 error(PANIC); 
             }
 
-            // We have no use for the header
-            // and footer anymore. 
+            // We have no longer any use for the
+            // header, footer or command string.
             free(pre); 
             free(pst); 
+            free(cmd);
 
             // If we have a buffer everything wen't fine
             // above. Go ahead and write buffer to file. 

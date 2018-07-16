@@ -79,6 +79,7 @@ do
            tno=$(( $tno + 1 ))
            evl "$p" "$r" "$tno"
            s=$?
+           p=$(echo $p | tr '\n' ' ')
            if [ $s -eq 2 ]; then
                echo "LEAK -> $p" 
                nok=$(( $nok + 1 ))

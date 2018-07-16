@@ -46,3 +46,7 @@
 - (copylib) non strict mode (amrss).
 - Ambiguous function call / format string allowed in non string mode (amrss).
 
+0.1.0-alpha.10:
+===============
+- Multiple (command):s allowed in (startup) (MUI5).
+

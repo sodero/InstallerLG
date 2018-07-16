@@ -492,6 +492,134 @@ char *get_strvar(entry_p c, char *v)
 }
 
 //----------------------------------------------------------------------------
+// Name:        get_optstr_va
+// Description: Concatenate all the strings in all the options of a given
+//              type in a variable number of contexts.
+// Input:       opt_t t:    The option type.
+//              ...         Any number of entry_p contexts to search in.
+// Return:      char *:     A concatenation of all the strings found.
+//----------------------------------------------------------------------------
+char *get_optstr_va(opt_t t, ...)
+{
+    entry_p c; 
+    va_list ap;
+    size_t n = 0; 
+    char *r = NULL;
+
+    // Init VA.
+    va_start(ap, t);
+    c = va_arg(ap, entry_p);
+
+    // Iterate over all contexts.
+    while(c && c_sane(c, 0))
+    {
+        entry_p *e = c->children;
+
+        // Count the number of children
+        // of the given option type.
+        while(*e && *e != end())
+        {
+            if((*e)->type == OPTION &&
+               (*e)->id == t)
+            {
+                n++;
+            }
+
+            // Next child.
+            e++;
+        }
+
+        // Next argument.
+        c = va_arg(ap, entry_p);
+    }
+
+    // End VA.
+    va_end(ap);
+
+    // Did we find any children with
+    // the right type?
+    if(n)
+    {
+        // Subtotals.
+        char *cs[n];
+        size_t s = 1,
+               i = 0;
+
+        // Init VA, again.
+        va_start(ap, t);
+        c = va_arg(ap, entry_p);
+
+        // Iterate over all contexts once
+        // again, find the right options,
+        // and resolve them all.
+        while(c)
+        {
+            entry_p *e = c->children;
+
+            // For all children of the current
+            // context, resolve the ones with
+            // the correct type.
+            while(*e && *e != end())
+            {
+                if((*e)->type == OPTION &&
+                   (*e)->id == t)
+                {
+                    // Merge strings if needed.
+                    cs[i] = get_chlstr(*e);
+
+                    // If we run out of memory,
+                    // free everything we have
+                    // allocated this far
+                    if(!cs[i])
+                    {
+                        while(i--)
+                        {
+                            free(cs[i]);
+                        }
+
+                        // End VA.
+                        va_end(ap);
+                        return r;
+                    }
+
+                    // Keep track of the total
+                    // string length.
+                    s += strlen(cs[i]);
+                    i++;
+                }
+
+                // Next child.
+                e++;
+            }
+
+            // Next argument.
+            c = va_arg(ap, entry_p);
+        }
+
+        // End VA.
+        va_end(ap);
+
+        // Allocate memory to hold the
+        // final concatenation.
+        r = calloc(s, 1);
+
+        if(r)
+        {
+            // Concatenate and free
+            // substrings in one go.
+            for(i = 0; i < n; i++)
+            {
+                strcat(r, cs[i]);
+                free(cs[i]);
+            }
+        }
+    }
+    
+    // Success or OOM.
+    return r; 
+}
+
+//----------------------------------------------------------------------------
 // Name:        get_chlst
 // Description: Concatenate the string representations of all children of a 
 //              context. 
