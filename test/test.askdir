@@ -3,6 +3,7 @@
 (askdir (prompt "p") (help "h")) ; "","Line 1: Missing option 'default' 0",""
 (askdir (prompt "p") (help "h") (default "d")) ; "","ph000d d",""
 (askdir (prompt "p") (help "h") (default "d") (newpath)) ; "","ph100d d",""
+(set @strict 0) (set f (cat "%" "l" (askdir (prompt "p") (help "h") (default "d") (newpath)))) (f 3) ; "","ph100d 3",""
 (askdir (prompt "p") (help "h") (default "d") (newpath) (disk)) ; "","ph110d d",""
 (askdir (prompt "p") (help "h") (default "d") (newpath) (disk) (assigns)) ; "","ph111d d",""
 (askdir dir) ; "","Line 1: syntax error, unexpected SYM, expecting '(' or ')' 'dir'",""

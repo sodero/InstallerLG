@@ -1,8 +1,10 @@
+(set @strict 0) (set i 8) (set f "%ld%s") (f i "-bit") ; "","8-bit",""
 (set a "1" b 2) ("prefix-%s-postfix-%ld" a b) ; "","prefix-1-postfix-2",""
 (set a "1" b 2) (format a b) ; "","Line 1: Undefined function 'format' 0",""
 (set format "prefix-%s-postfix-%ld!") (set a "1" b 2) (format a b) ; "","Line 1: Undefined function 'format' 0",""
 (set @strict 0) (set a "1" b 2) (format a b) ; "","",""
 (set @strict 0) (set format "prefix-%s-postfix-%ld") (set a "1" b 2) (format a b) ; "","prefix-1-postfix-2",""
+(set @strict 0) (set a "1" b 2) ("prefix-%s-postfix-%ld" a b) ; "","prefix-1-postfix-2",""
 (set a "1" b 2) (format a b) ; "","Line 1: Undefined function 'format' 0",""
 (set format "prefix-%s-postfix-%ld!") (set a "1" b 2) (format a b) ; "","Line 1: Undefined function 'format' 0",""
 (""); "","",""
@@ -22,5 +24,3 @@
 (set a 1) ("prefix-%s-postfix" a) ; "","Line 1: Format string type mismatch 'prefix-%s-postfix' 0",""
 ("%s" ("prefix-%ld-postfix" 1)) ; "","prefix-1-postfix",""
 (set i 1) (set i (+ 1 i)) ("%ld" i) ; "","2",""
-
-

@@ -5,6 +5,7 @@
 (set @strict 0) (askstring (prompt "p") ) ; "","Line 1: Missing option 'default' 0",""
 (set @strict 0) (askstring (default "d")) ; "","d d",""
 (askstring (prompt "p") (help "h") (default "d")) ; "","phd d",""
+(set a (askstring (prompt "p") (help "h") (default "d"))) (debug a); "","phd d 1",""
 (user 0) (askstring (prompt "p") (help "h") (default "d")) ; "","d",""
 (user 1) (askstring (prompt "p") (help "h") (default "d")) ; "","phd d",""
 (user 2) (askstring (prompt "p") (help "h") (default "d")) ; "","phd d",""

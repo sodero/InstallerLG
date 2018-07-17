@@ -12,4 +12,5 @@
 (askdisk (prompt "p") (help "h")) ; "","Line 1: Missing option 'dest' 0",""
 (askdisk (prompt "p") (help "h" ok)) ; "","Line 1: Missing option 'dest' 0",""
 (askdisk (prompt "p") (help "h") (dest "d")) ; "","1",""
+(set a (askdisk (prompt "p") (help "h") (dest "d"))) (+ a 5) ; "","6",""
 (askdisk (prompt "p") (help "h" ok) (dest "d" err)) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""

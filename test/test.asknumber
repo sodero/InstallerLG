@@ -1,7 +1,7 @@
 (asknumber) ; "","Line 1: Missing option 'prompt' 0",""
 (asknumber (prompt "p") ) ; "","Line 1: Missing option 'help' 0",""
 (asknumber (prompt "p") (help "h")) ; "","Line 1: Missing option 'default' 0",""
-(asknumber (prompt "p") (help "h") (default 2)) ; "","ph0100 2",""
+(set a (+ 1 (asknumber (prompt "p") (help "h") (default 2)))) (+ a 1) ; "","ph0100 4",""
 (asknumber (prompt "p") (help "h") (default -2)) ; "","ph0100 -2",""
 (asknumber (prompt "p") (help "h") (default 2) (range 1)) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (asknumber (prompt "p") (help "h") (default 2) (range 1 10)) ; "","ph110 2",""

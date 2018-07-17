@@ -7,6 +7,7 @@
 (message "1" "2" (all)) ; "","121",""
 (message (askstring (prompt "p") (help "h") (default "3")) "2" (all)) ; "","ph3 321",""
 (message ("%ld" 2) 1 (all)) ; "","211",""
+(set @strict 0) (set f "%ld") (message (f 2) 1 (all)) ; "","211",""
 (message "1" "2") ; "","121",""
 (message ("%ld" 2) 1) ; "","211",""
 (set @user-level 0) (message "1" "2") ; "","1",""

@@ -5,6 +5,7 @@
 (cat (askstring (prompt "p") (help "h") (default "a")) "b" "c") ; "","pha abc",""
 (cat "a" "" "c") ; "","ac",""
 (cat 1 2 3 ) ; "","123",""
+(set t (cat 1 2 3 )) (debug t)  ; "","123 1",""
 (cat 1 "a" 2 "b" 3 "c") ; "","1a2b3c",""
 (cat "very very very long long long " "massive massive massive huge huge huge " "beefy beefy beefy string string string") ; "","very very very long long long massive massive massive huge huge huge beefy beefy beefy string string string",""
 (set a "b") (set b a) (cat "a" b "c") ; "","abc",""

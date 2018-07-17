@@ -1,10 +1,17 @@
 - The GUI is all over the place. It should be in one place.
 - All project tooltypes must be promoted to variables in init().
+- OpenLocale() -> @installer-language
 - We need @strict = 0 testing on the gui parts. What is shown when we have nothing to show?
 - We have no (optional) test coverage on (copylib).
 - We have no (confirm) test coverage on (startup).
 - We need more @strict = 0 testing on (copylib).
 - We need (confirm) test feedback from (copyfiles).
-- amrss - when in expert mode you get garbage in one of the file lister.
+- amrss - when in expert mode you get garbage in one of the file listers.
 - (onerror) and (trap) should likely accept naked blocks just list (while), (until) and (foreach)
-- The multiple (command) allowed in (startup) should maybe be OK in other places as well? (textfile) + (append) ?
+- in places where we *only* have options and no CARG(x) (such as (ask*)) allow
+  options to be resolved vp:s. With this restriction there's very little risk for double
+  resolves, while still coping with IBrowse funkiness. Create get_opt_va_ex for this.
+  Or just create a special type of option, in the grammar, allowing only the absolute
+  minimum. That way you can return options without poluting the rest of the grammar.
+- (showmedia) seems to be a thing? (>= V44) refer to IBrowse script.
+- Check how bitwise + signed int work in 3.9.

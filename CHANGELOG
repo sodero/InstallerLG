@@ -49,4 +49,5 @@
 0.1.0-alpha.10:
 ===============
 - Multiple (command):s allowed in (startup) (MUI5).
+- Allow empty (if) statements (amrss).
 

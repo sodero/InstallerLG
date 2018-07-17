@@ -1,3 +1,5 @@
+(set c 1) (if c (exit (quiet)) (exit "!")) ; "","0",""
+(set c 0) (if c (exit (quiet)) (exit "!")) ; "","!Installation complete ./installer can be found in T:0",""
 (exit) ; "","Installation complete ./installer can be found in T:0",""
 (set @app-name "app") (exit) ; "","Installation complete app can be found in T:0",""
 (set @default-dest "T:") (exit) ; "","Installation complete ./installer can be found in T:0",""

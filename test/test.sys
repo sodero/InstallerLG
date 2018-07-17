@@ -25,3 +25,4 @@
 ("%ld" @user-level) ; "","2",""
 ("%s" @user-startup) ; "","s:user-startup",""
 ("%ld" @installer-version) ; "","2818051",""
+("%ld" (/ @installer-version 65536)) ; "","43",""

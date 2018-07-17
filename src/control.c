@@ -21,30 +21,34 @@
 //----------------------------------------------------------------------------
 entry_p m_if(entry_p contxt)
 {
-    // We always have atleast two arguments, the expression, 
-    // the TRUE branch and optionally the FALSE branch.
-    if(c_sane(contxt, 2))
+    // Allow empty bodies. If empty, resolve the
+    // conditional so that side effects, if any,
+    // will come into being.
+    if(c_sane(contxt, 1))
     {
-        // Let p be the branch that will be executed.
-        entry_p p = tru(CARG(1)) ? CARG(2) : CARG(3); 
+        // Truth value of the condition.
+        int c = tru(CARG(1));
 
-        // If the expression is FALSE and we don't have
-        // any FALSE branch, p will be either NULL if 
-        // there is room left in the array, or end() if
-        // it's full. 
-        if(!p || p == end())
+        // Is the body non-empty?
+        if(CARG(2) && CARG(2) != end())
         {
-            // We have nothing to execute.
-            RNUM(0); 
+            // Let p be the branch that will be executed.
+            entry_p p = c ? CARG(2) : CARG(3); 
+
+            // Is there a branch corresponding to the 
+            // resolved truth value? 
+            if(p && p != end())
+            {
+                // We execute the branch by resolving it.
+                return resolve(p);
+            }
         }
 
-        // We execute the branch by resolving it.
-        return resolve(p);
+        // We have nothing to execute.
+        RNUM(0);
     }
 
-    // The parser is broken, either the context
-    // is broken or we have invalid types in the
-    // branch nodes. 
+    // The parser is broken.
     error(PANIC);
     RCUR; 
 }

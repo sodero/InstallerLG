@@ -6,6 +6,7 @@
 (user 0) (askbool (prompt "p") (help "h")) ; "","0",""
 (user 0) (askbool (prompt "p") (help "h") (default 1)) ; "","1",""
 (user 0) (askbool (prompt "p") (help "h") (default 0)) ; "","0",""
+(user 0) (set r (+ 3 (askbool (prompt "p") (help "h") (default 0)))) (+ r) ; "","3",""
 (user 1) (askbool (prompt "p") (help "h")) ; "","phYesNo 1",""
 (user 2) (askbool (prompt "p") (help "h")) ; "","phYesNo 1",""
 (user 1) (askbool (prompt "p") (help "h") (default 0)) ; "","phYesNo 1",""

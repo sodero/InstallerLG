@@ -281,7 +281,8 @@ neq:            '(' NEQ pp ')'                  { $$ = new_native(strdup("<>"), 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* control.c|h ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 if:             '(' IF cvv ')'                  { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); } |
-                '(' IF cv ')'                   { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); };
+                '(' IF cv ')'                   { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); } |
+                '(' IF p ')'                    { $$ = new_native(strdup("if"), LINE, m_if, push(new_contxt(), $3), NUMBER); };
 select:         '(' SELECT p ps ')'             { $$ = new_native(strdup("select"), LINE, m_select, push(push(new_contxt(), $3), $4), NUMBER); }; 
 until:          '(' UNTIL p vps ')'             { $$ = new_native(strdup("until"), LINE, m_until, push(push(new_contxt(), $3), $4), NUMBER); };
 while:          '(' WHILE p vps ')'             { $$ = new_native(strdup("while"), LINE, m_while, push(push(new_contxt(), $3), $4), NUMBER); };
