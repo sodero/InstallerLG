@@ -1,3 +1,7 @@
+(set c 1) (askfile (prompt "p") (help "h") (if c (default "d") (disk))) ; "","ph00 d",""
+(set c 0) (askfile (prompt "p") (help "h") (if c (default "d") (disk))) ; "","Line 1: Missing option 'default' 0",""
+(set c 1) (askfile (prompt "p") (help "h") (default "d") (if c (disk) (newpath))) ; "","ph01 d",""
+(set c 0) (askfile (prompt "p") (help "h") (default "d") (if c (disk) (newpath))) ; "","ph10 d",""
 (askfile) ; "","Line 1: Missing option 'prompt' 0",""
 (askfile (prompt "p")) ; "","Line 1: Missing option 'help' 0",""
 (askfile (prompt "p") (help "h")) ; "","Line 1: Missing option 'default' 0",""

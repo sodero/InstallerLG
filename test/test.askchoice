@@ -1,3 +1,6 @@
+(set c 1) (message (askchoice (prompt "p") (help "h") (choices "a" "b" "c") (if c (default 2) (default 3)))) ; "","pha2 21",""
+(set c 0) (message (askchoice (prompt "p") (help "h") (choices "a" "b" "c") (if c (default 2) (default 1)))) ; "","pha1 11",""
+(set c 0) (message (askchoice (prompt "p") (help "h") (choices "a" "b" "c") (if c (default 2) (default 4)))) ; "","Line 1: No such item '4' 0",""
 (askchoice) ; "","Line 1: syntax error, unexpected ')', expecting '(' ')'",""
 (askchoice (prompt "p") (help "h") (choices "a" "b" "c")) ; "","pha0 0",""
 (askchoice (prompt "p") (help "h") (choices "a")) ; "","pha0 0",""

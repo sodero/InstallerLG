@@ -1,3 +1,6 @@
+(set min 2) (set max 9) (asknumber (prompt "p") (help "h") (default 2) (range min max)) ; "","ph29 2",""
+(set min 2 max 9 c 1) (asknumber (prompt "p") (help "h") (default 2) (if c (range min max) (range (+ 1 min) (- max 1)))) ; "","ph29 2",""
+(set min 2 max 9 c 0) (asknumber (prompt "p") (help "h") (default 2) (if c (range min max) (range (+ 1 min) (- max 1)))) ; "","ph38 2",""
 (asknumber) ; "","Line 1: Missing option 'prompt' 0",""
 (asknumber (prompt "p") ) ; "","Line 1: Missing option 'help' 0",""
 (asknumber (prompt "p") (help "h")) ; "","Line 1: Missing option 'default' 0",""

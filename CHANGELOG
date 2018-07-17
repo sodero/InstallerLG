@@ -50,4 +50,4 @@
 ===============
 - Multiple (command):s allowed in (startup) (MUI5).
 - Allow empty (if) statements (amrss).
-
+- Allow dynamic options (IBrowse).

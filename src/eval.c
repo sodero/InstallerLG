@@ -99,7 +99,7 @@ entry_p resolve(entry_p entry)
         {
             // Symbols are resolved from birth. 
             case SYMBOL: 
-                return entry->resolved ? entry->resolved : new_failure(); 
+                return entry->resolved;
 
             // A symbolic reference is resolved by resolving
             // the symbol it refers to.
@@ -113,7 +113,12 @@ entry_p resolve(entry_p entry)
             // Functions are resolved by executing them. 
             case CUSREF:
             case NATIVE:
-                return entry->call ? entry->call(entry) : new_failure(); 
+                return entry->call(entry);
+
+            // Dynamic options are treated like functions.
+            case OPTION:
+                return entry->id == OPT_DYNOPT ?
+                       entry->call(entry) : entry;
 
             // If we end up here, we already have a primitive. 
             default:
@@ -163,7 +168,7 @@ int num(entry_p entry)
             // Recur.
             case CUSREF:
             case NATIVE:
-                return num(entry->call ? entry->call(entry) : NULL); 
+                return num(entry->call(entry));
 
             // Attempt to convert string.
             case STRING:
@@ -293,7 +298,7 @@ char *str(entry_p entry)
             // Recur.
             case CUSREF:
             case NATIVE:
-                return str(entry->call ? entry->call(entry) : NULL); 
+                return str(entry->call(entry)); 
 
             // Conversion. Please note the use 
             // of NUMLEN. 
@@ -347,19 +352,8 @@ entry_p invoke(entry_p entry)
             if((*vec)->type == NATIVE ||
                (*vec)->type == CUSREF)
             {
-                if((*vec)->call)
-                {
-                    // The function call. 
-                    ret = (*vec)->call(*vec); 
-                }
-                else
-                {
-                    // Either the parser is broken
-                    // or (procedure) is not doing
-                    // its job. 
-                    error(PANIC);
-                    break; 
-                }
+                // The function call. 
+                ret = (*vec)->call(*vec); 
             }
 
             // Next one / skip anything

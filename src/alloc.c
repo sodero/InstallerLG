@@ -9,6 +9,7 @@
 
 #include "alloc.h"
 #include "error.h"
+#include "control.h"
 #include "procedure.h"
 #include "util.h"
 
@@ -476,6 +477,15 @@ entry_p new_option(char *n, opt_t t, entry_p e)
                 // more information than just 1 / 0. 
                 // E.g delopts and command.
                 move_contxt(entry, e); 
+            }
+
+            // If this is a dynamic option, it must
+            // be resolved to be used.
+            if(t == OPT_DYNOPT)
+            {
+                // Set callback for resolving. Only
+                // (if) statements are allowed.
+                entry->call = m_if;
             }
 
             // Success. 

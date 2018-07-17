@@ -7,6 +7,8 @@
 (set @strict 0) (askdisk (prompt "p" ok)) ; "","Line 1: Missing option 'dest' 0",""
 (set @strict 0) (askdisk (dest "d")) ; "","1",""
 (set @strict 0) (askdisk (prompt "p") (dest "d")) ; "","1",""
+(set c 1) (set @strict 0) (askdisk (prompt "p") (if c (dest "d") (dest "b"))) ; "","1",""
+(set c 0) (set @strict 0) (askdisk (prompt "p") (if c (dest "d") (safe))) ; "","Line 1: Missing option 'dest' 0",""
 (set @strict 0) (askdisk (help "h") (dest "d")) ; "","1",""
 (askdisk (disk err)) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
 (askdisk (prompt "p") (help "h")) ; "","Line 1: Missing option 'dest' 0",""

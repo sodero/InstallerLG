@@ -53,20 +53,19 @@
        /*                */ RESIDENT OVERRIDE
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- token type information ---------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps opt opts vpb xpb np sps par cv cvv add sub div mul
+%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps dynopt opt opts vpb xpb np sps par cv cvv add sub
        /*                */ lt lte neq gt gte eq set cus dcl fmt if while until and or xor not bitand bitor 
        /*                */ bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring 
        /*                */ asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier 
        /*                */ fileonly getassign getdefaulttool getposition getstack gettooltype getdevice 
-       /*                */ getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch 
+       /*                */ getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch div
        /*                */ select symbolset symbolval tackon transcript complete user working welcome 
        /*                */ abort copyfiles copylib database debug delete execute exit foreach makeassign 
        /*                */ makedir message onerror protect rename rexx run startup textfile tooltype
-       /*                */ trap all append assigns choices command compression confirm default
-       /*                */ delopts dest disk files fonts help infos include newname newpath 
-       /*                */ nogauge noposition noreq pattern prompt quiet range safe
-       /*                */ setdefaulttool setposition setstack settooltype source swapcolors optional 
-       /*                */ resident override
+       /*                */ trap all append assigns choices command compression confirm default mul
+       /*                */ delopts dest disk files fonts help infos include newname newpath optional 
+       /*                */ nogauge noposition noreq pattern prompt quiet range safe resident override
+       /*                */ setdefaulttool setposition setstack settooltype source swapcolors
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- destruction --------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Use the destructor of the start symbol to set of  */
@@ -76,19 +75,18 @@
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function */
 /* found in alloc.c                                  */
-%destructor { kill($$); }   s p pp ps pps ivp vp vps opt opts vpb xpb np sps par cv cvv add sub div mul lt lte neq
+%destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts vpb xpb np sps par cv cvv add sub div mul
                             gt gte eq set cus dcl fmt if while until and or xor not bitand bitor bitxor bitnot 
                             shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice 
-                            askoptions askbool askdisk cat exists expandpath earlier fileonly getassign 
+                            askoptions askbool askdisk exists expandpath earlier fileonly getassign pattern
                             getdefaulttool getposition getstack gettooltype optional resident override source
                             getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch 
                             select symbolset symbolval tackon transcript complete user working welcome abort 
                             copyfiles copylib database debug delete execute exit foreach makeassign makedir 
                             message onerror protect rename rexx run startup textfile tooltype trap all append 
-                            assigns choices command compression confirm default delopts dest disk 
-                            files fonts help infos include newname newpath nogauge noposition 
-                            noreq pattern prompt quiet range safe setdefaulttool setposition setstack 
-                            settooltype swapcolors
+                            assigns choices command compression confirm default delopts dest disk lt lte neq
+                            files fonts help infos include newname newpath nogauge noposition settooltype cat 
+                            noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors
 %%
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- start --------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -165,6 +163,7 @@ opt:            all                             |
                 settooltype                     |    
                 source                          |         
                 swapcolors                      |     
+                dynopt                          |
                 resident                        ;
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- functions ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -451,6 +450,7 @@ swapcolors:     '(' SWAPCOLORS ')'              { $$ = new_option(strdup("swapco
 optional:       '(' OPTIONAL ps ')'             { $$ = new_option(strdup("optional"), OPT_OPTIONAL, $3); }; 
 resident:       '(' RESIDENT ')'                { $$ = new_option(strdup("resident"), OPT_RESIDENT, NULL); };
 override:       '(' OVERRIDE p ')'              { $$ = new_option(strdup("override"), OPT_OVERRIDE, push(new_contxt(), $3)); }; 
+dynopt:         '(' IF p opt opt ')'            { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(push(new_contxt(), $3), $4), $5)); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %%
 

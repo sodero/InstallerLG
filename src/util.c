@@ -123,16 +123,29 @@ static entry_p get_opt_aux(entry_p c, opt_t t)
             // Iterate over all options.
             while(*v && *v != end())
             {
+                entry_p e = *v; 
+
                 // ID == the type of option.
-                if((*v)->type == OPTION)
+                if(e->type == OPTION)
                 {
-                    if(((opt_t) (*v)->id) == t)
+                    // Dynamic options need to
+                    // be resolved before eval.
+                    if(e->id == OPT_DYNOPT)
+                    {
+                        // Replace dummy with
+                        // its resolved value.
+                        e = resolve(e);
+                    }
+
+                    // Have we found the right
+                    // type of option?
+                    if(e->id == t)
                     {
                         // We found it.
-                        return *v; 
+                        return e; 
                     }
                 }
-                
+
                 // Nope, next. 
                 v++; 
             }

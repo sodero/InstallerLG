@@ -79,7 +79,8 @@ typedef enum
     OPT_FAIL,
     OPT_FORCE,
     OPT_NOFAIL,
-    OPT_OKNODELETE
+    OPT_OKNODELETE,
+    OPT_DYNOPT
 } opt_t; 
 
 //----------------------------------------------------------------------------
