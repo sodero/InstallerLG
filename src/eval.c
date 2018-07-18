@@ -259,21 +259,28 @@ char *str(entry_p entry)
                     case OPT_GETDEFAULTTOOL:
                     case OPT_GETSTACK:
                     case OPT_GETTOOLTYPE:
+                        // All the options above have a single
+                        // child.
                         return str
                         (
                             entry->children ? 
                             entry->children[0] : NULL
                         );
+
                     case OPT_HELP: 
                     case OPT_PROMPT: 
-                        // FIXME
-                        /* Wrong! All children shall be merged */
-                        return str
-                        (
-                            entry->children ? 
-                            entry->children[0] : NULL
-                        );
+                        // (help) and (prompt) may have multiple
+                        // childred that must be concatenated.
+                        free(entry->name);
+                        entry->name = get_chlstr(entry);
+
+                        // On OOM, fall through and PANIC below.
+                        if(entry->name)
+                        {
+                            return entry->name;
+                        }
                 }
+                break;
 
             // This doesn't make sense. We need
             // a proper string though. 
@@ -303,11 +310,14 @@ char *str(entry_p entry)
             // Conversion. Please note the use 
             // of NUMLEN. 
             case NUMBER:
+                // Have we converted this number to a
+                // string before?
                 if(!entry->name)
                 {
                     entry->name = malloc(NUMLEN); 
                 }
 
+                // On OOM, fall through and PANIC below.
                 if(entry->name)
                 {
                     snprintf(entry->name, NUMLEN, "%d", entry->id); 
