@@ -294,6 +294,13 @@ entry_p m_fmt(entry_p contxt)
 
         free(sct);
 
+        // Without format specifiers, the format string
+        // is the return value.
+        if(!k)
+        {
+            ret = strdup(fmt);
+        }
+
         // Fail if the number of arguments and the number
         // of specifiers don't match, and we're in strict
         // mode.
