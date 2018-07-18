@@ -634,11 +634,11 @@ char *get_optstr_va(opt_t t, ...)
 
 //----------------------------------------------------------------------------
 // Name:        get_chlst
-// Description: Concatenate the string representations of all children of a 
-//              context. 
+// Description: Concatenate the string representations of all non context
+//              children of a context. 
 // Input:       entry_p c:  The context.
 // Return:      char *:     The concatenation of the string representations 
-//                          of all children of 'c'.
+//                          of all non context children of 'c'.
 //----------------------------------------------------------------------------
 char *get_chlstr(entry_p c)
 {
@@ -653,10 +653,10 @@ char *get_chlstr(entry_p c)
         size_t n = 0; 
         entry_p *e = c->children;
 
-        // Count the number of children.
+        // Count the number of non context children.
         while(*e && *e != end())
         {
-            n++;
+            n += ((*e)->type != CONTXT) ? 1 : 0;
             e++;
         }
 
@@ -668,20 +668,25 @@ char *get_chlstr(entry_p c)
 
             if(v)
             {
+                // Total length.
                 size_t l = 0; 
 
-                // Save all string pointers so that we
-                // don't evaluate children twice and 
-                // thereby set of side effects more
-                // than once.
+                // Save all string pointers so that we don't
+                // evaluate children twice and thereby set of
+                // side effects more than once.
                 while(n > 0)
                 {
-                    v[--n] = str(*(--e));
-                    l += strlen(v[n]);
+                    entry_p c = *(--e); 
+
+                    if(c->type != CONTXT)
+                    {
+                        v[--n] = str(c);
+                        l += strlen(v[n]);
+                    }
                 }
 
-                // If the total length is non zero, we
-                // will concatenate all children.
+                // If the total length is non zero, we will
+                // concatenate all children.
                 if(l)
                 {
                     // Allocate memory to hold the full

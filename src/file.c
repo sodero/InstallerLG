@@ -3812,9 +3812,12 @@ entry_p m_tooltype(entry_p contxt)
                 // On non-Amiga systems we always succeed.
                 DNUM = 1; 
 
-                // Remove warnings
-                settooltype = setstack = setdefaulttool;
-                file = NULL; 
+                // For testing purposes only.
+                printf("%s%d%d%d",
+                        file,
+                        settooltype ? 1 : 0,
+                        setstack ? 1 : 0,
+                        setdefaulttool ? 1: 0);
                 #endif
             }
             else

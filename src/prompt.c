@@ -446,8 +446,11 @@ entry_p m_askdisk(entry_p contxt)
                 // Restore auto request. 
                 p->pr_WindowPtr = w; 
                 #else
+                // On non-Amiga systems we always succeed.
                 DNUM = 1; 
-                newname = NULL; 
+
+                // For testing purposes only.
+                printf("%d", newname ? 1 : 0);
                 #endif
             }
             else

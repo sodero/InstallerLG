@@ -287,18 +287,18 @@ until:          '(' UNTIL p vps ')'             { $$ = new_native(strdup("until"
 while:          '(' WHILE p vps ')'             { $$ = new_native(strdup("while"), LINE, m_while, push(push(new_contxt(), $3), $4), NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h --------------------------------------------------------------------------------------------------------------------------------------------------------*/
-execute:        '(' EXECUTE p opts ')'          { $$ = new_native(strdup("execute"), LINE, m_execute, push(push(new_contxt(), $3), $4), NUMBER); } | 
-                '(' EXECUTE opts p ')'          { $$ = new_native(strdup("execute"), LINE, m_execute, push(push(new_contxt(), $4), $3), NUMBER); } | 
-                '(' EXECUTE opts p opts ')'     { $$ = new_native(strdup("execute"), LINE, m_execute, push(push(push(new_contxt(), $4), $3), $5), NUMBER); } |
-                '(' EXECUTE p ')'               { $$ = new_native(strdup("execute"), LINE, m_execute, push(new_contxt(), $3), NUMBER); }; 
-rexx:           '(' REXX p opts ')'             { $$ = new_native(strdup("rexx"), LINE, m_rexx, push(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' REXX opts p ')'             { $$ = new_native(strdup("rexx"), LINE, m_rexx, push(push(new_contxt(), $4), $3), NUMBER); } |
-                '(' REXX opts p opts ')'        { $$ = new_native(strdup("rexx"), LINE, m_rexx, push(push(push(new_contxt(), $4), $3), $5), NUMBER); } |
-                '(' REXX p ')'                  { $$ = new_native(strdup("rexx"), LINE, m_rexx, push(new_contxt(), $3), NUMBER); };
-run:            '(' RUN p opts ')'              { $$ = new_native(strdup("run"), LINE, m_run, push(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' RUN opts p ')'              { $$ = new_native(strdup("run"), LINE, m_run, push(push(new_contxt(), $4), $3), NUMBER); } |
-                '(' RUN opts p opts ')'         { $$ = new_native(strdup("run"), LINE, m_run, push(push(push(new_contxt(), $4), $3), $5), NUMBER); } |
-                '(' RUN p ')'                   { $$ = new_native(strdup("run"), LINE, m_run, push(new_contxt(), $3), NUMBER); };
+execute:        '(' EXECUTE ps opts ')'          { $$ = new_native(strdup("execute"), LINE, m_execute, push($3, $4), NUMBER); } | 
+                '(' EXECUTE opts ps ')'          { $$ = new_native(strdup("execute"), LINE, m_execute, push($4, $3), NUMBER); } | 
+                '(' EXECUTE opts ps opts ')'     { $$ = new_native(strdup("execute"), LINE, m_execute, push(push($4, $3), $5), NUMBER); } |
+                '(' EXECUTE ps ')'               { $$ = new_native(strdup("execute"), LINE, m_execute, $3, NUMBER); }; 
+rexx:           '(' REXX ps opts ')'             { $$ = new_native(strdup("rexx"), LINE, m_rexx, push($3, $4), NUMBER); } |
+                '(' REXX opts ps ')'             { $$ = new_native(strdup("rexx"), LINE, m_rexx, push($4, $3), NUMBER); } |
+                '(' REXX opts ps opts ')'        { $$ = new_native(strdup("rexx"), LINE, m_rexx, push(push($4, $3), $5), NUMBER); } |
+                '(' REXX ps ')'                  { $$ = new_native(strdup("rexx"), LINE, m_rexx, $3, NUMBER); };
+run:            '(' RUN ps opts ')'              { $$ = new_native(strdup("run"), LINE, m_run, push($3, $4), NUMBER); } |
+                '(' RUN opts ps ')'              { $$ = new_native(strdup("run"), LINE, m_run, push($4, $3), NUMBER); } |
+                '(' RUN opts ps opts ')'         { $$ = new_native(strdup("run"), LINE, m_run, push(push($4, $3), $5), NUMBER); } |
+                '(' RUN ps ')'                   { $$ = new_native(strdup("run"), LINE, m_run, $3, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* exit.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 abort:          '(' ABORT ps ')'                { $$ = new_native(strdup("abort"), LINE, m_abort, $3, NUMBER); }; 
