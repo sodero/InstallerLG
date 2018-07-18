@@ -676,11 +676,11 @@ char *get_chlstr(entry_p c)
                 // side effects more than once.
                 while(n > 0)
                 {
-                    entry_p c = *(--e); 
+                    entry_p cur = *(--e); 
 
-                    if(c->type != CONTXT)
+                    if(cur->type != CONTXT)
                     {
-                        v[--n] = str(c);
+                        v[--n] = str(cur);
                         l += strlen(v[n]);
                     }
                 }
