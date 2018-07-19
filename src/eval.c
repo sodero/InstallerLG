@@ -274,13 +274,17 @@ char *str(entry_p entry)
                         free(entry->name);
                         entry->name = get_chlstr(entry);
 
-                        // On OOM, fall through and PANIC below.
+                        // On OOM, fall through.
                         if(entry->name)
                         {
                             return entry->name;
                         }
+                        else
+                        {
+                            // OOM.
+                            error(PANIC);
+                        }
                 }
-                break;
 
             // This doesn't make sense. We need
             // a proper string though. 

@@ -108,6 +108,52 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 
             if(cmd)
             {
+                // Working dir.
+                char *cwd = NULL; 
+
+                // DOS / Arexx script?
+                if(pre)
+                {
+                    size_t cl = strlen(cmd) + strlen(pre) + 2;
+                    char *t = malloc(cl); 
+
+                    if(t)
+                    {
+                        // Prepend prefix to command string.
+                        snprintf(t, cl, "%s %s", pre, cmd); 
+                        free(cmd);
+                        cmd = t;
+                    }
+                    else
+                    {
+                        // Out of memory
+                        error(PANIC); 
+                        free(cmd); 
+                        RCUR; 
+                    }
+                } 
+
+                // If we have a valid destination dir,
+                // change to that directory. We're not
+                // treating errors as such. 
+                if(dir && *dir && h_exists(dir))
+                {
+                    // Use the global buffer.
+                    char *buf = get_buf();
+
+                    // Try to get current working dir.
+                    if(getcwd(buf, buf_size()) == buf)
+                    {
+                        // Try to change to the new dir
+                        // and save the old one so that
+                        // we can go back afterwards.
+                        if(!chdir(dir))
+                        {
+                            cwd = buf;
+                        }
+                    }
+                }
+
                 #ifdef AMIGA
                 // Not sure we need input and output but let's 
                 // make sure that we're not getting something
@@ -115,112 +161,49 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 BPTR inp = (BPTR) Open("NIL:", MODE_OLDFILE),
                      out = (BPTR) Open("NIL:", MODE_NEWFILE); 
 
-                // Can this not be true? 
-                if(inp && out)
+                // Execute whatever we have in cmd. 
+                DNUM = SystemTags
+                (
+                    cmd, 
+                    SYS_Input, inp, 
+                    SYS_Output, out, 
+                    TAG_END
+                ); 
+
+                // On error, get secondary status. 
+                if(DNUM)
                 {
-                    // Working dir.
-                    char *cwd = NULL; 
-
-                    // If we have a valid destination dir,
-                    // change to that directory. We're not
-                    // treating errors as such. 
-                    if(dir && *dir && h_exists(dir))
-                    {
-                        // Use the global buffer.
-                        char *buf = get_buf();
-
-                        // Try to get current working dir.
-                        if(getcwd(buf, buf_size()) == buf)
-                        {
-                            // Try to change to the new dir
-                            // and save the old one so that
-                            // we can go back afterwards.
-                            if(!chdir(dir))
-                            {
-                                cwd = buf;
-                            }
-                        }
-                    }
-
-                    // DOS / Arexx script?
-                    if(pre)
-                    {
-                        size_t cl = strlen(cmd) + strlen(pre) + 2;
-                        char *t = malloc(cl); 
-
-                        if(t)
-                        {
-                            // Prepend prefix to command string.
-                            snprintf(t, cl, "%s %s", pre, cmd); 
-                            free(cmd);
-                            cmd = t;
-                        }
-                        else
-                        {
-                            // Out of memory
-                            error(PANIC); 
-                            free(cmd); 
-
-                            // Necessary? 
-                            Close(inp); 
-                            Close(out); 
-
-                            // Bail.
-                            RCUR; 
-                        }
-                    } 
-
-                    // Execute whatever we have in cmd. 
-                    DNUM = SystemTags
-                    (
-                        cmd, 
-                        SYS_Input, inp, 
-                        SYS_Output, out, 
-                        TAG_END
-                    ); 
-
-                    // Get and set secondary status. 
                     LONG ioe = IoErr(); 
+
+                    // Expose IoErr to script.
                     set_numvar(contxt, "@ioerr", ioe); 
-
-                    // Have we changed the working dir?
-                    if(cwd)
-                    {
-                        // Go back to where we started. 
-                        chdir(cwd); 
-                    }
-
-                    // Necessary? 
-                    Close(inp); 
-                    Close(out); 
-
-                    // We should have all zeroes
-                    if(DNUM || ioe)
-                    {
-                        // Give IoErr priority.
-                        DNUM = ioe ? ioe : DNUM;
-
-                        // Only fail if we're in 'strict' mode.
-                        if(get_numvar(contxt, "@strict"))
-                        {
-                            error(contxt->id, ERR_EXEC, cmd); 
-                        }
-                    } 
-                } 
-                else
-                {
-                    // Unknown error.
-                    error(PANIC); 
-                    free(cmd); 
-                    RCUR;  
                 }
+
+                // Necessary? 
+                Close(inp); 
+                Close(out); 
                 #else
                 // For testing purposes only.
-                printf("%s%s%s", cmd,
-                        pre ? pre : "",
-                        dir ? dir : "");
+                printf("%s%s", cmd, dir ? dir : "");
                 #endif
-                    
+
+                // Have we changed the working dir?
+                if(cwd)
+                {
+                    // Go back to where we started. 
+                    chdir(cwd); 
+                }
+
+                // OK == 0.
+                if(DNUM)
+                {
+                    // Only fail if we're in 'strict' mode.
+                    if(get_numvar(contxt, "@strict"))
+                    {
+                        error(contxt->id, ERR_EXEC, cmd); 
+                    }
+                } 
+   
                 // Free concatenation.
                 free(cmd); 
             }
