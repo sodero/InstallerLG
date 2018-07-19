@@ -155,33 +155,56 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 }
 
                 #ifdef AMIGA
-                // Not sure we need input and output but let's 
-                // make sure that we're not getting something
-                // we don't want / expect.
-                BPTR inp = (BPTR) Open("NIL:", MODE_OLDFILE),
-                     out = (BPTR) Open("NIL:", MODE_NEWFILE); 
-
-                // Execute whatever we have in cmd. 
-                DNUM = SystemTags
-                (
-                    cmd, 
-                    SYS_Input, inp, 
-                    SYS_Output, out, 
-                    TAG_END
-                ); 
-
-                // On error, get secondary status. 
-                if(DNUM)
+                // No input needed.
+                BPTR inp = (BPTR) Open("NIL:", MODE_OLDFILE); 
+                
+                // Can this fail?
+                if(inp)
                 {
-                    LONG ioe = IoErr(); 
+                    // No output needed.
+                    BPTR out = (BPTR) Open("NIL:", MODE_OLDFILE); 
 
-                    // Expose IoErr to script.
-                    set_numvar(contxt, "@ioerr", ioe); 
+                    // Can this fail?
+                    if(out)
+                    {
+
+                        // Execute whatever we have in cmd. 
+                        DNUM = SystemTags
+                        (
+                            cmd, 
+                            SYS_Input, inp, 
+                            SYS_Output, out, 
+                            TAG_END
+                        ); 
+
+                        // On error, get secondary status. 
+                        if(DNUM)
+                        {
+                            LONG ioe = IoErr(); 
+
+                            // Expose IoErr to script.
+                            set_numvar(contxt, "@ioerr", ioe); 
+                        }
+
+                        // Not sure if we need to close NIL:
+                        // but it doesn't hurt.
+                        Close(out); 
+                    }
+                    else
+                    {
+                        // Unknown error.
+                        DNUM = -1;
+                    }
+
+                    // Not sure if we need to close NIL:
+                    // but it doesn't hurt.
+                    Close(inp); 
                 }
-
-                // Necessary? 
-                Close(inp); 
-                Close(out); 
+                else
+                {
+                    // Unknown error.
+                    DNUM = -1;
+                }
                 #else
                 // For testing purposes only.
                 printf("%s%s", cmd, dir ? dir : "");
