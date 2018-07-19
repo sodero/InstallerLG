@@ -951,7 +951,18 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
 MUIDSP IPTR InstallerGuiCopyFilesEnd(Class *cls,
                                      Object *obj) 
 {
+    static Object *lst;
     struct InstallerGuiData *my = INST_DATA(cls, obj);
+
+    // Initial lookup.
+    if(!lst)
+    {
+        lst = (Object *) DoMethod
+        (
+            obj, MUIM_FindUData,
+            MUIV_InstallerGui_FileList
+        );
+    }
 
     // Uninstall timer created to establish a time
     // slice where the user has a chance to abort
@@ -964,8 +975,23 @@ MUIDSP IPTR InstallerGuiCopyFilesEnd(Class *cls,
         MUIM_Application_RemInputHandler, &my->ticker
     );
 
-    // Always true. 
-    return (IPTR) TRUE; 
+
+    // Sanity check.
+    if(lst)
+    {
+        // Leave the file list the way we
+        // found it (empty).
+        DoMethod(lst, MUIM_List_Clear);
+
+        // Always true.
+        return (IPTR) TRUE;
+    }
+    else
+    {
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return (IPTR) FALSE;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -2571,7 +2597,7 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
     }
 
     // Do we need confirmation?
-    if(cnf)
+    if(cnf && n)
     {
         static Object *sel, *top;
         
