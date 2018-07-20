@@ -1,3 +1,6 @@
+(set x "y") (askchoice (prompt "p" "p" x) (help "h" "h" "h") (choices "a" "b" "c")) ; "","ppyhhha0 0",""
+(set x "y") (askchoice (prompt "p" "p" (x)) (help "h" "h" "h") (choices "a" "b" "c")) ; "","Line 1: Undefined function 'x' 0",""
+(set @strict 0) (set x "y") (askchoice (prompt "p" "p" (x)) (help "h" "h" "h") (choices "a" "b" "c")) ; "","ppyhhha0 0",""
 (askchoice (prompt "p" "p" "p") (help "h" "h" "h") (choices "a" "b" "c")) ; "","ppphhha0 0",""
 (askchoice (prompt p "p" "p") (help "h" "h" "h") (choices "a" "b" "c")) ; "","Line 1: Undefined variable 'p' 0",""
 (askchoice (prompt "p" "p") (help "h" "h" h) (choices "a" "b" "c")) ; "","Line 1: Undefined variable 'h' 0",""

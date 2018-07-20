@@ -56,3 +56,8 @@
 ===============
 - Merge (run), (execute) and (rexx) children (NetSurf).
 - File lister garbage fixed.
+
+0.1.0-alpha.12:
+===============
+- (user) turned into a real function returning the old value when set (AWebJFIF).
+- ?

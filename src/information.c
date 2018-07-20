@@ -31,7 +31,7 @@
 //----------------------------------------------------------------------------
 entry_p m_complete(entry_p contxt)
 {
-    // We need atleast one argument
+    // We need atleast one argument.
     if(c_sane(contxt, 1))
     {
         // Pass on the return value. 
@@ -42,7 +42,7 @@ entry_p m_complete(entry_p contxt)
     }
     else
     {
-        // The parser is broken
+        // The parser is broken.
         error(PANIC); 
         RCUR; 
     }
@@ -112,7 +112,7 @@ entry_p m_debug(entry_p contxt)
     }
     else
     {
-        // The parser is broken
+        // The parser is broken.
         error(PANIC); 
         RCUR;
     }
@@ -177,11 +177,29 @@ entry_p m_message(entry_p contxt)
 // (user <user-level>)
 //   change the user level (debugging purposes only)
 //
-// ***********************
-// Implemented using m_set
-// *********************** 
-//
+// Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //----------------------------------------------------------------------------
+entry_p m_user(entry_p contxt)
+{
+    // We need one argument
+    if(c_sane(contxt, 1)) 
+    {
+        // Save old value.
+        int old = get_numvar(contxt, "@user-level"); 
+
+        // Set new value of @user-level.
+        set_numvar(contxt, "@user-level", num(CARG(1))); 
+
+        // Return the old.
+        RNUM(old);
+    }
+    else
+    {
+        // Broken parser.
+        error(PANIC);
+        RCUR; 
+    }
+}
 
 //----------------------------------------------------------------------------
 // (welcome <string> <string> ...)

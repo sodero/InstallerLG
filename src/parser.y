@@ -348,8 +348,7 @@ complete:       '(' COMPLETE p ')'              { $$ = new_native(strdup("comple
 debug:          '(' DEBUG ps ')'                { $$ = new_native(strdup("debug"), LINE, m_debug, $3, NUMBER); }; 
 message:        '(' MESSAGE ps all ')'          { $$ = new_native(strdup("message"), LINE, m_message, push($3, $4), NUMBER); } | 
                 '(' MESSAGE ps ')'              { $$ = new_native(strdup("message"), LINE, m_message, $3, NUMBER); };
-user:           '(' USER INT ')'                { $$ = new_native(strdup("user"), LINE, m_set, push(push(new_contxt(), 
-                                                       new_symbol(strdup("@user-level"))), new_number($3)), DANGLE); }; 
+user:           '(' USER p ')'                  { $$ = new_native(strdup("user"), LINE, m_user, push(new_contxt(), $3), NUMBER); };
 welcome:        '(' WELCOME ps ')'              { $$ = new_native(strdup("welcome"), LINE, m_welcome, $3, NUMBER); } |
                 '(' WELCOME ')'                 { $$ = new_native(strdup("welcome"), LINE, m_welcome, NULL, NUMBER); }; 
 working:        '(' WORKING ps ')'              { $$ = new_native(strdup("working"), LINE, m_working, $3, NUMBER); }; 

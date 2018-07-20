@@ -1,5 +1,7 @@
 - The GUI is all over the place. It should be in one place.
-- Retest (run), (execute) and (rexx) on AROS.
+- (user) must be a real function. It shall return the old value.
+- Check how bitwise + signed int work in 3.9.
+- Check list mgmt for mem leaks.
 - All project tooltypes must be promoted to variables in init().
 - OpenLocale() -> @installer-language
 - We need @strict = 0 testing on the gui parts. What is shown when we have nothing to show?
@@ -7,7 +9,5 @@
 - We have no (confirm) test coverage on (startup).
 - We need more @strict = 0 testing on (copylib).
 - We need (confirm) test feedback from (copyfiles).
-- amrss - when in expert mode you get garbage in one of the file listers.
 - (onerror) and (trap) should likely accept naked blocks just list (while), (until) and (foreach)
-- (showmedia) seems to be a thing? (>= V44) refer to IBrowse script.
-- Check how bitwise + signed int work in 3.9.
+- (showmedia) seems to be a thing? (>= V44), refer to IBrowse script.
