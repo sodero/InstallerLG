@@ -124,39 +124,58 @@ entry_p m_gosub(entry_p contxt)
         // can be resolved into a format string exists.
         if(!get_numvar(contxt, "@strict"))
         {
-            // The name of the function is taken to be a
-            // name of a variable with the format string.
-            char *fmt = get_strvar(contxt, contxt->name);
+            // Output string.
+            entry_p res = NULL;
 
-            // The format string is stored as the name of
-            // native function.
-            free(contxt->name);
-            kill(contxt->resolved);
-            contxt->name = strdup(fmt);
-
-            if(contxt->name)
+            // First invocation?
+            if(!contxt->resolved)
             {
                 // We need a resolved dummy. See new_*.
+                // In this case we're mimicing a NATIVE
+                // returning a STRING:
                 contxt->resolved = new_string(strdup(""));
 
+                // Out of memory?
                 if(contxt->resolved)
                 {
-                    // Make the current contxt a parent
-                    // of the dummy, otherwise kill(..)
-                    // won't free the dummy. Set proper
-                    // type and callback function.
-                    contxt->call = m_fmt;
-                    contxt->type = NATIVE;
+                    // Reparent the dummy.
                     contxt->resolved->parent = contxt;
-
-                    // Return the resolved value of the
-                    // things we've stitched together.
-                    return resolve(contxt);
+                }
+                else
+                {
+                    // Panic already set.
+                    res = new_failure(); 
                 }
             }
 
-            // Out of memory.
-            error(PANIC);
+            // No failure this far?
+            if(!res)
+            {
+                // Save the old name. We need to do this
+                // in order to resolve the format string
+                // multiple times when needed.
+                char *old = contxt->name;
+
+                // Set format string, type and callback
+                // to mimic a real ("%ld" ..) function.
+                contxt->call = m_fmt;
+                contxt->type = NATIVE;
+                contxt->name = get_strvar(contxt, contxt->name);
+
+                // Get the resolved value of the things
+                // we've stitched together.
+                res = resolve(contxt);
+
+                // Restore everything so that we can do
+                // this again, once again resolving the
+                // format string.
+                contxt->name = old;
+                contxt->call = m_gosub;
+                contxt->type = CUSREF;
+            }
+
+            // Success or failure.
+            return res;
         }
 
         // No match found.
