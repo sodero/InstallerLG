@@ -60,4 +60,4 @@
 0.1.0-alpha.12:
 ===============
 - (user) turned into a real function returning the old value when set (AWebJFIF).
-- ?
+- Ambiguous function call / format string fix (amrss).
