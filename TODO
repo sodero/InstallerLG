@@ -1,5 +1,5 @@
+- (textfile) should take several (append):s, each with multiple children. Like (startup) and (command).
 - The GUI is all over the place. It should be in one place.
-- (user) must be a real function. It shall return the old value.
 - Check how bitwise + signed int work in 3.9.
 - Check list mgmt for mem leaks.
 - All project tooltypes must be promoted to variables in init().

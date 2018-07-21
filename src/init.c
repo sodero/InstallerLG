@@ -33,7 +33,7 @@
 
 static char version[] __attribute__((used)) = "\0$VER: InstallerLG " 
                                                VER(MAJOR) "." VER(MINOR) 
-                                              " [ALPHA12]";
+                                              " [ALPHA13]";
 
 //----------------------------------------------------------------------------
 // Name:        init
