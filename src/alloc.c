@@ -205,9 +205,9 @@ entry_p new_symbol(char *n)
 //----------------------------------------------------------------------------
 entry_p new_custom(char *n, int l, entry_p s, entry_p c) 
 {
-    // All functions must have a name and
-    // one or more children. 
-    if(n && c)
+    // Functions must have a name, but
+    // they can have an empty body.
+    if(n)
     {
         // We rely on everything being set to '0'
         entry_p entry = calloc(1, sizeof(entry_t)); 
@@ -244,19 +244,22 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
                 }
             }
 
-            // Transfer and kill the input.
-            entry->children = c->children;
-            c->children = NULL; 
-            kill(c); 
-
-            // Iter.
-            e = entry->children; 
-
-            // Adopt all children. 
-            while(*e && *e != end())
+            if(c)
             {
-                (*e)->parent = entry;
-                e++; 
+                // Transfer and kill the input.
+                entry->children = c->children;
+                c->children = NULL; 
+                kill(c); 
+
+                // Iter.
+                e = entry->children; 
+
+                // Adopt all children. 
+                while(*e && *e != end())
+                {
+                    (*e)->parent = entry;
+                    e++; 
+                }
             }
 
             // Success. 

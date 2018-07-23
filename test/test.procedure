@@ -1,3 +1,7 @@
+(procedure f1); "","f1",""
+(procedure f1) (f1); "","",""
+(procedure f1) (+ (f1)); "","0",""
+(procedure f1 a b c) (+ (f1 1 2 3)); "","0",""
 (procedure f1 (+ 1 1) (+ 1 2)) (f1); "","3",""
 (procedure f1 ((+ 1 1) (+ 1 2))) (f1); "","3",""
 (procedure f1 (+ 1 2)); "","f1",""

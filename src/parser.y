@@ -371,7 +371,9 @@ iconinfo:       '(' ICONINFO opts ')'           { $$ = new_native(strdup("iconin
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* procedure.c|h -------------------------------------------------------------------------------------------------------------------------------------------------------*/
 dcl:            '(' DCL SYM par s ')'           { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, $4, $5)), NUMBER); } |
-                '(' DCL SYM s ')'               { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, NULL, $4)), NUMBER); };
+                '(' DCL SYM par ')'             { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, $4, NULL)), NUMBER); } |
+                '(' DCL SYM s ')'               { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, NULL, $4)), NUMBER); } |
+                '(' DCL SYM ')'                 { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, NULL, NULL)), NUMBER); };
 cus:            '(' SYM ps ')'                  { $$ = new_cusref($2, LINE, $3); } |
                 '(' SYM ')'                     { $$ = new_cusref($2, LINE, NULL); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

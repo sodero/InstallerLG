@@ -356,23 +356,28 @@ entry_p invoke(entry_p entry)
         // Iter. 
         entry_p *vec = entry->children;
 
-        // As long as we have something and
-        // no one fails, execute and save the 
-        // return value. 
-        while (*vec && 
-               *vec != end() &&
-               !did_error())
+        // Empty procedures are allowed, there
+        // might be no children at all.
+        if(vec)
         {
-            if((*vec)->type == NATIVE ||
-               (*vec)->type == CUSREF)
+            // As long as we have something and
+            // no one fails, execute and save the 
+            // return value. 
+            while (*vec && 
+                   *vec != end() &&
+                   !did_error())
             {
-                // The function call. 
-                ret = (*vec)->call(*vec); 
-            }
+                if((*vec)->type == NATIVE ||
+                   (*vec)->type == CUSREF)
+                {
+                    // The function call. 
+                    ret = (*vec)->call(*vec); 
+                }
 
-            // Next one / skip anything
-            // that we can't execute. 
-            vec++; 
+                // Next one / skip anything
+                // that we can't execute. 
+                vec++; 
+            }
         }
 
         // Return the last value. 
