@@ -1,3 +1,8 @@
+(select 0 (set a 2) (set a 3)) (+ a); "","2",""
+(select 0 (debug "a") (debug "b")); "","a 1",""
+(select 1 (debug "a") (debug "b")); "","b 1",""
+(select 1 ((debug "a") (debug "b")) (debug "c")); "","c 1",""
+(select 0 ((debug "a") (debug "b")) (debug "c")); "","a b 1",""
 (select 0 "abc" "def") ; "","abc",""
 (select 1 "abc" "def") ; "","def",""
 (select 2 "abc" "def") ; "","Line 1: No such item '2' 0",""
