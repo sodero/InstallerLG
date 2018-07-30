@@ -1,5 +1,6 @@
 (trap 1 (message "!")) ; "","1",""
 (trap 1 ((message "!") (message "?"))) ; "","1",""
+(trap 1 (message "!") (message "?")) ; "","1",""
 (trap) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (trap err) ; "","Line 1: syntax error, unexpected ')', expecting '(' ')'",""
 (trap 1 err ((message "!") (message "?"))) ; "","Line 1: syntax error, unexpected SYM, expecting '(' 'err'",""

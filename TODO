@@ -9,5 +9,4 @@
 - We have no (confirm) test coverage on (startup).
 - We need more @strict = 0 testing on (copylib).
 - We need (confirm) test feedback from (copyfiles).
-- (onerror) and (trap) should likely accept naked blocks just list (while), (until) and (foreach)
 - (showmedia) seems to be a thing? (>= V44), refer to IBrowse script.

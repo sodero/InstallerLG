@@ -309,9 +309,9 @@ exit:           '(' EXIT ps quiet ')'           { $$ = new_native(strdup("exit")
                 '(' EXIT quiet')'               { $$ = new_native(strdup("exit"), LINE, m_exit, push(new_contxt(), $3), NUMBER); } |
                 '(' EXIT ps ')'                 { $$ = new_native(strdup("exit"), LINE, m_exit, $3, NUMBER); } |
                 '(' EXIT ')'                    { $$ = new_native(strdup("exit"), LINE, m_exit, NULL, NUMBER); }; 
-onerror:        '(' ONERROR vpb ')'             { $$ = new_native(strdup("onerror"), LINE, m_procedure, push(new_contxt(), 
+onerror:        '(' ONERROR vps ')'             { $$ = new_native(strdup("onerror"), LINE, m_procedure, push(new_contxt(), 
                                                        new_custom(strdup("@onerror"), LINE, NULL, $3)), DANGLE); };
-trap:           '(' TRAP p vpb ')'              { $$ = new_native(strdup("trap"), LINE, m_trap, push(push(new_contxt(), $3), $4), NUMBER); };
+trap:           '(' TRAP p vps ')'              { $$ = new_native(strdup("trap"), LINE, m_trap, push(push(new_contxt(), $3), $4), NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* file.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 copyfiles:      '(' COPYFILES opts ')'          { $$ = new_native(strdup("copyfiles"), LINE, m_copyfiles, $3, NUMBER); }; 

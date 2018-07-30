@@ -69,4 +69,5 @@
 0.1.0-alpha.14:
 ===============
 - (select) block execution fixed.
+- (onerror) and (trap) naked blocks allowed. 
 - ?
