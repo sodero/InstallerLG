@@ -3403,15 +3403,27 @@ entry_p m_textfile(entry_p contxt)
                     // but it's how the CBM installer works.
                     if(append)
                     {
-                        // String to append. 
-                        const char *ap = str(append); 
+                        // Gather and merge all (append) strings.
+                        char *app = get_optstr_va(OPT_APPEND, contxt, NULL); 
 
-                        // Log operation.
-                        h_log(contxt, tr(S_APND), ap, fn); 
-
-                        if(fputs(ap, fp) == EOF)
+                        if(app)
                         {
-                            error(contxt->id, ERR_WRITE_FILE, fn); 
+                            // Log operation.
+                            h_log(contxt, tr(S_APND), app, fn); 
+
+                            if(fputs(app, fp) == EOF)
+                            {
+                                error(contxt->id, ERR_WRITE_FILE, fn); 
+                                DNUM = 0; 
+                            }
+
+                            // Free concatenation.
+                            free(app);
+                        }
+                        else
+                        {
+                            // Out of memory.
+                            error(PANIC);
                             DNUM = 0; 
                         }
                     }

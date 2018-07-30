@@ -67,3 +67,8 @@
 - Empty procedures allowed (MCC_Date).
 - (select) block execution fixed.
 - (onerror) and (trap) naked blocks allowed. 
+
+0.1.0-alpha.14:
+===============
+- (textfile) multiple (append) allowed (NetSurf).
+- ?
