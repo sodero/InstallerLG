@@ -413,7 +413,7 @@ symbolval:      '(' SYMBOLVAL p ')'             { $$ = new_native(strdup("symbol
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- options ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 all:            '(' ALL ')'                     { $$ = new_option(strdup("all"), OPT_ALL, NULL); };
-append:         '(' APPEND p ')'                { $$ = new_option(strdup("append"), OPT_APPEND, push(new_contxt(), $3)); }; 
+append:         '(' APPEND ps ')'               { $$ = new_option(strdup("append"), OPT_APPEND, $3); }; 
 assigns:        '(' ASSIGNS ')'                 { $$ = new_option(strdup("assigns"), OPT_ASSIGNS, NULL); };
 choices:        '(' CHOICES ps ')'              { $$ = new_option(strdup("choices"), OPT_CHOICES, $3); }; 
 command:        '(' COMMAND ps ')'              { $$ = new_option(strdup("command"), OPT_COMMAND, $3); }; 
