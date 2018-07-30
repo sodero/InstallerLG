@@ -51,11 +51,11 @@ Tested:
  
 Not tested
 ==========================================================================================
-http://aminet.net/comm/www/netsurf.lha - (textfile) + (append) problems.
-http://aminet.net/dev/mui/MCC_Date.lha - Empty (procedure) and switch like (select) pattern.
-http://aminet.net/dev/mui/MCC_DateString.lha   -"-
-http://aminet.net/dev/mui/MCC_DateText.lha     -"-
-http://aminet.net/dev/mui/MCC_Guigfx.lha       -"- Look in this one for a nice (select) example.
+http://aminet.net/comm/www/netsurf.lha
+http://aminet.net/dev/mui/MCC_Date.lha
+http://aminet.net/dev/mui/MCC_DateString.lha
+http://aminet.net/dev/mui/MCC_DateText.lha
+http://aminet.net/dev/mui/MCC_Guigfx.lha
 http://aminet.net/dev/mui/MCC_HotkeyString.lha
 http://aminet.net/dev/mui/MCC_HTMLtext.lha
 http://aminet.net/dev/mui/MCC_HTMLview.lha
