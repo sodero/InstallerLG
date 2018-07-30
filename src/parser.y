@@ -53,7 +53,7 @@
        /*                */ RESIDENT OVERRIDE
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- token type information ---------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps dynopt opt opts vpb xpb np sps par cv cvv add sub
+%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps dynopt opt opts vpb xpb xpbs np sps par cv cvv add sub
        /*                */ lt lte neq gt gte eq set cus dcl fmt if while until and or xor not bitand bitor 
        /*                */ bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring 
        /*                */ asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier 
@@ -75,7 +75,7 @@
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function */
 /* found in alloc.c                                  */
-%destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts vpb xpb np sps par cv cvv add sub div mul
+%destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts vpb xpb xpbs np sps par cv cvv add sub div mul
                             gt gte eq set cus dcl fmt if while until and or xor not bitand bitor bitxor bitnot 
                             shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice 
                             askoptions askbool askdisk exists expandpath earlier fileonly getassign pattern
@@ -112,6 +112,8 @@ vpb:            '(' vps ')'                     { $$ = $2; } |
                 vp                              { $$ = push(new_contxt(), $1); };
 xpb:            vpb                             |
                 np                              ;
+xpbs:           xpb                             { $$ = push(new_contxt(), $1); }|
+                xpbs xpb                      { $$ = push($1, $2); };
 np:             INT                             { $$ = new_number($1); } |
                 HEX                             { $$ = new_number($1); } |
                 BIN                             { $$ = new_number($1); } |
@@ -282,7 +284,7 @@ neq:            '(' NEQ pp ')'                  { $$ = new_native(strdup("<>"), 
 if:             '(' IF cvv ')'                  { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); } |
                 '(' IF cv ')'                   { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); } |
                 '(' IF p ')'                    { $$ = new_native(strdup("if"), LINE, m_if, push(new_contxt(), $3), NUMBER); };
-select:         '(' SELECT p ps ')'             { $$ = new_native(strdup("select"), LINE, m_select, push(push(new_contxt(), $3), $4), NUMBER); }; 
+select:         '(' SELECT p xpbs ')'             { $$ = new_native(strdup("select"), LINE, m_select, push(push(new_contxt(), $3), $4), NUMBER); }; 
 until:          '(' UNTIL p vps ')'             { $$ = new_native(strdup("until"), LINE, m_until, push(push(new_contxt(), $3), $4), NUMBER); };
 while:          '(' WHILE p vps ')'             { $$ = new_native(strdup("while"), LINE, m_while, push(push(new_contxt(), $3), $4), NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
