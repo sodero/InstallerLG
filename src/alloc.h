@@ -32,6 +32,7 @@ entry_p new_native(char *n, int l, call_t call, entry_p e, type_t r);
 //----------------------------------------------------------------------------
 void kill(entry_p entry);
 entry_p append(entry_p **dst, entry_p e);
+entry_p merge(entry_p dst, entry_p src);
 entry_p push(entry_p dst, entry_p src);
 entry_p end(void); 
 

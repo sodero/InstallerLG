@@ -637,6 +637,55 @@ entry_p append(entry_p **dst, entry_p e)
 }
 
 //----------------------------------------------------------------------------
+// Name:        merge
+// Description: Move and append all children of a context to another one. The
+//              empty context will be killed.
+// Input:       entry_p dst:    The destination context. 
+//              entry_p src:    The source context. 
+// Return:      entry_p:        The destination context.
+//----------------------------------------------------------------------------
+entry_p merge(entry_p dst, entry_p src)
+{
+    // Sanity check.
+    if(dst && dst->children &&
+       src && src->children)
+    {
+        entry_p *s = src->children;
+        entry_p **d = &dst->children;
+
+        // For all children in the source
+        // context append to destination
+        // and reparent.
+        while(*s && *s != end())
+        {
+            // We might run out of memory
+            // but in that case append( )
+            // will PANIC.
+            if(append(d, *s))
+            {
+                (*s)->parent = dst; 
+            }
+
+            // Next child.
+            s++;
+        }
+    }
+    else
+    {
+        // Bad input.
+        error(PANIC);
+    }
+
+    // No matter how things went above, we
+    // own 'src' and need to free it, else
+    // we will leak on success and if OOM.
+    kill(src); 
+        
+    // Return destination.
+    return dst; 
+}
+
+//----------------------------------------------------------------------------
 // Name:        push
 // Description: Type aware 'append' working on 'entry_t' level. Takes care of
 //              children and symbols, while avoiding duplicates of the latter. 

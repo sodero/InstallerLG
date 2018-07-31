@@ -1,2 +1,8 @@
 (debug "a" "b" "c") ; "","a b c 1",""
+(debug "a") (debug "b") (debug "c") ; "","a b c 1",""
+((debug "a") (debug "b") (debug "c")) ; "","a b c 1",""
+((debug "a") (debug "b")) (debug "c") ; "","a b c 1",""
+(debug "a") ((debug "b") (debug "c")) ; "","a b c 1",""
+((debug "a")) (debug "b") ((debug "c")) ; "","a b c 1",""
+((debug "a") (debug "a")) (debug "b") (debug "b") ((debug "c") (debug "c")) ; "","a a b b c c 1",""
 (debug) ; "","Line 1: syntax error, unexpected ')' ')'",""

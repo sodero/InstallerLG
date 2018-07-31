@@ -23,7 +23,7 @@
 %define api.pure full                                                                                            
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
-%expect 1
+%expect 2
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- primitives ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %token<s> /* string pri. */ SYM STR 
@@ -103,7 +103,7 @@ pps:            pps p p                         { $$ = push(push($1, $2), $3); }
                 pp                              ;
 vp:             ivp                             |
                 '(' vp ')'                      { $$ = $2; };
-vps:            vps vp                          { $$ = push($1, $2); } |
+vps:            vps vps                         { $$ = merge($1, $2); } |
                 vp                              { $$ = push(new_contxt(), $1); } |
                 '(' vps ')'                     { $$ = $2; };
 opts:           opts opt                        { $$ = push($1, $2); } |
@@ -113,7 +113,7 @@ vpb:            '(' vps ')'                     { $$ = $2; } |
 xpb:            vpb                             |
                 np                              ;
 xpbs:           xpb                             { $$ = push(new_contxt(), $1); }|
-                xpbs xpb                      { $$ = push($1, $2); };
+                xpbs xpb                        { $$ = push($1, $2); };
 np:             INT                             { $$ = new_number($1); } |
                 HEX                             { $$ = new_number($1); } |
                 BIN                             { $$ = new_number($1); } |
@@ -284,23 +284,23 @@ neq:            '(' NEQ pp ')'                  { $$ = new_native(strdup("<>"), 
 if:             '(' IF cvv ')'                  { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); } |
                 '(' IF cv ')'                   { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); } |
                 '(' IF p ')'                    { $$ = new_native(strdup("if"), LINE, m_if, push(new_contxt(), $3), NUMBER); };
-select:         '(' SELECT p xpbs ')'             { $$ = new_native(strdup("select"), LINE, m_select, push(push(new_contxt(), $3), $4), NUMBER); }; 
+select:         '(' SELECT p xpbs ')'           { $$ = new_native(strdup("select"), LINE, m_select, push(push(new_contxt(), $3), $4), NUMBER); }; 
 until:          '(' UNTIL p vps ')'             { $$ = new_native(strdup("until"), LINE, m_until, push(push(new_contxt(), $3), $4), NUMBER); };
 while:          '(' WHILE p vps ')'             { $$ = new_native(strdup("while"), LINE, m_while, push(push(new_contxt(), $3), $4), NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h --------------------------------------------------------------------------------------------------------------------------------------------------------*/
-execute:        '(' EXECUTE ps opts ')'          { $$ = new_native(strdup("execute"), LINE, m_execute, push($3, $4), NUMBER); } | 
-                '(' EXECUTE opts ps ')'          { $$ = new_native(strdup("execute"), LINE, m_execute, push($4, $3), NUMBER); } | 
-                '(' EXECUTE opts ps opts ')'     { $$ = new_native(strdup("execute"), LINE, m_execute, push(push($4, $3), $5), NUMBER); } |
-                '(' EXECUTE ps ')'               { $$ = new_native(strdup("execute"), LINE, m_execute, $3, NUMBER); }; 
-rexx:           '(' REXX ps opts ')'             { $$ = new_native(strdup("rexx"), LINE, m_rexx, push($3, $4), NUMBER); } |
-                '(' REXX opts ps ')'             { $$ = new_native(strdup("rexx"), LINE, m_rexx, push($4, $3), NUMBER); } |
-                '(' REXX opts ps opts ')'        { $$ = new_native(strdup("rexx"), LINE, m_rexx, push(push($4, $3), $5), NUMBER); } |
-                '(' REXX ps ')'                  { $$ = new_native(strdup("rexx"), LINE, m_rexx, $3, NUMBER); };
-run:            '(' RUN ps opts ')'              { $$ = new_native(strdup("run"), LINE, m_run, push($3, $4), NUMBER); } |
-                '(' RUN opts ps ')'              { $$ = new_native(strdup("run"), LINE, m_run, push($4, $3), NUMBER); } |
-                '(' RUN opts ps opts ')'         { $$ = new_native(strdup("run"), LINE, m_run, push(push($4, $3), $5), NUMBER); } |
-                '(' RUN ps ')'                   { $$ = new_native(strdup("run"), LINE, m_run, $3, NUMBER); };
+execute:        '(' EXECUTE ps opts ')'         { $$ = new_native(strdup("execute"), LINE, m_execute, push($3, $4), NUMBER); } | 
+                '(' EXECUTE opts ps ')'         { $$ = new_native(strdup("execute"), LINE, m_execute, push($4, $3), NUMBER); } | 
+                '(' EXECUTE opts ps opts ')'    { $$ = new_native(strdup("execute"), LINE, m_execute, push(push($4, $3), $5), NUMBER); } |
+                '(' EXECUTE ps ')'              { $$ = new_native(strdup("execute"), LINE, m_execute, $3, NUMBER); }; 
+rexx:           '(' REXX ps opts ')'            { $$ = new_native(strdup("rexx"), LINE, m_rexx, push($3, $4), NUMBER); } |
+                '(' REXX opts ps ')'            { $$ = new_native(strdup("rexx"), LINE, m_rexx, push($4, $3), NUMBER); } |
+                '(' REXX opts ps opts ')'       { $$ = new_native(strdup("rexx"), LINE, m_rexx, push(push($4, $3), $5), NUMBER); } |
+                '(' REXX ps ')'                 { $$ = new_native(strdup("rexx"), LINE, m_rexx, $3, NUMBER); };
+run:            '(' RUN ps opts ')'             { $$ = new_native(strdup("run"), LINE, m_run, push($3, $4), NUMBER); } |
+                '(' RUN opts ps ')'             { $$ = new_native(strdup("run"), LINE, m_run, push($4, $3), NUMBER); } |
+                '(' RUN opts ps opts ')'        { $$ = new_native(strdup("run"), LINE, m_run, push(push($4, $3), $5), NUMBER); } |
+                '(' RUN ps ')'                  { $$ = new_native(strdup("run"), LINE, m_run, $3, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* exit.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 abort:          '(' ABORT ps ')'                { $$ = new_native(strdup("abort"), LINE, m_abort, $3, NUMBER); }; 
