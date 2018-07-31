@@ -18,17 +18,28 @@
 //     returns logical `AND' of `<expr1>' and `<expr2>'
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+//
+// The 3.9 implementation supports any number of arguments. Since this seems
+// to be used by several installers, we'll support it.
 //----------------------------------------------------------------------------
 entry_p m_and(entry_p contxt)
 {
-    // We need two arguments. 
+    // We need atleast two arguments. 
     if(c_sane(contxt, 2))
     {
-        RNUM
-        (
-            num(CARG(1)) && 
-            num(CARG(2))
-        );
+        // Evaluate all children, if any of
+        // them are false, return false.
+        for(entry_p *cur = contxt->children; 
+            *cur && *cur != end(); cur++)
+        {
+            if(!num(*cur))
+            {
+                RNUM(0);
+            }
+        }
+
+        // All children were true.
+        RNUM(1);
     }
     else
     {
@@ -206,17 +217,28 @@ entry_p m_in(entry_p contxt)
 //     returns logical `OR' of `<expr1>' and `<expr2>'
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+//
+// The 3.9 implementation supports any number of arguments. Since this seems
+// to be used by several installers, we'll support it.
 //----------------------------------------------------------------------------
 entry_p m_or(entry_p contxt)
 {
-    // We need two arguments. 
+    // We need atleast two arguments. 
     if(c_sane(contxt, 2))
     {
-        RNUM
-        (
-            num(CARG(1)) ||  
-            num(CARG(2))
-        );
+        // Evaluate all children, if any of
+        // them are true, return true.
+        for(entry_p *cur = contxt->children; 
+            *cur && *cur != end(); cur++)
+        {
+            if(num(*cur))
+            {
+                RNUM(1);
+            }
+        }
+
+        // All children were false.
+        RNUM(0);
     }
     else
     {

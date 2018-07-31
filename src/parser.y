@@ -260,14 +260,14 @@ mul:            '(' '*' ps ')'                  { $$ = new_native(strdup("*"), L
 sub:            '(' '-' pp ')'                  { $$ = new_native(strdup("-"), LINE, m_sub, $3, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* bitwise.c|h ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
-and:            '(' AND pp ')'                  { $$ = new_native(strdup("AND"), LINE, m_and, $3, NUMBER); }; 
+and:            '(' AND ps ')'                  { $$ = new_native(strdup("AND"), LINE, m_and, $3, NUMBER); }; 
 bitand:         '(' BITAND pp ')'               { $$ = new_native(strdup("BITAND"), LINE, m_bitand, $3, NUMBER); }; 
 bitnot:         '(' BITNOT p ')'                { $$ = new_native(strdup("BITNOT"), LINE, m_bitnot, push(new_contxt(), $3), NUMBER); }; 
 bitor:          '(' BITOR pp ')'                { $$ = new_native(strdup("BITOR"), LINE, m_bitor, $3, NUMBER); }; 
 bitxor:         '(' BITXOR pp ')'               { $$ = new_native(strdup("BITXOR"), LINE, m_bitxor, $3, NUMBER); }; 
 not:            '(' NOT p ')'                   { $$ = new_native(strdup("NOT"), LINE, m_not, push(new_contxt(), $3), NUMBER); }; 
 in:             '(' IN p ps ')'                 { $$ = new_native(strdup("IN"), LINE, m_in, push(push(new_contxt(), $3), $4), NUMBER); }; 
-or:             '(' OR pp ')'                   { $$ = new_native(strdup("OR"), LINE, m_or, $3, NUMBER); }; 
+or:             '(' OR ps ')'                   { $$ = new_native(strdup("OR"), LINE, m_or, $3, NUMBER); }; 
 shiftleft:      '(' SHIFTLEFT pp ')'            { $$ = new_native(strdup("shiftleft"), LINE, m_shiftleft, $3, NUMBER); }; 
 shiftright:     '(' SHIFTRIGHT pp ')'           { $$ = new_native(strdup("shiftright"), LINE, m_shiftright, $3, NUMBER); }; 
 xor:            '(' XOR pp ')'                  { $$ = new_native(strdup("XOR"), LINE, m_xor, $3, NUMBER); }; 
