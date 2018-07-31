@@ -1,3 +1,6 @@
+(if (+ 1) ((set a 2) (+ a a)) (+ 3 3)); "","4",""
+(if (IN %00001111 0) ((set a 2) (+ a a)) (+ 3 3)); "","4",""
+(set x 1) (if (IN x 0) ((set a 2) (+ a a)) (+ 3 3)); "","4",""
 (set #flag 1) (if (= 1 #flag) ((message "very") (message "true")) ((message "very") (message "false"))) (debug "go") (exit (quiet)) (debug "off"); "","verytruego 0",""
 (set #flag 0) (if (= 1 #flag) ((message "very") (message "true")) ((message "very") (message "false"))) (debug "go") (exit (quiet)) (debug "off");; "","veryfalsego 0",""
 (set #flag 1) (if (= 1 #flag) ((message "very")) ((message "true") (message "very") (message "false"))) (debug "go") (exit (quiet)) (debug "off");; "","verygo 0",""

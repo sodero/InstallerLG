@@ -48,11 +48,11 @@ Tested:
 * http://aminet.net/comm/www/AWeb-MOS.lha
 * http://aminet.net/dev/mui/MCC_BWin.lha
 * http://aminet.net/dev/mui/MCC_CalendarMOS.lha
+* http://aminet.net/comm/www/netsurf.lha
  
 Not tested
 ==========================================================================================
-http://aminet.net/comm/www/netsurf.lha
-http://aminet.net/dev/mui/MCC_Date.lha
+http://aminet.net/dev/mui/MCC_Date.lha - (AND) shall take any number of arguments. VPS can contain NP. See line 3532+.
 http://aminet.net/dev/mui/MCC_DateString.lha
 http://aminet.net/dev/mui/MCC_DateText.lha
 http://aminet.net/dev/mui/MCC_Guigfx.lha
