@@ -53,7 +53,7 @@
        /*                */ RESIDENT OVERRIDE
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- token type information ---------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps dynopt opt opts vpb xpb xpbs np sps par cv cvv add sub
+%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np sps par cv cvv add sub
        /*                */ lt lte neq gt gte eq set cus dcl fmt if while until and or xor not bitand bitor 
        /*                */ bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring 
        /*                */ asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier 
@@ -75,7 +75,7 @@
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function */
 /* found in alloc.c                                  */
-%destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts vpb xpb xpbs np sps par cv cvv add sub div mul
+%destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np sps par cv cvv add sub div mul
                             gt gte eq set cus dcl fmt if while until and or xor not bitand bitor bitxor bitnot 
                             shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice 
                             askoptions askbool askdisk exists expandpath earlier fileonly getassign pattern
@@ -108,10 +108,9 @@ vps:            vps vps                         { $$ = merge($1, $2); } |
                 '(' vps ')'                     { $$ = $2; };
 opts:           opts opt                        { $$ = push($1, $2); } |
                 opt                             { $$ = push(new_contxt(), $1); };
-vpb:            '(' vps ')'                     { $$ = $2; } |
-                vp                              { $$ = push(new_contxt(), $1); };
-xpb:            vpb                             |
-                np                              ;
+xpb:            '(' vps ')'                     { $$ = $2; } |
+                '(' vps np ')'                  { $$ = push($2, $3); } |
+                p                               { $$ = push(new_contxt(), $1); };
 xpbs:           xpb                             { $$ = push(new_contxt(), $1); }|
                 xpbs xpb                        { $$ = push($1, $2); };
 np:             INT                             { $$ = new_number($1); } |

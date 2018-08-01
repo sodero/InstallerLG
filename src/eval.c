@@ -339,12 +339,12 @@ char *str(entry_p entry)
 
 //----------------------------------------------------------------------------
 // Name:        invoke
-// Description: Execute all (executable) children of a CONTXT and return the 
-//              the return value of the last executed function. If any of the
-//              functions in the CONTXT fails, the execution will be aborted.
+// Description: Evaluate all children of a CONTXT. In most cases this implies
+//              executing all executable children and return the return value
+//              of the last executed function. If any of the functions in the
+//              CONTXT fails, the execution will be aborted.
 // Input:       entry_p entry:  An entry_t pointer to a CONTXT object. 
-// Return:      entry_p:        The return value of the last function in 
-//                              entry. 
+// Return:      entry_p:        The last resolved value in the entry CONTXT.
 //----------------------------------------------------------------------------
 entry_p invoke(entry_p entry)
 {
@@ -360,22 +360,15 @@ entry_p invoke(entry_p entry)
         // might be no children at all.
         if(vec)
         {
-            // As long as we have something and
-            // no one fails, execute and save the 
-            // return value. 
+            // As long as no one fails, resolve
+            // all children and save the return
+            // value of the last one.
             while (*vec && 
                    *vec != end() &&
                    !did_error())
             {
-                if((*vec)->type == NATIVE ||
-                   (*vec)->type == CUSREF)
-                {
-                    // The function call. 
-                    ret = (*vec)->call(*vec); 
-                }
-
-                // Next one / skip anything
-                // that we can't execute. 
+                // Resolve and proceed.
+                ret = resolve(*vec);
                 vec++; 
             }
         }
