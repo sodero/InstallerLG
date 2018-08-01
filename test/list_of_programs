@@ -49,23 +49,22 @@ Tested:
 * http://aminet.net/dev/mui/MCC_BWin.lha
 * http://aminet.net/dev/mui/MCC_CalendarMOS.lha
 * http://aminet.net/comm/www/netsurf.lha
+* http://aminet.net/dev/mui/MCC_Date.lha
+* http://aminet.net/dev/mui/MCC_MiniMailer.lha
+* http://aminet.net/dev/mui/MCC_UrltextMOS.lha
+* http://aminet.net/dev/mui/MCC_TearOff.lha
  
 Not tested
 ==========================================================================================
-http://aminet.net/dev/mui/MCC_Date.lha - (AND) shall take any number of arguments. VPS can contain NP. See line 3532+.
-http://aminet.net/dev/mui/MCC_DateString.lha
-http://aminet.net/dev/mui/MCC_DateText.lha
-http://aminet.net/dev/mui/MCC_Guigfx.lha
+http://aminet.net/dev/mui/MCC_DateString.lha (hmm, kolla 32-bitars-sakerna i TODO).
+http://aminet.net/dev/mui/MCC_DateText.lha ( -"- )
+http://aminet.net/dev/mui/MCC_Guigfx.lha (ok, men kanske saknas en strang i en copylib prompt?)
 http://aminet.net/dev/mui/MCC_HotkeyString.lha
-http://aminet.net/dev/mui/MCC_HTMLtext.lha
+http://aminet.net/dev/mui/MCC_HTMLtext.lha (kolla hur (welcome) funkar, varfor far vi en dubbel?)
 http://aminet.net/dev/mui/MCC_HTMLview.lha
 http://aminet.net/dev/mui/MCC_Lamp.lha
 http://aminet.net/dev/mui/MCC_Mailtext.lha
-http://aminet.net/dev/mui/MCC_MiniMailer.lha
 http://aminet.net/dev/mui/MCC_MonthNavi.lha
 http://aminet.net/dev/mui/MCC_Popph.lha
 http://aminet.net/dev/mui/MCC_SettingsWi.lha
 http://aminet.net/dev/mui/MCC_SpeedBarMOS.lha
-http://aminet.net/dev/mui/MCC_TearOff.lha
-http://aminet.net/dev/mui/mcc_toolbar-15.12.lha
-http://aminet.net/dev/mui/MCC_UrltextMOS.lha
