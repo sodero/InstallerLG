@@ -73,3 +73,7 @@
 - (textfile) multiple (append) allowed (NetSurf).
 - (AND) and (OR) >2 arguments allowed (MCC_Date).
 - Primitives allowed to mimic return values at the end of control blocks (MCC_Date). 
+
+0.1.0-alpha.15:
+===============
+- Default (welcome) and (exit) fix.

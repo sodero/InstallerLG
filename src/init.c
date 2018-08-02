@@ -33,7 +33,44 @@
 
 static char version[] __attribute__((used)) = "\0$VER: InstallerLG " 
                                                VER(MAJOR) "." VER(MINOR) 
-                                              " [ALPHA14]";
+                                              " [ALPHA15]";
+
+//----------------------------------------------------------------------------
+// Name:        native_exists
+// Description: Init helper; find first occurence of callback in AST.
+// Input:       entry_p contxt:  CONTXT.
+// Return:      entry_p:         NATIVE callback if found, NULL otherwise.
+//----------------------------------------------------------------------------
+static entry_p native_exists(entry_p contxt, call_t f)
+{
+    entry_p e = NULL;
+
+    // NULL are valid values.
+    if(contxt &&
+       contxt->children)
+    {
+        // Iterate over all children and
+        // recur if needed.
+        for(entry_p *c = contxt->children;
+            *c && *c != end() && !e; c++)
+        {
+            if((*c)->type == NATIVE &&
+               (*c)->call == f)
+            {
+                // We found it.
+                e = *c;
+            }
+            else
+            {
+                // Recur.
+                e = native_exists(*c, f);
+            }
+        }
+    }
+
+    // NULL or m_welcome.
+    return e;
+}
 
 //----------------------------------------------------------------------------
 // Name:        init
@@ -48,32 +85,13 @@ entry_p init(entry_p contxt)
     if(contxt &&
        contxt->children)
     {
-        // Iterator. 
-        entry_p e = NULL; 
+        // Is there a 'welcome' already?
+        entry_p e = native_exists(contxt, m_welcome);
 
+        #ifdef AMIGA
+        // If no (welcome) is found insert a default one on top.
         // Only on Amiga, otherwise tests will break, they don't
-        // expect any default (welcome) or (exit):s.
-        #ifdef AMIGA 
-        // Search for a 'welcome' in the root, if there is one
-        // (or two) in one of the children then so be it, then 
-        // they are probably there for a reason. 
-        entry_p *c = contxt->children; 
-
-        while(*c && *c != end())
-        {
-            // Match function pointer rather than function name
-            // since the latter can lie to us (and is slower). 
-            if((*c)->type == NATIVE &&
-               (*c)->call == m_welcome)
-            {
-                e = *c; 
-                break; 
-            }
-
-            c++; 
-        }
-
-        // If no (welcome) is found insert a default one on top
+        // expect any default (welcome).
         if(!e)
         {
             // The line numbers and naming are for debugging 
@@ -435,28 +453,13 @@ entry_p init(entry_p contxt)
         // code is executed.
         ror(contxt->children);
        
-        // Only on Amiga, otherwise tests will break,
-        // they don't expect any default (welcome) or
-        // (exit):s.
-        #ifdef AMIGA 
-        e = NULL; 
-        c = contxt->children; 
+        // Is there an 'exit' already?
+        e = native_exists(contxt, m_exit);
 
-        // Search for an (exit) in the root.
-        while(*c && *c != end())
-        {
-            // Match function pointer.
-            if((*c)->type == NATIVE &&
-               (*c)->call == m_exit)
-            {
-                e = *c; 
-                break; 
-            }
-
-            c++; 
-        }
-
-        // If no (exit) is found insert a default one at the bottom. 
+        #ifdef AMIGA
+        // If no (exit) is found insert a default one at
+        // the bottom. Only on Amiga, otherwise tests will
+        // break, they don't expect any default (exit).
         if(!e)
         {
             // The line numbers and naming are for debugging 
