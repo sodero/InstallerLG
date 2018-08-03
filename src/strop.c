@@ -53,7 +53,7 @@ entry_p m_cat(entry_p contxt)
 
                 // If we couldn't resolve the current argument, 
                 // return an empty string. 
-                if(did_error())
+                if(DID_ERR())
                 {
                     free(buf); 
                     REST; 
@@ -92,7 +92,7 @@ entry_p m_cat(entry_p contxt)
                         else
                         {
                             // Out of memory.
-                            error(PANIC);
+                            PANIC(contxt);
                             free(tmp); 
                             free(buf); 
                             REST;
@@ -113,7 +113,7 @@ entry_p m_cat(entry_p contxt)
     // The parser isn't necessarily broken 
     // if we end up here. We could alse be
     // out of memory.
-    error(PANIC);
+    PANIC(contxt);
     RCUR;
 }
 
@@ -164,12 +164,12 @@ entry_p m_fmt(entry_p contxt)
                         else
                         {
                             // Out of memory
-                            error(PANIC);
+                            PANIC(contxt);
                         }
                     }
                     else 
                     {
-                        error(contxt->id, ERR_FMT_INVALID, contxt->name); 
+                        ERR(ERR_FMT_INVALID, contxt->name); 
                         break; 
                     }
                 }
@@ -190,7 +190,7 @@ entry_p m_fmt(entry_p contxt)
 
                     // Bail out if we didn't manage to
                     // resolve the current argument.
-                    if(did_error())
+                    if(DID_ERR())
                     {
                         arg = NULL; 
                         break;
@@ -216,7 +216,7 @@ entry_p m_fmt(entry_p contxt)
                         else
                         {
                             // Out of memory
-                            error(PANIC);
+                            PANIC(contxt);
                         }
                     }
                     // Format numeric value.
@@ -239,13 +239,13 @@ entry_p m_fmt(entry_p contxt)
                         else
                         {
                             // Out of memory
-                            error(PANIC);
+                            PANIC(contxt);
                         }
                     }
                     else
                     {
                         // Fail on argument -> specifier mismatch.
-                        error(contxt->id, ERR_FMT_MISMATCH, contxt->name); 
+                        ERR(ERR_FMT_MISMATCH, contxt->name); 
                     }
 
                     // Next specifier -> argument.
@@ -255,7 +255,7 @@ entry_p m_fmt(entry_p contxt)
                 {
                     // Fail if the number of arguments and the number
                     // of specifiers don't match.
-                    error(contxt->id, ERR_FMT_MISSING, contxt->name); 
+                    ERR(ERR_FMT_MISSING, contxt->name); 
                     break; 
                 }
             }
@@ -282,7 +282,7 @@ entry_p m_fmt(entry_p contxt)
             else
             {
                 // Out of memory
-                error(PANIC);
+                PANIC(contxt);
             }
         }
 
@@ -307,7 +307,7 @@ entry_p m_fmt(entry_p contxt)
         if(arg && *arg && *arg != end() &&
            get_numvar(contxt, "@strict"))
         {
-            error(contxt->id, ERR_FMT_UNUSED, contxt->name); 
+            ERR(ERR_FMT_UNUSED, contxt->name); 
         }
         else if(ret)
         {
@@ -319,7 +319,7 @@ entry_p m_fmt(entry_p contxt)
     {
         // Either something is terribly
         // broken or we're out of memory
-        error(PANIC);
+        PANIC(contxt);
         free(sct);
         RCUR;
     }
@@ -365,7 +365,7 @@ entry_p m_pathonly(entry_p contxt)
                 else
                 {
                     // Out of memory.
-                    error(PANIC); 
+                    PANIC(contxt); 
                 }
             }
         }
@@ -377,7 +377,7 @@ entry_p m_pathonly(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
         RCUR;
     }
 }
@@ -412,7 +412,7 @@ entry_p m_patmatch(entry_p contxt)
         else
         {
             // We probably had a buffer overflow. 
-            error(contxt->id, ERR_OVERFLOW, p); 
+            ERR(ERR_OVERFLOW, p); 
             RNUM(0); 
         }
         #else
@@ -422,7 +422,7 @@ entry_p m_patmatch(entry_p contxt)
     else
     {
         // The parser is broken.
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR; 
     }
 }
@@ -446,7 +446,7 @@ entry_p m_strlen(entry_p contxt)
     else
     {
         // The parser is broken.
-        error(PANIC);
+        PANIC(contxt);
         RCUR; 
     }
 }
@@ -490,7 +490,7 @@ entry_p m_substr(entry_p contxt)
                 else
                 {
                     // Out of memory.
-                    error(PANIC);
+                    PANIC(contxt);
                     REST;
                 }
             }
@@ -516,7 +516,7 @@ entry_p m_substr(entry_p contxt)
                     else
                     {
                         // Out of memory.
-                        error(PANIC);
+                        PANIC(contxt);
                         REST;
                     }
                 }
@@ -534,7 +534,7 @@ entry_p m_substr(entry_p contxt)
     // The parser isn't necessarily broken 
     // if we end up here. We could also be
     // out of memory.
-    error(PANIC);
+    PANIC(contxt);
     RCUR; 
 }
 
@@ -564,7 +564,7 @@ entry_p m_tackon(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR;
     }
 }
@@ -602,7 +602,7 @@ char *h_tackon(entry_p contxt,
                 if(!r)
                 {
                     // Out of memory.
-                    error(PANIC); 
+                    PANIC(contxt); 
                 }
 
                 return r;
@@ -617,7 +617,7 @@ char *h_tackon(entry_p contxt,
                 if(!r)
                 {
                     // Out of memory.
-                    error(PANIC); 
+                    PANIC(contxt); 
                 }
 
                 return r;
@@ -631,7 +631,7 @@ char *h_tackon(entry_p contxt,
                  // Only fail if we're in 'strict' mode.
                 if(get_numvar(contxt, "@strict"))
                 {
-                    error(contxt->id, ERR_NOT_A_FILE, f); 
+                    ERR(ERR_NOT_A_FILE, f); 
                     return NULL; 
                 }
             }
@@ -672,10 +672,11 @@ char *h_tackon(entry_p contxt,
             else
             {
                 // Out of memory.
-                error(PANIC); 
+                PANIC(contxt); 
             }
         }
     }
 
+    // Failure.
     return NULL; 
 }

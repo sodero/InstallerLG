@@ -75,7 +75,7 @@ entry_p m_askbool(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!did_error())
+                if(!DID_ERR())
                 {
                     // Prompt user.
                     DNUM = gui_bool(p, h, yes, no);
@@ -84,18 +84,14 @@ entry_p m_askbool(entry_p contxt)
         }
         else
         {
-            error
-            (
-                contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : 
-                "help"
-            ); 
+            char *m = !prompt ? "prompt" : "help";
+            ERR(ERR_MISSING_OPTION, m);
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Success, failure or
@@ -171,9 +167,7 @@ entry_p m_askchoice(entry_p contxt)
                 if(d < 0 || d >= i)
                 {
                     // Nope, out of range.
-                    error(contxt->id, ERR_NO_ITEM, 
-                          str(deflt)); 
-
+                    ERR(ERR_NO_ITEM, str(deflt)); 
                     RNUM(0); 
                 }
 
@@ -196,7 +190,7 @@ entry_p m_askchoice(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!did_error())
+                if(!DID_ERR())
                 {
                     int hlt = 0; 
 
@@ -206,7 +200,7 @@ entry_p m_askchoice(entry_p contxt)
                     // Halt if abort.
                     if(hlt)
                     {
-                        error(HALT); 
+                        HALT(); 
                     }
                 }
             }
@@ -217,19 +211,14 @@ entry_p m_askchoice(entry_p contxt)
         }
         else
         {
-            error
-            (
-                contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : 
-                !help ? "help" : 
-                "choices"
-            ); 
+            char *m = !prompt ? "prompt" : !help ? "help" : "choices";
+            ERR(ERR_MISSING_OPTION, m);
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Success, failure or
@@ -272,7 +261,7 @@ entry_p m_askdir(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!did_error())
+                if(!DID_ERR())
                 {
                     int np = newpath ? 1 : 0,
                         dk = disk ? 1 : 0,
@@ -285,7 +274,7 @@ entry_p m_askdir(entry_p contxt)
                     // halt if user aborted.
                     if(!ret)
                     {
-                        error(HALT); 
+                        HALT(); 
                         REST; 
                     }
                 }
@@ -308,13 +297,8 @@ entry_p m_askdir(entry_p contxt)
         }
         else
         {
-            error
-            (
-                contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : 
-                !help ? "help" : 
-                "default"
-            ); 
+            char *m = !prompt ? "prompt" : !help ? "help" : "default";
+            ERR(ERR_MISSING_OPTION, m);
         }
 
         // Return empty string
@@ -324,7 +308,7 @@ entry_p m_askdir(entry_p contxt)
     else
     {
         // Broken parser.
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR;
     }
 }
@@ -383,7 +367,7 @@ entry_p m_askdisk(entry_p contxt)
 
                     // Only show requester if we could
                     // resolve all options.
-                    if(!did_error())
+                    if(!DID_ERR())
                     {
                         // Retry until we can get a lock or the
                         // user aborts. 
@@ -424,14 +408,14 @@ entry_p m_askdisk(entry_p contxt)
                             if(!DNUM)
                             {
                                 // Could not create 'newname' assign. 
-                                error(contxt->id, ERR_ASSIGN, str(CARG(1))); 
+                                ERR(ERR_ASSIGN, str(CARG(1))); 
                                 UnLock(l); 
                             }
                         }
                         else
                         {
                             // An assign must contain at least one character. 
-                            error(contxt->id, ERR_INVALID_ASSIGN, nn); 
+                            ERR(ERR_INVALID_ASSIGN, nn); 
                             UnLock(l); 
                         }
                     }
@@ -457,24 +441,19 @@ entry_p m_askdisk(entry_p contxt)
             {
                 // A volume name must contain at
                 // least one character. 
-                error(contxt->id, ERR_INVALID_VOLUME, n); 
+                ERR(ERR_INVALID_VOLUME, n); 
             }
         }
         else
         {
-            error
-            (
-                contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : 
-                !help ? "help" : 
-                "dest"
-            ); 
+            char *m = !prompt ? "prompt" : !help ? "help" : "dest";
+            ERR(ERR_MISSING_OPTION, m);
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Success, failure or
@@ -517,7 +496,7 @@ entry_p m_askfile(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!did_error())
+                if(!DID_ERR())
                 {
                     int np = newpath ? 1 : 0,
                         dk = disk ? 1 : 0;
@@ -529,7 +508,7 @@ entry_p m_askfile(entry_p contxt)
                     // halt if user aborted.
                     if(!ret)
                     {
-                        error(HALT); 
+                        HALT(); 
                         REST; 
                     }
                 }
@@ -552,13 +531,8 @@ entry_p m_askfile(entry_p contxt)
         }
         else
         {
-            error
-            (
-                contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : 
-                !help ? "help" : 
-                "default"
-            ); 
+            char *m = !prompt ? "prompt" : !help ? "help" : "default";
+            ERR(ERR_MISSING_OPTION, m);
         }
 
         // Return empty string
@@ -568,7 +542,7 @@ entry_p m_askfile(entry_p contxt)
     else
     {
         // Broken parser.
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR;
     }
 }
@@ -618,7 +592,7 @@ entry_p m_asknumber(entry_p contxt)
                 else
                 {
                     // The parser is broken
-                    error(PANIC); 
+                    PANIC(contxt); 
                     RCUR; 
                 }
             }
@@ -633,7 +607,7 @@ entry_p m_asknumber(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!did_error())
+                if(!DID_ERR())
                 {
                     int hlt = 0; 
 
@@ -643,7 +617,7 @@ entry_p m_asknumber(entry_p contxt)
                     // Halt if abort.
                     if(hlt)
                     {
-                        error(HALT); 
+                        HALT(); 
                     }
                 }
             }
@@ -655,19 +629,14 @@ entry_p m_asknumber(entry_p contxt)
         }
         else
         {
-            error
-            (
-                contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : 
-                !help ? "help" : 
-                "default"
-            ); 
+            char *m = !prompt ? "prompt" : !help ? "help" : "default";
+            ERR(ERR_MISSING_OPTION, m);
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Success, failure or
@@ -736,8 +705,7 @@ entry_p m_askoptions(entry_p contxt)
                 if(d >= (1 << i))
                 {
                     // Nope, out of range.
-                    error(contxt->id, ERR_NO_ITEM, 
-                          str(deflt)); 
+                    ERR(ERR_NO_ITEM, str(deflt)); 
                     RNUM(0); 
                 }
 
@@ -760,7 +728,7 @@ entry_p m_askoptions(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!did_error())
+                if(!DID_ERR())
                 {
                     // Prompt user.
                     DNUM = gui_options(p, h, chs, i); 
@@ -773,19 +741,14 @@ entry_p m_askoptions(entry_p contxt)
         }
         else
         {
-            error
-            (
-                contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : 
-                !help ? "help" : 
-                "choices"
-            );
+            char *m = !prompt ? "prompt" : !help ? "help" : "choices";
+            ERR(ERR_MISSING_OPTION, m);
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Success, failure or
@@ -821,7 +784,7 @@ entry_p m_askstring(entry_p contxt)
                 
                 // Only show requester if we could
                 // resolve all options.
-                if(!did_error())
+                if(!DID_ERR())
                 {
                     int hlt = 0; 
 
@@ -831,7 +794,7 @@ entry_p m_askstring(entry_p contxt)
                     // Halt if abort.
                     if(hlt)
                     {
-                        error(HALT); 
+                        HALT(); 
                         REST;
                     }
                 }
@@ -853,13 +816,8 @@ entry_p m_askstring(entry_p contxt)
         }
         else
         {
-            error
-            (
-                contxt->id, ERR_MISSING_OPTION, 
-                !prompt ? "prompt" : 
-                !help ? "help" : 
-                "default"
-            );
+            char *m = !prompt ? "prompt" : !help ? "help" : "default";
+            ERR(ERR_MISSING_OPTION, m);
         }
 
         // Return empty string
@@ -869,7 +827,7 @@ entry_p m_askstring(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR;
     }
 }

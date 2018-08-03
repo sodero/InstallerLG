@@ -19,7 +19,7 @@
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //----------------------------------------------------------------------------
-entry_p m_add (entry_p contxt)
+entry_p m_add(entry_p contxt)
 {
     // We should have one or more arguments.
     if(c_sane(contxt, 1))
@@ -40,7 +40,7 @@ entry_p m_add (entry_p contxt)
     else
     {
         // The parser is broken.
-        error(PANIC);
+        PANIC(contxt);
     }
 
     // Success or broken 
@@ -73,14 +73,13 @@ entry_p m_div(entry_p contxt)
         else
         {
             // Division by zero.
-            error(contxt->id, ERR_DIV_BY_ZERO, 
-                  contxt->name); 
+            ERR(ERR_DIV_BY_ZERO, contxt->name); 
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
     }
 
     // Division by zero or 
@@ -114,7 +113,7 @@ entry_p m_mul(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
     }
 
     // Success or broken 
@@ -142,7 +141,7 @@ entry_p m_sub(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
         RCUR; 
     }
 }

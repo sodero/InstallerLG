@@ -60,7 +60,7 @@ entry_p new_contxt(void)
     }
 
     // Out of memory.
-    error(PANIC);
+    PANIC(NULL);
     free(entry);
 
     // Failure.
@@ -91,9 +91,11 @@ entry_p new_number(int n)
     else
     {
         // Out of memory.
-        error(PANIC);
-        return NULL;
+        PANIC(NULL);
     }
+    
+    // Failure
+    return NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -130,7 +132,9 @@ entry_p new_string(char *n)
     free(n); 
 
     // Out of memory / bad input.
-    error(PANIC);
+    PANIC(NULL);
+
+    // Failure.
     return NULL; 
 }
 
@@ -188,7 +192,9 @@ entry_p new_symbol(char *n)
     free(n); 
 
     // Out of memory / bad input.
-    error(PANIC);
+    PANIC(NULL);
+
+    // Failure.
     return NULL; 
 }
 
@@ -276,7 +282,9 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
     kill(s); 
             
     // Out of memory / bad input.
-    error(PANIC);
+    PANIC(NULL);
+
+    // Failure.
     return NULL; 
 }
 
@@ -318,7 +326,9 @@ entry_p new_symref(char *n, int l)
     free(n);
 
     // Out of memory / bad input.
-    error(PANIC);
+    PANIC(NULL);
+
+    // Failure.
     return NULL; 
 }
 
@@ -362,7 +372,7 @@ static void move_contxt(entry_p dst, entry_p src)
     }
 
     // Invalid input.
-    error(PANIC);
+    PANIC(NULL);
 }
 
 //----------------------------------------------------------------------------
@@ -428,7 +438,7 @@ entry_p new_native(char *n, int l, call_t call, entry_p e, type_t r)
             }
 
             // Out of memory. 
-            error(PANIC); 
+            PANIC(NULL);
             free(entry); 
         }
     }
@@ -440,7 +450,9 @@ entry_p new_native(char *n, int l, call_t call, entry_p e, type_t r)
     kill(e); 
 
     // Bad input.
-    error(PANIC);
+    PANIC(NULL);
+
+    // Failure.
     return NULL;
 }
 
@@ -504,7 +516,9 @@ entry_p new_option(char *n, opt_t t, entry_p e)
 
     // Out of memory / 
     // invalid input. 
-    error(PANIC);
+    PANIC(NULL);
+
+    // Failure.
     return NULL;
 }
 
@@ -557,7 +571,9 @@ entry_p new_cusref(char *n, int l, entry_p e)
 
     // Out of memory / 
     // invalid input. 
-    error(PANIC);
+    PANIC(NULL);
+
+    // Failure.
     return NULL; 
 }
 
@@ -621,7 +637,9 @@ entry_p append(entry_p **dst, entry_p e)
                 kill((*dst)[0]);
                 (*dst)[0] = e; 
 
-                error(PANIC);
+                PANIC(NULL);
+
+                // Failure.
                 return e; 
             }
         }
@@ -632,7 +650,9 @@ entry_p append(entry_p **dst, entry_p e)
     }
 
     // Bad input. 
-    error(PANIC);
+    PANIC(NULL);
+
+    // Failure.
     return NULL; 
 }
 
@@ -673,7 +693,7 @@ entry_p merge(entry_p dst, entry_p src)
     else
     {
         // Bad input.
-        error(PANIC);
+        PANIC(NULL);
     }
 
     // No matter how things went above, we
@@ -759,7 +779,9 @@ entry_p push(entry_p dst, entry_p src)
     kill(src); 
 
     // Out of memory / bad input.
-    error(PANIC);
+    PANIC(NULL);
+
+    // Failure.
     return dst; 
 }
 

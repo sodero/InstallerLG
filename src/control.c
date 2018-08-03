@@ -49,7 +49,7 @@ entry_p m_if(entry_p contxt)
     }
 
     // The parser is broken.
-    error(PANIC);
+    PANIC(contxt);
     RCUR; 
 }
 
@@ -83,13 +83,13 @@ entry_p m_select(entry_p contxt)
         }
 
         // No such item, n > the number of items. 
-        error(contxt->id, ERR_NO_ITEM, str(CARG(1))); 
+        ERR(ERR_NO_ITEM, str(CARG(1))); 
         RNUM(0); 
     }
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR;
     }
 }
@@ -117,7 +117,7 @@ static entry_p h_whunt(entry_p contxt, int m)
         // Use XOR to support both 'while' and 'until'. Break 
         // the loop if something goes wrong inside.
         while((m ^ tru(CARG(1))) && 
-              !did_error())
+              !DID_ERR())
         {
             // Save the return value of the last function
             // in the CONTXT
@@ -132,7 +132,7 @@ static entry_p h_whunt(entry_p contxt, int m)
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
         RCUR; 
     }
 }

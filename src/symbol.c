@@ -44,7 +44,7 @@ entry_p m_set(entry_p contxt)
 
             // If we manage to resolve the right hand
             // side, create a copy of its contents.
-            if(!did_error())
+            if(!DID_ERR())
             {
                 entry_p res = malloc(sizeof(entry_t)); 
 
@@ -61,7 +61,7 @@ entry_p m_set(entry_p contxt)
                         if(!res->name)
                         {
                             // Out of memory. 
-                            error(PANIC);
+                            PANIC(contxt);
                             free(res); 
                             break; 
                         }
@@ -92,7 +92,7 @@ entry_p m_set(entry_p contxt)
                 else
                 {
                     // Out of memory. 
-                    error(PANIC);
+                    PANIC(contxt);
                     break; 
                 }
 
@@ -113,7 +113,7 @@ entry_p m_set(entry_p contxt)
     else
     {
         // Broken parser.  
-        error(PANIC);
+        PANIC(contxt);
     }
 
     // FIXME
@@ -147,7 +147,7 @@ entry_p m_symbolset(entry_p contxt)
             entry_p rhs = resolve(*cur++);
 
             // Could we resolve both lhs and rhs? 
-            if(!did_error())
+            if(!DID_ERR())
             {
                 // Create a copy of the evaluated rhs. 
                 entry_p res = malloc(sizeof(entry_t)); 
@@ -165,7 +165,7 @@ entry_p m_symbolset(entry_p contxt)
                         if(!res->name)
                         {
                             // Out of memory. 
-                            error(PANIC);
+                            PANIC(contxt);
                             free(res); 
                             break; 
                         }
@@ -243,7 +243,7 @@ entry_p m_symbolset(entry_p contxt)
                 else
                 {
                     // Out of memory. 
-                    error(PANIC); 
+                    PANIC(contxt); 
                     RCUR; 
                 }
             }
@@ -291,7 +291,7 @@ entry_p m_symbolval(entry_p contxt)
 
         // Return the resolved value if
         // the symbol could be found.
-        if(!did_error())
+        if(!DID_ERR())
         {
             return r; 
         }
@@ -304,7 +304,7 @@ entry_p m_symbolval(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
         RCUR;
     }
 }

@@ -10,13 +10,18 @@
 #ifndef ERROR_H_
 #define ERROR_H_
 
+#include "types.h"
+
 //----------------------------------------------------------------------------
-// Shorthands
+// Macros
 //----------------------------------------------------------------------------
-#define PANIC __LINE__, ERR_PANIC, __func__
-#define MISS 1, ERR_MISS, __func__
-#define HALT -1, ERR_HALT, __func__
-#define RESET -2, ERR_RESET, __func__
+#define HALT() error(NULL, 0, ERR_HALT, __func__)
+#define RESET() error(NULL, 0, ERR_RESET, __func__)
+#define PANIC(C) error(C, __LINE__, ERR_PANIC, __func__)
+#define ERR_C(C,T,I) error((C), (C)->id, T, I)
+#define ERR(T,I) ERR_C(contxt,T,I)
+#define DID_ERR() (error(NULL, 0, ERR_NONE, NULL) != 0)
+#define DID_HALT() (error(NULL, 0, ERR_NONE, NULL) == ERR_HALT)
 
 //----------------------------------------------------------------------------
 // Error types
@@ -24,12 +29,11 @@
 typedef enum
 {
     ERR_NONE = 0,
-    ERR_PANIC,
-    ERR_MISS,
     ERR_HALT, 
-    ERR_RESET,
-    ERR_OVERFLOW,
     ERR_ABORT,
+    ERR_RESET,
+    ERR_PANIC,
+    ERR_OVERFLOW,
     ERR_READ, 
     ERR_READ_FILE, 
     ERR_READ_DIR, 
@@ -63,10 +67,8 @@ typedef enum
 } error_t; 
 
 //----------------------------------------------------------------------------
-// Functions
+// Don't use this function directly, use the macros above instead.
 //----------------------------------------------------------------------------
-int did_error(void);
-int did_halt(void);
-int error(int id, error_t type, const char *info);
+int error(entry_p contxt, int id, error_t type, const char *info);
 
 #endif

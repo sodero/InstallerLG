@@ -33,7 +33,7 @@ entry_p find_symbol(entry_p entry)
     // only. We could enable local (set), 
     // but this might break old scripts, so
     // let's not do it. 
-    entry_p con = local(entry); 
+    entry_p con = local(entry);
 
     if(con)
     {
@@ -67,14 +67,13 @@ entry_p find_symbol(entry_p entry)
         if(get_numvar(global(entry), "@strict"))
         {
             // We found nothing. 
-            error(entry->id, ERR_UNDEF_VAR, 
-                  entry->name); 
+            ERR_C(entry, ERR_UNDEF_VAR, entry->name); 
         }
     }
     else
     {
         // Bad input. 
-        error(PANIC);
+        PANIC(entry);
     }
 
     // A failure will be evaluated as
@@ -127,7 +126,9 @@ entry_p resolve(entry_p entry)
     }
 
     // Bad input. 
-    error(PANIC);
+    PANIC(entry);
+
+    // Failure.
     return new_failure();
 }
 
@@ -180,7 +181,9 @@ int num(entry_p entry)
     }
 
     // Bad input. 
-    error(PANIC);
+    PANIC(entry);
+
+    // Failure.
     return 0; 
 }
 
@@ -202,7 +205,7 @@ int tru(entry_p entry)
         entry_p e = resolve(entry); 
 
         // Evaluate on success.
-        if(!did_error())
+        if(!DID_ERR())
         {
             // Only numerical values and strings
             // can be true.
@@ -216,7 +219,7 @@ int tru(entry_p entry)
     else
     {
         // Bad input. 
-        error(PANIC);
+        PANIC(entry);
     }
 
     // False.
@@ -282,7 +285,7 @@ char *str(entry_p entry)
                         else
                         {
                             // OOM.
-                            error(PANIC);
+                            PANIC(entry);
                         }
                 }
 
@@ -333,7 +336,10 @@ char *str(entry_p entry)
         }
     }
 
-    error(PANIC);
+    // Bad input.
+    PANIC(entry);
+
+    // Failure.
     return ""; 
 }
 
@@ -365,7 +371,7 @@ entry_p invoke(entry_p entry)
             // value of the last one.
             while (*vec && 
                    *vec != end() &&
-                   !did_error())
+                   !DID_ERR())
             {
                 // Resolve and proceed.
                 ret = resolve(*vec);
@@ -378,7 +384,9 @@ entry_p invoke(entry_p entry)
     }
 
     // Bad input. 
-    error(PANIC);
+    PANIC(entry);
+
+    // Failure.
     return ret;
 }
 
@@ -399,7 +407,7 @@ void run(entry_p entry)
 
         // Execute the (onerror) function
         // on failure. 
-        if(did_error() && !did_halt())
+        if(DID_ERR() && !DID_HALT())
         {
             status = m_onerror(entry); 
         }

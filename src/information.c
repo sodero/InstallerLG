@@ -43,7 +43,7 @@ entry_p m_complete(entry_p contxt)
     else
     {
         // The parser is broken.
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR; 
     }
 }
@@ -113,7 +113,7 @@ entry_p m_debug(entry_p contxt)
     else
     {
         // The parser is broken.
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR;
     }
 }
@@ -146,7 +146,7 @@ entry_p m_message(entry_p contxt)
             {
                 // If we could resolve all our children,
                 // show the result of the concatenation.
-                if(!did_error())
+                if(!DID_ERR())
                 {
                     gui_message(msg, 0);  
                 }
@@ -157,7 +157,7 @@ entry_p m_message(entry_p contxt)
             else
             {
                 // Out of memory.
-                error(PANIC);
+                PANIC(contxt);
                 RCUR;
             }
         }
@@ -168,7 +168,7 @@ entry_p m_message(entry_p contxt)
     else
     {
         // The parser is broken.
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR; 
     }
 }
@@ -196,7 +196,7 @@ entry_p m_user(entry_p contxt)
     else
     {
         // Broken parser.
-        error(PANIC);
+        PANIC(contxt);
         RCUR; 
     }
 }
@@ -232,7 +232,7 @@ entry_p m_welcome(entry_p contxt)
         {
             // If we could resolve all our children,
             // show the result of the concatenation.
-            if(!did_error())
+            if(!DID_ERR())
             {
                 gui_welcome(msg, &lvl, &lgf, &prt); 
             }
@@ -255,14 +255,14 @@ entry_p m_welcome(entry_p contxt)
             }
             else
             {
-                error(HALT); 
+                HALT(); 
                 RNUM(0); 
             }
         }
     }
         
     // OOM / broken parser.
-    error(PANIC);
+    PANIC(contxt);
     RCUR; 
 }
 
@@ -284,7 +284,7 @@ entry_p m_working(entry_p contxt)
         {
             // Only proceed if we could resolve all
             // our children.
-            if(!did_error())
+            if(!DID_ERR())
             {
                 // Standard prefix.
                 const char *pre = tr(S_WRKN); 
@@ -329,6 +329,6 @@ entry_p m_working(entry_p contxt)
         
     // Broken parser /
     // out of memory.
-    error(PANIC);
+    PANIC(contxt);
     RCUR; 
 }

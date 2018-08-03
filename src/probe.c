@@ -112,7 +112,7 @@ entry_p m_database(entry_p contxt)
     else
     {
         // The parser is broken.
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR;
     }
 }
@@ -135,7 +135,7 @@ entry_p m_earlier(entry_p contxt)
         if(stat(str(CARG(1)), &f1))
         {
             // Could not read from file / dir. 
-            error(contxt->id, ERR_READ, str(CARG(1))); 
+            ERR(ERR_READ, str(CARG(1))); 
             RNUM(0); 
         }
 
@@ -143,7 +143,7 @@ entry_p m_earlier(entry_p contxt)
         if(stat(str(CARG(2)), &f2))
         {
             // Could not read from file / dir. 
-            error(contxt->id, ERR_READ, str(CARG(2))); 
+            ERR(ERR_READ, str(CARG(2))); 
             RNUM(0); 
         }
 
@@ -156,7 +156,7 @@ entry_p m_earlier(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR;
     }
 }
@@ -303,7 +303,7 @@ entry_p m_getassign(entry_p contxt)
                             else
                             {
                                 // Out of memory
-                                error(PANIC);
+                                PANIC(contxt);
                                 REST;
                             }
                         }
@@ -326,7 +326,7 @@ entry_p m_getassign(entry_p contxt)
             // sure this can happen. I believe
             // LockDosList will block until the
             // end of time if a problem occurs.
-            error(contxt->id, ERR_READ, asn); 
+            ERR(ERR_READ, asn); 
         }
         #endif
 
@@ -397,7 +397,7 @@ entry_p m_getdevice(entry_p contxt)
                         else
                         {
                             // Unknown error.
-                            error(PANIC);
+                            PANIC(contxt);
                         }
                     }
                 }
@@ -409,7 +409,7 @@ entry_p m_getdevice(entry_p contxt)
         }
 
         // Could not get information about <path>.
-        error(contxt->id, ERR_READ, str(CARG(1))); 
+        ERR(ERR_READ, str(CARG(1))); 
         #endif
 
         // Return empty string
@@ -419,7 +419,7 @@ entry_p m_getdevice(entry_p contxt)
     else
     {
         // The parser is broken.
-        error(PANIC);
+        PANIC(contxt);
         RCUR;
     }
 }
@@ -479,7 +479,7 @@ entry_p m_getdiskspace(entry_p contxt)
         // we could get a lock, but failed
         // when trying to retrieve info 
         // from the lock.
-        error(contxt->id, ERR_READ, n); 
+        ERR(ERR_READ, n); 
         #endif
 
         // Failure.
@@ -488,7 +488,7 @@ entry_p m_getdiskspace(entry_p contxt)
     else
     {
         // The parser is broken.
-        error(PANIC);
+        PANIC(contxt);
         RCUR;
     }
 }
@@ -521,7 +521,7 @@ entry_p m_getenv(entry_p contxt)
     else
     {
         // The parser is broken.
-        error(PANIC);
+        PANIC(contxt);
         RCUR;
     }
 }
@@ -554,14 +554,14 @@ entry_p m_getsize(entry_p contxt)
         else
         {
             // We could not open the file. 
-            error(contxt->id, ERR_READ_FILE, str(CARG(1))); 
+            ERR(ERR_READ_FILE, str(CARG(1))); 
             DNUM = 0;
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
     }
     
     // Success, failure or
@@ -603,14 +603,14 @@ entry_p m_getsum(entry_p contxt)
         }
         else
         {
-            error(contxt->id, ERR_READ_FILE, fn); 
+            ERR(ERR_READ_FILE, fn); 
             DNUM = 0;
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
     }
 
     // Success, failure or
@@ -675,7 +675,7 @@ int h_getversion(entry_p contxt, const char *file)
             // Could not read from file. This 
             // will pick up problems from both
             // fgetc() and fread() above. 
-            error(contxt->id, ERR_READ_FILE, file); 
+            ERR(ERR_READ_FILE, file); 
         }
 
         // We don't need the file anymore. 
@@ -687,7 +687,7 @@ int h_getversion(entry_p contxt, const char *file)
         if(get_numvar(contxt, "@strict"))
         {
             // Could not read from file. 
-            error(contxt->id, ERR_READ_FILE, file); 
+            ERR(ERR_READ_FILE, file); 
         }
         else
         {
@@ -779,7 +779,7 @@ entry_p m_getversion(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
     }
 
     // Return whatever we have, could
@@ -831,7 +831,7 @@ entry_p m_iconinfo(entry_p contxt)
                 // we run into resource problems. 
                 for(size_t i = 0; 
                     tt[i] != end() &&
-                    !did_error(); i++)
+                    !DID_ERR(); i++)
                 {
                     // If we have an option of any kind. 
                     if(tt[i])
@@ -956,7 +956,7 @@ entry_p m_iconinfo(entry_p contxt)
             else
             {
                 // More information? IoErr() is nice.  
-                error(contxt->id, ERR_READ_FILE, file); 
+                ERR(ERR_READ_FILE, file); 
                 RNUM(0); 
             }
 
@@ -965,14 +965,14 @@ entry_p m_iconinfo(entry_p contxt)
         }
         else
         {
-            error(contxt->id, ERR_MISSING_OPTION, "dest"); 
+            ERR(ERR_MISSING_OPTION, "dest"); 
             RNUM(0); 
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
         RCUR; 
     }
 }

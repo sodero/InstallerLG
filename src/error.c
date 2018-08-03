@@ -9,37 +9,15 @@
 
 #include "error.h"
 #include "gui.h"
+#include "util.h"
 
 #include <stdio.h>
 
 //----------------------------------------------------------------------------
-// Name:        did_error
-// Description: Function used to determine whether or not we have erred.
-// Input:       -
-// Return:      int:    '1' if we have erred, '0' otherwise.
-//----------------------------------------------------------------------------
-int did_error(void)
-{
-    int err = error(0, ERR_NONE, NULL) != 0 ? 1 : 0; 
-    return err; 
-}
-
-//----------------------------------------------------------------------------
-// Name:        did_halt
-// Description: Function used to determine whether or not we should halt.
-// Input:       -
-// Return:      int:    '1' if we should halt execution, '0' otherwise.
-//----------------------------------------------------------------------------
-int did_halt(void)
-{
-    int err = error(0, ERR_NONE, NULL) == -1 ? 1 : 0; 
-    return err; 
-}
-
-//----------------------------------------------------------------------------
 // Name:        error
 // Description: Function used to set / get / communicate errors.
-// Input:       int id:             A numerical identifier aiding debugging. 
+// Input:       !!!.OS.TEST!!!
+//              int id:             A numerical identifier aiding debugging. 
 //                                  In most cases this will be a line number. 
 //              error_t:            Type of error to set, or ERR_NONE to get 
 //                                  status.  
@@ -47,18 +25,17 @@ int did_halt(void)
 //                                  that makes sense to the user.
 // Return:      int:                The current state. 
 //----------------------------------------------------------------------------
-int error(int id, error_t type, const char *info)
+int error(entry_p contxt, int id, error_t type, const char *info)
 {
-    static int err;
+    static error_t last;
     static const char *des[] =
     {
         NULL, 
-        "Internal error",
-        "Implementation missing",
         "Halt",
-        "Reset",
-        "Buffer overflow",
         "Abort",
+        "Reset",
+        "Internal error",
+        "Buffer overflow",
         "Read error", 
         "Could not read from file", 
         "Could not read directory",
@@ -91,31 +68,44 @@ int error(int id, error_t type, const char *info)
         "Options are mutually exclusive"
     };
 
-    // Unless ERR_NONE...
-    if(id && type && info)
+    // Set or get state?
+    if(type != ERR_NONE)
     {
-        // Save the ID for future use by
-        // did_error and did_halt..
-        err = id; 
-
-        // Real errors have ID:s >= 1 
-        if(id > 0)
+        // Clear state?
+        if(type == ERR_RESET)
         {
-            // Try to show the error dialog window
-            if(!gui_error(id, des[type], info))
-            {
-                // Fallback to stderr if necessary
-                fprintf(stderr, "Line %d: %s '%s'\n", 
-                        id, des[type], info);
-            }
+            last = ERR_NONE;
         }
-        // ERR_RESET
-        else if(id == -2)
+        // Set state and show error message
+        // if applicable.
+        else
         {
-            err = 0; 
+            // Save value for future 'gets'.
+            last = type;
+
+            // If we have a 'real' error, show
+            // it to the user.
+            if(type > ERR_RESET)
+            {
+                // Try to show the error dialog window
+                if(!gui_error(id, des[type], info))
+                {
+                    // Fallback to stderr if necessary
+                    fprintf(stderr, "Line %d: %s '%s'\n", 
+                            id, des[type], info);
+                }
+
+                // If this is a PANIC, or if we're in
+                // debug mode, do a context dump.
+                if(type == ERR_PANIC ||
+                   get_numvar(contxt, "@debug"))
+                {
+                    pretty_print(contxt);
+                }
+            }
         }
     }
 
-    // Used by did_error and did_halt
-    return err; 
+    // Current / last state.
+    return last; 
 }

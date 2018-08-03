@@ -66,7 +66,7 @@ entry_p m_expandpath(entry_p contxt)
             else
             {
                 // Out of memory.
-                error(PANIC); 
+                PANIC(contxt); 
             }
 
             UnLock(lock); 
@@ -80,7 +80,7 @@ entry_p m_expandpath(entry_p contxt)
     else
     {
         // Broken parser
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR;
     }
 }
@@ -134,7 +134,7 @@ static int h_confirm(entry_p contxt,
         // value is that same as skip.
         if(ret < 0)
         {
-            error(HALT); 
+            HALT(); 
             ret = 0; 
         }
 
@@ -144,7 +144,7 @@ static int h_confirm(entry_p contxt,
     else
     {
         // Broken parser. 
-        error(PANIC); 
+        PANIC(contxt); 
         return 0; 
     }
 }
@@ -268,14 +268,14 @@ static const char *h_fileonly(entry_p contxt,
             if(get_numvar(contxt, "@strict"))
             {
                 // Empty string or dir / vol.
-                error(contxt->id, ERR_NOT_A_FILE, s); 
+                ERR(ERR_NOT_A_FILE, s); 
             }
         }   
     }
     else
     {
         // Bad input.
-        error(PANIC);
+        PANIC(contxt);
     }
 
     // Always return a valid
@@ -339,7 +339,7 @@ static pnode_p h_filetree(entry_p contxt,
                             // bail out. 
                             if(!h_exists(n_src))
                             {
-                                error(contxt->id, ERR_NO_SUCH_FILE_OR_DIR, n_src); 
+                                ERR(ERR_NO_SUCH_FILE_OR_DIR, n_src); 
                                 free(n_src); 
                                 closedir(dir); 
                                 return NULL; 
@@ -447,7 +447,7 @@ static pnode_p h_filetree(entry_p contxt,
                                 {
                                     // We probably had a buffer overflow.
                                     // No more pattern matching today.
-                                    error(contxt->id, ERR_OVERFLOW, str(pattern)); 
+                                    ERR(ERR_OVERFLOW, str(pattern)); 
                                     pattern = NULL; 
                                 }
                                 #else
@@ -528,7 +528,9 @@ static pnode_p h_filetree(entry_p contxt,
                                 else
                                 {
                                     // Out of memory.
-                                    error(PANIC); 
+                                    PANIC(contxt); 
+
+                                    // Free what we have and exit.
                                     free(n_src); 
                                     free(n_dst); 
                                     break; 
@@ -554,7 +556,7 @@ static pnode_p h_filetree(entry_p contxt,
             }
             else
             {
-                error(contxt->id, ERR_READ_DIR, src); 
+                ERR(ERR_READ_DIR, src); 
                 return NULL; 
             }
         }
@@ -612,13 +614,13 @@ static pnode_p h_filetree(entry_p contxt,
         else
         // It's neither a directory or a file.
         {
-            error(contxt->id, ERR_NO_SUCH_FILE_OR_DIR, src); 
+            ERR(ERR_NO_SUCH_FILE_OR_DIR, src); 
             return NULL; 
         }
     }
 
     // Out of memory.
-    error(PANIC); 
+    PANIC(contxt); 
 
     // These might leak when OOM
     // if we don't free them.
@@ -674,7 +676,7 @@ static int h_protect_get(entry_p contxt,
             if(!done)
             {
                 // No, fail and set impossible mask.
-                error(contxt->id, ERR_GET_PERM, file); 
+                ERR(ERR_GET_PERM, file); 
                 *mask = -1; 
             }
 
@@ -691,7 +693,7 @@ static int h_protect_get(entry_p contxt,
     }
 
     // Out of memory.
-    error(PANIC); 
+    PANIC(contxt); 
     return 0; 
 }
 
@@ -719,7 +721,7 @@ static int h_protect_set(entry_p contxt,
         {
             if(!SetProtection(file, mask))
             {
-                error(contxt->id, ERR_SET_PERM, file); 
+                ERR(ERR_SET_PERM, file); 
                 return 0; 
             }
         }
@@ -732,7 +734,7 @@ static int h_protect_set(entry_p contxt,
     else
     {
         // Bad input.
-        error(PANIC); 
+        PANIC(contxt); 
         return 0; 
     }
 }
@@ -810,7 +812,7 @@ static int h_copyfile(entry_p contxt,
                             {
                                 // Skip file or abort.
                                 fclose(fs); 
-                                return did_halt() ? 0 : 1; 
+                                return DID_HALT() ? 0 : 1; 
                             }
                         }
                     }
@@ -827,7 +829,7 @@ static int h_copyfile(entry_p contxt,
                     {
                         if(fwrite(buf, 1, n, fd) != n)
                         {
-                            error(contxt->id, ERR_WRITE_FILE, dst); 
+                            ERR(ERR_WRITE_FILE, dst); 
                             break; 
                         }
 
@@ -882,7 +884,7 @@ static int h_copyfile(entry_p contxt,
                                             if(!PutDiskObject(dst, obj))
                                             {
                                                 // We failed for some unknown reason.
-                                                error(contxt->id, ERR_WRITE_FILE, id); 
+                                                ERR(ERR_WRITE_FILE, id); 
                                             }
 
                                             FreeDiskObject(obj);
@@ -903,12 +905,12 @@ static int h_copyfile(entry_p contxt,
                         }
 
                         // Reset error codes if necessary.
-                        if(did_error())
+                        if(DID_ERR())
                         {
                             if(mode & CF_NOFAIL)
                             {
                                 // Forget all errors.
-                                error(RESET);
+                                RESET();
                             }
                             else
                             {
@@ -936,7 +938,7 @@ static int h_copyfile(entry_p contxt,
                     else
                     {
                         // Fail for real.
-                        error(contxt->id, ERR_WRITE_FILE, dst); 
+                        ERR(ERR_WRITE_FILE, dst); 
                     }
                 }
             }
@@ -951,13 +953,13 @@ static int h_copyfile(entry_p contxt,
                 else
                 {
                     // Fail for real.
-                    error(contxt->id, ERR_READ_FILE, src); 
+                    ERR(ERR_READ_FILE, src); 
                 }
             }
         }
         else
         {
-            error(HALT); 
+            HALT(); 
             h_log(contxt, tr(S_ACPY), src, dst); 
         }
     }
@@ -1061,12 +1063,12 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
 
             // For some unknown reason, we can't 
             // create the directory.
-            error(contxt->id, ERR_WRITE_DIR, dst); 
+            ERR(ERR_WRITE_DIR, dst); 
         }
         else
         {
             // Out of memory.
-            error(PANIC); 
+            PANIC(contxt); 
         }
     }
 
@@ -1124,7 +1126,7 @@ entry_p m_copyfiles(entry_p contxt)
            (choices && (pattern || all)) ||
            (all && (choices || pattern)))
         {
-            error(contxt->id, ERR_OPTION_MUTEX, 
+            ERR(ERR_OPTION_MUTEX, 
                   "pattern/choices/all"); 
             RCUR; 
         }
@@ -1135,7 +1137,7 @@ entry_p m_copyfiles(entry_p contxt)
            (nofail && (fail || oknodelete)) ||
            (oknodelete && (nofail || fail)))
         {
-            error(contxt->id, ERR_OPTION_MUTEX, 
+            ERR(ERR_OPTION_MUTEX, 
                   "fail/nofail/oknodelete"); 
             RCUR; 
         }
@@ -1154,8 +1156,7 @@ entry_p m_copyfiles(entry_p contxt)
             if(h_exists(src) == 2 &&
                !all && !choices && !pattern)
             {
-                error(contxt->id, ERR_MISSING_OPTION, 
-                      "all/choices/pattern"); 
+                ERR(ERR_MISSING_OPTION, "all/choices/pattern"); 
                 RCUR; 
             }
 
@@ -1246,9 +1247,9 @@ entry_p m_copyfiles(entry_p contxt)
                     // is set.
                     if(!prompt || !help)
                     {
+                        char * m = prompt ? "help" : "prompt"; 
+                        ERR(ERR_MISSING_OPTION, m);
                         cur = NULL; 
-                        error(contxt->id, ERR_MISSING_OPTION, 
-                              prompt ? "help" : "prompt"); 
                     }
                 }
 
@@ -1317,7 +1318,7 @@ entry_p m_copyfiles(entry_p contxt)
                                 break; 
 
                             default: 
-                                error(PANIC); 
+                                PANIC(contxt); 
                                 DNUM = 0; 
                         }
                     }
@@ -1331,7 +1332,7 @@ entry_p m_copyfiles(entry_p contxt)
                     // '-1' == halt.
                     if(go == -1)
                     {
-                        error(HALT); 
+                        HALT(); 
                     }
                 }
 
@@ -1350,14 +1351,14 @@ entry_p m_copyfiles(entry_p contxt)
         }
         else
         {
-            error(contxt->id, ERR_MISSING_OPTION, 
-                  !source ? "source" : "dest"); 
+            char *m = !source ? "source" : "dest";
+            ERR(ERR_MISSING_OPTION, m);
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
     }
 
     // We don't know if we're successsful, 
@@ -1410,8 +1411,8 @@ entry_p m_copylib(entry_p contxt)
            (nofail && (fail || oknodelete)) ||
            (oknodelete && (nofail || fail)))
         {
-            error(contxt->id, ERR_OPTION_MUTEX, 
-                  "fail/nofail/oknodelete"); 
+            ERR(ERR_OPTION_MUTEX, 
+                "fail/nofail/oknodelete"); 
             RCUR; 
         }
 
@@ -1453,7 +1454,7 @@ entry_p m_copylib(entry_p contxt)
                     if(get_numvar(contxt, "@strict"))
                     {
                         // Could not find version string.
-                        error(contxt->id, ERR_NO_VERSION, s); 
+                        ERR(ERR_NO_VERSION, s); 
                         RCUR;
                     }
                 }
@@ -1464,7 +1465,7 @@ entry_p m_copylib(entry_p contxt)
                     if(get_numvar(contxt, "@strict"))
                     {
                         // Destination is a file, not a dir. 
-                        error(contxt->id, ERR_NOT_A_DIR, d); 
+                        ERR(ERR_NOT_A_DIR, d); 
                         RCUR;
                     }
                 }
@@ -1510,7 +1511,7 @@ entry_p m_copylib(entry_p contxt)
                         // Permission problems or the dir is
                         // more than 1 level deeper than the
                         // existing path. 
-                        error(contxt->id, ERR_WRITE_DIR, d); 
+                        ERR(ERR_WRITE_DIR, d); 
                         RCUR;
                     }
                 }
@@ -1611,7 +1612,7 @@ entry_p m_copylib(entry_p contxt)
                             if(get_numvar(contxt, "@strict"))
                             {
                                 // Could not find version string.
-                                error(contxt->id, ERR_NO_VERSION, f); 
+                                ERR(ERR_NO_VERSION, f); 
                                 vs = vf;
                             }
                             else
@@ -1767,7 +1768,7 @@ entry_p m_copylib(entry_p contxt)
                         if(get_numvar(contxt, "@strict"))
                         {
                             // Dest file exists, but is a directory. 
-                            error(contxt->id, ERR_NOT_A_FILE, f); 
+                            ERR(ERR_NOT_A_FILE, f); 
                         }
                     }
 
@@ -1781,25 +1782,21 @@ entry_p m_copylib(entry_p contxt)
                 if(get_numvar(contxt, "@strict"))
                 {
                     // No file, doesn't exist or is dir. 
-                    error(contxt->id, ERR_NOT_A_FILE, s); 
+                    ERR(ERR_NOT_A_FILE, s); 
                 }
             }
         }
         else
         {
-            error
-            (
-                contxt->id, ERR_MISSING_OPTION, 
-                !source ? "source" : 
-                !dest ? "dest" :
-                !prompt ? "prompt" : "help"
-            ); 
+            char *m = !source ? "source" : !dest ? "dest" : 
+                      !prompt ? "prompt" : "help";
+            ERR(ERR_MISSING_OPTION, m); 
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
     }
 
     // Success or failure.
@@ -1895,7 +1892,7 @@ static int h_delete_file(entry_p contxt, const char *file)
                     }
                     else
                     {
-                        error(contxt->id, ERR_DELETE_FILE, info); 
+                        ERR(ERR_DELETE_FILE, info); 
                         return 0;
                     }
                 }
@@ -1906,14 +1903,14 @@ static int h_delete_file(entry_p contxt, const char *file)
         }
         else
         {
-            error(contxt->id, ERR_DELETE_FILE, file); 
+            ERR(ERR_DELETE_FILE, file); 
             return 0;
         }
     }
     else
     {
         // Unknown error.
-        error(PANIC); 
+        PANIC(contxt); 
         return 0;
     }
 }
@@ -2080,7 +2077,7 @@ static int h_delete_dir(entry_p contxt, const char *dir)
     else
     {
         // Bad input.
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Fail silently.
@@ -2155,7 +2152,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
                 // Please note that 'breaks' will take us
                 // here, so will MatchFirst / MatchNext()
                 // problems.
-                error(contxt->id, ERR_DELETE_FILE, pat); 
+                ERR(ERR_DELETE_FILE, pat); 
             }
         }
         #else
@@ -2165,7 +2162,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
     }
 
     // Bad input.
-    error(PANIC); 
+    PANIC(contxt); 
     return 0;
 }
 
@@ -2232,8 +2229,8 @@ entry_p m_delete(entry_p contxt)
                 // is set.
                 if(!prompt || !help)
                 {
-                    error(contxt->id, ERR_MISSING_OPTION, 
-                          prompt ? "help" : "prompt"); 
+                    char *m = prompt ? "help" : "prompt"; 
+                    ERR(ERR_MISSING_OPTION, m);
                     RCUR; 
                 }
             }
@@ -2289,13 +2286,13 @@ entry_p m_delete(entry_p contxt)
         else
         {
             // We probably had a buffer overflow. 
-            error(contxt->id, ERR_OVERFLOW, w); 
+            ERR(ERR_OVERFLOW, w); 
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Success or broken 
@@ -2345,7 +2342,7 @@ entry_p m_exists(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
     }
 
     // Success or broken 
@@ -2371,7 +2368,7 @@ entry_p m_fileonly(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR; 
     }
 }
@@ -2516,7 +2513,7 @@ entry_p m_foreach(entry_p contxt)
                     if(!cur)
                     {
                         // Out of memory.
-                        error(PANIC); 
+                        PANIC(contxt); 
                         err = 1;
                     }
 
@@ -2533,7 +2530,7 @@ entry_p m_foreach(entry_p contxt)
         {
             // We could end up here for a number
             // of reasons. More details perhaps?
-            error(contxt->id, ERR_READ_DIR, dn); 
+            ERR(ERR_READ_DIR, dn); 
         }
 
         // Iterate over the entire list of files / dirs and
@@ -2569,7 +2566,7 @@ entry_p m_foreach(entry_p contxt)
 
                         // We probably had a buffer overflow. 
                         default:
-                            error(contxt->id, ERR_OVERFLOW, pt); 
+                            ERR(ERR_OVERFLOW, pt); 
                             err = 1; 
                     }
                 }
@@ -2598,7 +2595,7 @@ entry_p m_foreach(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Success or broken 
@@ -2678,7 +2675,7 @@ entry_p m_makeassign(entry_p contxt)
             if(!DNUM)
             {
                 // Could not create / rm assign / get lock. 
-                error(contxt->id, ERR_ASSIGN, str(CARG(1))); 
+                ERR(ERR_ASSIGN, str(CARG(1))); 
             }
         }
         else
@@ -2690,7 +2687,7 @@ entry_p m_makeassign(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Return what we have. Could
@@ -2749,8 +2746,8 @@ entry_p m_makedir(entry_p contxt)
             // is set.
             if(!prompt || !help)
             {
-                error(contxt->id, ERR_MISSING_OPTION, 
-                      prompt ? "help" : "prompt"); 
+                char *m = prompt ? "help" : "prompt"; 
+                ERR(ERR_MISSING_OPTION, m);
                 RCUR; 
             }
         }
@@ -2822,7 +2819,7 @@ entry_p m_makedir(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
     
     // Success, failure or
@@ -2991,7 +2988,7 @@ entry_p m_protect(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Success, failure or
@@ -3023,17 +3020,16 @@ entry_p m_startup(entry_p contxt)
         // We need a command, a prompt and a help text. 
         if(!command || !prompt || !help) 
         {
-            error(contxt->id, ERR_MISSING_OPTION, 
-                  !command ? "command" : 
-                  !prompt ? "prompt" : 
-                  "help"); 
+            char *m = !command ? "command" : !prompt ? 
+                                 "prompt" : "help"; 
+            ERR(ERR_MISSING_OPTION, m);
             RCUR; 
         }
 
         // And somewhere to put the command.  
         if(!strlen(app))
         {
-            error(contxt->id, ERR_INVALID_APP, app); 
+            ERR(ERR_INVALID_APP, app); 
             RCUR; 
         }
 
@@ -3169,7 +3165,7 @@ entry_p m_startup(entry_p contxt)
                         else
                         {
                             // Out of memory
-                            error(PANIC); 
+                            PANIC(contxt); 
                         }
                     }
 
@@ -3180,7 +3176,7 @@ entry_p m_startup(entry_p contxt)
             else
             {
                 // Out of memory
-                error(PANIC); 
+                PANIC(contxt); 
             }
 
             // We have no longer any use for the
@@ -3260,7 +3256,7 @@ entry_p m_startup(entry_p contxt)
                                 if(remove(tmp))
                                 {
                                     // This is highly unlikely, but why not? 
-                                    error(contxt->id, ERR_WRITE_FILE, tmp); 
+                                    ERR(ERR_WRITE_FILE, tmp); 
                                 }
                             }
                         }
@@ -3278,13 +3274,13 @@ entry_p m_startup(entry_p contxt)
                     if(tmp)
                     {
                         free(tmp); 
-                        error(contxt->id, ERR_WRITE_FILE, fln); 
+                        ERR(ERR_WRITE_FILE, fln); 
                     }
                 }
                 else
                 {
                     // Out of memory
-                    error(PANIC); 
+                    PANIC(contxt); 
                 }
 
                 // We no longer need the buffer holding
@@ -3295,19 +3291,19 @@ entry_p m_startup(entry_p contxt)
             {
                 // No buffer == read problem, or OOM but then
                 // we already have a PANIC. 
-                error(contxt->id, ERR_READ_FILE, fln); 
+                ERR(ERR_READ_FILE, fln); 
             }
         }
         else
         {
             // Broken parser. 
-            error(PANIC); 
+            PANIC(contxt); 
         }
     }
     else
     {
         // Broken parser. 
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Success, failure or
@@ -3370,8 +3366,8 @@ entry_p m_textfile(entry_p contxt)
                 // is set.
                 if(!prompt || !help)
                 {
-                    error(contxt->id, ERR_MISSING_OPTION, 
-                          prompt ? "help" : "prompt"); 
+                    char *m = prompt ? "help" : "prompt"; 
+                    ERR(ERR_MISSING_OPTION, m);
                     RCUR; 
                 }
             }
@@ -3413,7 +3409,7 @@ entry_p m_textfile(entry_p contxt)
 
                             if(fputs(app, fp) == EOF)
                             {
-                                error(contxt->id, ERR_WRITE_FILE, fn); 
+                                ERR(ERR_WRITE_FILE, fn); 
                                 DNUM = 0; 
                             }
 
@@ -3423,7 +3419,7 @@ entry_p m_textfile(entry_p contxt)
                         else
                         {
                             // Out of memory.
-                            error(PANIC);
+                            PANIC(contxt);
                             DNUM = 0; 
                         }
                     }
@@ -3452,7 +3448,7 @@ entry_p m_textfile(entry_p contxt)
                                 // Write to destination file.
                                 if(fwrite(buf, 1, n, fp) != n)
                                 {
-                                    error(contxt->id, ERR_WRITE_FILE, fn); 
+                                    ERR(ERR_WRITE_FILE, fn); 
                                     DNUM = 0; 
                                     break; 
                                 }
@@ -3475,13 +3471,13 @@ entry_p m_textfile(entry_p contxt)
                     // or else this doesn't make sense.
                     if(!append && !include)
                     {
-                        error(contxt->id, ERR_NOTHING_TO_DO, contxt->name); 
+                        ERR(ERR_NOTHING_TO_DO, contxt->name); 
                         DNUM = 0; 
                     }
                 }
                 else
                 {
-                    error(contxt->id, ERR_WRITE_FILE, fn); 
+                    ERR(ERR_WRITE_FILE, fn); 
                 }
             }
             else
@@ -3493,13 +3489,13 @@ entry_p m_textfile(entry_p contxt)
         }
         else
         {
-            error(contxt->id, ERR_MISSING_OPTION, "dest"); 
+            ERR(ERR_MISSING_OPTION, "dest"); 
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
             
     // Success, failure or
@@ -3570,8 +3566,8 @@ entry_p m_tooltype(entry_p contxt)
                 // is set.
                 if(!prompt || !help)
                 {
-                    error(contxt->id, ERR_MISSING_OPTION, 
-                          prompt ? "help" : "prompt"); 
+                    char *m = prompt ? "help" : "prompt"; 
+                    ERR(ERR_MISSING_OPTION, m);
                     RCUR; 
                 }
             }
@@ -3580,8 +3576,8 @@ entry_p m_tooltype(entry_p contxt)
             // options are mutually exclusive. 
             if(noposition && setposition)
             {
-                error(contxt->id, ERR_OPTION_MUTEX, 
-                      "noposition/setposition"); 
+                ERR(ERR_OPTION_MUTEX, 
+                    "noposition/setposition"); 
                 RCUR; 
             }
 
@@ -3679,7 +3675,7 @@ entry_p m_tooltype(entry_p contxt)
                                 else
                                 {
                                     // Out of memory.
-                                    error(PANIC); 
+                                    PANIC(contxt); 
                                 }
                             }
                             // It doesn't exist, append new tooltype.
@@ -3712,7 +3708,7 @@ entry_p m_tooltype(entry_p contxt)
                                 else
                                 {
                                     // Out of memory.
-                                    error(PANIC); 
+                                    PANIC(contxt); 
                                 }
                             }
                         }
@@ -3747,7 +3743,7 @@ entry_p m_tooltype(entry_p contxt)
                                 else
                                 {
                                     // Out of memory.
-                                    error(PANIC); 
+                                    PANIC(contxt); 
                                 }
                             }
                         }
@@ -3792,7 +3788,7 @@ entry_p m_tooltype(entry_p contxt)
                     else
                     {
                         // We failed for some unknown reason.
-                        error(contxt->id, ERR_WRITE_FILE, file); 
+                        ERR(ERR_WRITE_FILE, file); 
                     }
 
                     // Restore DiskObject, otherwise memory
@@ -3818,7 +3814,7 @@ entry_p m_tooltype(entry_p contxt)
                 else
                 {
                     // More information? IoErr() is nice.  
-                    error(contxt->id, ERR_READ_FILE, file); 
+                    ERR(ERR_READ_FILE, file); 
                 }
                 #else
                 // On non-Amiga systems we always succeed.
@@ -3841,13 +3837,13 @@ entry_p m_tooltype(entry_p contxt)
         else
         {
             // We need an icon.
-            error(contxt->id, ERR_MISSING_OPTION, "dest"); 
+            ERR(ERR_MISSING_OPTION, "dest"); 
         }
     }
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Success, failure or
@@ -3880,7 +3876,7 @@ entry_p m_transcript(entry_p contxt)
             // write the result of the concatenation
             // to the log file (unless logging is
             // disabled).
-            if(!did_error())
+            if(!DID_ERR())
             {
                 DNUM = h_log(contxt, "%s\n", msg) ? 1 : 0; 
             }
@@ -3892,7 +3888,7 @@ entry_p m_transcript(entry_p contxt)
     }
 
     // OOM / broken parser.
-    error(PANIC);
+    PANIC(contxt);
     RCUR; 
 }
 
@@ -3947,8 +3943,8 @@ entry_p m_rename(entry_p contxt)
             // is set.
             if(!prompt || !help)
             {
-                error(contxt->id, ERR_MISSING_OPTION, 
-                      prompt ? "help" : "prompt"); 
+                char *m = prompt ? "help" : "prompt"; 
+                ERR(ERR_MISSING_OPTION, m);
                 RNUM(0); 
             }
         }
@@ -3978,7 +3974,7 @@ entry_p m_rename(entry_p contxt)
                 }
                 else
                 {
-                    error(contxt->id, ERR_RENAME_FILE, fr); 
+                    ERR(ERR_RENAME_FILE, fr); 
                     RNUM(0); 
                 }
             }
@@ -4009,7 +4005,7 @@ entry_p m_rename(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
         RCUR; 
     }
 }
@@ -4060,7 +4056,7 @@ int h_log(entry_p contxt, const char *fmt, ...)
             // Could we open the file AND write all data to it? 
             if(n < 0)
             {
-                error(contxt->id, ERR_WRITE_FILE, lf); 
+                ERR(ERR_WRITE_FILE, lf); 
                 n = 0; 
             }
 

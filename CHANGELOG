@@ -77,3 +77,4 @@
 0.1.0-alpha.15:
 ===============
 - Default (welcome) and (exit) fix.
+- Debug mode toggle (@debug 0/1) 

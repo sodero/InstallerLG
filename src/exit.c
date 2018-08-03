@@ -40,7 +40,7 @@ entry_p m_abort(entry_p contxt)
             // If we could resolve all our children,
             // show the result of the concatenation
             // unless we have an empty string.
-            if(strlen(msg) && !did_error())
+            if(strlen(msg) && !DID_ERR())
             {
                 gui_message(msg, 0);  
             }
@@ -50,13 +50,15 @@ entry_p m_abort(entry_p contxt)
 
             // Set abort state. Will make 
             // invoke() halt. 
-            error(-3, ERR_ABORT, __func__); 
+            error(contxt, -3, ERR_ABORT, __func__); 
             RNUM(0);
         }
     }
 
     // Broken parser / OOM
-    error(PANIC); 
+    PANIC(contxt); 
+
+    // Failure.
     RCUR; 
 }
 
@@ -89,7 +91,7 @@ entry_p m_exit(entry_p contxt)
                 // If we could resolve all our children,
                 // show the result of the concatenation
                 // unless we have an empty string.
-                if(strlen(msg) && !did_error())
+                if(strlen(msg) && !DID_ERR())
                 {
                     gui_message(msg, 0);  
                 }
@@ -100,13 +102,15 @@ entry_p m_exit(entry_p contxt)
             else
             {
                 // Out of memory
-                error(PANIC);
+                PANIC(contxt); 
+
+                // Failure.
                 RCUR;
             }
         }
 
         // Show final message unless 'quiet' is set. 
-        if(!did_error() &&
+        if(!DID_ERR() &&
            !get_opt_va(OPT_QUIET, contxt, NULL))
         {
             // Get name and location of application. 
@@ -132,13 +136,15 @@ entry_p m_exit(entry_p contxt)
         }
 
         // Make invoke() halt.
-        error(HALT); 
+        HALT(); 
         RNUM(0); 
     }
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt); 
+
+        // Failure.
         RCUR;
     }
 }
@@ -163,7 +169,7 @@ entry_p m_onerror(entry_p contxt)
         // Reset error code otherwise 
         // m_gosub / invoke will halt
         // immediately.
-        error(RESET); 
+        RESET();
 
         // A static reference. We might be out of
         // heap when this is invoked. 
@@ -179,7 +185,9 @@ entry_p m_onerror(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC);  
+        PANIC(contxt); 
+
+        // Failure.
         RCUR;
     }
 }
@@ -205,7 +213,9 @@ entry_p m_trap(entry_p contxt)
     else
     {
         // The parser is broken
-        error(PANIC);  
+        PANIC(contxt); 
+
+        // Failure.
         RCUR;
     }
 }

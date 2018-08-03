@@ -86,7 +86,7 @@ entry_p m_gosub(entry_p contxt)
                         else
                         {
                             // Out of memory
-                            error(PANIC);
+                            PANIC(contxt);
                             return new_failure(); 
                         }
 
@@ -108,7 +108,7 @@ entry_p m_gosub(entry_p contxt)
                 }
                 else
                 {
-                    error(contxt->id, ERR_MAX_DEPTH, contxt->name); 
+                    ERR(ERR_MAX_DEPTH, contxt->name); 
                     return new_failure(); // FIXME
                 }
             }
@@ -179,12 +179,12 @@ entry_p m_gosub(entry_p contxt)
         }
 
         // No match found.
-        error(contxt->id, ERR_UNDEF_FNC, contxt->name); 
+        ERR(ERR_UNDEF_FNC, contxt->name); 
     }
     else
     {
         // The parser is broken
-        error(PANIC);
+        PANIC(contxt);
     }
     
     // FIXME
@@ -218,7 +218,7 @@ entry_p m_procedure(entry_p contxt)
     else
     {
         // Everything is broken.
-        error(PANIC);
+        PANIC(contxt);
         RCUR; 
     }
 }

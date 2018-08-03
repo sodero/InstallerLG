@@ -75,8 +75,9 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             // valid code so lets fail anyway.
             if(!prompt || !help)
             {
-                error(contxt->id, ERR_MISSING_OPTION, 
-                      prompt ? "help" : "prompt"); 
+                char *m = prompt ? "help" : "prompt";
+
+                ERR(ERR_MISSING_OPTION, m);
                 RCUR; 
             }
         }
@@ -89,7 +90,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             // HALT if abort
             if(c == -1)
             {
-                error(HALT); 
+                HALT(); 
             } 
 
             // Abort or skip
@@ -127,8 +128,10 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                     else
                     {
                         // Out of memory
-                        error(PANIC); 
+                        PANIC(contxt); 
                         free(cmd); 
+
+                        // Failure.
                         RCUR; 
                     }
                 } 
@@ -223,7 +226,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                     // Only fail if we're in 'strict' mode.
                     if(get_numvar(contxt, "@strict"))
                     {
-                        error(contxt->id, ERR_EXEC, cmd); 
+                        ERR(ERR_EXEC, cmd); 
                     }
                 } 
    
@@ -232,8 +235,8 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             }
             else
             {
-                // OOM.
-                error(PANIC); 
+                // Out of memory.
+                PANIC(contxt); 
                 RCUR;  
             }
         }
@@ -245,7 +248,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
     else
     {
         // The parser is broken
-        error(PANIC); 
+        PANIC(contxt); 
     }
 
     // Return whatever we have, 

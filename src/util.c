@@ -298,13 +298,6 @@ int c_sane(entry_p c, size_t n)
         DBG("!c || !c->children\n");
     }
 
-    // Did we fail? 
-    if(!status)
-    {
-        // Additional debugging info.
-        pretty_print(c); 
-    }
-
     return status; 
 }
 

@@ -174,7 +174,7 @@ entry_p init(entry_p contxt)
             push(push(push(push(push(push(
             push(push(push(push(push(push(
             push(push(push(push(push(push(
-            push(push
+            push(push(push(push
             (
                 new_contxt(), 
                 new_symbol(strdup("@user-level"))),
@@ -241,6 +241,12 @@ entry_p init(entry_p contxt)
                 #endif
                 /*
                 Toggle 'strict' mode.
+                */
+            ),
+                new_symbol(strdup("@debug"))),
+                new_number(0)
+                /*
+                Toggle 'debug' mode.
                 */
             ),
 
