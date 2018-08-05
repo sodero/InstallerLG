@@ -53,18 +53,17 @@ Tested:
 * http://aminet.net/dev/mui/MCC_MiniMailer.lha
 * http://aminet.net/dev/mui/MCC_UrltextMOS.lha
 * http://aminet.net/dev/mui/MCC_TearOff.lha
+* http://aminet.net/dev/mui/MCC_DateString.lha
+* http://aminet.net/dev/mui/MCC_DateText.lha
+* http://aminet.net/dev/mui/MCC_Guigfx.lha
+* http://aminet.net/dev/mui/MCC_HotkeyString.lha
+* http://aminet.net/dev/mui/MCC_HTMLtext.lha
+* http://aminet.net/dev/mui/MCC_MonthNavi.lha
+* http://aminet.net/dev/mui/MCC_Popph.lha
+* http://aminet.net/dev/mui/MCC_SpeedBarMOS.lha
+* http://aminet.net/dev/mui/MCC_SettingsWi.lha
  
 Not tested
 ==========================================================================================
-http://aminet.net/dev/mui/MCC_DateString.lha (hmm, kolla 32-bitars-sakerna i TODO).
-http://aminet.net/dev/mui/MCC_DateText.lha ( -"- )
-http://aminet.net/dev/mui/MCC_Guigfx.lha (ok, men kanske saknas en strang i en copylib prompt?)
-http://aminet.net/dev/mui/MCC_HotkeyString.lha
-http://aminet.net/dev/mui/MCC_HTMLtext.lha
-http://aminet.net/dev/mui/MCC_HTMLview.lha
-http://aminet.net/dev/mui/MCC_Lamp.lha
-http://aminet.net/dev/mui/MCC_Mailtext.lha
-http://aminet.net/dev/mui/MCC_MonthNavi.lha
-http://aminet.net/dev/mui/MCC_Popph.lha
-http://aminet.net/dev/mui/MCC_SettingsWi.lha
-http://aminet.net/dev/mui/MCC_SpeedBarMOS.lha
+http://aminet.net/dev/mui/MCC_Mailtext.lha (styrkod #prop rad 115 - ma ze?)
+http://aminet.net/dev/mui/MCC_Lamp.lha - 1710?

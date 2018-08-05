@@ -78,3 +78,4 @@
 ===============
 - Default (welcome) and (exit) fix.
 - Debug mode toggle (@debug 0/1) 
+- String delimiter fix.
