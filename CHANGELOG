@@ -79,3 +79,7 @@
 - Default (welcome) and (exit) fix.
 - Debug mode toggle (@debug 0/1) 
 - String delimiter fix.
+
+0.1.0-alpha.16:
+===============
+- (askchoice) control sequence filter.

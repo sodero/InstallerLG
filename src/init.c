@@ -33,7 +33,7 @@
 
 static char version[] __attribute__((used)) = "\0$VER: InstallerLG " 
                                                VER(MAJOR) "." VER(MINOR) 
-                                              " [ALPHA15]";
+                                              " [ALPHA16]";
 
 //----------------------------------------------------------------------------
 // Name:        native_exists
