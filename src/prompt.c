@@ -133,8 +133,8 @@ entry_p m_askchoice(entry_p contxt)
             // need room for 32 pointers + NULL.
             static const char *chs[33]; 
 
-            // Index
-            int i = 0; 
+            // Indices
+            int i = 0, j = 0;
 
             // Pick up a string representation of all
             // the options.
@@ -177,8 +177,21 @@ entry_p m_askchoice(entry_p contxt)
                     }
                 }
 
+                // Invisible items are valid as default
+                // values, so we need to count these as
+                // well.
+                j++;
+
                 // Next option.
                 e++; 
+            }
+
+            // Exit if there's nothing to show.
+            if(!i)
+            {
+                // Use the default value if such
+                // exists.
+                RNUM(deflt ? num(deflt) : 0);
             }
 
             // Terminate array. 
@@ -192,7 +205,7 @@ entry_p m_askchoice(entry_p contxt)
 
                 // Check for negative values
                 // as well.
-                if(d < 0 || d >= i)
+                if(d < 0 || d >= j)
                 {
                     // Nope, out of range.
                     ERR(ERR_NO_ITEM, str(deflt)); 
@@ -689,7 +702,7 @@ entry_p m_askoptions(entry_p contxt)
 
         DNUM = -1; 
 
-        // We need everything but a defaut value.
+        // We need everything but a default value.
         if(prompt && help && choices)
         {
             // Unless the parser is broken, 
@@ -701,8 +714,8 @@ entry_p m_askoptions(entry_p contxt)
             // need room for 32 pointers + NULL.
             static const char *chs[33]; 
 
-            // Index
-            int i = 0; 
+            // Indices
+            int i = 0, j = 0;
 
             // Pick up a string representation of all
             // the options.
@@ -745,8 +758,21 @@ entry_p m_askoptions(entry_p contxt)
                     }
                 }
 
+                // Invisible items are valid as default
+                // values, so we need to count these as
+                // well.
+                j++;
+
                 // Next option.
                 e++; 
+            }
+
+            // Exit if there's nothing to show.
+            if(!i)
+            {
+                // Use the default value if such
+                // exists.
+                RNUM(deflt ? num(deflt) : -1);
             }
 
             // Terminate array. 
@@ -758,7 +784,7 @@ entry_p m_askoptions(entry_p contxt)
                 // Is there such a choice? 
                 int d = num(deflt);
 
-                if(d >= (1 << i))
+                if(d >= (1 << j))
                 {
                     // Nope, out of range.
                     ERR(ERR_NO_ITEM, str(deflt)); 
