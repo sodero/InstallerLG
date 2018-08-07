@@ -84,3 +84,7 @@
 ===============
 - (askchoice) and (askoptions) control sequence filter.
 - (askchoice) and (askoptions) invisible item default value fix.
+
+0.1.0-alpha.17:
+===============
+- 32-bit numerical token fix.

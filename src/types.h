@@ -1,10 +1,16 @@
-#ifndef TYPES_H_
-#define TYPES_H_
-
+//----------------------------------------------------------------------------
+// types.h:
+//
+// Datatypes and constants used everywhere.
 //----------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //----------------------------------------------------------------------------
+
+#ifndef TYPES_H_
+#define TYPES_H_
+
+#include <stdint.h>
 
 //----------------------------------------------------------------------------
 // Misc constants.
@@ -92,7 +98,7 @@ typedef entry_p (*call_t) (entry_p);
 struct entry_s
 {
     type_t type;            // One of type_t above. 
-    int id;                 // Numerical ID. Refer to new_*. 
+    int32_t id;             // Numerical ID. Refer to new_*.
     char *name;             // String repr. Refer to new_*(). 
     call_t call;            // NATIVE function. 
     entry_p resolved;       // Resolved value. Refer to eval().

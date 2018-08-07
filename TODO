@@ -1,4 +1,3 @@
-- Check how bitwise + signed int work in 3.9.
 - Check how strings are evaluated w. (AND) aso, in 3.9.
 - Check list mgmt for mem leaks.
 - Replace all the _va things with context merges.
