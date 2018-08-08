@@ -1,7 +1,7 @@
+- The GUI is all over the place. It should be in one place.
 - Check how strings are evaluated w. (AND) aso, in 3.9.
 - Check list mgmt for mem leaks.
 - Replace all the _va things with context merges.
-- The GUI is all over the place. It should be in one place.
 - All project tooltypes must be promoted to variables in init().
 - OpenLocale() -> @installer-language
 - We need @strict = 0 testing on the gui parts. What is shown when we have nothing to show?

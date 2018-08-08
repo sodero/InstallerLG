@@ -232,7 +232,7 @@ int yyerror(yyscan_t scanner, const char *err)
     {
         // A slightly less detailed
         // graphical error report.
-        error(NULL, line, ERR_ABORT, err);
+        error(NULL, line, ERR_PARSE, err);
     }
 
     // Return a bogus value, not the

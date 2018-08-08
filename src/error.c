@@ -34,6 +34,7 @@ int error(entry_p contxt, int id, error_t type, const char *info)
         "Halt",
         "Abort",
         "Reset",
+        "Parse error",
         "Internal error",
         "Buffer overflow",
         "Read error", 

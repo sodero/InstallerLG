@@ -88,3 +88,7 @@
 0.1.0-alpha.17:
 ===============
 - 32-bit numerical token fix.
+
+0.1.0-alpha.18:
+===============
+- Error feedback regression fixed.

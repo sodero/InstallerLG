@@ -32,6 +32,7 @@ typedef enum
     ERR_HALT, 
     ERR_ABORT,
     ERR_RESET,
+    ERR_PARSE,
     ERR_PANIC,
     ERR_OVERFLOW,
     ERR_READ, 
