@@ -247,6 +247,7 @@ struct MUIP_InstallerGui_CheckBoxes
     ULONG Help;
     ULONG Names;
     ULONG Default; 
+    ULONG Halt; 
 };
 
 //----------------------------------------------------------------------------
@@ -1503,6 +1504,7 @@ MUIDSP IPTR InstallerGuiNumber(Class *cls,
 //                          Help - Help text
 //                          Names - Array of choices (strings)
 //                          Default - Default bitmask
+//                          Halt - Halt return value
 // Return:                  A bitmask representing the selected button(s)
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
@@ -1606,6 +1608,7 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
             // Wait for proceed or abort.
             id = InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2);
 
+            // Remove all dynamic objects in group.
             if(DoMethod(grp, MUIM_Group_InitChange))
             {
                 // Bitmask.
@@ -1623,9 +1626,16 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
                 }
 
                 DoMethod(grp, MUIM_Group_ExitChange);
+    
+                if(id != MUIV_InstallerGui_Proceed)
+                {
+                    // On abort return HALT.
+                    *((int *) msg->Halt) = 1; 
+                    ret = 0;
+                }
 
-                return id == MUIV_InstallerGui_Proceed ?
-                       ret : 0;
+                // Bitmap or zero on abort.
+                return ret;
             }
         }
     }
@@ -2409,12 +2419,14 @@ int gui_choice(const char *msg,
 //              const char *hlp:    Help text.
 //              const char **nms:   List of strings from which to choose.
 //              int def:            Default bitmap.
+//              int *hlt:           Halt return value.
 // Return:      int:                A bitmap representing the selection.
 //----------------------------------------------------------------------------
 int gui_options(const char *msg, 
                 const char *hlp,
                 const char **nms, 
-                int def)
+                int def,
+                int *hlt)
 {
     int ret = (int)
     #ifdef AMIGA
@@ -2425,7 +2437,8 @@ int gui_options(const char *msg,
         msg, 
         hlp, 
         nms, 
-        def
+        def,
+        hlt
     );
     #else
     // Testing purposes.

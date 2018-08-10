@@ -812,8 +812,16 @@ entry_p m_askoptions(entry_p contxt)
                 // resolve all options.
                 if(!DID_ERR())
                 {
+                    int hlt = 0; 
+
                     // Prompt user.
-                    DNUM = gui_options(p, h, chs, i); 
+                    DNUM = gui_options(p, h, chs, i, &hlt); 
+
+                    // Halt if abort.
+                    if(hlt)
+                    {
+                        HALT(); 
+                    }
                 }
             }
             else
