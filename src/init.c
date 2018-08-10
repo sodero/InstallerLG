@@ -88,6 +88,52 @@ entry_p init(entry_p contxt)
         // Is there a 'welcome' already?
         entry_p e = native_exists(contxt, m_welcome);
 
+        // Get tooltype values / cli arguments.
+        const char *a_app = arg_get(ARG_APPNAME),
+                   *a_scr = arg_get(ARG_SCRIPT),
+                   *a_min = arg_get(ARG_MINUSER),
+                   *a_def = arg_get(ARG_DEFUSER),
+                   *a_log = arg_get(ARG_LOGFILE),
+                   *a_npr = arg_get(ARG_NOPRETEND),
+                   *a_nlg = arg_get(ARG_NOLOG);
+
+        // Set default values.
+        int defusr = 2, minusr = 0,
+            nolog = (a_nlg && !strcasecmp("FALSE", a_nlg)) ? 0 : 1,
+            nopretend = nopretend = (a_npr && !strcasecmp("TRUE", a_npr)) ? 1 : 0;
+
+        a_app = a_app ? a_app : "";
+        a_scr = a_scr ? a_scr : "";
+        a_log = a_log ? a_log : "install_log_file";
+
+        // Minimum user level setting?
+        if(a_min)
+        {
+            // 'NOVICE' (0) is implicit.
+            if(!strcasecmp("AVERAGE", a_min))
+            {
+                minusr = 1;
+            }
+            else if(!strcasecmp("EXPERT", a_min))
+            {
+                minusr = 2;
+            }
+        }
+
+        // Default user level setting?
+        if(a_def)
+        {
+            // 'EXPERT' (2) is implicit.
+            if(!strcasecmp("NOVICE", a_def))
+            {
+                defusr = 0;
+            }
+            else if(!strcasecmp("AVERAGE", a_def))
+            {
+                defusr = 1;
+            }
+        }
+
         #ifdef AMIGA
         // If no (welcome) is found insert a default one on top.
         // Only on Amiga, otherwise tests will break, they don't
@@ -203,7 +249,7 @@ entry_p init(entry_p contxt)
                 */
             ),
                 new_symbol(strdup("@log"))),
-                new_number(0)
+                new_number(nolog ? 0 : 1)
                 /*
                 Logging enabled = 1, disabled = 0.
                 */
@@ -285,7 +331,7 @@ entry_p init(entry_p contxt)
                 */
             ),
                 new_symbol(strdup("@app-name"))),
-                new_string(strdup(arg_get(ARG_APPNAME)))
+                new_string(strdup(a_app))
                 /*
                 The `APPNAME' value given at startup.
                 */
@@ -377,7 +423,7 @@ entry_p init(entry_p contxt)
                 */
             ),
                 new_symbol(strdup("@icon"))),
-                new_string(strdup(arg_get(ARG_SCRIPT)))
+                new_string(strdup(a_scr))
                 /*
                 Installer icon path.
                 */
@@ -395,7 +441,7 @@ entry_p init(entry_p contxt)
                 */
             ),
                 new_symbol(strdup("@log-file"))),
-                new_string(strdup("install_log_file"))
+                new_string(strdup(a_log))
                 /*
                 The default log file.
                 */
