@@ -215,9 +215,9 @@ entry_p m_welcome(entry_p contxt)
         char *msg = "";
 
         // Installer settings.
-        int lvl = 0, 
-            lgf = 0, 
-            prt = 0; 
+        int lvl = get_numvar(contxt, "@user-level"),
+            prt = get_numvar(contxt, "@pretend"),
+            lgf = get_numvar(contxt, "@log");
 
         // Do we have any arguments?
         if(contxt->children &&
