@@ -2442,7 +2442,7 @@ int gui_options(const char *msg,
     );
     #else
     // Testing purposes.
-    printf("%s%s%s%d\n", msg, hlp, *nms, def) ? def : 0;
+    printf("%s%s%s%d%d\n", msg, hlp, *nms, def, *hlt) ? def : 0;
     #endif
 
     return ret;
