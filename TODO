@@ -1,4 +1,4 @@
-- The GUI is all over the place. It should be in one place.
+- Abort doesn't work everywhere.
 - Check how strings are evaluated w. (AND) aso, in 3.9.
 - Check list mgmt for mem leaks.
 - Replace all the _va things with context merges.

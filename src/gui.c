@@ -516,9 +516,88 @@ static ULONG InstallerGuiPageSet(Object *obj,
         // Show the message if we have one.
         if(msg)
         {
-            set(txt, MUIA_ShowMe, FALSE);
-            set(txt, MUIA_Text_Contents, msg);
-            set(txt, MUIA_ShowMe, TRUE);
+            // Wrap at 50 for now, even though
+            // we make room for more below.
+            char *src = (char *) msg;
+            size_t cnt = strlen(src), len = 50;
+
+            // Allow no more than 80 columns
+            // and 10 lines of text, newline
+            // characters are included. More
+            // than this would be to much in
+            // a single page.
+            static char dst[80 * 10];
+
+            // Do we have a non empty message?
+            if(cnt)
+            {
+                // Cap the size of the message.
+                cnt = cnt < (sizeof(dst) - 1) ?
+                      cnt : (sizeof(dst) - 1);
+
+                // Copy for wrapping.
+                memcpy(dst, src, cnt);
+
+                // Do we need to word wrap?
+                if(cnt > len)
+                {
+                    // Start from the first point
+                    // where we need to wrap.
+                    size_t cur = len;
+
+                    // As long we have characters.
+                    while(cur < cnt)
+                    {
+                        // Last wrapping point.
+                        size_t ref = cur - len;
+
+                        // Go backwards from where we are
+                        // to a point where we can wrap.
+                        while(cur > ref && dst[cur] > 33)
+                        {
+                            cur--;
+                        }
+
+                        // If we ended up where we started
+                        // we failed. Wrap in the middle of
+                        // the word in that case. This will
+                        // only happen with words >= len.
+                        if(cur == ref)
+                        {
+                            // Restore the previous point.
+                            cur += len;
+                        }
+                        else
+                        {
+                            // If we found a wrapping point
+                            // we must make sure that no NL
+                            // exists before this point but
+                            // after the previous point.
+                            while(++ref < cur)
+                            {
+                                if(dst[ref] == '\n')
+                                {
+                                    // Skip wrap.
+                                    cur = ref;
+                                    break; 
+                                }
+                            }
+                        }
+
+                        // Wrap and continue.
+                        dst[cur] = '\n';
+                        cur += len;
+                    }
+                }
+
+                // Terminate string.
+                dst[cnt] = '\0';
+
+                // Show the message.
+                set(txt, MUIA_ShowMe, FALSE);
+                set(txt, MUIA_Text_Contents, dst);
+                set(txt, MUIA_ShowMe, TRUE);
+            }
         }
 
         // Always.
@@ -1484,7 +1563,6 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
                         MUIA_Image_FreeVert, TRUE,
                         MUIA_ShowSelState, FALSE,
                         MUIA_Selected, sel, 
-                        MUIA_Weight, 0,
                         TAG_END),
                     MUIA_Group_Child, (Object *) MUI_NewObject(
                         MUIC_Text, 
@@ -1741,12 +1819,13 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
         MUIA_Window_RootObject, MUI_NewObject(
             MUIC_Group,
             MUIA_UserData, MUIV_InstallerGui_TopGroup, 
+            MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
             /* Top text */
             MUIA_Group_Child, (Object *) MUI_NewObject(
                 MUIC_Text, 
                 MUIA_UserData, MUIV_InstallerGui_Text, 
-                MUIA_Text_Contents, "\n\n\n\n\n", 
-                MUIA_Text_SetVMax, FALSE, 
+                MUIA_Text_Contents, "\n\n\n\n\n\n\n\n\n\n",
+                MUIA_Text_SetMax, FALSE, 
                 MUIA_Text_PreParse, "\33c", 
                 TAG_END),
             /* Top pager */
@@ -1757,6 +1836,7 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
                 /* Page 0 - P_WELCOME */
                 MUIA_Group_Child, MUI_NewObject(
                     MUIC_Group,
+                    MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                     MUIA_Group_Child, (Object *) MUI_NewObject(
                         MUIC_Rectangle, 
                         MUIA_Rectangle_HBar, TRUE, 
@@ -1765,13 +1845,13 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
                     MUIA_Group_Child, MUI_NewObject(
                         MUIC_Group,
                         MUIA_Group_Horiz, TRUE,
-                        MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
+                        MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 32),
                         MUIA_Group_Child, (Object *) MUI_NewObject(
                             MUIC_Radio, 
                             MUIA_UserData, MUIV_InstallerGui_UserLevel, 
                             MUIA_Radio_Entries, lev,
                             TAG_END),
-                        MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
+                        MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 32),
                         TAG_END),
                     TAG_END),
                 /* Page 1 - P_COPYFILES */
