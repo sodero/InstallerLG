@@ -89,18 +89,18 @@ entry_p init(entry_p contxt)
         entry_p e = native_exists(contxt, m_welcome);
 
         // Get tooltype values / cli arguments.
-        const char *a_app = arg_get(ARG_APPNAME),
-                   *a_scr = arg_get(ARG_SCRIPT),
+        const char *a_app = arg_get(ARG_APPNAME), // OK
+                   *a_scr = arg_get(ARG_SCRIPT),  // OK
                    *a_min = arg_get(ARG_MINUSER),
                    *a_def = arg_get(ARG_DEFUSER),
-                   *a_log = arg_get(ARG_LOGFILE),
+                   *a_log = arg_get(ARG_LOGFILE), // OK
                    *a_npr = arg_get(ARG_NOPRETEND),
                    *a_nlg = arg_get(ARG_NOLOG);
 
         // Set default values.
         int defusr = 2, minusr = 0,
-            nolog = (a_nlg && !strcasecmp("FALSE", a_nlg)) ? 0 : 1,
-            nopretend = nopretend = (a_npr && !strcasecmp("TRUE", a_npr)) ? 1 : 0;
+            nolog = (a_nlg && !strcasecmp("TRUE", a_nlg)) ? 1 : 0,
+            nopretend = (a_npr && !strcasecmp("TRUE", a_npr)) ? 1 : 0;
 
         a_app = a_app ? a_app : "";
         a_scr = a_scr ? a_scr : "";
@@ -132,6 +132,9 @@ entry_p init(entry_p contxt)
             {
                 defusr = 1;
             }
+
+            defusr = defusr > minusr ?
+                     defusr : minusr;
         }
 
         #ifdef AMIGA
@@ -220,20 +223,33 @@ entry_p init(entry_p contxt)
             push(push(push(push(push(push(
             push(push(push(push(push(push(
             push(push(push(push(push(push(
+            push(push(push(push(push(push(
             push(push(push(push
             (
                 new_contxt(), 
                 new_symbol(strdup("@user-level"))),
-                new_number(2)
+                new_number(defusr)
                 /*
                 User level, 0 = novice, 1 = average,
                 2 = expert.
+                */
+            ),
+                new_symbol(strdup("@user-min"))),
+                new_number(minusr)
+                /*
+                Minimum user level.
                 */
             ),
                 new_symbol(strdup("@pretend"))),
                 new_number(0)
                 /*
                 Pretend mode, 1 = on, 0 = off.
+                */
+            ),
+                new_symbol(strdup("@no-pretend"))),
+                new_number(nopretend)
+                /*
+                Disallow pretend mode.
                 */
             ),
                 new_symbol(strdup("@installer-version"))),
@@ -249,9 +265,15 @@ entry_p init(entry_p contxt)
                 */
             ),
                 new_symbol(strdup("@log"))),
-                new_number(nolog ? 0 : 1)
+                new_number(0)
                 /*
                 Logging enabled = 1, disabled = 0.
+                */
+            ),
+                new_symbol(strdup("@no-log"))),
+                new_number(nolog)
+                /*
+                Disallow logging.
                 */
             ),
                 new_symbol(strdup("@yes"))),
