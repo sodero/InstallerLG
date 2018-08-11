@@ -234,7 +234,13 @@ entry_p m_welcome(entry_p contxt)
             // show the result of the concatenation.
             if(!DID_ERR())
             {
-                gui_welcome(msg, &lvl, &lgf, &prt); 
+                gui_welcome
+                (
+                    msg, &lvl, &lgf, &prt,
+                    get_numvar(contxt, "@user-min"),
+                    get_numvar(contxt, "@no-pretend"),
+                    get_numvar(contxt, "@no-log")
+                );
             }
 
             // If we have children, then we also

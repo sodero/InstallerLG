@@ -78,7 +78,11 @@ Object *Win;
 //----------------------------------------------------------------------------
 CLASS_DEF(InstallerGui) 
 {
-    struct MUI_InputHandlerNode ticker;
+    struct MUI_InputHandlerNode Ticker;
+    Object *ExpertLevel,
+           *UserLevel,
+           *Pretend,
+           *Log;
 };
 
 //----------------------------------------------------------------------------
@@ -117,6 +121,12 @@ struct MUIP_InstallerGui_Welcome
 {
     ULONG MethodID;
     ULONG Message;
+    ULONG Level;
+    ULONG Log;
+    ULONG Pretend;
+    ULONG MinLevel;
+    ULONG NoPretend;
+    ULONG NoLog;
 };
 
 //----------------------------------------------------------------------------
@@ -613,107 +623,127 @@ static ULONG InstallerGuiPageSet(Object *obj,
 }
 
 //----------------------------------------------------------------------------
-// InstallerGuiWelcome - Show welcome message 
+// InstallerGuiWelcome - Show welcome message. The Level, Log, and Pretend
+//                       parameters are int pointers that act as both input
+//                       and output.
 // Input:                Message - the welcome message text
-// Return:               4 3 2 1  <- Bit number
-//                       ^ ^ ^ ^
-//                       | | | |
-//                       | | | +- User level LSB
-//                       | | +--- User level MSB
-//                       | +----- Log to file 
-//                       +------- Pretend
-//
-//                       User level 0 = abort
+//                       Level - User level
+//                       Log - Log to file
+//                       Pretend - Pretend mode
+//                       MinLevel - Minimum user level
+//                       NoPretend - Disable pretend mode
+//                       NoLog - Disable logging
+// Return:               1 on success, 0 on abort
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiWelcome(Class *cls,
                                 Object *obj,
                                 struct MUIP_InstallerGui_Welcome *msg)
 {
     // Show welcome page.
-    if(InstallerGuiPageSet(obj, P_WELCOME, B_PROCEED_ABORT, 
-                           msg->Message))
+    if(InstallerGuiPageSet(obj, P_WELCOME, B_PROCEED_ABORT, msg->Message))
     {
-        // Wait for proceed or abort.
-        if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
-           MUIV_InstallerGui_Proceed)
+        struct InstallerGuiData *my = INST_DATA(cls, obj);
+
+        // If the minimum user level is set to 'expert',
+        // disable radio buttons to indicate that there
+        // is no choice to be made.
+        if(msg->MinLevel == 2)
         {
-            static Object *usr, *prt, *lgf;
+            set(my->UserLevel, MUIA_Disabled, TRUE);
+        }
+        // If the minimum user level is set to 'average',
+        // show 'average' and 'expert' only.
+        else if(msg->MinLevel == 1)
+        {
+            set(my->UserLevel, MUIA_ShowMe, FALSE);
+            set(my->ExpertLevel, MUIA_ShowMe, TRUE);
+        }
 
-            // Initial lookup. 
-            if(!usr)
+        // Set the current user level, reflecting the minimum user
+        // level unless there are overrides in the script.
+        set(my->UserLevel, MUIA_Radio_Active, *((int *) msg->Level));
+
+        // Wait for proceed or abort.
+        if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2)
+           == MUIV_InstallerGui_Proceed)
+        {
+            // Get the selected user level value. If we have
+            // a minimum user level of 'average' we're using
+            // a different set of radio buttons. Fetch from
+            // the right object and adjust the return value.
+            if(msg->MinLevel == 1)
             {
-                usr = (Object *) DoMethod
-                (
-                    obj, MUIM_FindUData, 
-                    MUIV_InstallerGui_UserLevel
-                );
-
-                prt = (Object *) DoMethod
-                (
-                    obj, MUIM_FindUData, 
-                    MUIV_InstallerGui_Pretend
-                );
-
-                lgf = (Object *) DoMethod
-                (
-                    obj, MUIM_FindUData, 
-                    MUIV_InstallerGui_Logging
-                );
+                // Minimum user level 'average'.
+                get(my->ExpertLevel, MUIA_Radio_Active, (int *) msg->Level);
+                (*((int *) msg->Level))++;
+            }
+            else
+            {
+                // Minimum user level 'novice' or 'expert'.
+                get(my->UserLevel, MUIA_Radio_Active, (int *) msg->Level);
             }
 
-            // Sanity check.
-            if(usr && prt && lgf)
+            // Disable the pretend choice if the NOPRETEND
+            // tooltype is used. The default behaviour is
+            // to install for real, not to pretend.
+            SetAttrs
+            (
+                my->Pretend,
+                MUIA_Radio_Active,
+                msg->NoPretend ? 0 : *((int *) msg->Pretend),
+                MUIA_Disabled, msg->NoPretend ? TRUE : FALSE,
+                TAG_END
+            );
+
+            // Disable the 'log to file' choice if the NOLOG
+            // tooltype is used. The default behaviour is to
+            // not write to a log file.
+            SetAttrs
+            (
+                my->Log,
+                MUIA_Radio_Active,
+                msg->NoLog ? 0 : *((int *) msg->Log),
+                MUIA_Disabled, msg->NoLog ? TRUE : FALSE,
+                TAG_END
+            );
+
+            // Don't show logging and pretend mode settings
+            // to 'Novice' users.
+            if(*((int *) msg->Level))
             {
-                ULONG pat = 0; 
-
-                // Novice, Intermediate, Expert. 
-                get(usr, MUIA_Radio_Active, &pat); 
-
-                // MUI is one step behind, fix that.
-                pat++; 
-                
-                // Don't show logging and pretend mode
-                // settings to 'Novice' users.
-                if(pat > 1)
+                // Show pretend / log page.
+                if(InstallerGuiPageSet(obj, P_PRETEND_LOG, B_PROCEED_ABORT,
+                                      (ULONG) ""))
                 {
-                    // Show pretend / log page.
-                    if(InstallerGuiPageSet(obj, P_PRETEND_LOG, B_PROCEED_ABORT, (ULONG) ""))
+                    // Wait for proceed or abort.
+                    if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2)
+                       == MUIV_InstallerGui_Proceed)
                     {
-                        // Wait for proceed or abort.
-                        if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
-                           MUIV_InstallerGui_Proceed)
-                        {
-                            ULONG prp = 0, 
-                                  lgp = 0; 
-
-                            // Get pretend and log settings.
-                            get(prt, MUIA_Radio_Active, &prp); 
-                            get(lgf, MUIA_Radio_Active, &lgp); 
-
-                            // Transform settings into bitmap.
-                            pat |= ((lgp << 2) | (prp << 3));
-
-                            // Intermediate or expert.
-                            return pat; 
-                        }
-                        else
-                        {
-                            // User abort.
-                            return 0; 
-                        }
+                        // Get pretend and log settings.
+                        get(my->Pretend, MUIA_Radio_Active, (int *) msg->Pretend);
+                        get(my->Log, MUIA_Radio_Active, (int *) msg->Log);
+                    }
+                    else
+                    {
+                        // Abort.
+                        return 0;
                     }
                 }
                 else
                 {
-                    // Novice user.
-                    return pat; 
+                    // Unknown error.
+                    GERR(tr(S_UNER));
+                    return 0;
                 }
             }
+
+            // Done.
+            return 1;
         }
         else
         {
-            // User abort.
-            return 0; 
+            // Abort.
+            return 0;
         }
     }
 
@@ -887,7 +917,7 @@ MUIDSP IPTR InstallerGuiCopyFilesStart(Class *cls,
 
             // Install a timer to create a time slice
             // where the user has a chance to abort.
-            DoMethod(_app(obj), MUIM_Application_AddInputHandler, &my->ticker);
+            DoMethod(_app(obj), MUIM_Application_AddInputHandler, &my->Ticker);
 
             // Configure gauge so that one tick == one file.
             SetAttrs(prg, MUIA_Gauge_Max, msg->NumberOfFiles,
@@ -1052,7 +1082,7 @@ MUIDSP IPTR InstallerGuiCopyFilesEnd(Class *cls,
     DoMethod
     (
         _app (obj), 
-        MUIM_Application_RemInputHandler, &my->ticker
+        MUIM_Application_RemInputHandler, &my->Ticker
     );
 
 
@@ -1806,14 +1836,27 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
 			                Object *obj,
 			                struct opSet *msg)
 {
-    struct InstallerGuiData *my;
-    static const char *lev[4], *pre[3], *log[3]; 
+    // Misc widgets.
+    Object *el = NULL,
+           *ul = NULL,
+           *pr = NULL,
+           *lg = NULL;
 
+    // Radio buttons.
+    static const char *lev[4],
+                      *pre[3],
+                      *log[3];
+
+    // User level.
     lev[0] = tr(S_ULNV); // Novice
     lev[1] = tr(S_ULIN); // Intermediate
     lev[2] = tr(S_ULEX); // Expert
+
+    // Pretend mode.
     pre[0] = tr(S_INRL); // For real
     pre[1] = tr(S_INDR); // Dry run
+
+    // Logging mode.
     log[0] = tr(S_NOLG); // No logging
     log[1] = tr(S_SILG); // Log to file
 
@@ -1856,10 +1899,16 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
                         MUIC_Group,
                         MUIA_Group_Horiz, TRUE,
                         MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 32),
-                        MUIA_Group_Child, (Object *) MUI_NewObject(
-                            MUIC_Radio, 
-                            MUIA_UserData, MUIV_InstallerGui_UserLevel, 
+                        MUIA_Group_Child, ul = (Object *) MUI_NewObject(
+                            MUIC_Radio,
+                            MUIA_UserData, MUIV_InstallerGui_UserLevel,
                             MUIA_Radio_Entries, lev,
+                            TAG_END),
+                        MUIA_Group_Child, el = (Object *) MUI_NewObject(
+                            MUIC_Radio,
+                            MUIA_ShowMe, FALSE,
+                            MUIA_UserData, MUIV_InstallerGui_UserLevel,
+                            MUIA_Radio_Entries, lev + 1,
                             TAG_END),
                         MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 32),
                         TAG_END),
@@ -1910,13 +1959,13 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
                         MUIC_Group,
                         MUIA_Group_Horiz, TRUE,
                         MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
-                        MUIA_Group_Child, (Object *) MUI_NewObject(
+                        MUIA_Group_Child, pr = (Object *) MUI_NewObject(
                             MUIC_Radio, 
                             MUIA_UserData, MUIV_InstallerGui_Pretend,
                             MUIA_Radio_Entries, pre, 
                             TAG_END),
                         MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
-                        MUIA_Group_Child, (Object *) MUI_NewObject(
+                        MUIA_Group_Child, lg = (Object *) MUI_NewObject(
                             MUIC_Radio, 
                             MUIA_UserData, MUIV_InstallerGui_Logging,
                             MUIA_Radio_Entries, log, 
@@ -2102,13 +2151,35 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
         TAG_END
     );
     
-    // Initialize timer struct.
-    my = INST_DATA(cls, obj);
-    my->ticker.ihn_Object = obj;
-    my->ticker.ihn_Flags = MUIIHNF_TIMER;
-    my->ticker.ihn_Method = MUIM_InstallerGui_Ticker;
-    my->ticker.ihn_Millis = 50;
+    // Initialize the rest if the superclass is OK.
+    if(obj)
+    {
+        struct InstallerGuiData *my = INST_DATA(cls, obj);
 
+        // Initialize timer struct.
+        my->Ticker.ihn_Object = obj;
+        my->Ticker.ihn_Flags = MUIIHNF_TIMER;
+        my->Ticker.ihn_Method = MUIM_InstallerGui_Ticker;
+        my->Ticker.ihn_Millis = 50;
+
+        // Save values for later access to some
+        // of the widgets above.
+        if(el && el && pr && lg)
+        {
+            my->ExpertLevel = el;
+            my->UserLevel = ul;
+            my->Pretend = pr;
+            my->Log = lg;
+        }
+        else
+        {
+            // Forgot something.
+            MUI_DisposeObject(obj);
+            obj = NULL;
+        }
+    }
+
+    // Done.
     return (IPTR) obj;
 }
 
@@ -2284,7 +2355,7 @@ int gui_init(void)
     );
 
     // Bail out on error.
-    if (!InstallerGuiClass)
+    if(!InstallerGuiClass)
     {
         GERR(tr(S_FMCC)); 
         return FALSE;
@@ -2559,31 +2630,55 @@ int gui_number(const char *msg,
 //----------------------------------------------------------------------------
 // Name:        gui_welcome
 // Description: Show welcome message and prompt for user level / installer
-//              mode.
+//              mode. Note that the 'lvl', 'lgf', and 'prt' parameters act
+//              as both input and output.
 // Input:       const char *msg:    Welcome message.
-//              int *lvl:           User level return value.
-//              int *lgf:           Log settings return value.
-//              int *prt:           Pretend mode return value.
-// Return:      -
+//              int *lvl:           User level return and input value.
+//              int *lgf:           Log settings return and input value.
+//              int *prt:           Pretend mode return and input value.
+//              int min:            Minimum user level.
+//              int npr:            Disable pretend mode.
+//              int nlg:            Disable logging.
+// Return:      int:                1 on success, 0 on abort.
 //----------------------------------------------------------------------------
-void gui_welcome(const char *msg, 
-                 int *lvl, 
-                 int *lgf, 
-                 int *prt)
+int gui_welcome(const char *msg,
+                int *lvl,
+                int *lgf,
+                int *prt,
+                int min,
+                int npr,
+                int nlg)
 {
-    int pat = (int)
+    int ret = (int)
     #ifdef AMIGA
-    DoMethod(Win, MUIM_InstallerGui_Welcome, msg);
+    DoMethod
+    (
+        Win, MUIM_InstallerGui_Welcome,
+        msg,
+        lvl,
+        lgf,
+        prt,
+        min,
+        npr,
+        nlg
+    );
     #else
     1;
     // Testing purposes.
-    printf("%s\n", msg);
+    printf
+    (
+        "%s%d%d%d%d%d%d\n",
+        msg,
+        *lvl,
+        *lgf,
+        *prt,
+        min,
+        npr,
+        nlg
+    );
     #endif
 
-    // Turn the bit pattern into booleans.
-    *lvl = pat & 3; 
-    *lgf = pat & 4 ? 1 : 0; 
-    *prt = pat >> 3; 
+    return ret;
 }
 
 //----------------------------------------------------------------------------
