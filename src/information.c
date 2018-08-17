@@ -135,6 +135,9 @@ entry_p m_message(entry_p contxt)
         entry_p all = get_opt(contxt, OPT_ALL);
         int level = get_numvar(contxt, "@user-level");
 
+        // Silence.
+        DNUM = 0;
+
         // Non novice or override using (all)?
         if(level > 0 || all)
         {
@@ -224,6 +227,9 @@ entry_p m_welcome(entry_p contxt)
         int lvl = get_numvar(contxt, "@user-level"),
             prt = get_numvar(contxt, "@pretend"),
             lgf = get_numvar(contxt, "@log");
+
+        // Continue.
+        DNUM = 1;
 
         // Do we have any arguments?
         if(contxt->children &&
