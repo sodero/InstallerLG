@@ -1,4 +1,3 @@
-- Abort (esc) doesn't work in everywhere.
 - Empty help bubbles if not set. Should be invisible.
 - OpenLocale() -> @installer-language
 - Check how strings are evaluated w. (AND) aso, in 3.9.

@@ -148,7 +148,14 @@ entry_p m_message(entry_p contxt)
                 // show the result of the concatenation.
                 if(!DID_ERR())
                 {
-                    gui_message(msg, 0);  
+                    // Show message dialog.
+                    DNUM = gui_message(msg, 0);  
+                }
+
+                // User abort?
+                if(!DNUM)
+                {
+                    HALT(); 
                 }
 
                 // Free the temporary buffer.
@@ -158,12 +165,11 @@ entry_p m_message(entry_p contxt)
             {
                 // Out of memory.
                 PANIC(contxt);
-                RCUR;
             }
         }
 
         // Done. 
-        RNUM(1); 
+        RCUR;
     }
     else
     {
@@ -227,20 +233,34 @@ entry_p m_welcome(entry_p contxt)
             msg = get_chlstr(contxt);
         }
 
-        // Did we manaage to concatenate something?
+        // Did we manage to concatenate something?
         if(msg)
         {
             // If we could resolve all our children,
             // show the result of the concatenation.
             if(!DID_ERR())
             {
-                gui_welcome
+                // Show welcome dialog.
+                DNUM = gui_welcome
                 (
                     msg, &lvl, &lgf, &prt,
                     get_numvar(contxt, "@user-min"),
                     get_numvar(contxt, "@no-pretend"),
                     get_numvar(contxt, "@no-log")
                 );
+
+                // On 'Proceed', set level and mode.
+                if(DNUM)
+                {
+                    set_numvar(contxt, "@user-level", lvl); 
+                    set_numvar(contxt, "@pretend", prt); 
+                    set_numvar(contxt, "@log", lgf); 
+                }
+                else
+                {
+                    // Abort.
+                    HALT(); 
+                }
             }
 
             // If we have children, then we also
@@ -251,19 +271,8 @@ entry_p m_welcome(entry_p contxt)
                 free(msg);
             }
 
-            // User level 0 = abort
-            if(lvl > 0)
-            {
-                set_numvar(contxt, "@user-level", lvl - 1); 
-                set_numvar(contxt, "@pretend", prt); 
-                set_numvar(contxt, "@log", lgf); 
-                RNUM(1);
-            }
-            else
-            {
-                HALT(); 
-                RNUM(0); 
-            }
+            // Done or halt.
+            RCUR; 
         }
     }
         

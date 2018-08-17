@@ -1184,11 +1184,16 @@ MUIDSP IPTR InstallerGuiMessage(Class *cls,
         // Wait for user input unless we're in immediate mode.
         if(!msg->Immediate)
         {
-            // Wait for proceed and proceed only.
-            InstallerGuiWait(obj, MUIV_InstallerGui_ProceedOnly, 1); 
+            // Wait for proceed or abort.
+            if(InstallerGuiWait(obj, MUIV_InstallerGui_ProceedOnly, 1)
+               != MUIV_InstallerGui_ProceedOnly)
+            {
+                // User abort.
+                return FALSE;
+            }
         }
 
-        // Always. 
+        // Proceed.
         return TRUE;
     }
     else
@@ -2260,12 +2265,16 @@ void gui_exit(void)
 // Description: Show message.
 // Input:       const char *msg:    Message shown to the user. 
 //              int imm:            No proceed button.
-// Return:      -
+// Return:      int:                1 on proceed, 0 on abort.
 //----------------------------------------------------------------------------
-void gui_message(const char *msg, int imm)
+int gui_message(const char *msg, int imm)
 {
     #ifdef AMIGA
-    DoMethod(Win, MUIM_InstallerGui_Message, msg, imm);
+    return (int) DoMethod
+    (
+        Win, MUIM_InstallerGui_Message,
+        msg, imm
+    );
     #else
     // Testing purposes.
     if(imm)
@@ -2276,6 +2285,8 @@ void gui_message(const char *msg, int imm)
     {
         fputs(msg, stdout); 
     }
+
+    return 1;
     #endif
 }
 
@@ -2450,7 +2461,7 @@ int gui_number(const char *msg,
 //              int min:            Minimum user level.
 //              int npr:            Disable pretend mode.
 //              int nlg:            Disable logging.
-// Return:      int:                1 on success, 0 on abort.
+// Return:      int:                1 on proceed, 0 on abort.
 //----------------------------------------------------------------------------
 int gui_welcome(const char *msg,
                 int *lvl,
