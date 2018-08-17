@@ -102,13 +102,13 @@ entry_p global(entry_p e)
 }
 
 //----------------------------------------------------------------------------
-// Name:        get_opt_aux
+// Name:        get_opt
 // Description: Find option of a given type in a context.
 // Input:       entry_p c:  The context to search in. 
 //              opt_t t:    The type of option to search for.
 // Return:      entry_p:    An OPTION entry if found, NULL otherwise.
 //----------------------------------------------------------------------------
-static entry_p get_opt_aux(entry_p c, opt_t t)
+entry_p get_opt(entry_p c, opt_t t)
 {
     // We need a context. 
     if(c && c != end() &&
@@ -171,54 +171,9 @@ static entry_p get_opt_aux(entry_p c, opt_t t)
         }
     }
 
-    // Nothing found.
-    return NULL; 
-}
-
-//----------------------------------------------------------------------------
-// Name:        get_opt_va
-// Description: Find option of a given type in one or more contexts.
-// Input:       opt_t t:    The type of option to search for.
-//              ...         Any number of entry_p contexts to search in.
-//              NULL        Terminating NULL
-// Return:      entry_p:    An OPTION entry if found, NULL otherwise.
-//----------------------------------------------------------------------------
-entry_p get_opt_va(opt_t t, ...)
-{
-    // Init VA.
-    va_list ap;
-    entry_p cur, top;
-
-    va_start(ap, t);
-    top = cur = va_arg(ap, entry_p);
-
-    // For all arguments following the
-    // type, treat them as contxts and
-    // search for the option therein.
-    while(cur)
-    {
-        // Search for option.
-        cur = get_opt_aux(cur, t);
-
-        if(cur)
-        {
-            // We found it.
-            break;
-        }
-        else
-        {
-            // Next argument.
-            cur = va_arg(ap, entry_p);
-        }
-    }
-
-    // End VA.
-    va_end(ap);
-
     // If in non strict mode, allow the absense
     // of (prompt) and (help).
-    if(!cur && top &&
-       !get_numvar(top, "@strict"))
+    if(!get_numvar(c, "@strict"))
     {
         if(t == OPT_PROMPT || t == OPT_HELP)
         {
@@ -228,8 +183,8 @@ entry_p get_opt_va(opt_t t, ...)
         }
     }
 
-    // Option or NULL.
-    return cur;
+    // Nothing found.
+    return NULL; 
 }
 
 //----------------------------------------------------------------------------
@@ -498,131 +453,96 @@ char *get_strvar(entry_p c, char *v)
 }
 
 //----------------------------------------------------------------------------
-// Name:        get_optstr_va
+// Name:        get_optstr
 // Description: Concatenate all the strings in all the options of a given
-//              type in a variable number of contexts.
-// Input:       opt_t t:    The option type.
-//              ...         Any number of entry_p contexts to search in.
-// Return:      char *:     A concatenation of all the strings found.
+//              type in contxt.
+// Input:       entry_p c:         Context. 
+//              opt_t t:           The option type.
+// Return:      char *:            A concatenation of all the strings found.
 //----------------------------------------------------------------------------
-char *get_optstr_va(opt_t t, ...)
+char *get_optstr(entry_p c, opt_t t)
 {
-    entry_p c; 
-    va_list ap;
     size_t n = 0; 
-    char *r = NULL;
+    entry_p *e = c->children;
 
-    // Init VA.
-    va_start(ap, t);
-    c = va_arg(ap, entry_p);
-
-    // Iterate over all contexts.
-    while(c && c_sane(c, 0))
+    // Count the number of children
+    // of the given option type.
+    while(*e && *e != end())
     {
-        entry_p *e = c->children;
-
-        // Count the number of children
-        // of the given option type.
-        while(*e && *e != end())
+        if((*e)->type == OPTION &&
+           (*e)->id == t)
         {
-            if((*e)->type == OPTION &&
-               (*e)->id == t)
-            {
-                n++;
-            }
-
-            // Next child.
-            e++;
+            n++;
         }
 
-        // Next argument.
-        c = va_arg(ap, entry_p);
+        // Next child.
+        e++;
     }
 
-    // End VA.
-    va_end(ap);
-
-    // Did we find any children with
-    // the right type?
+    // Did we find the right type?
     if(n)
     {
-        // Subtotals.
-        char *cs[n];
-        size_t s = 1,
-               i = 0;
+        // References to string evaluations of all
+        // options of the right type.
+        char **cs = calloc(n + 1, sizeof(char *)),
+             **os = cs;
 
-        // Init VA, again.
-        va_start(ap, t);
-        c = va_arg(ap, entry_p);
-
-        // Iterate over all contexts once
-        // again, find the right options,
-        // and resolve them all.
-        while(c)
+        if(cs)
         {
-            entry_p *e = c->children;
+            // Empty string.
+            e = c->children;
+            n = 1;
 
-            // For all children of the current
-            // context, resolve the ones with
-            // the correct type.
+            // For all children, evaluate them
+            // once and save string pointers.
             while(*e && *e != end())
             {
                 if((*e)->type == OPTION &&
                    (*e)->id == t)
                 {
-                    // Merge strings if needed.
-                    cs[i] = get_chlstr(*e);
-
-                    // If we run out of memory,
-                    // free everything we have
-                    // allocated this far
-                    if(!cs[i])
-                    {
-                        while(i--)
-                        {
-                            free(cs[i]);
-                        }
-
-                        // End VA.
-                        va_end(ap);
-                        return r;
-                    }
-
-                    // Keep track of the total
-                    // string length.
-                    s += strlen(cs[i]);
-                    i++;
+                    // Sum up the length.
+                    *cs = get_chlstr(*e);
+                    n += strlen(*(cs++));
                 }
 
                 // Next child.
                 e++;
             }
 
-            // Next argument.
-            c = va_arg(ap, entry_p);
-        }
+            // Allocate memory to hold the
+            // concatenation of all strings.
+            char * r = calloc(n, 1);
 
-        // End VA.
-        va_end(ap);
-
-        // Allocate memory to hold the
-        // final concatenation.
-        r = calloc(s, 1);
-
-        if(r)
-        {
-            // Concatenate and free
-            // substrings in one go.
-            for(i = 0; i < n; i++)
+            if(r)
             {
-                strcat(r, cs[i]);
-                free(cs[i]);
+                // Start all over.
+                cs = os;
+
+                // Concatenate and free
+                // substrings in one go.
+                while(*cs)
+                {
+                      strcat(r, *cs);
+                      free(*(cs++));
+                }
+
+                // Free references.
+                free(os);
+
+                // Done.
+                return r;
+            }
+            else
+            {
+                // Out of memory.
+                free(cs);
             }
         }
+        // Out of memory
     }
-    
-    // Success or OOM.
-    return r; 
+
+    // Not found / OOM.
+    return NULL;
 }
 
 //----------------------------------------------------------------------------

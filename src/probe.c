@@ -724,7 +724,7 @@ entry_p m_getversion(entry_p contxt)
             const char *w = str(CARG(1));
 
             // A resident library or device? 
-            if(get_opt_va(OPT_RESIDENT, contxt, NULL))
+            if(get_opt(contxt, OPT_RESIDENT))
             {
                 #ifdef AMIGA
                 struct Resident *res = 
@@ -805,11 +805,11 @@ entry_p m_iconinfo(entry_p contxt)
     // We need one or more arguments.
     if(c_sane(contxt, 1))
     {
-        entry_p dst   =   get_opt_va(OPT_DEST, contxt, NULL);
-        entry_p tt[]  = { get_opt_va(OPT_GETTOOLTYPE, contxt, NULL),
-                          get_opt_va(OPT_GETDEFAULTTOOL, contxt, NULL),
-                          get_opt_va(OPT_GETSTACK, contxt, NULL),
-                          get_opt_va(OPT_GETPOSITION, contxt, NULL), end() };
+        entry_p dst   =   get_opt(contxt, OPT_DEST);
+        entry_p tt[]  = { get_opt(contxt, OPT_GETTOOLTYPE),
+                          get_opt(contxt, OPT_GETDEFAULTTOOL),
+                          get_opt(contxt, OPT_GETSTACK),
+                          get_opt(contxt, OPT_GETPOSITION), end() };
 
         // We need something to work with. 
         if(dst) 

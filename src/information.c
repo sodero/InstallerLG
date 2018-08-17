@@ -132,7 +132,7 @@ entry_p m_message(entry_p contxt)
     {
         // Get information needed to determine 
         // wheter to show anything or not.
-        entry_p all = get_opt_va(OPT_ALL, contxt, NULL);
+        entry_p all = get_opt(contxt, OPT_ALL);
         int level = get_numvar(contxt, "@user-level");
 
         // Non novice or override using (all)?

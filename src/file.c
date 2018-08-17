@@ -1091,32 +1091,32 @@ entry_p m_copyfiles(entry_p contxt)
     // We need atleast one argument
     if(c_sane(contxt, 1))
     {
-        entry_p prompt     = get_opt_va(OPT_PROMPT, contxt, NULL),
-                help       = get_opt_va(OPT_HELP, contxt, NULL),
-                source     = get_opt_va(OPT_SOURCE, contxt, NULL),
-                dest       = get_opt_va(OPT_DEST, contxt, NULL),
-                newname    = get_opt_va(OPT_NEWNAME, contxt, NULL),
-                choices    = get_opt_va(OPT_CHOICES, contxt, NULL),
-                all        = get_opt_va(OPT_ALL, contxt, NULL),
-                pattern    = get_opt_va(OPT_PATTERN, contxt, NULL),
-                infos      = get_opt_va(OPT_INFOS, contxt, NULL),
-                confirm    = get_opt_va(OPT_CONFIRM, contxt, NULL),
-                safe       = get_opt_va(OPT_SAFE, contxt, NULL),
-                nogauge    = get_opt_va(OPT_NOGAUGE, contxt, NULL),
-                fonts      = get_opt_va(OPT_FONTS, contxt, NULL),
-                optional   = get_opt_va(OPT_OPTIONAL, contxt, NULL),
-                delopts    = get_opt_va(OPT_DELOPTS, contxt, NULL),
-                files      = all ? NULL : get_opt_va(OPT_FILES, contxt, NULL),
-                fail       = get_opt_va(OPT_FAIL, delopts, NULL) ?
-                             NULL : get_opt_va(OPT_FAIL, optional, NULL),
-                nofail     = get_opt_va(OPT_NOFAIL, delopts, NULL) ?
-                             NULL : get_opt_va(OPT_NOFAIL, optional, NULL),
-                oknodelete = get_opt_va(OPT_OKNODELETE, delopts, NULL) ?
-                             NULL : get_opt_va(OPT_OKNODELETE, optional, NULL),
-                force      = get_opt_va(OPT_FORCE, delopts, NULL) ? 
-                             NULL : get_opt_va(OPT_FORCE, optional, NULL),
-                askuser    = get_opt_va(OPT_ASKUSER, delopts, NULL) ?
-                             NULL : get_opt_va(OPT_ASKUSER, optional, NULL);
+        entry_p prompt     = get_opt(contxt, OPT_PROMPT),
+                help       = get_opt(contxt, OPT_HELP),
+                source     = get_opt(contxt, OPT_SOURCE),
+                dest       = get_opt(contxt, OPT_DEST),
+                newname    = get_opt(contxt, OPT_NEWNAME),
+                choices    = get_opt(contxt, OPT_CHOICES),
+                all        = get_opt(contxt, OPT_ALL),
+                pattern    = get_opt(contxt, OPT_PATTERN),
+                infos      = get_opt(contxt, OPT_INFOS),
+                confirm    = get_opt(contxt, OPT_CONFIRM),
+                safe       = get_opt(contxt, OPT_SAFE),
+                nogauge    = get_opt(contxt, OPT_NOGAUGE),
+                fonts      = get_opt(contxt, OPT_FONTS),
+                optional   = get_opt(contxt, OPT_OPTIONAL),
+                delopts    = get_opt(contxt, OPT_DELOPTS),
+                files      = all ? NULL : get_opt(contxt, OPT_FILES),
+                fail       = get_opt(delopts, OPT_FAIL) ?
+                             NULL : get_opt(optional, OPT_FAIL),
+                nofail     = get_opt(delopts, OPT_NOFAIL) ?
+                             NULL : get_opt(optional, OPT_NOFAIL),
+                oknodelete = get_opt(delopts, OPT_OKNODELETE) ?
+                             NULL : get_opt(optional, OPT_OKNODELETE),
+                force      = get_opt(delopts, OPT_FORCE) ? 
+                             NULL : get_opt(optional, OPT_FORCE),
+                askuser    = get_opt(delopts, OPT_ASKUSER) ?
+                             NULL : get_opt(optional, OPT_ASKUSER);
 
         DNUM = 0; 
 
@@ -1380,28 +1380,28 @@ entry_p m_copylib(entry_p contxt)
     // We need atleast one argument
     if(c_sane(contxt, 1))
     {   
-        entry_p prompt     = get_opt_va(OPT_PROMPT, contxt, NULL),
-                help       = get_opt_va(OPT_HELP, contxt, NULL),
-                source     = get_opt_va(OPT_SOURCE, contxt, NULL),
-                dest       = get_opt_va(OPT_DEST, contxt, NULL),
-                newname    = get_opt_va(OPT_NEWNAME, contxt, NULL),
-                infos      = get_opt_va(OPT_INFOS, contxt, NULL),
-                confirm    = get_opt_va(OPT_CONFIRM, contxt, NULL),
-                safe       = get_opt_va(OPT_SAFE, contxt, NULL),
-                nogauge    = get_opt_va(OPT_NOGAUGE, contxt, NULL),
-                noposition = get_opt_va(OPT_NOPOSITION, contxt, NULL),
-                optional   = get_opt_va(OPT_OPTIONAL, contxt, NULL),
-                delopts    = get_opt_va(OPT_DELOPTS, contxt, NULL),
-                fail       = get_opt_va(OPT_FAIL, delopts, NULL) ?
-                             NULL : get_opt_va(OPT_FAIL, optional, NULL),
-                nofail     = get_opt_va(OPT_NOFAIL, delopts, NULL) ?
-                             NULL : get_opt_va(OPT_NOFAIL, optional, NULL),
-                oknodelete = get_opt_va(OPT_OKNODELETE, delopts, NULL) ?
-                             NULL : get_opt_va(OPT_OKNODELETE, optional, NULL),
-                force      = get_opt_va(OPT_FORCE, delopts, NULL) ? 
-                             NULL : get_opt_va(OPT_FORCE, optional, NULL),
-                askuser    = get_opt_va(OPT_ASKUSER, delopts, NULL) ?
-                             NULL : get_opt_va(OPT_ASKUSER, optional, NULL);
+        entry_p prompt     = get_opt(contxt, OPT_PROMPT),
+                help       = get_opt(contxt, OPT_HELP),
+                source     = get_opt(contxt, OPT_SOURCE),
+                dest       = get_opt(contxt, OPT_DEST),
+                newname    = get_opt(contxt, OPT_NEWNAME),
+                infos      = get_opt(contxt, OPT_INFOS),
+                confirm    = get_opt(contxt, OPT_CONFIRM),
+                safe       = get_opt(contxt, OPT_SAFE),
+                nogauge    = get_opt(contxt, OPT_NOGAUGE),
+                noposition = get_opt(contxt, OPT_NOPOSITION),
+                optional   = get_opt(contxt, OPT_OPTIONAL),
+                delopts    = get_opt(contxt, OPT_DELOPTS),
+                fail       = get_opt(delopts, OPT_FAIL) ?
+                             NULL : get_opt(optional, OPT_FAIL),
+                nofail     = get_opt(delopts, OPT_NOFAIL) ?
+                             NULL : get_opt(optional, OPT_NOFAIL),
+                oknodelete = get_opt(delopts, OPT_OKNODELETE) ?
+                             NULL : get_opt(optional, OPT_OKNODELETE),
+                force      = get_opt(delopts, OPT_FORCE) ? 
+                             NULL : get_opt(optional, OPT_FORCE),
+                askuser    = get_opt(delopts, OPT_ASKUSER) ?
+                             NULL : get_opt(optional, OPT_ASKUSER);
 
         DNUM = 0; 
 
@@ -1814,13 +1814,13 @@ static int h_delete_file(entry_p contxt, const char *file)
 {
     if(file)
     {
-        entry_p infos    = get_opt_va(OPT_INFOS, CARG(2), CARG(3), NULL), 
-                optional = get_opt_va(OPT_OPTIONAL, CARG(2), CARG(3), NULL), 
-                delopts  = get_opt_va(OPT_DELOPTS, CARG(2), CARG(3), NULL), 
-                force    = get_opt_va(OPT_FORCE, delopts, NULL) ? NULL :
-                           get_opt_va(OPT_FORCE, optional, NULL),
-                askuser  = get_opt_va(OPT_ASKUSER, delopts, NULL) ? NULL :
-                           get_opt_va(OPT_ASKUSER, optional, NULL);
+        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
+                optional = get_opt(CARG(2), OPT_OPTIONAL), 
+                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
+                force    = get_opt(delopts, OPT_FORCE) ? NULL :
+                           get_opt(optional, OPT_FORCE),
+                askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
+                           get_opt(optional, OPT_ASKUSER);
 
         // If (force) is used, give permissions 
         // so that delete can succeed. 
@@ -1926,14 +1926,14 @@ static int h_delete_dir(entry_p contxt, const char *dir)
 {
     if(dir)
     {
-        entry_p infos    = get_opt_va(OPT_INFOS, CARG(2), CARG(3), NULL), 
-                optional = get_opt_va(OPT_OPTIONAL, CARG(2), CARG(3), NULL), 
-                delopts  = get_opt_va(OPT_DELOPTS, CARG(2), CARG(3), NULL), 
-                all      = get_opt_va(OPT_ALL, CARG(2), CARG(3), NULL), 
-                force    = get_opt_va(OPT_FORCE, delopts, NULL) ? NULL :
-                           get_opt_va(OPT_FORCE, optional, NULL),
-                askuser  = get_opt_va(OPT_FORCE, delopts, NULL) ? NULL :
-                           get_opt_va(OPT_ASKUSER, optional, NULL);
+        entry_p infos    = get_opt(CARG(2), OPT_INFOS), 
+                optional = get_opt(CARG(2), OPT_OPTIONAL), 
+                delopts  = get_opt(CARG(2), OPT_DELOPTS), 
+                all      = get_opt(CARG(2), OPT_ALL), 
+                force    = get_opt(delopts, OPT_FORCE) ? NULL :
+                           get_opt(optional, OPT_FORCE),
+                askuser  = get_opt(delopts, OPT_FORCE) ? NULL :
+                           get_opt(optional, OPT_ASKUSER);
 
         if(!force && access(dir, W_OK))
         {
@@ -2193,10 +2193,10 @@ entry_p m_delete(entry_p contxt)
         // Can we parse the input string? 
         if(wc >= 0)
         {
-            entry_p help     = get_opt_va(OPT_HELP, CARG(2), CARG(3), NULL),
-                    prompt   = get_opt_va(OPT_PROMPT, CARG(2), CARG(3), NULL), 
-                    confirm  = get_opt_va(OPT_CONFIRM, CARG(2), CARG(3), NULL), 
-                    safe     = get_opt_va(OPT_SAFE, CARG(2), CARG(3), NULL);
+            entry_p help     = get_opt(CARG(2), OPT_HELP),
+                    prompt   = get_opt(CARG(2), OPT_PROMPT), 
+                    confirm  = get_opt(CARG(2), OPT_CONFIRM), 
+                    safe     = get_opt(CARG(2), OPT_SAFE);
 
             // Do we need confirmation?
             if(confirm)
@@ -2311,7 +2311,7 @@ entry_p m_exists(entry_p contxt)
     if(c_sane(contxt, 1))
     {
         // Supress volume requester?
-        if(get_opt_va(OPT_NOREQ, contxt, NULL))
+        if(get_opt(contxt, OPT_NOREQ))
         {
             #ifdef AMIGA
             struct Process *p = (struct Process *) 
@@ -2613,7 +2613,7 @@ entry_p m_makeassign(entry_p contxt)
 {
     if(c_sane(contxt, 1))
     {
-        entry_p safe = get_opt_va(OPT_SAFE, contxt, NULL);
+        entry_p safe = get_opt(contxt, OPT_SAFE);
 
         // Is this a safe operation or are we not 
         // running in pretend mode? 
@@ -2707,11 +2707,11 @@ entry_p m_makedir(entry_p contxt)
     // of the directory to be created.
     if(c_sane(contxt, 1))
     {
-        entry_p prompt   = get_opt_va(OPT_PROMPT, CARG(2), CARG(3), NULL),
-                help     = get_opt_va(OPT_HELP, CARG(2), CARG(3), NULL),
-                infos    = get_opt_va(OPT_INFOS, CARG(2), CARG(3), NULL),
-                confirm  = get_opt_va(OPT_CONFIRM, CARG(2), CARG(3), NULL),
-                safe     = get_opt_va(OPT_SAFE, CARG(2), CARG(3), NULL); 
+        entry_p prompt   = get_opt(CARG(2), OPT_PROMPT),
+                help     = get_opt(CARG(2), OPT_HELP),
+                infos    = get_opt(CARG(2), OPT_INFOS),
+                confirm  = get_opt(CARG(2), OPT_CONFIRM),
+                safe     = get_opt(CARG(2), OPT_SAFE); 
 
         DNUM = 0; 
 
@@ -2861,7 +2861,7 @@ entry_p m_protect(entry_p contxt)
             // Get with option.
             if(CARG(2)->type == CONTXT)
             {
-                entry_p override = get_opt_va(OPT_OVERRIDE, CARG(2), NULL);
+                entry_p override = get_opt(CARG(2), OPT_OVERRIDE);
 
                 if(override)
                 {
@@ -2881,8 +2881,8 @@ entry_p m_protect(entry_p contxt)
                 const char *flg = str(CARG(2)); 
                 size_t len = strlen(flg); 
 
-                entry_p safe = get_opt_va(OPT_SAFE, CARG(3), NULL),
-                        override = get_opt_va(OPT_OVERRIDE, CARG(3), NULL);
+                entry_p safe = get_opt(CARG(3), OPT_SAFE),
+                        override = get_opt(CARG(3), OPT_OVERRIDE);
 
                 // If any numbers are present in the string, 
                 // treat it as an absolute mask instead.
@@ -3010,9 +3010,9 @@ entry_p m_startup(entry_p contxt)
         char *cmd = NULL;
         const char *app = str(CARG(1));
 
-        entry_p command  = get_opt_va(OPT_COMMAND, CARG(2), CARG(3), NULL),
-                help     = get_opt_va(OPT_HELP, CARG(2), CARG(3), NULL),
-                prompt   = get_opt_va(OPT_PROMPT, CARG(2), CARG(3), NULL);
+        entry_p command  = get_opt(CARG(2), OPT_COMMAND),
+                help     = get_opt(CARG(2), OPT_HELP),
+                prompt   = get_opt(CARG(2), OPT_PROMPT);
 
         // Expect failure. 
         DNUM = 0; 
@@ -3038,7 +3038,7 @@ entry_p m_startup(entry_p contxt)
         // be set by h_confirm. Confirmation is needed
         // when user level is not novice or (confirm)
         // is used.
-        if(get_opt_va(OPT_CONFIRM, CARG(2), CARG(3), NULL) ||
+        if(get_opt(CARG(2), OPT_CONFIRM) ||
            get_numvar(contxt, "@user-level") > 0)
         {
             if(!h_confirm(contxt, str(help), str(prompt)))
@@ -3054,7 +3054,7 @@ entry_p m_startup(entry_p contxt)
         }
 
         // Gather and merge all (command) strings.
-        cmd = get_optstr_va(OPT_COMMAND, CARG(2), CARG(3), NULL);
+        cmd = get_optstr(CARG(2), OPT_COMMAND);
 
         if(cmd)
         {
@@ -3323,13 +3323,13 @@ entry_p m_textfile(entry_p contxt)
     // We need atleast one argument
     if(c_sane(contxt, 1))
     {
-        entry_p prompt   = get_opt_va(OPT_PROMPT, contxt, NULL),
-                help     = get_opt_va(OPT_HELP, contxt, NULL),
-                dest     = get_opt_va(OPT_DEST, contxt, NULL),
-                append   = get_opt_va(OPT_APPEND, contxt, NULL),
-                include  = get_opt_va(OPT_INCLUDE, contxt, NULL),
-                confirm  = get_opt_va(OPT_CONFIRM, contxt, NULL),
-                safe     = get_opt_va(OPT_SAFE, contxt, NULL); 
+        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+                help     = get_opt(contxt, OPT_HELP),
+                dest     = get_opt(contxt, OPT_DEST),
+                append   = get_opt(contxt, OPT_APPEND),
+                include  = get_opt(contxt, OPT_INCLUDE),
+                confirm  = get_opt(contxt, OPT_CONFIRM),
+                safe     = get_opt(contxt, OPT_SAFE); 
 
         DNUM = 0; 
 
@@ -3400,7 +3400,7 @@ entry_p m_textfile(entry_p contxt)
                     if(append)
                     {
                         // Gather and merge all (append) strings.
-                        char *app = get_optstr_va(OPT_APPEND, contxt, NULL); 
+                        char *app = get_optstr(contxt, OPT_APPEND); 
 
                         if(app)
                         {
@@ -3516,16 +3516,16 @@ entry_p m_tooltype(entry_p contxt)
     // No arguments needed. 
     if(c_sane(contxt, 0))
     {
-        entry_p help            = get_opt_va(OPT_HELP, contxt, NULL),
-                prompt          = get_opt_va(OPT_PROMPT, contxt, NULL),
-                dest            = get_opt_va(OPT_DEST, contxt, NULL),
-                settooltype     = get_opt_va(OPT_SETTOOLTYPE, contxt, NULL),
-                setdefaulttool  = get_opt_va(OPT_SETDEFAULTTOOL, contxt, NULL),
-                setstack        = get_opt_va(OPT_SETSTACK, contxt, NULL),
-                noposition      = get_opt_va(OPT_NOPOSITION, contxt, NULL),
-                setposition     = get_opt_va(OPT_SETPOSITION, contxt, NULL),
-                confirm         = get_opt_va(OPT_CONFIRM, contxt, NULL),
-                safe            = get_opt_va(OPT_SAFE, contxt, NULL);
+        entry_p help            = get_opt(contxt, OPT_HELP),
+                prompt          = get_opt(contxt, OPT_PROMPT),
+                dest            = get_opt(contxt, OPT_DEST),
+                settooltype     = get_opt(contxt, OPT_SETTOOLTYPE),
+                setdefaulttool  = get_opt(contxt, OPT_SETDEFAULTTOOL),
+                setstack        = get_opt(contxt, OPT_SETSTACK),
+                noposition      = get_opt(contxt, OPT_NOPOSITION),
+                setposition     = get_opt(contxt, OPT_SETPOSITION),
+                confirm         = get_opt(contxt, OPT_CONFIRM),
+                safe            = get_opt(contxt, OPT_SAFE);
 
         DNUM = 0; 
 
@@ -3903,11 +3903,11 @@ entry_p m_rename(entry_p contxt)
     // We need atleast two arguments
     if(c_sane(contxt, 2))
     {
-        entry_p help    = get_opt_va(OPT_HELP, CARG(3), NULL),
-                prompt  = get_opt_va(OPT_PROMPT, CARG(3), NULL), 
-                confirm = get_opt_va(OPT_CONFIRM, CARG(3), NULL), 
-                disk    = get_opt_va(OPT_DISK, CARG(3), NULL), 
-                safe    = get_opt_va(OPT_SAFE, CARG(3), NULL);
+        entry_p help    = get_opt(CARG(3), OPT_HELP),
+                prompt  = get_opt(CARG(3), OPT_PROMPT), 
+                confirm = get_opt(CARG(3), OPT_CONFIRM), 
+                disk    = get_opt(CARG(3), OPT_DISK), 
+                safe    = get_opt(CARG(3), OPT_SAFE);
 
         const char *fr  = str(CARG(1)), 
                    *to  = str(CARG(2));

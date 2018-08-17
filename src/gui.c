@@ -2566,7 +2566,7 @@ int gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, int cnf)
     );
     #else
     // Testing purposes.
-    lst ? (cnf ? ((msg && hlp) ? 0 : -1) : 1) : -1;
+    (lst ? (cnf ? ((msg && hlp) ? 0 : -1) : 1) : -1);
     #endif
 }
 
