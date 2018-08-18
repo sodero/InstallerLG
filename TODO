@@ -1,5 +1,4 @@
 - Empty help bubbles if not set. Should be invisible.
-- OpenLocale() -> @installer-language
 - Check how strings are evaluated w. (AND) aso, in 3.9.
 - Check list mgmt for mem leaks.
 - We need @strict = 0 testing on the gui parts. What is shown when we have nothing to show?

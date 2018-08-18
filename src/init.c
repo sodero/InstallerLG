@@ -19,6 +19,10 @@
 
 #include <string.h>
 
+#ifdef AMIGA
+#include <proto/locale.h>
+#endif
+
 //----------------------------------------------------------------------------
 // Stringification
 //----------------------------------------------------------------------------
@@ -33,7 +37,7 @@
 
 static char version[] __attribute__((used)) = "\0$VER: InstallerLG " 
                                                VER(MAJOR) "." VER(MINOR) 
-                                              " [ALPHA21]";
+                                              " [ALPHA22]";
 
 //----------------------------------------------------------------------------
 // Name:        native_exists
@@ -89,16 +93,29 @@ entry_p init(entry_p contxt)
         entry_p e = native_exists(contxt, m_welcome);
 
         // Get tooltype values / cli arguments.
-        const char *a_app = arg_get(ARG_APPNAME),
-                   *a_scr = arg_get(ARG_SCRIPT),
-                   *a_min = arg_get(ARG_MINUSER),
-                   *a_def = arg_get(ARG_DEFUSER),
-                   *a_log = arg_get(ARG_LOGFILE);
+        char *a_app = arg_get(ARG_APPNAME),
+             *a_scr = arg_get(ARG_SCRIPT),
+             *a_min = arg_get(ARG_MINUSER),
+             *a_def = arg_get(ARG_DEFUSER),
+             *a_log = arg_get(ARG_LOGFILE),
+             *a_loc = NULL;
 
         // Set default values.
         int defusr = 2, minusr = 0,
             nolog = arg_get(ARG_NOLOG) ? 1 : 0,
             nopretend = arg_get(ARG_NOPRETEND) ? 1 : 0;
+
+        #ifdef AMIGA
+        // Open the current default locale.
+        struct Locale *loc = OpenLocale(NULL);
+
+        // Set the preferred installer language.
+        if(loc && loc->loc_PrefLanguages[0])
+        {
+            a_loc = strdup(loc->loc_PrefLanguages[0]);
+            CloseLocale(loc);
+        }
+        #endif
 
         a_app = a_app ? a_app : "";
         a_scr = a_scr ? a_scr : "";
@@ -449,9 +466,9 @@ entry_p init(entry_p contxt)
                 */
             ),
                 new_symbol(strdup("@language"))),
-                new_string(strdup("english"))
+                new_string(a_loc ? a_loc : strdup("english"))
                 /*
-                NOT USED.
+                Default language.
                 */
             ),
                 new_symbol(strdup("@special-msg"))),

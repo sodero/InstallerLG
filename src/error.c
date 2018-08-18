@@ -16,8 +16,7 @@
 //----------------------------------------------------------------------------
 // Name:        error
 // Description: Function used to set / get / communicate errors.
-// Input:       !!!.OS.TEST!!!
-//              int id:             A numerical identifier aiding debugging. 
+// Input:       int id:             A numerical identifier aiding debugging.
 //                                  In most cases this will be a line number. 
 //              error_t:            Type of error to set, or ERR_NONE to get 
 //                                  status.  
