@@ -513,15 +513,8 @@ MUIDSP IPTR InstallerGuiPageSet(Class *cls,
     set(my->Top, MUIA_Group_ActivePage, msg->Top);
     set(my->Bottom, MUIA_Group_ActivePage, msg->Bottom);
 
-    // Set help bubble.
-    if(msg->Help)
-    {
-        // You should really disable the bubble
-        // instead of checking for NULL. Doing
-        // it like this leaves old help strings
-        // behind in some cases.
-        set(my->Root, MUIA_ShortHelp, msg->Help);
-    }
+    // NULL will disable the help bubble.
+    set(my->Root, MUIA_ShortHelp, msg->Help);
 
     // Wrap at 50 for now, even though
     // we make room for more below.

@@ -109,3 +109,7 @@
 0.1.0-alpha.22:
 ===============
 - Default locale promoted to @language.
+
+0.1.0-alpha.23:
+===============
+- Help bubble fix.
