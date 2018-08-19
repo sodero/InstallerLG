@@ -5,7 +5,7 @@
 0.1.0-alpha.2:
 ==============
 - Made lexer case insensitive (YAM)
-- Filenames ending with '/' are now accepted by tackon (YAM)
+- Filenames ending with '/' are now accepted by tackon in non strict mode (YAM)
 
 0.1.0-alpha.3:
 ==============
@@ -113,3 +113,7 @@
 0.1.0-alpha.23:
 ===============
 - Help bubble fix.
+
+0.1.0-alpha.24:
+===============
+- (debug) prints undefined variables as they should.

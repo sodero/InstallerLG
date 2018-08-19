@@ -57,16 +57,9 @@ entry_p m_complete(entry_p contxt)
 entry_p m_debug(entry_p contxt)
 {
     // We need a proper context, no arguments
-    // needed though. 
-    //
-    // REALLY? 
-    //
-    // FIXME
-    //
-    // More problems, you should be able to 
-    // handle missing symbols, they should 
-    // generate <NIL> strings. See doc. 
-    //
+    // needed though. Doesn't make sense, but
+    // that's how the 3.9 implementation does
+    // it.
     if(c_sane(contxt, 0))
     {
         // Are we being invoked from shell or
@@ -80,16 +73,55 @@ entry_p m_debug(entry_p contxt)
         // log when invoked from Workbench.
         while(*cur && *cur != end())
         {
+            char *s = NULL;
+
+            // If this is a variable, test if it's
+            // defined, and if not, print <NIL>.
+            if((*cur)->type == SYMREF)
+            {
+                // Save level of strictness.
+                entry_p res;
+                int m = get_numvar(contxt, "@strict");
+
+                // Set non strict mode and search
+                // for symbol. By doing it this way
+                // we repress the error message that
+                // is shown when symbols are missing.
+                set_numvar(contxt, "@strict", 0);
+                res = find_symbol(*cur);
+
+                // If the symbol is missing, we will
+                // have a STATUS entry that is false.
+                if(res->type == STATUS && !tru(res))
+                {
+                    // As prescribed.
+                    s = "<NIL>";
+                }
+                else
+                {
+                    // Symbol found. Resolve it.
+                    s = str(*cur);
+                }
+
+                // Restore level of strictness.
+                set_numvar(contxt, "@strict", m);
+            }
+            else
+            {
+                // Resolve string.
+                s = str(*cur);
+            }
+
             if(cli)
             {
-                // From shell.
-                printf("%s ", str(*cur)); 
+                // Invoked from CLI.
+                printf("%s ", s); 
             }
             #ifdef AMIGA
             else
             {
-                // From Workbench.
-                KPrintF("%s ", str(*cur)); 
+                // Invoked from WB.
+                KPrintF("%s ", s); 
             }
             #endif
             cur++; 
@@ -98,16 +130,18 @@ entry_p m_debug(entry_p contxt)
         // Append final newline. 
         if(cli)
         {
-            // From shell.
+            // Invoked from CLI.
             printf("\n"); 
         }
         #ifdef AMIGA
         else
         {
-            // From Workbench.
+            // Invoked from WB.
             KPrintF("\n"); 
         }
         #endif
+
+        // Done.
         RNUM(1); 
     }
     else

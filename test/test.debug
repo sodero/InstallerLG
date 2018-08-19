@@ -1,3 +1,8 @@
+(debug undef) ; "","<NIL> 1",""
+(set @strict 0) (debug undef) ; "","<NIL> 1",""
+(set @strict 1) (debug undef) ; "","<NIL> 1",""
+(set @strict 1) (debug undef) (+ 2 @strict); "","<NIL> 3",""
+(set @strict 0) (debug undef) (+ 2 @strict); "","<NIL> 2",""
 (debug "a" "b" "c") ; "","a b c 1",""
 (debug "a") (debug "b") (debug "c") ; "","a b c 1",""
 ((debug "a") (debug "b") (debug "c")) ; "","a b c 1",""

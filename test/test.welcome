@@ -1,4 +1,5 @@
 (welcome "Welcome") ; "","Welcome200000 1",""
+(set @strict 0) (welcome undef) ; "","200000 1",""
 (set @pretend 1) (welcome "Welcome") ; "","Welcome201000 1",""
 (set @pretend 1 @log 1) (welcome "Welcome") ; "","Welcome211000 1",""
 (set @pretend 1 @log 1 @no-pretend 1 @user-min 1) (welcome "Welcome") ; "","Welcome211110 1",""
