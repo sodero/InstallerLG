@@ -346,7 +346,8 @@ rename:         '(' RENAME pp opts')'           { $$ = new_native(strdup("rename
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* information.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------*/
 complete:       '(' COMPLETE p ')'              { $$ = new_native(strdup("complete"), LINE, m_complete, push(new_contxt(), $3), NUMBER); }; 
-debug:          '(' DEBUG ps ')'                { $$ = new_native(strdup("debug"), LINE, m_debug, $3, NUMBER); }; 
+debug:          '(' DEBUG ps ')'                { $$ = new_native(strdup("debug"), LINE, m_debug, $3, NUMBER); } |
+                '(' DEBUG ')'                   { $$ = new_native(strdup("debug"), LINE, m_debug, NULL, NUMBER); }; 
 message:        '(' MESSAGE ps all ')'          { $$ = new_native(strdup("message"), LINE, m_message, push($3, $4), NUMBER); } | 
                 '(' MESSAGE ps ')'              { $$ = new_native(strdup("message"), LINE, m_message, $3, NUMBER); };
 user:           '(' USER p ')'                  { $$ = new_native(strdup("user"), LINE, m_user, push(new_contxt(), $3), NUMBER); };

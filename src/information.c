@@ -56,15 +56,14 @@ entry_p m_complete(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_debug(entry_p contxt)
 {
-    // We need a proper context, no arguments
-    // needed though. Doesn't make sense, but
-    // that's how the 3.9 implementation does
-    // it.
-    if(c_sane(contxt, 0))
+    // Are we being invoked from shell or
+    // WB?
+    int cli = arg_argc(-1);
+
+    // Children are optional. Doesn't make sense,
+    // but that's how it's done in 3.9.
+    if(contxt && contxt->children)
     {
-        // Are we being invoked from shell or
-        // WB?
-        int cli = arg_argc(-1);
         entry_p *cur = contxt->children; 
 
         // For all children, print the string
@@ -126,30 +125,24 @@ entry_p m_debug(entry_p contxt)
             #endif
             cur++; 
         }
-
-        // Append final newline. 
-        if(cli)
-        {
-            // Invoked from CLI.
-            printf("\n"); 
-        }
-        #ifdef AMIGA
-        else
-        {
-            // Invoked from WB.
-            KPrintF("\n"); 
-        }
-        #endif
-
-        // Done.
-        RNUM(1); 
     }
+
+    // Append final newline. 
+    if(cli)
+    {
+        // Invoked from CLI.
+        printf("\n"); 
+    }
+    #ifdef AMIGA
     else
     {
-        // The parser is broken.
-        PANIC(contxt); 
-        RCUR;
+        // Invoked from WB.
+        KPrintF("\n"); 
     }
+    #endif
+
+    // Always.
+    RNUM(1); 
 }
 
 //----------------------------------------------------------------------------
