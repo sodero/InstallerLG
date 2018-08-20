@@ -1,6 +1,4 @@
 - Check how strings are evaluated w. (AND) aso, in 3.9.
-- We have no (optional) test coverage on (copylib).
-- We need more @strict = 0 testing on (copylib).
 - We have no (confirm) test coverage on (startup).
 - We need (confirm) test feedback from (copyfiles).
 - Check list mgmt for mem leaks.
