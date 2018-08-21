@@ -1,3 +1,6 @@
+(user 2) (set @user-startup "_st_") (startup "ace" (confirm) (prompt "p") (help "h") (command "paul" "gene" "ace" "peter")) ; "cp ../test/data.startup.i3 _st_","ph 1","cmp _st_ ../test/data.startup.o13 && rm -f _st_"
+(user 0) (set @user-startup "_st_") (startup "ace" (confirm) (prompt "p") (help "h") (command "paul" "gene" "ace" "peter")) ; "cp ../test/data.startup.i3 _st_","ph 1","cmp _st_ ../test/data.startup.o13 && rm -f _st_"
+(user 0) (set @user-startup "_st_") (startup "ace" (prompt "p") (help "h") (command "paul" "gene" "ace" "peter")) ; "cp ../test/data.startup.i3 _st_","1","cmp _st_ ../test/data.startup.o13 && rm -f _st_"
 (set @user-startup "_st_") (startup "ace" (prompt "p") (help "h") (command "paul" "gene" "ace" "peter")) ; "cp ../test/data.startup.i3 _st_","ph 1","cmp _st_ ../test/data.startup.o13 && rm -f _st_"
 (set @user-startup "_st_") (startup "ace" (prompt "p") (help "h") (command "paul\\n" "gene\\n" "ace\\n" "peter")) ; "cp ../test/data.startup.i3 _st_","ph 1","cmp _st_ ../test/data.startup.o12 && rm -f _st_"
 (set @user-startup "_st_") (startup "ace" (prompt "p") (help "h") (command "paul" "gene") (command "ace" "peter")) ; "cp ../test/data.startup.i3 _st_","ph 1","cmp _st_ ../test/data.startup.o13 && rm -f _st_"

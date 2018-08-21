@@ -1,5 +1,4 @@
 - Check how strings are evaluated w. (AND) aso, in 3.9.
-- We have no (confirm) test coverage on (startup).
-- We need (confirm) test feedback from (copyfiles).
+- We need (confirm) test feedback from (copyfiles). Ok, _start -> _end?
 - Check list mgmt for mem leaks.
 - (showmedia) seems to be a thing? (>= V44), refer to IBrowse script.
