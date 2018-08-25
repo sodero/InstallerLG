@@ -16,7 +16,7 @@ FILES := $(EXE) 'InstallerLG installer' 'InstallerLG installer.info'
 #---------------------------------------------------------------------------------#
 # Targets
 #---------------------------------------------------------------------------------#
-.PHONY: dist aros
+.PHONY: dist
 dist: $(LHA) $(README)
 
 .PHONY: aros
