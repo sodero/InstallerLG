@@ -40,8 +40,8 @@ src: clean
 clean:
 	$(MAKE) -C $(BIN) $@
 	$(RM) $(EXE)
-	$(RM) $(LHA)
 	$(RM) $(README)
+	$(RM) $(DIR)/*.lha
 	$(RM) $(FLT)/*.c $(FLT)/*.h
 	$(RM) -R $(NAME)
 
