@@ -2,7 +2,7 @@ Short:        Commodore Installer replacement
 Author:       Ola Söder
 Uploader:     rolfkopman@gmail.com (Ola Söder)
 Type:         util/sys
-Architecture: __ARCH__
+Architecture: generic
 Requires:     MUI 3.8
 Version:      0.1.0-alpha.25
 Distribution: Aminet
@@ -15,3 +15,9 @@ version 2.1. InstallerLG aims to be fully compatible with the original as
 described in the V43.3 documentation. Many of the resource limitations of
 the Commodore implementation are gone, and the GUI has been replaced by a
 MUI / Zune based one.
+
+This archive contains the source code of InstallerLG.
+
+See also:
+https://github.com/sodero/InstallerLG
+https://sourceforge.net/projects/installerlg/

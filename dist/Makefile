@@ -26,6 +26,16 @@ aros:
 	cp $(BIN)/*.c $(FLT)
 	cp $(BIN)/*.h $(FLT)
 
+.PHONY: src
+src: clean
+	mkdir $(NAME)
+	cp ../LICENSE $(NAME)
+	cp ../README.md $(NAME)
+	cp -R ../build $(NAME)
+	cp -R ../src $(NAME)
+	cp -R ../test $(NAME)
+	lha a $(DIR)/$(NAME).src.lha $(NAME)
+
 .PHONY: clean
 clean:
 	$(MAKE) -C $(BIN) $@
@@ -33,6 +43,7 @@ clean:
 	$(RM) $(LHA)
 	$(RM) $(README)
 	$(RM) $(FLT)/*.c $(FLT)/*.h
+	$(RM) -R $(NAME)
 
 $(LHA): $(EXE)
 	lha a $@ $(FILES)
