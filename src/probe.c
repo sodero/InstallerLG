@@ -585,9 +585,11 @@ entry_p m_getsum(entry_p contxt)
 
         if(f)
         {
-            int c = getc(f);
-            uint32_t a = 1,
-                     b = 0;
+            // This will yield different results
+            // on 32 / 64 bit systems but that's
+            // hardly a problem (or?).
+            int c = getc(f),
+                a = 1, b = 0;
 
             // Adler-32 checksum.
             while(c != EOF)

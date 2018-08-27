@@ -122,4 +122,5 @@
 ===============
 - Naked (debug) allowed.
 - (getsum) using Adler-32.
-- ?
+- DEFUSER / MINUSER tooltype promotion (welcome) fix.
+- Installer overwrite on same version but different checksum.

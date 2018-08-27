@@ -632,12 +632,15 @@ MUIDSP IPTR InstallerGuiWelcome(Class *cls,
         // show 'average' and 'expert' only.
         else if(msg->MinLevel == 1)
         {
+            // Hide the full one.
             set(my->UserLevel, MUIA_ShowMe, FALSE);
             set(my->ExpertLevel, MUIA_ShowMe, TRUE);
+
+            // Take minimum user level into account.
+            set(my->ExpertLevel, MUIA_Radio_Active, *((int *) msg->Level) - 1);
         }
 
-        // Set the current user level, reflecting the minimum user
-        // level unless there are overrides in the script.
+        // Set the current user level.
         set(my->UserLevel, MUIA_Radio_Active, *((int *) msg->Level));
 
         // Wait for proceed or abort.
