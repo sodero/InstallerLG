@@ -585,20 +585,19 @@ entry_p m_getsum(entry_p contxt)
 
         if(f)
         {
-            int c = getc(f), 
-                n = 1; 
+            int c = getc(f);
+            uint32_t a = 1,
+                     b = 0;
 
-            DNUM = 0; 
-
-            // Generate silly checksum. Replace
-            // this with something else.
+            // Adler-32 checksum.
             while(c != EOF)
             {
-                DNUM -= (c + n);
+                a = (a + c) % 65521;
+                b = (a + b) % 65521;
                 c = getc(f); 
-                n = ~DNUM; 
             }
 
+            DNUM = (b << 16) | a;
             fclose(f); 
         }
         else

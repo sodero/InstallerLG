@@ -121,7 +121,5 @@
 0.1.0-alpha.25:
 ===============
 - Naked (debug) allowed.
-
-0.1.0-alpha.26:
-===============
+- (getsum) using Adler-32.
 - ?
