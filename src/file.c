@@ -636,12 +636,12 @@ static pnode_p h_filetree(entry_p contxt,
 //              file / dir protection bits. 
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
-//              LONG *mask:         Pointer to the LONG to hold the result.
+//              int32_t *mask:      Pointer to the result.
 // Return:      int:                On success '1', else '0'. 
 //----------------------------------------------------------------------------
 static int h_protect_get(entry_p contxt, 
-                         const char *file,
-                         LONG *mask)
+                         char *file,
+                         int32_t *mask)
 {
     if(contxt && mask && file)
     {
@@ -753,14 +753,14 @@ static int h_protect_set(entry_p contxt,
 // Name:        h_copyfile
 // Description: Copy file. Helper used by m_copyfiles and m_copylib.
 // Input:       entry_p contxt:     The execution context.
-//              const char *src:    Source file.
-//              const char *dst:    Destination file.
+//              char *src:          Source file.
+//              char *dst:          Destination file.
 //              int mode:           Copy mode, see CF_*.
 // Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
 static int h_copyfile(entry_p contxt, 
-                      const char *src, 
-                      const char *dst,
+                      char *src, 
+                      char *dst,
                       int mode)
 {
     if(contxt && src && dst)
@@ -897,7 +897,7 @@ static int h_copyfile(entry_p contxt,
 
                         // Preserve file permissions. On err,
                         // code will be set by h_protect_x().
-                        LONG prm; 
+                        int32_t prm; 
 
                         if(h_protect_get(contxt, src, &prm))
                         {
@@ -1284,7 +1284,7 @@ entry_p m_copyfiles(entry_p contxt)
                     for(; cur && DNUM; 
                         cur = cur->next)
                     {
-                        LONG prm; 
+                        int32_t prm; 
 
                         // Copy file / create dir / skip if zero:ed
                         switch(cur->type)
@@ -1426,8 +1426,8 @@ entry_p m_copylib(entry_p contxt)
         if(source && dest && 
            prompt && help) 
         {
-            const char *s = str(source), 
-                       *d = str(dest); 
+            char *s = str(source), 
+                 *d = str(dest); 
 
             // Does the source file exist?
             if(h_exists(s) == 1)
@@ -2766,7 +2766,7 @@ entry_p m_makedir(entry_p contxt)
         if(safe || !get_numvar(contxt, "@pretend"))
         {
             // The name of the directory. 
-            const char *dn = str(CARG(1)); 
+            char *dn = str(CARG(1)); 
 
             // Create the directory. 
             DNUM = h_makedir(contxt, dn, 0 /* FIXME */); 
@@ -2853,7 +2853,7 @@ entry_p m_protect(entry_p contxt)
     // A single argument is all we need. 
     if(c_sane(contxt, 1))
     {
-        const char *file = str(CARG(1)); 
+        char *file = str(CARG(1)); 
         DNUM = 0;
 
         if(CARG(2) && CARG(2) != end())
@@ -3533,7 +3533,7 @@ entry_p m_tooltype(entry_p contxt)
         if(dest) 
         {
             // Something is 'dest'.info 
-            const char *file = str(dest);
+            char *file = str(dest);
 
             // Do we need confirmation?
             if(confirm)

@@ -816,14 +816,14 @@ entry_p m_iconinfo(entry_p contxt)
         if(dst) 
         {
             // Something is 'dst'.info 
-            const char *file = str(dst);
+            char *file = str(dst);
 
             #ifdef AMIGA
             // Get icon information. 
             struct DiskObject *obj = (struct DiskObject *) 
                 GetDiskObject(file);
             #else
-            const char *obj = file; 
+            char *obj = file; 
             #endif
 
             if(obj)

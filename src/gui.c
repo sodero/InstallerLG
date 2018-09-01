@@ -15,7 +15,11 @@
 #include <libraries/asl.h>
 #include <libraries/mui.h> 
 #include <proto/alib.h>
+# ifndef __MORPHOS__
 #include <proto/debug.h>
+# else
+#include <clib/debug_protos.h>
+# endif
 #include <proto/exec.h>
 #include <proto/graphics.h>
 #include <proto/intuition.h>

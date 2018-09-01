@@ -395,10 +395,10 @@ entry_p m_patmatch(entry_p contxt)
     {
         #ifdef AMIGA
         // Use the global buffer.
-        char *buf = get_buf();
+        char *buf = get_buf(),
+             *p = str(CARG(1)),
+             *m = str(CARG(2));
 
-        // Create pattern. 
-        const char *p = str(CARG(1)), *m = str(CARG(2));
         LONG w = ParsePattern(p, buf, buf_size()); 
 
         // Can we parse the pattern?
