@@ -35,7 +35,7 @@
 #define MAJOR 43
 #define MINOR 3
 
-static char version[] __attribute__((used)) = "\0$VER: InstallerLG " 
+const char version[] __attribute__((used)) = "\0$VER: InstallerLG " 
                                                VER(MAJOR) "." VER(MINOR) 
                                               " [ALPHA25]";
 

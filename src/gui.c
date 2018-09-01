@@ -72,6 +72,7 @@
 // The installer window 
 //----------------------------------------------------------------------------
 Object *Win; 
+extern char version[];
 
 //----------------------------------------------------------------------------
 // InstallerGui - Class members
@@ -2201,6 +2202,8 @@ int gui_init(void)
     App = (Object *) MUI_NewObject(
         MUIC_Application,
         MUIA_Application_Title, tr(S_INST),
+        MUIA_Application_Version, version + 1,
+        MUIA_Application_Description, "App installation utility",
         MUIA_Application_Window, Win = (Object *) NewObject(
             InstallerGuiClass->mcc_Class, NULL, 
             TAG_END),
