@@ -124,3 +124,8 @@
 - (getsum) using Adler-32.
 - DEFUSER / MINUSER tooltype promotion (welcome) fix.
 - Installer overwrite on same version but different checksum.
+
+0.1.0-alpha.26:
+===============
+- Application description fixed to make Exchange happy (polluks).
+- MorphOS adaptations.
