@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------------
 
 #include "gui.h"
+#include "version.h"
 #include "resource.h"
 
 #ifdef AMIGA
@@ -76,7 +77,6 @@
 // The installer window 
 //----------------------------------------------------------------------------
 Object *Win; 
-extern char version[];
 
 //----------------------------------------------------------------------------
 // InstallerGui - Class members
@@ -2184,6 +2184,9 @@ DISPATCH(InstallerGui)
 //----------------------------------------------------------------------------
 int gui_init(void)
 {
+    // Amiga style version string.
+    static char version[] = VERSION_STRING;
+
     #ifdef AMIGA
     Object *App; 
 
@@ -2238,7 +2241,7 @@ int gui_init(void)
     return TRUE;
     #else
     // Testing purposes.
-    return 1;
+    return strlen(version + 1) ? 1 : 0;
     #endif
 }
 

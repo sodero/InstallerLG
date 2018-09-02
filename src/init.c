@@ -16,28 +16,13 @@
 #include "procedure.h"
 #include "symbol.h"
 #include "util.h"
+#include "version.h"
 
 #include <string.h>
 
 #ifdef AMIGA
 #include <proto/locale.h>
 #endif
-
-//----------------------------------------------------------------------------
-// Stringification
-//----------------------------------------------------------------------------
-#define STR(X) #X
-#define VER(X) STR(X)
-
-//----------------------------------------------------------------------------
-// InstallerNG version information
-//----------------------------------------------------------------------------
-#define MAJOR 43
-#define MINOR 3
-
-const char version[] __attribute__((used)) = "\0$VER: InstallerLG " 
-                                               VER(MAJOR) "." VER(MINOR) 
-                                              " [ALPHA25]";
 
 //----------------------------------------------------------------------------
 // Name:        native_exists
