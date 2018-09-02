@@ -2185,7 +2185,7 @@ DISPATCH(InstallerGui)
 int gui_init(void)
 {
     // Amiga style version string.
-    static char version[] = VERSION_STRING;
+    static char version[] __attribute__((used)) = VERSION_STRING;
 
     #ifdef AMIGA
     Object *App; 
