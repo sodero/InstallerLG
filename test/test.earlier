@@ -13,4 +13,4 @@
 (earlier "_eX_" "_e2_") ; "mkdir _e2_ && sleep 1 && mkdir _e1_","Line 1: Read error '_eX_' 0","rm -Rf _e1_ _e2_"
 (earlier "_e1_" "_eY_") ; "mkdir _e2_ && sleep 1 && mkdir _e1_","Line 1: Read error '_eY_' 0","rm -Rf _e1_ _e2_"
 (earlier "_e1_" "_e2_") ; "rm -f _e1_ _e2_","Line 1: Read error '_e1_' 0",""
-(earlier "_e1_" "_e2_") ; "rm -f _e1_ _e2_ && touch _e1_","Line 1: Read error '_e2_' 0","rm -f _e2_"
+(earlier "_e1_" "_e2_") ; "rm -f _e1_ _e2_ && touch _e1_","Line 1: Read error '_e2_' 0","rm -f _e1_ _e2_"

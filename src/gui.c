@@ -9,13 +9,18 @@
 //----------------------------------------------------------------------------
 
 #include "gui.h"
+#include "version.h"
 #include "resource.h"
 
 #ifdef AMIGA
 #include <libraries/asl.h>
 #include <libraries/mui.h> 
 #include <proto/alib.h>
+# ifndef __MORPHOS__
 #include <proto/debug.h>
+# else
+#include <clib/debug_protos.h>
+# endif
 #include <proto/exec.h>
 #include <proto/graphics.h>
 #include <proto/intuition.h>
@@ -72,7 +77,6 @@
 // The installer window 
 //----------------------------------------------------------------------------
 Object *Win; 
-extern char version[];
 
 //----------------------------------------------------------------------------
 // InstallerGui - Class members
@@ -2180,6 +2184,9 @@ DISPATCH(InstallerGui)
 //----------------------------------------------------------------------------
 int gui_init(void)
 {
+    // Amiga style version string.
+    static char version[] __attribute__((used)) = VERSION_STRING;
+
     #ifdef AMIGA
     Object *App; 
 
@@ -2234,7 +2241,7 @@ int gui_init(void)
     return TRUE;
     #else
     // Testing purposes.
-    return 1;
+    return strlen(version + 1) ? 1 : 0;
     #endif
 }
 
