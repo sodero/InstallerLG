@@ -27,13 +27,14 @@ aros:
 	cp $(BIN)/*.h $(FLT)
 
 .PHONY: src
-src: clean
+src: clean aros
 	mkdir $(NAME)
 	cp ../LICENSE $(NAME)
 	cp ../README.md $(NAME)
 	cp -R ../build $(NAME)
 	cp -R ../src $(NAME)
 	cp -R ../test $(NAME)
+	cp -R aros $(NAME)
 	lha a $(DIR)/$(NAME).src.lha $(NAME)
 
 .PHONY: clean
