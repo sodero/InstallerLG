@@ -5,7 +5,6 @@ Type:         util/sys
 Architecture: generic
 Requires:     MUI 3.8
 Version:      0.1.0-alpha.26
-Replaces:     util/sys/InstallerLG.src.lha
 Distribution: Aminet
 
 InstallerLG
