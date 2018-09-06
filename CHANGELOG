@@ -129,3 +129,7 @@
 ===============
 - Application description fixed to make Exchange happy (polluks).
 - MorphOS adaptations.
+
+0.1.0-alpha.27:
+===============
+- Help bubble moved to the top.
