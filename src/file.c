@@ -68,6 +68,8 @@ entry_p m_expandpath(entry_p contxt)
                     UnLock(lock);
                 }
             }
+            #else
+            RSTR(strdup(pth));
             #endif
         }
 
