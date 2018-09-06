@@ -5,7 +5,6 @@ Type:         util/sys
 Architecture: __ARCH__
 Requires:     MUI 3.8
 Version:      0.1.0-alpha.27
-Replaces:     util/sys/InstallerLG.i386-aros.lha
 Distribution: Aminet
 
 InstallerLG
