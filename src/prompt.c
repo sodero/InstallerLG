@@ -438,7 +438,7 @@ entry_p m_askdisk(entry_p contxt)
                         const char *nn = str(newname); 
 
                         // Assigns must be > 0 characters long.
-                        if(strlen(nn))
+                        if(*nn)
                         {
                             // On success, the lock belongs to 
                             // the system. Do not UnLock().

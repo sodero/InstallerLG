@@ -226,7 +226,7 @@ int tru(entry_p entry)
             // Only numerical values and strings
             // can be true.
             if((e->type == NUMBER && e->id) ||
-               (e->type == STRING && strlen(e->name)))
+               (e->type == STRING && *(e->name)))
             {
                 return 1; 
             }

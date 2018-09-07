@@ -40,7 +40,7 @@ entry_p m_abort(entry_p contxt)
             // If we could resolve all our children,
             // show the result of the concatenation
             // unless we have an empty string.
-            if(strlen(msg) && !DID_ERR())
+            if(*msg && !DID_ERR())
             {
                 gui_message(msg, 0);  
             }
@@ -91,7 +91,7 @@ entry_p m_exit(entry_p contxt)
                 // If we could resolve all our children,
                 // show the result of the concatenation
                 // unless we have an empty string.
-                if(strlen(msg) && !DID_ERR())
+                if(*msg && !DID_ERR())
                 {
                     gui_message(msg, 0);  
                 }
@@ -119,7 +119,7 @@ entry_p m_exit(entry_p contxt)
 
             // Only display the 'the app can be found here' message
             // if we know the name and location of the application.
-            if(strlen(app) && strlen(dst))
+            if(*app && *dst)
             {
                 snprintf(get_buf(), buf_size(), 
                          tr(S_CBFI), tr(S_ICPL), 
