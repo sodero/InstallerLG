@@ -39,6 +39,7 @@ entry_p find_symbol(entry_p entry)
     {
         do
         {
+            // Current.
             entry_p *tmp; 
 
             // Iterate over all symbols in the current
@@ -47,13 +48,28 @@ entry_p find_symbol(entry_p entry)
                 tmp && *tmp && *tmp != end(); 
                 tmp++)
             {
+                // Return value.
+                entry_p ret = *tmp;
+
                 // The current item might be a CUSTOM
                 // Only match SYMBOL:s, return if we
                 // find a match. 
-                if((*tmp)->type == SYMBOL &&
-                   !strcmp((*tmp)->name, entry->name)) 
+                if(ret->type == SYMBOL &&
+                   !strcmp(ret->name, entry->name))
                 {
-                    return *tmp; 
+                    // Rearrange symbols to make the
+                    // next lookup (if any) faster.
+                    // Don't do this on user defined
+                    // procedures though, symbols in
+                    // those are positional (args).
+                    if(ret->parent->type != CUSTOM)
+                    {
+                        *tmp = *(con->symbols);
+                        *(con->symbols) = ret;
+                    }
+
+                    // Symbol found.
+                    return ret;
                 }
             }
 
