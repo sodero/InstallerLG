@@ -826,13 +826,25 @@ static int h_copyfile(entry_p contxt,
                     // to read.
                     while(n)
                     {
-                        if(fwrite(buf, 1, n, fd) != n)
+                        if(fwrite(buf, 1, n, fd) == n)
+                        {
+                            if(!(mode & CF_SILENT) &&
+                               !gui_copyfiles_setcur(NULL, mode & CF_NOGAUGE))
+                            {
+                                // User abort.
+                                HALT();
+                                break;
+                            }
+                            else
+                            {
+                                n = fread(buf, 1, BUFSIZ, fs);
+                            }
+                        }
+                        else
                         {
                             ERR(ERR_WRITE_FILE, dst);
                             break;
                         }
-
-                        n = fread(buf, 1, BUFSIZ, fs);
                     }
 
                     // Close input and output files.

@@ -91,6 +91,9 @@ CLASS_DEF(InstallerGui)
            *Complete, *Pretend, *Bottom, *String,
            *Number, *Empty, *Text, *List,
            *Log, *Top, *Ask, *Yes, *No;
+
+    // String buffer.
+    char Buf[1 << 10];
 };
 
 //----------------------------------------------------------------------------
@@ -521,23 +524,15 @@ MUIDSP IPTR InstallerGuiPageSet(Class *cls,
     // NULL will disable the help bubble.
     set(my->Text, MUIA_ShortHelp, msg->Help);
 
-    // Wrap at 50 for now, even though
-    // we make room for more below.
+    // Wrap at 50 (less ad hoc?).
     size_t cnt = strlen(src), len = 50;
 
-    // Allow no more than 80 columns
-    // and 10 lines of text, newline
-    // characters are included. More
-    // than this would be to much in
-    // a single page.
-    static char dst[80 * 10];
-
     // Cap the size of the message.
-    cnt = cnt < (sizeof(dst) - 1) ?
-          cnt : (sizeof(dst) - 1);
+    cnt = cnt < (sizeof(my->Buf) - 1) ?
+          cnt : (sizeof(my->Buf) - 1);
 
     // Copy for wrapping.
-    memcpy(dst, src, cnt);
+    memcpy(my->Buf, src, cnt);
 
     // Do we need to word wrap?
     if(cnt > len)
@@ -554,7 +549,7 @@ MUIDSP IPTR InstallerGuiPageSet(Class *cls,
 
             // Go backwards from where we are
             // to a point where we can wrap.
-            while(cur > ref && dst[cur] > 33)
+            while(cur > ref && my->Buf[cur] > 33)
             {
                 cur--;
             }
@@ -576,7 +571,7 @@ MUIDSP IPTR InstallerGuiPageSet(Class *cls,
                 // after the previous point.
                 while(++ref < cur)
                 {
-                    if(dst[ref] == '\n')
+                    if(my->Buf[ref] == '\n')
                     {
                         // Skip wrap.
                         cur = ref;
@@ -586,17 +581,17 @@ MUIDSP IPTR InstallerGuiPageSet(Class *cls,
             }
 
             // Wrap and continue.
-            dst[cur] = '\n';
+            my->Buf[cur] = '\n';
             cur += len;
         }
     }
 
     // Terminate string.
-    dst[cnt] = '\0';
+    my->Buf[cnt] = '\0';
 
     // Show the message.
     set(my->Text, MUIA_ShowMe, FALSE);
-    set(my->Text, MUIA_Text_Contents, dst);
+    set(my->Text, MUIA_Text_Contents, my->Buf);
     set(my->Text, MUIA_ShowMe, TRUE);
 
     // Always.
@@ -782,7 +777,6 @@ MUIDSP IPTR InstallerGuiAskFile(Class *cls,
             if(DoMethod(my->Ask, MUIM_Group_InitChange))
             {
                 char *ret = NULL;
-                static char buf[PATH_MAX];
 
                 // Add pop up requester.
                 DoMethod(my->Ask, OM_ADDMEMBER, pop);
@@ -802,13 +796,13 @@ MUIDSP IPTR InstallerGuiAskFile(Class *cls,
                         // We need to create a copy of the filename
                         // string since we're about to free the pop
                         // up requester.
-                        int n = snprintf(buf, sizeof(buf), "%s", ret);
+                        int n = snprintf(my->Buf, sizeof(my->Buf), "%s", ret);
 
                         // Make sure that we succeded in creating a
                         // copy of the filename.
-                        if(n >= 0 && n < sizeof(buf))
+                        if(n >= 0 && n < sizeof(my->Buf))
                         {
-                            ret = buf;
+                            ret = my->Buf;
                         }
                     }
 
@@ -1009,94 +1003,79 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
                                         Object *obj,
                                         struct MUIP_InstallerGui_CopyFilesSetCur *msg)
 {
-    struct timeval tv;
-    static unsigned long last;
-    char *txt = (char *) msg->File;
-    struct InstallerGuiData *my = INST_DATA(cls, obj);
-
-    // We need to keep track of the
-    // last time we've been here.
-    gettimeofday(&tv, NULL);
-
-    // If we have a file name, update
-    // the progress bar.
-    if(txt)
+    if(msg->File)
     {
-        char *cut = NULL;
-        struct TextExtent e;
+        struct InstallerGuiData *my = INST_DATA(cls, obj);
+        char *file = (char *) msg->File;
+        size_t len = strlen(file);
+        struct TextExtent ext;
 
-        // Get rendered size of file string.
-        ULONG cur = 0, len = strlen(txt),
-              h = _height(my->Progress),
-              w = _width(my->Progress),
-              max = TextFit(_rp(my->Progress),
-                            txt, len, &e, NULL,
-                            1, w, h);
+        // Get the number of characters that
+        // can be shown given the width of the
+        // gauge and the contents of the string.
+        ULONG max = TextFit
+        (
+            _rp(my->Progress),
+            file, len, &ext, NULL, 1,
+            _mwidth(my->Progress),
+            _mheight(my->Progress)
+        );
 
-        // If the string length of the file
-        // name is longer than we can fit in
-        // the progress bar, truncate string.
-        if(max < len)
+        // Do we need to truncate the file
+        // string to not wreck the gauge?
+        if(len > max)
         {
-            // Modify a copy ot the string.
-            cut = strdup(txt);
+            // The gauge might have room for more
+            // than the temporary my->Buffer.
+            len = max < sizeof(my->Buf) ? max : sizeof(my->Buf);
 
-            if(cut)
-            {
-                // Truncate copy and let the copy
-                // replace the current string
-                cut[max] = '\0';
-                txt = cut;
-            }
-            else
-            {
-                // Out of memory.
-                GERR(tr(S_UNER));
-                return (IPTR) FALSE;
-            }
+            // Truncate and switch.
+            snprintf(my->Buf, len, "%s", file);
+            file = my->Buf;
         }
 
         // Update progress bar. Text and number.
         if(!msg->NoGauge)
         {
+            ULONG cur = 0;
+
             // Get current progress.
             get(my->Progress, MUIA_Gauge_Current, &cur);
 
             // Add another file on top of the current
             // progress (one file = one tick).
-            SetAttrs(my->Progress, MUIA_Gauge_InfoText, txt,
+            SetAttrs(my->Progress, MUIA_Gauge_InfoText, file,
                      MUIA_Gauge_Current, ++cur, TAG_END);
         }
         else
         {
             // Update text only, ignore the gauge.
-            set(my->Progress, MUIA_Gauge_InfoText, txt);
+            set(my->Progress, MUIA_Gauge_InfoText, file);
         }
-
-        // Dispose the copy, if any.
-        free(cut);
     }
-
-    // Has enough time passsed for us to let the user get
-    // a chance to abort?
-    if(((tv.tv_sec << 20L) + tv.tv_usec) - last > 40000)
+    else
     {
-        // Wait for the next tick (or abort) before returning.
-        if(InstallerGuiWait(obj, MUIV_InstallerGui_Tick, 2) ==
-           MUIV_InstallerGui_Tick)
+        // Inv. count.
+        static int n;
+
+        // Give the user a chance to abort every
+        // 1024:th block.
+        if(++n >> 10)
         {
-            // Save the current time.
-            gettimeofday(&tv, NULL);
-            last = (tv.tv_sec << 20L) + tv.tv_usec;
-        }
-        else
-        {
-            // User abort.
-            return (IPTR) FALSE;
+            // Wait for the next tick (or abort).
+            if(InstallerGuiWait(obj, MUIV_InstallerGui_Tick, 2) !=
+               MUIV_InstallerGui_Tick)
+            {
+                // User abort.
+                return (IPTR) FALSE;
+            }
+
+            // Start all over again.
+            n = 0;
         }
     }
 
-    // Next file.
+    // Next block.
     return (IPTR) TRUE;
 }
 
@@ -2605,7 +2584,7 @@ int gui_copyfiles_setcur(const char *cur, int nogauge)
     );
     #else
     // Testing purposes.
-    (cur ? 1 + nogauge : 0);
+    (!cur ? 1 + nogauge : 3);
     #endif
 }
 
