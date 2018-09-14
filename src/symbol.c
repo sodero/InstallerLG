@@ -68,10 +68,10 @@ entry_p m_set(entry_p contxt)
                     }
 
                     // In non strict mode we might have a
-                    // STATUS on the right hand side if a
+                    // DANGLE on the right hand side if a
                     // bogus resolve was done. To prevent
                     // leaks we need to typecast the rhs.
-                    if(res->type == STATUS)
+                    if(res->type == DANGLE)
                     {
                         // Typecast to string. The string
                         // will be empty. If evaluated as
@@ -116,8 +116,9 @@ entry_p m_set(entry_p contxt)
         PANIC(contxt);
     }
 
-    // FIXME
-    return new_failure(); 
+    // Unresolvable right hand
+    // side or broken parser.
+    return end();
 }
 
 //----------------------------------------------------------------------------
@@ -172,10 +173,10 @@ entry_p m_symbolset(entry_p contxt)
                     }
 
                     // In non strict mode we might have a
-                    // STATUS on the right hand side if a
+                    // DANGLE on the right hand side if a
                     // bogus resolve was done. To prevent
                     // leaks we need to typecast the rhs.
-                    if(res->type == STATUS)
+                    if(res->type == DANGLE)
                     {
                         // Typecast to string. The string
                         // will be empty. If evaluated as

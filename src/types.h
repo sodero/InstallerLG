@@ -33,7 +33,6 @@ typedef enum
     CUSTOM, 
     CUSREF, 
     CONTXT,
-    STATUS,
     DANGLE
 } type_t;
 

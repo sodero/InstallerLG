@@ -12,14 +12,14 @@ run()
             return 2
         fi
         e=`cat $l | grep -v "^==[0-9]\+=="`
-        if [ -n "$e" ]; then 
+        if [ -n "$e" ]; then
             o="$e $o"
         fi
         rm $l
-    else 
-        o=`$prg $instfile 2>&1` 
+    else
+        o=`$prg $instfile 2>&1`
     fi
-    rm $instfile 
+    rm $instfile
     o=`echo $o | tr -d  '\n'`
     if [ "$o" = "$2" ]; then
         return 1
@@ -40,7 +40,7 @@ evl()
     pre=`echo "$2" | sed -e 's/.*\"\(.*\)\",\".*\",\".*\".*$/\1/'`
     inf=`echo "$2" | sed -e 's/.*\".*\",\"\(.*\)\",\".*\".*$/\1/'`
     pst=`echo "$2" | sed -e 's/.*\".*\",\".*\",\"\(.*\)\".*$/\1/'`
-    if [ -n "$pre" ]; then 
+    if [ -n "$pre" ]; then
         o=`eval "$pre" 2>&1`
         if [ $? -ne 0 ]; then
             echo "ERR:$o"
@@ -49,7 +49,7 @@ evl()
     fi
     run "$1 ; [$pre ; $pst]" "$inf" "$3" "$4"
     ret=$?
-    if [ -n "$pst" ]; then 
+    if [ -n "$pst" ]; then
         o=`eval "$pst" 2>&1`
         if [ $? -ne 0 ]; then
             echo "In line $3 FAIL/ERR:$o"
@@ -58,7 +58,7 @@ evl()
             fi
         fi
     fi
-    return $ret 
+    return $ret
 }
 
 prg=$1
@@ -67,21 +67,21 @@ oom=$3
 nfl=0
 nok=0
 
-for f in `ls -t $tst/test.*`; 
-do 
+for f in `ls -t $tst/test.*`;
+do
     tno=0
     echo "-> $f"
-    while read -r l; 
+    while read -r l;
     do
        p=`echo "$l" | sed -e 's/;.*$//'`
        r=`echo "$l" | sed -e 's/.*;//'`
-       if [ ! -z "$p" ]; then 
+       if [ ! -z "$p" ]; then
            tno=$(( $tno + 1 ))
            evl "$p" "$r" "$tno"
            s=$?
            p=$(echo $p | tr '\n' ' ')
            if [ $s -eq 2 ]; then
-               echo "LEAK -> $p" 
+               echo "LEAK -> $p"
                nok=$(( $nok + 1 ))
                exit 1
            elif [ $s -eq 1 ]; then
@@ -89,7 +89,7 @@ do
                nok=$(( $nok + 1 ))
            elif [ $s -eq 0 ]; then
                if [ ! -z "$oom" ]; then
-                   echo "IGNORE -> $p" 
+                   echo "IGNORE -> $p"
                    nok=$(( $nok + 1 ))
                else
                    echo "FAIL -> $p"
