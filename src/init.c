@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// init.c: 
+// init.c:
 //
 // Initilization by means of prepending and appending code.
 //----------------------------------------------------------------------------
@@ -64,12 +64,12 @@ static entry_p native_exists(entry_p contxt, call_t f)
 //----------------------------------------------------------------------------
 // Name:        init
 // Description: Prepend / append startup and shutdown code.
-// Input:       entry_p contxt:  The start symbol, refer to the parser. 
+// Input:       entry_p contxt:  The start symbol, refer to the parser.
 // Return:      entry_p:         Start + startup / shutdown additions.
 //----------------------------------------------------------------------------
 entry_p init(entry_p contxt)
 {
-    // If we don't have a context with 
+    // If we don't have a context with
     // children the parser is broken.
     if(contxt &&
        contxt->children)
@@ -143,27 +143,27 @@ entry_p init(entry_p contxt)
         // expect any default (welcome).
         if(!e)
         {
-            // The line numbers and naming are for debugging 
-            // purposes only. 
+            // The line numbers and naming are for debugging
+            // purposes only.
             e = new_native
             (
-                strdup("welcome"), __LINE__, m_welcome, 
+                strdup("welcome"), __LINE__, m_welcome,
                 push
                 (
-                    new_contxt(), 
+                    new_contxt(),
                     new_string(strdup("Welcome"))
                 ),
                 NUMBER
             );
 
-            // Add to the root and reparent. 
+            // Add to the root and reparent.
             if(e)
             {
-                append(&contxt->children, e); 
-                e->parent = contxt; 
+                append(&contxt->children, e);
+                e->parent = contxt;
             }
 
-            // Rotate right to make it end up on top. 
+            // Rotate right to make it end up on top.
             ror(contxt->children);
         }
         #endif
@@ -171,13 +171,13 @@ entry_p init(entry_p contxt)
         // without doing anything.
         e = new_native
         (
-            strdup("onerror"), __LINE__, m_procedure, 
+            strdup("onerror"), __LINE__, m_procedure,
             push
             (
-                new_contxt(), 
+                new_contxt(),
                 new_custom
                 (
-                    strdup("@onerror"), __LINE__, NULL, 
+                    strdup("@onerror"), __LINE__, NULL,
                     push
                     (
                         new_contxt(),
@@ -191,42 +191,42 @@ entry_p init(entry_p contxt)
                             ),
                                 push
                                 (
-                                    new_contxt(), 
+                                    new_contxt(),
                                     new_number(0)
                                 )
-                            ), 
+                            ),
                             NUMBER
-                        ) 
+                        )
                     )
                 )
             ),
             DANGLE
         );
 
-        // Add to the root and reparent. 
+        // Add to the root and reparent.
         if(e)
         {
-            append(&contxt->children, e); 
-            e->parent = contxt; 
+            append(&contxt->children, e);
+            e->parent = contxt;
         }
 
-        // Rotate right to make it end up on top. 
+        // Rotate right to make it end up on top.
         ror(contxt->children);
-        
+
         // Set default variables using (set) instead
         // of creating them directly. Hides all the
         // magic involved in symbol handling.
         e = new_native
         (
             // All the numerical values.
-            strdup("set"), __LINE__, m_set, 
+            strdup("set"), __LINE__, m_set,
             push(push(push(push(push(push(
             push(push(push(push(push(push(
             push(push(push(push(push(push(
             push(push(push(push(push(push(
             push(push(push(push
             (
-                new_contxt(), 
+                new_contxt(),
                 new_symbol(strdup("@user-level"))),
                 new_number(defusr)
                 /*
@@ -321,14 +321,14 @@ entry_p init(entry_p contxt)
             NUMBER
         );
 
-        // Add to the root and reparent. 
+        // Add to the root and reparent.
         if(e)
         {
-            append(&contxt->children, e); 
-            e->parent = contxt; 
+            append(&contxt->children, e);
+            e->parent = contxt;
         }
 
-        // Rotate right to make it end up on top. 
+        // Rotate right to make it end up on top.
         // We need these to be set before any user
         // code is executed.
         ror(contxt->children);
@@ -345,7 +345,7 @@ entry_p init(entry_p contxt)
             push(push(push(push(push(push(push(push(
             push(push(push(push(push(push
             (
-                new_contxt(), 
+                new_contxt(),
                 new_symbol(strdup("@abort-button"))),
                 new_string(strdup(""))
                 /*
@@ -427,7 +427,7 @@ entry_p init(entry_p contxt)
                 new_symbol(strdup("@default-dest"))),
                 new_string(strdup("T:"))
                 /*
-                Suggested location for installing 
+                Suggested location for installing
                 an application.
                 */
             ),
@@ -515,18 +515,18 @@ entry_p init(entry_p contxt)
             STRING
         );
 
-        // Add to the root and reparent. 
+        // Add to the root and reparent.
         if(e)
         {
-            append(&contxt->children, e); 
-            e->parent = contxt; 
+            append(&contxt->children, e);
+            e->parent = contxt;
         }
 
-        // Rotate right to make it end up on top. 
+        // Rotate right to make it end up on top.
         // We need these to be set before any user
         // code is executed.
         ror(contxt->children);
-       
+
         // Is there an 'exit' already?
         e = native_exists(contxt, m_exit);
 
@@ -536,26 +536,26 @@ entry_p init(entry_p contxt)
         // break, they don't expect any default (exit).
         if(!e)
         {
-            // The line numbers and naming are for debugging 
-            // purposes only. 
+            // The line numbers and naming are for debugging
+            // purposes only.
             e = new_native
             (
-                strdup("exit"), __LINE__, 
+                strdup("exit"), __LINE__,
                 m_exit, NULL, NUMBER
             );
 
-            // Add to the root and reparent. 
+            // Add to the root and reparent.
             if(e)
             {
-                append(&contxt->children, e); 
-                e->parent = contxt; 
+                append(&contxt->children, e);
+                e->parent = contxt;
             }
 
-            // No rotation. 
+            // No rotation.
         }
         #endif
     }
 
-    return contxt; 
+    return contxt;
 }
 

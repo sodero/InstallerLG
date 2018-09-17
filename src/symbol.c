@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// symbol.c: 
+// symbol.c:
 //
 // Symbol manipulation
 //----------------------------------------------------------------------------
@@ -18,21 +18,21 @@
 
 //----------------------------------------------------------------------------
 // (set <varname> <value> [<varname2> <value2> ...])
-//      sets the variable `<varname>' to the indicated value. 
+//      sets the variable `<varname>' to the indicated value.
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //----------------------------------------------------------------------------
 entry_p m_set(entry_p contxt)
 {
-    // Symbol destination. 
+    // Symbol destination.
     entry_p dst = global(contxt);
 
     // We need atleast one symbol and one value.
     if(c_sane(contxt, 1) &&
        s_sane(contxt, 1) && dst)
     {
-        entry_p *sym = contxt->symbols, 
-                *val = contxt->children; 
+        entry_p *sym = contxt->symbols,
+                *val = contxt->children;
 
         // Iterate over all symbol -> value tuples
         while(*sym && *sym != end() &&
@@ -46,24 +46,24 @@ entry_p m_set(entry_p contxt)
             // side, create a copy of its contents.
             if(!DID_ERR())
             {
-                entry_p res = malloc(sizeof(entry_t)); 
+                entry_p res = malloc(sizeof(entry_t));
 
                 if(res)
                 {
                     // Do a deep copy of the value.
-                    memmove(res, rhs, sizeof(entry_t)); 
+                    memmove(res, rhs, sizeof(entry_t));
 
                     // Copy name string if such exists.
                     if(res->name)
                     {
-                        res->name = strdup(res->name); 
+                        res->name = strdup(res->name);
 
                         if(!res->name)
                         {
-                            // Out of memory. 
+                            // Out of memory.
                             PANIC(contxt);
-                            free(res); 
-                            break; 
+                            free(res);
+                            break;
                         }
                     }
 
@@ -79,40 +79,40 @@ entry_p m_set(entry_p contxt)
                         res->type = STRING;
                     }
 
-                    // Reparent the value and free the old 
-                    // resolved value if any. Also, create 
+                    // Reparent the value and free the old
+                    // resolved value if any. Also, create
                     // a reference from the global context
                     // to the symbol.
-                    res->parent = *sym; 
-                    kill((*sym)->resolved); 
-                    (*sym)->resolved = res; 
-                    push(dst, *sym); 
-                    (*sym)->parent = contxt;  
+                    res->parent = *sym;
+                    kill((*sym)->resolved);
+                    (*sym)->resolved = res;
+                    push(dst, *sym);
+                    (*sym)->parent = contxt;
                 }
                 else
                 {
-                    // Out of memory. 
+                    // Out of memory.
                     PANIC(contxt);
-                    break; 
+                    break;
                 }
 
                 // Do we have any more tuples?
                 if(*(++sym) == *(++val))
                 {
                     // We're at the end of the list.
-                    return res; 
+                    return res;
                 }
             }
             else
             {
                 // Unresolvable rhs.
-                break; 
+                break;
             }
         }
     }
     else
     {
-        // Broken parser.  
+        // Broken parser.
         PANIC(contxt);
     }
 
@@ -130,45 +130,45 @@ entry_p m_set(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_symbolset(entry_p contxt)
 {
-    // Symbol destination. 
+    // Symbol destination.
     entry_p dst = global(contxt);
 
     // We need one or more tuples of symbol
-    // name and value. 
+    // name and value.
     if(c_sane(contxt, 2) && dst)
     {
-        entry_p ret = DCUR; 
-        entry_p *cur = contxt->children; 
+        entry_p ret = DCUR;
+        entry_p *cur = contxt->children;
 
-        // Iterate over all tuples. 
+        // Iterate over all tuples.
         while(*cur && *cur != end())
         {
-            // Resolve symbol name and value. 
+            // Resolve symbol name and value.
             const char *lhs = str(*cur++);
             entry_p rhs = resolve(*cur++);
 
-            // Could we resolve both lhs and rhs? 
+            // Could we resolve both lhs and rhs?
             if(!DID_ERR())
             {
-                // Create a copy of the evaluated rhs. 
-                entry_p res = malloc(sizeof(entry_t)); 
+                // Create a copy of the evaluated rhs.
+                entry_p res = malloc(sizeof(entry_t));
 
                 if(res)
                 {
-                    entry_p *sym = contxt->symbols; 
-                    memmove(res, rhs, sizeof(entry_t)); 
+                    entry_p *sym = contxt->symbols;
+                    memmove(res, rhs, sizeof(entry_t));
 
-                    // Do a deep copy if necessary. 
+                    // Do a deep copy if necessary.
                     if(res->name)
                     {
-                        res->name = strdup(res->name); 
+                        res->name = strdup(res->name);
 
                         if(!res->name)
                         {
-                            // Out of memory. 
+                            // Out of memory.
                             PANIC(contxt);
-                            free(res); 
-                            break; 
+                            free(res);
+                            break;
                         }
                     }
 
@@ -184,7 +184,7 @@ entry_p m_symbolset(entry_p contxt)
                         res->type = STRING;
                     }
 
-                    // Do we already have a symbol 
+                    // Do we already have a symbol
                     // with this name?
                     while(*sym && *sym != end())
                     {
@@ -192,78 +192,78 @@ entry_p m_symbolset(entry_p contxt)
                         // value with the copy of the rhs
                         if(!strcmp((*sym)->name, lhs))
                         {
-                            kill((*sym)->resolved); 
+                            kill((*sym)->resolved);
                             (*sym)->resolved = res;
-                            push(dst, *sym); 
-                            res->parent = *sym; 
-                            ret = res; 
-                            break; 
+                            push(dst, *sym);
+                            res->parent = *sym;
+                            ret = res;
+                            break;
                         }
 
                         // Iterate over all symbols in
-                        // this context. 
-                        sym++; 
+                        // this context.
+                        sym++;
                     }
 
                     // Is this is a new symbol?
                     if(ret != res)
                     {
-                        entry_p nsm = new_symbol(strdup(lhs)); 
+                        entry_p nsm = new_symbol(strdup(lhs));
 
                         if(nsm)
                         {
-                            res->parent = nsm; 
-                            nsm->resolved = res; 
+                            res->parent = nsm;
+                            nsm->resolved = res;
 
                             // Append the symbol to the current
                             // context and create a global ref.
                             if(append(&contxt->symbols, nsm))
                             {
-                                push(dst, nsm); 
-                                nsm->parent = contxt;  
-                                ret = res; 
+                                push(dst, nsm);
+                                nsm->parent = contxt;
+                                ret = res;
                                 continue;
                             }
 
-                            // Out of memory. 
-                            kill(nsm); 
+                            // Out of memory.
+                            kill(nsm);
                         }
                     }
                     else
                     {
                         // Symbol exists. Its new
                         // value has already been
-                        // set above. 
-                        continue; 
+                        // set above.
+                        continue;
                     }
 
-                    // Out of memory. 
-                    kill(res); 
+                    // Out of memory.
+                    kill(res);
                     break;
                 }
                 else
                 {
-                    // Out of memory. 
-                    PANIC(contxt); 
-                    RCUR; 
+                    // Out of memory.
+                    PANIC(contxt);
+                    RCUR;
                 }
             }
             else
             {
                 // Could not resolve either the lhs
                 // or the rhs. Error will be set by
-                // resolve(). 
-                RCUR; 
+                // resolve().
+                RCUR;
             }
         }
 
-        // Return the last rhs. 
-        return ret; 
+        // Return the last rhs.
+        return ret;
     }
     else
     {
         // Broken parser
-        RCUR; 
+        RCUR;
     }
 }
 
@@ -280,21 +280,21 @@ entry_p m_symbolval(entry_p contxt)
     // of the symbol.
     if(c_sane(contxt, 1))
     {
-        static entry_t e = { .type = SYMREF }; 
-        entry_p r; 
+        static entry_t e = { .type = SYMREF };
+        entry_p r;
 
         // Initialize and resolve dummy.
-        e.parent = contxt; 
-        e.id = contxt->id; 
-        e.name = str(CARG(1)); 
+        e.parent = contxt;
+        e.id = contxt->id;
+        e.name = str(CARG(1));
 
-        r = resolve(&e); 
+        r = resolve(&e);
 
         // Return the resolved value if
         // the symbol could be found.
         if(!DID_ERR())
         {
-            return r; 
+            return r;
         }
         else
         {

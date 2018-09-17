@@ -16,7 +16,7 @@ CDEF = -D_POSIX_SOURCE -D_DEFAULT_SOURCE
 else
 ifeq ($(OS),Darwin)
 CGEN = -g -std=c99
-CWRN = -Weverything -Wno-format-nonliteral -Wno-switch-enum 
+CWRN = -Weverything -Wno-format-nonliteral -Wno-switch-enum
 CWRN += -Wno-format-security -Wno-vla -Werror
 else
 CC := gcc
@@ -76,6 +76,6 @@ else
 endif
 
 .PHONY: clean
-clean: 
+clean:
 	$(RM) -R *.o $(EXE) $(EXE).tmp.* leak.* err.* _??_ _???_
 

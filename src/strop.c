@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// strop.c: 
+// strop.c:
 //
 // String operations
 //----------------------------------------------------------------------------
@@ -35,28 +35,28 @@ entry_p m_cat(entry_p contxt)
     if(c_sane(contxt, 1))
     {
         // Start with a string length of 64.
-        size_t n = 64; 
-        char *buf = calloc(n + 1, 1);  
+        size_t n = 64;
+        char *buf = calloc(n + 1, 1);
 
         if(buf)
         {
-            size_t l = 0, i = 0; 
+            size_t l = 0, i = 0;
 
             // Iterate over all arguments.
-            while(contxt->children[i] && 
-                  contxt->children[i] != end()) 
+            while(contxt->children[i] &&
+                  contxt->children[i] != end())
             {
                 // Resolve and get a string representation
                 // of the current argument.
-                const char *s = str(contxt->children[i++]); 
-                size_t ln; 
+                const char *s = str(contxt->children[i++]);
+                size_t ln;
 
-                // If we couldn't resolve the current argument, 
-                // return an empty string. 
+                // If we couldn't resolve the current argument,
+                // return an empty string.
                 if(DID_ERR())
                 {
-                    free(buf); 
-                    REST; 
+                    free(buf);
+                    REST;
                 }
 
                 // Get length of the current argument.
@@ -65,52 +65,52 @@ entry_p m_cat(entry_p contxt)
                 // If the length is > 0, append to the result.
                 if(ln)
                 {
-                    l += strlen(s); 
+                    l += strlen(s);
 
                     // If we're about to exceed the current buffer,
                     // allocate a new one big enough.
-                    if(l > n) 
+                    if(l > n)
                     {
-                        char *tmp; 
+                        char *tmp;
 
                         // Double up until we have enough.
                         while(n && n < l)
                         {
-                            n = n << 1;  
+                            n = n << 1;
                         }
 
                         tmp = calloc(n + 1, 1);
 
                         // Copy the contents to the new buffer
                         // and free the old one.
-                        if(tmp && n) 
+                        if(tmp && n)
                         {
-                            memcpy(tmp, buf, l - ln + 1); 
-                            free(buf); 
-                            buf = tmp; 
+                            memcpy(tmp, buf, l - ln + 1);
+                            free(buf);
+                            buf = tmp;
                         }
                         else
                         {
                             // Out of memory.
                             PANIC(contxt);
-                            free(tmp); 
-                            free(buf); 
+                            free(tmp);
+                            free(buf);
                             REST;
                         }
                     }
 
                     // By now we're ready to append.
-                    strncat(buf, s, n); 
+                    strncat(buf, s, n);
                 }
-            } 
+            }
 
             // Unless we're out of memory, buf will
             // will contain the concatenation of all
             // the children.
-            RSTR(buf); 
+            RSTR(buf);
         }
     }
-    // The parser isn't necessarily broken 
+    // The parser isn't necessarily broken
     // if we end up here. We could alse be
     // out of memory.
     PANIC(contxt);
@@ -126,14 +126,14 @@ entry_p m_cat(entry_p contxt)
 entry_p m_fmt(entry_p contxt)
 {
     // The format string is in the name of this contxt. It will hold
-    // a maximum of length / 2 of specifiers. 
-    char *ret = NULL, *fmt = contxt->name; 
+    // a maximum of length / 2 of specifiers.
+    char *ret = NULL, *fmt = contxt->name;
     char **sct = calloc((strlen(fmt) >> 1) + 1, sizeof(char *));
 
     if(contxt && fmt && sct)
     {
-        size_t i = 0, j = 0, k = 0, l = 0; 
-        entry_p *arg = contxt->children; 
+        size_t i = 0, j = 0, k = 0, l = 0;
+        entry_p *arg = contxt->children;
 
         // Scan the format string.
         for(; fmt[i]; i++)
@@ -144,22 +144,22 @@ entry_p m_fmt(entry_p contxt)
                 // that's not preceeded by an escape.
                 if(!i || (i && fmt[i - 1] != '\\'))
                 {
-                    i++; 
+                    i++;
 
-                    // If this is a specifier that we recognize, 
+                    // If this is a specifier that we recognize,
                     // then allocate a new string with just this
                     // specifier, nothing else.
                     if(fmt[i] == 's' || (
                        fmt[i++] == 'l' &&
                        fmt[i] && fmt[i] == 'd'))
                     {
-                        sct[k] = calloc(i - j + 2, 1); 
+                        sct[k] = calloc(i - j + 2, 1);
 
                         if(sct[k])
                         {
                             memcpy(sct[k], fmt + j, i - j + 1);
-                            j = i + 1;  
-                            k++; 
+                            j = i + 1;
+                            k++;
                         }
                         else
                         {
@@ -167,32 +167,32 @@ entry_p m_fmt(entry_p contxt)
                             PANIC(contxt);
                         }
                     }
-                    else 
+                    else
                     {
-                        ERR(ERR_FMT_INVALID, contxt->name); 
-                        break; 
+                        ERR(ERR_FMT_INVALID, contxt->name);
+                        break;
                     }
                 }
             }
         }
 
-        // Iterate over all format specifiers and arguments and do 
+        // Iterate over all format specifiers and arguments and do
         // the appropriate conversions and formating.
         if(k)
         {
             for(k = 0; sct[k]; k++)
             {
-                if(arg && *arg && 
+                if(arg && *arg &&
                    *arg != end())
                 {
-                    size_t oln = strlen(sct[k]);  
-                    entry_p cur = resolve(*arg); 
+                    size_t oln = strlen(sct[k]);
+                    entry_p cur = resolve(*arg);
 
                     // Bail out if we didn't manage to
                     // resolve the current argument.
                     if(DID_ERR())
                     {
-                        arg = NULL; 
+                        arg = NULL;
                         break;
                     }
 
@@ -200,18 +200,18 @@ entry_p m_fmt(entry_p contxt)
                     if(sct[k][oln - 1] == 's' &&
                        cur->type == STRING)
                     {
-                        size_t nln = oln + strlen(cur->name);  
-                        char *new = calloc(nln + 1, 1); 
+                        size_t nln = oln + strlen(cur->name);
+                        char *new = calloc(nln + 1, 1);
 
                         // Replace the current format string with
                         // the corresponding formated string.
                         if(new)
                         {
-                            int n = snprintf(new, nln, sct[k], cur->name); 
+                            int n = snprintf(new, nln, sct[k], cur->name);
 
-                            l += n > 0 ? (size_t) n : 0; 
-                            free(sct[k]); 
-                            sct[k] = new; 
+                            l += n > 0 ? (size_t) n : 0;
+                            free(sct[k]);
+                            sct[k] = new;
                         }
                         else
                         {
@@ -223,18 +223,18 @@ entry_p m_fmt(entry_p contxt)
                     else if(sct[k][oln - 1] == 'd' &&
                             cur->type == NUMBER)
                     {
-                        size_t nln = oln + NUMLEN;  
-                        char *new = calloc(nln + 1, 1); 
+                        size_t nln = oln + NUMLEN;
+                        char *new = calloc(nln + 1, 1);
 
                         // Replace the current format string with
                         // the corresponding formated string.
                         if(new)
                         {
-                            int n = snprintf(new, nln, sct[k], cur->id);  
+                            int n = snprintf(new, nln, sct[k], cur->id);
 
-                            l += n > 0 ? (size_t) n : 0; 
-                            free(sct[k]); 
-                            sct[k] = new; 
+                            l += n > 0 ? (size_t) n : 0;
+                            free(sct[k]);
+                            sct[k] = new;
                         }
                         else
                         {
@@ -245,18 +245,18 @@ entry_p m_fmt(entry_p contxt)
                     else
                     {
                         // Fail on argument -> specifier mismatch.
-                        ERR(ERR_FMT_MISMATCH, contxt->name); 
+                        ERR(ERR_FMT_MISMATCH, contxt->name);
                     }
 
                     // Next specifier -> argument.
-                    arg++; 
+                    arg++;
                 }
-                else 
+                else
                 {
                     // Fail if the number of arguments and the number
                     // of specifiers don't match.
-                    ERR(ERR_FMT_MISSING, contxt->name); 
-                    break; 
+                    ERR(ERR_FMT_MISSING, contxt->name);
+                    break;
                 }
             }
         }
@@ -265,19 +265,19 @@ entry_p m_fmt(entry_p contxt)
         if(k && l)
         {
             // Allocate memory to hold all of them.
-            l += strlen(fmt + j); 
-            ret = calloc(l + 1, 1); 
+            l += strlen(fmt + j);
+            ret = calloc(l + 1, 1);
 
             if(ret)
             {
                 // All format strings.
                 for(k = 0; sct[k]; k++)
                 {
-                    strcat(ret, sct[k]); 
+                    strcat(ret, sct[k]);
                 }
 
                 // Suffix.
-                strcat(ret, fmt + j); 
+                strcat(ret, fmt + j);
             }
             else
             {
@@ -307,12 +307,12 @@ entry_p m_fmt(entry_p contxt)
         if(arg && *arg && *arg != end() &&
            get_numvar(contxt, "@strict"))
         {
-            ERR(ERR_FMT_UNUSED, contxt->name); 
+            ERR(ERR_FMT_UNUSED, contxt->name);
         }
         else if(ret)
         {
             // Success.
-            RSTR(ret); 
+            RSTR(ret);
         }
     }
     else
@@ -327,7 +327,7 @@ entry_p m_fmt(entry_p contxt)
     // Return empty string
     // on failure.
     free(ret);
-    REST; 
+    REST;
 }
 
 //----------------------------------------------------------------------------
@@ -338,14 +338,14 @@ entry_p m_fmt(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_pathonly(entry_p contxt)
 {
-    // We need one argument, a full path. 
+    // We need one argument, a full path.
     if(c_sane(contxt, 1))
     {
-        const char *s = str(CARG(1)); 
-        size_t i = strlen(s); 
+        const char *s = str(CARG(1));
+        size_t i = strlen(s);
 
         // Scan backwards.
-        while(i--) 
+        while(i--)
         {
             // If we find a delimiter, then
             // we have the path to the left
@@ -354,18 +354,18 @@ entry_p m_pathonly(entry_p contxt)
                s[i] == ':' )
             {
                 // Get termination for free.
-                char *r = calloc(i + 2, 1); 
+                char *r = calloc(i + 2, 1);
 
                 if(r)
                 {
                     // Copy and return path.
-                    memcpy(r, s, i + 1); 
-                    RSTR(r); 
+                    memcpy(r, s, i + 1);
+                    RSTR(r);
                 }
                 else
                 {
                     // Out of memory.
-                    PANIC(contxt); 
+                    PANIC(contxt);
                 }
             }
         }
@@ -399,7 +399,7 @@ entry_p m_patmatch(entry_p contxt)
              *p = str(CARG(1)),
              *m = str(CARG(2));
 
-        LONG w = ParsePattern(p, buf, buf_size()); 
+        LONG w = ParsePattern(p, buf, buf_size());
 
         // Can we parse the pattern?
         if(w >= 0)
@@ -411,19 +411,19 @@ entry_p m_patmatch(entry_p contxt)
         }
         else
         {
-            // We probably had a buffer overflow. 
-            ERR(ERR_OVERFLOW, p); 
-            RNUM(0); 
+            // We probably had a buffer overflow.
+            ERR(ERR_OVERFLOW, p);
+            RNUM(0);
         }
         #else
-        RNUM(0); 
+        RNUM(0);
         #endif
     }
     else
     {
         // The parser is broken.
-        PANIC(contxt); 
-        RCUR; 
+        PANIC(contxt);
+        RCUR;
     }
 }
 
@@ -441,13 +441,13 @@ entry_p m_strlen(entry_p contxt)
         RNUM
         (
             (int) strlen(str(CARG(1)))
-        ); 
-    } 
+        );
+    }
     else
     {
         // The parser is broken.
         PANIC(contxt);
-        RCUR; 
+        RCUR;
     }
 }
 
@@ -463,29 +463,29 @@ entry_p m_substr(entry_p contxt)
     {
         char *s = str(CARG(1));
         int i = num(CARG(2)),
-            l = (int) strlen(s); 
+            l = (int) strlen(s);
 
         // Is the number characters limited?
         if(CARG(3) && CARG(3) != end())
         {
-            // Get the number of characters 
-            // to copy. 
-            int j = num(CARG(3)); 
+            // Get the number of characters
+            // to copy.
+            int j = num(CARG(3));
 
             // Use the limitations used by the
-            // CBM installer. 
+            // CBM installer.
             if(i < l && j > 0 && i >= 0)
             {
-                char *r = calloc((size_t) l + 1, 1); 
+                char *r = calloc((size_t) l + 1, 1);
 
                 if(r)
                 {
                     // Cap all values and do the
-                    // actual copy. 
-                    l -= i; 
-                    l = l < j ? l : j; 
-                    memcpy(r, s + i, l); 
-                    RSTR(r); 
+                    // actual copy.
+                    l -= i;
+                    l = l < j ? l : j;
+                    memcpy(r, s + i, l);
+                    RSTR(r);
                 }
                 else
                 {
@@ -496,7 +496,7 @@ entry_p m_substr(entry_p contxt)
             }
         }
         else
-        // No, copy until the end of the string. 
+        // No, copy until the end of the string.
         {
             // Max cap
             if(i < l)
@@ -504,14 +504,14 @@ entry_p m_substr(entry_p contxt)
                 // Min cap
                 if(i > 0)
                 {
-                    char *r = calloc((size_t) l + 1, 1); 
+                    char *r = calloc((size_t) l + 1, 1);
 
                     if(r)
                     {
                         // All values are already
-                        // capped, just copy. 
-                        memcpy(r, s + i, l - i); 
-                        RSTR(r); 
+                        // capped, just copy.
+                        memcpy(r, s + i, l - i);
+                        RSTR(r);
                     }
                     else
                     {
@@ -521,21 +521,21 @@ entry_p m_substr(entry_p contxt)
                     }
                 }
 
-                // Return full string. 
-                return CARG(1); 
+                // Return full string.
+                return CARG(1);
             }
         }
 
         // Fall through. Return
-        // empty string. 
+        // empty string.
         REST;
     }
 
-    // The parser isn't necessarily broken 
+    // The parser isn't necessarily broken
     // if we end up here. We could also be
     // out of memory.
     PANIC(contxt);
-    RCUR; 
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -546,15 +546,15 @@ entry_p m_substr(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_tackon(entry_p contxt)
 {
-    // We need atleast two arguments, a path 
+    // We need atleast two arguments, a path
     // and a file.
     if(c_sane(contxt, 2))
     {
-        char *r = h_tackon(contxt, str(CARG(1)), str(CARG(2))); 
+        char *r = h_tackon(contxt, str(CARG(1)), str(CARG(2)));
 
         if(r)
         {
-            RSTR(r); 
+            RSTR(r);
         }
 
         // Return empty string
@@ -564,7 +564,7 @@ entry_p m_tackon(entry_p contxt)
     else
     {
         // The parser is broken
-        PANIC(contxt); 
+        PANIC(contxt);
         RCUR;
     }
 }
@@ -577,32 +577,32 @@ entry_p m_tackon(entry_p contxt)
 //              const char *f:      The file.
 // Return:      const char *:       The dir/file concatenation.
 //----------------------------------------------------------------------------
-char *h_tackon(entry_p contxt, 
-               const char *p, 
+char *h_tackon(entry_p contxt,
+               const char *p,
                const char *f)
 {
     // We need a path and a file.
     if(p && f)
     {
-        size_t lp = strlen(p), 
-               lf = strlen(f); 
+        size_t lp = strlen(p),
+               lf = strlen(f);
 
         // No point doing this if both
         // strings are empty.
         if(lp || lf)
         {
-            char *r = NULL; 
+            char *r = NULL;
 
             // If the path is empty, the result
             // equals the filename.
-            if(!lp) 
+            if(!lp)
             {
-                r = strdup(f); 
+                r = strdup(f);
 
                 if(!r)
                 {
                     // Out of memory.
-                    PANIC(contxt); 
+                    PANIC(contxt);
                 }
 
                 return r;
@@ -610,14 +610,14 @@ char *h_tackon(entry_p contxt,
 
             // If the filename is empty, the result
             // equals the path.
-            if(!lf) 
+            if(!lf)
             {
-                r = strdup(p); 
+                r = strdup(p);
 
                 if(!r)
                 {
                     // Out of memory.
-                    PANIC(contxt); 
+                    PANIC(contxt);
                 }
 
                 return r;
@@ -631,52 +631,52 @@ char *h_tackon(entry_p contxt,
                  // Only fail if we're in 'strict' mode.
                 if(get_numvar(contxt, "@strict"))
                 {
-                    ERR(ERR_NOT_A_FILE, f); 
-                    return NULL; 
+                    ERR(ERR_NOT_A_FILE, f);
+                    return NULL;
                 }
             }
 
             // Allocate memory to hold path, filename,
             // delimiter and termination.
-            r = calloc(lp + lf + 2, 1); 
+            r = calloc(lp + lf + 2, 1);
 
             if(r)
             {
                 // Copy the path.
-                memcpy(r, p, lp); 
+                memcpy(r, p, lp);
 
                 // Remove double delimiters if any.
                 if(p[lp - 1] == '/' ||
-                   p[lp - 1] == ':') 
+                   p[lp - 1] == ':')
                 {
                     if(f[0] == '/' ||
-                       f[0] == ':') 
+                       f[0] == ':')
                     {
-                        f++; 
+                        f++;
                     }
                 }
                 else
                 // Insert delimiter if none exist.
                 {
-                    if(f[0] != '/' && 
-                       f[0] != ':') 
+                    if(f[0] != '/' &&
+                       f[0] != ':')
                     {
-                        strcat(r, "/"); 
+                        strcat(r, "/");
                     }
                 }
 
                 // Concatenate the result.
-                strcat(r, f); 
-                return r; 
+                strcat(r, f);
+                return r;
             }
             else
             {
                 // Out of memory.
-                PANIC(contxt); 
+                PANIC(contxt);
             }
         }
     }
 
     // Failure.
-    return NULL; 
+    return NULL;
 }

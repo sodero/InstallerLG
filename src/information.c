@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// information.c: 
+// information.c:
 //
 // Functions for informing the user
 //----------------------------------------------------------------------------
@@ -34,7 +34,7 @@ entry_p m_complete(entry_p contxt)
     // We need atleast one argument.
     if(c_sane(contxt, 1))
     {
-        // Pass on the return value. 
+        // Pass on the return value.
         RNUM
         (
             gui_complete(num(CARG(1)))
@@ -43,8 +43,8 @@ entry_p m_complete(entry_p contxt)
     else
     {
         // The parser is broken.
-        PANIC(contxt); 
-        RCUR; 
+        PANIC(contxt);
+        RCUR;
     }
 }
 
@@ -64,11 +64,11 @@ entry_p m_debug(entry_p contxt)
     // but that's how it's done in 3.9.
     if(contxt && contxt->children)
     {
-        entry_p *cur = contxt->children; 
+        entry_p *cur = contxt->children;
 
         // For all children, print the string
         // representation, to stdout if we're
-        // running in a shell or to the debug 
+        // running in a shell or to the debug
         // log when invoked from Workbench.
         while(*cur && *cur != end())
         {
@@ -114,40 +114,40 @@ entry_p m_debug(entry_p contxt)
             if(cli)
             {
                 // Invoked from CLI.
-                printf("%s ", s); 
+                printf("%s ", s);
             }
             #ifdef AMIGA
             else
             {
                 // Invoked from WB.
-                KPrintF("%s ", s); 
+                KPrintF("%s ", s);
             }
             #endif
-            cur++; 
+            cur++;
         }
     }
 
-    // Append final newline. 
+    // Append final newline.
     if(cli)
     {
         // Invoked from CLI.
-        printf("\n"); 
+        printf("\n");
     }
     #ifdef AMIGA
     else
     {
         // Invoked from WB.
-        KPrintF("\n"); 
+        KPrintF("\n");
     }
     #endif
 
     // Always.
-    RNUM(1); 
+    RNUM(1);
 }
 
 //----------------------------------------------------------------------------
 // (message <string1> <string2>... (all))
-//     display message with Proceed and Abort buttons if user 
+//     display message with Proceed and Abort buttons if user
 //     level > 0 (novice)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
@@ -157,7 +157,7 @@ entry_p m_message(entry_p contxt)
     // We need atleast one argument.
     if(c_sane(contxt, 1))
     {
-        // Get information needed to determine 
+        // Get information needed to determine
         // wheter to show anything or not.
         entry_p all = get_opt(contxt, OPT_ALL);
         int level = get_numvar(contxt, "@user-level");
@@ -179,13 +179,13 @@ entry_p m_message(entry_p contxt)
                 if(!DID_ERR())
                 {
                     // Show message dialog.
-                    DNUM = gui_message(msg, 0);  
+                    DNUM = gui_message(msg, 0);
                 }
 
                 // User abort?
                 if(!DNUM)
                 {
-                    HALT(); 
+                    HALT();
                 }
 
                 // Free the temporary buffer.
@@ -198,14 +198,14 @@ entry_p m_message(entry_p contxt)
             }
         }
 
-        // Done. 
+        // Done.
         RCUR;
     }
     else
     {
         // The parser is broken.
-        PANIC(contxt); 
-        RCUR; 
+        PANIC(contxt);
+        RCUR;
     }
 }
 
@@ -218,13 +218,13 @@ entry_p m_message(entry_p contxt)
 entry_p m_user(entry_p contxt)
 {
     // We need one argument
-    if(c_sane(contxt, 1)) 
+    if(c_sane(contxt, 1))
     {
         // Save old value.
-        int old = get_numvar(contxt, "@user-level"); 
+        int old = get_numvar(contxt, "@user-level");
 
         // Set new value of @user-level.
-        set_numvar(contxt, "@user-level", num(CARG(1))); 
+        set_numvar(contxt, "@user-level", num(CARG(1)));
 
         // Return the old.
         RNUM(old);
@@ -233,7 +233,7 @@ entry_p m_user(entry_p contxt)
     {
         // Broken parser.
         PANIC(contxt);
-        RCUR; 
+        RCUR;
     }
 }
 
@@ -285,14 +285,14 @@ entry_p m_welcome(entry_p contxt)
                 // On 'Proceed', set level and mode.
                 if(DNUM)
                 {
-                    set_numvar(contxt, "@user-level", lvl); 
-                    set_numvar(contxt, "@pretend", prt); 
-                    set_numvar(contxt, "@log", lgf); 
+                    set_numvar(contxt, "@user-level", lvl);
+                    set_numvar(contxt, "@pretend", prt);
+                    set_numvar(contxt, "@log", lgf);
                 }
                 else
                 {
                     // Abort.
-                    HALT(); 
+                    HALT();
                 }
             }
 
@@ -305,13 +305,13 @@ entry_p m_welcome(entry_p contxt)
             }
 
             // Done or halt.
-            RCUR; 
+            RCUR;
         }
     }
-        
+
     // OOM / broken parser.
     PANIC(contxt);
-    RCUR; 
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -322,10 +322,10 @@ entry_p m_welcome(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_working(entry_p contxt)
 {
-    if(c_sane(contxt, 1)) 
+    if(c_sane(contxt, 1))
     {
         // Concatenate all children.
-        char *msg = get_chlstr(contxt); 
+        char *msg = get_chlstr(contxt);
 
         // Did we manage to concatenate something?
         if(msg)
@@ -335,8 +335,8 @@ entry_p m_working(entry_p contxt)
             if(!DID_ERR())
             {
                 // Standard prefix.
-                const char *pre = tr(S_WRKN); 
-                size_t len = strlen(pre) + 
+                const char *pre = tr(S_WRKN);
+                size_t len = strlen(pre) +
                              strlen(msg) + 1;
 
                 // Memory to hold prefix and children.
@@ -345,20 +345,20 @@ entry_p m_working(entry_p contxt)
                 if(con)
                 {
                     // Concatenate prefix and children.
-                    snprintf(con, len, "%s%s", pre, msg); 
+                    snprintf(con, len, "%s%s", pre, msg);
 
                     // Free the children buffer.
                     free(msg);
 
                     // Show the result. Return immediately.
                     // No waiting for any events.
-                    gui_message(con, 1);  
+                    gui_message(con, 1);
 
                     // Free the final message buffer.
                     free(con);
 
                     // Success.
-                    RNUM(1); 
+                    RNUM(1);
                 }
                 else
                 {
@@ -370,13 +370,13 @@ entry_p m_working(entry_p contxt)
             {
                 // Could not resolve children.
                 free(msg);
-                RNUM(0); 
+                RNUM(0);
             }
         }
     }
-        
+
     // Broken parser /
     // out of memory.
     PANIC(contxt);
-    RCUR; 
+    RCUR;
 }

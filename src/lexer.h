@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// lexer.h: 
+// lexer.h:
 //
 // InstallerNG tokenizer
 //----------------------------------------------------------------------------
@@ -18,8 +18,8 @@ typedef void* yyscan_t;
 
 typedef union
 {
-    int n; 
-    char *s; 
+    int n;
+    char *s;
     entry_p e;
 } YYSTYPE;
 

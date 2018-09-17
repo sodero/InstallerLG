@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// control.c: 
+// control.c:
 //
 // Control structures
 //----------------------------------------------------------------------------
@@ -33,10 +33,10 @@ entry_p m_if(entry_p contxt)
         if(CARG(2) && CARG(2) != end())
         {
             // Let p be the branch that will be executed.
-            entry_p p = c ? CARG(2) : CARG(3); 
+            entry_p p = c ? CARG(2) : CARG(3);
 
-            // Is there a branch corresponding to the 
-            // resolved truth value? 
+            // Is there a branch corresponding to the
+            // resolved truth value?
             if(p && p != end())
             {
                 // We execute the branch by resolving it.
@@ -50,7 +50,7 @@ entry_p m_if(entry_p contxt)
 
     // The parser is broken.
     PANIC(contxt);
-    RCUR; 
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -69,27 +69,27 @@ entry_p m_select(entry_p contxt)
 
         // Find the n:th (0-indexed) item, go one step
         // at a time in case no such item exist.
-        while(CARG(2)->children[i] && 
+        while(CARG(2)->children[i] &&
               CARG(2)->children[i] != end())
         {
             // Return the resolved value of the found
-            // item. 
+            // item.
             if(i == j)
             {
-                return resolve(CARG(2)->children[i]); 
+                return resolve(CARG(2)->children[i]);
             }
 
-            i++; 
+            i++;
         }
 
-        // No such item, n > the number of items. 
-        ERR(ERR_NO_ITEM, str(CARG(1))); 
-        RNUM(0); 
+        // No such item, n > the number of items.
+        ERR(ERR_NO_ITEM, str(CARG(1)));
+        RNUM(0);
     }
     else
     {
         // The parser is broken
-        PANIC(contxt); 
+        PANIC(contxt);
         RCUR;
     }
 }
@@ -108,15 +108,15 @@ static entry_p h_whunt(entry_p contxt, int m)
        CARG(2)->type == CONTXT)
     {
         // Set the return value of this function to zero.
-        DNUM = 0; 
+        DNUM = 0;
 
-        // Prepare to return the resolved value of this 
-        // function if the expression is false from the start. 
-        entry_p r = contxt->resolved; 
+        // Prepare to return the resolved value of this
+        // function if the expression is false from the start.
+        entry_p r = contxt->resolved;
 
-        // Use XOR to support both 'while' and 'until'. Break 
+        // Use XOR to support both 'while' and 'until'. Break
         // the loop if something goes wrong inside.
-        while((m ^ tru(CARG(1))) && 
+        while((m ^ tru(CARG(1))) &&
               !DID_ERR())
         {
             // Save the return value of the last function
@@ -124,16 +124,16 @@ static entry_p h_whunt(entry_p contxt, int m)
             r = invoke(CARG(2));
         }
 
-        // Return either zero, the value of the resolved 
-        // value of this function, or the return value of 
+        // Return either zero, the value of the resolved
+        // value of this function, or the return value of
         // the last function in the last iteration.
-        return r; 
+        return r;
     }
     else
     {
         // The parser is broken
         PANIC(contxt);
-        RCUR; 
+        RCUR;
     }
 }
 
@@ -146,7 +146,7 @@ static entry_p h_whunt(entry_p contxt, int m)
 entry_p m_until(entry_p contxt)
 {
     // Implemented in h_whunt.
-    return h_whunt(contxt, 1); 
+    return h_whunt(contxt, 1);
 }
 
 //----------------------------------------------------------------------------
@@ -158,5 +158,5 @@ entry_p m_until(entry_p contxt)
 entry_p m_while(entry_p contxt)
 {
     // Implemented in h_whunt.
-    return h_whunt(contxt, 0); 
+    return h_whunt(contxt, 0);
 }

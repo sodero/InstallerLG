@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// prompt.c: 
+// prompt.c:
 //
 // User prompting
 //----------------------------------------------------------------------------
@@ -36,34 +36,34 @@ entry_p m_askbool(entry_p contxt)
 {
     if(contxt)
     {
-        const char *yes = tr(S_AYES), *no = tr(S_NONO); 
+        const char *yes = tr(S_AYES), *no = tr(S_NONO);
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
                 deflt    = get_opt(contxt, OPT_DEFAULT),
                 choices  = get_opt(contxt, OPT_CHOICES);
 
         // Default = 'no'.
-        DNUM = 0; 
+        DNUM = 0;
 
         if(prompt && help)
         {
             // Do we have a choice option?
             if(choices)
             {
-                // Unless the parser is broken, 
-                // we will have >= one child. 
+                // Unless the parser is broken,
+                // we will have >= one child.
                 entry_p *e = choices->children;
 
                 // Pick up whatever we can, use the default
                 // value if we only have a single choice.
-                yes = *e && *e != end() ? str(*e) : yes; 
-                no = *(++e) && *e != end() ? str(*e) : no; 
+                yes = *e && *e != end() ? str(*e) : yes;
+                no = *(++e) && *e != end() ? str(*e) : no;
             }
 
             // Do we have a user specified default?
             if(deflt)
             {
-                DNUM = num(deflt); 
+                DNUM = num(deflt);
             }
 
             // Show requester unless we're executing in
@@ -91,12 +91,12 @@ entry_p m_askbool(entry_p contxt)
     else
     {
         // The parser is broken
-        PANIC(contxt); 
+        PANIC(contxt);
     }
 
     // Success, failure or
-    // broken parser. 
-    RCUR; 
+    // broken parser.
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -105,8 +105,8 @@ entry_p m_askbool(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //
-// The installer in OS 3.9 doesn't seem to return a bitmap, which 
-// is how it is supposed to work according to the Installer.guide, 
+// The installer in OS 3.9 doesn't seem to return a bitmap, which
+// is how it is supposed to work according to the Installer.guide,
 // instead it returns a zero index. We choose to ignore the guide
 // and mimic the behaviour of the implementation in 3.9.
 //----------------------------------------------------------------------------
@@ -119,19 +119,19 @@ entry_p m_askchoice(entry_p contxt)
                 choices  = get_opt(contxt, OPT_CHOICES),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
 
-        DNUM = 0; 
+        DNUM = 0;
 
         // Are all mandatory options (!?) present?
         if(prompt && help && choices)
         {
-            // Unless the parser is broken, 
-            // we will have >= one child. 
+            // Unless the parser is broken,
+            // we will have >= one child.
             entry_p *e = choices->children;
 
             // The choice is represented by a bitmask of
             // 32 bits, refer to Install.guide. Thus, we
             // need room for 32 pointers + NULL.
-            static const char *chs[33]; 
+            static const char *chs[33];
 
             // Indices
             int i = 0, j = 0;
@@ -183,7 +183,7 @@ entry_p m_askchoice(entry_p contxt)
                 j++;
 
                 // Next option.
-                e++; 
+                e++;
             }
 
             // Exit if there's nothing to show.
@@ -194,13 +194,13 @@ entry_p m_askchoice(entry_p contxt)
                 RNUM(deflt ? num(deflt) : 0);
             }
 
-            // Terminate array. 
-            chs[i] = NULL; 
+            // Terminate array.
+            chs[i] = NULL;
 
             // Do we have default option?
             if(deflt)
             {
-                // Is there such a choice? 
+                // Is there such a choice?
                 int d = num(deflt);
 
                 // Check for negative values
@@ -208,18 +208,18 @@ entry_p m_askchoice(entry_p contxt)
                 if(d < 0 || d >= j)
                 {
                     // Nope, out of range.
-                    ERR(ERR_NO_ITEM, str(deflt)); 
-                    RNUM(0); 
+                    ERR(ERR_NO_ITEM, str(deflt));
+                    RNUM(0);
                 }
 
                 // Yes, use the default
                 // value given.
-                i = d; 
+                i = d;
             }
             else
             {
-                // No default = 0 
-                i = 0; 
+                // No default = 0
+                i = 0;
             }
 
             // Show requester unless we're executing in
@@ -233,15 +233,15 @@ entry_p m_askchoice(entry_p contxt)
                 // resolve all options.
                 if(!DID_ERR())
                 {
-                    int hlt = 0; 
+                    int hlt = 0;
 
                     // Prompt user.
-                    DNUM = gui_choice(p, h, chs, i, &hlt); 
+                    DNUM = gui_choice(p, h, chs, i, &hlt);
 
                     // Halt if abort.
                     if(hlt)
                     {
-                        HALT(); 
+                        HALT();
                     }
                 }
             }
@@ -259,12 +259,12 @@ entry_p m_askchoice(entry_p contxt)
     else
     {
         // The parser is broken
-        PANIC(contxt); 
+        PANIC(contxt);
     }
 
     // Success, failure or
-    // broken parser. 
-    RCUR; 
+    // broken parser.
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -273,8 +273,8 @@ entry_p m_askchoice(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //
-// We don't support (assigns) and (newpath), or rather, we act 
-// as if they are always present. 
+// We don't support (assigns) and (newpath), or rather, we act
+// as if they are always present.
 //----------------------------------------------------------------------------
 entry_p m_askdir(entry_p contxt)
 {
@@ -309,14 +309,14 @@ entry_p m_askdir(entry_p contxt)
                         as = assigns ? 1 : 0;
 
                     // Prompt user.
-                    ret = gui_askdir(p, h, np, dk, as, d); 
+                    ret = gui_askdir(p, h, np, dk, as, d);
 
                     // Return empty string and
                     // halt if user aborted.
                     if(!ret)
                     {
-                        HALT(); 
-                        REST; 
+                        HALT();
+                        REST;
                     }
                 }
                 else
@@ -328,13 +328,13 @@ entry_p m_askdir(entry_p contxt)
             }
             else
             {
-                // We're executing in 'novice' mode, 
-                // use the default value. 
-                ret = str(deflt); 
+                // We're executing in 'novice' mode,
+                // use the default value.
+                ret = str(deflt);
             }
 
             // We have a file.
-            RSTR(strdup(ret)); 
+            RSTR(strdup(ret));
         }
         else
         {
@@ -349,7 +349,7 @@ entry_p m_askdir(entry_p contxt)
     else
     {
         // Broken parser.
-        PANIC(contxt); 
+        PANIC(contxt);
         RCUR;
     }
 }
@@ -360,8 +360,8 @@ entry_p m_askdir(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //
-// Limitations: (disk) and (assigns) aren't supported. Assigns 
-// always satisfy the request and (disk) is simply ignored. 
+// Limitations: (disk) and (assigns) aren't supported. Assigns
+// always satisfy the request and (disk) is simply ignored.
 //
 //----------------------------------------------------------------------------
 entry_p m_askdisk(entry_p contxt)
@@ -371,108 +371,108 @@ entry_p m_askdisk(entry_p contxt)
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
                 dest     = get_opt(contxt, OPT_DEST),
-                newname  = get_opt(contxt, OPT_NEWNAME); 
+                newname  = get_opt(contxt, OPT_NEWNAME);
 
-        DNUM = 0; 
+        DNUM = 0;
 
         // Are all mandatory options (!?) present?
         if(prompt && help && dest)
         {
-            char n[PATH_MAX]; 
+            char n[PATH_MAX];
 
             // Append ':' to turn 'dest' into something
             // we can 'Lock'.
-            snprintf(n, PATH_MAX, "%s:", str(dest)); 
+            snprintf(n, PATH_MAX, "%s:", str(dest));
 
             // Volume names must be > 0 characters long.
             if(strlen(n) > 1)
             {
                 #ifdef AMIGA
-                struct Process *p = (struct Process *) 
+                struct Process *p = (struct Process *)
                     FindTask(NULL);
 
-                // Save the current window ptr. 
+                // Save the current window ptr.
                 APTR w = p->pr_WindowPtr;
 
-                // Disable auto request. 
-                p->pr_WindowPtr = (APTR) -1L; 
+                // Disable auto request.
+                p->pr_WindowPtr = (APTR) -1L;
 
-                // Is this volume present already? 
+                // Is this volume present already?
                 BPTR l = (BPTR) Lock(n, ACCESS_READ);
                 if(!l)
                 {
-                    const char *msg = str(prompt), 
+                    const char *msg = str(prompt),
                                *hlp = str(help),
                                *bt1 = tr(S_RTRY),
-                               *bt2 = tr(S_ABRT); 
+                               *bt2 = tr(S_ABRT);
 
                     // Only show requester if we could
                     // resolve all options.
                     if(!DID_ERR())
                     {
                         // Retry until we can get a lock or the
-                        // user aborts. 
+                        // user aborts.
                         while(!l)
                         {
-                            // Probe user, retry or abort?  
+                            // Probe user, retry or abort?
                             if(gui_bool(msg, hlp, bt1, bt2))
                             {
                                 l = (BPTR) Lock(n, ACCESS_READ);
                             }
                             else
                             {
-                                // User abort. 
-                                break; 
+                                // User abort.
+                                break;
                             }
                         }
                     }
                 }
 
-                // Did the user abort? 
+                // Did the user abort?
                 if(l)
                 {
                     // Are we going to create an assign
-                    // aliasing 'dest'? 
+                    // aliasing 'dest'?
                     if(newname)
                     {
-                        const char *nn = str(newname); 
+                        const char *nn = str(newname);
 
                         // Assigns must be > 0 characters long.
                         if(*nn)
                         {
-                            // On success, the lock belongs to 
+                            // On success, the lock belongs to
                             // the system. Do not UnLock().
-                            DNUM = AssignLock(nn, l) ? 1 : 0; 
+                            DNUM = AssignLock(nn, l) ? 1 : 0;
 
                             // On failure, we need to UnLock()
-                            // it ourselves. 
+                            // it ourselves.
                             if(!DNUM)
                             {
-                                // Could not create 'newname' assign. 
-                                ERR(ERR_ASSIGN, str(CARG(1))); 
-                                UnLock(l); 
+                                // Could not create 'newname' assign.
+                                ERR(ERR_ASSIGN, str(CARG(1)));
+                                UnLock(l);
                             }
                         }
                         else
                         {
-                            // An assign must contain at least one character. 
-                            ERR(ERR_INVALID_ASSIGN, nn); 
-                            UnLock(l); 
+                            // An assign must contain at least one character.
+                            ERR(ERR_INVALID_ASSIGN, nn);
+                            UnLock(l);
                         }
                     }
                     else
                     {
-                        // Sucess. 
-                        DNUM = 1; 
-                        UnLock(l); 
+                        // Sucess.
+                        DNUM = 1;
+                        UnLock(l);
                     }
                 }
 
-                // Restore auto request. 
-                p->pr_WindowPtr = w; 
+                // Restore auto request.
+                p->pr_WindowPtr = w;
                 #else
                 // On non-Amiga systems we always succeed.
-                DNUM = 1; 
+                DNUM = 1;
 
                 // For testing purposes only.
                 printf("%d", newname ? 1 : 0);
@@ -481,8 +481,8 @@ entry_p m_askdisk(entry_p contxt)
             else
             {
                 // A volume name must contain at
-                // least one character. 
-                ERR(ERR_INVALID_VOLUME, n); 
+                // least one character.
+                ERR(ERR_INVALID_VOLUME, n);
             }
         }
         else
@@ -494,12 +494,12 @@ entry_p m_askdisk(entry_p contxt)
     else
     {
         // The parser is broken
-        PANIC(contxt); 
+        PANIC(contxt);
     }
 
     // Success, failure or
-    // broken parser. 
-    RCUR; 
+    // broken parser.
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -508,9 +508,9 @@ entry_p m_askdisk(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //
-// The installer in OS 3.9 doesn't seem to recognise (disk) and 
-// (newpath). We support (disk) but not (newpath), or rather we 
-// act as if (newpath) is always present. 
+// The installer in OS 3.9 doesn't seem to recognise (disk) and
+// (newpath). We support (disk) but not (newpath), or rather we
+// act as if (newpath) is always present.
 //----------------------------------------------------------------------------
 entry_p m_askfile(entry_p contxt)
 {
@@ -543,14 +543,14 @@ entry_p m_askfile(entry_p contxt)
                         dk = disk ? 1 : 0;
 
                     // Prompt user.
-                    ret = gui_askfile(p, h, np, dk, d); 
+                    ret = gui_askfile(p, h, np, dk, d);
 
                     // Return empty string and
                     // halt if user aborted.
                     if(!ret)
                     {
-                        HALT(); 
-                        REST; 
+                        HALT();
+                        REST;
                     }
                 }
                 else
@@ -562,13 +562,13 @@ entry_p m_askfile(entry_p contxt)
             }
             else
             {
-                // We're executing in 'novice' mode, 
-                // use the default value. 
-                ret = str(deflt); 
+                // We're executing in 'novice' mode,
+                // use the default value.
+                ret = str(deflt);
             }
 
             // We have a file.
-            RSTR(strdup(ret)); 
+            RSTR(strdup(ret));
         }
         else
         {
@@ -583,7 +583,7 @@ entry_p m_askfile(entry_p contxt)
     else
     {
         // Broken parser.
-        PANIC(contxt); 
+        PANIC(contxt);
         RCUR;
     }
 }
@@ -612,8 +612,8 @@ entry_p m_asknumber(entry_p contxt)
 
         if(prompt && help && deflt)
         {
-            // Default range. 
-            int min = 0, max = 100; 
+            // Default range.
+            int min = 0, max = 100;
 
             if(range)
             {
@@ -623,18 +623,18 @@ entry_p m_asknumber(entry_p contxt)
                     max = num(range->children[1]);
 
                     // Use default range when the
-                    // user given range is invalid. 
+                    // user given range is invalid.
                     if(min >= max)
                     {
-                        max = 100; 
-                        min = 0; 
+                        max = 100;
+                        min = 0;
                     }
                 }
                 else
                 {
                     // The parser is broken
-                    PANIC(contxt); 
-                    RCUR; 
+                    PANIC(contxt);
+                    RCUR;
                 }
             }
 
@@ -650,7 +650,7 @@ entry_p m_asknumber(entry_p contxt)
                 // resolve all options.
                 if(!DID_ERR())
                 {
-                    int hlt = 0; 
+                    int hlt = 0;
 
                     // Prompt user.
                     DNUM = gui_number(p, h, min, max, d, &hlt);
@@ -658,13 +658,13 @@ entry_p m_asknumber(entry_p contxt)
                     // Halt if abort.
                     if(hlt)
                     {
-                        HALT(); 
+                        HALT();
                     }
                 }
             }
             else
             {
-                // Use the default value. 
+                // Use the default value.
                 DNUM = num(deflt);
             }
         }
@@ -677,12 +677,12 @@ entry_p m_asknumber(entry_p contxt)
     else
     {
         // The parser is broken
-        PANIC(contxt); 
+        PANIC(contxt);
     }
 
     // Success, failure or
-    // broken parser. 
-    RCUR; 
+    // broken parser.
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -700,19 +700,19 @@ entry_p m_askoptions(entry_p contxt)
                 choices  = get_opt(contxt, OPT_CHOICES),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
 
-        DNUM = -1; 
+        DNUM = -1;
 
         // We need everything but a default value.
         if(prompt && help && choices)
         {
-            // Unless the parser is broken, 
-            // we will have >= one child. 
+            // Unless the parser is broken,
+            // we will have >= one child.
             entry_p *e = choices->children;
 
             // Options are represented by bitmask of 32
-            // bits, refer to Install.guide. Thus, we 
+            // bits, refer to Install.guide. Thus, we
             // need room for 32 pointers + NULL.
-            static const char *chs[33]; 
+            static const char *chs[33];
 
             // Indices
             int i = 0, j = 0;
@@ -764,7 +764,7 @@ entry_p m_askoptions(entry_p contxt)
                 j++;
 
                 // Next option.
-                e++; 
+                e++;
             }
 
             // Exit if there's nothing to show.
@@ -775,30 +775,30 @@ entry_p m_askoptions(entry_p contxt)
                 RNUM(deflt ? num(deflt) : -1);
             }
 
-            // Terminate array. 
-            chs[i] = NULL; 
+            // Terminate array.
+            chs[i] = NULL;
 
             // Do we have default option?
             if(deflt)
             {
-                // Is there such a choice? 
+                // Is there such a choice?
                 int d = num(deflt);
 
                 if(d >= (1 << j))
                 {
                     // Nope, out of range.
-                    ERR(ERR_NO_ITEM, str(deflt)); 
-                    RNUM(0); 
+                    ERR(ERR_NO_ITEM, str(deflt));
+                    RNUM(0);
                 }
 
                 // Yes, use the default
                 // value given.
-                i = d; 
+                i = d;
             }
             else
             {
-                // No default = -1 
-                i = -1; 
+                // No default = -1
+                i = -1;
             }
 
             // Show requester unless we're executing in
@@ -812,15 +812,15 @@ entry_p m_askoptions(entry_p contxt)
                 // resolve all options.
                 if(!DID_ERR())
                 {
-                    int hlt = 0; 
+                    int hlt = 0;
 
                     // Prompt user.
-                    DNUM = gui_options(p, h, chs, i, &hlt); 
+                    DNUM = gui_options(p, h, chs, i, &hlt);
 
                     // Halt if abort.
                     if(hlt)
                     {
-                        HALT(); 
+                        HALT();
                     }
                 }
             }
@@ -838,12 +838,12 @@ entry_p m_askoptions(entry_p contxt)
     else
     {
         // The parser is broken
-        PANIC(contxt); 
+        PANIC(contxt);
     }
 
     // Success, failure or
-    // broken parser. 
-    RCUR; 
+    // broken parser.
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -870,13 +870,13 @@ entry_p m_askstring(entry_p contxt)
             {
                 const char *p = str(prompt),
                            *h = str(help),
-                           *d = str(deflt);  
-                
+                           *d = str(deflt);
+
                 // Only show requester if we could
                 // resolve all options.
                 if(!DID_ERR())
                 {
-                    int hlt = 0; 
+                    int hlt = 0;
 
                     // Prompt user.
                     res = gui_string(p, h, d, &hlt);
@@ -884,7 +884,7 @@ entry_p m_askstring(entry_p contxt)
                     // Halt if abort.
                     if(hlt)
                     {
-                        HALT(); 
+                        HALT();
                         REST;
                     }
                 }
@@ -899,10 +899,10 @@ entry_p m_askstring(entry_p contxt)
             else
             {
                 // Use the default value.
-                res = str(deflt); 
+                res = str(deflt);
             }
-            
-            RSTR(strdup(res)); 
+
+            RSTR(strdup(res));
         }
         else
         {
@@ -917,7 +917,7 @@ entry_p m_askstring(entry_p contxt)
     else
     {
         // The parser is broken
-        PANIC(contxt); 
+        PANIC(contxt);
         RCUR;
     }
 }
