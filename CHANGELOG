@@ -10,7 +10,7 @@
 0.1.0-alpha.3:
 ==============
 - (optional) quirks 'fixed' (YAM).
-- (while) and (until) naked blocks allowed (YAM). 
+- (while) and (until) naked blocks allowed (YAM).
 - (exit (QUIET)) is now (always) totally silent.
 - WB invocation fixed (project / tool / SCRIPT tooltype).
 - Graphical parser feedback when invoked from WB.
@@ -21,12 +21,12 @@
 
 0.1.0-alpha.5:
 ==============
-- Strict mode toggle (@strict 0/1) 
+- Strict mode toggle (@strict 0/1)
 - (foreach) naked blocks allowed (FlexCat)
 
 0.1.0-alpha.6:
 ==============
-- (copylib) non strict mode (OpenURL) 
+- (copylib) non strict mode (OpenURL)
 - Naked (welcome) (HWP_*)
 
 0.1.0-alpha.7:
@@ -66,18 +66,18 @@
 ===============
 - Empty procedures allowed (MCC_Date).
 - (select) block execution fixed.
-- (onerror) and (trap) naked blocks allowed. 
+- (onerror) and (trap) naked blocks allowed.
 
 0.1.0-alpha.14:
 ===============
 - (textfile) multiple (append) allowed (NetSurf).
 - (AND) and (OR) >2 arguments allowed (MCC_Date).
-- Primitives allowed to mimic return values at the end of control blocks (MCC_Date). 
+- Primitives allowed to mimic return values at the end of control blocks (MCC_Date).
 
 0.1.0-alpha.15:
 ===============
 - Default (welcome) and (exit) fix.
-- Debug mode toggle (@debug 0/1) 
+- Debug mode toggle (@debug 0/1)
 - String delimiter fix.
 
 0.1.0-alpha.16:
@@ -129,3 +129,15 @@
 ===============
 - Application description fixed to make Exchange happy (polluks).
 - MorphOS adaptations.
+
+0.1.0-alpha.27:
+===============
+- Help bubble moved to the top.
+- Improved error handling.
+
+0.1.0-alpha.28:
+===============
+- Performance improvements.
+- Aminet compliant naming.
+- Improved file copy abort.
+- Size reduction.

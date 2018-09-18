@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------
-// eval.c: 
+// eval.c:
 //
-// Functions for evaluation of entry_t objects. 
+// Functions for evaluation of entry_t objects.
 //----------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
@@ -21,7 +21,7 @@
 
 //----------------------------------------------------------------------------
 // Name:        find_symbol
-// Description: Find the referent of a symbolic reference. 
+// Description: Find the referent of a symbolic reference.
 // Input:       entry_p entry:  A symbolic reference, SYMREF.
 // Return:      entry_p:        A symbol, SYMBOL, matching the symbolic
 //                              reference. NULL if no match is found.
@@ -29,36 +29,52 @@
 entry_p find_symbol(entry_p entry)
 {
     // Local variables have priority. This
-    // currently implies function arguments 
-    // only. We could enable local (set), 
+    // currently implies function arguments
+    // only. We could enable local (set),
     // but this might break old scripts, so
-    // let's not do it. 
+    // let's not do it.
     entry_p con = local(entry);
 
     if(con)
     {
         do
         {
-            entry_p *tmp; 
+            // Current.
+            entry_p *tmp;
 
             // Iterate over all symbols in the current
-            // context. 
+            // context.
             for(tmp = con->symbols;
-                tmp && *tmp && *tmp != end(); 
+                tmp && *tmp && *tmp != end();
                 tmp++)
             {
+                // Return value.
+                entry_p ret = *tmp;
+
                 // The current item might be a CUSTOM
                 // Only match SYMBOL:s, return if we
-                // find a match. 
-                if((*tmp)->type == SYMBOL &&
-                   !strcmp((*tmp)->name, entry->name)) 
+                // find a match.
+                if(ret->type == SYMBOL &&
+                   !strcmp(ret->name, entry->name))
                 {
-                    return *tmp; 
+                    // Rearrange symbols to make the
+                    // next lookup (if any) faster.
+                    // Don't do this on user defined
+                    // procedures though, symbols in
+                    // those are positional (args).
+                    if(ret->parent->type != CUSTOM)
+                    {
+                        *tmp = *(con->symbols);
+                        *(con->symbols) = ret;
+                    }
+
+                    // Symbol found.
+                    return ret;
                 }
             }
 
-            // Nothing found in the current context. 
-            // Climb one scope higher and try again. 
+            // Nothing found in the current context.
+            // Climb one scope higher and try again.
             con = local(con->parent);
         }
         while(con);
@@ -66,50 +82,49 @@ entry_p find_symbol(entry_p entry)
         // Only fail if we're in 'strict' mode.
         if(get_numvar(global(entry), "@strict"))
         {
-            // We found nothing. 
-            ERR_C(entry, ERR_UNDEF_VAR, entry->name); 
+            // We found nothing.
+            ERR_C(entry, ERR_UNDEF_VAR, entry->name);
         }
     }
     else
     {
-        // Bad input. 
+        // Bad input.
         PANIC(entry);
     }
 
     // A failure will be evaluated as
     // as a zero or an empty string.
-    return new_failure();
+    return end();
 }
 
 //----------------------------------------------------------------------------
 // Name:        resolve
 // Description: Derive primitive from a complex type, something that can be
-//              directly evaluated as a string or numerical value. 
+//              directly evaluated as a string or numerical value.
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
-// Return:      entry_p:        Pointer to an entry_t primitive.  
+// Return:      entry_p:        Pointer to an entry_t primitive.
 //----------------------------------------------------------------------------
 entry_p resolve(entry_p entry)
 {
     // Is there anything to resolve?
-    if(entry && 
-       entry != end())
+    if(entry)
     {
         switch(entry->type)
         {
-            // Symbols are resolved from birth. 
-            case SYMBOL: 
+            // Symbols are resolved from birth.
+            case SYMBOL:
                 return entry->resolved;
 
             // A symbolic reference is resolved by resolving
             // the symbol it refers to.
-            case SYMREF: 
-                return resolve(find_symbol(entry)); 
+            case SYMREF:
+                return resolve(find_symbol(entry));
 
             // A context is resolved by executing all functions in it.
-            case CONTXT: 
+            case CONTXT:
                 return invoke(entry);
 
-            // Functions are resolved by executing them. 
+            // Functions are resolved by executing them.
             case CUSREF:
             case NATIVE:
                 return entry->call(entry);
@@ -119,52 +134,50 @@ entry_p resolve(entry_p entry)
                 return entry->id == OPT_DYNOPT ?
                        entry->call(entry) : entry;
 
-            // If we end up here, we already have a primitive. 
+            // If we end up here, we already have a primitive.
             default:
-                return entry; 
+                return entry;
         }
     }
 
-    // Bad input. 
+    // Bad input.
     PANIC(entry);
 
     // Failure.
-    return new_failure();
+    return end();
 }
 
 //----------------------------------------------------------------------------
 // Name:        num
-// Description: Get integer representation of an entry. This implies resolving 
-//              it, and, if necessary, converting it. 
+// Description: Get integer representation of an entry. This implies resolving
+//              it, and, if necessary, converting it.
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
-// Return:      int:            An integer representation of the input. 
+// Return:      int:            An integer representation of the input.
 //----------------------------------------------------------------------------
 int num(entry_p entry)
 {
     // Is there anything to resolve?
-    if(entry && 
-       entry != end())
+    if(entry)
     {
         switch(entry->type)
         {
             // Options might contain numbers. If not, a '0'
-            // will be returned. 
+            // will be returned.
             case OPTION:
-                return atoi(str(entry)); 
+                return atoi(str(entry));
 
-            // These are all numeric values: 
-            case STATUS:
+            // These are all numeric values:
             case DANGLE:
             case NUMBER:
                 return entry->id;
 
             // Recur.
             case SYMBOL:
-                return num(entry->resolved); 
+                return num(entry->resolved);
 
             // Recur.
             case SYMREF:
-                return num(find_symbol(entry)); 
+                return num(find_symbol(entry));
 
             // Recur.
             case CUSREF:
@@ -176,15 +189,15 @@ int num(entry_p entry)
                 return atoi(entry->name);
 
             default:
-                break; 
+                break;
         }
     }
 
-    // Bad input. 
+    // Bad input.
     PANIC(entry);
 
     // Failure.
-    return 0; 
+    return 0;
 }
 
 //----------------------------------------------------------------------------
@@ -193,16 +206,15 @@ int num(entry_p entry)
 //              if necessary, converting it. Non empty strings and non zero
 //              numerical values are considered true, everythings else false.
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
-// Return:      int:            The truth value of the input. 
+// Return:      int:            The truth value of the input.
 //----------------------------------------------------------------------------
 int tru(entry_p entry)
 {
-    // Is there nything to resolve?
-    if(entry && 
-       entry != end())
+    // Is there anything to resolve?
+    if(entry)
     {
         // Attempt to resolve it.
-        entry_p e = resolve(entry); 
+        entry_p e = resolve(entry);
 
         // Evaluate on success.
         if(!DID_ERR())
@@ -210,55 +222,54 @@ int tru(entry_p entry)
             // Only numerical values and strings
             // can be true.
             if((e->type == NUMBER && e->id) ||
-               (e->type == STRING && strlen(e->name)))
+               (e->type == STRING && *(e->name)))
             {
-                return 1; 
+                return 1;
             }
         }
     }
     else
     {
-        // Bad input. 
+        // Bad input.
         PANIC(entry);
     }
 
     // False.
-    return 0; 
+    return 0;
 }
 
 //----------------------------------------------------------------------------
 // Name:        str
-// Description: Get string representation of an entry. This implies resolving 
-//              it, and, if necessary, converting it. 
+// Description: Get string representation of an entry. This implies resolving
+//              it, and, if necessary, converting it.
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
-// Return:      int:            String representation of the input. 
+// Return:      int:            String representation of the input.
 //----------------------------------------------------------------------------
 char *str(entry_p entry)
 {
     // Is there anything to resolve?
-    if(entry && 
-       entry != end())
+    if(entry)
     {
         switch(entry->type)
         {
             // Special treatment of options
-            // with a single string argument. 
-            // Let other options fall through. 
+            // with a single string argument.
+            // Let other options fall through.
             case OPTION:
                 switch(entry->id)
                 {
-                    case OPT_APPEND: 
-                    case OPT_CONFIRM: 
-                    case OPT_DEFAULT: 
-                    case OPT_DEST: 
-                    case OPT_DISK: 
-                    case OPT_INCLUDE: 
-                    case OPT_NEWNAME: 
-                    case OPT_PATTERN: 
-                    case OPT_SETDEFAULTTOOL: 
-                    case OPT_SETSTACK: 
-                    case OPT_SOURCE: 
-                    case OPT_OVERRIDE: 
+                    case OPT_APPEND:
+                    case OPT_CONFIRM:
+                    case OPT_DEFAULT:
+                    case OPT_DEST:
+                    case OPT_DISK:
+                    case OPT_INCLUDE:
+                    case OPT_NEWNAME:
+                    case OPT_PATTERN:
+                    case OPT_SETDEFAULTTOOL:
+                    case OPT_SETSTACK:
+                    case OPT_SOURCE:
+                    case OPT_OVERRIDE:
                     case OPT_GETDEFAULTTOOL:
                     case OPT_GETSTACK:
                     case OPT_GETTOOLTYPE:
@@ -266,12 +277,12 @@ char *str(entry_p entry)
                         // child.
                         return str
                         (
-                            entry->children ? 
+                            entry->children ?
                             entry->children[0] : NULL
                         );
 
-                    case OPT_HELP: 
-                    case OPT_PROMPT: 
+                    case OPT_HELP:
+                    case OPT_PROMPT:
                         // (help) and (prompt) may have multiple
                         // childred that must be concatenated.
                         free(entry->name);
@@ -289,45 +300,45 @@ char *str(entry_p entry)
                         }
                 }
 
-            // This doesn't make sense. We need
-            // a proper string though. 
-            case STATUS:
+            // Dangling entries and options
+            // are considered empty strings
+            // with the exceptions above.
             case DANGLE:
-                return ""; 
+                return "";
 
             // Strings and function names can
-            // be returned directly. 
+            // be returned directly.
             case CUSTOM:
             case STRING:
                 return entry->name;
 
             // Recur.
             case SYMBOL:
-                return str(entry->resolved); 
+                return str(entry->resolved);
 
             // Recur.
             case SYMREF:
-                return str(find_symbol(entry)); 
+                return str(find_symbol(entry));
 
             // Recur.
             case CUSREF:
             case NATIVE:
-                return str(entry->call(entry)); 
+                return str(entry->call(entry));
 
-            // Conversion. Please note the use 
-            // of NUMLEN. 
+            // Conversion. Please note the use
+            // of NUMLEN.
             case NUMBER:
                 // Have we converted this number to a
                 // string before?
                 if(!entry->name)
                 {
-                    entry->name = malloc(NUMLEN); 
+                    entry->name = malloc(NUMLEN);
                 }
 
                 // On OOM, fall through and PANIC below.
                 if(entry->name)
                 {
-                    snprintf(entry->name, NUMLEN, "%d", entry->id); 
+                    snprintf(entry->name, NUMLEN, "%d", entry->id);
                     return entry->name;
                 }
 
@@ -340,7 +351,7 @@ char *str(entry_p entry)
     PANIC(entry);
 
     // Failure.
-    return ""; 
+    return "";
 }
 
 //----------------------------------------------------------------------------
@@ -349,17 +360,17 @@ char *str(entry_p entry)
 //              executing all executable children and return the return value
 //              of the last executed function. If any of the functions in the
 //              CONTXT fails, the execution will be aborted.
-// Input:       entry_p entry:  An entry_t pointer to a CONTXT object. 
+// Input:       entry_p entry:  An entry_t pointer to a CONTXT object.
 // Return:      entry_p:        The last resolved value in the entry CONTXT.
 //----------------------------------------------------------------------------
 entry_p invoke(entry_p entry)
 {
-    // Be prepared to fail. 
-    entry_p ret = new_failure(); 
+    // Be prepared to fail.
+    entry_p ret = end();
 
     if(entry)
     {
-        // Iter. 
+        // Iter.
         entry_p *vec = entry->children;
 
         // Empty procedures are allowed, there
@@ -369,21 +380,21 @@ entry_p invoke(entry_p entry)
             // As long as no one fails, resolve
             // all children and save the return
             // value of the last one.
-            while (*vec && 
+            while (*vec &&
                    *vec != end() &&
                    !DID_ERR())
             {
                 // Resolve and proceed.
                 ret = resolve(*vec);
-                vec++; 
+                vec++;
             }
         }
 
-        // Return the last value. 
+        // Return the last value.
         return ret;
     }
 
-    // Bad input. 
+    // Bad input.
     PANIC(entry);
 
     // Failure.
@@ -393,8 +404,8 @@ entry_p invoke(entry_p entry)
 //----------------------------------------------------------------------------
 // Name:        run
 // Description: Run script. Setup and teardown of everything, GUI included.
-// Input:       entry_p entry:  The start symbol, refer to the parser. 
-// Return:      - 
+// Input:       entry_p entry:  The start symbol, refer to the parser.
+// Return:      -
 //----------------------------------------------------------------------------
 void run(entry_p entry)
 {
@@ -402,25 +413,25 @@ void run(entry_p entry)
     // the execution.
     if(gui_init())
     {
-        // Execute the script. 
+        // Execute the script.
         entry_p status = invoke(entry);
 
         // Execute the (onerror) function
-        // on failure. 
+        // on failure.
         if(DID_ERR() && !DID_HALT())
         {
-            status = m_onerror(entry); 
+            status = m_onerror(entry);
         }
 
         // Output what we have unless we're
         // running from WB.
         if(arg_argc(-1))
         {
-            printf("%s\n", str(status)); 
+            printf("%s\n", str(status));
         }
 
         // GUI teardown.
-        gui_exit(); 
+        gui_exit();
     }
 
     // Free AST

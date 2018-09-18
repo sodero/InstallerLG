@@ -90,8 +90,8 @@ entry_p m_debug(entry_p contxt)
                 res = find_symbol(*cur);
 
                 // If the symbol is missing, we will
-                // have a STATUS entry that is false.
-                if(res->type == STATUS && !tru(res))
+                // have a DANGLE entry that is false.
+                if(res->type == DANGLE && !tru(res))
                 {
                     // As prescribed.
                     s = "<NIL>";

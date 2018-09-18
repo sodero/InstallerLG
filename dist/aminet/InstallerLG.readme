@@ -4,8 +4,7 @@ Uploader:     rolfkopman@gmail.com (Ola Söder)
 Type:         util/sys
 Architecture: __ARCH__
 Requires:     MUI 3.8
-Version:      0.1.0-alpha.26
-Replaces:     util/sys/InstallerLG.i386-aros.lha
+Version:      0.1.0-alpha.28
 Distribution: Aminet
 
 InstallerLG

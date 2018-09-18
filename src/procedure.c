@@ -87,7 +87,7 @@ entry_p m_gosub(entry_p contxt)
                         {
                             // Out of memory
                             PANIC(contxt);
-                            return new_failure(); 
+                            return end();
                         }
 
                         // Continue until we have no more arguments from the
@@ -108,8 +108,10 @@ entry_p m_gosub(entry_p contxt)
                 }
                 else
                 {
-                    ERR(ERR_MAX_DEPTH, contxt->name); 
-                    return new_failure(); // FIXME
+                    // We will run out of stack if
+                    // we don't abort.
+                    ERR(ERR_MAX_DEPTH, contxt->name);
+                    return end();
                 }
             }
 
@@ -144,7 +146,7 @@ entry_p m_gosub(entry_p contxt)
                 else
                 {
                     // Panic already set.
-                    res = new_failure(); 
+                    res = end();
                 }
             }
 
@@ -187,8 +189,9 @@ entry_p m_gosub(entry_p contxt)
         PANIC(contxt);
     }
     
-    // FIXME
-    return new_failure(); 
+    // Undefined user procedure
+    // or broken parser.
+    return end();
 }
 
 //----------------------------------------------------------------------------

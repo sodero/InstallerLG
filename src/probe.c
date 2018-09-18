@@ -199,7 +199,7 @@ entry_p m_getassign(entry_p contxt)
         {
             const char *o = str(opt); 
             
-            if(strlen(o))
+            if(*o)
             {
                 // Translate from Installer speak to DOS
                 // speak. 
@@ -848,7 +848,7 @@ entry_p m_iconinfo(entry_p contxt)
 
                             // Variable names must be atleast one
                             // character long.
-                            if(strlen(n))
+                            if(*n)
                             {
                                 char *svl = NULL;
                                 entry_p val;

@@ -7,8 +7,8 @@ SRC := ../src
 BIN := ../build
 EXE := installer
 NAME := InstallerLG
-ARCH := $(shell uname -m)
 OS := $(shell uname -s | tr A-Z a-z)
+ARCH := $(shell uname -m | tr -d ower)
 LHA := $(DIR)/$(NAME).$(ARCH)-$(OS).lha
 README := $(DIR)/$(NAME).$(ARCH)-$(OS).readme
 FILES := $(EXE) 'InstallerLG installer' 'InstallerLG installer.info'
@@ -27,13 +27,14 @@ aros:
 	cp $(BIN)/*.h $(FLT)
 
 .PHONY: src
-src: clean
+src: clean aros
 	mkdir $(NAME)
 	cp ../LICENSE $(NAME)
 	cp ../README.md $(NAME)
 	cp -R ../build $(NAME)
 	cp -R ../src $(NAME)
 	cp -R ../test $(NAME)
+	cp -R aros $(NAME)
 	lha a $(DIR)/$(NAME).src.lha $(NAME)
 
 .PHONY: clean

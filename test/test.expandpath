@@ -1,3 +1,5 @@
 (expandpath) ; "","Line 1: syntax error, unexpected ')' ')'",""
-(expandpath "path") ; "","",""
+(expandpath "path") ; "","path",""
+(expandpath undef) ; "","Line 1: Undefined variable 'undef' 0",""
+(set @strict 0) (expandpath undef) ; "","",""
 (expandpath "path" err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""

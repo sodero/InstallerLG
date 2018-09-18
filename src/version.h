@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// version.h: 
+// version.h:
 //
 // InstallerLG version information
 //----------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #define MAJOR 43
 #define MINOR 3
-#define BUILD 26
+#define BUILD 28
 #define PHASE "ALPHA"
 
 #define STY(X) #X

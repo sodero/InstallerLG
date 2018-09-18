@@ -15,10 +15,8 @@
 //----------------------------------------------------------------------------
 // Allocation of entry_t types.
 //----------------------------------------------------------------------------
-entry_p new_dangle(void); 
 entry_p new_contxt(void); 
 entry_p new_number(int n); 
-entry_p new_failure(void); 
 entry_p new_string(char *n); 
 entry_p new_symbol(char *n); 
 entry_p new_symref(char *n, int l);

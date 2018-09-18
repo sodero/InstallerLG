@@ -179,7 +179,7 @@ entry_p get_opt(entry_p c, opt_t t)
         {
             // This will be resolved as an
             // emtpy string.
-            return new_failure();
+            return end();
         }
     }
 
