@@ -1,0 +1,69 @@
+* = Needs verification
+
+Tested:
+==========================================================================================
+* http://aminet.net/comm/yam/YAM29p1-AROS-i386.lha
+* http://aminet.net/dev/misc/FlexCat-2.18.lha
+* http://aminet.net/comm/www/OpenURL-7.18.lha
+* http://aminet.net/dev/mui/MCC_BetterString-11.32.lha
+* http://aminet.net/util/misc/eGame.lha
+* http://aminet.net/util/libs/codesets-6.21.lha
+* http://aminet.net/dev/mui/MCC_TheBar-26.19.lha
+* http://aminet.net/dev/mui/MCC_NList-0.124.lha
+* http://aminet.net/dev/mui/MCC_TextEditor-15.50.lha
+* http://aminet.net/dev/hwood/HWP_ZIP.lha
+* http://aminet.net/dev/hwood/HWP_YAFA.lha
+* http://aminet.net/dev/hwood/HWP_XMLParser.lha
+* http://aminet.net/dev/hwood/HWP_MovieSetter.lha
+* http://aminet.net/dev/hwood/HWP_SID.lha
+* http://aminet.net/dev/hwood/HWP_SQLite3.lha
+* http://aminet.net/dev/hwood/HWP_SVGImage.lha
+* http://aminet.net/dev/hwood/HWP_OggTheora.lha
+* http://aminet.net/dev/hwood/HWP_OggVorbis.lha
+* http://aminet.net/dev/hwood/HWP_PCX.lha
+* http://aminet.net/dev/hwood/HWP_Planarama.lha
+* http://aminet.net/dev/hwood/HWP_TIFF.lha
+* http://aminet.net/dev/hwood/HWP_VectorGfx.lha
+* http://aminet.net/dev/hwood/HWP_XAD.lha
+* http://aminet.net/dev/hwood/HWP_RapaGUI.lha
+* http://aminet.net/dev/hwood/HWP_Polybios.lha
+* http://aminet.net/dev/hwood/HWP_MUIRoyale.lha
+* http://aminet.net/dev/hwood/HWP_Malibu.lha
+* http://aminet.net/dev/hwood/HWP_HTTPStreamer.lha
+* http://aminet.net/dev/hwood/HWP_GLGalore.lha
+* http://aminet.net/dev/hwood/HWP_JPEG2000.lha
+* http://aminet.net/dev/hwood/HWP_FLICAnim.lha
+* http://aminet.net/dev/hwood/HWP_AVCodec.lha
+* http://aminet.net/dev/hwood/HWP_DigiBooster.lha
+* http://aminet.net/dev/hwood/HWP_AHX.lha
+* http://aminet.net/dev/hwood/HWP_AIFF.lha
+* http://aminet.net/dev/hwood/HWP_APNG.lha
+* http://aminet.net/comm/www/MetalWEB401.lha
+* http://aminet.net/comm/www/amrss.lha
+* https://github.com/jens-maus/amissl/releases/download/4.2/AmiSSL-4.2.lha
+* http://muidev.de/download/MUI%205.0%20-%20Release/MUI-5.0-2018R1-os3.lha
+* https://www.ibrowse-dev.net/resources/IBrowse2.4-020+.lha
+* http://aminet.net/comm/www/Voyager.lha
+* http://aminet.net/comm/www/awebjfif68020.lha
+* http://aminet.net/comm/www/AWeb-MOS.lha
+* http://aminet.net/dev/mui/MCC_BWin.lha
+* http://aminet.net/dev/mui/MCC_CalendarMOS.lha
+* http://aminet.net/comm/www/netsurf.lha
+* http://aminet.net/dev/mui/MCC_Date.lha
+* http://aminet.net/dev/mui/MCC_MiniMailer.lha
+* http://aminet.net/dev/mui/MCC_UrltextMOS.lha
+* http://aminet.net/dev/mui/MCC_TearOff.lha
+* http://aminet.net/dev/mui/MCC_DateString.lha
+* http://aminet.net/dev/mui/MCC_DateText.lha
+* http://aminet.net/dev/mui/MCC_Guigfx.lha
+* http://aminet.net/dev/mui/MCC_HotkeyString.lha
+* http://aminet.net/dev/mui/MCC_HTMLtext.lha
+* http://aminet.net/dev/mui/MCC_MonthNavi.lha
+* http://aminet.net/dev/mui/MCC_Popph.lha
+* http://aminet.net/dev/mui/MCC_SpeedBarMOS.lha
+* http://aminet.net/dev/mui/MCC_SettingsWi.lha
+* http://aminet.net/dev/mui/MCC_Mailtext.lha
+* http://aminet.net/dev/mui/MCC_Lamp.lha
+
+Not tested
+==========================================================================================
