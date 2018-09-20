@@ -145,4 +145,5 @@
 0.1.0-alpha.29:
 ===============
 - Proper AmigaDOS return values.
+- Non naked options allowed (IconDeluxe).
 - ?
