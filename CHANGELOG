@@ -141,3 +141,8 @@
 - Aminet compliant naming.
 - Improved file copy abort.
 - Size reduction.
+
+0.1.0-alpha.29:
+===============
+- Proper AmigaDOS return values.
+- ?
