@@ -11,6 +11,10 @@
 #ifndef ARGS_H_
 #define ARGS_H_
 
+#ifdef AMIGA
+#include <dos/dos.h>
+#endif
+
 enum
 {
     ARG_SCRIPT = 0,

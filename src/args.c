@@ -11,7 +11,6 @@
 #include "resource.h"
 
 #ifdef AMIGA
-#include <dos/dos.h>
 #include <proto/dos.h>
 #include <proto/icon.h>
 #include <workbench/startup.h>

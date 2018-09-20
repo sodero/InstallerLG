@@ -3263,13 +3263,15 @@ int main(int argc, char **argv)
 
 #ifdef AMIGA
     // Translate value of r to the appropriate
-    // Amiga DOS return value.
+    // Amiga DOS return value. Syntax error is
+    // an ERROR and file not found / readable
+    // a FAIL.
+    return (!r ? r :
+           (r == 1 ? RETURN_ERROR : RETURN_FAIL));
 #else
     // Ignore syntax error on non Amiga systems.
-    r = r == 1 ? 0 : r;
+    return (r == 1 ? 0 : r);
 #endif
-
-    return r;
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
