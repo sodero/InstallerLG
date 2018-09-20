@@ -1,3 +1,12 @@
+#---------------------------------------------------------------------------------#
+# OS
+#---------------------------------------------------------------------------------#
+ifeq ($(shell uname),Darwin)
+SED := gsed
+else
+SED := sed
+endif
+
 #-----------------------------------------------------------------------------------#
 # Configuration
 #-----------------------------------------------------------------------------------#
@@ -26,7 +35,7 @@ aros:
 	cp $(SRC)/*.h $(FLT)
 	cp $(BIN)/*.c $(FLT)
 	cp $(BIN)/*.h $(FLT)
-	sed -i 's/FILES :=.*$$/FILES := $(STEMS)/' $(FLT)/mmakefile.src
+	$(SED) -i 's/FILES :=.*$$/FILES := $(STEMS)/' $(FLT)/mmakefile.src
 
 .PHONY: src
 src: clean aros
@@ -53,7 +62,7 @@ $(LHA): $(EXE)
 	cp $(BIN)/$(EXE) .
 
 $(README): $(DIR)/$(NAME).readme
-	cat $^ | sed -e 's/__ARCH__/$(ARCH)-$(OS)/' > $@
+	cat $^ | $(SED) -e 's/__ARCH__/$(ARCH)-$(OS)/' > $@
 
 $(EXE):
 	$(MAKE) -C $(BIN)
