@@ -146,4 +146,5 @@
 ===============
 - Proper AmigaDOS return values.
 - Non naked options allowed (IconDeluxe).
+- '' handled by (exist).
 - ?

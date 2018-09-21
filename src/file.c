@@ -161,69 +161,79 @@ int h_exists(const char *n)
     // this 'file' doesn't exist.
     if(n)
     {
-        #ifdef AMIGA
-        int r = 0;
-        struct FileInfoBlock *fib = (struct FileInfoBlock *)
-               AllocDosObject(DOS_FIB, NULL);
-
-        if(fib)
+        // Empty string = current dir.
+        if(*n)
         {
-            BPTR lock = (BPTR) Lock(n, ACCESS_READ);
+            #ifdef AMIGA
+            int r = 0;
+            struct FileInfoBlock *fib = (struct FileInfoBlock *)
+                   AllocDosObject(DOS_FIB, NULL);
 
-            if(lock)
+            if(fib)
             {
-                if(Examine(lock, fib))
+                BPTR lock = (BPTR) Lock(n, ACCESS_READ);
+
+                if(lock)
                 {
-                    // ST_FILE         -3
-                    // ST_LINKFILE     -4
-                    if(fib->fib_DirEntryType < 0)
+                    if(Examine(lock, fib))
                     {
-                        // A file.
-                        r = 1;
+                        // ST_FILE         -3
+                        // ST_LINKFILE     -4
+                        if(fib->fib_DirEntryType < 0)
+                        {
+                            // A file.
+                            r = 1;
+                        }
+                        // ST_ROOT          1
+                        // ST_USERDIR       2
+                        // ST_SOFTLINK      3
+                        // ST_LINKDIR       4
+                        else if(fib->fib_DirEntryType > 0)
+                        {
+                            // A directory.
+                            r = 2;
+                        }
+                        // Return values according to the
+                        // CBM installer documentation.
                     }
-                    // ST_ROOT          1
-                    // ST_USERDIR       2
-                    // ST_SOFTLINK      3
-                    // ST_LINKDIR       4
-                    else if(fib->fib_DirEntryType > 0)
-                    {
-                        // A directory.
-                        r = 2;
-                    }
-                    // Return values according to the
-                    // CBM installer documentation.
+
+                    UnLock(lock);
                 }
 
-                UnLock(lock);
+                FreeDosObject(DOS_FIB, fib);
             }
 
-            FreeDosObject(DOS_FIB, fib);
+            return r;
+            #else
+            // This implementation doesn't work on MorphOS.
+            // I have no clue why, it works on AROS. Let's
+            // use the implementation above on all Amiga
+            // like systems for now.
+            struct stat fs;
+            if(!stat(n, &fs))
+            {
+                // A file?
+                if(S_ISREG(fs.st_mode))
+                {
+                    // Value according to the CBM
+                    // installer documentation.
+                    return 1;
+                }
+                // A directory?
+                if(S_ISDIR(fs.st_mode))
+                {
+                    // Ibid.
+                    return 2;
+                }
+            }
+            #endif
         }
-
-        return r;
-        #else
-        // This implementation doesn't work on MorphOS.
-        // I have no clue why, it works on AROS. Let's
-        // use the implementation above on all Amiga
-        // like systems for now.
-        struct stat fs;
-        if(!stat(n, &fs))
+        else
         {
-            // A file?
-            if(S_ISREG(fs.st_mode))
-            {
-                // Value according to the CBM
-                // installer documentation.
-                return 1;
-            }
-            // A directory?
-            if(S_ISDIR(fs.st_mode))
-            {
-                // Ibid.
-                return 2;
-            }
+            // The current dir exists,
+            // and it's a dir, really.
+            return 2;
         }
-        #endif
     }
 
     // Ibid.
