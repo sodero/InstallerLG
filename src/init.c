@@ -102,8 +102,9 @@ entry_p init(entry_p contxt)
         }
         #endif
 
-        a_app = a_app ? a_app : "";
+        // Use the defaults of the CBM installer.
         a_scr = a_scr ? a_scr : "";
+        a_app = a_app ? a_app : "Test App";
         a_log = a_log ? a_log : "install_log_file";
 
         // Minimum user level setting?

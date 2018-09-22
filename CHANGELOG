@@ -144,7 +144,8 @@
 
 0.1.0-alpha.29:
 ===============
+- '' handled by (exist).
 - Proper AmigaDOS return values.
 - Non naked options allowed (IconDeluxe).
-- '' handled by (exist).
+- Default @app-name set to 'Test App' (mimic CBM Installer).
 - ?

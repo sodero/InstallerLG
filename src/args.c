@@ -179,13 +179,11 @@ int arg_init(int argc, char **argv)
     // or an rda, otherwise we have failed.
     return (rda || dob) ? 1 : 0;
     #else
-    // On non-AMIGA systems, support what we can;
-    // the executable and the first argument. The
-    // rest is ignored.
+    // On non-AMIGA systems, only the script
+    // name is supported.
     if(argc >= 2)
     {
         args[ARG_SCRIPT] = argv[1];
-        args[ARG_APPNAME] = argv[0];
     }
     else
     {
