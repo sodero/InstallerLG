@@ -2669,7 +2669,7 @@ entry_p m_makeassign(entry_p contxt)
             {
                 #ifdef AMIGA
                 // Remove assign.
-                DNUM = AssignLock(str(CARG(1)), NULL) ? 1 : 0;
+                DNUM = AssignLock(str(CARG(1)), (BPTR) NULL) ? 1 : 0;
                 #else
                 DNUM = 2;
                 #endif
