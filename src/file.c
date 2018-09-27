@@ -293,6 +293,125 @@ static const char *h_fileonly(entry_p contxt,
 }
 
 //----------------------------------------------------------------------------
+// Name:        h_isfont
+// Description: Check if string has a .font suffix.
+// Input:       const char *src:    String.
+// Return:      int:                1 if true, 0 otherwise.
+//----------------------------------------------------------------------------
+static int h_isfont(const char *src)
+{
+    static char suf[] = ".font";
+    char *pos = strstr(src, suf);
+
+    if(pos && !strcmp(pos, suf))
+    {
+        // It's a font.
+        return 1;
+    }
+    else
+    {
+        // Something else.
+        return 0;
+    }
+}
+
+//----------------------------------------------------------------------------
+// Name:        h_choices
+// Description: Helper fo h_filetree taking care of (choices). Generating a
+//              complete file / directory tree with source and destination
+//              tuples.
+// Input:       entry_p contxt:     The execution context.
+//              entry_p choices:    * List of files.
+//              entry_p fonts:      * Skip fonts.
+//
+//              * Refer to the Installer.guide.
+//
+//              const char *src:    Source directory.
+//              const char *dst:    Destination directory.
+// Return:      entry_p:            A linked list of file and dir pairs.
+//----------------------------------------------------------------------------
+static pnode_p h_choices(entry_p contxt,
+                         entry_p choices,
+                         entry_p fonts,
+                         const char *src,
+                         const char *dst)
+{
+    if(contxt && choices && src && dst)
+    {
+        // Unless the parser is broken,
+        // we will have >= one child.
+        entry_p *e = choices->children;
+
+        // Create head node.
+        pnode_p node = calloc(1, sizeof(struct pnode_t)),
+                head = node;
+
+        if(node)
+        {
+            // We already know the type of the
+            // first element; it's a directory.
+            node->name = strdup(src);
+            node->copy = strdup(dst);
+            node->type = 2;
+
+            // Not necessary to check the return value.
+            node->next = calloc(1, sizeof(struct pnode_t));
+            node = node->next;
+
+            // Iterate over all filenames.
+            while(node)
+            {
+                // Resolve current file.
+                char *f_nam = str(*e);
+
+                // Next file.
+                e++;
+
+                // Build source <-> dest pair.
+                node->name = h_tackon(contxt, src, f_nam);
+                node->copy = h_tackon(contxt, dst, h_fileonly(contxt, f_nam));
+                node->type = h_exists(node->name);
+
+                // Make sure that the file / dir exists.
+                if(node->type)
+                {
+                    // Filter out fonts?
+                    if(fonts && h_isfont(node->name))
+                    {
+                        // Skip font.
+                        node->type = 0;
+                    }
+
+                    // If there are more files, allocate
+                    // memory for the next node.
+                    if(*e && *e != end())
+                    {
+                        // Not necessary to check the return value.
+                        node->next = calloc(1, sizeof(struct pnode_t));
+                    }
+                }
+                else
+                {
+                    // File or directory doesn't exist.
+                    ERR(ERR_NO_SUCH_FILE_OR_DIR, node->name);
+                }
+
+                // Next element.
+                node = node->next;
+            }
+
+            // List complete.
+            return head;
+        }
+    }
+
+    // Unknown error /
+    // Out of memory.
+    PANIC(contxt);
+    return NULL;
+}
+
+//----------------------------------------------------------------------------
 // Name:        h_filetree
 // Description: Generate a complete file / directory tree with source and
 //              destination tuples. Used by m_copyfiles.
@@ -303,8 +422,10 @@ static const char *h_fileonly(entry_p contxt,
 //              entry_p fonts:      * Skip fonts.
 //              entry_p choices:    * List of files.
 //              entry_p pattern:    * File / dir pattern.
-//              * Refer to the Istaller.guide.
-// Return:      int:                On success '1', else '0'.
+//
+//              * Refer to the Installer.guide.
+//
+// Return:      entry_p:            A linked list of file and dir pairs.
 //----------------------------------------------------------------------------
 static pnode_p h_filetree(entry_p contxt,
                           const char *src,
@@ -319,6 +440,15 @@ static pnode_p h_filetree(entry_p contxt,
 
     if(src && dst)
     {
+        // File enumeration.
+        if(choices)
+        {
+            // No need for recursion. Handle
+            // enumerations separately.
+            return h_choices(contxt, choices,
+                             fonts, src, dst);
+        }
+
         int type = h_exists(src);
 
         // Is source a directory?
@@ -328,46 +458,6 @@ static pnode_p h_filetree(entry_p contxt,
 
             if(dir)
             {
-                // If the (choices) option is set we need to
-                // verify that all choices exist (as files).
-                if(choices)
-                {
-                    // Unless the parser is broken,
-                    // we will have >= one child.
-                    entry_p *e = choices->children;
-
-                    // Iterate over all filenames.
-                    while(*e && *e != end())
-                    {
-                        // Build path.
-                        n_src = h_tackon(contxt, src, str(*e));
-
-                        if(n_src)
-                        {
-                            // If it doesn't exist, free everything and
-                            // bail out.
-                            if(!h_exists(n_src))
-                            {
-                                ERR(ERR_NO_SUCH_FILE_OR_DIR, n_src);
-                                free(n_src);
-                                closedir(dir);
-                                return NULL;
-                            }
-                            else
-                            {
-                                // Next filename.
-                                free(n_src);
-                                e++;
-                            }
-                        }
-                        else
-                        {
-                            // Out of memory.
-                            break;
-                        }
-                    }
-                }
-
                 // Create head node.
                 pnode_p node = calloc(1, sizeof(struct pnode_t)),
                         head = node;
@@ -392,38 +482,6 @@ static pnode_p h_filetree(entry_p contxt,
 
                         if(n_src && n_dst)
                         {
-                            if(choices)
-                            {
-                                // Unless the parser is broken,
-                                // we will have >= one child.
-                                entry_p *e = choices->children;
-
-                                // Iterate over all filenames.
-                                while(*e && *e != end())
-                                {
-                                    // Stop when we have a match.
-                                    if(!strcasecmp(str(*e), entry->d_name))
-                                    {
-                                        break;
-                                    }
-
-                                    // Next filename.
-                                    e++;
-                                }
-
-                                // Get proper type if we have a match.
-                                if(*e && *e != end())
-                                {
-                                    type = h_exists(n_src);
-                                }
-                                // Otherwise clear type, this will make
-                                // m_copyfiles skip it.
-                                else
-                                {
-                                    type = 0;
-                                }
-                            }
-                            else
                             if(pattern)
                             {
                                 #ifdef AMIGA
@@ -470,16 +528,10 @@ static pnode_p h_filetree(entry_p contxt,
                             }
 
                             // Filter out fonts?
-                            if(fonts)
+                            if(fonts && h_isfont(node->name))
                             {
-                                static char suf[] = ".font";
-                                char *pos = strstr(n_src, suf);
-
-                                if(pos && !strcmp(pos, suf))
-                                {
-                                    // It's a font. Skip it.
-                                    type = 0;
-                                }
+                                // Skip font.
+                                node->type = 0;
                             }
 
                             // If we have a directory, recur.
