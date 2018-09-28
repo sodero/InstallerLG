@@ -149,4 +149,4 @@
 - Non naked options allowed (IconDeluxe).
 - Default @app-name set to 'Test App' (mimic CBM Installer).
 - Fixed (abort) button.
-- ?
+- (copyfiles) (choices) subdirectory fix.

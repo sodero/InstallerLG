@@ -1069,8 +1069,8 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
         static int n;
 
         // Give the user a chance to abort every
-        // 1024:th block.
-        if(++n >> 10)
+        // 64:th block.
+        if(++n >> 6)
         {
             // Wait for the next tick (or abort).
             if(InstallerGuiWait(obj, MUIV_InstallerGui_Tick, 2) !=
