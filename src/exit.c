@@ -42,7 +42,7 @@ entry_p m_abort(entry_p contxt)
             // unless we have an empty string.
             if(*msg && !DID_ERR())
             {
-                gui_message(msg, 0);
+                gui_abort(msg);
             }
 
             // Free the temporary buffer.
