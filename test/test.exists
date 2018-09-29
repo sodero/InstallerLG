@@ -1,3 +1,4 @@
+(exists "" (noreq)) ; "","2",""
 (if (and (exists "_ex_") (exists "_ey_"))) ; "rm -Rf _ex_ _ey_ && mkdir _ex_ _ey_","0","rmdir _ex_ _ey_"
 (if (and (exists "_ex_") (exists "_ey_")) 1) ; "rm -Rf _ex_ _ey_ && mkdir _ex_ _ey_","1","rmdir _ex_ _ey_"
 (if (= (and (exists "_ex_") (exists "_ey_")) 1) 1) ; "rm -Rf _ex_ _ey_ && mkdir _ex_ _ey_","1","rmdir _ex_ _ey_"

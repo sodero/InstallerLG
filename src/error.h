@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// error.h: 
+// error.h:
 //
 // Functions for setting, getting and communicating errors.
 //----------------------------------------------------------------------------
@@ -29,43 +29,43 @@
 typedef enum
 {
     ERR_NONE = 0,
-    ERR_HALT, 
+    ERR_HALT,
     ERR_ABORT,
     ERR_RESET,
     ERR_PARSE,
     ERR_PANIC,
     ERR_OVERFLOW,
-    ERR_READ, 
-    ERR_READ_FILE, 
-    ERR_READ_DIR, 
-    ERR_WRITE_FILE, 
-    ERR_WRITE_DIR, 
-    ERR_RENAME_FILE, 
-    ERR_DELETE_FILE, 
-    ERR_NO_VERSION, 
-    ERR_NOT_A_FILE, 
-    ERR_NOT_A_DIR, 
-    ERR_NO_SUCH_FILE_OR_DIR, 
+    ERR_READ,
+    ERR_READ_FILE,
+    ERR_READ_DIR,
+    ERR_WRITE_FILE,
+    ERR_WRITE_DIR,
+    ERR_RENAME_FILE,
+    ERR_DELETE_FILE,
+    ERR_NO_VERSION,
+    ERR_NOT_A_FILE,
+    ERR_NOT_A_DIR,
+    ERR_NO_SUCH_FILE_OR_DIR,
     ERR_GET_PERM,
     ERR_SET_PERM,
     ERR_EXEC,
     ERR_ASSIGN,
-    ERR_UNDEF_FNC, 
-    ERR_UNDEF_VAR, 
-    ERR_MAX_DEPTH, 
-    ERR_MISSING_OPTION, 
+    ERR_UNDEF_FNC,
+    ERR_UNDEF_VAR,
+    ERR_MAX_DEPTH,
+    ERR_MISSING_OPTION,
     ERR_NOTHING_TO_DO,
-    ERR_DIV_BY_ZERO, 
-    ERR_FMT_INVALID, 
-    ERR_FMT_MISMATCH, 
-    ERR_FMT_MISSING, 
-    ERR_FMT_UNUSED, 
-    ERR_NO_ITEM, 
+    ERR_DIV_BY_ZERO,
+    ERR_FMT_INVALID,
+    ERR_FMT_MISMATCH,
+    ERR_FMT_MISSING,
+    ERR_FMT_UNUSED,
+    ERR_NO_ITEM,
     ERR_INVALID_APP,
     ERR_INVALID_VOLUME,
     ERR_INVALID_ASSIGN,
     ERR_OPTION_MUTEX
-} error_t; 
+} error_t;
 
 //----------------------------------------------------------------------------
 // Don't use this function directly, use the macros above instead.

@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// exit.c: 
+// exit.c:
 //
 // Interuption of program execution
 //----------------------------------------------------------------------------
@@ -42,24 +42,24 @@ entry_p m_abort(entry_p contxt)
             // unless we have an empty string.
             if(*msg && !DID_ERR())
             {
-                gui_message(msg, 0);  
+                gui_abort(msg);
             }
 
             // Free the temporary buffer.
             free(msg);
 
-            // Set abort state. Will make 
-            // invoke() halt. 
-            error(contxt, -3, ERR_ABORT, __func__); 
+            // Set abort state. Will make
+            // invoke() halt.
+            error(contxt, -3, ERR_ABORT, __func__);
             RNUM(0);
         }
     }
 
     // Broken parser / OOM
-    PANIC(contxt); 
+    PANIC(contxt);
 
     // Failure.
-    RCUR; 
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -68,15 +68,15 @@ entry_p m_abort(entry_p contxt)
 //
 // This causes normal termination of a script.  If strings are
 // provided, they are displayed.  The 'done with installation'
-// message is then displayed.  The 'onerror' statements are not 
-// executed.  If (quiet) is specified, the final report display 
+// message is then displayed.  The 'onerror' statements are not
+// executed.  If (quiet) is specified, the final report display
 // is skipped.
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //----------------------------------------------------------------------------
 entry_p m_exit(entry_p contxt)
 {
-    // All we need is a context. 
+    // All we need is a context.
     if(contxt)
     {
         // If we have any children, display them.
@@ -93,7 +93,7 @@ entry_p m_exit(entry_p contxt)
                 // unless we have an empty string.
                 if(*msg && !DID_ERR())
                 {
-                    gui_message(msg, 0);  
+                    gui_message(msg, 0);
                 }
 
                 // Free the temporary buffer.
@@ -102,47 +102,47 @@ entry_p m_exit(entry_p contxt)
             else
             {
                 // Out of memory
-                PANIC(contxt); 
+                PANIC(contxt);
 
                 // Failure.
                 RCUR;
             }
         }
 
-        // Show final message unless 'quiet' is set. 
+        // Show final message unless 'quiet' is set.
         if(!DID_ERR() &&
            !get_opt(contxt, OPT_QUIET))
         {
-            // Get name and location of application. 
-            const char *app = get_strvar(contxt, "@app-name"), 
+            // Get name and location of application.
+            const char *app = get_strvar(contxt, "@app-name"),
                        *dst = get_strvar(contxt, "@default-dest");
 
             // Only display the 'the app can be found here' message
             // if we know the name and location of the application.
             if(*app && *dst)
             {
-                snprintf(get_buf(), buf_size(), 
-                         tr(S_CBFI), tr(S_ICPL), 
+                snprintf(get_buf(), buf_size(),
+                         tr(S_CBFI), tr(S_ICPL),
                          app, dst);
 
                 // Display the full message.
-                gui_message(get_buf(), 0);  
+                gui_message(get_buf(), 0);
             }
             else
             {
                 // Display the bare minimum.
-                gui_message(tr(S_ICPL), 0);  
+                gui_message(tr(S_ICPL), 0);
             }
         }
 
         // Make invoke() halt.
-        HALT(); 
-        RNUM(0); 
+        HALT();
+        RNUM(0);
     }
     else
     {
         // The parser is broken
-        PANIC(contxt); 
+        PANIC(contxt);
 
         // Failure.
         RCUR;
@@ -157,35 +157,35 @@ entry_p m_exit(entry_p contxt)
 // In part implemented using m_procedure. This function
 // just invokes the @onerror custom procedure inserted
 // using (onerror) which is a special case of (procedure)
-// ****************************************************** 
+// ******************************************************
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //----------------------------------------------------------------------------
 entry_p m_onerror(entry_p contxt)
 {
-    // We need nothing but a context. 
+    // We need nothing but a context.
     if(c_sane(contxt, 0))
     {
-        // Reset error code otherwise 
+        // Reset error code otherwise
         // m_gosub / invoke will halt
         // immediately.
         RESET();
 
         // A static reference. We might be out of
-        // heap when this is invoked. 
+        // heap when this is invoked.
         static entry_t ref = { .type = CUSREF,
-                               .name = "@onerror" }; 
-        // Connect reference to the current context. 
-        ref.parent = contxt; 
+                               .name = "@onerror" };
+        // Connect reference to the current context.
+        ref.parent = contxt;
 
         // Invoke @onerror by calling m_gosub just
-        // like any non-native function call. 
-        return m_gosub(&ref); 
+        // like any non-native function call.
+        return m_gosub(&ref);
     }
     else
     {
         // The parser is broken
-        PANIC(contxt); 
+        PANIC(contxt);
 
         // Failure.
         RCUR;
@@ -200,20 +200,20 @@ entry_p m_onerror(entry_p contxt)
 //
 // Despite what the Installer.guide says, the implementaion of 'trap' in OS
 // 3.9 seems like a stub, it doesn't work at all. Let's just leave this one
-// empty. 
+// empty.
 //----------------------------------------------------------------------------
 entry_p m_trap(entry_p contxt)
 {
-    // Flags and statement. 
+    // Flags and statement.
     if(c_sane(contxt, 2))
     {
-        // Dummy. 
+        // Dummy.
         RNUM(1);
     }
     else
     {
         // The parser is broken
-        PANIC(contxt); 
+        PANIC(contxt);
 
         // Failure.
         RCUR;

@@ -141,3 +141,12 @@
 - Aminet compliant naming.
 - Improved file copy abort.
 - Size reduction.
+
+0.1.0-alpha.29:
+===============
+- '' handled by (exist).
+- Proper AmigaDOS return values.
+- Non naked options allowed (IconDeluxe).
+- Default @app-name set to 'Test App' (mimic CBM Installer).
+- Fixed (abort) button.
+- (copyfiles) (choices) subdirectory fix.

@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// error.c: 
+// error.c:
 //
 // Functions for setting, getting and communicating errors.
 //----------------------------------------------------------------------------
@@ -17,30 +17,30 @@
 // Name:        error
 // Description: Function used to set / get / communicate errors.
 // Input:       int id:             A numerical identifier aiding debugging.
-//                                  In most cases this will be a line number. 
-//              error_t:            Type of error to set, or ERR_NONE to get 
-//                                  status.  
+//                                  In most cases this will be a line number.
+//              error_t:            Type of error to set, or ERR_NONE to get
+//                                  status.
 //              const char *info:   A message describing the problem in a way
 //                                  that makes sense to the user.
-// Return:      int:                The current state. 
+// Return:      int:                The current state.
 //----------------------------------------------------------------------------
 int error(entry_p contxt, int id, error_t type, const char *info)
 {
     static error_t last;
     static const char *des[] =
     {
-        NULL, 
+        NULL,
         "Halt",
         "Abort",
         "Reset",
         "Parse error",
         "Internal error",
         "Buffer overflow",
-        "Read error", 
-        "Could not read from file", 
+        "Read error",
+        "Could not read from file",
         "Could not read directory",
         "Could not write to file",
-        "Could not create directory", 
+        "Could not create directory",
         "Could not rename file",
         "Could not delete file",
         "Version string not found",
@@ -51,17 +51,17 @@ int error(entry_p contxt, int id, error_t type, const char *info)
         "Could not set file / dir permissions",
         "Could not execute command",
         "Could not create / remove assign",
-        "Undefined function", 
-        "Undefined variable", 
-        "Max recursion depth exceeded", 
+        "Undefined function",
+        "Undefined variable",
+        "Max recursion depth exceeded",
         "Missing option",
         "Nothing to do",
-        "Division by zero", 
-        "Invalid format string", 
-        "Format string type mismatch", 
-        "Missing format string arguments", 
-        "Unused format string arguments", 
-        "No such item", 
+        "Division by zero",
+        "Invalid format string",
+        "Format string type mismatch",
+        "Missing format string arguments",
+        "Unused format string arguments",
+        "No such item",
         "Invalid application name",
         "Invalid name of volume",
         "Invalid name of assign",
@@ -91,7 +91,7 @@ int error(entry_p contxt, int id, error_t type, const char *info)
                 if(!gui_error(id, des[type], info))
                 {
                     // Fallback to stderr if necessary
-                    fprintf(stderr, "Line %d: %s '%s'\n", 
+                    fprintf(stderr, "Line %d: %s '%s'\n",
                             id, des[type], info);
                 }
 
@@ -107,5 +107,5 @@ int error(entry_p contxt, int id, error_t type, const char *info)
     }
 
     // Current / last state.
-    return last; 
+    return last;
 }

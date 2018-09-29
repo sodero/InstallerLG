@@ -22,16 +22,16 @@
 //----------------------------------------------------------------------------
 // Data types.
 //----------------------------------------------------------------------------
-typedef enum 
+typedef enum
 {
     NUMBER,
-    STRING, 
+    STRING,
     SYMBOL,
     SYMREF,
-    NATIVE, 
-    OPTION, 
-    CUSTOM, 
-    CUSREF, 
+    NATIVE,
+    OPTION,
+    CUSTOM,
+    CUSREF,
     CONTXT,
     DANGLE
 } type_t;
@@ -39,8 +39,8 @@ typedef enum
 //----------------------------------------------------------------------------
 // Option types, refer to new_option() and parser/opt.
 //----------------------------------------------------------------------------
-typedef enum 
-{ 
+typedef enum
+{
     OPT_ALL,
     OPT_APPEND,
     OPT_ASSIGNS,
@@ -49,7 +49,7 @@ typedef enum
     OPT_COMPRESSION,
     OPT_CONFIRM,
     OPT_DEFAULT,
-    OPT_DELOPTS, 
+    OPT_DELOPTS,
     OPT_DEST,
     OPT_DISK,
     OPT_FILES,
@@ -65,11 +65,11 @@ typedef enum
     OPT_NEWPATH,
     OPT_NOGAUGE,
     OPT_NOPOSITION,
-    OPT_NOREQ, 
+    OPT_NOREQ,
     OPT_PATTERN,
     OPT_PROMPT,
     OPT_QUIET,
-    OPT_RANGE, 
+    OPT_RANGE,
     OPT_SAFE,
     OPT_SETDEFAULTTOOL,
     OPT_SETPOSITION,
@@ -86,7 +86,7 @@ typedef enum
     OPT_NOFAIL,
     OPT_OKNODELETE,
     OPT_DYNOPT
-} opt_t; 
+} opt_t;
 
 //----------------------------------------------------------------------------
 // Types used by the parser and all native functions.
@@ -96,17 +96,17 @@ typedef entry_p (*call_t) (entry_p);
 
 struct entry_s
 {
-    type_t type;            // One of type_t above. 
+    type_t type;            // One of type_t above.
     int32_t id;             // Numerical ID. Refer to new_*.
-    char *name;             // String repr. Refer to new_*(). 
-    call_t call;            // NATIVE function. 
+    char *name;             // String repr. Refer to new_*().
+    call_t call;            // NATIVE function.
     entry_p resolved;       // Resolved value. Refer to eval().
     entry_p *children;      // Subordinate native functions.
     entry_p *symbols;       // Variables / user defined functions.
-    entry_p parent;         // Self descriptive.  
-}; 
+    entry_p parent;         // Self descriptive.
+};
 
-typedef struct entry_s entry_t; 
+typedef struct entry_s entry_t;
 
 #ifndef AMIGA
 #   define LONG int

@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// resource.h: 
+// resource.h:
 //
 // Encapsulation of resources that we might want to localize later on.
 //----------------------------------------------------------------------------
@@ -87,7 +87,7 @@ typedef enum
 
     // Out of range.
     S_GONE,
-} res_t; 
+} res_t;
 
 const char *tr(res_t r);
 

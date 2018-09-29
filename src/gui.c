@@ -110,6 +110,7 @@ CLASS_DEF(InstallerGui)
 #define MUIM_InstallerGui_CopyFilesAdd     (TAGBASE_LG + 110)
 #define MUIM_InstallerGui_Confirm          (TAGBASE_LG + 111)
 #define MUIM_InstallerGui_Message          (TAGBASE_LG + 112)
+#define MUIM_InstallerGui_Abort            (TAGBASE_LG + 113)
 #define MUIM_InstallerGui_Radio            (TAGBASE_LG + 114)
 #define MUIM_InstallerGui_Bool             (TAGBASE_LG + 115)
 #define MUIM_InstallerGui_String           (TAGBASE_LG + 116)
@@ -208,6 +209,15 @@ struct MUIP_InstallerGui_Message
     ULONG MethodID;
     ULONG Message;
     ULONG Immediate;
+};
+
+//----------------------------------------------------------------------------
+// InstallerGui - Abort parameters
+//----------------------------------------------------------------------------
+struct MUIP_InstallerGui_Abort
+{
+    ULONG MethodID;
+    ULONG Message;
 };
 
 //----------------------------------------------------------------------------
@@ -1059,8 +1069,8 @@ MUIDSP IPTR InstallerGuiCopyFilesSetCur(Class *cls,
         static int n;
 
         // Give the user a chance to abort every
-        // 1024:th block.
-        if(++n >> 10)
+        // 64:th block.
+        if(++n >> 6)
         {
             // Wait for the next tick (or abort).
             if(InstallerGuiWait(obj, MUIV_InstallerGui_Tick, 2) !=
@@ -1182,6 +1192,37 @@ MUIDSP IPTR InstallerGuiMessage(Class *cls,
         GERR(tr(S_UNER));
         return FALSE;
     }
+}
+
+//----------------------------------------------------------------------------
+// InstallerGuiAbort - Show message and abort
+// Input:              Message - The message to be shown
+// Return:             TRUE on success, FALSE otherwise
+//----------------------------------------------------------------------------
+MUIDSP IPTR InstallerGuiAbort(Class *cls,
+                              Object *obj,
+                              struct MUIP_InstallerGui_Abort *msg)
+{
+    // Setup the correct page and button combination.
+    if(DoMethod(obj, MUIM_InstallerGui_PageSet, msg->Message,
+                NULL, P_MESSAGE, B_ABORT))
+    {
+        // Wait for abort.
+        if(InstallerGuiWait(obj, MUIV_InstallerGui_AbortOnly, 1)
+           == MUIV_InstallerGui_AbortOnly)
+        {
+            // User abort.
+            return TRUE;
+        }
+    }
+    else
+    {
+        // Unknown error.
+        GERR(tr(S_UNER));
+    }
+
+    // Escape or error.
+    return FALSE;
 }
 
 //----------------------------------------------------------------------------
@@ -2096,6 +2137,9 @@ DISPATCH(InstallerGui)
         case MUIM_InstallerGui_Message:
             return InstallerGuiMessage(cls, obj, (struct MUIP_InstallerGui_Message *) msg);
 
+        case MUIM_InstallerGui_Abort:
+            return InstallerGuiAbort(cls, obj, (struct MUIP_InstallerGui_Abort *) msg);
+
         case MUIM_InstallerGui_Radio:
             return InstallerGuiRadio(cls, obj, (struct MUIP_InstallerGui_Radio *) msg);
 
@@ -2273,6 +2317,27 @@ int gui_message(const char *msg, int imm)
     return 1;
     #endif
 }
+
+//----------------------------------------------------------------------------
+// Name:        gui_abort
+// Description: Show message and abort.
+// Input:       const char *msg:    Message shown to the user.
+// Return:      -
+//----------------------------------------------------------------------------
+void gui_abort(const char *msg)
+{
+    #ifdef AMIGA
+    DoMethod
+    (
+        Win, MUIM_InstallerGui_Abort,
+        msg
+    );
+    #else
+    // Testing purposes.
+    fputs(msg, stdout);
+    #endif
+}
+
 
 //----------------------------------------------------------------------------
 // Name:        gui_choice
