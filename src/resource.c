@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// resource.c: 
+// resource.c:
 //
 // Encapsulation of resources that we might want to localize later on.
 //----------------------------------------------------------------------------
@@ -12,9 +12,9 @@
 
 //----------------------------------------------------------------------------
 // Name:        tr
-// Description: Get string from string ID. 
-// Input:       A res_t string ID. 
-// Return:      The string corresponding to the string ID. 
+// Description: Get string from string ID.
+// Input:       A res_t string ID.
+// Return:      The string corresponding to the string ID.
 //----------------------------------------------------------------------------
 const char *tr(res_t r)
 {
@@ -25,16 +25,16 @@ const char *tr(res_t r)
     static const char *res[] =
     {
         // Out of range.
-        "NONE", 
+        "NONE",
 
-        "Copying file(s)", 
+        "Copying file(s)",
         "Overwrite existing directory '%s'?",
-        "Abort copy '%s' to '%s'.\n", 
-        "Could not copy '%s' to '%s'.\n", 
-        "Delete write protected file '%s'?", 
-        "Delete write protected directory '%s'?", 
-        "Overwrite write protected file '%s'?", 
-        "Delete file '%s'?", 
+        "Abort copy '%s' to '%s'.\n",
+        "Could not copy '%s' to '%s'.\n",
+        "Delete write protected file '%s'?",
+        "Delete write protected directory '%s'?",
+        "Overwrite write protected file '%s'?",
+        "Delete file '%s'?",
         "Deleted '%s'.\n",
         "No such file '%s'.\n",
         "Renamed '%s' to '%s'.\n",
@@ -98,7 +98,7 @@ const char *tr(res_t r)
         "GONE"
     };
 
-    // res[i] is a valid string. 
-    return res[i]; 
+    // res[i] is a valid string.
+    return res[i];
 }
 

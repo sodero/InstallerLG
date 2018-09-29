@@ -1,6 +1,6 @@
 %{
 //----------------------------------------------------------------------------
-// lexer.l: 
+// lexer.l:
 //
 // InstallerNG tokenizer
 //----------------------------------------------------------------------------
@@ -34,26 +34,26 @@ static char *strduptr(const char *str);
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
     /*- decimal numbers ----------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
--?[0-9]+                { 
+-?[0-9]+                {
     yylval->n = (int32_t) strtoul(yytext, NULL, 10);
-    return INT; 
+    return INT;
 }
 
-    
+
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
     /*- hexadecimal numbers ------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
-\$[0-9a-fA-F]+          { 
+\$[0-9a-fA-F]+          {
     yylval->n = (int32_t) strtoul(yytext + 1, NULL, 16);
-    return HEX; 
+    return HEX;
 }
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
     /*- binary numbers -----------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
-%[01]+                  { 
+%[01]+                  {
     yylval->n = (int32_t) strtoul(yytext + 1, NULL, 2);
-    return BIN; 
+    return BIN;
 }
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -169,8 +169,8 @@ static char *strduptr(const char *str);
 "newname"               { return NEWNAME;        }
 "newpath"               { return NEWPATH;        }
 "nogauge"               { return NOGAUGE;        }
-"noposition"            { return NOPOSITION;     } 
-"noreq"                 { return NOREQ;          } 
+"noposition"            { return NOPOSITION;     }
+"noreq"                 { return NOREQ;          }
 "pattern"               { return PATTERN;        }
 "prompt"                { return PROMPT;         }
 "quiet"                 { return QUIET;          }
@@ -191,16 +191,16 @@ static char *strduptr(const char *str);
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 \"(\\.|[^"])*\"         |
 '(\\.|[^'])*'           {
-    yylval->s = strduptr(yytext); 
-    return STR;        
-}    
+    yylval->s = strduptr(yytext);
+    return STR;
+}
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
     /*- symbols ------------------------------------------------------------------------------------------------------------------------------------*/
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 [^"' \n\t\(\)\+\*/]+    {
     yylval->s = strdup(yytext);
-    return SYM;        
+    return SYM;
 }
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -247,40 +247,41 @@ int yyerror(yyscan_t scanner, const char *err)
 int main(int argc, char **argv)
 {
     // Assume failure.
-    int r = -1; 
+    int r = -1;
 
-    // Initialize the argument handling. Transparent 
-    // handling of Workbench and CLI arguments. 
+    // Initialize the argument handling. Transparent
+    // handling of Workbench and CLI arguments.
     if(arg_init(argc, argv))
     {
-        yyscan_t lexer; 
+        yyscan_t lexer;
 
         // Allocate and initialize whatever the lexer
-        // needs. Reentrant, see comment at the top. 
+        // needs. Reentrant, see comment at the top.
         if(yylex_init(&lexer) == 0)
         {
             // Get the name of the script from CLI
-            // or tooltypes / wb.  
-            char *n = arg_get(ARG_SCRIPT); 
+            // or tooltypes / wb.
+            char *n = arg_get(ARG_SCRIPT);
             FILE *f = fopen(n, "r");
 
             if(f)
             {
                 // Set input file and parse.
-                yyset_in(f, lexer); 
+                yyset_in(f, lexer);
 
-                // Ignore the return value
-                // of yyparse.  
-                yyparse(lexer);
-                r = 0; 
+                // Save parser return value.
+                r = yyparse(lexer);
 
-                // Close the input file. 
-                fclose(f); 
+                // r = 1 on syntax error.
+                // r = 0 on success.
+
+                // Close the input file.
+                fclose(f);
             }
             else
             {
                 // We can't read from the file.
-                fprintf(stderr, tr(S_CNOF), n); 
+                fprintf(stderr, tr(S_CNOF), n);
             }
 
             // Free all resources allocated by
@@ -294,12 +295,21 @@ int main(int argc, char **argv)
         }
 
         // Free all resources allocated by
-        // the argument handling routines. 
-        arg_done(); 
+        // the argument handling routines.
+        arg_done();
     }
 
-    // -1, 1 or 2
-    return r; 
+#ifdef AMIGA
+    // Translate value of r to the appropriate
+    // Amiga DOS return value. Syntax error is
+    // an ERROR and file not found / readable
+    // a FAIL.
+    return (!r ? r :
+           (r == 1 ? RETURN_ERROR : RETURN_FAIL));
+#else
+    // Ignore syntax error on non Amiga systems.
+    return (r == 1 ? 0 : r);
+#endif
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -322,20 +332,20 @@ static char *strduptr(const char *str)
     `\\' backslash
     `\ooo' some octal number `ooo' (V42.6)
     `\xXX' some hex number `XX' (V42.6) */
-    int len = strlen(str); 
+    int len = strlen(str);
 
     // Translations
     static char chr[] = "nrthvbf\"'\\\0";
     static char raw[] = "\n\r\t\t\v\b\f\"'\\\0";
 
     // Please note 'len -1', we strip the " from the string
-    // at this point, str index starts at 1 and we skip the 
+    // at this point, str index starts at 1 and we skip the
     // last character.
-    char *out = calloc(len - 1, 1); 
+    char *out = calloc(len - 1, 1);
 
     if(out)
     {
-        int io = 0; 
+        int io = 0;
 
         for(int i = 1; i < len - 1; i++)
         {
@@ -351,29 +361,29 @@ static char *strduptr(const char *str)
                     // Is this a hex number that needs to be
                     // translated into a character?
                     if(str[i + 1] == 'x' && (
-                      ((str[i + 2] >= 48 && str[i + 2] <= 57) || 
+                      ((str[i + 2] >= 48 && str[i + 2] <= 57) ||
                        (str[i + 2] >= 65 && str[i + 2] <= 70) ||
                        (str[i + 2] >= 97 && str[i + 2] <= 102)) &&
-                      ((str[i + 3] >= 48 && str[i + 3] <= 57) || 
+                      ((str[i + 3] >= 48 && str[i + 3] <= 57) ||
                        (str[i + 3] >= 65 && str[i + 3] <= 70) ||
                        (str[i + 3] >= 97 && str[i + 3] <= 102))))
                     {
-                        // Temporary string for conversion 
-                        char h[] = 
+                        // Temporary string for conversion
+                        char h[] =
                         {
-                            str[i + 2], 
-                            str[i + 3], 
+                            str[i + 2],
+                            str[i + 3],
                             '\0'
                         };
 
-                        // Three digits, \ooo. 
-                        i += 3; 
-                        
-                        // Convert temp string to character.
-                        out[io++] = (char) strtol(h, NULL, 16);      
+                        // Three digits, \ooo.
+                        i += 3;
 
-                        // Continue with the rest of the string. 
-                        continue; 
+                        // Convert temp string to character.
+                        out[io++] = (char) strtol(h, NULL, 16);
+
+                        // Continue with the rest of the string.
+                        continue;
                     }
                     // Is this a oct number that needs to be
                     // translated into a character?
@@ -381,36 +391,36 @@ static char *strduptr(const char *str)
                        str[i + 2] >= 48 && str[i + 2] <= 55 &&
                        str[i + 3] >= 48 && str[i + 3] <= 55)
                     {
-                        // Temporary string for conversion 
-                        char h[] = 
+                        // Temporary string for conversion
+                        char h[] =
                         {
-                            str[i + 1], 
-                            str[i + 2], 
-                            str[i + 3], 
+                            str[i + 1],
+                            str[i + 2],
+                            str[i + 3],
                             '\0'
                         };
 
-                        // Two digits + 'x', \xXX. 
-                        i += 3; 
+                        // Two digits + 'x', \xXX.
+                        i += 3;
 
                         // Convert temp string to character.
-                        out[io++] = (char) strtol(h, NULL, 8);      
+                        out[io++] = (char) strtol(h, NULL, 8);
 
-                        // Continue with the rest of the string. 
-                        continue; 
+                        // Continue with the rest of the string.
+                        continue;
                     }
                 }
 
-                // Standard escape sequence. 
-                for(int j = 0; 
+                // Standard escape sequence.
+                for(int j = 0;
                     chr[j]; j++)
                 {
-                    // A direct mapping between the current 
+                    // A direct mapping between the current
                     // character and the value representing
-                    // the full escape sequence. 
+                    // the full escape sequence.
                     if(str[i + 1] == chr[j])
                     {
-                        i++; 
+                        i++;
                         cr = raw[j];
                         break;
                     }
@@ -419,12 +429,12 @@ static char *strduptr(const char *str)
 
             // Copy input to ouput. The 'cr' might have
             // been translated, maybe it's just a copy.
-            out[io++] = cr; 
+            out[io++] = cr;
         }
     }
 
-    // Unless we're out of memory, 
+    // Unless we're out of memory,
     // out will be a copy of str.
-    return out; 
+    return out;
 }
 

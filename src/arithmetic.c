@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------
-// arithmetic.c: 
+// arithmetic.c:
 //
-// Arithmetic operations 
+// Arithmetic operations
 //----------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
@@ -26,15 +26,15 @@ entry_p m_add(entry_p contxt)
     {
         // Work directly with our resolved
         // value.
-        DNUM = 0; 
-        entry_p *cur = contxt->children; 
+        DNUM = 0;
+        entry_p *cur = contxt->children;
 
         // For each child, add the numeric
-        // value to our resolved value. 
+        // value to our resolved value.
         while(*cur && *cur != end())
         {
             DNUM += num(*cur);
-            cur++; 
+            cur++;
         }
     }
     else
@@ -43,9 +43,9 @@ entry_p m_add(entry_p contxt)
         PANIC(contxt);
     }
 
-    // Success or broken 
+    // Success or broken
     // parser.
-    RCUR; 
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -56,24 +56,24 @@ entry_p m_add(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_div(entry_p contxt)
 {
-    // We should have exactly two arguments. 
+    // We should have exactly two arguments.
     if(c_sane(contxt, 2))
     {
         // Let's not divide by zero.
-        DNUM = num(CARG(2)); 
+        DNUM = num(CARG(2));
 
         if(DNUM)
         {
             RNUM
             (
-                num(CARG(1)) / 
-                DNUM 
-            ); 
+                num(CARG(1)) /
+                DNUM
+            );
         }
         else
         {
             // Division by zero.
-            ERR(ERR_DIV_BY_ZERO, contxt->name); 
+            ERR(ERR_DIV_BY_ZERO, contxt->name);
         }
     }
     else
@@ -82,9 +82,9 @@ entry_p m_div(entry_p contxt)
         PANIC(contxt);
     }
 
-    // Division by zero or 
+    // Division by zero or
     // broken parser.
-    RCUR; 
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -98,16 +98,16 @@ entry_p m_mul(entry_p contxt)
     // We should have one or more arguments.
     if(c_sane(contxt, 1))
     {
-        DNUM = 1; 
+        DNUM = 1;
 
         // Multiply all children. The first
         // is multiplied by 1.
-        entry_p *cur = contxt->children; 
+        entry_p *cur = contxt->children;
 
         while(*cur && *cur != end())
         {
             DNUM *= num(*cur);
-            cur++; 
+            cur++;
         }
     }
     else
@@ -116,9 +116,9 @@ entry_p m_mul(entry_p contxt)
         PANIC(contxt);
     }
 
-    // Success or broken 
+    // Success or broken
     // parser.
-    RCUR; 
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -134,14 +134,14 @@ entry_p m_sub(entry_p contxt)
     {
         RNUM
         (
-            num(CARG(1)) - 
+            num(CARG(1)) -
             num(CARG(2))
-        ); 
+        );
     }
     else
     {
         // The parser is broken
         PANIC(contxt);
-        RCUR; 
+        RCUR;
     }
 }

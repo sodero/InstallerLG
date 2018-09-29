@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// comparison.c: 
+// comparison.c:
 //
 // Comparison operators
 //----------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 #include <string.h>
 
 //----------------------------------------------------------------------------
-// < <= == >= > 
+// < <= == >= >
 //     helper function for m_eq, m_gt, m_gte, m_lt, m_lte, m_ne.
 //----------------------------------------------------------------------------
 static int h_cmp(entry_p a, entry_p b)
@@ -34,11 +34,11 @@ static int h_cmp(entry_p a, entry_p b)
     {
         return strcmp(a->name, b->name);
     }
-    // Otherwise convert whatever we have to 
+    // Otherwise convert whatever we have to
     // numerical values and subtract.
     else
     {
-        return num(a) - num(b); 
+        return num(a) - num(b);
     }
 }
 
@@ -53,7 +53,7 @@ entry_p m_eq(entry_p contxt)
     // We should have two arguments
     if(c_sane(contxt, 2))
     {
-        // Turn the result of h_cmp 
+        // Turn the result of h_cmp
         // into 0 or 1.
         RNUM
         (
@@ -64,7 +64,7 @@ entry_p m_eq(entry_p contxt)
     {
         // The parser is broken
         PANIC(contxt);
-        RCUR; 
+        RCUR;
     }
 }
 
@@ -79,7 +79,7 @@ entry_p m_gt(entry_p contxt)
     // We should have two arguments
     if(c_sane(contxt, 2))
     {
-        // Turn the result of h_cmp 
+        // Turn the result of h_cmp
         // into 0 or 1.
         RNUM
         (
@@ -90,7 +90,7 @@ entry_p m_gt(entry_p contxt)
     {
         // The parser is broken
         PANIC(contxt);
-        RCUR; 
+        RCUR;
     }
 }
 
@@ -105,7 +105,7 @@ entry_p m_gte(entry_p contxt)
     // We should have two arguments
     if(c_sane(contxt, 2))
     {
-        // Turn the result of h_cmp 
+        // Turn the result of h_cmp
         // into 0 or 1.
         RNUM
         (
@@ -116,7 +116,7 @@ entry_p m_gte(entry_p contxt)
     {
         // The parser is broken
         PANIC(contxt);
-        RCUR; 
+        RCUR;
     }
 }
 
@@ -131,7 +131,7 @@ entry_p m_lt(entry_p contxt)
     // We should have two arguments
     if(c_sane(contxt, 2))
     {
-        // Turn the result of h_cmp 
+        // Turn the result of h_cmp
         // into 0 or 1.
         RNUM
         (
@@ -142,7 +142,7 @@ entry_p m_lt(entry_p contxt)
     {
         // The parser is broken
         PANIC(contxt);
-        RCUR; 
+        RCUR;
     }
 }
 
@@ -157,7 +157,7 @@ entry_p m_lte(entry_p contxt)
     // We should have two arguments
     if(c_sane(contxt, 2))
     {
-        // Turn the result of h_cmp 
+        // Turn the result of h_cmp
         // into 0 or 1.
         RNUM
         (
@@ -168,7 +168,7 @@ entry_p m_lte(entry_p contxt)
     {
         // The parser is broken
         PANIC(contxt);
-        RCUR; 
+        RCUR;
     }
 }
 
@@ -183,7 +183,7 @@ entry_p m_neq(entry_p contxt)
     // We should have two arguments
     if(c_sane(contxt, 2))
     {
-        // Turn the result of h_cmp 
+        // Turn the result of h_cmp
         // into 0 or 1.
         RNUM
         (
@@ -194,6 +194,6 @@ entry_p m_neq(entry_p contxt)
     {
         // The parser is broken
         PANIC(contxt);
-        RCUR; 
+        RCUR;
     }
 }

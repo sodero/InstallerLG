@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// init.h: 
+// init.h:
 //
 // Initilization by means of prepending and appending code.
 //----------------------------------------------------------------------------
@@ -12,6 +12,6 @@
 
 #include "types.h"
 
-entry_p init(entry_p contxt); 
+entry_p init(entry_p contxt);
 
 #endif

@@ -1,6 +1,6 @@
 ("%s" @default-dest) ; "","T:",""
 ("%s" @abort-button) ; "","",""
-(fileonly @app-name) ; "","installer",""
+("%s" @app-name) ; "","Test App",""
 ("%ld" @ioerr) ; "","0",""
 ("%s" @askoptions-help) ; "","",""
 ("%s" @askchoice-help) ; "","",""

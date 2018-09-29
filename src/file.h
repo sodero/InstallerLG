@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------
-// file.h: 
+// file.h:
 //
-// File operations 
+// File operations
 //----------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
@@ -36,12 +36,12 @@ int h_log(entry_p contxt, const char *fmt, ...);
 //----------------------------------------------------------------------------
 struct pnode_t
 {
-    struct pnode_t *next; 
-    char *name; 
-    char *copy; 
+    struct pnode_t *next;
+    char *name;
+    char *copy;
     long type;
-}; 
+};
 
-typedef struct pnode_t * pnode_p; 
+typedef struct pnode_t * pnode_p;
 
 #endif

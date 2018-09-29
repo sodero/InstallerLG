@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// util.h: 
+// util.h:
 //
 // Misc utility functions primarily used by the 'native' methods.
 //----------------------------------------------------------------------------
@@ -23,13 +23,13 @@ entry_p global(entry_p e);
 int c_sane(entry_p c, size_t n);
 int s_sane(entry_p c, size_t n);
 void pretty_print(entry_p entry);
-int get_numvar(entry_p c, char *v); 
+int get_numvar(entry_p c, char *v);
 entry_p get_opt(entry_p c, opt_t t);
-char *get_strvar(entry_p c, char *v); 
+char *get_strvar(entry_p c, char *v);
 char *get_optstr(entry_p c, opt_t);
-char *get_chlstr(entry_p c); 
-void set_numvar(entry_p c, char *v, int n); 
-void set_strvar(entry_p c, char *v, char *n); 
+char *get_chlstr(entry_p c);
+void set_numvar(entry_p c, char *v, int n);
+void set_strvar(entry_p c, char *v, char *n);
 char *get_buf(void);
 size_t buf_size(void);
 
