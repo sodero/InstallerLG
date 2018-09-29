@@ -42,8 +42,8 @@ src: clean aros
 	mkdir $(NAME)
 	cp ../LICENSE $(NAME)
 	cp ../README.md $(NAME)
-	cp -R ../build $(NAME)
-	cp -R ../src $(NAME)
+	cp -R $(BIN) $(NAME)
+	cp -R $(SRC) $(NAME)
 	cp -R ../test $(NAME)
 	cp -R aros $(NAME)
 	lha a $(DIR)/$(NAME).src.lha $(NAME)
@@ -56,6 +56,7 @@ clean:
 	$(RM) $(DIR)/*.lha
 	$(RM) $(FLT)/*.c $(FLT)/*.h
 	$(RM) -R $(NAME)
+	$(RM) $(SRC)/*.swp ../test/*.swp $(BIN)/_*
 
 $(LHA): $(EXE)
 	lha a $@ $(FILES)
@@ -67,4 +68,3 @@ $(README): $(DIR)/$(NAME).readme
 $(EXE):
 	$(MAKE) -C $(BIN)
 	cp $(BIN)/$(EXE) .
-
