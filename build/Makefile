@@ -64,6 +64,12 @@ endif
 gui.o: gui.c gui.h
 	$(CC) -Os -c $< -DLLVL=2 $(CWRN)
 
+strings.h:
+	catcomp /src/Installer.cd CFILE /src/$@ NONUMBERS
+
+deutsch: ../src/Installer.cd ../src/Installer.ct
+	catcomp /src/Installer.cd /src/Installer.ct CATALOG Catalogs/$@/Installer.catalog
+
 #---------------------------------------------------------------------------------#
 # Misc
 #---------------------------------------------------------------------------------#

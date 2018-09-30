@@ -11,7 +11,7 @@ Vorhandenes Verzeichnis '%s' überschreiben?
 ; Overwrite existing directory '%s'?
 ;
 MSG_ABORTCOPYTO
-Abort copy '%s' to '%s'.\n
+Abbruch von kopiert '%s' nach '%s'.\n
 ; Abort copy '%s' to '%s'.\n
 ;
 MSG_COULDNOTCOPYTO
@@ -31,23 +31,23 @@ Schreibgeschützte Datei '%s' überschreiben?
 ; Overwrite write protected file '%s'?
 ;
 MSG_DELETEFILE
-Delete file '%s'?
+Datei '%s' löschen?
 ; Delete file '%s'?
 ;
 MSG_DELETED
-Deleted '%s'.\n
+'%s' gelöscht.\n
 ; Deleted '%s'.\n
 ;
 MSG_NOSUCHFILE
-No such file '%s'.\n
+Keine solche Datei '%s'.\n
 ; No such file '%s'.\n
 ;
 MSG_RENAMEDTO
-Renamed '%s' to '%s'.\n
+Umbenannt '%s' in '%s'.\n
 ; Renamed '%s' to '%s'.\n
 ;
 MSG_COPIEDTO
-Copied '%s' to '%s'.\n
+Kopiert '%s' nach '%s'.\n
 ; Copied '%s' to '%s'.\n
 ;
 MSG_DIRECTORYEXISTSALREADY
@@ -55,15 +55,15 @@ Das Verzeichnis '%s' existiert bereits.\n
 ; Directory '%s' exists already.\n
 ;
 MSG_CREATED
-Created '%s'.\n
+'%s' erstellt.\n
 ; Created '%s'.\n
 ;
 MSG_GETMASK
-Get mask '%s' %d\n
+Hole Maske '%s' %d\n
 ; Get mask '%s' %d\n
 ;
 MSG_PROTECT
-Protect '%s' %d\n
+Schütze '%s' %d\n
 ; Protect '%s' %d\n
 ;
 MSG_INSTALLER
@@ -75,7 +75,7 @@ Installationsart festlegen
 ; Set Installation Mode
 ;
 MSG_DESTINATIONDRAWER
-Destination drawer
+Zielschublade
 ; Destination drawer
 ;
 MSG_COPYINGFILE
@@ -83,11 +83,11 @@ Datei wird kopiert
 ; Copying file
 ;
 MSG_FILESTOINSTALL
-Files to install
+Zu installierende Dateien
 ; Files to install
 ;
 MSG_INSTALLATIONMODEANDLOGGING
-Installation mode and logging
+Installationsmodus und Protokollierung
 ; Installation mode and logging
 ;
 MSG_PROGRESS
@@ -99,11 +99,11 @@ Fortfahren
 ; Proceed
 ;
 MSG_RETRY
-Retry
+Wiederholen
 ; Retry
 ;
 MSG_ABORT
-Abbruch
+Abbrechen
 ; Abort
 ;
 MSG_YES
@@ -119,7 +119,7 @@ Ok
 ; Ok
 ;
 MSG_NEXT
-Next
+Nächster
 ; Next
 ;
 MSG_SKIP
@@ -131,15 +131,15 @@ Unbekannter Fehler
 ; Unknown error
 ;
 MSG_SETUPFAILED
-Setup failed
+Setup fehlgeschlagen
 ; Setup failed
 ;
 MSG_FAILEDCREATINGMUICUSTOMCLASS
-Failed creating MUI custom class
+Fehler beim Erstellen der benutzerdefinierten MUI-Klasse
 ; Failed creating MUI custom class
 ;
 MSG_FAILEDCREATINGMUIAPPLICATION
-Failed creating MUI application
+Fehler beim Erstellen der MUI-Anwendung
 ; Failed creating MUI application
 ;
 MSG_INITIALIZATIONFAILED
@@ -163,7 +163,7 @@ Anfänger - Alle Aktionen automatisch
 ; Novice User - All Actions Automatic
 ;
 MSG_INTERMEDIATEUSERLIMITEDMANUALCONTROL
-Intermediate User - Limited Manual Control
+Fortgeschrittener - Begrenzte manuelle Steuerung
 ; Intermediate User - Limited Manual Control
 ;
 MSG_EXPERTUSERMUSTCONFIRMALLACTIONS
@@ -171,7 +171,7 @@ Experte - Muss alle Aktionen bestätigen
 ; Expert User - Must Confirm all actions
 ;
 MSG_INSTALLFORREAL
-Install for real
+Tatsächlich installieren
 ; Install for real
 ;
 MSG_DRYRUNONLY
@@ -183,23 +183,23 @@ Keine Protokollierung
 ; No logging
 ;
 MSG_LOGTOFILE
-Log to file
+In Datei speichern
 ; Log to file
 ;
 MSG_INSTALLERREQUIREDARGUMENTMISSING
-installer: required argument missing\n
+installer: erforderliches Argument fehlt\n
 ; installer: required argument missing\n
 ;
 MSG_NCANBEFOUNDIN
-%s\n\n%s can be found in %s
+%s\n\n%s kann in %s gefunden werden
 ; %s\n\n%s can be found in %s
 ;
 MSG_INSTALLATIONCOMPLETE
-Installation complete
+Installation abgeschlossen
 ; Installation complete
 ;
 MSG_EXECUTED
-Executed '%s'.\n
+'%s' wurde ausgeführt.\n
 ; Executed '%s'.\n
 ;
 MSG_ERRORCOULDNOTOPENFILE
@@ -211,39 +211,39 @@ Zeile %d: %s '%s'\n
 ; Line %d: %s '%s'\n
 ;
 MSG_WORKINGONINSTALLATIONN
-Working on installation...\n\n
+Arbeite an der Installation ...\n\n
 ; Working on installation...\n\n
 ;
 MSG_SELECTDIRECTORY
-Select directory
+Verzeichnis auswählen
 ; Select directory
 ;
 MSG_SELECTFILE
-Datei aussuchen
+Datei auswählen
 ; Select file
 ;
 MSG_ASSIGNTO
-Assign '%s' to '%s'\n
+Weise '%s' an '%s' zu\n
 ; Assign '%s' to '%s'\n
 ;
 MSG_REMOVEASSIGN
-Remove assign '%s'\n
+Entferne Zuweisung '%s'\n
 ; Remove assign '%s'\n
 ;
 MSG_COULDNOTASSIGNTO
-Could not assign '%s' to '%s'\n
+'%s' konnte nicht an '%s' zugewiesen werden\n
 ; Could not assign '%s' to '%s'\n
 ;
 MSG_COULDNOTREMOVEASSIGN
-Could not remove assign '%s'\n
+Konnte Zuweisung '%s' nicht entfernen\n
 ; Could not remove assign '%s'\n
 ;
 MSG_APPENDTO
-Append '%s' to '%s'\n
+Hänge '%s' an '%s'\n
 ; Append '%s' to '%s'\n
 ;
 MSG_INCLUDEIN
-Include '%s' in '%s'\n
+Füge '%s' in '%s' ein\n
 ; Include '%s' in '%s'\n
 ;
 MSG_VERSIONTOINSTALL
@@ -251,7 +251,7 @@ Zu installierende Version
 ; Version to install
 ;
 MSG_VERSIONCURRENTLYINSTALLED
-Version currently installed
+Version ist derzeit installiert
 ; Version currently installed
 ;
 MSG_UNKNOWNVERSION
@@ -259,7 +259,7 @@ Unbekannte Version
 ; Unknown version
 ;
 MSG_DESTINATIONDRAWER2
-Destination drawer
+Zielschublade
 ; Destination drawer
 ;
 MSG_THEREISNOCURRENTLYINSTALLEDVERSION
