@@ -1,0 +1,267 @@
+## version $VER: Installer.catalog 1.0 (20.09.2018)
+## codeset 0
+## language deutsch
+;
+MSG_COPYINGFILES
+Datei(en) kopieren
+; Copying file(s)
+;
+MSG_OVERWRITEEXISTINGDIRECTORY
+Vorhandenes Verzeichnis '%s' überschreiben?
+; Overwrite existing directory '%s'?
+;
+MSG_ABORTCOPYTO
+Abort copy '%s' to '%s'.\n
+; Abort copy '%s' to '%s'.\n
+;
+MSG_COULDNOTCOPYTO
+'%s' konnte nicht nach '%s' kopiert werden.\n
+; Could not copy '%s' to '%s'.\n
+;
+MSG_DELETEWRITEPROTECTEDFILE
+Schreibgeschützte Datei '%s' löschen?
+; Delete write protected file '%s'?
+;
+MSG_DELETEWRITEPROTECTEDDIRECTORY
+Schreibgeschütztes Verzeichnis '%s' löschen?
+; Delete write protected directory '%s'?
+;
+MSG_OVERWRITEWRITEPROTECTEDFILE
+Schreibgeschützte Datei '%s' überschreiben?
+; Overwrite write protected file '%s'?
+;
+MSG_DELETEFILE
+Delete file '%s'?
+; Delete file '%s'?
+;
+MSG_DELETED
+Deleted '%s'.\n
+; Deleted '%s'.\n
+;
+MSG_NOSUCHFILE
+No such file '%s'.\n
+; No such file '%s'.\n
+;
+MSG_RENAMEDTO
+Renamed '%s' to '%s'.\n
+; Renamed '%s' to '%s'.\n
+;
+MSG_COPIEDTO
+Copied '%s' to '%s'.\n
+; Copied '%s' to '%s'.\n
+;
+MSG_DIRECTORYEXISTSALREADY
+Das Verzeichnis '%s' existiert bereits.\n
+; Directory '%s' exists already.\n
+;
+MSG_CREATED
+Created '%s'.\n
+; Created '%s'.\n
+;
+MSG_GETMASK
+Get mask '%s' %d\n
+; Get mask '%s' %d\n
+;
+MSG_PROTECT
+Protect '%s' %d\n
+; Protect '%s' %d\n
+;
+MSG_INSTALLER
+Installer
+; Installer
+;
+MSG_SETINSTALLATIONMODE
+Installationsart festlegen
+; Set Installation Mode
+;
+MSG_DESTINATIONDRAWER
+Destination drawer
+; Destination drawer
+;
+MSG_COPYINGFILE
+Datei wird kopiert
+; Copying file
+;
+MSG_FILESTOINSTALL
+Files to install
+; Files to install
+;
+MSG_INSTALLATIONMODEANDLOGGING
+Installation mode and logging
+; Installation mode and logging
+;
+MSG_PROGRESS
+Fortschritt
+; Progress
+;
+MSG_PROCEED
+Fortfahren
+; Proceed
+;
+MSG_RETRY
+Retry
+; Retry
+;
+MSG_ABORT
+Abbruch
+; Abort
+;
+MSG_YES
+Ja
+; Yes
+;
+MSG_NO
+Nein
+; No
+;
+MSG_OK
+Ok
+; Ok
+;
+MSG_NEXT
+Next
+; Next
+;
+MSG_SKIP
+Überspringen
+; Skip
+;
+MSG_UNKNOWNERROR
+Unbekannter Fehler
+; Unknown error
+;
+MSG_SETUPFAILED
+Setup failed
+; Setup failed
+;
+MSG_FAILEDCREATINGMUICUSTOMCLASS
+Failed creating MUI custom class
+; Failed creating MUI custom class
+;
+MSG_FAILEDCREATINGMUIAPPLICATION
+Failed creating MUI application
+; Failed creating MUI application
+;
+MSG_INITIALIZATIONFAILED
+Initialisierung fehlgeschlagen
+; Initialization failed
+;
+MSG_ERROR
+Fehler
+; Error
+;
+MSG_SUCCESS
+Erfolg
+; Success
+;
+MSG_LINE
+Zeile %d: %s '%s'
+; Line %d: %s '%s'
+;
+MSG_NOVICEUSERALLACTIONSAUTOMATIC
+Anfänger - Alle Aktionen automatisch
+; Novice User - All Actions Automatic
+;
+MSG_INTERMEDIATEUSERLIMITEDMANUALCONTROL
+Intermediate User - Limited Manual Control
+; Intermediate User - Limited Manual Control
+;
+MSG_EXPERTUSERMUSTCONFIRMALLACTIONS
+Experte - Muss alle Aktionen bestätigen
+; Expert User - Must Confirm all actions
+;
+MSG_INSTALLFORREAL
+Install for real
+; Install for real
+;
+MSG_DRYRUNONLY
+Trockenlauf
+; Dry run only
+;
+MSG_NOLOGGING
+Keine Protokollierung
+; No logging
+;
+MSG_LOGTOFILE
+Log to file
+; Log to file
+;
+MSG_INSTALLERREQUIREDARGUMENTMISSING
+installer: required argument missing\n
+; installer: required argument missing\n
+;
+MSG_NCANBEFOUNDIN
+%s\n\n%s can be found in %s
+; %s\n\n%s can be found in %s
+;
+MSG_INSTALLATIONCOMPLETE
+Installation complete
+; Installation complete
+;
+MSG_EXECUTED
+Executed '%s'.\n
+; Executed '%s'.\n
+;
+MSG_ERRORCOULDNOTOPENFILE
+Fehler: Die Datei '%s' konnte nicht geöffnet werden\n
+; Error: Could not open file '%s'\n
+;
+MSG_LINE2
+Zeile %d: %s '%s'\n
+; Line %d: %s '%s'\n
+;
+MSG_WORKINGONINSTALLATIONN
+Working on installation...\n\n
+; Working on installation...\n\n
+;
+MSG_SELECTDIRECTORY
+Select directory
+; Select directory
+;
+MSG_SELECTFILE
+Datei aussuchen
+; Select file
+;
+MSG_ASSIGNTO
+Assign '%s' to '%s'\n
+; Assign '%s' to '%s'\n
+;
+MSG_REMOVEASSIGN
+Remove assign '%s'\n
+; Remove assign '%s'\n
+;
+MSG_COULDNOTASSIGNTO
+Could not assign '%s' to '%s'\n
+; Could not assign '%s' to '%s'\n
+;
+MSG_COULDNOTREMOVEASSIGN
+Could not remove assign '%s'\n
+; Could not remove assign '%s'\n
+;
+MSG_APPENDTO
+Append '%s' to '%s'\n
+; Append '%s' to '%s'\n
+;
+MSG_INCLUDEIN
+Include '%s' in '%s'\n
+; Include '%s' in '%s'\n
+;
+MSG_VERSIONTOINSTALL
+Zu installierende Version
+; Version to install
+;
+MSG_VERSIONCURRENTLYINSTALLED
+Version currently installed
+; Version currently installed
+;
+MSG_UNKNOWNVERSION
+Unbekannte Version
+; Unknown version
+;
+MSG_DESTINATIONDRAWER2
+Destination drawer
+; Destination drawer
+;
+MSG_THEREISNOCURRENTLYINSTALLEDVERSION
+Es gibt keine aktuell installierte Version
+; There is no currently installed version
