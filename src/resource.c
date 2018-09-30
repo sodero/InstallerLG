@@ -9,6 +9,15 @@
 
 #include "error.h"
 #include "resource.h"
+#ifdef AMIGA
+#include <proto/exec.h>
+#include <proto/locale.h>
+#define CATCOMP_BLOCK
+#define CATCOMP_CODE
+#include "strings.h"
+
+static struct LocaleInfo li;
+#endif
 
 //----------------------------------------------------------------------------
 // Name:        tr
@@ -21,6 +30,7 @@ const char *tr(res_t r)
     // Fail nicely if we're out of range.
     res_t i = r > S_GONE ? S_GONE : r;
 
+#ifndef AMIGA
     // res_t -> string mappings.
     static const char *res[] =
     {
@@ -100,5 +110,12 @@ const char *tr(res_t r)
 
     // res[i] is a valid string.
     return res[i];
+#else
+    if(!li.li_LocaleBase)
+    {
+        li.li_LocaleBase = OpenLibrary("locale.library", 37);
+        li.li_Catalog = OpenCatalog(NULL, "Installer.catalog", TAG_DONE);
+    }
+    return GetString(&li, i - 1);
+#endif
 }
-
