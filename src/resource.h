@@ -90,5 +90,7 @@ typedef enum
 } res_t;
 
 const char *tr(res_t r);
+void locale_init(void);
+void locale_exit(void);
 
 #endif
