@@ -24,6 +24,7 @@ AMIGA = true
 CWRN = -Wall -Wno-pointer-sign
 CGEN = -Os -std=gnu99 -DAMIGA
 LDLIBS = -ldebug
+I18N = strings.h
 ifeq ($(OS),MorphOS)
 LDLIBS += -noixemul
 endif
@@ -64,7 +65,9 @@ endif
 gui.o: gui.c gui.h
 	$(CC) -Os -c $< -DLLVL=2 $(CWRN)
 
-strings.h:
+resource.c: $(I18N)
+
+strings.h: ../src/Installer.cd
 	catcomp /src/Installer.cd CFILE /src/$@ NONUMBERS
 
 deutsch: ../src/Installer.cd ../src/Installer.ct
@@ -84,4 +87,3 @@ endif
 .PHONY: clean
 clean:
 	$(RM) -R *.o $(EXE) $(EXE).tmp.* leak.* err.* _??_ _???_
-
