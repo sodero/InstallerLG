@@ -30,7 +30,9 @@ const char *tr(res_t r)
     // Fail nicely if we're out of range.
     res_t i = r > S_GONE ? S_GONE : r;
 
-#ifndef AMIGA
+    #ifdef AMIGA
+    return GetString(&li, i - 1);
+    #else
     // res_t -> string mappings.
     static const char *res[] =
     {
@@ -110,12 +112,39 @@ const char *tr(res_t r)
 
     // res[i] is a valid string.
     return res[i];
-#else
+    #endif
+}
+
+//----------------------------------------------------------------------------
+// Name:        locale_init
+// Description: Initialize and open the catalog.
+// Input:       -
+// Return:      -
+//----------------------------------------------------------------------------
+void locale_init(void)
+{
+    #ifdef AMIGA
     if(!li.li_LocaleBase)
     {
         li.li_LocaleBase = OpenLibrary("locale.library", 37);
         li.li_Catalog = OpenCatalog(NULL, "Installer.catalog", TAG_DONE);
     }
-    return GetString(&li, i - 1);
-#endif
+    #endif
+}
+
+//----------------------------------------------------------------------------
+// Name:        locale_exit
+// Description: Close catalog and free locale resources.
+// Input:       -
+// Return:      -
+//----------------------------------------------------------------------------
+void locale_exit(void)
+{
+    #ifdef AMIGA
+    if(li.li_LocaleBase)
+    {
+        CloseCatalog(li.li_Catalog);
+        CloseLibrary(li.li_LocaleBase);
+    }
+    #endif
 }

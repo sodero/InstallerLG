@@ -409,6 +409,8 @@ entry_p invoke(entry_p entry)
 //----------------------------------------------------------------------------
 void run(entry_p entry)
 {
+    locale_init();
+
     // Initialize GUI before starting
     // the execution.
     if(gui_init())
@@ -433,6 +435,9 @@ void run(entry_p entry)
         // GUI teardown.
         gui_exit();
     }
+
+    // i18n teardown.
+    locale_exit();
 
     // Free AST
     kill(entry);
