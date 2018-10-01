@@ -2000,7 +2000,7 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
         my->Ticker.ihn_Object = obj;
         my->Ticker.ihn_Flags = MUIIHNF_TIMER;
         my->Ticker.ihn_Method = MUIM_InstallerGui_Ticker;
-        my->Ticker.ihn_Millis = 50;
+        my->Ticker.ihn_Millis = 10;
 
         // Save widgets.
         if(el && ul && fp && cm && pr &&
