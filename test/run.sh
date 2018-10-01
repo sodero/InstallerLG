@@ -1,5 +1,6 @@
 run()
 {
+    export _INSTALLER_LG_=yes
     instfile=`mktemp ./installer.tmp.XXXXXX`
     echo $1 > $instfile
     if [ `uname` = "Linux" ]; then
