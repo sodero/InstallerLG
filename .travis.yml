@@ -1,0 +1,10 @@
+language:
+    - c
+
+script:
+    - make -C build && make -C build test
+
+addons:
+  apt:
+    packages:
+      - valgrind
