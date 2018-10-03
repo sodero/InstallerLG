@@ -43,7 +43,7 @@ entry_p m_database(entry_p contxt)
     if(c_sane(contxt, 1))
     {
         int memf = -1;
-        const char *feat = str(CARG(1)),
+        char *feat = str(CARG(1)),
             *cpu =
         #ifdef __i386__
             "x86",
@@ -53,22 +53,36 @@ entry_p m_database(entry_p contxt)
             "ARM",
         #elif __ppc__
             "PowerPC",
-        #elif __mc68000__
-            "68000",
-        #elif __mc68010__
-            "68010",
-        #elif __mc68020__
-            "68020",
-        #elif __mc68030__
-            "68030",
-        #elif __mc68040__
-            "68040",
-        #elif __mc68060__
-            "68060",
         #else
             "Unknown",
         #endif
             *ret = "Unknown";
+        #ifdef AMIGA
+        struct ExecBase *AbsSysBase = *((struct ExecBase **)4);
+        UWORD flags = AbsSysBase->AttnFlags;
+
+        strcpy(cpu, "68000");
+        if(flags & AFF_68010)
+        {
+            cpu[3] = '1';
+        }
+        if(flags & AFF_68020)
+        {
+            cpu[3] = '2';
+        }
+        if(flags & AFF_68030)
+        {
+            cpu[3] = '3';
+        }
+        if(flags & AFF_68040)
+        {
+            cpu[3] = '4';
+        }
+        if(flags & AFF_68060)
+        {
+            cpu[3] = '6';
+        }
+        #endif
 
         if(!strcmp(feat, "cpu"))
         {
