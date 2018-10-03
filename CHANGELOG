@@ -150,3 +150,8 @@
 - Default @app-name set to 'Test App' (mimic CBM Installer).
 - Fixed (abort) button.
 - (copyfiles) (choices) subdirectory fix.
+
+0.1.0-alpha.30:
+===============
+- Locale support (German and Swedish<-FIXME translations included).
+- (database) runtime cpu detection fixed.
