@@ -4,19 +4,24 @@ run()
     instfile=`mktemp ./installer.tmp.XXXXXX`
     echo $1 > $instfile
     if [ `uname` = "Linux" ]; then
-        l=`mktemp ./leak.tmp.XXXXXX`
-        o=`valgrind --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 $prg $instfile 2>$l`
-        if [ $? -ne 0 ]; then
-            s=`mktemp ./leak.tmp.XXXXXX`
-            cat $l | sed -r 's/==[0-9]+/;==/g' >> $s
-            cat $instfile >> $s
-            return 2
+       if [ `which valgrind` ]; then
+            l=`mktemp ./leak.tmp.XXXXXX`
+            o=`valgrind --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 $prg $instfile 2>$l`
+            if [ $? -ne 0 ]; then
+                s=`mktemp ./leak.tmp.XXXXXX`
+                cat $l | sed -r 's/==[0-9]+/;==/g' >> $s
+                cat $instfile >> $s
+                return 2
+            fi
+            e=`cat $l | grep -v "^==[0-9]\+=="`
+            if [ -n "$e" ]; then
+                o="$e $o"
+            fi
+            rm $l
+       else
+            echo "Valgrind is missing!"
+            exit 1
         fi
-        e=`cat $l | grep -v "^==[0-9]\+=="`
-        if [ -n "$e" ]; then
-            o="$e $o"
-        fi
-        rm $l
     else
         o=`$prg $instfile 2>&1`
     fi
