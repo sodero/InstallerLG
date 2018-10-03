@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/sodero/InstallerLG.svg?branch=master)](https://travis-ci.com/sodero/InstallerLG)
+
 # InstallerLG
 
 A re-implementation of the LISP-like 'Installer' scripting language included
