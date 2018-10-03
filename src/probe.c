@@ -24,11 +24,130 @@
 #include <exec/execbase.h>
 #include <exec/memory.h>
 #include <exec/resident.h>
+#include <exec/system.h>
 #include <proto/dos.h>
 #include <proto/exec.h>
 #include <proto/icon.h>
 #include <workbench/workbench.h>
 #endif
+
+//----------------------------------------------------------------------------
+// Name:        h_cpu_name
+// Description: Helper for m_database. Get host CPU architecture.
+// Input:       -
+// Return:      char *: Host CPU architecture.
+//----------------------------------------------------------------------------
+static char *h_cpu_name(void)
+{
+    enum { ERR, PPC, ARM, M68000, M68010, M68020,
+           M68030, M68040, M68060, X86, X86_64, ALL };
+
+    static char *cpu[ALL] = { "Unknown", "PowerPC", "ARM",
+                              "68000", "68010", "68020", "68030",
+                              "68040", "68060", "x86", "x84_64" };
+    u_int32_t arc = ERR;
+
+    #ifdef __MORPHOS__
+    // On MorphOS, there is only PPC (for now) (and no define).
+    NewGetSystemAttrs(&arc, sizeof(arc), SYSTEMINFOTYPE_MACHINE);
+    arc = arc == 1 ? PPC : ERR;
+    #else
+    #ifdef __AROS__
+    // On AROS, everything is possible.
+    APTR ProcessorBase = OpenResource("processor.resource");
+
+    if(ProcessorBase)
+    {
+        ULONG fam;
+
+        struct TagItem tags[] =
+        {
+            { GCIT_Family, (IPTR) &fam },
+            { TAG_DONE, TAG_DONE }
+        };
+
+        GetCPUInfo(tags);
+
+        switch(fam)
+        {
+            case CPUFAMILY_60X:
+            case CPUFAMILY_7X0:
+            case CPUFAMILY_74XX:
+            case CPUFAMILY_4XX:
+               arc = PPC;
+               break;
+
+            case CPUFAMILY_ARM_3:
+            case CPUFAMILY_ARM_4:
+            case CPUFAMILY_ARM_4T:
+            case CPUFAMILY_ARM_5:
+            case CPUFAMILY_ARM_5T:
+            case CPUFAMILY_ARM_5TE:
+            case CPUFAMILY_ARM_5TEJ:
+            case CPUFAMILY_ARM_6:
+            case CPUFAMILY_ARM_7:
+               arc = ARM;
+               break;
+
+            case CPUFAMILY_MOTOROLA_68000:
+               arc = M68000;
+               break;
+
+            case CPUFAMILY_AMD_K5:
+            case CPUFAMILY_AMD_K6:
+            case CPUFAMILY_AMD_K7:
+            case CPUFAMILY_INTEL_486:
+            case CPUFAMILY_INTEL_PENTIUM:
+            case CPUFAMILY_INTEL_PENTIUM_PRO:
+            case CPUFAMILY_INTEL_PENTIUM4:
+               arc = X86;
+               break;
+
+            case CPUFAMILY_AMD_K8:
+            case CPUFAMILY_AMD_K9:
+            case CPUFAMILY_AMD_K10:
+               arc = X86_64;
+               break;
+
+            }
+    }
+    #else
+    #ifdef AMIGA
+    // AmigaOS3 - Beware, not tested.
+    struct ExecBase *AbsSysBase = *((struct ExecBase **)4);
+    UWORD flags = AbsSysBase->AttnFlags;
+
+    if(flags & AFF_68010)
+    {
+        arc = M68010;
+    }
+    else if(flags & AFF_68020)
+    {
+        arc = M68020;
+    }
+    else if(flags & AFF_68030)
+    {
+        arc = M68030;
+    }
+    else if(flags & AFF_68040)
+    {
+        arc = M68040;
+    }
+    else if(flags & AFF_68060)
+    {
+        arc = M68060;
+    }
+    else
+    {
+        arc = M68000;
+    }
+    #endif
+    #endif
+    #endif
+
+    // CPU or 'Unknown'.
+    return cpu[arc];
+}
 
 //----------------------------------------------------------------------------
 // (database <feature> [<checkvalue>])
@@ -43,36 +162,13 @@ entry_p m_database(entry_p contxt)
     if(c_sane(contxt, 1))
     {
         int memf = -1;
-        const char *feat = str(CARG(1)),
-            *cpu =
-        #ifdef __i386__
-            "x86",
-        #elif __amd64__
-            "x86_64",
-        #elif __arm__
-            "ARM",
-        #elif __ppc__
-            "PowerPC",
-        #elif __mc68000__
-            "68000",
-        #elif __mc68010__
-            "68010",
-        #elif __mc68020__
-            "68020",
-        #elif __mc68030__
-            "68030",
-        #elif __mc68040__
-            "68040",
-        #elif __mc68060__
-            "68060",
-        #else
-            "Unknown",
-        #endif
-            *ret = "Unknown";
+        char *feat = str(CARG(1)),
+              *ret = "Unknown";
 
         if(!strcmp(feat, "cpu"))
         {
-            ret = cpu;
+            // Get host CPU name.
+            ret = h_cpu_name();
         }
         else
         if(!strcmp(feat, "graphics-mem"))
