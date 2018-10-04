@@ -3,7 +3,7 @@ language:
 
 script:
     - make -C build && make -C build test
-    - ls aerr.tmp.* &> /dev/null && cat err.tmp.* && exit 1 || true
+    - ls err.tmp.* &> /dev/null && cat err.tmp.* && exit 1 || true
 
 addons:
   apt:
