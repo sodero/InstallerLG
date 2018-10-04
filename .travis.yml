@@ -2,8 +2,7 @@ language:
     - c
 
 script:
-    - make -C build && make -C build test
-    - ls err.tmp.* &> /dev/null && cat err.tmp.* && exit 1 || true
+    - make -C build test || cat build/err.tmp.* build/leak.tmp.* 2> /dev/null && false
 
 addons:
   apt:
