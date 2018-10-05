@@ -155,3 +155,5 @@
 ===============
 - Locale support (German and Swedish<-FIXME translations included).
 - (database) runtime cpu detection fixed.
+- (copyfiles) (fonts) fixed.
+- ?

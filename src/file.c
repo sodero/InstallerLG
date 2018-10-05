@@ -322,7 +322,7 @@ static int h_isfont(const char *src)
 //              tuples.
 // Input:       entry_p contxt:     The execution context.
 //              entry_p choices:    * List of files.
-//              entry_p fonts:      * Skip fonts.
+//              entry_p fonts:      * Include fonts.
 //
 //              * Refer to the Installer.guide.
 //
@@ -358,36 +358,71 @@ static pnode_p h_choices(entry_p contxt,
             node->next = calloc(1, sizeof(struct pnode_t));
             node = node->next;
 
-            // Iterate over all filenames.
+            // Iterate over all files / dirs.
             while(node)
             {
                 // Resolve current file.
                 char *f_nam = str(*e);
-
-                // Next file.
-                e++;
 
                 // Build source <-> dest pair.
                 node->name = h_tackon(contxt, src, f_nam);
                 node->copy = h_tackon(contxt, dst, h_fileonly(contxt, f_nam));
                 node->type = h_exists(node->name);
 
+                // Next file.
+                e++;
+
                 // Make sure that the file / dir exists.
                 if(node->type)
                 {
-                    // Filter out fonts?
-                    if(fonts && h_isfont(node->name))
-                    {
-                        // Skip font.
-                        node->type = 0;
-                    }
-
                     // If there are more files, allocate
                     // memory for the next node.
                     if(*e && *e != end())
                     {
                         // Not necessary to check the return value.
                         node->next = calloc(1, sizeof(struct pnode_t));
+                    }
+
+                    // Copy the font (if any) as well?
+                    if(fonts)
+                    {
+                        // Font = file + .font.
+                        snprintf(get_buf(), buf_size(), "%s.font", node->name);
+
+                        // Only if the font is a file.
+                        if(h_exists(get_buf()) == 1)
+                        {
+                            // This might be the last file / dir.
+                            // If true, no next element will exist
+                            // at this point so we need to create it.
+                            if(!node->next)
+                            {
+                                // Not necessary to check the return value.
+                                node->next = calloc(1, sizeof(struct pnode_t));
+                            }
+
+                            // Proceed with font.
+                            node = node->next;
+
+                            // Fill out the details.
+                            if(node)
+                            {
+                                // We already have the font name, create the
+                                // copy and set type, always a file.
+                                node->name = strdup(get_buf());
+                                node->copy = h_tackon(contxt, dst, h_fileonly(contxt, get_buf()));
+                                node->type = 1;
+
+                                // Unless we ran out of memory, and there are
+                                // more files / dirs, create new list element.
+                                if(node->name && node->copy
+                                   && *e && *e != end())
+                                {
+                                    // Not necessary to check the return value.
+                                    node->next = calloc(1, sizeof(struct pnode_t));
+                                }
+                            }
+                        }
                     }
                 }
                 else
@@ -397,7 +432,7 @@ static pnode_p h_choices(entry_p contxt,
                 }
 
                 // Next element.
-                node = node->next;
+                node = node ? node->next : node;
             }
 
             // List complete.
@@ -527,13 +562,6 @@ static pnode_p h_filetree(entry_p contxt,
                                 type = h_exists(n_src);
                             }
 
-                            // Filter out fonts?
-                            if(fonts && h_isfont(node->name))
-                            {
-                                // Skip font.
-                                node->type = 0;
-                            }
-
                             // If we have a directory, recur.
                             if(type == 2)
                             {
@@ -656,15 +684,49 @@ static pnode_p h_filetree(entry_p contxt,
                         file->name = n_src;
                         file->copy = n_dst;
 
-                        // The list is complete.
-                        return head;
+                        if(fonts)
+                        {
+                            // Font = file + .font.
+                            char *font = get_buf();
+                            snprintf(font, buf_size(), "%s.font", n_src);
+
+                            if(h_exists(get_buf()) == 1)
+                            {
+                                pnode_p font = calloc(1, sizeof(struct pnode_t));
+
+                                if(font)
+                                {
+                                    font->name = strdup(get_buf());
+                                    font->copy = h_tackon(contxt, dst, h_fileonly(contxt, get_buf()));
+
+                                    // Add the font to the list.
+                                    if(font->name && font->copy)
+                                    {
+                                        font->type = 1;
+                                        file->next = font;
+
+                                        // The list is complete.
+                                        return head;
+                                    }
+                                    else
+                                    {
+                                        free(font->name);
+                                        free(font->copy);
+                                        free(font);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // The list is complete.
+                            return head;
+                        }
                     }
-                    else
-                    {
-                        // Out of memory.
-                        free(head->name);
-                        free(head->copy);
-                    }
+
+                    // Out of memory.
+                    free(head->name);
+                    free(head->copy);
                 }
             }
 
