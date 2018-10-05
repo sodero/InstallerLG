@@ -293,29 +293,6 @@ static const char *h_fileonly(entry_p contxt,
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_isfont
-// Description: Check if string has a .font suffix.
-// Input:       const char *src:    String.
-// Return:      int:                1 if true, 0 otherwise.
-//----------------------------------------------------------------------------
-static int h_isfont(const char *src)
-{
-    static char suf[] = ".font";
-    char *pos = strstr(src, suf);
-
-    if(pos && !strcmp(pos, suf))
-    {
-        // It's a font.
-        return 1;
-    }
-    else
-    {
-        // Something else.
-        return 0;
-    }
-}
-
-//----------------------------------------------------------------------------
 // Name:        h_choices
 // Description: Helper fo h_filetree taking care of (choices). Generating a
 //              complete file / directory tree with source and destination
@@ -687,8 +664,7 @@ static pnode_p h_filetree(entry_p contxt,
                         if(fonts)
                         {
                             // Font = file + .font.
-                            char *font = get_buf();
-                            snprintf(font, buf_size(), "%s.font", n_src);
+                            snprintf(get_buf(), buf_size(), "%s.font", n_src);
 
                             if(h_exists(get_buf()) == 1)
                             {
