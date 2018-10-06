@@ -68,10 +68,13 @@ gui.o: gui.c gui.h
 resource.c: $(I18N)
 
 strings.h: ../src/Installer.cd
-	catcomp /src/Installer.cd CFILE /src/$@ NONUMBERS
+	catcomp /src/Installer.cd CFILE /src/$@ NONUMBERS || \
+flexcat /src/Installer.cd /src/$@=CatComp_h.sd
 
-deutsch: ../src/Installer.cd ../src/Installer.ct
-	catcomp /src/Installer.cd /src/Installer.ct CATALOG Catalogs/$@/Installer.catalog
+deutsch: ../src/Installer.cd
+	makedir Catalogs/$@ ALL
+	catcomp /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog || \
+flexcat /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog
 
 #---------------------------------------------------------------------------------#
 # Misc
