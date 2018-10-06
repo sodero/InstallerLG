@@ -67,16 +67,16 @@ gui.o: gui.c gui.h
 
 resource.c: $(I18N)
 
-strings.h: ../src/Installer.cd
+strings.h: Installer.cd
 	catcomp /src/Installer.cd CFILE /src/$@ NONUMBERS || \
 flexcat /src/Installer.cd /src/$@=CatComp_h.sd
 
-deutsch: ../src/Installer.cd
+deutsch: Installer.cd deutsch.ct
 	makedir Catalogs/$@ ALL
 	catcomp /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog || \
 flexcat /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog
 
-svenska: ../src/Installer.cd
+svenska: Installer.cd svenska.ct
 	makedir Catalogs/$@ ALL
 	catcomp /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog || \
 flexcat /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog
@@ -94,4 +94,5 @@ endif
 
 .PHONY: clean
 clean:
+	$(RM) ../src/$(I18N)
 	$(RM) -R *.o $(EXE) $(EXE).tmp.* leak.* err.* _??_ _???_
