@@ -153,7 +153,7 @@
 
 0.1.0-alpha.30:
 ===============
-- Locale support (German and Swedish<-FIXME translations included).
+- Locale support (German and Swedish translations included).
 - (database) runtime cpu detection fixed.
 - (copyfiles) (choices) non strict mode (ign-addon-ods).
 - (copyfiles) (fonts) fixed.

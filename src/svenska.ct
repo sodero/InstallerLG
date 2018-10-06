@@ -1,0 +1,267 @@
+## version $VER: Installer.catalog 1.0 (20.09.2018)
+## codeset 0
+## language svenska
+;
+MSG_COPYINGFILES
+Kopierar fil(er)
+; Copying file(s)
+;
+MSG_OVERWRITEEXISTINGDIRECTORY
+Skriva över befintlig katalog '%s'?
+; Overwrite existing directory '%s'?
+;
+MSG_ABORTCOPYTO
+Kopiering av '%s' till '%s' avbruten.\n
+; Abort copy '%s' to '%s'.\n
+;
+MSG_COULDNOTCOPYTO
+Misslyckades kopiera '%s' till '%s'.\n
+; Could not copy '%s' to '%s'.\n
+;
+MSG_DELETEWRITEPROTECTEDFILE
+Ta bort skrivskyddad fil '%s'?
+; Delete write protected file '%s'?
+;
+MSG_DELETEWRITEPROTECTEDDIRECTORY
+Ta bort skrivskyddad katalog '%s'?
+; Delete write protected directory '%s'?
+;
+MSG_OVERWRITEWRITEPROTECTEDFILE
+Skriva över skrivskyddad fil '%s'?
+; Overwrite write protected file '%s'?
+;
+MSG_DELETEFILE
+Ta bort fil '%s'?
+; Delete file '%s'?
+;
+MSG_DELETED
+'%s' borttagen.\n
+; Deleted '%s'.\n
+;
+MSG_NOSUCHFILE
+'%s' finns ej.\n
+; No such file '%s'.\n
+;
+MSG_RENAMEDTO
+Döpt om '%s' till '%s'.\n
+; Renamed '%s' to '%s'.\n
+;
+MSG_COPIEDTO
+Kopierat '%s' till '%s'.\n
+; Copied '%s' to '%s'.\n
+;
+MSG_DIRECTORYEXISTSALREADY
+Katalog '%s' existerar redan.\n
+; Directory '%s' exists already.\n
+;
+MSG_CREATED
+Skapade '%s'.\n
+; Created '%s'.\n
+;
+MSG_GETMASK
+Inläsning av filrättigheter '%s' %d\n
+; Get mask '%s' %d\n
+;
+MSG_PROTECT
+Sätter filrättigheter '%s' %d\n
+; Protect '%s' %d\n
+;
+MSG_INSTALLER
+Installer
+; Installer
+;
+MSG_SETINSTALLATIONMODE
+Välj installationsläge
+; Set Installation Mode
+;
+MSG_DESTINATIONDRAWER
+Målkatalog
+; Destination drawer
+;
+MSG_COPYINGFILE
+Kopierar fil
+; Copying file
+;
+MSG_FILESTOINSTALL
+Filer att installera
+; Files to install
+;
+MSG_INSTALLATIONMODEANDLOGGING
+Installationsläge och loggning
+; Installation mode and logging
+;
+MSG_PROGRESS
+Progression
+; Progress
+;
+MSG_PROCEED
+Fortsätt
+; Proceed
+;
+MSG_RETRY
+Försök igen
+; Retry
+;
+MSG_ABORT
+Avbryt
+; Abort
+;
+MSG_YES
+Ja
+; Yes
+;
+MSG_NO
+Nej
+; No
+;
+MSG_OK
+Ok
+; Ok
+;
+MSG_NEXT
+Nästa
+; Next
+;
+MSG_SKIP
+Hoppa över
+; Skip
+;
+MSG_UNKNOWNERROR
+Okänt fel
+; Unknown error
+;
+MSG_SETUPFAILED
+Uppstart misslyckades
+; Setup failed
+;
+MSG_FAILEDCREATINGMUICUSTOMCLASS
+Skapandet av MUI-klass misslyckades
+; Failed creating MUI custom class
+;
+MSG_FAILEDCREATINGMUIAPPLICATION
+Skapandet av MUI-applikation misslyckades
+; Failed creating MUI application
+;
+MSG_INITIALIZATIONFAILED
+Initialisering misslyckades
+; Initialization failed
+;
+MSG_ERROR
+Fel
+; Error
+;
+MSG_SUCCESS
+Lyckades
+; Success
+;
+MSG_LINE
+Rad %d: %s '%s'
+; Line %d: %s '%s'
+;
+MSG_NOVICEUSERALLACTIONSAUTOMATIC
+Nybörjare - Inga val görs av användaren
+; Novice User - All Actions Automatic
+;
+MSG_INTERMEDIATEUSERLIMITEDMANUALCONTROL
+Avancerad - Kritiska val görs av användaren
+; Intermediate User - Limited Manual Control
+;
+MSG_EXPERTUSERMUSTCONFIRMALLACTIONS
+Expert - Alla val görs av användaren
+; Expert User - Must Confirm all actions
+;
+MSG_INSTALLFORREAL
+Installera på riktigt
+; Install for real
+;
+MSG_DRYRUNONLY
+Torrsim endast
+; Dry run only
+;
+MSG_NOLOGGING
+Ingen loggning
+; No logging
+;
+MSG_LOGTOFILE
+Logga till fil
+; Log to file
+;
+MSG_INSTALLERREQUIREDARGUMENTMISSING
+installer: Erforderligt argument saknas\n
+; installer: required argument missing\n
+;
+MSG_NCANBEFOUNDIN
+%s\n\n%s återfinns i %s
+; %s\n\n%s can be found in %s
+;
+MSG_INSTALLATIONCOMPLETE
+Installationen är klar
+; Installation complete
+;
+MSG_EXECUTED
+'%s' exekverades.\n
+; Executed '%s'.\n
+;
+MSG_ERRORCOULDNOTOPENFILE
+Fel: Filen '%s' kunde ej öppnas\n
+; Error: Could not open file '%s'\n
+;
+MSG_LINE2
+Rad %d: %s '%s'\n
+; Line %d: %s '%s'\n
+;
+MSG_WORKINGONINSTALLATIONN
+Arbete pågår...\n\n
+; Working on installation...\n\n
+;
+MSG_SELECTDIRECTORY
+Välj katalog
+; Select directory
+;
+MSG_SELECTFILE
+Välj fil
+; Select file
+;
+MSG_ASSIGNTO
+Skapar 'assign' av '%s' till '%s'\n
+; Assign '%s' to '%s'\n
+;
+MSG_REMOVEASSIGN
+Tar bort 'assign' '%s'\n
+; Remove assign '%s'\n
+;
+MSG_COULDNOTASSIGNTO
+Kunde ej skapa 'assign' av '%s' till '%s'\n
+; Could not assign '%s' to '%s'\n
+;
+MSG_COULDNOTREMOVEASSIGN
+Kunde ej ta bort 'assign' '%s'\n
+; Could not remove assign '%s'\n
+;
+MSG_APPENDTO
+Tillfogar '%s' till '%s'\n
+; Append '%s' to '%s'\n
+;
+MSG_INCLUDEIN
+Inkluderar '%s' i '%s'\n
+; Include '%s' in '%s'\n
+;
+MSG_VERSIONTOINSTALL
+Version att installera
+; Version to install
+;
+MSG_VERSIONCURRENTLYINSTALLED
+Befintlig version
+; Version currently installed
+;
+MSG_UNKNOWNVERSION
+Okänd version
+; Unknown version
+;
+MSG_DESTINATIONDRAWER2
+Målkatalog
+; Destination drawer
+;
+MSG_THEREISNOCURRENTLYINSTALLEDVERSION
+Ingen version är installerad
+; There is no currently installed version

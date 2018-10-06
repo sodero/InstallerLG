@@ -76,6 +76,11 @@ deutsch: ../src/Installer.cd
 	catcomp /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog || \
 flexcat /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog
 
+svenska: ../src/Installer.cd
+	makedir Catalogs/$@ ALL
+	catcomp /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog || \
+flexcat /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog
+
 #---------------------------------------------------------------------------------#
 # Misc
 #---------------------------------------------------------------------------------#
