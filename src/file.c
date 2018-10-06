@@ -349,8 +349,10 @@ static pnode_p h_choices(entry_p contxt,
                 // Next file.
                 e++;
 
-                // Make sure that the file / dir exists.
-                if(node->type)
+                // Make sure that the file / dir exists. But only
+                // in strict mode, otherwise just go on, missing
+                // files will be skipped during file copy anyway.
+                if(node->type || !get_numvar(contxt, "@strict"))
                 {
                     // If there are more files, allocate
                     // memory for the next node.

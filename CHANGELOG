@@ -155,5 +155,6 @@
 ===============
 - Locale support (German and Swedish<-FIXME translations included).
 - (database) runtime cpu detection fixed.
+- (copyfiles) (choices) non strict mode (ign-addon-ods).
 - (copyfiles) (fonts) fixed.
 - ?
