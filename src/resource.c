@@ -10,20 +10,20 @@
 #include "error.h"
 #include "resource.h"
 #ifdef AMIGA
-# include <proto/exec.h>
-# include <proto/locale.h>
-# define CATCOMP_BLOCK
-# define CATCOMP_CODE
-# define Installer_BASIC_CODE
+#include <proto/exec.h>
+#include <proto/locale.h>
+#define CATCOMP_BLOCK
+#define CATCOMP_CODE
+#define Installer_BASIC_CODE
 struct Installer_LocaleInfo
 {
     APTR li_LocaleBase;
     APTR li_Catalog;
 };
-# include "strings.h"
-# ifdef Installer_STRINGS_H
-#  define GetString(a,b) GetInstallerString(a,b)
-# endif
+#include "strings.h"
+#ifdef Installer_STRINGS_H
+#define GetString(a,b) GetInstallerString(a,b)
+#endif
 struct Installer_LocaleInfo li;
 #endif
 
