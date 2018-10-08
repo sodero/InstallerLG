@@ -24,13 +24,13 @@ AMIGA = true
 CWRN = -Wall -Wno-pointer-sign
 CGEN = -Os -std=gnu99 -DAMIGA
 LDLIBS = -ldebug
-I18N = strings.h
 ifeq ($(OS),MorphOS)
 LDLIBS += -noixemul
 endif
 endif
 endif
 
+I18N = strings.h
 CINC += -I . -I $(VPATH)
 CFLAGS += $(CINC) $(CGEN) $(CWRN) $(CDEF)
 
@@ -62,24 +62,21 @@ else
 	@echo "[SKIPPED] $(LEX) $(LFLAGS) -t $< > $@"
 endif
 
-gui.o: gui.c gui.h
+gui.o: gui.c gui.h $(I18N)
 	$(CC) -Os -c $< -DLLVL=2 $(CWRN)
 
-resource.c: $(I18N)
-
-strings.h: Installer.cd
-	catcomp /src/Installer.cd CFILE /src/$@ NONUMBERS || \
-flexcat /src/Installer.cd /src/$@=CatComp_h.sd
+$(I18N): Installer.cd
+	catcomp $< CFILE $@ NONUMBERS 2> /dev/null || flexcat $< $@=CatComp_h.sd
 
 deutsch: Installer.cd deutsch.ct
-	makedir Catalogs/$@ ALL
-	catcomp /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog || \
-flexcat /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog
+	mkdir -p Catalogs/$@
+	catcomp $< $(word 2,$^) CATALOG Catalogs/$@/Installer.catalog 2> /dev/null || \
+    flexcat $< $(word 2,$^) CATALOG Catalogs/$@/Installer.catalog
 
 svenska: Installer.cd svenska.ct
-	makedir Catalogs/$@ ALL
-	catcomp /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog || \
-flexcat /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog
+	mkdir -p Catalogs/$@
+	catcomp $< $(word 2,$^) CATALOG Catalogs/$@/Installer.catalog 2> /dev/null || \
+    flexcat $< $(word 2,$^) CATALOG Catalogs/$@/Installer.catalog
 
 #---------------------------------------------------------------------------------#
 # Misc
@@ -94,5 +91,4 @@ endif
 
 .PHONY: clean
 clean:
-	$(RM) ../src/$(I18N)
-	$(RM) -R *.o $(EXE) $(EXE).tmp.* leak.* err.* _??_ _???_
+	$(RM) -Rf *.o $(EXE) $(EXE).tmp.* leak.* err.* _??_ _???_ Catalogs $(I18N)
