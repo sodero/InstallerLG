@@ -24,7 +24,13 @@
 #include <exec/execbase.h>
 #include <exec/memory.h>
 #include <exec/resident.h>
-#include <exec/system.h>
+# ifdef __MORPHOS__
+#  include <exec/system.h>
+# endif
+# ifdef __AROS__
+#  include <proto/processor.h>
+#  include <resources/processor.h>
+# endif
 #include <proto/dos.h>
 #include <proto/exec.h>
 #include <proto/icon.h>
