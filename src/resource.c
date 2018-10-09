@@ -136,7 +136,7 @@ void locale_init(void)
         li.li_LocaleBase = OpenLibrary("locale.library", 37);
         li.li_Catalog = OpenCatalog(NULL, "Installer.catalog", TAG_DONE);
         #else
-        li.li_LocaleBase = li.li_Catalog = NULL;
+        li.li_LocaleBase = li.li_Catalog = (APTR) 0;
         #endif
     }
 }
@@ -155,7 +155,7 @@ void locale_exit(void)
         CloseCatalog(li.li_Catalog);
         CloseLibrary(li.li_LocaleBase);
         #else
-        li.li_LocaleBase = li.li_Catalog = NULL;
+        li.li_LocaleBase = li.li_Catalog = (APTR) 0;
         #endif
     }
 }
