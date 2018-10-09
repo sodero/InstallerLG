@@ -51,7 +51,7 @@ static char *h_cpu_name(void)
     static char *cpu[ALL] = { "Unknown", "PowerPC", "ARM",
                               "68000", "68010", "68020", "68030",
                               "68040", "68060", "x86", "x84_64" };
-    u_int32_t arc = ERR;
+    uint32_t arc = ERR;
 
     #ifdef __MORPHOS__
     // On MorphOS, there is only PPC (for now) (and no define).

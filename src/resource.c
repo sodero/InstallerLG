@@ -10,22 +10,17 @@
 #include "error.h"
 #include "resource.h"
 #ifdef AMIGA
-#include <proto/exec.h>
-#include <proto/locale.h>
-#define CATCOMP_BLOCK
-#define CATCOMP_CODE
-#define Installer_BASIC_CODE
-struct Installer_LocaleInfo
+# include <proto/exec.h>
+# include <proto/locale.h>
+#endif
+
+struct LocaleInfo
 {
     APTR li_LocaleBase;
     APTR li_Catalog;
 };
-#include "strings.h"
-#ifdef Installer_STRINGS_H
-#define GetString(a,b) GetInstallerString(a,b)
-#endif
-struct Installer_LocaleInfo li;
-#endif
+
+static struct LocaleInfo li;
 
 //----------------------------------------------------------------------------
 // Name:        tr
@@ -38,9 +33,6 @@ const char *tr(res_t r)
     // Fail nicely if we're out of range.
     res_t i = r > S_GONE ? S_GONE : r;
 
-    #ifdef AMIGA
-    return GetString(&li, i - 1);
-    #else
     // res_t -> string mappings.
     static const char *res[] =
     {
@@ -118,9 +110,16 @@ const char *tr(res_t r)
         "GONE"
     };
 
-    // res[i] is a valid string.
-    return res[i];
+    #ifdef AMIGA
+    if(li.li_LocaleBase &&
+       li.li_Catalog && i > S_NONE)
+    {
+        return GetCatalogStr(li.li_Catalog, i - 1, res[i]);
+    }
     #endif
+
+    // Always a valid string.
+    return res[i];
 }
 
 //----------------------------------------------------------------------------
@@ -131,13 +130,15 @@ const char *tr(res_t r)
 //----------------------------------------------------------------------------
 void locale_init(void)
 {
-    #ifdef AMIGA
     if(!li.li_LocaleBase)
     {
+        #ifdef AMIGA
         li.li_LocaleBase = OpenLibrary("locale.library", 37);
         li.li_Catalog = OpenCatalog(NULL, "Installer.catalog", TAG_DONE);
+        #else
+        li.li_LocaleBase = li.li_Catalog = NULL;
+        #endif
     }
-    #endif
 }
 
 //----------------------------------------------------------------------------
@@ -148,11 +149,13 @@ void locale_init(void)
 //----------------------------------------------------------------------------
 void locale_exit(void)
 {
-    #ifdef AMIGA
     if(li.li_LocaleBase)
     {
+        #ifdef AMIGA
         CloseCatalog(li.li_Catalog);
         CloseLibrary(li.li_LocaleBase);
+        #else
+        li.li_LocaleBase = li.li_Catalog = NULL;
+        #endif
     }
-    #endif
 }

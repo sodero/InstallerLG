@@ -3,6 +3,7 @@
 #---------------------------------------------------------------------------------#
 VPATH := ../src
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
+CATCOMP := $(shell which catcomp 2> /dev/null || which flexcat)
 OS := $(shell uname)
 EXE := installer
 
@@ -24,11 +25,14 @@ AMIGA = true
 CWRN = -Wall -Wno-pointer-sign
 CGEN = -Os -std=gnu99 -DAMIGA
 LDLIBS = -ldebug
-I18N = strings.h
 ifeq ($(OS),MorphOS)
 LDLIBS += -noixemul
 endif
 endif
+endif
+
+ifneq ($(AMIGA),true)
+DD = ..
 endif
 
 CINC += -I . -I $(VPATH)
@@ -65,21 +69,18 @@ endif
 gui.o: gui.c gui.h
 	$(CC) -Os -c $< -DLLVL=2 $(CWRN)
 
-resource.c: $(I18N)
-
-strings.h: Installer.cd
-	catcomp /src/Installer.cd CFILE /src/$@ NONUMBERS || \
-flexcat /src/Installer.cd /src/$@=CatComp_h.sd
-
+#---------------------------------------------------------------------------------#
+# Catalogs
+#---------------------------------------------------------------------------------#
+.PHONY: deutsch
 deutsch: Installer.cd deutsch.ct
-	makedir Catalogs/$@ ALL
-	catcomp /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog || \
-flexcat /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog
+	mkdir -p Catalogs/$@
+	$(CATCOMP) $(DD)/src/Installer.cd $(DD)/src/$@.ct CATALOG Catalogs/$@/Installer.catalog
 
+.PHONY: svenska
 svenska: Installer.cd svenska.ct
-	makedir Catalogs/$@ ALL
-	catcomp /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog || \
-flexcat /src/Installer.cd /src/$@.ct CATALOG Catalogs/$@/Installer.catalog
+	mkdir -p Catalogs/$@
+	$(CATCOMP) $(DD)/src/Installer.cd $(DD)/src/$@.ct CATALOG Catalogs/$@/Installer.catalog
 
 #---------------------------------------------------------------------------------#
 # Misc
@@ -94,5 +95,4 @@ endif
 
 .PHONY: clean
 clean:
-	$(RM) ../src/$(I18N)
-	$(RM) -R *.o $(EXE) $(EXE).tmp.* leak.* err.* _??_ _???_
+	$(RM) -R Catalogs *.o $(EXE) $(EXE).tmp.* leak.* err.* _??_ _???_
