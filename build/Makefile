@@ -4,6 +4,7 @@
 VPATH := ../src
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 CATCOMP := $(shell which catcomp 2> /dev/null || which flexcat)
+CATS := $(subst .ct,,$(notdir $(wildcard $(VPATH)/*.ct)))
 OS := $(shell uname)
 EXE := installer
 
@@ -72,6 +73,9 @@ gui.o: gui.c gui.h
 #---------------------------------------------------------------------------------#
 # Catalogs
 #---------------------------------------------------------------------------------#
+.PHONY: catalogs
+catalogs: $(CATS)
+
 .PHONY: deutsch
 deutsch: Installer.cd deutsch.ct
 	mkdir -p Catalogs/$@
