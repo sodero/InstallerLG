@@ -14,11 +14,11 @@
 ; Choose destination
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 (set @default-dest
-  (askdir
-    (prompt "Please choose a location for installing InstallerLG")
-    (help "-")
-    (default @default-dest)
-  )
+    (askdir
+        (prompt "Please choose a location for installing InstallerLG")
+        (help "-")
+        (default @default-dest)
+    )
 )
 
 ;---------------------------------------------------------------------------------------------------------------------------------------------
@@ -28,13 +28,13 @@
         (getversion #app-bin)
         (getversion (tackon @default-dest #app-bin))
     )
-    ; Same version
+    ; Same version.
     (
         (if (<>
                 (getsum #app-bin)
                 (getsum (tackon @default-dest #app-bin))
             )
-            ; Different checksum
+            ; Different checksum.
             (
                 (copyfiles
                     (prompt ("Destination '%s'" @default-dest))
@@ -45,7 +45,7 @@
             )
         )
     )
-    ; Different version
+    ; Different version.
     (
         (copylib
             (prompt ("Copying '%s' to '%s'" #app-bin (tackon @default-dest #app-bin)))
@@ -57,3 +57,47 @@
     )
 )
 
+;---------------------------------------------------------------------------------------------------------------------------------------------
+; Copy catalogs
+;---------------------------------------------------------------------------------------------------------------------------------------------
+(if (getassign "LOCALE")
+    (
+        ; Multi select.
+        (set cats
+            (askoptions
+                (prompt "Install catalogs?")
+                (help "-")
+                (choices "Deutsch" "Svenska")
+                (default 0)
+            )
+        )
+
+        ; If any of the catalogs were chosen
+        (if (<> cats 0)
+            (
+                ; Create 'Catalogs' if missing.
+                (if (not (exists "LOCALE:Catalogs"))
+                    (makedir "LOCALE:Catalogs")
+                )
+
+                ; Copy 'deutsch' if selected.
+                (if (bitand cats 1)
+                    (copyfiles
+                        (source "Catalogs/deutsch/Installer.catalog")
+                        (dest "LOCALE:Catalogs/deutsch")
+                        (optional "force")
+                    )
+                )
+
+                ; Copy 'svenska' if selected.
+                (if (bitand cats 2)
+                    (copyfiles
+                        (source "Catalogs/svenska/Installer.catalog")
+                        (dest "LOCALE:Catalogs/svenska")
+                        (optional "force")
+                    )
+                )
+            )
+        )
+    )
+)
