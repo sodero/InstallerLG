@@ -15,12 +15,13 @@ DIR := aminet
 SRC := ../src
 BIN := ../build
 EXE := installer
+CAT := Catalogs
 NAME := InstallerLG
 OS := $(shell uname -s | tr A-Z a-z)
 ARCH := $(shell uname -m | tr -d ower)
 LHA := $(DIR)/$(NAME).$(ARCH)-$(OS).lha
 README := $(DIR)/$(NAME).$(ARCH)-$(OS).readme
-FILES := $(EXE) 'InstallerLG installer' 'InstallerLG installer.info'
+FILES := $(EXE) $(CAT) 'InstallerLG installer' 'InstallerLG installer.info'
 STEMS := $(sort $(basename $(notdir $(wildcard $(SRC)/*.c) $(wildcard $(BIN)/*.c))))
 
 #-----------------------------------------------------------------------------------#
@@ -55,16 +56,19 @@ clean:
 	$(RM) $(README)
 	$(RM) $(DIR)/*.lha
 	$(RM) $(FLT)/*.c $(FLT)/*.h
-	$(RM) -R $(NAME)
+	$(RM) -R $(NAME) Catalogs
 	$(RM) $(SRC)/*.swp ../test/*.swp $(BIN)/_*
 
-$(LHA): $(EXE)
+$(LHA): $(EXE) $(CAT)
 	lha a $@ $(FILES)
-	cp $(BIN)/$(EXE) .
+
+$(CAT):
+	$(MAKE) -C $(BIN) catalogs
+	cp -R $(BIN)/$(CAT) .
+
+$(EXE):
+	$(MAKE) -C $(BIN) $(EXE)
+	cp $(BIN)/$(EXE) $(EXE)
 
 $(README): $(DIR)/$(NAME).readme
 	cat $^ | $(SED) -e 's/__ARCH__/$(ARCH)-$(OS)/' > $@
-
-$(EXE):
-	$(MAKE) -C $(BIN)
-	cp $(BIN)/$(EXE) .
