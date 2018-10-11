@@ -3,8 +3,6 @@
 #---------------------------------------------------------------------------------#
 VPATH := ../src
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
-CATCOMP := $(shell which catcomp 2> /dev/null || which flexcat)
-CATS := $(subst .ct,,$(notdir $(wildcard $(VPATH)/*.ct)))
 OS := $(shell uname)
 EXE := Installer
 
@@ -73,18 +71,14 @@ gui.o: gui.c gui.h
 #---------------------------------------------------------------------------------#
 # Catalogs
 #---------------------------------------------------------------------------------#
-.PHONY: catalogs
-catalogs: $(CATS)
-
-.PHONY: deutsch
-deutsch: Installer.cd deutsch.ct
-	mkdir -p Catalogs/$@
-	$(CATCOMP) $(DD)/src/Installer.cd $(DD)/src/$@.ct CATALOG Catalogs/$@/Installer.catalog
-
-.PHONY: svenska
-svenska: Installer.cd svenska.ct
-	mkdir -p Catalogs/$@
-	$(CATCOMP) $(DD)/src/Installer.cd $(DD)/src/$@.ct CATALOG Catalogs/$@/Installer.catalog
+.PHONY: cat
+cat:
+	for CAT in $(subst .ct,,$(notdir $(wildcard $(VPATH)/*.ct))); do \
+	mkdir -p Catalogs/$$CAT && \
+	catcomp $(DD)/src/$(EXE).cd TRANSLATION $(DD)/src/$$CAT.ct \
+            CATALOG Catalogs/$$CAT/$(EXE).catalog 2> /dev/null || \
+	flexcat $(DD)/src/$(EXE).cd $(DD)/src/$$CAT.ct \
+            CATALOG Catalogs/$$CAT/$(EXE).catalog ; done
 
 #---------------------------------------------------------------------------------#
 # Misc

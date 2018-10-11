@@ -63,7 +63,7 @@ $(LHA): $(EXE) $(CAT)
 	lha a $@ $(FILES)
 
 $(CAT):
-	$(MAKE) -C $(BIN) catalogs
+	$(MAKE) -C $(BIN) cat
 	cp -R $(BIN)/$(CAT) .
 
 $(EXE):
