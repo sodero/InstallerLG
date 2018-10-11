@@ -6,7 +6,7 @@ OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 CATCOMP := $(shell which catcomp 2> /dev/null || which flexcat)
 CATS := $(subst .ct,,$(notdir $(wildcard $(VPATH)/*.ct)))
 OS := $(shell uname)
-EXE := installer
+EXE := Installer
 
 #---------------------------------------------------------------------------------#
 # OS
@@ -90,7 +90,7 @@ svenska: Installer.cd svenska.ct
 # Misc
 #---------------------------------------------------------------------------------#
 .PHONY: test
-test: installer
+test: $(EXE)
 ifneq ($(AMIGA),true)
 	@sh ../test/run.sh ./$(EXE) ../test $(REXTRA)
 else
