@@ -56,93 +56,103 @@ entry_p m_complete(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_debug(entry_p contxt)
 {
-    // Are we being invoked from shell or
-    // WB?
+    // Invoked from shell or WB?
     int cli = arg_argc(-1);
 
-    // Children are optional. Doesn't make sense,
-    // but that's how it's done in 3.9.
-    if(contxt && contxt->children)
+    // Sanity check.
+    if(contxt && contxt->resolved)
     {
-        entry_p *cur = contxt->children;
-
-        // For all children, print the string
-        // representation, to stdout if we're
-        // running in a shell or to the debug
-        // log when invoked from Workbench.
-        while(*cur && *cur != end())
+        // Children are optional. Doesn't
+        // make sense, but that's how it's
+        // done in 3.9.
+        if(contxt->children)
         {
-            char *s = NULL;
+            entry_p *cur = contxt->children;
 
-            // If this is a variable, test if it's
-            // defined, and if not, print <NIL>.
-            if((*cur)->type == SYMREF)
+            // For all children, print the string
+            // representation, to stdout if we're
+            // running in a shell or to the debug
+            // log when invoked from Workbench.
+            while(*cur && *cur != end())
             {
-                // Save level of strictness.
-                entry_p res;
-                int m = get_numvar(contxt, "@strict");
+                char *s = NULL;
 
-                // Set non strict mode and search
-                // for symbol. By doing it this way
-                // we repress the error message that
-                // is shown when symbols are missing.
-                set_numvar(contxt, "@strict", 0);
-                res = find_symbol(*cur);
-
-                // If the symbol is missing, we will
-                // have a DANGLE entry that is false.
-                if(res->type == DANGLE && !tru(res))
+                // If this is a variable, test if it's
+                // defined, and if not, print <NIL>.
+                if((*cur)->type == SYMREF)
                 {
-                    // As prescribed.
-                    s = "<NIL>";
+                    // Save level of strictness.
+                    entry_p res;
+                    int m = get_numvar(contxt, "@strict");
+
+                    // Set non strict mode and search
+                    // for symbol. By doing it this way
+                    // we repress the error message that
+                    // is shown when symbols are missing.
+                    set_numvar(contxt, "@strict", 0);
+                    res = find_symbol(*cur);
+
+                    // If the symbol is missing, we will
+                    // have a DANGLE entry that is false.
+                    if(res->type == DANGLE && !tru(res))
+                    {
+                        // As prescribed.
+                        s = "<NIL>";
+                    }
+                    else
+                    {
+                        // Symbol found. Resolve it.
+                        s = str(*cur);
+                    }
+
+                    // Restore level of strictness.
+                    set_numvar(contxt, "@strict", m);
                 }
                 else
                 {
-                    // Symbol found. Resolve it.
+                    // Resolve string.
                     s = str(*cur);
                 }
 
-                // Restore level of strictness.
-                set_numvar(contxt, "@strict", m);
+                if(cli)
+                {
+                    // Invoked from CLI.
+                    printf("%s ", s);
+                }
+                #ifdef AMIGA
+                else
+                {
+                    // Invoked from WB.
+                    KPrintF("%s ", s);
+                }
+                #endif
+                cur++;
             }
-            else
-            {
-                // Resolve string.
-                s = str(*cur);
-            }
-
-            if(cli)
-            {
-                // Invoked from CLI.
-                printf("%s ", s);
-            }
-            #ifdef AMIGA
-            else
-            {
-                // Invoked from WB.
-                KPrintF("%s ", s);
-            }
-            #endif
-            cur++;
         }
-    }
 
-    // Append final newline.
-    if(cli)
-    {
-        // Invoked from CLI.
-        printf("\n");
+        // Append final newline.
+        if(cli)
+        {
+            // Invoked from CLI.
+            printf("\n");
+        }
+        #ifdef AMIGA
+        else
+        {
+            // Invoked from WB.
+            KPrintF("\n");
+        }
+        #endif
+
+        // Always.
+        RNUM(1);
     }
-    #ifdef AMIGA
     else
     {
-        // Invoked from WB.
-        KPrintF("\n");
+        // The parser is broken.
+        PANIC(contxt);
+        RCUR;
     }
-    #endif
-
-    // Always.
-    RNUM(1);
 }
 
 //----------------------------------------------------------------------------

@@ -1014,7 +1014,7 @@ static int h_copyfile(entry_p contxt,
 
                         // Preserve file permissions. On err,
                         // code will be set by h_protect_x().
-                        int32_t prm;
+                        int32_t prm = 0;
 
                         if(h_protect_get(contxt, src, &prm))
                         {
@@ -1401,7 +1401,7 @@ entry_p m_copyfiles(entry_p contxt)
                     for(; cur && DNUM;
                         cur = cur->next)
                     {
-                        int32_t prm;
+                        int32_t prm = 0;
 
                         // Copy file / create dir / skip if zero:ed
                         switch(cur->type)
@@ -2498,7 +2498,7 @@ entry_p m_fileonly(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_foreach(entry_p contxt)
 {
-    if(contxt || c_sane(contxt, 3))
+    if(c_sane(contxt, 3))
     {
         // Pattern matching is not done
         // on non-Amiga systems.
