@@ -78,7 +78,8 @@ cat:
 	catcomp $(DD)/src/$(EXE).cd TRANSLATION $(DD)/src/$$CAT.ct \
             CATALOG Catalogs/$$CAT/$(EXE).catalog 2> /dev/null || \
 	flexcat $(DD)/src/$(EXE).cd $(DD)/src/$$CAT.ct \
-            CATALOG Catalogs/$$CAT/$(EXE).catalog ; done
+            CATALOG Catalogs/$$CAT/$(EXE).catalog || \
+	rm -Rf Catalogs; done
 
 #---------------------------------------------------------------------------------#
 # Misc
