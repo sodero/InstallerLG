@@ -1,10 +1,16 @@
 #---------------------------------------------------------------------------------#
 # OS
 #---------------------------------------------------------------------------------#
-ifeq ($(shell uname),Darwin)
+OS := $(shell uname)
+ifeq ($(OS),Darwin)
 SED := gsed
 else
 SED := sed
+endif
+ifeq ($(OS),MorphOS)
+LHAFLAGS := a -r
+else
+LHAFLAGS := a
 endif
 
 #-----------------------------------------------------------------------------------#
@@ -19,7 +25,7 @@ CAT := Catalogs
 NAME := InstallerLG
 OS := $(shell uname -s | tr A-Z a-z)
 ARCH := $(shell uname -m | tr -d ower)
-LHA := $(DIR)/$(NAME).$(ARCH)-$(OS).lha
+ARC := $(DIR)/$(NAME).$(ARCH)-$(OS).lha
 README := $(DIR)/$(NAME).$(ARCH)-$(OS).readme
 FILES := $(EXE) $(CAT) 'InstallerLG installer' 'InstallerLG installer.info'
 STEMS := $(sort $(basename $(notdir $(wildcard $(SRC)/*.c) $(wildcard $(BIN)/*.c))))
@@ -28,7 +34,7 @@ STEMS := $(sort $(basename $(notdir $(wildcard $(SRC)/*.c) $(wildcard $(BIN)/*.c
 # Targets
 #-----------------------------------------------------------------------------------#
 .PHONY: dist
-dist: $(LHA) $(README)
+dist: $(ARC) $(README)
 
 .PHONY: aros
 aros:
@@ -47,7 +53,7 @@ src: clean aros
 	cp -R $(SRC) $(NAME)
 	cp -R ../test $(NAME)
 	cp -R aros $(NAME)
-	lha a $(DIR)/$(NAME).src.lha $(NAME)
+	lha $(LHAFLAGS) $(DIR)/$(NAME).src.lha $(NAME)
 
 .PHONY: clean
 clean:
@@ -59,8 +65,8 @@ clean:
 	$(RM) -R $(NAME) Catalogs
 	$(RM) $(SRC)/*.swp ../test/*.swp $(BIN)/_*
 
-$(LHA): $(EXE) $(CAT)
-	lha a $@ $(FILES)
+$(ARC): $(EXE) $(CAT)
+	lha $(LHAFLAGS) $@ $(FILES)
 
 $(CAT):
 	$(MAKE) -C $(BIN) cat
