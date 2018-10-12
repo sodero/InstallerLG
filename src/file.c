@@ -822,8 +822,12 @@ static int h_protect_set(entry_p contxt,
         {
             if(!SetProtection(file, mask))
             {
-                ERR(ERR_SET_PERM, file);
-                return 0;
+                // Only fail if we're in 'strict' mode.
+                if(get_numvar(contxt, "@strict"))
+                {
+                    ERR(ERR_SET_PERM, file);
+                    return 0;
+                }
             }
         }
         #endif
