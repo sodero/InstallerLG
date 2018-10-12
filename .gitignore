@@ -5,3 +5,4 @@
 *.swp
 build/installer
 build/_*
+build/Catalogs/

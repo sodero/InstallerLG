@@ -17,6 +17,6 @@
 
 #define STY(X) #X
 #define VER(X) STY(X)
-#define VERSION_STRING "\0$VER: InstallerLG " VER(MAJOR) "." VER(MINOR) " [" PHASE VER(BUILD) "]";
+#define VERSION_STRING "\0$VER: InstallerLG " VER(MAJOR) "." VER(MINOR) " (" __DATE__ ")" " [" PHASE VER(BUILD) "]";
 
 #endif

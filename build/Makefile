@@ -65,7 +65,7 @@ else
 	@echo "[SKIPPED] $(LEX) $(LFLAGS) -t $< > $@"
 endif
 
-gui.o: gui.c gui.h
+gui.o: gui.c gui.h version.h
 	$(CC) -Os -c $< -DLLVL=2 $(CWRN)
 
 #---------------------------------------------------------------------------------#
