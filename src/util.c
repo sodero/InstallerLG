@@ -502,7 +502,7 @@ char *get_optstr(entry_p c, opt_t t)
                 {
                     // Sum up the length.
                     *cs = get_chlstr(*e);
-                    n += strlen(*(cs++));
+                    n += *cs ? strlen(*(cs++)) : 0;
                 }
 
                 // Next child.
@@ -535,7 +535,7 @@ char *get_optstr(entry_p c, opt_t t)
             else
             {
                 // Out of memory.
-                free(cs);
+                free(os);
             }
         }
         // Out of memory
