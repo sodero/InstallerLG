@@ -532,6 +532,8 @@ static pnode_p h_filetree(entry_p contxt,
                                     pattern = NULL;
                                 }
                                 #else
+                                // Get rid of warning.
+                                *pat = '\0';
                                 type = h_exists(n_src);
                                 #endif
                             }
