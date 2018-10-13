@@ -2,4 +2,16 @@
 - Check GUI list mgmt for leaks.
 - file.c is a nightmare, clean up.
 - Exchange Show / Hide doesn't work?
-- (showmedia) seems to be a thing? (>= V44), refer to IBrowse script.
+- >= V44
+-- (back <code>)
+-- (closemedia <media>)
+-- (closewbobject <argument>)
+-- (effect <position> <effect> <color 1> <color 2>)
+-- (openwbobject <argument> ...)
+-- (reboot)
+-- (retrace)
+-- (setmedia <media> <action> [parameter])
+-- (showmedia <medianame> <filename> <position> <size> <borderflag> ...)
+   seems to be a thing? refer to IBrowse script.
+-- (showwbobject <argument>)
+-- (trace)
