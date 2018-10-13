@@ -985,14 +985,17 @@ entry_p m_iconinfo(entry_p contxt)
                                     svl = (char *) FindToolType(obj->do_ToolTypes, n);
                                     n = str(tt[i]->children[++j]);
                                 }
+
+                                // Always a valid value.
+                                svl = svl ? svl : "";
                                 #else
                                 // Testing purposes only.
                                 snprintf(get_buf(), buf_size(), "%d:%zu", t, j);
                                 svl = get_buf();
                                 #endif
 
-                                // Always create a valid value (string).
-                                val = new_string(strdup(svl ? svl : ""));
+                                // Always a valid (string).
+                                val = new_string(strdup(svl));
 
                                 if(val)
                                 {

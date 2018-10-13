@@ -498,13 +498,13 @@ static pnode_p h_filetree(entry_p contxt,
                         {
                             if(pattern)
                             {
-                                #ifdef AMIGA
                                 // Use a static buffer, Installer.guide
                                 // restricts pattern length to 64. It
                                 // seems like MatchPattern can use a lot
                                 // of stack if we use long patterns, so
                                 // let's not get rid of this limitation.
                                 static char pat[BUFSIZ];
+                                #ifdef AMIGA
                                 LONG w = ParsePattern(str(pattern), pat, sizeof(pat));
 
                                 // Can we parse the pattern?
@@ -1061,6 +1061,13 @@ static int h_copyfile(entry_p contxt,
             }
             else
             {
+                // The source handle might be open.
+                if(fs)
+                {
+                    // Not true on non Amiga systems.
+                    fclose(fs);
+                }
+
                 if(mode & CF_NOFAIL)
                 {
                     // Ignore failure.

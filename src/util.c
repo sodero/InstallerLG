@@ -328,20 +328,18 @@ int s_sane(entry_p c, size_t n)
 //----------------------------------------------------------------------------
 void set_numvar(entry_p c, char *v, int n)
 {
+    // Dummy reference used for searching.
+    static entry_t ref = { .type = SYMREF };
+
     // We need a name and a context.
     if(c && v)
     {
-        // Dummy reference used to find
-        // the variable.
-        entry_p s;
-        static entry_t ref = { .type = SYMREF };
-
-        // Name and reparent dummy.
-        ref.name = v;
+        // Name and reparent.
         ref.parent = c;
+        ref.name = v;
 
         // Find whatever 'v' is.
-        s = find_symbol(&ref);
+        entry_p s = find_symbol(&ref);
 
         // This should be a symbol.
         if(s && s->type == SYMBOL)
@@ -484,50 +482,49 @@ char *get_optstr(entry_p c, opt_t t)
     {
         // References to string evaluations of all
         // options of the right type.
-        char **cs = calloc(n + 1, sizeof(char *)),
-             **os = cs;
+        char **cs = calloc(n + 1, sizeof(char *));
 
         if(cs)
         {
             // Empty string.
             e = c->children;
-            n = 1;
+            size_t ln = 1;
 
             // For all children, evaluate them
             // once and save string pointers.
-            while(*e && *e != end())
+            for(size_t i = 0; i < n &&
+                *e && *e != end(); e++)
             {
-                if((*e)->type == OPTION &&
-                   (*e)->id == t)
+                if((*e)->id == t &&
+                   (*e)->type == OPTION)
                 {
                     // Sum up the length.
-                    *cs = get_chlstr(*e);
-                    n += *cs ? strlen(*(cs++)) : 0;
-                }
+                    char *cur = get_chlstr(*e);
 
-                // Next child.
-                e++;
+                    if(cur)
+                    {
+                        cs[i++] = cur;
+                        ln += strlen(cur);
+                    }
+                }
             }
 
             // Allocate memory to hold the
             // concatenation of all strings.
-            char * r = calloc(n, 1);
+            char *r = calloc(ln, 1);
 
             if(r)
             {
-                // Start all over.
-                cs = os;
-
                 // Concatenate and free
                 // substrings in one go.
-                while(*cs)
+                for(size_t i = 0; cs[i]; i++)
                 {
-                      strcat(r, *cs);
-                      free(*(cs++));
+                    strlcat(r, cs[i], ln);
+                    free(cs[i]);
                 }
 
                 // Free references.
-                free(os);
+                free(cs);
 
                 // Done.
                 return r;
@@ -535,7 +532,7 @@ char *get_optstr(entry_p c, opt_t t)
             else
             {
                 // Out of memory.
-                free(os);
+                free(cs);
             }
         }
         // Out of memory
@@ -612,7 +609,7 @@ char *get_chlstr(entry_p c)
                         // 'v' array is null terminated.
                         while(v[n])
                         {
-                            strcat(r, v[n]);
+                            strlcat(r, v[n], l + 1);
                             n++;
                         }
                     }

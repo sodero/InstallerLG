@@ -38,10 +38,10 @@ size_t buf_size(void);
 //----------------------------------------------------------------------------
 #define DCUR    contxt->resolved
 #define DNUM    contxt->resolved->id
-#define RCUR    do { return contxt ? contxt->resolved : NULL; } while(0)
-#define RNUM(X) do { contxt->resolved->id = X; return contxt->resolved; } while(0)
-#define RSTR(X) do { char *rstr = X; if(rstr) { free(contxt->resolved->name); contxt->resolved->name = rstr;} else { PANIC(contxt); contxt->resolved->name[0] = '\0'; }; return contxt->resolved; } while(0)
-#define REST    do { if(contxt->resolved->name) contxt->resolved->name[0] = '\0'; return contxt->resolved; } while(0)
+#define RCUR    { return contxt ? contxt->resolved : NULL; }
+#define RNUM(X) { contxt->resolved->id = X; return contxt->resolved; }
+#define RSTR(X) { char *rstr = X; if(rstr) { free(contxt->resolved->name); contxt->resolved->name = rstr;} else { PANIC(contxt); contxt->resolved->name[0] = '\0'; }; return contxt->resolved; }
+#define REST    { if(contxt->resolved->name) contxt->resolved->name[0] = '\0'; return contxt->resolved; }
 #define CARG(X) (contxt->children[X - 1])
 #define CSYM(X) (contxt->symbols[X - 1])
 

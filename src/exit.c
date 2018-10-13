@@ -163,6 +163,11 @@ entry_p m_exit(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_onerror(entry_p contxt)
 {
+    // A static reference. We might be out of
+    // heap when this is invoked.
+    static entry_t ref = { .type = CUSREF,
+                           .name = "@onerror" };
+
     // We need nothing but a context.
     if(c_sane(contxt, 0))
     {
@@ -171,10 +176,6 @@ entry_p m_onerror(entry_p contxt)
         // immediately.
         RESET();
 
-        // A static reference. We might be out of
-        // heap when this is invoked.
-        static entry_t ref = { .type = CUSREF,
-                               .name = "@onerror" };
         // Connect reference to the current context.
         ref.parent = contxt;
 

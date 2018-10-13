@@ -265,19 +265,19 @@ entry_p m_fmt(entry_p contxt)
         if(k && l)
         {
             // Allocate memory to hold all of them.
-            l += strlen(fmt + j);
-            ret = calloc(l + 1, 1);
+            l += strlen(fmt + j) + 1;
+            ret = calloc(l, 1);
 
             if(ret)
             {
                 // All format strings.
                 for(k = 0; sct[k]; k++)
                 {
-                    strcat(ret, sct[k]);
+                    strlcat(ret, sct[k], l);
                 }
 
                 // Suffix.
-                strcat(ret, fmt + j);
+                strlcat(ret, fmt + j, l);
             }
             else
             {
@@ -638,7 +638,8 @@ char *h_tackon(entry_p contxt,
 
             // Allocate memory to hold path, filename,
             // delimiter and termination.
-            r = calloc(lp + lf + 2, 1);
+            size_t lt = lp + lf + 2;
+            r = calloc(lt, 1);
 
             if(r)
             {
@@ -661,12 +662,12 @@ char *h_tackon(entry_p contxt,
                     if(f[0] != '/' &&
                        f[0] != ':')
                     {
-                        strcat(r, "/");
+                        strlcat(r, "/", lt);
                     }
                 }
 
                 // Concatenate the result.
-                strcat(r, f);
+                strlcat(r, f, lt);
                 return r;
             }
             else
