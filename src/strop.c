@@ -100,7 +100,7 @@ entry_p m_cat(entry_p contxt)
                     }
 
                     // By now we're ready to append.
-                    strncat(buf, s, n);
+                    strncat(buf, s, n - strlen(buf));
                 }
             }
 
@@ -273,11 +273,11 @@ entry_p m_fmt(entry_p contxt)
                 // All format strings.
                 for(k = 0; sct[k]; k++)
                 {
-                    strlcat(ret, sct[k], l);
+                    strncat(ret, sct[k], l - strlen(ret));
                 }
 
                 // Suffix.
-                strlcat(ret, fmt + j, l);
+                strncat(ret, fmt + j, l - strlen(ret));
             }
             else
             {
@@ -662,12 +662,12 @@ char *h_tackon(entry_p contxt,
                     if(f[0] != '/' &&
                        f[0] != ':')
                     {
-                        strlcat(r, "/", lt);
+                        strncat(r, "/", lt - strlen(r));
                     }
                 }
 
                 // Concatenate the result.
-                strlcat(r, f, lt);
+                strncat(r, f, lt - strlen(r));
                 return r;
             }
             else

@@ -519,7 +519,7 @@ char *get_optstr(entry_p c, opt_t t)
                 // substrings in one go.
                 for(size_t i = 0; cs[i]; i++)
                 {
-                    strlcat(r, cs[i], ln);
+                    strncat(r, cs[i], ln - strlen(r));
                     free(cs[i]);
                 }
 
@@ -609,7 +609,7 @@ char *get_chlstr(entry_p c)
                         // 'v' array is null terminated.
                         while(v[n])
                         {
-                            strlcat(r, v[n], l + 1);
+                            strncat(r, v[n], l + 1 - strlen(r));
                             n++;
                         }
                     }
