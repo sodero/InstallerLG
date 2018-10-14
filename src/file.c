@@ -3324,21 +3324,9 @@ entry_p m_startup(entry_p contxt)
 
                 if(tmp)
                 {
-                    // Use mktemp, I don't know if we can use
-                    // anything better without risking that the
-                    // temp file ends up outside of S:, T: for
-                    // example.
+                    // Create temporary file.
                     snprintf(tmp, tln, "%s.XXXXXX", fln);
-
-                    // Temporary workaround to make this build
-                    // on MorphOS. Where's mktemp?
-                    #ifndef __MORPHOS__
-                    tmp = mktemp(tmp);
-                    #endif
-
-                    // When using C2011 we should replace this
-                    // with "wx" in case 'tmp' already exists.
-                    FILE *fp = fopen(tmp, "w");
+                    FILE *fp = fdopen(mkstemp(tmp), "w");
 
                     if(fp)
                     {
