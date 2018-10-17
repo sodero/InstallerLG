@@ -10,7 +10,7 @@ EXE := Installer
 # OS
 #---------------------------------------------------------------------------------#
 ifeq ($(OS),Linux)
-CWRN = -Wall -Wno-unused-but-set-variable
+CWRN = -Wall -Wextra
 CGEN = -g -std=c99
 CDEF = -D_POSIX_SOURCE -D_DEFAULT_SOURCE
 else

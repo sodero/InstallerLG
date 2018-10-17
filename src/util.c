@@ -139,7 +139,7 @@ entry_p get_opt(entry_p c, opt_t t)
 
                     // Have we found the right
                     // type of option?
-                    if(e->id == t)
+                    if(e->id == (int32_t) t)
                     {
                         // We found it.
                         return e;
@@ -468,7 +468,7 @@ char *get_optstr(entry_p c, opt_t t)
     while(*e && *e != end())
     {
         if((*e)->type == OPTION &&
-           (*e)->id == t)
+           (*e)->id == (int32_t) t)
         {
             n++;
         }
@@ -495,7 +495,7 @@ char *get_optstr(entry_p c, opt_t t)
             for(size_t i = 0; i < n &&
                 *e && *e != end(); e++)
             {
-                if((*e)->id == t &&
+                if((*e)->id == (int32_t) t &&
                    (*e)->type == OPTION)
                 {
                     // Sum up the length.
