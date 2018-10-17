@@ -9,7 +9,7 @@
 (iconinfo) ; "","Line 1: syntax error, unexpected ')', expecting '(' ')'",""
 (iconinfo (safe)) ; "","Line 1: Missing option 'dest' 0",""
 (iconinfo (dest) (safe)) ; "","Line 1: syntax error, unexpected ')' ')'",""
-(iconinfo (dest "shell.info") (help)) ; "","Line 1: syntax error, unexpected ')' ')'",""
+(iconinfo (dest "shell.info") (help)) ; "","1",""
 (iconinfo (dest "shell.info") (prompt)) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (iconinfo (dest "shell.info") (help "1")) ; "","1",""
 (iconinfo (dest "shell.info") (prompt "1")) ; "","1",""

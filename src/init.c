@@ -344,7 +344,7 @@ entry_p init(entry_p contxt)
             push(push(push(push(push(push(push(push(
             push(push(push(push(push(push(push(push(
             push(push(push(push(push(push(push(push(
-            push(push(push(push(push(push
+            push(push(push(push(push(push(push(push
             (
                 new_contxt(),
                 new_symbol(strdup("@abort-button"))),
@@ -511,6 +511,12 @@ entry_p init(entry_p contxt)
                 new_string(strdup("askuser"))
                 /*
                 Hack to deal with (optional) quirks.
+                */
+            ),
+                new_symbol(strdup("@null"))),
+                new_string(strdup("NULL"))
+                /*
+                Hack to deal with broken scripts.
                 */
             ),
             STRING
