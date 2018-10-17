@@ -16,8 +16,7 @@ CDEF = -D_POSIX_SOURCE -D_DEFAULT_SOURCE
 else
 ifeq ($(OS),Darwin)
 CGEN = -g -std=c99
-CWRN = -Wno-format-nonliteral -Wno-switch-enum
-CWRN += -Wno-format-security -Werror -Weverything -Wno-vla
+CWRN += -Werror -Weverything -Wno-format-nonliteral -Wno-date-time
 else
 CC := gcc
 AMIGA = true

@@ -134,9 +134,15 @@ entry_p resolve(entry_p entry)
                 return entry->id == OPT_DYNOPT ?
                        entry->call(entry) : entry;
 
-            // If we end up here, we already have a primitive.
-            default:
+            // We already have a primitive.
+            case NUMBER:
+            case STRING:
+            case DANGLE:
                 return entry;
+
+            // We should never end up here.
+            case CUSTOM:
+                break;
         }
     }
 
@@ -188,7 +194,9 @@ int num(entry_p entry)
             case STRING:
                 return atoi(entry->name);
 
-            default:
+            // We should never end up here.
+            case CONTXT:
+            case CUSTOM:
                 break;
         }
     }
@@ -342,7 +350,8 @@ char *str(entry_p entry)
                     return entry->name;
                 }
 
-            default:
+            // We should never end up here.
+            case CONTXT:
                 break;
         }
     }
