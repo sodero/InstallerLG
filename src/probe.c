@@ -177,6 +177,26 @@ entry_p m_database(entry_p contxt)
             ret = h_cpu_name();
         }
         else
+        if(!strcmp(feat, "os"))
+        {
+            // Get OS name. If an 68k AmigaOS build
+            // is used on something != AmigaOS, for
+            // some reason, we will return AmigaOS.
+            #ifdef __AROS__
+            ret = "AROS";
+            #else
+            #ifdef __MORPHOS__
+            ret = "MorphOS";
+            #else
+            #ifdef __AMIGA__
+            ret = "AmigaOS";
+            #else
+            ret = "Unknown";
+            #endif
+            #endif
+            #endif
+        }
+        else
         if(!strcmp(feat, "graphics-mem"))
         {
             memf =

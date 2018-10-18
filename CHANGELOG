@@ -164,4 +164,5 @@
 0.1.0-alpha.31:
 ===============
 - Empty (help) options allowed (InstallerGen).
+- (database) can report name of OS.
 - ?
