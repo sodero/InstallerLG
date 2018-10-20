@@ -179,22 +179,24 @@ entry_p m_database(entry_p contxt)
         else
         if(!strcmp(feat, "os"))
         {
-            // Get OS name. If an 68k AmigaOS build
-            // is used on something != AmigaOS, for
-            // some reason, we will return AmigaOS.
-            #ifdef __AROS__
-            ret = "AROS";
-            #else
-            #ifdef __MORPHOS__
-            ret = "MorphOS";
-            #else
-            #ifdef __AMIGA__
-            ret = "AmigaOS";
+            // Get OS name.
+            #ifdef AMIGA
+            if(FindResident("MorphOS"))
+            {
+                ret = "MorphOS";
+            }
+            else
+            {
+                #ifdef __AROS__
+                ret = "AROS";
+                #else
+                ret = "AmigaOS";
+                #endif
+            }
             #else
             ret = "Unknown";
             #endif
-            #endif
-            #endif
+
         }
         else
         if(!strcmp(feat, "graphics-mem"))
