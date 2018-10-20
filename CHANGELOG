@@ -165,4 +165,5 @@
 ===============
 - Empty (help) options allowed (InstallerGen).
 - (database) can report name of OS.
+- (askoptions) bug affecting invisible items fixed.
 - ?

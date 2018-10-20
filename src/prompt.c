@@ -714,8 +714,8 @@ entry_p m_askoptions(entry_p contxt)
             // need room for 32 pointers + NULL.
             static const char *chs[33];
 
-            // Indices
-            int i = 0, j = 0;
+            // Choice index.
+            int i = 0;
 
             // Pick up a string representation of all
             // the options.
@@ -725,43 +725,26 @@ entry_p m_askoptions(entry_p contxt)
 
                 // From the Installer.guide:
                 //
-                // 1. If you use an empty string as choice descriptor, the choice will
-                //    be invisible to the user, i.e. it will not be displayed on screen.
-                //    By using variables you can easily set up a programable number of
-                //    choices then while retaining the bit numbering.
-                if(*cur)
+                // Previous versions of Installer did not support proportional fonts
+                // well and some people depended on the non proportional layout of
+                // the display for table like choices.  So Installer will continue to
+                // render choices non proportional unless you start one of the
+                // choices with a special escape sequence `"<ESC>[2p"'. This escape
+                // sequence allows proportional rendering. It is wise to specify this
+                // only in the first choice of the list. Note this well.  (V42)
+                if(strlen(cur) > 3)
                 {
-                    // 2. Previous versions of Installer did not support proportional fonts
-                    //    well and some people depended on the non proportional layout of
-                    //    the display for table like choices.  So Installer will continue to
-                    //    render choices non proportional unless you start one of the
-                    //    choices with a special escape sequence `"<ESC>[2p"'. This escape
-                    //    sequence allows proportional rendering. It is wise to specify this
-                    //    only in the first choice of the list. Note this well.  (V42)
-                    if(strlen(cur) > 3)
+                    // We rely on Zune / MUI for #2. Hide
+                    // this control sequence if it exists.
+                    if(!memcmp("\x1B[2p", cur, 4))
                     {
-                        // We rely on Zune / MUI for #2. Hide
-                        // this control sequence if it exists.
-                        if(!memcmp("\x1B[2p", cur, 4))
-                        {
-                            // Skip sequence.
-                            cur += 4;
-                        }
-                    }
-
-                    // Make sure that the removal of the control
-                    // sequence hasn't cleared the string.
-                    if(*cur)
-                    {
-                        // Something to show.
-                        chs[i++] = cur;
+                        // Skip sequence.
+                        cur += 4;
                     }
                 }
 
-                // Invisible items are valid as default
-                // values, so we need to count these as
-                // well.
-                j++;
+                // Save choice.
+                chs[i++] = cur;
 
                 // Next option.
                 e++;
@@ -784,7 +767,7 @@ entry_p m_askoptions(entry_p contxt)
                 // Is there such a choice?
                 int d = num(deflt);
 
-                if(d >= (1 << j))
+                if(d >= (1 << i))
                 {
                     // Nope, out of range.
                     ERR(ERR_NO_ITEM, str(deflt));

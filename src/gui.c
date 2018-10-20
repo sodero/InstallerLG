@@ -1497,8 +1497,9 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
                 (
                     MUIC_Group,
                     MUIA_Group_Horiz, TRUE,
+                    MUIA_ShowMe, *(*cs) ? TRUE : FALSE,
                     MUIA_InputMode, MUIV_InputMode_Toggle,
-                    MUIA_Selected, sel,
+                    MUIA_Selected, *(*cs) ? sel : FALSE,
                     MUIA_Group_Child, (Object *) MUI_NewObject(
                         MUIC_Image,
                         MUIA_Frame, MUIV_Frame_ImageButton,
