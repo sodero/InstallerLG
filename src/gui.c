@@ -810,7 +810,7 @@ MUIDSP IPTR InstallerGuiAskFile(Class *cls,
 
                         // Make sure that we succeded in creating a
                         // copy of the filename.
-                        if(n >= 0 && n < sizeof(my->Buf))
+                        if(n >= 0 && ((size_t) n < sizeof(my->Buf)))
                         {
                             ret = my->Buf;
                         }
@@ -1153,6 +1153,11 @@ MUIDSP IPTR InstallerGuiExit(Class *cls,
                              Object *obj,
                              struct MUIP_InstallerGui_Exit *msg)
 {
+    // Silence.
+    (void) cls;
+    (void) obj;
+    (void) msg;
+
     // Do nothing.
     return TRUE;
 }
@@ -1167,6 +1172,9 @@ MUIDSP IPTR InstallerGuiMessage(Class *cls,
                                 Object *obj,
                                 struct MUIP_InstallerGui_Message *msg)
 {
+    // Silence.
+    (void) cls;
+
     // Setup the correct page and button combination.
     if(DoMethod(obj, MUIM_InstallerGui_PageSet, msg->Message, NULL,
                 P_MESSAGE, msg->Immediate ? B_NONE : B_PROCEED))
@@ -1203,6 +1211,9 @@ MUIDSP IPTR InstallerGuiAbort(Class *cls,
                               Object *obj,
                               struct MUIP_InstallerGui_Abort *msg)
 {
+    // Silence.
+    (void) cls;
+
     // Setup the correct page and button combination.
     if(DoMethod(obj, MUIM_InstallerGui_PageSet, msg->Message,
                 NULL, P_MESSAGE, B_ABORT))
@@ -1687,6 +1698,9 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
 			                Object *obj,
 			                struct opSet *msg)
 {
+    // Silence.
+    (void) msg;
+
     // Temp widgets.
     Object *el, *ul, *fp, *cm, *pr,
            *st, *nm, *bp, *em, *rt,

@@ -20,7 +20,7 @@ CWRN += -Werror -Weverything -Wno-format-nonliteral -Wno-date-time
 else
 CC := gcc
 AMIGA = true
-CWRN = -Wall -Wno-pointer-sign
+CWRN = -Wall -Wextra -Wno-pointer-sign
 CGEN = -Os -std=gnu99 -DAMIGA
 LDLIBS = -ldebug
 ifeq ($(OS),MorphOS)
