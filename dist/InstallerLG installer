@@ -1,7 +1,7 @@
 ; InstallerLG
 ; $VER: InstallerLG 0.1.0-alpha.31
 
-(set #app-bin "installer")
+(set #app-bin "Installer")
 (set @app-name "InstallerLG")
 (set @default-dest "C:")
 

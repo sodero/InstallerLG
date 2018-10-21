@@ -388,7 +388,7 @@ MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
     ret = DoMethod(_app(obj), MUIM_Application_NewInput, &sig);
 
     // Enter the message loop.
-    while(ret != MUIV_Application_ReturnID_Quit)
+    while(ret != (ULONG) MUIV_Application_ReturnID_Quit)
     {
         // Iterate over all signals that we're
         // waiting for.
