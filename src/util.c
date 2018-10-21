@@ -700,25 +700,25 @@ static void pp_aux(entry_p entry, int indent)
     char *ts = t + sizeof(t) - 1 - indent;
     ts = ts < t ? t : ts;
 
-    // Data type descriptions.
-    char *tps[] =
-    {
-        "NUMBER",
-        "STRING",
-        "SYMBOL",
-        "SYMREF",
-        "NATIVE",
-        "OPTION",
-        "CUSTOM",
-        "CUSREF",
-        "CONTXT",
-        "STATUS",
-        "DANGLE"
-    };
-
     // NULL is a valid value.
     if(entry)
     {
+        // Data type descriptions.
+        char *tps[] =
+        {
+            "NUMBER",
+            "STRING",
+            "SYMBOL",
+            "SYMREF",
+            "NATIVE",
+            "OPTION",
+            "CUSTOM",
+            "CUSREF",
+            "CONTXT",
+            "STATUS",
+            "DANGLE"
+        };
+
         // All entries have a type, a parent and an ID.
         DBG("%s\n", tps[entry->type]);
         DBG("%sThis:%p\n", ts, (void *) entry);

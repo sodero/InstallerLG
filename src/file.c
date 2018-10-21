@@ -4136,9 +4136,6 @@ entry_p m_rename(entry_p contxt)
 //----------------------------------------------------------------------------
 int h_log(entry_p contxt, const char *fmt, ...)
 {
-    // Use whatever format and arguments we get
-    va_list ap;
-
     if(contxt && fmt)
     {
         // Only if logging is enabled...
@@ -4159,6 +4156,9 @@ int h_log(entry_p contxt, const char *fmt, ...)
                 // Append formatted string.
                 if(n > 0)
                 {
+                    // Use whatever format and arguments we get
+                    va_list ap;
+
                     va_start(ap, fmt);
                     n = vfprintf(fp, fmt, ap);
                     va_end(ap);

@@ -127,10 +127,10 @@ entry_p m_fmt(entry_p contxt)
 {
     // The format string is in the name of this contxt. It will hold
     // a maximum of length / 2 of specifiers.
-    char *ret = NULL, *fmt = contxt->name;
-    char **sct = calloc((strlen(fmt) >> 1) + 1, sizeof(char *));
+    char *ret = NULL, *fmt = contxt ? contxt->name : NULL;
+    char **sct = fmt ? calloc((strlen(fmt) >> 1) + 1, sizeof(char *)) : NULL;
 
-    if(contxt && fmt && sct)
+    if(sct)
     {
         size_t i = 0, j = 0, k = 0, l = 0;
         entry_p *arg = contxt->children;
@@ -142,7 +142,7 @@ entry_p m_fmt(entry_p contxt)
             if(fmt[i] == '%')
             {
                 // that's not preceeded by an escape.
-                if(!i || (i && fmt[i - 1] != '\\'))
+                if(!i || fmt[i - 1] != '\\')
                 {
                     i++;
 

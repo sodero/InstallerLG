@@ -686,7 +686,6 @@ entry_p push(entry_p dst, entry_p src)
     if(dst && src)
     {
         // Assume we're dealing with a child.
-        size_t u = 0;
         entry_p **dst_p = &dst->children;
 
         // Symbols and user-defined procedures
@@ -695,6 +694,9 @@ entry_p push(entry_p dst, entry_p src)
             src->type == CUSTOM) &&
             dst->type == CONTXT)
         {
+            // Index.
+            size_t u = 0;
+
             // We can't have multiple references
             // with the same name.
             while(dst->symbols[u] &&

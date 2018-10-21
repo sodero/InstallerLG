@@ -1490,7 +1490,7 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
             while(*cs && i < 32)
             {
                 // Default selection.
-                LONG sel = (msg->Default & (1 << i)) ? TRUE : FALSE;
+                LONG sel = (msg->Default & (1u << i)) ? TRUE : FALSE;
 
                 // New checkbox with default selection.
                 Object *c = (Object *) MUI_NewObject
