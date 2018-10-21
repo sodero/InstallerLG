@@ -759,7 +759,7 @@ int h_getversion(entry_p contxt, const char *file)
         int i = 0, c = 0;
 
         // Version key.
-        int vk[] = {'$','V','E','R',':',0};
+        int vk[] = {'$','V','E','R',':', ' ', 0};
 
         // Read one byte at a time to find the
         // location of the version key if any.
@@ -780,16 +780,24 @@ int h_getversion(entry_p contxt, const char *file)
             // Do we have data in the buffer?
             if(!ferror(fp))
             {
-                int v, r;
+                // Begin search after first ws.
+                char *s = strchr(get_buf(), ' ');
 
-                // Version string pattern.
-                const char *p = "%*[^0123456789]%d.%d%*[^\0]";
-
-                // Try to find version string.
-                if(sscanf(get_buf(), p, &v, &r) == 2)
+                // If there's no ws we fail.
+                if(s)
                 {
-                    // We found something.
-                    ver = (v << 16) | r;
+                    // Ver and rev.
+                    int v = 0, r = 0;
+
+                    // Version string pattern.
+                    const char *p = "%*[^0123456789]%d.%d%*[^\0]";
+
+                    // Try to find version string.
+                    if(sscanf(s, p, &v, &r) == 2)
+                    {
+                        // We found something.
+                        ver = (v << 16) | r;
+                    }
                 }
             }
         }
