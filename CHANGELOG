@@ -167,4 +167,5 @@
 - (database) can report name of OS.
 - (askoptions) bug affecting invisible items fixed.
 - (getversion) corner case fix.
+- (pathonly) trailing slash skipped.
 - ?

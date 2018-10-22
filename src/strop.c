@@ -358,8 +358,20 @@ entry_p m_pathonly(entry_p contxt)
 
                 if(r)
                 {
-                    // Copy and return path.
+                    // Copy full path.
                     memcpy(r, s, i + 1);
+
+                    // Cut trailing '/' if preceeded
+                    // by something absolute, dir or
+                    // volume.
+                    if(i > 1 &&
+                       r[i] == '/' &&
+                       r[i - 1] != '/' &&
+                       r[i - 1] != ':')
+                    {
+                        r[i] = '\0';
+                    }
+
                     RSTR(r);
                 }
                 else
