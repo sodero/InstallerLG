@@ -190,7 +190,7 @@ entry_p m_symbolset(entry_p contxt)
                     {
                         // If true, replace its resolved
                         // value with the copy of the rhs
-                        if(!strcmp((*sym)->name, lhs))
+                        if(!strcasecmp((*sym)->name, lhs))
                         {
                             kill((*sym)->resolved);
                             (*sym)->resolved = res;

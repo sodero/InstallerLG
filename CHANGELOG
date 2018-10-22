@@ -168,4 +168,5 @@
 - (askoptions) bug affecting invisible items fixed.
 - (getversion) corner case fix.
 - (pathonly) trailing slash skipped.
+- Symbols made case insensitive (MCC_BWin).
 - ?

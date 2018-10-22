@@ -716,7 +716,7 @@ entry_p push(entry_p dst, entry_p src)
                 // refer to @onerror for an example.
                 // Needless to say, this is ofcourse
                 // also true for normal variables.
-                if(!strcmp(old, new))
+                if(!strcasecmp(old, new))
                 {
                     dst->symbols[u] = src;
                     return dst;

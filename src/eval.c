@@ -55,7 +55,7 @@ entry_p find_symbol(entry_p entry)
                 // Only match SYMBOL:s, return if we
                 // find a match.
                 if(ret->type == SYMBOL &&
-                   !strcmp(ret->name, entry->name))
+                   !strcasecmp(ret->name, entry->name))
                 {
                     // Rearrange symbols to make the
                     // next lookup (if any) faster.

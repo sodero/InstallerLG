@@ -46,7 +46,7 @@ entry_p m_gosub(entry_p contxt)
               *cus != end())
         {
             if((*cus)->type == CUSTOM &&
-               !strcmp((*cus)->name, contxt->name))
+               !strcasecmp((*cus)->name, contxt->name))
             {
                 entry_p ret;
                 entry_p *arg = (*cus)->symbols,

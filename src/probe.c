@@ -1039,7 +1039,7 @@ entry_p m_iconinfo(entry_p contxt)
                                             contxt->symbols[k] != end();
                                             k++)
                                         {
-                                            if(!strcmp(contxt->symbols[k]->name, n))
+                                            if(!strcasecmp(contxt->symbols[k]->name, n))
                                             {
                                                 kill(contxt->symbols[k]->resolved);
                                                 contxt->symbols[k]->resolved = val;
