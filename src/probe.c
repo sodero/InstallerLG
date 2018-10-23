@@ -185,13 +185,13 @@ entry_p m_database(entry_p contxt)
             {
                 ret = "MorphOS";
             }
+            else if(FindResident("processor.resource"))
+            {
+                ret = "AROS";
+            }
             else
             {
-                #ifdef __AROS__
-                ret = "AROS";
-                #else
                 ret = "AmigaOS";
-                #endif
             }
             #else
             ret = "Unknown";
