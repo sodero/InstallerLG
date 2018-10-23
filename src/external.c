@@ -57,7 +57,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                confirm->children[0] != end())
             {
                 // ...then do so.
-                th = num(confirm->children[0]);
+                th = num(confirm);
             }
 
             // If we are below the threshold value,

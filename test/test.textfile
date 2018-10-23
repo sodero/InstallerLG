@@ -32,3 +32,7 @@
 (user 1) (textfile (dest "_tf_") (append "a") (confirm 2) (prompt "p") (help "h")) ; "rm -f _tf_","1","cmp _tf_ ../test/data.textfile.o1 && rm -Rf _tf_"
 (user 1) (textfile (dest "_tf_") (append "a") (confirm 1) (prompt "p") (help "h")) ; "rm -f _tf_","ph 1","cmp _tf_ ../test/data.textfile.o1 && rm -Rf _tf_"
 (user 1) (textfile (dest "_tf_") (append "a") (confirm 0) (prompt "p") (help "h")) ; "rm -f _tf_","ph 1","cmp _tf_ ../test/data.textfile.o1 && rm -Rf _tf_"
+(user 1) (textfile (dest "_tf_") (append "a") (confirm "expert") (prompt "p") (help "h")) ; "rm -f _tf_","1","cmp _tf_ ../test/data.textfile.o1 && rm -Rf _tf_"
+(user 1) (textfile (dest "_tf_") (append "a") (confirm "average") (prompt "p") (help "h")) ; "rm -f _tf_","ph 1","cmp _tf_ ../test/data.textfile.o1 && rm -Rf _tf_"
+(user 1) (textfile (dest "_tf_") (append "a") (confirm "novice") (prompt "p") (help "h")) ; "rm -f _tf_","ph 1","cmp _tf_ ../test/data.textfile.o1 && rm -Rf _tf_"
+(user 1) (textfile (dest "_tf_") (append "a") (confirm "clown") (prompt "p") (help "h")) ; "rm -f _tf_","ph 1","cmp _tf_ ../test/data.textfile.o1 && rm -Rf _tf_"

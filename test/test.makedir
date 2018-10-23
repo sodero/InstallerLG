@@ -19,5 +19,7 @@
 (user 1) (makedir "_md_" (confirm) (prompt "p") (help "h")) ; "rm -Rf _md_","1","test -d _md_ && rm -Rf _md_"
 (user 2) (makedir "_md_" (confirm) (prompt "p") (help "h")) ; "rm -Rf _md_","ph 1","test -d _md_ && rm -Rf _md_"
 (user 1) (makedir "_md_" (confirm 0) (prompt "p") (help "h")) ; "rm -Rf _md_","ph 1","test -d _md_ && rm -Rf _md_"
+(user 1) (makedir "_md_" (confirm "Besserwisser") (prompt "p") (help "h")) ; "rm -Rf _md_","ph 1","test -d _md_ && rm -Rf _md_"
 (user 1) (makedir "_md_" (confirm 1) (prompt "p") (help "h")) ; "rm -Rf _md_","ph 1","test -d _md_ && rm -Rf _md_"
 (user 1) (makedir "_md_" (confirm 2) (prompt "p") (help "h")) ; "rm -Rf _md_","1","test -d _md_ && rm -Rf _md_"
+(user 1) (makedir "_md_" (confirm "EXPERT") (prompt "p") (help "h")) ; "rm -Rf _md_","1","test -d _md_ && rm -Rf _md_"

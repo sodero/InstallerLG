@@ -154,6 +154,48 @@ entry_p resolve(entry_p entry)
 }
 
 //----------------------------------------------------------------------------
+// Name:        opt_to_int
+// Description: Convert option to numerical value. This will translate string
+//              representations of user levels to the corresponding numerical
+//              value.
+// Input:       entry_p entry:  An entry_t pointer to an OPTION object.
+// Return:      int:            An integer representation of the input.
+//----------------------------------------------------------------------------
+static int opt_to_int(entry_p entry)
+{
+    // Resolve once.
+    char *opt = str(entry);
+
+    // Special treatment of (confirm).
+    if(entry->id == OPT_CONFIRM)
+    {
+        // Ignore case.
+        if(!strcasecmp(opt, "novice"))
+        {
+            // Refer to Installer.guide.
+            return 0;
+        }
+
+        // Ignore case.
+        if(!strcasecmp(opt, "average"))
+        {
+            // Refer to Installer.guide.
+            return 1;
+        }
+
+        // Ignore case.
+        if(!strcasecmp(opt, "expert"))
+        {
+            // Refer to Installer.guide.
+            return 2;
+        }
+    }
+
+    // Fall through.
+    return atoi(opt);
+}
+
+//----------------------------------------------------------------------------
 // Name:        num
 // Description: Get integer representation of an entry. This implies resolving
 //              it, and, if necessary, converting it.
@@ -167,12 +209,11 @@ int num(entry_p entry)
     {
         switch(entry->type)
         {
-            // Options might contain numbers. If not, a '0'
-            // will be returned.
+            // Translate options.
             case OPTION:
-                return atoi(str(entry));
+                return opt_to_int(entry);
 
-            // These are all numeric values:
+            // These are numeric values:
             case DANGLE:
             case NUMBER:
                 return entry->id;

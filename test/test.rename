@@ -7,6 +7,8 @@
 (rename "_rn_" "_rm_" (safe)) ; "rm -Rf _rm_ && touch _rn_","-1","rm -Rf _rm_"
 (rename "_rn_" "_rm_" (safe) (confirm 1)) ; "rm -Rf _rm_ && touch _rn_","Line 1: Missing option 'prompt' 0","rm -Rf _rm_"
 (rename "_rn_" "_rm_" (safe) (confirm 1) (prompt "p")) ; "rm -Rf _rm_ && touch _rn_","Line 1: Missing option 'help' 0","rm -Rf _rm_"
+(rename "_rn_" "_rm_" (safe) (confirm 'average')) ; "rm -Rf _rm_ && touch _rn_","Line 1: Missing option 'prompt' 0","rm -Rf _rm_"
+(rename "_rn_" "_rm_" (safe) (confirm 'average') (prompt "p")) ; "rm -Rf _rm_ && touch _rn_","Line 1: Missing option 'help' 0","rm -Rf _rm_"
 (set @yes 1) (rename "_rn_" "_rm_" (safe) (confirm 1) (prompt "p") (help "h")) ; "rm -Rf _rm_ && touch _rn_","-1","rm -Rf _rm_"
 (rename "_rn_" "_rm_" (safe) (confirm 1) (prompt "p") (help "h")) ; "rm -Rf _rm_ && touch _rn_","ph -1","rm -Rf _rm_"
 (set @yes 1) (rename "_rn_" "_rm_" (safe) (confirm 1) (help "help") (prompt "prompt")) ; "rm -Rf _rm_ && touch _rn_","-1","rm -Rf _rm_"

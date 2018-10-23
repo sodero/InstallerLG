@@ -21,6 +21,7 @@
 (delete "_dl_" (prompt "p") (help "h") (confirm 1)) ; "rm -Rf _dl_ && touch _dl_","ph 1","test ! -f _dl_ && rm -f _dl_"
 (delete (prompt "p") (help "h") (confirm 1) "_dl_") ; "rm -Rf _dl_ && touch _dl_","ph 1","test ! -f _dl_ && rm -f _dl_"
 (delete (confirm 1) (prompt "p") "_dl_" (help "h")) ; "rm -Rf _dl_ && touch _dl_","ph 1","test ! -f _dl_ && rm -f _dl_"
+(delete (confirm "average") (prompt "p") "_dl_" (help "h")) ; "rm -Rf _dl_ && touch _dl_","ph 1","test ! -f _dl_ && rm -f _dl_"
 (delete "_dl_" (all)) ; "rm -Rf _dl_ && mkdir _dl_ && touch _dl_/_dl_ && chmod a-w _dl_/_dl_","0","test -d _dl_ && rm -Rf _dl_"
 (delete "_dl_" (all) (optional "force")) ; "rm -Rf _dl_ && mkdir _dl_ && touch _dl_/_dl_ && chmod a-w _dl_/_dl_","1","test ! -d _dl_ && rm -Rf _dl_"
 (delete "_dl_" (all) (optional "force") (delopts "force")) ; "rm -Rf _dl_ && mkdir _dl_ && touch _dl_/_dl_ && chmod a-w _dl_/_dl_","0","test -d _dl_ && rm -Rf _dl_"

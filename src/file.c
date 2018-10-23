@@ -1356,7 +1356,7 @@ entry_p m_copyfiles(entry_p contxt)
                        confirm->children[0] != end())
                     {
                         // ...then do so.
-                        th = num(confirm->children[0]);
+                        th = num(confirm);
                     }
 
                     // If we are below the threshold value, or
@@ -1610,7 +1610,7 @@ entry_p m_copylib(entry_p contxt)
                        confirm->children[0] != end())
                     {
                         // ...then do so.
-                        th = num(confirm->children[0]);
+                        th = num(confirm);
                     }
 
                     // If we are below the threshold value, or
@@ -2339,7 +2339,7 @@ entry_p m_delete(entry_p contxt)
                    confirm->children[0] != end())
                 {
                     // ...then do so.
-                    th = num(confirm->children[0]);
+                    th = num(confirm);
                 }
 
                 // If we are below the threshold value,
@@ -2856,7 +2856,7 @@ entry_p m_makedir(entry_p contxt)
                confirm->children[0] != end())
             {
                 // ...then do so.
-                th = num(confirm->children[0]);
+                th = num(confirm);
             }
 
             // If we are below the threshold value,
@@ -3464,7 +3464,7 @@ entry_p m_textfile(entry_p contxt)
                    confirm->children[0] != end())
                 {
                     // ...then do so.
-                    th = num(confirm->children[0]);
+                    th = num(confirm);
                 }
 
                 // If we are below the threshold value,
@@ -3664,7 +3664,7 @@ entry_p m_tooltype(entry_p contxt)
                    confirm->children[0] != end())
                 {
                     // ...then do so.
-                    th = num(confirm->children[0]);
+                    th = num(confirm);
                 }
 
                 // If we are below the threshold value,
@@ -4041,7 +4041,7 @@ entry_p m_rename(entry_p contxt)
                confirm->children[0] != end())
             {
                 // ...then do so.
-                th = num(confirm->children[0]);
+                th = num(confirm);
             }
 
             // If we are below the threshold value,

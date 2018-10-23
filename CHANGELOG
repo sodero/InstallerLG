@@ -169,4 +169,4 @@
 - (getversion) corner case fix.
 - (pathonly) trailing slash skipped.
 - Symbols made case insensitive (MCC_BWin).
-- ?
+- (confirm) non numerical user levels allowed (MCC_DateString and MCC_DateText).
