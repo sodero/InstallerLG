@@ -1,22 +1,62 @@
 ; InstallerLG
-; $VER: InstallerLG 0.1.0-alpha.31
+; $VER: InstallerLG 0.1.0-alpha.32
 
 (set #app-bin "Installer")
 (set @app-name "InstallerLG")
 (set @default-dest "C:")
 
 ;---------------------------------------------------------------------------------------------------------------------------------------------
+; Strings
+;---------------------------------------------------------------------------------------------------------------------------------------------
+(if (= @language "deutsch")
+    (
+        (set #welcome_str "Welcome to the InstallerLG installer")
+        (set #dest_str "Please choose target directory")
+        (set #dest_help_str "")
+        (set #copy_same_str "Destination '%s'")
+        (set #copy_same_hlp_str "")
+        (set #copy_diff_str "Copying '%s' to '%s'")
+        (set #copy_diff_hlp_str "")
+        (set #cat_str "Which catalogs to install?")
+        (set #cat_hlp_str "")
+    )
+(if (= @language "svenska")
+    (
+        (set #welcome_str "Installation av InstallerLG")
+        (set #dest_str "Välj målkatalog")
+        (set #dest_help_str "")
+        (set #copy_same_str "Mål '%s'")
+        (set #copy_same_hlp_str "")
+        (set #copy_diff_str "Kopierar '%s' till '%s'")
+        (set #copy_diff_hlp_str "")
+        (set #cat_str "Vilka kataloger ska installeras?")
+        (set #cat_hlp_str "")
+    )
+; else
+    (
+        (set #welcome_str "Welcome to the InstallerLG installer")
+        (set #dest_str "Please choose target directory")
+        (set #dest_help_str "")
+        (set #copy_same_str "Destination '%s'")
+        (set #copy_same_hlp_str "")
+        (set #copy_diff_str "Copying '%s' to '%s'")
+        (set #copy_diff_hlp_str "")
+        (set #cat_str "Which catalogs to install?")
+        (set #cat_hlp_str "")
+    )))
+
+;---------------------------------------------------------------------------------------------------------------------------------------------
 ; Welcome
 ;---------------------------------------------------------------------------------------------------------------------------------------------
-(welcome "Welcome to the InstallerLG installer\n")
+(welcome #welcome_str)
 
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 ; Choose destination
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 (set @default-dest
     (askdir
-        (prompt "Please choose a location for installing InstallerLG")
-        (help "-")
+        (prompt #dest_str)
+        (help #dest_help_str)
         (default @default-dest)
     )
 )
@@ -37,8 +77,8 @@
             ; Different checksum.
             (
                 (copyfiles
-                    (prompt ("Destination '%s'" @default-dest))
-                    (help "-")
+                    (prompt (#copy_same_str @default-dest))
+                    (help #copy_same_hlp_str)
                     (source #app-bin)
                     (dest @default-dest)
                 )
@@ -48,8 +88,8 @@
     ; Different version.
     (
         (copylib
-            (prompt ("Copying '%s' to '%s'" #app-bin (tackon @default-dest #app-bin)))
-            (help "-")
+            (prompt (#copy_diff_str #app-bin (tackon @default-dest #app-bin)))
+            (help #copy_diff_hlp_str)
             (source #app-bin)
             (dest @default-dest)
             (confirm 0)
@@ -65,8 +105,8 @@
         ; Multi select.
         (set cats
             (askoptions
-                (prompt "Install catalogs?")
-                (help "-")
+                (prompt #cat_str)
+                (help #cat_hlp_str)
                 (choices "Deutsch" "Svenska")
                 (default 0)
             )
