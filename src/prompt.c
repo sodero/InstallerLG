@@ -132,15 +132,20 @@ entry_p m_askchoice(entry_p contxt)
             // 32 bits, refer to Install.guide. Thus, we
             // need room for 32 pointers + NULL.
             static const char *chs[33];
+            static int add[32];
 
             // Indices
             int i = 0, j = 0;
 
             // Pick up a string representation of all
             // the options.
-            while(*e && *e != end())
+            while(*e && *e != end() && j < 32)
             {
+                // Resolve once.
                 char *cur = str(*e);
+
+                // Save skip deltas. See (1).
+                add[i] = j - i;
 
                 // From the Installer.guide:
                 //
@@ -237,6 +242,9 @@ entry_p m_askchoice(entry_p contxt)
 
                     // Prompt user.
                     DNUM = gui_choice(p, h, chs, i, &hlt);
+
+                    // Add skippers. Don't trust the GUI.
+                    DNUM += (DNUM < 32 ? add[DNUM] : 0);
 
                     // Halt if abort.
                     if(hlt)
@@ -719,7 +727,7 @@ entry_p m_askoptions(entry_p contxt)
 
             // Pick up a string representation of all
             // the options.
-            while(*e && *e != end())
+            while(*e && *e != end() && i < 32)
             {
                 char *cur = str(*e);
 
