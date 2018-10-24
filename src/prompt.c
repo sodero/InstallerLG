@@ -238,13 +238,22 @@ entry_p m_askchoice(entry_p contxt)
                 // resolve all options.
                 if(!DID_ERR())
                 {
-                    int hlt = 0;
+                    int hlt = 0, d = 0;
 
-                    // Prompt user.
-                    DNUM = gui_choice(p, h, chs, i, &hlt);
+                    // Cap / compute skipper.
+                    if(i > 0 && i < 31 &&
+                       i - add[i - 1] > 0 &&
+                       i + add[i - 1] < 31)
+                    {
+                        d = add[i - 1];
+                    }
 
-                    // Add skippers. Don't trust the GUI.
-                    DNUM += (DNUM < 32 ? add[DNUM] : 0);
+                    // Prompt user. Subtract skipper from default.
+                    DNUM = gui_choice(p, h, chs, i - d, &hlt);
+
+                    // Add skipper. Don't trust the GUI.
+                    DNUM += ((DNUM < 32 && DNUM >= 0) ?
+                            add[DNUM] : 0);
 
                     // Halt if abort.
                     if(hlt)

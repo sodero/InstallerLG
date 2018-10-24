@@ -36,7 +36,7 @@
 (set @strict 0) (askchoice (prompt p) (help "h") (choices "b" "c" "d") (default 2)) ; "","hb2 2",""
 (set @strict 0) (askchoice (prompt p) (help) (choices "b" "c" "d") (default 2)) ; "","NULLb2 2",""
 (set @strict 0) (askchoice (prompt "p") (help h) (choices "b" "c" "d") (default 2)) ; "","pb2 2",""
-(set @strict 0) (askchoice (prompt "p") (help "h") (choices b "c" "d") (default 2)) ; "","phc2 2",""
+(set @strict 0) (askchoice (prompt "p") (help "h") (choices b "c" "d") (default 2)) ; "","phc1 2",""
 (set @strict 0) (askchoice (prompt "p") (help "h") (choices "b" "c" d) (default 2)) ; "","phb2 2",""
 (set @strict 0) (askchoice (prompt "p") (help "h") (choices b c d) (default 2)) ; "","2",""
 (set @strict 0) (askchoice (prompt "p") (help "h") (choices "b" "c" "d") (default d)) ; "","phb0 0",""
