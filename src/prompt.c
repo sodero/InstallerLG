@@ -784,7 +784,7 @@ entry_p m_askoptions(entry_p contxt)
                 // Is there such a choice?
                 int d = num(deflt);
 
-                if(d >= (1 << i))
+                if(d >= (1L << i))
                 {
                     // Nope, out of range.
                     ERR(ERR_NO_ITEM, str(deflt));
