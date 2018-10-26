@@ -21,6 +21,18 @@
         (set #cat_str "Which catalogs to install?")
         (set #cat_hlp_str "")
     )
+(if (= @language "italiano")
+    (
+        (set #welcome_str "Benvenuto nell'installer di InstallerLG")
+        (set #dest_str "Per favore seleziona una directory di destinazione")
+        (set #dest_help_str "")
+        (set #copy_same_str "Destinazione '%s'")
+        (set #copy_same_hlp_str "")
+        (set #copy_diff_str "Copia di '%s' in '%s'")
+        (set #copy_diff_hlp_str "")
+        (set #cat_str "Quale lingua si desidera installare?")
+        (set #cat_hlp_str "")
+    )
 (if (= @language "svenska")
     (
         (set #welcome_str "Installation av InstallerLG")
