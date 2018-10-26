@@ -1,0 +1,277 @@
+## version $VER: Installer.catalog 1.0 (26.10.2018)
+## codeset 0
+## language italiano
+## chunk AUTH Translated by Samir Hawamdeh (http://www.betatesting.it/backforthefuture)
+;
+; ATO Italia
+; Compiled with FlexCat 2.18 PPC (AmigaOS4)
+; flexcat Installer.cd italian.ct catalog=Installer.catalog
+; 
+; Italian translation of InstallerLG
+;
+; Traduzione italiana di InstallerLG
+;
+MSG_COPYINGFILES
+Copia dei file
+; Copying file(s)
+;
+MSG_OVERWRITEEXISTINGDIRECTORY
+Sovrascrivere la directory esistente '%s'?
+; Overwrite existing directory '%s'?
+;
+MSG_ABORTCOPYTO
+Interrompi la copia di '%s' in '%s'.\n
+; Abort copy '%s' to '%s'.\n
+;
+MSG_COULDNOTCOPYTO
+Impossibile copiare '%s' in '%s'.\n
+; Could not copy '%s' to '%s'.\n
+;
+MSG_DELETEWRITEPROTECTEDFILE
+Eliminare i file protetti da scrittura '%s'?
+; Delete write protected file '%s'?
+;
+MSG_DELETEWRITEPROTECTEDDIRECTORY
+Eliminare le directory protette da scrittura '%s'?
+; Delete write protected directory '%s'?
+;
+MSG_OVERWRITEWRITEPROTECTEDFILE
+Sovrascrivere i file protetti da scrittura '%s'?
+; Overwrite write protected file '%s'?
+;
+MSG_DELETEFILE
+Eliminare il file '%s'?
+; Delete file '%s'?
+;
+MSG_DELETED
+Eliminato '%s'.\n
+; Deleted '%s'.\n
+;
+MSG_NOSUCHFILE
+Nessun file '%s'.\n
+; No such file '%s'.\n
+;
+MSG_RENAMEDTO
+Rinominato '%s' in '%s'.\n
+; Renamed '%s' to '%s'.\n
+;
+MSG_COPIEDTO
+Copiato '%s' in '%s'.\n
+; Copied '%s' to '%s'.\n
+;
+MSG_DIRECTORYEXISTSALREADY
+Directory '%s' già esistente.\n
+; Directory '%s' exists already.\n
+;
+MSG_CREATED
+Creato '%s'.\n
+; Created '%s'.\n
+;
+MSG_GETMASK
+Ottieni maschera '%s' %d\n
+; Get mask '%s' %d\n
+;
+MSG_PROTECT
+Proteggi '%s' %d\n
+; Protect '%s' %d\n
+;
+MSG_INSTALLER
+Installer
+; Installer
+;
+MSG_SETINSTALLATIONMODE
+Modalità di installazione
+; Set Installation Mode
+;
+MSG_DESTINATIONDRAWER
+Cassetto di destinazione
+; Destination drawer
+;
+MSG_COPYINGFILE
+Copia file
+; Copying file
+;
+MSG_FILESTOINSTALL
+File da installare
+; Files to install
+;
+MSG_INSTALLATIONMODEANDLOGGING
+Modalità di installazione e registro
+; Installation mode and logging
+;
+MSG_PROGRESS
+Progresso
+; Progress
+;
+MSG_PROCEED
+Procedi
+; Proceed
+;
+MSG_RETRY
+Riprova
+; Retry
+;
+MSG_ABORT
+Abbandona
+; Abort
+;
+MSG_YES
+Si
+; Yes
+;
+MSG_NO
+No
+; No
+;
+MSG_OK
+Ok
+; Ok
+;
+MSG_NEXT
+Successivo
+; Next
+;
+MSG_SKIP
+Salta
+; Skip
+;
+MSG_UNKNOWNERROR
+Errore sconosciuto
+; Unknown error
+;
+MSG_SETUPFAILED
+Setup fallito
+; Setup failed
+;
+MSG_FAILEDCREATINGMUICUSTOMCLASS
+Impossibile creare la classe custom MUI/Zune
+; Failed creating MUI custom class
+;
+MSG_FAILEDCREATINGMUIAPPLICATION
+Impossibile creare l'applicazione MUI/Zune
+; Failed creating MUI application
+;
+MSG_INITIALIZATIONFAILED
+Inizializzazione fallita
+; Initialization failed
+;
+MSG_ERROR
+Errore
+; Error
+;
+MSG_SUCCESS
+Successo
+; Success
+;
+MSG_LINE
+Linea %d: %s '%s'
+; Line %d: %s '%s'
+;
+MSG_NOVICEUSERALLACTIONSAUTOMATIC
+Utente inesperto - Operazioni in automatico
+; Novice User - All Actions Automatic
+;
+MSG_INTERMEDIATEUSERLIMITEDMANUALCONTROL
+Utente intermedio - Limitato controllo manuale
+; Intermediate User - Limited Manual Control
+;
+MSG_EXPERTUSERMUSTCONFIRMALLACTIONS
+Utente esperto - Conferma tutte le operazioni
+; Expert User - Must Confirm all actions
+;
+MSG_INSTALLFORREAL
+Installazione effettiva
+; Install for real
+;
+MSG_DRYRUNONLY
+Installazione virtuale
+; Dry run only
+;
+MSG_NOLOGGING
+No registro
+; No logging
+;
+MSG_LOGTOFILE
+File registro
+; Log to file
+;
+MSG_INSTALLERREQUIREDARGUMENTMISSING
+Installer: argomento richiesto mancante\n
+; installer: required argument missing\n
+;
+MSG_NCANBEFOUNDIN
+%s\n\n%s si trova nella directory %s
+; %s\n\n%s can be found in %s
+;
+MSG_INSTALLATIONCOMPLETE
+Installazione completata!
+; Installation complete
+;
+MSG_EXECUTED
+Eseguito '%s'.\n
+; Executed '%s'.\n
+;
+MSG_ERRORCOULDNOTOPENFILE
+Errore: Impossibile aprire il file '%s'\n
+; Error: Could not open file '%s'\n
+;
+MSG_LINE2
+Linea %d: %s '%s'\n
+; Line %d: %s '%s'\n
+;
+MSG_WORKINGONINSTALLATIONN
+Installazione in corso...\n\n
+; Working on installation...\n\n
+;
+MSG_SELECTDIRECTORY
+Seleziona directory
+; Select directory
+;
+MSG_SELECTFILE
+Seleziona file
+; Select file
+;
+MSG_ASSIGNTO
+Assign '%s' in '%s'\n
+; Assign '%s' to '%s'\n
+;
+MSG_REMOVEASSIGN
+Rimuovi l'assign '%s'\n
+; Remove assign '%s'\n
+;
+MSG_COULDNOTASSIGNTO
+Impossibile impostare l'assign '%s' in '%s'\n
+; Could not assign '%s' to '%s'\n
+;
+MSG_COULDNOTREMOVEASSIGN
+Impossibile rimuovere l'assign '%s'\n
+; Could not remove assign '%s'\n
+;
+MSG_APPENDTO
+Aggiungi '%s' in '%s'\n
+; Append '%s' to '%s'\n
+;
+MSG_INCLUDEIN
+Includi '%s' in '%s'\n
+; Include '%s' in '%s'\n
+;
+MSG_VERSIONTOINSTALL
+Versione da installare
+; Version to install
+;
+MSG_VERSIONCURRENTLYINSTALLED
+Versione attualmente installata
+; Version currently installed
+;
+MSG_UNKNOWNVERSION
+Versione sconosciuta
+; Unknown version
+;
+MSG_DESTINATIONDRAWER2
+Cassetto di destinazione
+; Destination drawer
+;
+MSG_THEREISNOCURRENTLYINSTALLEDVERSION
+Non è presente alcuna versione installata
+; There is no currently installed version
+;
