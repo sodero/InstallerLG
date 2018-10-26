@@ -4,7 +4,6 @@
 (set #app-bin "Installer")
 (set @app-name "InstallerLG")
 (set @default-dest "C:")
-(set @strict 1)
 
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 ; Strings
@@ -77,6 +76,15 @@
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 ; Copy executable
 ;---------------------------------------------------------------------------------------------------------------------------------------------
+(if (<> (exists #app-bin) 1)
+    ; We never have anything to copy at this point,
+    ; attempt to do it anyway just to fail and exit.
+    (copyfiles
+        (source #app-bin)
+        (dest "T:")
+    )
+)
+
 (if (=
         (getversion #app-bin)
         (getversion (tackon @default-dest #app-bin))
@@ -120,7 +128,7 @@
             (askoptions
                 (prompt #cat_str)
                 (help #cat_hlp_str)
-                (choices "Deutsch" "Svenska")
+                (choices "Deutsch" "Italiano" "Svenska")
                 (default 0)
             )
         )
@@ -142,8 +150,17 @@
                     )
                 )
 
-                ; Copy 'svenska' if selected.
+                ; Copy 'italiano' if selected.
                 (if (bitand cats 2)
+                    (copyfiles
+                        (source "Catalogs/italiano/Installer.catalog")
+                        (dest "LOCALE:Catalogs/italiano")
+                        (optional "force")
+                    )
+                )
+
+                ; Copy 'svenska' if selected.
+                (if (bitand cats 3)
                     (copyfiles
                         (source "Catalogs/svenska/Installer.catalog")
                         (dest "LOCALE:Catalogs/svenska")

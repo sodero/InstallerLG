@@ -38,9 +38,9 @@ entry_p m_gosub(entry_p contxt)
     // Is the global context in order?
     if(s_sane(con, 0))
     {
-        // Look through all symbols and see
-        // there's a used defined procedure
-        // that matches the reference name.
+        // Search through all symbols and see if
+        // there's a used defined procedure that
+        // matches the reference name.
         entry_p *cus = con->symbols;
         while(*cus &&
               *cus != end())
