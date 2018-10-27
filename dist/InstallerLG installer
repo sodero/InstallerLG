@@ -77,32 +77,23 @@
 ; Copy executable
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 (if (<> (exists #app-bin) 1)
-    ; We never have anything to copy at this point,
-    ; attempt to do it anyway just to fail and exit.
+    ; This will fail and exit.
     (copyfiles
         (source #app-bin)
         (dest "T:")
     )
 )
 
-(if (=
-        (getversion #app-bin)
-        (getversion (tackon @default-dest #app-bin))
-    )
+(if (= (getversion #app-bin) (getversion (tackon @default-dest #app-bin)))
     ; Same version.
     (
-        (if (<>
-                (getsum #app-bin)
-                (getsum (tackon @default-dest #app-bin))
-            )
+        (if (<> (getsum #app-bin) (getsum (tackon @default-dest #app-bin)))
             ; Different checksum.
-            (
-                (copyfiles
-                    (prompt (#copy_same_str @default-dest))
-                    (help #copy_same_hlp_str)
-                    (source #app-bin)
-                    (dest @default-dest)
-                )
+            (copyfiles
+                (prompt (#copy_same_str @default-dest))
+                (help #copy_same_hlp_str)
+                (source #app-bin)
+                (dest @default-dest)
             )
         )
     )
@@ -136,36 +127,32 @@
         ; If any of the catalogs were chosen
         (if (<> cats 0)
             (
-                ; Create 'Catalogs' if missing.
+                ; Index to language helper.
+                (procedure to_lang index native
+                    (if (= native 1)
+                        (select index "deutsch" "italiano" "svenska" "")
+                        (select index "german"  "italian"  "swedish" "")
+                    )
+                )
+
+                ; Create 'Catalogs' if it's missing.
                 (if (not (exists "LOCALE:Catalogs"))
                     (makedir "LOCALE:Catalogs")
                 )
 
-                ; Copy 'deutsch' if selected.
-                (if (bitand cats 1)
-                    (copyfiles
-                        (source "Catalogs/deutsch/Installer.catalog")
-                        (dest "LOCALE:Catalogs/deutsch")
-                        (optional "force")
-                    )
-                )
+                ; Use native names unless we're on AROS.
+                (set i 0 n (<> "AROS" (database "os")))
 
-                ; Copy 'italiano' if selected.
-                (if (bitand cats 2)
-                    (copyfiles
-                        (source "Catalogs/italiano/Installer.catalog")
-                        (dest "LOCALE:Catalogs/italiano")
-                        (optional "force")
+                ; Copy all selected catalogs.
+                (while (> (strlen (to_lang i n)) 0)
+                    (if (bitand cats (shiftleft 1 i))
+                        (copyfiles
+                            (source ("Catalogs/%s/Installer.catalog" (to_lang i 1)))
+                            (dest ("LOCALE:Catalogs/%s" (to_lang i n)))
+                            (optional "force")
+                        )
                     )
-                )
-
-                ; Copy 'svenska' if selected.
-                (if (bitand cats 3)
-                    (copyfiles
-                        (source "Catalogs/svenska/Installer.catalog")
-                        (dest "LOCALE:Catalogs/svenska")
-                        (optional "force")
-                    )
+                    (set i (+ i 1))
                 )
             )
         )
