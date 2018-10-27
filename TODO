@@ -16,3 +16,4 @@
 -- (showwbobject <argument>)
 -- (trace)
 - Some kind of uninstaller, see http://aminet.net/package/util/wb/Uninstaller
+- The LANGUAGE tooltype does not work. See MCC_Popph.lha
