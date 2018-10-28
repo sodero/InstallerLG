@@ -1,12 +1,13 @@
 ## version $VER: Installer.catalog 1.0 (26.10.2018)
 ## codeset 0
 ## language italiano
-## chunk AUTH Translated by Samir Hawamdeh (http://www.betatesting.it/backforthefuture)
+;
+; Translated by Samir Hawamdeh (http://www.betatesting.it/backforthefuture)
 ;
 ; ATO Italia
 ; Compiled with FlexCat 2.18 PPC (AmigaOS4)
 ; flexcat Installer.cd italian.ct catalog=Installer.catalog
-; 
+;
 ; Italian translation of InstallerLG
 ;
 ; Traduzione italiana di InstallerLG
