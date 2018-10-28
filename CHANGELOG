@@ -176,4 +176,5 @@
 - (askchoice) empty choices fixed.
 - Italian translation (Samir Hawamdeh).
 - LANGUAGE tooltype promoted to @language.
+- (copyfiles) directory (choices) fix.
 - ?
