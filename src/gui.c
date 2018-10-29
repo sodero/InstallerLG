@@ -94,6 +94,9 @@ CLASS_DEF(InstallerGui)
 
     // String buffer.
     char Buf[1 << 10];
+
+    // Abort state.
+    int Dirty;
 };
 
 //----------------------------------------------------------------------------
@@ -118,6 +121,7 @@ CLASS_DEF(InstallerGui)
 #define MUIM_InstallerGui_CheckBoxes       (TAGBASE_LG + 118)
 #define MUIM_InstallerGui_AskFile          (TAGBASE_LG + 119)
 #define MUIM_InstallerGui_PageSet          (TAGBASE_LG + 120)
+#define MUIM_InstallerGui_IsDirty          (TAGBASE_LG + 121)
 
 //----------------------------------------------------------------------------
 // InstallerGui - Init parameters
@@ -309,6 +313,14 @@ struct MUIP_InstallerGui_PageSet
     ULONG Help;
     ULONG Top;
     ULONG Bottom;
+};
+
+//----------------------------------------------------------------------------
+// InstallerGui - IsDirty parameters
+//----------------------------------------------------------------------------
+struct MUIP_InstallerGui_IsDirty
+{
+    ULONG MethodID;
 };
 
 //----------------------------------------------------------------------------
@@ -1142,6 +1154,25 @@ MUIDSP IPTR InstallerGuiCopyFilesAdd(Class *cls,
     // Always true.
     return (IPTR) TRUE;
 }
+
+//----------------------------------------------------------------------------
+// InstallerGuiIsDirty - Tag installation as dirty. The user needs to confirm
+//                       an abort from here on.
+// Input:                -
+// Return:               TRUE
+//----------------------------------------------------------------------------
+MUIDSP IPTR InstallerGuiIsDirty(Class *cls,
+                                Object *obj)
+{
+    struct InstallerGuiData *my = INST_DATA(cls, obj);
+
+    // Tag as dirty.
+    my->Dirty = 1;
+
+    // Always true.
+    return (IPTR) TRUE;
+}
+
 
 
 //----------------------------------------------------------------------------
@@ -2017,6 +2048,9 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
         my->Ticker.ihn_Method = MUIM_InstallerGui_Ticker;
         my->Ticker.ihn_Millis = 10;
 
+        // Reset abort state.
+        my->Dirty = 0;
+
         // Save widgets.
         if(el && ul && fp && cm && pr &&
            st && nm && bp && em && tx &&
@@ -2178,6 +2212,9 @@ DISPATCH(InstallerGui)
 
         case MUIM_InstallerGui_Confirm:
             return InstallerGuiConfirm(cls, obj, (struct MUIP_InstallerGui_Confirm *) msg);
+
+        case MUIM_InstallerGui_IsDirty:
+            return InstallerGuiIsDirty(cls, obj);
     }
 
     // Unknown method, promote to parent.
@@ -2301,6 +2338,20 @@ void gui_exit(void)
     {
         MUI_DeleteCustomClass(InstallerGuiClass);
     }
+    #endif
+}
+
+//----------------------------------------------------------------------------
+// Name:        gui_isdirty
+// Description: Tag installation as dirty. The user needs to confirm an abort
+//              from here on.
+// Input:       -
+// Return:      -
+//----------------------------------------------------------------------------
+void gui_isdirty(void)
+{
+    #ifdef AMIGA
+    DoMethod(Win, MUIM_InstallerGui_IsDirty);
     #endif
 }
 

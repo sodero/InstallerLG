@@ -170,7 +170,6 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                     // Can this fail?
                     if(out)
                     {
-
                         // Execute whatever we have in cmd.
                         DNUM = SystemTags
                         (
@@ -179,6 +178,10 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                             SYS_Output, out,
                             TAG_END
                         );
+
+                        // We might have written something
+                        // to disk. Tag as dirty.
+                        gui_isdirty();
 
                         // On error, get secondary status.
                         if(DNUM)
