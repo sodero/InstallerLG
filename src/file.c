@@ -293,6 +293,11 @@ static const char *h_fileonly(entry_p contxt,
 }
 
 //----------------------------------------------------------------------------
+// Forward declaration needed by h_choices.
+static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
+                          entry_p files, entry_p fonts, entry_p choices,
+                          entry_p pattern);
+//----------------------------------------------------------------------------
 // Name:        h_choices
 // Description: Helper fo h_filetree taking care of (choices). Generating a
 //              complete file / directory tree with source and destination
@@ -354,6 +359,35 @@ static pnode_p h_choices(entry_p contxt,
                 // files will be skipped during file copy anyway.
                 if(node->type || !get_numvar(contxt, "@strict"))
                 {
+                    if(node->type == 2)
+                    {
+                        #ifndef AMIGA
+                        if(strcmp(f_nam, ".") &&
+                           strcmp(f_nam, ".."))
+                        #endif
+                        {
+                            // Get tree of subdirectory.
+                            // Don't promote (choices).
+                            node->next = h_filetree
+                            (
+                                contxt,
+                                node->name,
+                                node->copy,
+                                NULL,
+                                NULL,
+                                NULL,
+                                NULL
+                            );
+
+                            // Fast forward to the end of
+                            // the list.
+                            while(node->next)
+                            {
+                                node = node->next;
+                            }
+                        }
+                    }
+
                     // If there are more files, allocate
                     // memory for the next node.
                     if(*e && *e != end())
@@ -442,12 +476,12 @@ static pnode_p h_choices(entry_p contxt,
 // Return:      entry_p:            A linked list of file and dir pairs.
 //----------------------------------------------------------------------------
 static pnode_p h_filetree(entry_p contxt,
-                          const char *src,
-                          const char *dst,
-                          entry_p files,
-                          entry_p fonts,
-                          entry_p choices,
-                          entry_p pattern)
+                         const char *src,
+                         const char *dst,
+                         entry_p files,
+                         entry_p fonts,
+                         entry_p choices,
+                         entry_p pattern)
 {
     char *n_src = NULL,
          *n_dst = NULL;

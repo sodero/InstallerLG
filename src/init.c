@@ -83,7 +83,7 @@ entry_p init(entry_p contxt)
              *a_min = arg_get(ARG_MINUSER),
              *a_def = arg_get(ARG_DEFUSER),
              *a_log = arg_get(ARG_LOGFILE),
-             *a_loc = NULL;
+             *a_loc = arg_get(ARG_LANGUAGE);
 
         // Set default values.
         int defusr = 2, minusr = 0,
@@ -91,14 +91,23 @@ entry_p init(entry_p contxt)
             nopretend = arg_get(ARG_NOPRETEND) ? 1 : 0;
 
         #ifdef AMIGA
-        // Open the current default locale.
-        struct Locale *loc = OpenLocale(NULL);
-
-        // Set the preferred installer language.
-        if(loc && loc->loc_PrefLanguages[0])
+        if(!a_loc)
         {
-            a_loc = strdup(loc->loc_PrefLanguages[0]);
-            CloseLocale(loc);
+            // Open the current default locale.
+            struct Locale *loc = OpenLocale(NULL);
+
+            // Set the preferred installer language.
+            if(loc && loc->loc_PrefLanguages[0])
+            {
+                a_loc = strdup(loc->loc_PrefLanguages[0]);
+                CloseLocale(loc);
+            }
+        }
+        else
+        {
+            // A copy is required. See the init
+            // of @language below.
+            a_loc = strdup(a_loc);
         }
         #endif
 

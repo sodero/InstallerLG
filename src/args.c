@@ -55,6 +55,7 @@ int arg_init(int argc, char **argv)
             "APPNAME/K,"
             "MINUSER/K,"
             "DEFUSER/K,"
+            "LANGUAGE/K,"
             "LOGFILE/K,"
             "NOLOG/S,"
             "NOPRETEND/S",
@@ -139,6 +140,8 @@ int arg_init(int argc, char **argv)
                         FindToolType((STRPTR *) tt, "MINUSER");
                     args[ARG_DEFUSER] = (char *)
                         FindToolType((STRPTR *) tt, "DEFUSER");
+                    args[ARG_LANGUAGE] = (char *)
+                        FindToolType((STRPTR *) tt, "LANGUAGE");
                     args[ARG_LOGFILE] = (char *)
                         FindToolType((STRPTR *) tt, "LOGFILE");
                     args[ARG_NOLOG] = (char *)
