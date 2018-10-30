@@ -86,7 +86,7 @@ entry_p init(entry_p contxt)
              *a_loc = arg_get(ARG_LANGUAGE);
 
         // Set default values.
-        int defusr = 2, minusr = 0,
+        int defusr = 1, minusr = 0,
             nolog = arg_get(ARG_NOLOG) ? 1 : 0,
             nopretend = arg_get(ARG_NOPRETEND) ? 1 : 0;
 
@@ -133,14 +133,14 @@ entry_p init(entry_p contxt)
         // Default user level setting?
         if(a_def)
         {
-            // 'EXPERT' (2) is implicit.
+            // 'AVERAGE' (1) is implicit.
             if(!strcasecmp("NOVICE", a_def))
             {
                 defusr = 0;
             }
-            else if(!strcasecmp("AVERAGE", a_def))
+            else if(!strcasecmp("EXPERT", a_def))
             {
-                defusr = 1;
+                defusr = 2;
             }
 
             defusr = defusr > minusr ?

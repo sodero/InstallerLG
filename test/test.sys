@@ -22,7 +22,7 @@
 ("%ld" @skip) ; "","0",""
 ("%ld" @abort) ; "","0",""
 ("%s" @special-msg) ; "","",""
-("%ld" @user-level) ; "","2",""
+("%ld" @user-level) ; "","1",""
 ("%s" @user-startup) ; "","s:user-startup",""
 ("%ld" @installer-version) ; "","2818051",""
 ("%ld" (/ @installer-version 65536)) ; "","43",""
