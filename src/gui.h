@@ -14,7 +14,6 @@
 
 int gui_init(void);
 void gui_exit(void);
-void gui_isdirty(void);
 int gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min, int npr, int nlg);
 int gui_message(const char *msg, int imm);
 void gui_abort(const char *msg);

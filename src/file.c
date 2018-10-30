@@ -1327,10 +1327,6 @@ entry_p m_copyfiles(entry_p contxt)
                 RNUM(1);
             }
 
-            // We might change something on disk.
-            // Tag as dirty.
-            gui_isdirty();
-
             // Does the destination already exist?
             if(h_exists(dst) == 2)
             {
@@ -1660,10 +1656,6 @@ entry_p m_copylib(entry_p contxt)
                         confirm = NULL;
                     }
                 }
-
-                // We might change something on disk.
-                // Tag as dirty.
-                gui_isdirty();
 
                 if(!dt)
                 {
@@ -2416,10 +2408,6 @@ entry_p m_delete(entry_p contxt)
             // running in pretend mode?
             if(safe || !get_numvar(contxt, "@pretend"))
             {
-                // We might change something on disk.
-                // Tag as dirty.
-                gui_isdirty();
-
                 // Did the input string contain any
                 // wildcards?
                 if(wc)
@@ -2940,10 +2928,6 @@ entry_p m_makedir(entry_p contxt)
             // The name of the directory.
             char *dn = str(CARG(1));
 
-            // We might change something on disk.
-            // Tag as dirty.
-            gui_isdirty();
-
             // Create the directory.
             DNUM = h_makedir(contxt, dn, 0 /* FIXME */);
 
@@ -3034,10 +3018,6 @@ entry_p m_protect(entry_p contxt)
 
         if(CARG(2) && CARG(2) != end())
         {
-            // We might change something on disk.
-            // Tag as dirty.
-            gui_isdirty();
-
             // Get with option.
             if(CARG(2)->type == CONTXT)
             {
@@ -3248,10 +3228,6 @@ entry_p m_startup(entry_p contxt)
 
             if(pre && pst)
             {
-                // We might change something on disk.
-                // Tag as dirty.
-                gui_isdirty();
-
                 // We don't need to write yet.
                 FILE *fp = fopen(fln, "r");
 
@@ -3562,10 +3538,6 @@ entry_p m_textfile(entry_p contxt)
                 const char *fn = str(dest);
                 FILE *fp = fopen(fn, "w");
 
-                // We might change something on disk.
-                // Tag as dirty.
-                gui_isdirty();
-
                 if(fp)
                 {
                     // Assume success.
@@ -3768,10 +3740,6 @@ entry_p m_tooltype(entry_p contxt)
             if(!confirm ||
                h_confirm(contxt, str(help), str(prompt)))
             {
-                // We might change something on disk.
-                // Tag as dirty.
-                gui_isdirty();
-
                 #ifdef AMIGA
                 // Get icon information.
                 struct DiskObject *obj = (struct DiskObject *)
@@ -4142,10 +4110,6 @@ entry_p m_rename(entry_p contxt)
         // running in pretend mode?
         if(safe || !get_numvar(contxt, "@pretend"))
         {
-            // We might change something on disk.
-            // Tag as dirty.
-            gui_isdirty();
-
             // Are we going to rename a file/dir?
             if(!disk)
             {
