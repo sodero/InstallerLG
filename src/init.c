@@ -543,32 +543,29 @@ entry_p init(entry_p contxt)
         // code is executed.
         ror(contxt->children);
 
-        // Is there an 'exit' already?
-        e = native_exists(contxt, m_exit);
+        // Create default (exit). Line numbers and
+        // naming are for debugging purposes only.
+        e = new_native
+        (
+            strdup("exit"), __LINE__,
+            m_exit, NULL, NUMBER
+        );
 
         #ifdef AMIGA
-        // If no (exit) is found insert a default one at
-        // the bottom. Only on Amiga, otherwise tests will
+        // Insert only on Amiga, otherwise tests will
         // break, they don't expect any default (exit).
-        if(!e)
+
+        // Add to the root and reparent.
+        if(e)
         {
-            // The line numbers and naming are for debugging
-            // purposes only.
-            e = new_native
-            (
-                strdup("exit"), __LINE__,
-                m_exit, NULL, NUMBER
-            );
-
-            // Add to the root and reparent.
-            if(e)
-            {
-                append(&contxt->children, e);
-                e->parent = contxt;
-            }
-
-            // No rotation.
+            append(&contxt->children, e);
+            e->parent = contxt;
         }
+
+        // No rotation. Default (exit) should be last.
+        #else
+        // We're not using this, kill it directly.
+        kill(e);
         #endif
     }
 
