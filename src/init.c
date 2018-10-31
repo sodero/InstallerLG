@@ -128,6 +128,12 @@ entry_p init(entry_p contxt)
             {
                 minusr = 2;
             }
+
+            // Default user must be >= min user.
+            if(minusr > defusr)
+            {
+                defusr = minusr;
+            }
         }
 
         // Default user level setting?
