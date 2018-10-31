@@ -1,7 +1,7 @@
 run()
 {
     export _INSTALLER_LG_=yes
-    instfile=`mktemp ./installer.tmp.XXXXXX`
+    instfile=`mktemp ./Installer.tmp.XXXXXX`
     echo $1 > $instfile
     if [ `uname` = "Linux" ]; then
        if [ `which valgrind` ]; then
