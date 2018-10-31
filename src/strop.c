@@ -658,24 +658,11 @@ char *h_tackon(entry_p contxt,
                 // Copy the path.
                 memcpy(r, p, lp);
 
-                // Remove double delimiters if any.
-                if(p[lp - 1] == '/' ||
-                   p[lp - 1] == ':')
-                {
-                    if(f[0] == '/' ||
-                       f[0] == ':')
-                    {
-                        f++;
-                    }
-                }
-                else
                 // Insert delimiter if none exist.
+                if(p[lp - 1] != '/' &&
+                   p[lp - 1] != ':')
                 {
-                    if(f[0] != '/' &&
-                       f[0] != ':')
-                    {
-                        strncat(r, "/", lt - strlen(r));
-                    }
+                   strncat(r, "/", lt - strlen(r));
                 }
 
                 // Concatenate the result.
