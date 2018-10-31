@@ -1,7 +1,6 @@
 - file.c : h_choices LEAK CHECK
 - Check GUI list mgmt for leaks.
 - file.c is a nightmare, clean up.
-- Exchange Show / Hide doesn't work?
 - >= V44
 -- (back <code>)
 -- (closemedia <media>)
@@ -16,4 +15,3 @@
 -- (showwbobject <argument>)
 -- (trace)
 - Some kind of uninstaller, see http://aminet.net/package/util/wb/Uninstaller
-- The LANGUAGE tooltype does not work. See MCC_Popph.lha
