@@ -415,6 +415,11 @@ MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
                         if(but)
                         {
                             set(but, MUIA_CycleChain, FALSE);
+                            if(n == 0)
+                            {
+                                set(Win, MUIA_Window_ActiveObject, but);
+
+                            }
                         }
                     }
                 }
@@ -2752,4 +2757,3 @@ int gui_error(int id,
     return (id && type && info) ? 0 : 1;
     #endif
 }
-
