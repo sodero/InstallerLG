@@ -375,6 +375,11 @@ MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
             {
                 // Add button to cycle chain.
                 set(but, MUIA_CycleChain, TRUE);
+                if(n == 0)
+                {
+                    set(Win, MUIA_Window_ActiveObject, but);
+
+                }
             }
             else
             {
@@ -415,11 +420,6 @@ MUIDSP ULONG InstallerGuiWait(Object *obj, ULONG notif, ULONG range)
                         if(but)
                         {
                             set(but, MUIA_CycleChain, FALSE);
-                            if(n == 0)
-                            {
-                                set(Win, MUIA_Window_ActiveObject, but);
-
-                            }
                         }
                     }
                 }
