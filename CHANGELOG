@@ -179,4 +179,4 @@
 - (copyfiles) directory (choices) fix.
 - Default (exit) fix.
 - Parent (tackon) fix.
-- ?
+- Improved UX - activate default buttons (polluks).
