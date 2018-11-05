@@ -186,6 +186,10 @@ MSG_LOGTOFILE
 Logga till fil
 ; Log to file
 ;
+MSG_LOGTOPRINTER
+Logga till skrivare
+; Log to printer
+;
 MSG_INSTALLERREQUIREDARGUMENTMISSING
 installer: Erforderligt argument saknas\n
 ; installer: required argument missing\n

@@ -64,6 +64,7 @@ typedef enum
     S_INDR, /* "Dry run only" */
     S_NOLG, /* "No logging" */
     S_SILG, /* "Log to file" */
+    S_PNLG, /* "Log to printer" */
     S_RQMS, /* "installer: required argument missing\n" */
     S_CBFI, /* "%s\n\n%s can be found in %s" */
     S_ICPL, /* "Installation complete" */

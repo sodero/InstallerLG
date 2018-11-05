@@ -137,6 +137,9 @@ No logging
 MSG_LOGTOFILE (//)
 Log to file
 ;
+MSG_LOGTOPRINTER (//)
+Log to printer
+;
 MSG_INSTALLERREQUIREDARGUMENTMISSING (//)
 installer: required argument missing\n
 ;

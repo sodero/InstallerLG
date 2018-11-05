@@ -186,6 +186,10 @@ MSG_LOGTOFILE
 In Datei speichern
 ; Log to file
 ;
+MSG_LOGTOPRINTER
+Ausdruck
+; Log to printer
+;
 MSG_INSTALLERREQUIREDARGUMENTMISSING
 installer: erforderliches Argument fehlt\n
 ; installer: required argument missing\n

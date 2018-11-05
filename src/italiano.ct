@@ -196,6 +196,10 @@ MSG_LOGTOFILE
 File registro
 ; Log to file
 ;
+MSG_LOGTOPRINTER
+Stampante
+; Log to printer
+;
 MSG_INSTALLERREQUIREDARGUMENTMISSING
 Installer: argomento richiesto mancante\n
 ; installer: required argument missing\n

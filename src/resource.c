@@ -85,6 +85,7 @@ const char *tr(res_t r)
         "Dry run only",
         "No logging",
         "Log to file",
+        "Log to printer",
         "installer: required argument missing\n",
         "%s\n\n%s can be found in %s",
         "Installation complete",
