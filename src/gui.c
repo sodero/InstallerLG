@@ -2552,6 +2552,7 @@ int gui_welcome(const char *msg,
     );
     #else
     // Testing purposes.
+    1;
     printf
     (
         "%s%d%d%d%d%d%d\n",
