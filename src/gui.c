@@ -2551,6 +2551,7 @@ int gui_welcome(const char *msg,
         msg, lvl, lgf, prt, min, npr, nlg
     );
     #else
+    1;
     // Testing purposes.
     printf
     (
