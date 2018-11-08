@@ -1710,18 +1710,18 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
     // Temp widgets.
     Object *el, *ul, *fp, *cm, *pr,
            *st, *nm, *bp, *em, *rt,
-           *tx, *ls, *lg, *pn, *tp,
-           *af, *ys, *no;
+           *tx, *ls, *lg, *tp, *af,
+           *ys, *no;
 
     // Radio button strings.
     static const char *lev[4],
                       *pre[3],
-                      *log[4];
+                      *log[3];
 
     // Clear to enable check.
     el = ul = fp = cm = pr = st =
     nm = bp = em = rt = tx = ls =
-    lg = pn = tp = af = ys = no = NULL;
+    lg = tp = af = ys = no = NULL;
 
     // User level.
     lev[0] = tr(S_ULNV); // Novice
@@ -1735,7 +1735,6 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
     // Logging mode.
     log[0] = tr(S_NOLG); // No logging
     log[1] = tr(S_SILG); // Log to file
-    log[2] = tr(S_PNLG); // Log to printer
 
     // The GUI is, as far as possible, a static
     // construct. We're not constructing things
