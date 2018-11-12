@@ -1,6 +1,8 @@
 (getversion) ; "","0",""
 (BITAND (getversion "./Installer") $ffff) ; "","3",""
 (shiftright (getversion "./Installer") 16) ; "","43",""
+(= (shiftright (getversion "./Installer") 16) 43) ; "","1",""
+(= (shiftright (getversion "./Installer") 16) 43.3) ; "","1",""
 (getversion "./Installer") ; "","2818051",""
 (getversion "_gv_") ; "","Line 1: Could not read from file '_gv_' 0",""
 (set @strict 0) (getversion "_gv_") ; "","0",""

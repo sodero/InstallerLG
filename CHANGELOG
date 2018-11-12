@@ -180,3 +180,9 @@
 - Default (exit) fix.
 - Parent (tackon) fix.
 - Improved UX - activate default buttons (polluks).
+
+0.1.0-alpha.33:
+===============
+- Fixed handling of non-integers.
+- ?
+
