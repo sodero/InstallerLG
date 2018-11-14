@@ -549,15 +549,16 @@ entry_p m_getdevice(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
-// (getdiskspace <path>)
-//     return available space (in bytes)
+// (getdiskspace <pathname> [<unit>])
+//     return available space
 //
-// Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+// FIXME - V44.10 - We need this one.
 //
-// Currently all values above 2G will be cap:ed. Shall we bother
-// with 64-bit values or shall we report free space in kB:s? Or
-// should we not care at all? This will work until some program
-// requires more than 2G diskspace.
+// Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
+//
+// The parameter <unit> is optional and defines the unit for the
+// returned disk space: "B" (or omitted) is "Bytes", "K" is "Kilobytes",
+// "M" is "Megabytes" and "G" is "Gigabytes".
 //----------------------------------------------------------------------------
 entry_p m_getdiskspace(entry_p contxt)
 {
