@@ -185,5 +185,5 @@
 ===============
 - Fixed handling of non-integers.
 - (getdiskspace) v44 compliant (WHDLOpener).
+- (reboot) implemented (v44).
 - ?
-
