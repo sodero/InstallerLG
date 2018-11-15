@@ -145,6 +145,7 @@ static char *strduptr(const char *str);
 "textfile"              { return TEXTFILE;       }
 "tooltype"              { return TOOLTYPE;       }
 "trap"                  { return TRAP;           }
+"reboot"                { return REBOOT;         }
 "all"                   { return ALL;            }
 "append"                { return APPEND;         }
 "assigns"               { return ASSIGNS;        }

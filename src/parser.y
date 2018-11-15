@@ -35,7 +35,7 @@
 %token /* comparison.c|h */ EQ GT GTE LT LTE NEQ
 %token /* control.c|h    */ IF SELECT UNTIL WHILE
 %token /* external.c|h   */ EXECUTE REXX RUN
-%token /* exit.c|h       */ ABORT EXIT ONERROR TRAP
+%token /* exit.c|h       */ ABORT EXIT ONERROR TRAP REBOOT
 %token /* file.c|h       */ COPYFILES COPYLIB DELETE EXISTS FILEONLY FOREACH MAKEASSIGN MAKEDIR PROTECT
        /*                */ STARTUP TEXTFILE TOOLTYPE TRANSCRIPT RENAME
 %token /* information.c  */ COMPLETE DEBUG MESSAGE USER WELCOME WORKING
@@ -62,7 +62,7 @@
        /*                */ select symbolset symbolval tackon transcript complete user working welcome
        /*                */ abort copyfiles copylib database debug delete execute exit foreach makeassign
        /*                */ makedir message onerror protect rename rexx run startup textfile tooltype
-       /*                */ trap all append assigns choices command compression confirm default mul
+       /*                */ trap reboot all append assigns choices command compression confirm default mul
        /*                */ delopts dest disk files fonts help infos include newname newpath optional
        /*                */ nogauge noposition noreq pattern prompt quiet range safe resident override
        /*                */ setdefaulttool setposition setstack settooltype source swapcolors
@@ -83,10 +83,10 @@
                             getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch
                             select symbolset symbolval tackon transcript complete user working welcome abort
                             copyfiles copylib database debug delete execute exit foreach makeassign makedir
-                            message onerror protect rename rexx run startup textfile tooltype trap all append
+                            message onerror protect rename rexx run startup textfile tooltype trap reboot all
                             assigns choices command compression confirm default delopts dest disk lt lte neq
                             files fonts help infos include newname newpath nogauge noposition settooltype cat
-                            noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors
+                            noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append
 %%
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- start --------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -201,6 +201,7 @@ ivp:            add       /* arithmetic.c|h */  |
                 exit                            |
                 onerror                         |
                 trap                            |
+                reboot                          |
                 copyfiles /* file.c|h */        |
                 copylib                         |
                 delete                          |
@@ -312,6 +313,7 @@ exit:           '(' EXIT ps quiet ')'           { $$ = new_native(strdup("exit")
 onerror:        '(' ONERROR vps ')'             { $$ = new_native(strdup("onerror"), LINE, m_procedure, push(new_contxt(),
                                                        new_custom(strdup("@onerror"), LINE, NULL, $3)), DANGLE); };
 trap:           '(' TRAP p vps ')'              { $$ = new_native(strdup("trap"), LINE, m_trap, push(push(new_contxt(), $3), $4), NUMBER); };
+reboot:         '(' REBOOT ')'                  { $$ = new_native(strdup("reboot"), LINE, m_reboot, NULL, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* file.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 copyfiles:      '(' COPYFILES opts ')'          { $$ = new_native(strdup("copyfiles"), LINE, m_copyfiles, $3, NUMBER); };

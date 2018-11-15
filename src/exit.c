@@ -220,3 +220,38 @@ entry_p m_trap(entry_p contxt)
         RCUR;
     }
 }
+
+//----------------------------------------------------------------------------
+// (reboot)                                                              (V44)
+//     reboot the Amiga
+//
+// Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
+//----------------------------------------------------------------------------
+entry_p m_reboot(entry_p contxt)
+{
+    // All we need is a context.
+    if(contxt)
+    {
+        // Don't reboot in pretend mode.
+        if(get_numvar(contxt, "@pretend"))
+        {
+            DNUM = 0;
+        }
+        else
+        {
+            #ifdef AMIGA
+            DNUM = 1; // FIXME
+            #else
+            DNUM = 1;
+            #endif
+        }
+    }
+    else
+    {
+        // Broken parser.
+        PANIC(contxt);
+    }
+
+    // No reboot.
+    RCUR;
+}
