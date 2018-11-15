@@ -549,16 +549,10 @@ entry_p m_getdevice(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
-// (getdiskspace <pathname> [<unit>])
+// (getdiskspace <pathname> [<unit>])                                    (V44)
 //     return available space
 //
-// FIXME - V44.10 - We need this one.
-//
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
-//
-// The parameter <unit> is optional and defines the unit for the
-// returned disk space: "B" (or omitted) is "Bytes", "K" is "Kilobytes",
-// "M" is "Megabytes" and "G" is "Gigabytes".
 //----------------------------------------------------------------------------
 entry_p m_getdiskspace(entry_p contxt)
 {
@@ -578,20 +572,47 @@ entry_p m_getdiskspace(entry_p contxt)
             // Retrieve information from lock.
             if(Info(lock, &id))
             {
-                long long bfree = (long long)
+                long long free = (long long)
                     (id.id_NumBlocks -
                      id.id_NumBlocksUsed) *
                      id.id_BytesPerBlock;
 
-                // Release lock before return.
+                // Release lock ASAP.
                 UnLock(lock);
 
-                // Return free space in bytes. Cap
-                // the value at 2G.
+                // From the Installer.guide 1.20:
+                //
+                // The parameter <unit> is optional and
+                // defines the unit for the returned disk
+                // space: "B" (or omitted) is "Bytes", "K"
+                // is "Kilobytes", "M" is "Megabytes" and
+                // "G" is "Gigabytes".
+                if(CARG(2) && CARG(2) != end())
+                {
+                    switch(*str(CARG(2)))
+                    {
+                        case 'K':
+                        case 'k':
+                            free >>= 10;
+                            break;
+
+                        case 'M':
+                        case 'm':
+                            free >>= 20;
+                            break;
+
+                        case 'G':
+                        case 'g':
+                            free >>= 30;
+                            break;
+                    }
+                }
+
+                // Cap the return value.
                 RNUM
                 (
-                    bfree > INT_MAX ?
-                    INT_MAX : (int) bfree
+                    free > INT_MAX ?
+                    INT_MAX : (int) free
                 );
             }
 
