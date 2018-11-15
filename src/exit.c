@@ -19,6 +19,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef AMIGA
+#include <proto/exec.h>
+#endif
+
 //----------------------------------------------------------------------------
 // (abort <string1> <string2> ...)
 //     abandon installation
@@ -240,7 +244,8 @@ entry_p m_reboot(entry_p contxt)
         else
         {
             #ifdef AMIGA
-            DNUM = 1; // FIXME
+            // Hard reset.
+            ColdReboot();
             #else
             DNUM = 1;
             #endif
