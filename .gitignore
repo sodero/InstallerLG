@@ -3,6 +3,6 @@
 *.ll
 *.plist
 *.swp
-build/installer
+build/Installer
 build/_*
 build/Catalogs/
