@@ -23,5 +23,6 @@
 #include "prompt.h"
 #include "strop.h"
 #include "symbol.h"
+#include "wb.h"
 
 #endif

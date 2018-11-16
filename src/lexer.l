@@ -146,6 +146,9 @@ static char *strduptr(const char *str);
 "tooltype"              { return TOOLTYPE;       }
 "trap"                  { return TRAP;           }
 "reboot"                { return REBOOT;         }
+"openwbobject"          { return OPENWBOBJECT;   }
+"showwbobject"          { return SHOWWBOBJECT;   }
+"closewbobject"         { return CLOSEWBOBJECT;  }
 "all"                   { return ALL;            }
 "append"                { return APPEND;         }
 "assigns"               { return ASSIGNS;        }

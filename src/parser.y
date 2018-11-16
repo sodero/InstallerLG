@@ -45,6 +45,7 @@
 %token /* prompt.c|h     */ ASKBOOL ASKCHOICE ASKDIR ASKDISK ASKFILE ASKNUMBER ASKOPTIONS ASKSTRING
 %token /* strop.c|h      */ CAT EXPANDPATH FMT PATHONLY PATMATCH STRLEN SUBSTR TACKON
 %token /* symbol.c|h     */ SET SYMBOLSET SYMBOLVAL
+%token /* wb.c|h         */ OPENWBOBJECT SHOWWBOBJECT CLOSEWBOBJECT
 %token /* options        */ ALL APPEND ASSIGNS CHOICES COMMAND COMPRESSION CONFIRM DEFAULT
        /*                */ DELOPTS DEST DISK FILES FONTS GETDEFAULTTOOL GETPOSITION
        /*                */ GETSTACK GETTOOLTYPE HELP INFOS INCLUDE NEWNAME NEWPATH NOGAUGE
@@ -65,7 +66,8 @@
        /*                */ trap reboot all append assigns choices command compression confirm default mul
        /*                */ delopts dest disk files fonts help infos include newname newpath optional
        /*                */ nogauge noposition noreq pattern prompt quiet range safe resident override
-       /*                */ setdefaulttool setposition setstack settooltype source swapcolors
+       /*                */ setdefaulttool setposition setstack settooltype source swapcolors openwbobject
+       /*                */ showwbobject closewbobject
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- destruction --------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Use the destructor of the start symbol to set of  */
@@ -87,6 +89,7 @@
                             assigns choices command compression confirm default delopts dest disk lt lte neq
                             files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append
+                            openwbobject showwbobject closewbobject
 %%
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- start --------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -169,11 +172,11 @@ opt:            all                             |
                 resident                        ;
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- functions ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
-ivp:            add       /* arithmetic.c|h */  |
+ivp:            add        /* arithmetic.c|h */ |
                 div                             |
                 mul                             |
                 sub                             |
-                and       /* bitwise.c|h */     |
+                and           /* bitwise.c|h */ |
                 bitand                          |
                 bitnot                          |
                 bitor                           |
@@ -184,25 +187,25 @@ ivp:            add       /* arithmetic.c|h */  |
                 shiftleft                       |
                 shiftright                      |
                 xor                             |
-                eq        /* comparison.c|h */  |
+                eq         /* comparison.c|h */ |
                 gt                              |
                 gte                             |
                 lt                              |
                 lte                             |
                 neq                             |
-                if        /* control.c|h */     |
+                if            /* control.c|h */ |
                 select                          |
                 until                           |
                 while                           |
-                execute   /* external.c|h */    |
+                execute      /* external.c|h */ |
                 rexx                            |
                 run                             |
-                abort     /* exit.c|h */        |
+                abort            /* exit.c|h */ |
                 exit                            |
                 onerror                         |
                 trap                            |
                 reboot                          |
-                copyfiles /* file.c|h */        |
+                copyfiles        /* file.c|h */ |
                 copylib                         |
                 delete                          |
                 exists                          |
@@ -222,7 +225,7 @@ ivp:            add       /* arithmetic.c|h */  |
                 user                            |
                 welcome                         |
                 working                         |
-                database  /* probe.c|h */       |
+                database        /* probe.c|h */ |
                 earlier                         |
                 getassign                       |
                 getdevice                       |
@@ -232,9 +235,9 @@ ivp:            add       /* arithmetic.c|h */  |
                 getsum                          |
                 getversion                      |
                 iconinfo                        |
-                cus       /* procedure.c|h */   |
+                cus         /* procedure.c|h */ |
                 dcl                             |
-                askbool   /* prompt.c|h */      |
+                askbool        /* prompt.c|h */ |
                 askchoice                       |
                 askdir                          |
                 askdisk                         |
@@ -242,7 +245,7 @@ ivp:            add       /* arithmetic.c|h */  |
                 asknumber                       |
                 askoptions                      |
                 askstring                       |
-                cat       /* strop.c|h */       |
+                cat             /* strop.c|h */ |
                 expandpath                      |
                 fmt                             |
                 pathonly                        |
@@ -250,9 +253,12 @@ ivp:            add       /* arithmetic.c|h */  |
                 strlen                          |
                 substr                          |
                 tackon                          |
-                set       /* symbol.c|h */      |
+                set            /* symbol.c|h */ |
                 symbolset                       |
-                symbolval                       ;
+                symbolval                       |
+                openwbobject       /* wb.c|h */ |
+                showwbobject                    |
+                closewbobject                   ;
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* arithmetic.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------*/
 add:            '(' '+' ps ')'                  { $$ = new_native(strdup("+"), LINE, m_add, $3, NUMBER); };
@@ -312,8 +318,8 @@ exit:           '(' EXIT ps quiet ')'           { $$ = new_native(strdup("exit")
                 '(' EXIT ')'                    { $$ = new_native(strdup("exit"), LINE, m_exit, NULL, NUMBER); };
 onerror:        '(' ONERROR vps ')'             { $$ = new_native(strdup("onerror"), LINE, m_procedure, push(new_contxt(),
                                                        new_custom(strdup("@onerror"), LINE, NULL, $3)), DANGLE); };
-trap:           '(' TRAP p vps ')'              { $$ = new_native(strdup("trap"), LINE, m_trap, push(push(new_contxt(), $3), $4), NUMBER); };
 reboot:         '(' REBOOT ')'                  { $$ = new_native(strdup("reboot"), LINE, m_reboot, NULL, NUMBER); };
+trap:           '(' TRAP p vps ')'              { $$ = new_native(strdup("trap"), LINE, m_trap, push(push(new_contxt(), $3), $4), NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* file.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 copyfiles:      '(' COPYFILES opts ')'          { $$ = new_native(strdup("copyfiles"), LINE, m_copyfiles, $3, NUMBER); };
@@ -415,6 +421,11 @@ tackon:         '(' TACKON pp ')'               { $$ = new_native(strdup("tackon
 set:            '(' SET sps ')'                 { $$ = new_native(strdup("set"), LINE, m_set, $3, DANGLE); };
 symbolset:      '(' SYMBOLSET pps ')'           { $$ = new_native(strdup("symbolset"), LINE, m_symbolset, $3, DANGLE); };
 symbolval:      '(' SYMBOLVAL p ')'             { $$ = new_native(strdup("symbolval"), LINE, m_symbolval, push(new_contxt(), $3), NUMBER); };
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* wb.c|h --------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+openwbobject:   '(' OPENWBOBJECT p opts ')'     { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), $3), $4), NUMBER); };
+showwbobject:   '(' SHOWWBOBJECT p ')'          { $$ = new_native(strdup("showwbobject"), LINE, m_showwbobject, push(new_contxt(), $3), NUMBER); };
+closewbobject:  '(' CLOSEWBOBJECT p ')'         { $$ = new_native(strdup("closewbobject"), LINE, m_closewbobject, push(new_contxt(), $3), NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- options ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 all:            '(' ALL ')'                     { $$ = new_option(strdup("all"), OPT_ALL, NULL); };
