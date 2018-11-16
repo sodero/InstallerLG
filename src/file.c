@@ -94,10 +94,10 @@ entry_p m_expandpath(entry_p contxt)
 // Return:      int:                If confirmed '1', else '0'. Both skip and
 //                                  abort will return a value of '0'.
 //----------------------------------------------------------------------------
-static int h_confirm(entry_p contxt,
-                     const char *hlp,
-                     const char *msg,
-                     ...)
+int h_confirm(entry_p contxt,
+              const char *hlp,
+              const char *msg,
+              ...)
 {
     if(contxt)
     {
@@ -2100,7 +2100,6 @@ static int h_delete_dir(entry_p contxt, const char *dir)
             // Do we need to ask for confirmation?
             if(askuser)
             {
-
                 // Only ask for confirmation if we're not
                 // running in novice mode.
                 if(!get_numvar(contxt, "@user-level") ||
