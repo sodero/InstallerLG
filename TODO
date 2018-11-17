@@ -1,17 +1,19 @@
 - file.c : h_choices LEAK CHECK
 - Check GUI list mgmt for leaks.
-- file.c is a nightmare, clean up.
+
 - >= V44
 -- (back <code>)
 -- (closemedia <media>)
 -- (closewbobject <argument>)
 -- (effect <position> <effect> <color 1> <color 2>)
--- (openwbobject <argument> ...)
--- (reboot)
--- (retrace)
 -- (setmedia <media> <action> [parameter])
 -- (showmedia <medianame> <filename> <position> <size> <borderflag> ...)
-   seems to be a thing? refer to IBrowse script.
--- (showwbobject <argument>)
+-- (retrace)
 -- (trace)
+-- DONE - Compare with OS3.9:
+-- (showwbobject <argument>)
+-- (openwbobject <argument> ...)
+-- (reboot)
+
 - Some kind of uninstaller, see http://aminet.net/package/util/wb/Uninstaller
+- (copylib) - compare with OS3.9 - Show filename or assume it's included in prompt text?
