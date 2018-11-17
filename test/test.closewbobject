@@ -1,1 +1,3 @@
 (closewbobject) ; "","Line 1: syntax error, unexpected ')' ')'",""
+(closewbobject "RAM:") ; "","-1",""
+(closewbobject "RAM:" err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""

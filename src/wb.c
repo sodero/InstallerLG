@@ -30,10 +30,10 @@ entry_p m_openwbobject(entry_p contxt)
     // We need a single argument.
     if(c_sane(contxt, 1))
     {
-        entry_p prompt     = get_opt(contxt, OPT_PROMPT),
-                help       = get_opt(contxt, OPT_HELP),
-                confirm    = get_opt(contxt, OPT_CONFIRM),
-                safe       = get_opt(contxt, OPT_SAFE);
+        entry_p prompt     = get_opt(CARG(2), OPT_PROMPT),
+                help       = get_opt(CARG(2), OPT_HELP),
+                confirm    = get_opt(CARG(2), OPT_CONFIRM),
+                safe       = get_opt(CARG(2), OPT_SAFE);
 
         // A non safe operation in pretend mode
         // always succeeds.
@@ -80,7 +80,7 @@ entry_p m_openwbobject(entry_p contxt)
             }
         }
 
-        if(!confirm || h_confirm(contxt, "", "", ""))
+        if(!confirm || h_confirm(contxt, str(help), str(prompt)))
         {
             #ifdef AMIGA
             DNUM = OpenWorkbenchObjectA(str(CARG(1)), NULL) ? 1 : 0;
@@ -111,12 +111,11 @@ entry_p m_openwbobject(entry_p contxt)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //
-// KNOWN BUG: This doesn't seem to work on MorphOS.
+// KNOWN BUG: This doesn't seem to work on AROS and MorphOS.
 //----------------------------------------------------------------------------
 entry_p m_showwbobject(entry_p contxt)
 {
-    // We need a sane context. Arguments
-    // are optional though.
+    // We need a single argument.
     if(c_sane(contxt, 1))
     {
         #ifdef AMIGA
@@ -143,12 +142,11 @@ entry_p m_showwbobject(entry_p contxt)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //
-// KNOWN BUG: This doesn't seem to work on MorphOS.
+// KNOWN BUG: This doesn't seem to work on AROS and MorphOS.
 //----------------------------------------------------------------------------
 entry_p m_closewbobject(entry_p contxt)
 {
-    // We need a sane context. Arguments
-    // are optional though.
+    // We need a single argument.
     if(c_sane(contxt, 1))
     {
         #ifdef AMIGA
