@@ -14,6 +14,10 @@
 #include "util.h"
 #include "wb.h"
 
+#ifdef AMIGA
+#include <proto/wb.h>
+#endif
+
 //----------------------------------------------------------------------------
 // (openwbobject <argument> ...)                                         (V44)
 //      open a workbench object which can be a disk, a drawer, a trashcan, a
@@ -78,16 +82,11 @@ entry_p m_openwbobject(entry_p contxt)
 
         if(!confirm || h_confirm(contxt, "", "", ""))
         {
-            /*
-            1531      This statement returs 1 if the object was successfully opened, 0
-            1532      if it was not opened and -1 if it was not opened because the
-            1533      workbench.library does not support this command (workbench.library
-            1534      supports this since V 44).
-            */
             #ifdef AMIGA
-            DNUM = 1; // FIXME
+            DNUM = OpenWorkbenchObjectA(str(CARG(1)), NULL) ? 1 : 0;
             #else
-            DNUM = 1;
+            // If not supported by workbench.library -1 is to be returned.
+            DNUM = -1;
             #endif
         }
         else
@@ -111,6 +110,8 @@ entry_p m_openwbobject(entry_p contxt)
 //      visible. The drawer has to be opened before.
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
+//
+// KNOWN BUG: This doesn't seem to work on MorphOS.
 //----------------------------------------------------------------------------
 entry_p m_showwbobject(entry_p contxt)
 {
@@ -118,16 +119,11 @@ entry_p m_showwbobject(entry_p contxt)
     // are optional though.
     if(c_sane(contxt, 1))
     {
-        /*
-        1554    This statement returs 1 if the object was successfully shown, 0 if
-        1555 it was not shown and -1 if it was not shown because the
-        1556 workbench.library does not support this command (workbench.library
-        1557 supports this since V 44).
-        */
         #ifdef AMIGA
-        DNUM = 1; // FIXME
+        DNUM = MakeWorkbenchObjectVisibleA(str(CARG(1)), NULL) ? 1 : 0;
         #else
-        DNUM = 1;
+        // If not supported by workbench.library -1 is to be returned.
+        DNUM = -1;
         #endif
     }
     else
@@ -146,6 +142,8 @@ entry_p m_showwbobject(entry_p contxt)
 //      be closed.
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
+//
+// KNOWN BUG: This doesn't seem to work on MorphOS.
 //----------------------------------------------------------------------------
 entry_p m_closewbobject(entry_p contxt)
 {
@@ -153,17 +151,11 @@ entry_p m_closewbobject(entry_p contxt)
     // are optional though.
     if(c_sane(contxt, 1))
     {
-        /*
-        1576
-        1577    This statement returs 1 if the object was successfully closed, 0 if
-        1578 it was not closed and -1 if it was not closed because the
-        1579 workbench.library does not support this command (workbench.library
-        1580 supports this since V 44).
-        */
         #ifdef AMIGA
-        DNUM = 1; // FIXME
+        DNUM = CloseWorkbenchObjectA(str(CARG(1)), NULL) ? 1 : 0;
         #else
-        DNUM = 1;
+        // If not supported by workbench.library -1 is to be returned.
+        DNUM = -1;
         #endif
     }
     else
