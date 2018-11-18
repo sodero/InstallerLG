@@ -415,40 +415,38 @@ char *str(entry_p entry)
 //----------------------------------------------------------------------------
 entry_p invoke(entry_p entry)
 {
-    // Be prepared to fail.
-    entry_p ret = end();
+    // Expect failure.
+    entry_p r = end();
 
     if(entry)
     {
-        // Iter.
-        entry_p *vec = entry->children;
+        // Iterator.
+        entry_p *c = entry->children;
 
         // Empty procedures are allowed, there
         // might be no children at all.
-        if(vec)
+        if(c)
         {
             // As long as no one fails, resolve
             // all children and save the return
             // value of the last one.
-            while (*vec &&
-                   *vec != end() &&
-                   !DID_ERR())
+            while(*c && *c != end() && !DID_ERR())
             {
                 // Resolve and proceed.
-                ret = resolve(*vec);
-                vec++;
+                r = resolve(*c);
+                c++;
             }
         }
 
         // Return the last value.
-        return ret;
+        return r;
     }
 
     // Bad input.
     PANIC(entry);
 
     // Failure.
-    return ret;
+    return r;
 }
 
 //----------------------------------------------------------------------------

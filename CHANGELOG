@@ -185,8 +185,7 @@
 ===============
 - Fixed handling of non-integers.
 - (getdiskspace) v44 compliant (WHDLOpener).
+- (openwbobject), (showwbobject) and (closewbobject) implemented (v44).
+- (trace) and (retrace) implemented (v44).
 - (reboot) implemented (v44).
-- (openwbobject) implemented (v44).
-- (showwbobject) implemented (v44).
-- (closewbobject) implemented (v44).
 - ?

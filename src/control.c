@@ -172,6 +172,8 @@ entry_p m_trace(entry_p contxt)
     // All we need is a context.
     if(contxt)
     {
+        // We're not doing anything
+        // except occupying space.
         RNUM(1);
     }
 
@@ -188,13 +190,58 @@ entry_p m_trace(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_retrace(entry_p contxt)
 {
-    // All we need is a context.
-    if(contxt)
+    // We need a context with a parent.
+    if(contxt && contxt->parent &&
+       contxt->parent->children)
     {
-        RNUM(1);
+        // Iterator and stop.
+        entry_p *c = contxt->parent->children;
+        entry_p s = *c;
+
+        // Locate ourselves.
+        while(*c != contxt) c++;
+
+        // Locate the first trace point,
+        // unless we're first in line.
+        if(*c != s)
+        {
+            // Find trace point.
+            while(*(--c) != s && (*c)->call != m_trace);
+
+            // Look for the second trace point,
+            // unless we're at the top by now.
+            if(*c != s)
+            {
+                // Find the second point.
+                while(*(--c) != s && (*c)->call != m_trace);
+            }
+        }
+
+        // Backtrack if we found two trace points.
+        if((*c)->call == m_trace)
+        {
+            // Expect failure.
+            entry_p r = end();
+
+            // Resolve everything up to the point
+            // where we currently are, once more.
+            while (*c && *c != contxt && !DID_ERR())
+            {
+                // Resolve and proceed.
+                r = resolve(*c);
+                c++;
+            }
+
+            // Return the last value.
+            return r;
+        }
+    }
+    else
+    {
+        // The parser is broken.
+        PANIC(contxt);
     }
 
-    // The parser is broken.
-    PANIC(contxt);
+    // Nowhere to go or panic.
     RCUR;
 }
