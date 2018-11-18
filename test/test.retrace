@@ -1,0 +1,2 @@
+(retrace) ; "","1",""
+(retrace err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""

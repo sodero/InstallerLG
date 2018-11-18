@@ -90,6 +90,8 @@ static char *strduptr(const char *str);
 "if"                    { return IF;             }
 "while"                 { return WHILE;          }
 "until"                 { return UNTIL;          }
+"trace"                 { return TRACE;          }
+"retrace"               { return RETRACE;        }
 "strlen"                { return STRLEN;         }
 "substr"                { return SUBSTR;         }
 "askdir"                { return ASKDIR;         }

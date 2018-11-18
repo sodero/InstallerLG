@@ -33,7 +33,7 @@
 /*        arithmetic.c|h */ /* '+' '/' '*' '-' */
 %token /* bitwise.c|h    */ AND BITAND BITNOT BITOR BITXOR NOT IN OR SHIFTLEFT SHIFTRIGHT XOR
 %token /* comparison.c|h */ EQ GT GTE LT LTE NEQ
-%token /* control.c|h    */ IF SELECT UNTIL WHILE
+%token /* control.c|h    */ IF SELECT UNTIL WHILE TRACE RETRACE
 %token /* external.c|h   */ EXECUTE REXX RUN
 %token /* exit.c|h       */ ABORT EXIT ONERROR TRAP REBOOT
 %token /* file.c|h       */ COPYFILES COPYLIB DELETE EXISTS FILEONLY FOREACH MAKEASSIGN MAKEDIR PROTECT
@@ -67,7 +67,7 @@
        /*                */ delopts dest disk files fonts help infos include newname newpath optional
        /*                */ nogauge noposition noreq pattern prompt quiet range safe resident override
        /*                */ setdefaulttool setposition setstack settooltype source swapcolors openwbobject
-       /*                */ showwbobject closewbobject
+       /*                */ showwbobject closewbobject trace retrace
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- destruction --------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Use the destructor of the start symbol to set of  */
@@ -89,7 +89,7 @@
                             assigns choices command compression confirm default delopts dest disk lt lte neq
                             files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append
-                            openwbobject showwbobject closewbobject
+                            openwbobject showwbobject closewbobject trace retrace
 %%
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- start --------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -197,6 +197,8 @@ ivp:            add        /* arithmetic.c|h */  |
                 select                           |
                 until                            |
                 while                            |
+                trace                            |
+                retrace                          |
                 execute      /* external.c|h */  |
                 rexx                             |
                 run                              |
@@ -294,6 +296,8 @@ if:             '(' IF cvv ')'                   { $$ = new_native(strdup("if"),
 select:         '(' SELECT p xpbs ')'            { $$ = new_native(strdup("select"), LINE, m_select, push(push(new_contxt(), $3), $4), NUMBER); };
 until:          '(' UNTIL p vps ')'              { $$ = new_native(strdup("until"), LINE, m_until, push(push(new_contxt(), $3), $4), NUMBER); };
 while:          '(' WHILE p vps ')'              { $$ = new_native(strdup("while"), LINE, m_while, push(push(new_contxt(), $3), $4), NUMBER); };
+trace:          '(' TRACE ')'                    { $$ = new_native(strdup("trace"), LINE, m_trace, NULL, NUMBER); };
+retrace:        '(' RETRACE ')'                  { $$ = new_native(strdup("retrace"), LINE, m_retrace, NULL, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h --------------------------------------------------------------------------------------------------------------------------------------------------------*/
 execute:        '(' EXECUTE ps opts ')'          { $$ = new_native(strdup("execute"), LINE, m_execute, push($3, $4), NUMBER); } |

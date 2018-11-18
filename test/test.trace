@@ -1,0 +1,2 @@
+(trace) ; "","1",""
+(trace err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""

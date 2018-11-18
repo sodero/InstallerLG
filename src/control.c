@@ -160,3 +160,41 @@ entry_p m_while(entry_p contxt)
     // Implemented in h_whunt.
     return h_whunt(contxt, 0);
 }
+
+//----------------------------------------------------------------------------
+// (trace)
+//     set a backtrace position
+//
+// Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
+//----------------------------------------------------------------------------
+entry_p m_trace(entry_p contxt)
+{
+    // All we need is a context.
+    if(contxt)
+    {
+        RNUM(1);
+    }
+
+    // The parser is broken.
+    PANIC(contxt);
+    RCUR;
+}
+
+//----------------------------------------------------------------------------
+// (retrace)
+//     backtrace to the next to last backtrace position
+//
+// Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
+//----------------------------------------------------------------------------
+entry_p m_retrace(entry_p contxt)
+{
+    // All we need is a context.
+    if(contxt)
+    {
+        RNUM(1);
+    }
+
+    // The parser is broken.
+    PANIC(contxt);
+    RCUR;
+}
