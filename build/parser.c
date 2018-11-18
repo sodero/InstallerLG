@@ -3494,7 +3494,7 @@ yyreduce:
 
   case 192:
 #line 300 "../src/parser.y" /* yacc.c:1651  */
-    { (yyval.e) = new_native(strdup("retrace"), LINE, m_retrace, NULL, NUMBER); }
+    { (yyval.e) = new_native(strdup("retrace"), LINE, m_retrace, NULL, DANGLE); }
 #line 3499 "parser.c" /* yacc.c:1651  */
     break;
 
