@@ -222,14 +222,16 @@ entry_p m_retrace(entry_p contxt)
         {
             // Expect failure.
             entry_p r = end();
+            entry_p *t = c;
 
-            // Resolve everything up to the point
-            // where we currently are, once more.
-            while (*c && *c != contxt && !DID_ERR())
+            for(; !DID_ERR(); c = t)
             {
-                // Resolve and proceed.
-                r = resolve(*c);
-                c++;
+                while (*c != contxt && !DID_ERR())
+                {
+                    // Resolve and proceed.
+                    r = resolve(*c);
+                    c++;
+                }
             }
 
             // Return the last value.
