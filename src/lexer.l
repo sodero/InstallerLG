@@ -154,6 +154,7 @@ static char *strduptr(const char *str);
 "all"                   { return ALL;            }
 "append"                { return APPEND;         }
 "assigns"               { return ASSIGNS;        }
+"back"                  { return BACK;           }
 "choices"               { return CHOICES;        }
 "command"               { return COMMAND;        }
 "compression"           { return COMPRESSION;    }
@@ -176,10 +177,13 @@ static char *strduptr(const char *str);
 "nogauge"               { return NOGAUGE;        }
 "noposition"            { return NOPOSITION;     }
 "noreq"                 { return NOREQ;          }
+"optional"              { return OPTIONAL;       }
+"override"              { return OVERRIDE;       }
 "pattern"               { return PATTERN;        }
 "prompt"                { return PROMPT;         }
 "quiet"                 { return QUIET;          }
 "range"                 { return RANGE;          }
+"resident"              { return RESIDENT;       }
 "safe"                  { return SAFE;           }
 "setdefaulttool"        { return SETDEFAULTTOOL; }
 "setstack"              { return SETSTACK;       }
@@ -187,9 +191,6 @@ static char *strduptr(const char *str);
 "setposition"           { return SETPOSITION;    }
 "source"                { return SOURCE;         }
 "swapcolors"            { return SWAPCOLORS;     }
-"optional"              { return OPTIONAL;       }
-"resident"              { return RESIDENT;       }
-"override"              { return OVERRIDE;       }
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
     /*- strings ------------------------------------------------------------------------------------------------------------------------------------*/

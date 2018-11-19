@@ -46,7 +46,7 @@
 %token /* strop.c|h      */ CAT EXPANDPATH FMT PATHONLY PATMATCH STRLEN SUBSTR TACKON
 %token /* symbol.c|h     */ SET SYMBOLSET SYMBOLVAL
 %token /* wb.c|h         */ OPENWBOBJECT SHOWWBOBJECT CLOSEWBOBJECT
-%token /* options        */ ALL APPEND ASSIGNS CHOICES COMMAND COMPRESSION CONFIRM DEFAULT
+%token /* options        */ ALL APPEND ASSIGNS BACK CHOICES COMMAND COMPRESSION CONFIRM DEFAULT
        /*                */ DELOPTS DEST DISK FILES FONTS GETDEFAULTTOOL GETPOSITION
        /*                */ GETSTACK GETTOOLTYPE HELP INFOS INCLUDE NEWNAME NEWPATH NOGAUGE
        /*                */ NOPOSITION NOREQ PATTERN PROMPT QUIET RANGE SAFE
@@ -67,7 +67,7 @@
        /*                */ delopts dest disk files fonts help infos include newname newpath optional
        /*                */ nogauge noposition noreq pattern prompt quiet range safe resident override
        /*                */ setdefaulttool setposition setstack settooltype source swapcolors openwbobject
-       /*                */ showwbobject closewbobject trace retrace
+       /*                */ showwbobject closewbobject trace retrace back
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- destruction --------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Use the destructor of the start symbol to set of  */
@@ -89,7 +89,7 @@
                             assigns choices command compression confirm default delopts dest disk lt lte neq
                             files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append
-                            openwbobject showwbobject closewbobject trace retrace
+                            openwbobject showwbobject closewbobject trace retrace back
 %%
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- start --------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -133,6 +133,7 @@ cvv:            p xpb xpb                        { $$ = push(push(push(new_contx
 opt:            all                              |
                 append                           |
                 assigns                          |
+                back                             |
                 choices                          |
                 command                          |
                 compression                      |
@@ -438,6 +439,7 @@ closewbobject:  '(' CLOSEWBOBJECT p ')'          { $$ = new_native(strdup("close
 all:            '(' ALL ')'                      { $$ = new_option(strdup("all"), OPT_ALL, NULL); };
 append:         '(' APPEND ps ')'                { $$ = new_option(strdup("append"), OPT_APPEND, $3); };
 assigns:        '(' ASSIGNS ')'                  { $$ = new_option(strdup("assigns"), OPT_ASSIGNS, NULL); };
+back:           '(' BACK vps ')'                { $$ = new_option(strdup("back"), OPT_BACK, $3); };
 choices:        '(' CHOICES ps ')'               { $$ = new_option(strdup("choices"), OPT_CHOICES, $3); };
 command:        '(' COMMAND ps ')'               { $$ = new_option(strdup("command"), OPT_COMMAND, $3); };
 compression:    '(' COMPRESSION ')'              { $$ = new_option(strdup("compression"), OPT_COMPRESSION, NULL); };

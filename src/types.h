@@ -44,6 +44,7 @@ typedef enum
     OPT_ALL,
     OPT_APPEND,
     OPT_ASSIGNS,
+    OPT_BACK,
     OPT_CHOICES,
     OPT_COMMAND,
     OPT_COMPRESSION,

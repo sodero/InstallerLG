@@ -138,42 +138,43 @@ extern int yydebug;
     ALL = 348,
     APPEND = 349,
     ASSIGNS = 350,
-    CHOICES = 351,
-    COMMAND = 352,
-    COMPRESSION = 353,
-    CONFIRM = 354,
-    DEFAULT = 355,
-    DELOPTS = 356,
-    DEST = 357,
-    DISK = 358,
-    FILES = 359,
-    FONTS = 360,
-    GETDEFAULTTOOL = 361,
-    GETPOSITION = 362,
-    GETSTACK = 363,
-    GETTOOLTYPE = 364,
-    HELP = 365,
-    INFOS = 366,
-    INCLUDE = 367,
-    NEWNAME = 368,
-    NEWPATH = 369,
-    NOGAUGE = 370,
-    NOPOSITION = 371,
-    NOREQ = 372,
-    PATTERN = 373,
-    PROMPT = 374,
-    QUIET = 375,
-    RANGE = 376,
-    SAFE = 377,
-    SETDEFAULTTOOL = 378,
-    SETPOSITION = 379,
-    SETSTACK = 380,
-    SETTOOLTYPE = 381,
-    SOURCE = 382,
-    SWAPCOLORS = 383,
-    OPTIONAL = 384,
-    RESIDENT = 385,
-    OVERRIDE = 386
+    BACK = 351,
+    CHOICES = 352,
+    COMMAND = 353,
+    COMPRESSION = 354,
+    CONFIRM = 355,
+    DEFAULT = 356,
+    DELOPTS = 357,
+    DEST = 358,
+    DISK = 359,
+    FILES = 360,
+    FONTS = 361,
+    GETDEFAULTTOOL = 362,
+    GETPOSITION = 363,
+    GETSTACK = 364,
+    GETTOOLTYPE = 365,
+    HELP = 366,
+    INFOS = 367,
+    INCLUDE = 368,
+    NEWNAME = 369,
+    NEWPATH = 370,
+    NOGAUGE = 371,
+    NOPOSITION = 372,
+    NOREQ = 373,
+    PATTERN = 374,
+    PROMPT = 375,
+    QUIET = 376,
+    RANGE = 377,
+    SAFE = 378,
+    SETDEFAULTTOOL = 379,
+    SETPOSITION = 380,
+    SETSTACK = 381,
+    SETTOOLTYPE = 382,
+    SOURCE = 383,
+    SWAPCOLORS = 384,
+    OPTIONAL = 385,
+    RESIDENT = 386,
+    OVERRIDE = 387
   };
 #endif
 /* Tokens.  */
@@ -270,42 +271,43 @@ extern int yydebug;
 #define ALL 348
 #define APPEND 349
 #define ASSIGNS 350
-#define CHOICES 351
-#define COMMAND 352
-#define COMPRESSION 353
-#define CONFIRM 354
-#define DEFAULT 355
-#define DELOPTS 356
-#define DEST 357
-#define DISK 358
-#define FILES 359
-#define FONTS 360
-#define GETDEFAULTTOOL 361
-#define GETPOSITION 362
-#define GETSTACK 363
-#define GETTOOLTYPE 364
-#define HELP 365
-#define INFOS 366
-#define INCLUDE 367
-#define NEWNAME 368
-#define NEWPATH 369
-#define NOGAUGE 370
-#define NOPOSITION 371
-#define NOREQ 372
-#define PATTERN 373
-#define PROMPT 374
-#define QUIET 375
-#define RANGE 376
-#define SAFE 377
-#define SETDEFAULTTOOL 378
-#define SETPOSITION 379
-#define SETSTACK 380
-#define SETTOOLTYPE 381
-#define SOURCE 382
-#define SWAPCOLORS 383
-#define OPTIONAL 384
-#define RESIDENT 385
-#define OVERRIDE 386
+#define BACK 351
+#define CHOICES 352
+#define COMMAND 353
+#define COMPRESSION 354
+#define CONFIRM 355
+#define DEFAULT 356
+#define DELOPTS 357
+#define DEST 358
+#define DISK 359
+#define FILES 360
+#define FONTS 361
+#define GETDEFAULTTOOL 362
+#define GETPOSITION 363
+#define GETSTACK 364
+#define GETTOOLTYPE 365
+#define HELP 366
+#define INFOS 367
+#define INCLUDE 368
+#define NEWNAME 369
+#define NEWPATH 370
+#define NOGAUGE 371
+#define NOPOSITION 372
+#define NOREQ 373
+#define PATTERN 374
+#define PROMPT 375
+#define QUIET 376
+#define RANGE 377
+#define SAFE 378
+#define SETDEFAULTTOOL 379
+#define SETPOSITION 380
+#define SETSTACK 381
+#define SETTOOLTYPE 382
+#define SOURCE 383
+#define SWAPCOLORS 384
+#define OPTIONAL 385
+#define RESIDENT 386
+#define OVERRIDE 387
 
 /* Value type.  */
 
