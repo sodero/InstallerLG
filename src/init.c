@@ -240,7 +240,7 @@ entry_p init(entry_p contxt)
             push(push(push(push(push(push(
             push(push(push(push(push(push(
             push(push(push(push(push(push(
-            push(push(push(push
+            push(push(push(push(push(push
             (
                 new_contxt(),
                 new_symbol(strdup("@user-level"))),
@@ -308,6 +308,12 @@ entry_p init(entry_p contxt)
                 new_number(0)
                 /*
                 Mock user input. 1 = abort.
+                */
+            ),
+                new_symbol(strdup("@back"))),
+                new_number(0)
+                /*
+                Mock user input. 1 = go back.
                 */
             ),
                 new_symbol(strdup("@each-type"))),

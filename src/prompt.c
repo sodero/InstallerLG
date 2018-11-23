@@ -39,6 +39,7 @@ entry_p m_askbool(entry_p contxt)
         const char *yes = tr(S_AYES), *no = tr(S_NONO);
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
+                back     = get_opt(contxt, OPT_BACK),
                 deflt    = get_opt(contxt, OPT_DEFAULT),
                 choices  = get_opt(contxt, OPT_CHOICES);
 
@@ -80,6 +81,16 @@ entry_p m_askbool(entry_p contxt)
                     // Prompt user.
                     DNUM = gui_bool(p, h, yes, no);
                 }
+
+                // Is the back option available?
+                if(back)
+                {
+                    // Real (back) or fake input?
+                    if(get_numvar(contxt, "@back"))
+                    {
+                        return invoke(back);
+                    }
+                }
             }
         }
         else
@@ -116,6 +127,7 @@ entry_p m_askchoice(entry_p contxt)
     {
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
+                back     = get_opt(contxt, OPT_BACK),
                 choices  = get_opt(contxt, OPT_CHOICES),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
 
@@ -255,6 +267,16 @@ entry_p m_askchoice(entry_p contxt)
                     DNUM += ((DNUM < 32 && DNUM >= 0) ?
                             add[DNUM] : 0);
 
+                    // Is the back option available?
+                    if(back)
+                    {
+                        // Real (back) or fake input?
+                        if(get_numvar(contxt, "@back"))
+                        {
+                            return invoke(back);
+                        }
+                    }
+
                     // Halt if abort.
                     if(hlt)
                     {
@@ -299,6 +321,7 @@ entry_p m_askdir(entry_p contxt)
     {
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
+                back     = get_opt(contxt, OPT_BACK),
                 deflt    = get_opt(contxt, OPT_DEFAULT),
                 newpath  = get_opt(contxt, OPT_NEWPATH),
                 disk     = get_opt(contxt, OPT_DISK),
@@ -327,6 +350,16 @@ entry_p m_askdir(entry_p contxt)
 
                     // Prompt user.
                     ret = gui_askdir(p, h, np, dk, as, d);
+
+                    // Is the back option available?
+                    if(back)
+                    {
+                        // Real (back) or fake input?
+                        if(get_numvar(contxt, "@back"))
+                        {
+                            return invoke(back);
+                        }
+                    }
 
                     // Return empty string and
                     // halt if user aborted.
@@ -387,6 +420,7 @@ entry_p m_askdisk(entry_p contxt)
     {
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
+                back     = get_opt(contxt, OPT_BACK),
                 dest     = get_opt(contxt, OPT_DEST),
                 newname  = get_opt(contxt, OPT_NEWNAME);
 
@@ -438,8 +472,24 @@ entry_p m_askdisk(entry_p contxt)
                             }
                             else
                             {
-                                // User abort.
-                                break;
+                                // Is the back option available?
+                                if(back)
+                                {
+                                    // Real (back) or fake input?
+                                    if(get_numvar(contxt, "@back"))
+                                    {
+                                        // Restore auto request.
+                                        p->pr_WindowPtr = w;
+
+                                        // Hook and exit.
+                                        return invoke(back);
+                                    }
+                                }
+                                else
+                                {
+                                    // User abort.
+                                    break;
+                                }
                             }
                         }
                     }
@@ -492,7 +542,7 @@ entry_p m_askdisk(entry_p contxt)
                 DNUM = 1;
 
                 // For testing purposes only.
-                printf("%d", newname ? 1 : 0);
+                printf("%d", (newname || back) ? 1 : 0);
                 #endif
             }
             else
@@ -535,6 +585,7 @@ entry_p m_askfile(entry_p contxt)
     {
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
+                back     = get_opt(contxt, OPT_BACK),
                 newpath  = get_opt(contxt, OPT_NEWPATH),
                 disk     = get_opt(contxt, OPT_DISK),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
@@ -561,6 +612,16 @@ entry_p m_askfile(entry_p contxt)
 
                     // Prompt user.
                     ret = gui_askfile(p, h, np, dk, d);
+
+                    // Is the back option available?
+                    if(back)
+                    {
+                        // Real (back) or fake input?
+                        if(get_numvar(contxt, "@back"))
+                        {
+                            return invoke(back);
+                        }
+                    }
 
                     // Return empty string and
                     // halt if user aborted.
@@ -622,6 +683,7 @@ entry_p m_asknumber(entry_p contxt)
     {
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
+                back     = get_opt(contxt, OPT_BACK),
                 range    = get_opt(contxt, OPT_RANGE),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
 
@@ -672,6 +734,16 @@ entry_p m_asknumber(entry_p contxt)
                     // Prompt user.
                     DNUM = gui_number(p, h, min, max, d, &hlt);
 
+                    // Is the back option available?
+                    if(back)
+                    {
+                        // Real (back) or fake input?
+                        if(get_numvar(contxt, "@back"))
+                        {
+                            return invoke(back);
+                        }
+                    }
+
                     // Halt if abort.
                     if(hlt)
                     {
@@ -714,6 +786,7 @@ entry_p m_askoptions(entry_p contxt)
     {
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
+                back     = get_opt(contxt, OPT_BACK),
                 choices  = get_opt(contxt, OPT_CHOICES),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
 
@@ -817,6 +890,16 @@ entry_p m_askoptions(entry_p contxt)
                     // Prompt user.
                     DNUM = gui_options(p, h, chs, i, &hlt);
 
+                    // Is the back option available?
+                    if(back)
+                    {
+                        // Real (back) or fake input?
+                        if(get_numvar(contxt, "@back"))
+                        {
+                            return invoke(back);
+                        }
+                    }
+
                     // Halt if abort.
                     if(hlt)
                     {
@@ -858,6 +941,7 @@ entry_p m_askstring(entry_p contxt)
     {
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
+                back     = get_opt(contxt, OPT_BACK),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
 
         if(prompt && help && deflt)
@@ -880,6 +964,16 @@ entry_p m_askstring(entry_p contxt)
 
                     // Prompt user.
                     res = gui_string(p, h, d, &hlt);
+
+                    // Is the back option available?
+                    if(back)
+                    {
+                        // Real (back) or fake input?
+                        if(get_numvar(contxt, "@back"))
+                        {
+                            return invoke(back);
+                        }
+                    }
 
                     // Halt if abort.
                     if(hlt)

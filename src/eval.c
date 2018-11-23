@@ -406,12 +406,12 @@ char *str(entry_p entry)
 
 //----------------------------------------------------------------------------
 // Name:        invoke
-// Description: Evaluate all children of a CONTXT. In most cases this implies
+// Description: Evaluate all children of an entry. In most cases this implies
 //              executing all executable children and return the return value
-//              of the last executed function. If any of the functions in the
-//              CONTXT fails, the execution will be aborted.
-// Input:       entry_p entry:  An entry_t pointer to a CONTXT object.
-// Return:      entry_p:        The last resolved value in the entry CONTXT.
+//              of the last executed function. If any of the functions fail,
+//              the execution will be aborted.
+// Input:       entry_p entry:  An entry_t pointer to a parent object.
+// Return:      entry_p:        The last resolved value.
 //----------------------------------------------------------------------------
 entry_p invoke(entry_p entry)
 {
