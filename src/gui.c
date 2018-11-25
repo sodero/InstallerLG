@@ -89,8 +89,8 @@ CLASS_DEF(InstallerGui)
     // Widgets.
     Object *ExpertLevel, *UserLevel, *Progress,
            *Complete, *Pretend, *Bottom, *String,
-           *Number, *Empty, *Text, *List,
-           *Log, *Top, *Ask, *Yes, *No;
+           *Number, *Empty, *Text, *List, *Log, *Top,
+           *Ask, *Yes, *No, *Abort, *AbortOnly, *AbortRun;
 
     // String buffer.
     char Buf[1 << 10];
@@ -1293,6 +1293,17 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
                 // Prepare before adding radio buttons.
                 if(DoMethod(my->Empty, MUIM_Group_InitChange))
                 {
+                    // Toggle 'Abort' and 'Back'?
+                    int bmd = *((int *) msg->Halt);
+
+                    // Use 'Abort' or 'Back'?
+                    if(bmd)
+                    {
+                        // Clear input and set 'Back'.
+                        set(my->Abort, MUIA_Text_Contents, "[BACK]");
+                        *((int *) msg->Halt) = 0;
+                    }
+
                     // Add radio buttons.
                     DoMethod(my->Empty, OM_ADDMEMBER, r);
 
@@ -1305,6 +1316,12 @@ MUIDSP IPTR InstallerGuiRadio(Class *cls,
                     {
                         // On abort return HALT.
                         *((int *) msg->Halt) = 1;
+                    }
+
+                    if(bmd)
+                    {
+                        // Restore 'Abort' if needed.
+                        set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
                     }
 
                     // Prepare before removing radio buttons.
@@ -1393,28 +1410,43 @@ MUIDSP IPTR InstallerGuiString(Class *cls,
                                struct MUIP_InstallerGui_String *msg)
 {
     // Result.
-    ULONG r = 0;
+    ULONG res = 0;
 
     // Show string widget page.
     if(DoMethod(obj, MUIM_InstallerGui_PageSet, msg->Message,
                 msg->Help, P_STRING, B_PROCEED_ABORT))
     {
         struct InstallerGuiData *my = INST_DATA(cls, obj);
+        int bmd = *((int *) msg->Halt);
 
         // Set initial value of string.
         set(my->String, MUIA_String_Contents, msg->Default);
+
+        // Use 'Abort' or 'Back'?
+        if(bmd)
+        {
+            // Clear input and set 'Back'.
+            set(my->Abort, MUIA_Text_Contents, "[BACK]");
+            *((int *) msg->Halt) = 0;
+        }
 
         // Wait for proceed or abort.
         if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2)
            == MUIV_InstallerGui_Proceed)
         {
             // On proceed get string value.
-            get(my->String, MUIA_String_Contents, &r);
+            get(my->String, MUIA_String_Contents, &res);
         }
         else
         {
             // On abort return HALT.
             *((int *) msg->Halt) = 1;
+        }
+
+        if(bmd)
+        {
+            // Restore 'Abort' if needed.
+            set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
         }
     }
     else
@@ -1424,7 +1456,7 @@ MUIDSP IPTR InstallerGuiString(Class *cls,
     }
 
     // Always return a valid string.
-    return r ? r : (ULONG) "";
+    return res ? res : (ULONG) "";
 }
 
 //----------------------------------------------------------------------------
@@ -1446,28 +1478,42 @@ MUIDSP IPTR InstallerGuiNumber(Class *cls,
                 msg->Help, P_NUMBER, B_PROCEED_ABORT))
     {
         struct InstallerGuiData *my = INST_DATA(cls, obj);
+        int bmd = *((int *) msg->Halt), res = 0;
 
         // Set min, max and default value.
         set(my->Number, MUIA_Numeric_Min, msg->Min);
         set(my->Number, MUIA_Numeric_Max, msg->Max);
         set(my->Number, MUIA_Numeric_Value, msg->Default);
 
+        // Use 'Abort' or 'Back'?
+        if(bmd)
+        {
+            // Clear input and set 'Back'.
+            set(my->Abort, MUIA_Text_Contents, "[BACK]");
+            *((int *) msg->Halt) = 0;
+        }
+
         // Wait for proceed or abort.
         if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2)
            == MUIV_InstallerGui_Proceed)
         {
-            ULONG res = 0;
-
             // On proceed get and return numerical value.
             get(my->Number, MUIA_Numeric_Value, &res);
-            return res;
         }
         else
         {
             // On abort return HALT.
             *((int *) msg->Halt) = 1;
-            return 0;
         }
+
+        if(bmd)
+        {
+            // Restore 'Abort' if needed.
+            set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
+        }
+
+        // Success or halt.
+        return res;
     }
 
     // Unknown error.
@@ -1501,7 +1547,16 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
             ULONG id;
             size_t i = 0;
             static Object * cb[33];
+            int bmd = *((int *) msg->Halt);
             const char **cs = (const char **) msg->Names;
+
+            // Use 'Abort' or 'Back'?
+            if(bmd)
+            {
+                // Clear input and set 'Back'.
+                set(my->Abort, MUIA_Text_Contents, "[BACK]");
+                *((int *) msg->Halt) = 0;
+            }
 
             // The maximum number of choices is 32.
             while(*cs && i < 32)
@@ -1564,6 +1619,12 @@ MUIDSP IPTR InstallerGuiCheckBoxes(Class *cls,
 
             // Wait for proceed or abort.
             id = InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2);
+
+            if(bmd)
+            {
+                // Restore 'Abort' if needed.
+                set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
+            }
 
             // Remove all dynamic objects in group.
             if(DoMethod(my->Empty, MUIM_Group_InitChange))
@@ -1711,7 +1772,7 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
     Object *el, *ul, *fp, *cm, *pr,
            *st, *nm, *bp, *em, *rt,
            *tx, *ls, *lg, *tp, *af,
-           *ys, *no;
+           *ys, *no, *ab, *ao, *ar;
 
     // Radio button strings.
     static const char *lev[4],
@@ -1721,7 +1782,8 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
     // Clear to enable check.
     el = ul = fp = cm = pr = st =
     nm = bp = em = rt = tx = ls =
-    lg = tp = af = ys = no = NULL;
+    lg = tp = af = ys = no = ab =
+    ao = ar = NULL;
 
     // User level.
     lev[0] = tr(S_ULNV); // Novice
@@ -1903,7 +1965,7 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
                         MUIA_Background, MUII_ButtonBack,
                         TAG_END),
                     MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
-                    MUIA_Group_Child, MUI_NewObject(
+                    MUIA_Group_Child, ab = MUI_NewObject(
                         MUIC_Text,
                         MUIA_UserData, MUIV_InstallerGui_Abort,
                         MUIA_Frame, MUIV_Frame_Button,
@@ -1942,7 +2004,7 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
                     MUIC_Group,
                     MUIA_Group_Horiz, TRUE,
                     MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
-                    MUIA_Group_Child, MUI_NewObject(
+                    MUIA_Group_Child, ao = MUI_NewObject(
                         MUIC_Text,
                         MUIA_UserData, MUIV_InstallerGui_AbortOnly,
                         MUIA_Frame, MUIV_Frame_Button,
@@ -1975,7 +2037,7 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
                         MUIA_InputMode, MUIV_InputMode_RelVerify,
                         MUIA_Background, MUII_ButtonBack,
                         TAG_END),
-                    MUIA_Group_Child, MUI_NewObject(
+                    MUIA_Group_Child, ar = MUI_NewObject(
                         MUIC_Text,
                         MUIA_UserData, MUIV_InstallerGui_AbortRun,
                         MUIA_Frame, MUIV_Frame_Button,
@@ -2027,17 +2089,20 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
         if(el && ul && fp && cm && pr &&
            st && nm && bp && em && tx &&
            ls && lg && tp && af && ys &&
-           no)
+           no && ab && ao && ar)
         {
             my->ExpertLevel = el;
+            my->AbortOnly = ao;
             my->UserLevel = ul;
             my->Progress = fp;
+            my->AbortRun = ar;
             my->Complete = cm;
             my->Pretend = pr;
             my->String = st;
             my->Number = nm;
             my->Bottom = bp;
             my->Empty = em;
+            my->Abort = ab;
             my->Text = tx;
             my->List = ls;
             my->Log = lg;

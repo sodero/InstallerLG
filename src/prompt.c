@@ -250,7 +250,8 @@ entry_p m_askchoice(entry_p contxt)
                 // resolve all options.
                 if(!DID_ERR())
                 {
-                    int hlt = 0, d = 0;
+                    // Promote (back).
+                    int hlt = back ? 1 : 0, d = 0;
 
                     // Cap / compute skipper.
                     if(i > 0 && i < 31 &&
@@ -271,7 +272,7 @@ entry_p m_askchoice(entry_p contxt)
                     if(back)
                     {
                         // Real (back) or fake input?
-                        if(get_numvar(contxt, "@back"))
+                        if(hlt || get_numvar(contxt, "@back"))
                         {
                             return invoke(back);
                         }
@@ -729,7 +730,8 @@ entry_p m_asknumber(entry_p contxt)
                 // resolve all options.
                 if(!DID_ERR())
                 {
-                    int hlt = 0;
+                    // Promote (back).
+                    int hlt = back ? 1 : 0;
 
                     // Prompt user.
                     DNUM = gui_number(p, h, min, max, d, &hlt);
@@ -738,7 +740,7 @@ entry_p m_asknumber(entry_p contxt)
                     if(back)
                     {
                         // Real (back) or fake input?
-                        if(get_numvar(contxt, "@back"))
+                        if(hlt || get_numvar(contxt, "@back"))
                         {
                             return invoke(back);
                         }
@@ -885,7 +887,8 @@ entry_p m_askoptions(entry_p contxt)
                 // resolve all options.
                 if(!DID_ERR())
                 {
-                    int hlt = 0;
+                    // Promote (back).
+                    int hlt = back ? 1 : 0;
 
                     // Prompt user.
                     DNUM = gui_options(p, h, chs, i, &hlt);
@@ -894,7 +897,7 @@ entry_p m_askoptions(entry_p contxt)
                     if(back)
                     {
                         // Real (back) or fake input?
-                        if(get_numvar(contxt, "@back"))
+                        if(hlt || get_numvar(contxt, "@back"))
                         {
                             return invoke(back);
                         }
@@ -960,7 +963,8 @@ entry_p m_askstring(entry_p contxt)
                 // resolve all options.
                 if(!DID_ERR())
                 {
-                    int hlt = 0;
+                    // Promote (back).
+                    int hlt = back ? 1 : 0;
 
                     // Prompt user.
                     res = gui_string(p, h, d, &hlt);
@@ -968,8 +972,7 @@ entry_p m_askstring(entry_p contxt)
                     // Is the back option available?
                     if(back)
                     {
-                        // Real (back) or fake input?
-                        if(get_numvar(contxt, "@back"))
+                        if(hlt || get_numvar(contxt, "@back"))
                         {
                             return invoke(back);
                         }

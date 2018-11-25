@@ -2,17 +2,21 @@
 - Check GUI list mgmt for leaks.
 
 - >= V44
--- (back <code>)
 -- (closemedia <media>)
--- (closewbobject <argument>)
 -- (effect <position> <effect> <color 1> <color 2>)
 -- (setmedia <media> <action> [parameter])
 -- (showmedia <medianame> <filename> <position> <size> <borderflag> ...)
+-- (back <code>)
+   -- DONE: askoptions, askchoice, asknumber, askstring
+   -- TODO: copyfiles, copylib, delete, execute, makedir, message, rename, textfile
 -- (retrace)
--- (trace)
+   -- Done, except depth and exit.
+
 -- DONE - Compare with OS3.9:
--- (showwbobject <argument>)
+-- (trace)
 -- (openwbobject <argument> ...)
+-- (showwbobject <argument>)
+-- (closewbobject <argument>)
 -- (reboot)
 
 - Some kind of uninstaller, see http://aminet.net/package/util/wb/Uninstaller
