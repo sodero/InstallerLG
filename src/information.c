@@ -193,7 +193,7 @@ entry_p m_message(entry_p contxt)
                 if(!DID_ERR())
                 {
                     // Show message dialog.
-                    DNUM = gui_message(msg, 0);
+                    DNUM = gui_message(msg);
                 }
 
                 // Free the temporary buffer.
@@ -376,7 +376,7 @@ entry_p m_working(entry_p contxt)
 
                     // Show the result. Return immediately.
                     // No waiting for any events.
-                    gui_message(con, 1);
+                    gui_working(con);
 
                     // Free the final message buffer.
                     free(con);

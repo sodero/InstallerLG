@@ -97,7 +97,7 @@ entry_p m_exit(entry_p contxt)
                 // unless we have an empty string.
                 if(*msg && !DID_ERR())
                 {
-                    gui_message(msg, 0);
+                    gui_finish(msg);
                 }
 
                 // Free the temporary buffer.
@@ -130,12 +130,12 @@ entry_p m_exit(entry_p contxt)
                          app, dst);
 
                 // Display the full message.
-                gui_message(get_buf(), 0);
+                gui_finish(get_buf());
             }
             else
             {
                 // Display the bare minimum.
-                gui_message(tr(S_ICPL), 0);
+                gui_finish(tr(S_ICPL));
             }
         }
 

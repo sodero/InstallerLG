@@ -15,7 +15,9 @@
 int gui_init(void);
 void gui_exit(void);
 int gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min, int npr, int nlg);
-int gui_message(const char *msg, int imm);
+int gui_message(const char *msg);
+int gui_working(const char *msg);
+int gui_finish(const char *msg);
 void gui_abort(const char *msg);
 int gui_bool(const char *msg, const char *hlp, const char *yes, const char *no);
 int gui_choice(const char *msg, const char *hlp, const char **nms, int def, int *hlt);

@@ -118,6 +118,8 @@ CLASS_DEF(InstallerGui)
 #define MUIM_InstallerGui_CheckBoxes       (TAGBASE_LG + 118)
 #define MUIM_InstallerGui_AskFile          (TAGBASE_LG + 119)
 #define MUIM_InstallerGui_PageSet          (TAGBASE_LG + 120)
+#define MUIM_InstallerGui_Finish           (TAGBASE_LG + 121)
+#define MUIM_InstallerGui_Working          (TAGBASE_LG + 122)
 
 //----------------------------------------------------------------------------
 // InstallerGui - Init parameters
@@ -208,7 +210,24 @@ struct MUIP_InstallerGui_Message
 {
     ULONG MethodID;
     ULONG Message;
-    ULONG Immediate;
+};
+
+//----------------------------------------------------------------------------
+// InstallerGui - Finish parameters
+//----------------------------------------------------------------------------
+struct MUIP_InstallerGui_Finish
+{
+    ULONG MethodID;
+    ULONG Message;
+};
+
+//----------------------------------------------------------------------------
+// InstallerGui - Working parameters
+//----------------------------------------------------------------------------
+struct MUIP_InstallerGui_Working
+{
+    ULONG MethodID;
+    ULONG Message;
 };
 
 //----------------------------------------------------------------------------
@@ -324,7 +343,7 @@ struct MUIP_InstallerGui_PageSet
 #define MUIV_InstallerGui_ProceedRun       (TAGBASE_LG + 206)
 #define MUIV_InstallerGui_SkipRun          (TAGBASE_LG + 207)
 #define MUIV_InstallerGui_AbortRun         (TAGBASE_LG + 208)
-#define MUIV_InstallerGui_ProceedOnly      (TAGBASE_LG + 209)
+#define MUIV_InstallerGui_Ok               (TAGBASE_LG + 209)
 #define MUIV_InstallerGui_LastButton       (TAGBASE_LG + 209)
 
 // Pages
@@ -342,7 +361,7 @@ struct MUIP_InstallerGui_PageSet
 #define B_YES_NO                           1
 #define B_ABORT                            2
 #define B_PROCEED_SKIP_ABORT               3
-#define B_PROCEED                          4
+#define B_OK                               4
 #define B_NONE                             5
 
 //----------------------------------------------------------------------------
@@ -1169,9 +1188,36 @@ MUIDSP IPTR InstallerGuiExit(Class *cls,
 }
 
 //----------------------------------------------------------------------------
+// InstallerGuiWorking - Show busy message
+// Input:                Message - The message
+// Return:               TRUE on success, FALSE otherwise
+//----------------------------------------------------------------------------
+MUIDSP IPTR InstallerGuiWorking(Class *cls,
+                                Object *obj,
+                                struct MUIP_InstallerGui_Working *msg)
+{
+    // Silence.
+    (void) cls;
+
+    // Setup the correct page and button combination.
+    if(DoMethod(obj, MUIM_InstallerGui_PageSet,
+                msg->Message, NULL, P_MESSAGE, B_NONE))
+    {
+        // We don't do anything. The
+        // message is already shown.
+        return TRUE;
+    }
+    else
+    {
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return FALSE;
+    }
+}
+
+//----------------------------------------------------------------------------
 // InstallerGuiMessage - Show message
 // Input:                Message - The prompt
-//                       Immediate - No button
 // Return:               TRUE on success, FALSE otherwise
 //----------------------------------------------------------------------------
 MUIDSP IPTR InstallerGuiMessage(Class *cls,
@@ -1182,22 +1228,47 @@ MUIDSP IPTR InstallerGuiMessage(Class *cls,
     (void) cls;
 
     // Setup the correct page and button combination.
-    if(DoMethod(obj, MUIM_InstallerGui_PageSet, msg->Message, NULL,
-                P_MESSAGE, msg->Immediate ? B_NONE : B_PROCEED))
+    if(DoMethod(obj, MUIM_InstallerGui_PageSet, msg->Message,
+                NULL, P_MESSAGE, B_PROCEED_ABORT))
     {
-        // Wait for user input unless we're in immediate mode.
-        if(!msg->Immediate)
+        // Wait for proceed or abort.
+        if(InstallerGuiWait(obj, MUIV_InstallerGui_Proceed, 2) ==
+           MUIV_InstallerGui_Proceed)
         {
-            // Wait for proceed or abort.
-            if(InstallerGuiWait(obj, MUIV_InstallerGui_ProceedOnly, 1)
-               != MUIV_InstallerGui_ProceedOnly)
-            {
-                // User abort.
-                return FALSE;
-            }
+            // Proceed.
+            return TRUE;
         }
+    }
+    else
+    {
+        // Unknown error.
+        GERR(tr(S_UNER));
+    }
 
-        // Proceed.
+    // Abort or panic.
+    return FALSE;
+}
+
+//----------------------------------------------------------------------------
+// InstallerGuiFinish - Show final message
+// Input:               Message - The message
+// Return:              TRUE on success, FALSE otherwise
+//----------------------------------------------------------------------------
+MUIDSP IPTR InstallerGuiFinish(Class *cls,
+                               Object *obj,
+                               struct MUIP_InstallerGui_Finish *msg)
+{
+    // Silence.
+    (void) cls;
+
+    // Setup the correct page and button combination.
+    if(DoMethod(obj, MUIM_InstallerGui_PageSet, msg->Message,
+                NULL, P_MESSAGE, B_OK))
+    {
+        // No need to wait for anything specific.
+        InstallerGuiWait(obj, MUIV_InstallerGui_Ok, 1);
+
+        // Always.
         return TRUE;
     }
     else
@@ -2047,16 +2118,16 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
                         MUIA_Background, MUII_ButtonBack,
                         TAG_END),
                     TAG_END),
-                /* Page 4 - B_PROCEED */
+                /* Page 4 - B_OK */
                 MUIA_Group_Child, MUI_NewObject(
                     MUIC_Group,
                     MUIA_Group_Horiz, TRUE,
                     MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
                     MUIA_Group_Child, MUI_NewObject(
                         MUIC_Text,
-                        MUIA_UserData, MUIV_InstallerGui_ProceedOnly,
+                        MUIA_UserData, MUIV_InstallerGui_Ok,
                         MUIA_Frame, MUIV_Frame_Button,
-                        MUIA_Text_Contents, tr(S_PRCD),
+                        MUIA_Text_Contents, tr(S_OKEY),
                         MUIA_Text_PreParse, "\33c",
                         MUIA_InputMode, MUIV_InputMode_RelVerify,
                         MUIA_Background, MUII_ButtonBack,
@@ -2223,6 +2294,12 @@ DISPATCH(InstallerGui)
         case MUIM_InstallerGui_Message:
             return InstallerGuiMessage(cls, obj, (struct MUIP_InstallerGui_Message *) msg);
 
+        case MUIM_InstallerGui_Finish:
+            return InstallerGuiFinish(cls, obj, (struct MUIP_InstallerGui_Finish *) msg);
+
+        case MUIM_InstallerGui_Working:
+            return InstallerGuiWorking(cls, obj, (struct MUIP_InstallerGui_Working *) msg);
+
         case MUIM_InstallerGui_Abort:
             return InstallerGuiAbort(cls, obj, (struct MUIP_InstallerGui_Abort *) msg);
 
@@ -2379,29 +2456,59 @@ void gui_exit(void)
 // Name:        gui_message
 // Description: Show message.
 // Input:       const char *msg:    Message shown to the user.
-//              int imm:            No proceed button.
 // Return:      int:                1 on proceed, 0 on abort.
 //----------------------------------------------------------------------------
-int gui_message(const char *msg, int imm)
+int gui_message(const char *msg)
 {
+    return (int)
     #ifdef AMIGA
-    return (int) DoMethod
+    DoMethod
     (
-        Win, MUIM_InstallerGui_Message,
-        msg, imm
+        Win, MUIM_InstallerGui_Message, msg,
     );
     #else
     // Testing purposes.
-    if(imm)
-    {
-        printf("%d:%s", imm, msg);
-    }
-    else
-    {
-        fputs(msg, stdout);
-    }
+    fputs(msg, stdout) >= 0 ? 1 : 0;
+    #endif
+}
 
-    return 1;
+//----------------------------------------------------------------------------
+// Name:        gui_finish
+// Description: Show final message.
+// Input:       const char *msg:    Message shown to the user.
+// Return:      int:                1 on success, 0 otherwise.
+//----------------------------------------------------------------------------
+int gui_finish(const char *msg)
+{
+    return (int)
+    #ifdef AMIGA
+    DoMethod
+    (
+        Win, MUIM_InstallerGui_Finish, msg
+    );
+    #else
+    // Testing purposes.
+    fputs(msg, stdout) >= 0 ? 1 : 0;
+    #endif
+}
+
+//----------------------------------------------------------------------------
+// Name:        gui_working
+// Description: Show busy message.
+// Input:       const char *msg:    Message shown to the user.
+// Return:      int:                1 on success, 0 otherwise.
+//----------------------------------------------------------------------------
+int gui_working(const char *msg)
+{
+    return (int)
+    #ifdef AMIGA
+    DoMethod
+    (
+        Win, MUIM_InstallerGui_Working, msg
+    );
+    #else
+    // Testing purposes.
+    fputs(msg, stdout) >= 0 ? 1 : 0;
     #endif
 }
 
@@ -2424,7 +2531,6 @@ void gui_abort(const char *msg)
     fputs(msg, stdout);
     #endif
 }
-
 
 //----------------------------------------------------------------------------
 // Name:        gui_choice
