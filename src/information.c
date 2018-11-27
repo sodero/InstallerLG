@@ -168,8 +168,12 @@ entry_p m_message(entry_p contxt)
     if(c_sane(contxt, 1))
     {
         // Get information needed to determine
-        // wheter to show anything or not.
-        entry_p all = get_opt(contxt, OPT_ALL);
+        // wheter to show anything or not. And,
+        // to determine if there is any (back)
+        // code to execute.
+        entry_p all = get_opt(contxt, OPT_ALL),
+                back = get_opt(contxt, OPT_BACK);
+
         int level = get_numvar(contxt, "@user-level");
 
         // Silence.
@@ -192,14 +196,24 @@ entry_p m_message(entry_p contxt)
                     DNUM = gui_message(msg, 0);
                 }
 
+                // Free the temporary buffer.
+                free(msg);
+
+                // Is the back option available?
+                if(back)
+                {
+                    // Real (back) or fake input?
+                    if(!DNUM || get_numvar(contxt, "@back"))
+                    {
+                        return invoke(back);
+                    }
+                }
+
                 // User abort?
                 if(!DNUM)
                 {
                     HALT();
                 }
-
-                // Free the temporary buffer.
-                free(msg);
             }
             else
             {
