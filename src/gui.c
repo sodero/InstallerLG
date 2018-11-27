@@ -2464,7 +2464,7 @@ int gui_message(const char *msg)
     #ifdef AMIGA
     DoMethod
     (
-        Win, MUIM_InstallerGui_Message, msg,
+        Win, MUIM_InstallerGui_Message, msg
     );
     #else
     // Testing purposes.
