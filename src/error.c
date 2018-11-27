@@ -18,15 +18,15 @@
 // Description: Function used to set / get / communicate errors.
 // Input:       int id:             A numerical identifier aiding debugging.
 //                                  In most cases this will be a line number.
-//              error_t:            Type of error to set, or ERR_NONE to get
+//              err_t:              Type of error to set, or ERR_NONE to get
 //                                  status.
 //              const char *info:   A message describing the problem in a way
 //                                  that makes sense to the user.
 // Return:      int:                The current state.
 //----------------------------------------------------------------------------
-int error(entry_p contxt, int id, error_t type, const char *info)
+int error(entry_p contxt, int id, err_t type, const char *info)
 {
-    static error_t last;
+    static err_t last;
     static const char *des[] =
     {
         NULL,

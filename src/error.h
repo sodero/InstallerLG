@@ -65,11 +65,11 @@ typedef enum
     ERR_INVALID_VOLUME,
     ERR_INVALID_ASSIGN,
     ERR_OPTION_MUTEX
-} error_t;
+} err_t;
 
 //----------------------------------------------------------------------------
 // Don't use this function directly, use the macros above instead.
 //----------------------------------------------------------------------------
-int error(entry_p contxt, int id, error_t type, const char *info);
+int error(entry_p contxt, int id, err_t type, const char *info);
 
 #endif
