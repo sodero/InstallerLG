@@ -482,7 +482,7 @@ char *get_optstr(entry_p c, opt_t t)
     {
         // References to string evaluations of all
         // options of the right type.
-        char **cs = calloc(n + 1, sizeof(char *));
+        char **cs = DBG_ALLOC(calloc(n + 1, sizeof(char *)));
 
         if(cs)
         {
@@ -511,7 +511,7 @@ char *get_optstr(entry_p c, opt_t t)
 
             // Allocate memory to hold the
             // concatenation of all strings.
-            char *r = calloc(ln, 1);
+            char *r = DBG_ALLOC(calloc(ln, 1));
 
             if(r)
             {
@@ -574,7 +574,7 @@ char *get_chlstr(entry_p c)
         {
             // Allocate memory to hold a string pointer
             // for each child.
-            char **v = calloc(n + 1, sizeof(char *));
+            char **v = DBG_ALLOC(calloc(n + 1, sizeof(char *)));
 
             if(v)
             {
@@ -601,7 +601,7 @@ char *get_chlstr(entry_p c)
                 {
                     // Allocate memory to hold the full
                     // concatenated string.
-                    r = calloc(l + 1, 1);
+                    r = DBG_ALLOC(calloc(l + 1, 1));
 
                     if(r)
                     {
@@ -815,5 +815,38 @@ char *get_buf(void)
 size_t buf_size(void)
 {
     return LG_BUFSIZ - 1;
+}
+
+//----------------------------------------------------------------------------
+// Name:        dbg_alloc
+// Description: Used by the DBG_ALLOC macro to provide more info when failing
+//              to allocate memory. And to fail deliberately for testing.
+// Input:       int line: Source code line.
+//              const char *func: Source code function.
+//              void *mem: Pointer to allocated memory.
+// Return:      void *: Pointer to allocated memory.
+//----------------------------------------------------------------------------
+void *dbg_alloc(int line, const char *func, void *mem)
+{
+    // Fail deliberately.
+#if 0
+    if(line == -1)
+    {
+        if(strcmp(func, "failing_function") == 0)
+        {
+            free(mem);
+            mem = NULL;
+        }
+    }
+#endif
+
+    // Debug info.
+    if(!mem)
+    {
+        DBG("Out of memory in %s line %d\n", func, line);
+    }
+
+    // Pass this on.
+    return mem;
 }
 

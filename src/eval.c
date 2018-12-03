@@ -381,7 +381,7 @@ char *str(entry_p entry)
                 // string before?
                 if(!entry->name)
                 {
-                    entry->name = malloc(NUMLEN);
+                    entry->name = DBG_ALLOC(malloc(NUMLEN));
                 }
 
                 // On OOM, fall through and PANIC below.

@@ -71,7 +71,7 @@ entry_p m_gosub(entry_p contxt)
                     while(*arg && *arg != end() &&
                           *ina && *ina != end())
                     {
-                        entry_p res = malloc(sizeof(entry_t));
+                        entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
 
                         // Do a deep copy and free the resources from
                         // the last invocation, if any.

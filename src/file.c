@@ -325,7 +325,7 @@ static pnode_p h_choices(entry_p contxt,
         entry_p *e = choices->children;
 
         // Create head node.
-        pnode_p node = calloc(1, sizeof(struct pnode_t)),
+        pnode_p node = DBG_ALLOC(calloc(1, sizeof(struct pnode_t))),
                 head = node;
 
         if(node)
@@ -337,7 +337,7 @@ static pnode_p h_choices(entry_p contxt,
             node->type = 2;
 
             // Not necessary to check the return value.
-            node->next = calloc(1, sizeof(struct pnode_t));
+            node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
             node = node->next;
 
             // Iterate over all files / dirs.
@@ -393,7 +393,7 @@ static pnode_p h_choices(entry_p contxt,
                     if(*e && *e != end())
                     {
                         // Not necessary to check the return value.
-                        node->next = calloc(1, sizeof(struct pnode_t));
+                        node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
                     }
 
                     // Copy the font (if any) as well?
@@ -411,7 +411,7 @@ static pnode_p h_choices(entry_p contxt,
                             if(!node->next)
                             {
                                 // Not necessary to check the return value.
-                                node->next = calloc(1, sizeof(struct pnode_t));
+                                node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
                             }
 
                             // Proceed with font.
@@ -432,7 +432,7 @@ static pnode_p h_choices(entry_p contxt,
                                    && *e && *e != end())
                                 {
                                     // Not necessary to check the return value.
-                                    node->next = calloc(1, sizeof(struct pnode_t));
+                                    node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
                                 }
                             }
                         }
@@ -507,7 +507,7 @@ static pnode_p h_filetree(entry_p contxt,
             if(dir)
             {
                 // Create head node.
-                pnode_p node = calloc(1, sizeof(struct pnode_t)),
+                pnode_p node = DBG_ALLOC(calloc(1, sizeof(struct pnode_t))),
                         head = node;
 
                 if(node)
@@ -620,7 +620,7 @@ static pnode_p h_filetree(entry_p contxt,
                             }
                             else
                             {
-                                node->next = calloc(1, sizeof(struct pnode_t));
+                                node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
                                 if(node->next)
                                 {
@@ -668,8 +668,8 @@ static pnode_p h_filetree(entry_p contxt,
         // Is source a file?
         if(type == 1)
         {
-            pnode_p file = calloc(1, sizeof(struct pnode_t)),
-                    head = calloc(1, sizeof(struct pnode_t));
+            pnode_p file = DBG_ALLOC(calloc(1, sizeof(struct pnode_t))),
+                    head = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
             if(head && file)
             {
@@ -706,7 +706,7 @@ static pnode_p h_filetree(entry_p contxt,
 
                             if(h_exists(get_buf()) == 1)
                             {
-                                pnode_p font = calloc(1, sizeof(struct pnode_t));
+                                pnode_p font = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
                                 if(font)
                                 {
@@ -2257,7 +2257,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
         // Pattern matching is only done on Amiga like OS:es
         #ifdef AMIGA
         struct AnchorPath *ap =
-            calloc(1, sizeof(struct AnchorPath) + PATH_MAX);
+            DBG_ALLOC(calloc(1, sizeof(struct AnchorPath) + PATH_MAX));
 
         if(ap)
         {
@@ -2569,7 +2569,7 @@ entry_p m_foreach(entry_p contxt)
                 {
                     // Allocate memory for the start node.
                     pnode_p cur;
-                    top = calloc(1, sizeof(struct pnode_t));
+                    top = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
                     #ifdef AMIGA
                     // This file info block will be used for all files
@@ -2656,7 +2656,7 @@ entry_p m_foreach(entry_p contxt)
                         // would get entries without names.
                         if(ent && cur->name)
                         {
-                            cur->next = calloc(1, sizeof(struct pnode_t));
+                            cur->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
                             cur = cur->next;
                         }
                     }
@@ -3221,8 +3221,8 @@ entry_p m_startup(entry_p contxt)
             const size_t len = strlen(";BEGIN ") + strlen(app),
                          ins = strlen(cmd) + 2;
 
-            char *pre = calloc(len + 1, 1),
-                 *pst = calloc(len + 1, 1),
+            char *pre = DBG_ALLOC(calloc(len + 1, 1)),
+                 *pst = DBG_ALLOC(calloc(len + 1, 1)),
                  *buf = NULL;
 
             if(pre && pst)
@@ -3262,7 +3262,7 @@ entry_p m_startup(entry_p contxt)
                         // we can keep the old file + any
                         // changes that we need to do in
                         // memory at the same time.
-                        buf = calloc(nsz, 1);
+                        buf = DBG_ALLOC(calloc(nsz, 1));
 
                         if(buf)
                         {
@@ -3353,7 +3353,7 @@ entry_p m_startup(entry_p contxt)
                 // becomes a problem, the system crashes, the
                 // power is lost and so on and so forth.
                 size_t tln = strlen(fln) + sizeof(".XXXXXX\0");
-                char *tmp = calloc(tln, 1);
+                char *tmp = DBG_ALLOC(calloc(tln, 1));
 
                 if(tmp)
                 {
@@ -3780,7 +3780,7 @@ entry_p m_tooltype(entry_p contxt)
                             if(o)
                             {
                                 // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = calloc(n, sizeof(char *));
+                                obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
 
                                 if(obj->do_ToolTypes)
                                 {
@@ -3829,7 +3829,7 @@ entry_p m_tooltype(entry_p contxt)
                             else
                             {
                                 // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = calloc(n + 1, sizeof(char *));
+                                obj->do_ToolTypes = DBG_ALLOC(calloc(n + 1, sizeof(char *)));
 
                                 if(obj->do_ToolTypes)
                                 {
@@ -3866,7 +3866,7 @@ entry_p m_tooltype(entry_p contxt)
                             if(o && n > 1)
                             {
                                 // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = calloc(n, sizeof(char *));
+                                obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
 
                                 if(obj->do_ToolTypes)
                                 {

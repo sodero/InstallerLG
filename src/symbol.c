@@ -46,7 +46,7 @@ entry_p m_set(entry_p contxt)
             // side, create a copy of its contents.
             if(!DID_ERR())
             {
-                entry_p res = malloc(sizeof(entry_t));
+                entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
 
                 if(res)
                 {
@@ -151,7 +151,7 @@ entry_p m_symbolset(entry_p contxt)
             if(!DID_ERR())
             {
                 // Create a copy of the evaluated rhs.
-                entry_p res = malloc(sizeof(entry_t));
+                entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
 
                 if(res)
                 {

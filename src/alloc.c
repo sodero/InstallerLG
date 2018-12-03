@@ -26,7 +26,7 @@
 entry_p new_contxt(void)
 {
     // We rely on everything being set to '0'
-    entry_p entry = calloc(1, sizeof(entry_t));
+    entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
 
     if(entry)
     {
@@ -36,8 +36,8 @@ entry_p new_contxt(void)
 
         // Memory for children and symbols, this will
         // be grown if necessary. Start with VECLEN.
-        symbols = calloc(VECLEN + 1, sizeof(entry_p));
-        children = calloc(VECLEN + 1, sizeof(entry_p));
+        symbols = DBG_ALLOC(calloc(VECLEN + 1, sizeof(entry_p)));
+        children = DBG_ALLOC(calloc(VECLEN + 1, sizeof(entry_p)));
 
         if(symbols && children)
         {
@@ -76,7 +76,7 @@ entry_p new_contxt(void)
 entry_p new_number(int n)
 {
     // We rely on everything being set to '0'
-    entry_p entry = calloc(1, sizeof(entry_t));
+    entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
 
     if(entry)
     {
@@ -112,7 +112,7 @@ entry_p new_string(char *n)
     if(n)
     {
         // We rely on everything being set to '0'
-        entry_p entry = calloc(1, sizeof (entry_t));
+        entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
 
         if(entry)
         {
@@ -152,7 +152,7 @@ entry_p new_symbol(char *n)
     if(n)
     {
         // We rely on everything being set to '0'
-        entry_p entry = calloc(1, sizeof(entry_t));
+        entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
 
         if(entry)
         {
@@ -197,7 +197,7 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
     if(n)
     {
         // We rely on everything being set to '0'
-        entry_p entry = calloc(1, sizeof(entry_t));
+        entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
 
         if(entry)
         {
@@ -288,7 +288,7 @@ entry_p new_symref(char *n, int l)
     if(n && (l > 0))
     {
         // We rely on everything being set to '0'
-        entry_p entry = calloc(1, sizeof(entry_t));
+        entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
 
         if(entry)
         {
@@ -377,7 +377,7 @@ entry_p new_native(char *n, int l, call_t call, entry_p e, type_t r)
     if(call && n && (l > 0))
     {
         // We rely on everything being set to '0'
-        entry_p entry = calloc(1, sizeof (entry_t));
+        entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
 
         if(entry)
         {
@@ -456,7 +456,7 @@ entry_p new_option(char *n, opt_t t, entry_p e)
     if(n)
     {
         // We rely on everything being set to '0'
-        entry_p entry = calloc(1, sizeof (entry_t));
+        entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
 
         if(entry)
         {
@@ -522,7 +522,7 @@ entry_p new_cusref(char *n, int l, entry_p e)
     if(n && (l > 0))
     {
         // We rely on everything being set to '0'
-        entry_p entry = calloc(1, sizeof (entry_t));
+        entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
 
         if(entry)
         {
@@ -585,7 +585,7 @@ entry_p append(entry_p **dst, entry_p e)
         {
             // We rely on everything being set to '0'. Make the
             // new array twice as big.
-            entry_p *new = calloc((n << 1) + 1, sizeof(entry_p));
+            entry_p *new = DBG_ALLOC(calloc((n << 1) + 1, sizeof(entry_p)));
 
             // Move everything to the new array.
             if(new)

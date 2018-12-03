@@ -32,6 +32,7 @@ void set_numvar(entry_p c, char *v, int n);
 void set_strvar(entry_p c, char *v, char *n);
 char *get_buf(void);
 size_t buf_size(void);
+void *dbg_alloc(int line, const char *func, void *mem);
 
 //----------------------------------------------------------------------------
 // Utility macros.
@@ -44,6 +45,7 @@ size_t buf_size(void);
 #define REST    { if(contxt->resolved->name) contxt->resolved->name[0] = '\0'; return contxt->resolved; }
 #define CARG(X) (contxt->children[X - 1])
 #define CSYM(X) (contxt->symbols[X - 1])
+#define DBG_ALLOC(M) dbg_alloc(__LINE__, __func__, M)
 
 #ifdef __AROS__
 #define B_TO_CSTR(S) AROS_BSTR_ADDR(S)

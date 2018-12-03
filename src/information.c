@@ -364,7 +364,7 @@ entry_p m_working(entry_p contxt)
                              strlen(msg) + 1;
 
                 // Memory to hold prefix and children.
-                char *con = calloc(len, 1);
+                char *con = DBG_ALLOC(calloc(len, 1));
 
                 if(con)
                 {

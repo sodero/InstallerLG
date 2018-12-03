@@ -116,7 +116,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 if(pre)
                 {
                     size_t cl = strlen(cmd) + strlen(pre) + 2;
-                    char *t = malloc(cl);
+                    char *t = DBG_ALLOC(malloc(cl));
 
                     if(t)
                     {
