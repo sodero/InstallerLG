@@ -820,19 +820,21 @@ size_t buf_size(void)
 //----------------------------------------------------------------------------
 // Name:        dbg_alloc
 // Description: Used by the DBG_ALLOC macro to provide more info when failing
-//              to allocate memory. And to fail deliberately for testing.
+//              to allocate memory. And to fail deliberately when testing.
 // Input:       int line: Source code line.
+//              const char *file: Source code file.
 //              const char *func: Source code function.
 //              void *mem: Pointer to allocated memory.
 // Return:      void *: Pointer to allocated memory.
 //----------------------------------------------------------------------------
-void *dbg_alloc(int line, const char *func, void *mem)
+void *dbg_alloc(int line, const char *file, const char *func, void *mem)
 {
     // Fail deliberately.
-#if 0
-    if(line == -1)
+#if 1 
+    if(line > -1)
     {
-        if(strcmp(func, "failing_function") == 0)
+        // if(strcmp(func, "h_choices") == 0)
+        if(strcmp(file, "../src/file.c") == 0)
         {
             free(mem);
             mem = NULL;
@@ -843,7 +845,7 @@ void *dbg_alloc(int line, const char *func, void *mem)
     // Debug info.
     if(!mem)
     {
-        DBG("Out of memory in %s line %d\n", func, line);
+        DBG("Out of memory in %s (%s) line %d\n", func, file, line);
     }
 
     // Pass this on.
