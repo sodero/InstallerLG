@@ -830,7 +830,7 @@ size_t buf_size(void)
 void *dbg_alloc(int line, const char *file, const char *func, void *mem)
 {
     // Fail deliberately.
-#if 1 
+#if 0
     if(line > -1)
     {
         // if(strcmp(func, "h_choices") == 0)
