@@ -198,7 +198,7 @@ static char *strduptr(const char *str);
 \"(\\.|[^"])*\"         |
 '(\\.|[^'])*'           {
     yylval->s = strduptr(yytext);
-    return STR;
+    return yylval->s ? STR : OOM;
 }
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -206,7 +206,7 @@ static char *strduptr(const char *str);
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 [^"' \n\t\(\)\+\*/]+    {
     yylval->s = strdup(yytext);
-    return SYM;
+    return yylval->s ? SYM : OOM;
 }
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -441,6 +441,10 @@ static char *strduptr(const char *str)
 
     // Unless we're out of memory,
     // out will be a copy of str.
+    // If we're out of memory this
+    // will be trapped by the OOM
+    // token and the parser will
+    // abort.
     return out;
 }
 

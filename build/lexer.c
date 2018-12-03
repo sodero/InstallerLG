@@ -2020,7 +2020,7 @@ YY_RULE_SETUP
 #line 199 "../src/lexer.l"
 {
     yylval->s = strduptr(yytext);
-    return STR;
+    return yylval->s ? STR : OOM;
 }
 	YY_BREAK
 /*----------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -2031,7 +2031,7 @@ YY_RULE_SETUP
 #line 207 "../src/lexer.l"
 {
     yylval->s = strdup(yytext);
-    return SYM;
+    return yylval->s ? SYM : OOM;
 }
 	YY_BREAK
 /*----------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -3470,6 +3470,10 @@ static char *strduptr(const char *str)
 
     // Unless we're out of memory,
     // out will be a copy of str.
+    // If we're out of memory this
+    // will be trapped by the OOM
+    // token and the parser will
+    // abort.
     return out;
 }
 
