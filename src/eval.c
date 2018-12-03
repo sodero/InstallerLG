@@ -13,6 +13,7 @@
 #include "eval.h"
 #include "exit.h"
 #include "gui.h"
+#include "resource.h"
 #include "util.h"
 
 #include <stdio.h>

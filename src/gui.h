@@ -32,7 +32,5 @@ int gui_copyfiles_setcur(const char *cur, int nogauge);
 void gui_copyfiles_end(void);
 int gui_complete(int com);
 int gui_confirm(const char *msg, const char *hlp);
-void locale_init(void);
-void locale_exit(void);
 
 #endif
