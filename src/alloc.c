@@ -231,7 +231,8 @@ entry_p new_custom(char *n, int l, entry_p s, entry_p c)
                 }
             }
 
-            if(c)
+            // If we have children, adopt them.
+            if(c && c->children)
             {
                 // Transfer and kill the input.
                 entry->children = c->children;
@@ -567,7 +568,7 @@ entry_p new_cusref(char *n, int l, entry_p e)
 //----------------------------------------------------------------------------
 entry_p append(entry_p **dst, entry_p e)
 {
-    if(dst && *dst)
+    if(e && dst && *dst)
     {
         size_t n = 0;
 

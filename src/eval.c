@@ -80,8 +80,12 @@ entry_p find_symbol(entry_p entry)
         }
         while(con);
 
-        // Only fail if we're in 'strict' mode.
-        if(get_numvar(global(entry), "@strict"))
+        // Only fail if we're in 'strict' mode. Never
+        // recur when looking for @strict, it might not
+        // be there if we're OOM. If we do so, we will
+        // run out of stack as well.
+        if(strcasecmp(entry->name, "@strict") &&
+           get_numvar(global(entry), "@strict"))
         {
             // We found nothing.
             ERR_C(entry, ERR_UNDEF_VAR, entry->name);
