@@ -829,51 +829,30 @@ size_t buf_size(void)
 //----------------------------------------------------------------------------
 void *dbg_alloc(int line, const char *file, const char *func, void *mem)
 {
-    // Fail deliberately if file, function or line defines set.
-    #if defined (FAIL_GTE) || defined(FAIL_FUNC) || defined(FAIL_FILE)
+    // Fail deliberately if file or line defines are set.
+    #if defined(FAIL_LINE) || defined(FAIL_FILE)
     const char *fail_file =
     #ifdef FAIL_FILE
     FAIL_FILE;
     #else
     NULL;
     #endif
-    const char *fail_func =
-    #ifdef FAIL_FUNC
-    FAIL_FUNC;
-    #else
-    NULL;
-    #endif
-    int fail_gte =
-    #ifdef FAIL_GTE
-    FAIL_GTE;
+    int fail_line =
+    #ifdef FAIL_LINE
+    FAIL_LINE;
     #else
     0;
     #endif
 
     // Do we have a line number restriction?
-    if(line >= fail_gte)
+    if(!fail_line || (line == fail_line))
     {
         // Do we have a file restriction?
-        if(fail_file && !strcmp(file, fail_file))
+        if(!fail_file || (fail_file && !strcmp(file, fail_file)))
         {
-            // Do we have a function restriction?
-            if(!fail_func || (fail_func && !strcmp(func, fail_func)))
-            {
-                // Free memory and pass NULL to the calling function.
-                free(mem);
-                mem = NULL;
-            }
-        }
-
-        // Do we have a function restriction?
-        if(fail_func && !strcmp(func, fail_func))
-        {
-            // Do we have a file restriction?
-            if(!fail_file || (fail_file && !strcmp(file, fail_file)))
-            {
-                free(mem);
-                mem = NULL;
-            }
+            // Free memory and pass NULL to the calling function.
+            free(mem);
+            mem = NULL;
         }
     }
     #endif
