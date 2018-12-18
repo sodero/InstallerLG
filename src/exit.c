@@ -172,31 +172,47 @@ entry_p m_onerror(entry_p contxt)
     static entry_t ref = { .type = CUSREF,
                            .name = "@onerror" };
 
-    // We need a context and '@onerror'. On
-    // OOM '@onerror' might not be there.
-    if(c_sane(contxt, 0) &&
-       find_symbol(&ref) != end())
+    // We need a context.
+    if(c_sane(contxt, 0))
     {
-        // Reset error code otherwise
-        // m_gosub / invoke will halt
-        // immediately.
-        RESET();
+        // Global context where the user
+        // defined procedures are found.
+        entry_p con = global(contxt);
 
-        // Connect reference to the current context.
-        ref.parent = contxt;
+        // Make sure that '@onerror' exists. On
+        // OOM it might be missing.
+        entry_p *err = con->symbols;
 
-        // Invoke @onerror by calling m_gosub just
-        // like any non-native function call.
-        return m_gosub(&ref);
+        while(*err && *err != end())
+        {
+            if((*err)->type == CUSTOM &&
+               !strcasecmp((*err)->name, ref.name))
+            {
+                // Reset error code otherwise
+                // m_gosub / invoke will halt
+                // immediately.
+                RESET();
+
+                // Connect reference to the current context.
+                ref.parent = contxt;
+
+                // Invoke @onerror by calling m_gosub just
+                // like any non-native function call.
+                return m_gosub(&ref);
+            }
+
+            // Next function.
+            err++;
+        }
     }
     else
     {
         // The parser is broken
         PANIC(contxt);
-
-        // Failure.
-        RCUR;
     }
+
+    // Failure.
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
