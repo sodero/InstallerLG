@@ -172,8 +172,10 @@ entry_p m_onerror(entry_p contxt)
     static entry_t ref = { .type = CUSREF,
                            .name = "@onerror" };
 
-    // We need nothing but a context.
-    if(c_sane(contxt, 0))
+    // We need a context and '@onerror'. On
+    // OOM '@onerror' might not be there.
+    if(c_sane(contxt, 0) &&
+       find_symbol(&ref) != end())
     {
         // Reset error code otherwise
         // m_gosub / invoke will halt
