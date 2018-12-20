@@ -2899,11 +2899,11 @@ int gui_confirm(const char *msg, const char *hlp)
 // Input:       int id:             Line number.
 //              const char *type:   Error description.
 //              const char *info:   Extra info, e.g. filename.
-// Return:      int:                1
+// Return:      -
 //----------------------------------------------------------------------------
-int gui_error(int id,
-              const char *type,
-              const char *info)
+void gui_error(int id,
+               const char *type,
+               const char *info)
 {
     #ifdef AMIGA
     static char err[BUFSIZ];
@@ -2920,11 +2920,7 @@ int gui_error(int id,
     // We don't have any way of knowing
     // whether this really works out...
     EasyRequest(NULL, &es, NULL);
-
-    // Ignore the user feedback.
-    return 1;
     #else
-    // Testing purposes.
-    return (id && type && info) ? 0 : 1;
+    fprintf(stderr, "Line %d: %s '%s'\n", id, type, info);
     #endif
 }

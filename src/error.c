@@ -89,13 +89,8 @@ int error(entry_p contxt, int id, err_t type, const char *info)
                     "Options are mutually exclusive"
                 };
 
-                // Try to show the error dialog window
-                if(!gui_error(id, des[type], info))
-                {
-                    // Fallback to stderr if necessary
-                    fprintf(stderr, "Line %d: %s '%s'\n",
-                            id, des[type], info);
-                }
+                // Error window / console output.
+                gui_error(id, des[type], info);
 
                 // If this is a PANIC, or if we're in
                 // debug mode, do a context dump.
