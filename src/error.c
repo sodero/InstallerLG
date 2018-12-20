@@ -26,47 +26,8 @@
 //----------------------------------------------------------------------------
 int error(entry_p contxt, int id, err_t type, const char *info)
 {
+    // Last error.
     static err_t last;
-    static const char *des[] =
-    {
-        NULL,
-        "Halt",
-        "Abort",
-        "Reset",
-        "Parse error",
-        "Internal error",
-        "Buffer overflow",
-        "Read error",
-        "Could not read from file",
-        "Could not read directory",
-        "Could not write to file",
-        "Could not create directory",
-        "Could not rename file",
-        "Could not delete file",
-        "Version string not found",
-        "Not a file",
-        "Not a directory",
-        "No such file or directory",
-        "Could not get file / dir permissions",
-        "Could not set file / dir permissions",
-        "Could not execute command",
-        "Could not create / remove assign",
-        "Undefined function",
-        "Undefined variable",
-        "Max recursion depth exceeded",
-        "Missing option",
-        "Nothing to do",
-        "Division by zero",
-        "Invalid format string",
-        "Format string type mismatch",
-        "Missing format string arguments",
-        "Unused format string arguments",
-        "No such item",
-        "Invalid application name",
-        "Invalid name of volume",
-        "Invalid name of assign",
-        "Options are mutually exclusive"
-    };
 
     // Set or get state?
     if(type != ERR_NONE)
@@ -87,6 +48,47 @@ int error(entry_p contxt, int id, err_t type, const char *info)
             // it to the user.
             if(type > ERR_RESET)
             {
+                static const char *des[] =
+                {
+                    NULL,
+                    "Halt",
+                    "Abort",
+                    "Reset",
+                    "Parse error",
+                    "Internal error",
+                    "Buffer overflow",
+                    "Read error",
+                    "Could not read from file",
+                    "Could not read directory",
+                    "Could not write to file",
+                    "Could not create directory",
+                    "Could not rename file",
+                    "Could not delete file",
+                    "Version string not found",
+                    "Not a file",
+                    "Not a directory",
+                    "No such file or directory",
+                    "Could not get file / dir permissions",
+                    "Could not set file / dir permissions",
+                    "Could not execute command",
+                    "Could not create / remove assign",
+                    "Undefined function",
+                    "Undefined variable",
+                    "Max recursion depth exceeded",
+                    "Missing option",
+                    "Nothing to do",
+                    "Division by zero",
+                    "Invalid format string",
+                    "Format string type mismatch",
+                    "Missing format string arguments",
+                    "Unused format string arguments",
+                    "No such item",
+                    "Invalid application name",
+                    "Invalid name of volume",
+                    "Invalid name of assign",
+                    "Options are mutually exclusive"
+                };
+
                 // Try to show the error dialog window
                 if(!gui_error(id, des[type], info))
                 {

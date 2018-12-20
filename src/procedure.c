@@ -28,9 +28,6 @@
 //----------------------------------------------------------------------------
 entry_p m_gosub(entry_p contxt)
 {
-    // Recursion depth.
-    static int dep = 0;
-
     // Global context where the user
     // defined procedures are found.
     entry_p con = global(contxt);
@@ -48,7 +45,6 @@ entry_p m_gosub(entry_p contxt)
             if((*cus)->type == CUSTOM &&
                !strcasecmp((*cus)->name, contxt->name))
             {
-                entry_p ret;
                 entry_p *arg = (*cus)->symbols,
                         *ina = contxt->children;
 
@@ -98,11 +94,15 @@ entry_p m_gosub(entry_p contxt)
                     }
                 }
 
+                // Recursion depth.
+                static int dep = 0;
+
                 // Keep track of the recursion depth. Do not
                 // invoke if we're beyond MAXDEP.
                 if(dep++ < MAXDEP)
                 {
-                    ret = invoke(*cus);
+                    // Return value.
+                    entry_p ret = invoke(*cus);
                     dep--;
                     return ret;
                 }

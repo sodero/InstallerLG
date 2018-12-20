@@ -1841,9 +1841,9 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
 
     // Temp widgets.
     Object *el, *ul, *fp, *cm, *pr,
-           *st, *nm, *bp, *em, *rt,
-           *tx, *ls, *lg, *tp, *af,
-           *ys, *no, *ab, *ao, *ar;
+           *st, *nm, *bp, *em, *tx,
+           *ls, *lg, *tp, *af, *ys,
+           *no, *ab, *ao, *ar;
 
     // Radio button strings.
     static const char *lev[4],
@@ -1852,9 +1852,9 @@ MUIDSP IPTR InstallerGuiNew(Class *cls,
 
     // Clear to enable check.
     el = ul = fp = cm = pr = st =
-    nm = bp = em = rt = tx = ls =
-    lg = tp = af = ys = no = ab =
-    ao = ar = NULL;
+    nm = bp = em = tx = ls = lg =
+    tp = af = ys = no = ab = ao =
+    ar = NULL;
 
     // User level.
     lev[0] = tr(S_ULNV); // Novice

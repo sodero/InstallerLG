@@ -2484,7 +2484,6 @@ entry_p m_exists(entry_p contxt)
             #endif
 
             // Get type (file / dir / 0)
-            //r = h_exists(str(CARG(1)));
             DNUM = h_exists(str(CARG(1)));
 
             #ifdef AMIGA

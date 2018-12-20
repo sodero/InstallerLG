@@ -151,7 +151,7 @@ entry_p m_fmt(entry_p contxt)
                     // specifier, nothing else.
                     if(fmt[i] == 's' || (
                        fmt[i++] == 'l' &&
-                       fmt[i] && fmt[i] == 'd'))
+                       fmt[i] == 'd'))
                     {
                         sct[k] = DBG_ALLOC(calloc(i - j + 2, 1));
 
