@@ -2,7 +2,7 @@ language:
     - c
 
 script:
-    - make -C build test || (cat build/err.tmp.* build/leak.tmp.* 2> /dev/null && false)
+    - cd build && ./fail.sh
 
 addons:
   apt:
