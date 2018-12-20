@@ -153,10 +153,7 @@ entry_p init(entry_p contxt)
                      defusr : minusr;
         }
 
-        #ifdef AMIGA
         // If no (welcome) is found insert a default one on top.
-        // Only on Amiga, otherwise tests will break, they don't
-        // expect any default (welcome).
         if(!e)
         {
             // The line numbers and naming are for debugging
@@ -172,6 +169,9 @@ entry_p init(entry_p contxt)
                 NUMBER
             );
 
+            // Only on Amiga, otherwise tests will break, they don't
+            // expect any default (welcome).
+            #ifdef AMIGA
             // Add to the root and reparent.
             if(e)
             {
@@ -181,8 +181,12 @@ entry_p init(entry_p contxt)
 
             // Rotate right to make it end up on top.
             ror(contxt->children);
+            #else
+            // We're not using this, kill it directly.
+            kill(e);
+            #endif
         }
-        #endif
+
         // Create default error handler, it simply returns '0'
         // without doing anything.
         e = new_native
