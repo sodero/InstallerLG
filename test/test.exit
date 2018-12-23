@@ -25,4 +25,4 @@
 (exit "1" "2" "3" (safe)) (+ 1); "","Line 1: syntax error, unexpected SAFE 'safe'",""
 (procedure die (die)) (onerror (die)) (exit); "","Installation complete Test App can be found in T:0",""
 (procedure die (die)) (onerror (die)) (exit) (+ 1); "","Installation complete Test App can be found in T:0",""
-(exit (askstring (prompt "p") (help "h") (default "d")) "1" "2" "3") ; "","phd d123Installation complete Test App can be found in T:0",""
+(exit (askstring (prompt "p") (help "h") (default "d")) "1" "2" "3") ; "","phd0 d123Installation complete Test App can be found in T:0",""

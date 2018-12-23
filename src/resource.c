@@ -77,7 +77,7 @@ const char *tr(res_t r)
         "Initialization failed",
         "Error",
         "Success",
-        "Line %d: %s '%s'",
+        "Line %d: %s '%s'\n",
         "Novice User - All Actions Automatic",
         "Intermediate User - Limited Manual Control",
         "Expert User - Must Confirm all actions",

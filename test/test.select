@@ -7,7 +7,7 @@
 (select 1 (debug "a") ((debug "b") (debug "c")) ((debug "a") (debug "b")) (debug "c")); "","b c 1",""
 (select 0 "ab" ((debug "a") (debug "b")) (debug "c")); "","ab",""
 (select 0 "abc" "def") ; "","abc",""
-(select 0 ((message ("%s%s" "abc" "def")) (debug (+1))) "abc" "def") ; "","abcdef1 1",""
+(select 0 ((message ("%s%s" "abc" "def")) (debug (+1))) "abc" "def") ; "","abcdef01 1",""
 (select 1 "abc" "def") ; "","def",""
 (select 1 "abc""def") ; "","def",""
 (select 2 "abc""def""ghi") ; "","ghi",""

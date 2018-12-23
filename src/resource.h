@@ -56,7 +56,7 @@ typedef enum
     S_FINT, /* "Initialization failed" */
     S_ERRS, /* "Error" */
     S_SUCC, /* "Success" */
-    S_LERR, /* "Line %d: %s '%s'" */
+    S_LERR, /* "Line %d: %s '%s'\n" */
     S_ULNV, /* "Novice User - All Actions Automatic" */
     S_ULIN, /* "Intermediate User - Limited Manual Control" */
     S_ULEX, /* "Expert User - Must Confirm all actions" */

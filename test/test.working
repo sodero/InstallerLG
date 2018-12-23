@@ -3,7 +3,7 @@
 (working "") ; "","Working on installation... 1",""
 (working "a" "b" "c") ; "","Working on installation... abc1",""
 (working "doing" "things") ; "","Working on installation... doingthings1",""
-(working (askstring (prompt "p") (help "h") (default "doing")) "things") ; "","phdoing Working on installation... doingthings1",""
+(working (askstring (prompt "p") (help "h") (default "doing")) "things") ; "","phdoing0 Working on installation... doingthings1",""
 (working "doing" "things" with variables) ; "","Line 1: Undefined variable 'variables' Line 1: Undefined variable 'with' 0",""
 (set with "1") (set variables "2") (working "doing" "things" with variables) ; "","Working on installation... doingthings121",""
 (set with nothing) (set variables "2") (working "doing" "things" with variables) ; "","Line 1: Undefined variable 'nothing' 0",""

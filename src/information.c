@@ -34,18 +34,20 @@ entry_p m_complete(entry_p contxt)
     // We need atleast one argument.
     if(c_sane(contxt, 1))
     {
-        // Pass on the return value.
-        RNUM
-        (
-            gui_complete(num(CARG(1)))
-        );
+        // Pass value on.
+        DNUM = num(CARG(1));
+
+        // Show and update.
+        gui_complete(DNUM);
     }
     else
     {
         // The parser is broken.
         PANIC(contxt);
-        RCUR;
     }
+        
+    // Success or panic.
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -193,44 +195,57 @@ entry_p m_message(entry_p contxt)
                 if(!DID_ERR())
                 {
                     // Show message dialog.
-                    DNUM = gui_message(msg);
-                }
+                    inp_t rc = gui_message(msg, back);
 
-                // Free the temporary buffer.
-                free(msg);
+                    // Free the temporary buffer.
+                    free(msg);
 
-                // Is the back option available?
-                if(back)
-                {
-                    // Real (back) or fake input?
-                    if(!DNUM || get_numvar(contxt, "@back"))
+                    // Is the back option available?
+                    if(back)
                     {
-                        return invoke(back);
+                        // Fake input?
+                        if(get_numvar(contxt, "@back"))
+                        {
+                            rc = G_ABORT;
+                        }
+
+                        // On abort execute.
+                        if(rc == G_ABORT)
+                        {
+                            invoke(back);
+                        }
                     }
+
+                    // FIXME
+                    if(rc == G_ABORT || rc == G_EXIT)
+                    {
+                        HALT();
+                    }
+
+                    // Translate response.
+                    DNUM = (rc == G_TRUE) ? 1 : 0;
+                }
+                else
+                {
+                    // Free the temporary buffer.
+                    free(msg);
                 }
 
-                // User abort?
-                if(!DNUM)
-                {
-                    HALT();
-                }
-            }
-            else
-            {
-                // Out of memory.
-                PANIC(contxt);
+                // Success or failure.
+                RCUR;
             }
         }
+        else
+        {
+            // Silence.
+            RCUR;
+        }
+    }
 
-        // Done.
-        RCUR;
-    }
-    else
-    {
-        // The parser is broken.
-        PANIC(contxt);
-        RCUR;
-    }
+    // Broken parser or
+    // out of memory.
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -298,7 +313,7 @@ entry_p m_welcome(entry_p contxt)
             if(!DID_ERR())
             {
                 // Show welcome dialog.
-                DNUM = gui_welcome
+                inp_t rc = gui_welcome
                 (
                     msg, &lvl, &lgf, &prt,
                     get_numvar(contxt, "@user-min"),
@@ -306,8 +321,11 @@ entry_p m_welcome(entry_p contxt)
                     get_numvar(contxt, "@no-log")
                 );
 
+                // True or false only.
+                DNUM = (rc == G_TRUE) ? 1 : 0;
+
                 // On 'Proceed', set level and mode.
-                if(DNUM)
+                if(rc == G_TRUE)
                 {
                     set_numvar(contxt, "@user-level", lvl);
                     set_numvar(contxt, "@pretend", prt);
