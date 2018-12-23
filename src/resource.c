@@ -70,6 +70,7 @@ const char *tr(res_t r)
         "Ok",
         "Next",
         "Skip",
+        "Back",
         "Unknown error",
         "Setup failed",
         "Failed creating MUI custom class",

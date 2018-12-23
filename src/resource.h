@@ -49,6 +49,7 @@ typedef enum
     S_OKEY, /* "Ok" */
     S_NEXT, /* "Next" */
     S_SKIP, /* "Skip" */
+    S_BACK, /* "Back" */
     S_UNER, /* "Unknown error" */
     S_STFL, /* "Setup failed" */
     S_FMCC, /* "Failed creating MUI custom class" */

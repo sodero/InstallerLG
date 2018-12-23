@@ -126,6 +126,10 @@ MSG_SKIP
 Überspringen
 ; Skip
 ;
+MSG_BACK
+Zurück
+; Back
+;
 MSG_UNKNOWNERROR
 Unbekannter Fehler
 ; Unknown error
