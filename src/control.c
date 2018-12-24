@@ -129,12 +129,10 @@ static entry_p h_whunt(entry_p contxt, int m)
         // the last function in the last iteration.
         return r;
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -199,21 +197,30 @@ entry_p m_retrace(entry_p contxt)
         entry_p s = *c;
 
         // Locate ourselves.
-        while(*c != contxt) c++;
+        while(*c != contxt)
+        {
+            c++;
+        }
 
         // Locate the first trace point,
         // unless we're first in line.
         if(*c != s)
         {
             // Find trace point.
-            while(*(--c) != s && (*c)->call != m_trace);
+            while(*(--c) != s && (*c)->call != m_trace)
+            {
+                // Do nothing.
+            }
 
             // Look for the second trace point,
             // unless we're at the top by now.
             if(*c != s)
             {
                 // Find the second point.
-                while(*(--c) != s && (*c)->call != m_trace);
+                while(*(--c) != s && (*c)->call != m_trace)
+                {
+                    // Do nothing.
+                }
             }
         }
 

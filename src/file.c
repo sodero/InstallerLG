@@ -165,12 +165,10 @@ bool h_confirm(entry_p contxt,
         // FIXME
         return rc == G_TRUE;
     }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
-        return G_ERR;
-    }
+
+    // Broken parser.
+    PANIC(contxt);
+    return false;
 }
 
 //----------------------------------------------------------------------------
@@ -291,19 +289,20 @@ static const char *h_fileonly(entry_p contxt,
             // the string.
             while(i &&
                   s[i - 1] != '/' &&
-                  s[i - 1] != ':' ) i--;
+                  s[i - 1] != ':' )
+            {
+                i--;
+            }
 
             // Return the new offset.
             return (s + i);
         }
-        else
+
+        // Only fail if we're in 'strict' mode.
+        if(get_numvar(contxt, "@strict"))
         {
-            // Only fail if we're in 'strict' mode.
-            if(get_numvar(contxt, "@strict"))
-            {
-                // Empty string or dir / vol.
-                ERR(ERR_NOT_A_FILE, s);
-            }
+            // Empty string or dir / vol.
+            ERR(ERR_NOT_A_FILE, s);
         }
     }
     else
@@ -683,13 +682,12 @@ static pnode_p h_filetree(entry_p contxt,
                 // The list is complete.
                 return head;
             }
-            else
-            {
-                ERR(ERR_READ_DIR, src);
-                return NULL;
-            }
+
+            // Could not read from dir.
+            ERR(ERR_READ_DIR, src);
+            return NULL;
         }
-        else
+
         // Is source a file?
         if(type == 1)
         {
@@ -747,12 +745,11 @@ static pnode_p h_filetree(entry_p contxt,
                                         // The list is complete.
                                         return head;
                                     }
-                                    else
-                                    {
-                                        free(font->name);
-                                        free(font->copy);
-                                        free(font);
-                                    }
+
+                                    // Out of memory.
+                                    free(font->name);
+                                    free(font->copy);
+                                    free(font);
                                 }
                             }
                         }
@@ -897,12 +894,10 @@ static int h_protect_set(entry_p contxt,
         h_log(contxt, tr(S_PTCT), file, mask);
         return 1;
     }
-    else
-    {
-        // Bad input.
-        PANIC(contxt);
-        return 0;
-    }
+
+    // Bad input.
+    PANIC(contxt);
+    return 0;
 }
 
 #define CF_INFOS        (1 << 0)
@@ -1165,11 +1160,9 @@ static inp_t h_copyfile(entry_p contxt,
         // Unknown status.
         return rc;
     }
-    else
-    {
-        // Unknown error.
-        return G_ERR;
-    }
+
+    // Unknown error.
+    return G_ERR;
 }
 
 //----------------------------------------------------------------------------
@@ -2123,18 +2116,18 @@ static int h_delete_file(entry_p contxt, const char *file)
             // All done.
             return 1;
         }
-        else
-        {
-            ERR(ERR_DELETE_FILE, file);
-            return 0;
-        }
+
+        // Could not delete file.
+        ERR(ERR_DELETE_FILE, file);
     }
     else
     {
         // Unknown error.
         PANIC(contxt);
-        return 0;
     }
+    
+    // Failure.
+    return 0;
 }
 
 //----------------------------------------------------------------------------
@@ -2295,11 +2288,9 @@ static int h_delete_dir(entry_p contxt, const char *dir)
         // Done.
         return 1;
     }
-    else
-    {
-        // Bad input.
-        PANIC(contxt);
-    }
+
+    // Bad input.
+    PANIC(contxt);
 
     // Fail silently.
     return 0;

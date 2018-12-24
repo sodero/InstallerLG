@@ -88,11 +88,9 @@ entry_p new_number(int n)
         // Success.
         return entry;
     }
-    else
-    {
-        // Out of memory.
-        PANIC(NULL);
-    }
+
+    // Out of memory.
+    PANIC(NULL);
 
     // Failure
     return NULL;
