@@ -6,7 +6,7 @@ run()
     if [ `uname` = "Linux" ]; then
        if [ `which valgrind` ]; then
             l=`mktemp ./leak.tmp.XXXXXX`
-            o=`valgrind --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 $prg $instfile 2>$l`
+            o=`valgrind --track-fds=yes --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 $prg $instfile 2>$l`
             if [ $? -ne 0 ]; then
                 s=`mktemp ./leak.tmp.XXXXXX`
                 cat $l | sed -r 's/==[0-9]+/;==/g' >> $s
