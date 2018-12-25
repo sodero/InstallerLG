@@ -17,11 +17,12 @@ run()
             if [ -n "$e" ]; then
                 o="$e $o"
             fi
+            valgrind --tool=massif --stacks=yes $prg $instfile > /dev/null 2>&1
             rm $l
        else
             echo "Valgrind is missing!"
             exit 1
-        fi
+       fi
     else
         o=`$prg $instfile 2>&1`
     fi
@@ -114,5 +115,11 @@ else
     echo "$nok test(s) passed"
 fi
 echo "--------------------------------------------"
+
+if [ `which valgrind` ]; then
+    echo Peak stack size: $(grep mem_stacks_B massif.out.* | sort -h -k 2 -t '=' | tail -1 | sed -e 's/.*=//') bytes
+    echo Peak heap size: $(grep mem_heap_B massif.out.* | sort -h -k 2 -t '=' | tail -1 | sed -e 's/.*=//') bytes
+    rm massif.out.*
+fi
 
 exit $nfl

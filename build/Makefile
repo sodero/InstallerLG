@@ -93,4 +93,4 @@ endif
 
 .PHONY: clean
 clean:
-	$(RM) -R Catalogs *.o $(EXE) $(EXE).tmp.* leak.* err.* _??_ _???_
+	$(RM) -R Catalogs *.o $(EXE) $(EXE).tmp.* leak.* err.* massif.* _??_ _???_
