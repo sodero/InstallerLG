@@ -114,34 +114,45 @@
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 (if (getassign "LOCALE")
     (
+        ; Index to language helper.
+        (procedure to_lang index native
+            (if (= native 1)
+                (select index "deutsch" "italiano" "svenska" "")
+                (select index "german"  "italian"  "swedish" "")
+            )
+        )
+
+        ; Use native names unless we're on AROS.
+        (set i 0 n (<> "AROS" (database "os")))
+
+        ; Ignore first character of Language.
+        (while (and (> (strlen (to_lang i n)) 0) (<> (substr (to_lang i n) 1) (substr (getenv "Language") 1)))
+            (set i (+ i 1))
+        )
+
+        (if (= (strlen (to_lang i n)) 0)
+            (set i -1)
+        )
+
         ; Multi select.
         (set cats
             (askoptions
                 (prompt #cat_str)
                 (help #cat_hlp_str)
                 (choices "Deutsch" "Italiano" "Svenska")
-                (default 0)
+                (default (shiftleft 1 i))
             )
         )
 
         ; If any of the catalogs were chosen
         (if (<> cats 0)
             (
-                ; Index to language helper.
-                (procedure to_lang index native
-                    (if (= native 1)
-                        (select index "deutsch" "italiano" "svenska" "")
-                        (select index "german"  "italian"  "swedish" "")
-                    )
-                )
-
                 ; Create 'Catalogs' if it's missing.
                 (if (not (exists "LOCALE:Catalogs"))
                     (makedir "LOCALE:Catalogs")
                 )
 
-                ; Use native names unless we're on AROS.
-                (set i 0 n (<> "AROS" (database "os")))
+                (set i 0)
 
                 ; Copy all selected catalogs.
                 (while (> (strlen (to_lang i n)) 0)
