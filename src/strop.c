@@ -669,11 +669,9 @@ char *h_tackon(entry_p contxt,
                 strncat(r, f, lt - strlen(r));
                 return r;
             }
-            else
-            {
-                // Out of memory.
-                PANIC(contxt);
-            }
+
+            // Out of memory.
+            PANIC(contxt);
         }
     }
 

@@ -260,11 +260,9 @@ entry_p m_symbolset(entry_p contxt)
         // Return the last rhs.
         return ret;
     }
-    else
-    {
-        // Broken parser
-        RCUR;
-    }
+
+    // Broken parser
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -296,16 +294,12 @@ entry_p m_symbolval(entry_p contxt)
         {
             return r;
         }
-        else
-        {
-            // Symbol not found.
-            RNUM(0);
-        }
+
+        // Symbol not found.
+        RNUM(0);
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }

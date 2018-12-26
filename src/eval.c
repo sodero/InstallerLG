@@ -347,11 +347,9 @@ char *str(entry_p entry)
                         {
                             return entry->name;
                         }
-                        else
-                        {
-                            // OOM.
-                            PANIC(entry);
-                        }
+
+                        // OOM.
+                        PANIC(entry);
                 }
 
             // Dangling entries and options

@@ -3,25 +3,20 @@ run()
     export _INSTALLER_LG_=yes
     instfile=`mktemp ./Installer.tmp.XXXXXX`
     echo $1 > $instfile
-    if [ `uname` = "Linux" ]; then
-       if [ `which valgrind` ]; then
-            l=`mktemp ./leak.tmp.XXXXXX`
-            o=`valgrind --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 $prg $instfile 2>$l`
-            if [ $? -ne 0 ]; then
-                s=`mktemp ./leak.tmp.XXXXXX`
-                cat $l | sed -r 's/==[0-9]+/;==/g' >> $s
-                cat $instfile >> $s
-                return 2
-            fi
-            e=`cat $l | grep -v "^==[0-9]\+=="`
-            if [ -n "$e" ]; then
-                o="$e $o"
-            fi
-            rm $l
-       else
-            echo "Valgrind is missing!"
-            exit 1
+    if [ `which valgrind` ]; then
+        l=`mktemp ./leak.tmp.XXXXXX`
+        o=`valgrind --track-fds=yes --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 $prg $instfile 2>$l`
+        if [ $? -ne 0 ]; then
+            s=`mktemp ./leak.tmp.XXXXXX`
+            cat $l | sed -r 's/==[0-9]+/;==/g' >> $s
+            cat $instfile >> $s
+            return 2
         fi
+        e=`cat $l | grep -v "^==[0-9]\+=="`
+        if [ -n "$e" ]; then
+            o="$e $o"
+        fi
+        rm $l
     else
         o=`$prg $instfile 2>&1`
     fi
@@ -62,6 +57,17 @@ evl()
             if [ $ret -eq 1 ]; then
                 ret=0
             fi
+        fi
+    fi
+    if [ `which valgrind` ]; then
+        if [ -n "$pre" ]; then
+            eval "$pre" 2>&1
+        fi
+        instfile=`mktemp ./Installer.tmp.XXXXXX`
+        echo "$1 ; [$pre ; $pst]" > $instfile
+        valgrind --tool=massif --stacks=yes $prg $instfile > /dev/null 2>&1
+        if [ -n "$pst" ]; then
+            eval "$pst" 2>&1
         fi
     fi
     return $ret
@@ -114,5 +120,11 @@ else
     echo "$nok test(s) passed"
 fi
 echo "--------------------------------------------"
+
+if [ `which valgrind` ]; then
+    echo Peak stack size: $(grep mem_stacks_B massif.out.* | sort -h -k 2 -t '=' | tail -1 | sed -e 's/.*=//') bytes
+    echo Peak heap size: $(grep mem_heap_B massif.out.* | sort -h -k 2 -t '=' | tail -1 | sed -e 's/.*=//') bytes
+    rm -f massif.out.*
+fi
 
 exit $nfl

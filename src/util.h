@@ -46,6 +46,7 @@ void *dbg_alloc(int line, const char *file, const char *func, void *mem);
 #define CARG(X) (contxt->children[X - 1])
 #define CSYM(X) (contxt->symbols[X - 1])
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, __func__, M)
+#define HERE printf("%s:%s:%d\n", __FILE__, __func__, __LINE__)
 
 #ifdef __AROS__
 #define B_TO_CSTR(S) AROS_BSTR_ADDR(S)

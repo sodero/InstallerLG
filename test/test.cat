@@ -4,7 +4,7 @@
 (cat "" "") ; "","",""
 (cat "a") ; "","a",""
 (cat "a" "b" "c") ; "","abc",""
-(cat (askstring (prompt "p") (help "h") (default "a")) "b" "c") ; "","pha abc",""
+(cat (askstring (prompt "p") (help "h") (default "a")) "b" "c") ; "","pha0 abc",""
 (cat "a" "" "c") ; "","ac",""
 (cat 1 2 3 ) ; "","123",""
 (set t (cat 1 2 3 )) (debug t)  ; "","123 1",""

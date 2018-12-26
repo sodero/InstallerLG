@@ -106,13 +106,11 @@ entry_p m_gosub(entry_p contxt)
                     dep--;
                     return ret;
                 }
-                else
-                {
-                    // We will run out of stack if
-                    // we don't abort.
-                    ERR(ERR_MAX_DEPTH, contxt->name);
-                    return end();
-                }
+
+                // We will run out of stack if
+                // we don't abort.
+                ERR(ERR_MAX_DEPTH, contxt->name);
+                return end();
             }
 
             // Next function.
@@ -218,10 +216,8 @@ entry_p m_procedure(entry_p contxt)
         // Return the function itself.
         return contxt->symbols[0];
     }
-    else
-    {
-        // Everything is broken.
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // Everything is broken.
+    PANIC(contxt);
+    RCUR;
 }

@@ -92,6 +92,9 @@ Next
 MSG_SKIP (//)
 Skip
 ;
+MSG_BACK (//)
+Back
+;
 MSG_UNKNOWNERROR (//)
 Unknown error
 ;

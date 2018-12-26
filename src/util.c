@@ -76,7 +76,10 @@ entry_p local(entry_p e)
     for(; e &&
         e->type != CONTXT &&
         e->type != CUSTOM
-        ; e = e->parent);
+        ; e = e->parent)
+    {
+        // Do nothing.
+    }
 
     // Something or NULL:
     return e;
@@ -95,7 +98,10 @@ entry_p global(entry_p e)
     // any further.
     for(e = local(e);
         e && local(e->parent);
-        e = local(e->parent));
+        e = local(e->parent))
+    {
+        // Do nothing.
+    }
 
     // Something or NULL:
     return e;
@@ -529,11 +535,9 @@ char *get_optstr(entry_p c, opt_t t)
                 // Done.
                 return r;
             }
-            else
-            {
-                // Out of memory.
-                free(cs);
-            }
+
+            // Out of memory.
+            free(cs);
         }
         // Out of memory
     }

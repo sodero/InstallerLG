@@ -126,6 +126,10 @@ MSG_SKIP
 Hoppa över
 ; Skip
 ;
+MSG_BACK
+Tillbaka
+; Back
+;
 MSG_UNKNOWNERROR
 Okänt fel
 ; Unknown error
