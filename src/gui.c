@@ -867,7 +867,7 @@ MUIDSP IPTR IGAskFile(Class *cls,
             if(msg->Back)
             {
                 // Set 'Back' button.
-                set(my->Abort, MUIA_Text_Contents, "[BACK]");
+                set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
             }
 
             // Prepare before adding requester.
@@ -997,7 +997,7 @@ MUIDSP IPTR IGCopyFilesStart(Class *cls,
             if(msg->Back)
             {
                 // Set 'Back' button.
-                set(my->AbortRun, MUIA_Text_Contents, "[BACK]");
+                set(my->AbortRun, MUIA_Text_Contents, tr(S_BACK));
 
                 // Wait for 'Proceed', 'Skip' or 'Back'.
                 rc = IGTrans(IGWait(obj, MUIV_IG_ProceedRun, 3));
@@ -1138,7 +1138,7 @@ MUIDSP IPTR IGCopyFilesSetCur(Class *cls,
 
             // Set new button text.
             set(my->AbortOnly, MUIA_Text_Contents,
-                back ? "[BACK]" : tr(S_ABRT));
+                back ? tr(S_BACK) : tr(S_ABRT));
         }
 
         // Get the number of characters that
@@ -1344,7 +1344,7 @@ MUIDSP IPTR IGMessage(Class *cls,
         if(msg->Back)
         {
             // Set 'Back' button.
-            set(my->Abort, MUIA_Text_Contents, "[BACK]");
+            set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
 
             // Wait for 'Proceed' or 'Back'.
             rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
@@ -1482,7 +1482,7 @@ MUIDSP IPTR IGRadio(Class *cls,
                     if(msg->Back)
                     {
                         // Set 'Back' button.
-                        set(my->Abort, MUIA_Text_Contents, "[BACK]");
+                        set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
                     }
 
                     // Add radio buttons.
@@ -1556,7 +1556,7 @@ MUIDSP IPTR IGBool(Class *cls,
         if(msg->Back)
         {
             // Set back.
-            set(my->AbortYes, MUIA_Text_Contents, "[BACK]");
+            set(my->AbortYes, MUIA_Text_Contents, tr(S_BACK));
 
             // Wait for yes, no or back.
             rc = IGTrans(IGWait(obj, MUIV_IG_Yes, 3));
@@ -1609,7 +1609,7 @@ MUIDSP IPTR IGString(Class *cls,
         if(msg->Back)
         {
             // Set 'Back' button.
-            set(my->Abort, MUIA_Text_Contents, "[BACK]");
+            set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
 
             // Wait for 'Proceed' or 'Back'.
             rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
@@ -1670,7 +1670,7 @@ MUIDSP IPTR IGNumber(Class *cls,
         if(msg->Back)
         {
             // Set 'Back' button.
-            set(my->Abort, MUIA_Text_Contents, "[BACK]");
+            set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
 
             // Wait for 'Proceed' or 'Back'.
             rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
@@ -1730,7 +1730,7 @@ MUIDSP IPTR IGCheckBoxes(Class *cls,
             if(msg->Back)
             {
                 // Set 'Back' button.
-                set(my->Abort, MUIA_Text_Contents, "[BACK]");
+                set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
             }
 
             // The maximum number of choices is 32.
@@ -1899,7 +1899,7 @@ MUIDSP IPTR IGConfirm(Class *cls,
                 if(msg->Back)
                 {
                     // Set 'Back' button.
-                    set(my->AbortRun, MUIA_Text_Contents, "[BACK]");
+                    set(my->AbortRun, MUIA_Text_Contents, tr(S_BACK));
 
                     // Wait for 'Proceed', 'Skip' or 'Back'.
                     rc = IGTrans(IGWait(obj, MUIV_IG_ProceedRun, 3));
