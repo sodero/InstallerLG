@@ -2676,7 +2676,7 @@ inp_t gui_choice(const char *msg,
     (inp_t) DoMethod
     (
         Win, MUIM_IG_Radio, msg,
-        hlp, nms, def, bck, ret,
+        hlp, nms, def, bck, ret
     );
     #else
     // Testing purposes.
@@ -2710,7 +2710,7 @@ inp_t gui_options(const char *msg,
     (inp_t) DoMethod
     (
         Win, MUIM_IG_CheckBoxes, msg,
-        hlp, nms, def, bck, ret,
+        hlp, nms, def, bck, ret
     );
     #else
     // Testing purposes.
@@ -2842,7 +2842,7 @@ inp_t gui_welcome(const char *msg,
     (inp_t) DoMethod
     (
         Win, MUIM_IG_Welcome, msg,
-        lvl, lgf, prt, min, npr, nlg,
+        lvl, lgf, prt, min, npr, nlg
     );
     #else
     // Testing purposes.
