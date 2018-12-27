@@ -152,6 +152,7 @@ bool h_confirm(entry_p contxt,
                 if(rc == G_ABORT)
                 {
                     invoke(back);
+                    rc = G_FALSE;
                 }
             }
         }
@@ -1528,6 +1529,7 @@ entry_p m_copyfiles(entry_p contxt)
                         if(rc == G_ABORT)
                         {
                             invoke(back);
+                            rc = G_FALSE;
                         }
                     }
 

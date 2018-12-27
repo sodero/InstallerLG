@@ -213,6 +213,7 @@ entry_p m_message(entry_p contxt)
                         if(rc == G_ABORT)
                         {
                             invoke(back);
+                            rc = G_FALSE;
                         }
                     }
 

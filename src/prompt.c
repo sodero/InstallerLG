@@ -94,6 +94,7 @@ entry_p m_askbool(entry_p contxt)
                         if(rc == G_ABORT)
                         {
                             invoke(back);
+                            rc = G_FALSE;
                         }
                     }
 
@@ -296,6 +297,7 @@ entry_p m_askchoice(entry_p contxt)
                         if(rc == G_ABORT)
                         {
                             invoke(back);
+                            rc = G_FALSE;
                         }
                     }
 
@@ -383,6 +385,7 @@ entry_p m_askdir(entry_p contxt)
                         if(rc == G_ABORT)
                         {
                             invoke(back);
+                            rc = G_FALSE;
                         }
                     }
 
@@ -514,6 +517,7 @@ entry_p m_askdisk(entry_p contxt)
                                         // executing the 'back' code.
                                         p->pr_WindowPtr = w;
                                         invoke(back);
+                                        rc = G_FALSE;
                                     }
                                 }
                                 // FIXME
@@ -659,6 +663,7 @@ entry_p m_askfile(entry_p contxt)
                         if(rc == G_ABORT)
                         {
                             invoke(back);
+                            rc = G_FALSE;
                         }
                     }
 
@@ -783,6 +788,7 @@ entry_p m_asknumber(entry_p contxt)
                         if(rc == G_ABORT)
                         {
                             invoke(back);
+                            rc = G_FALSE;
                         }
                     }
 
@@ -943,6 +949,7 @@ entry_p m_askoptions(entry_p contxt)
                         if(rc == G_ABORT)
                         {
                             invoke(back);
+                            rc = G_FALSE;
                         }
                     }
 
@@ -1022,6 +1029,7 @@ entry_p m_askstring(entry_p contxt)
                         if(rc == G_ABORT)
                         {
                             invoke(back);
+                            rc = G_FALSE;
                         }
                     }
 

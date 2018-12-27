@@ -192,6 +192,22 @@ entry_p m_retrace(entry_p contxt)
     if(contxt && contxt->parent &&
        contxt->parent->children)
     {
+        // Are we contained in an OPTION?
+        if(contxt->parent->type == OPTION &&
+           // Do we have a parent?
+           contxt->parent->parent &&
+           // That is a NATIVE function?
+           contxt->parent->parent->type == NATIVE &&
+           // Which has its own parent?
+           contxt->parent->parent->parent &&
+           // With children of its own?
+           contxt->parent->parent->parent->children)
+        {
+            // The pretend that we belong to the
+            // same scope as the NATIVE function.
+            contxt = contxt->parent->parent;
+        }
+
         // Iterator and stop.
         entry_p *c = contxt->parent->children;
         entry_p s = *c;
@@ -231,18 +247,35 @@ entry_p m_retrace(entry_p contxt)
             entry_p r = end();
             entry_p *t = c;
 
-            for(; !DID_ERR(); c = t)
+            // Frame counter.
+            static int dep = 0;
+
+            // Keep track of the recursion depth. Do not
+            // invoke if we're beyond MAXDEP.
+            if(dep++ < MAXDEP)
             {
-                while (*c != contxt && !DID_ERR())
+                for(; !DID_ERR(); c = t)
                 {
-                    // Resolve and proceed.
-                    r = resolve(*c);
-                    c++;
+                    // As long as no one fails, resolve
+                    // all children and save the return
+                    // value of the last one.
+                    while(*c && *c != end() && !DID_ERR())
+                    {
+                        // Resolve and proceed.
+                        r = resolve(*c);
+                        c++;
+                    }
                 }
+
+                // Leaving frame.
+                dep--;
+
+                // Return the last value.
+                return r;
             }
 
-            // Return the last value.
-            return r;
+            // We risk running out of stack.
+            ERR(ERR_MAX_DEPTH, contxt->name);
         }
     }
     else

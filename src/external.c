@@ -101,6 +101,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 if(rc == G_ABORT)
                 {
                     invoke(back);
+                    rc = G_FALSE;
                 }
             }
 
