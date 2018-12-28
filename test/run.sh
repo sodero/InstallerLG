@@ -67,8 +67,9 @@ evl()
         massfile=`mktemp ./massif.out.XXXXXX`
         echo "$1 ; [$pre ; $pst]" > $instfile
         valgrind --tool=massif --massif-out-file=$massfile --stacks=yes $prg $instfile > /dev/null 2>&1
-        sed -i -e "s/mem_stacks_B=/$1 mem_stacks_B=/" $massfile > /dev/null 2>&1
-        sed -i -e "s/mem_heap_B=/$1 mem_heap_B=/" $massfile > /dev/null 2>&1
+        snip=$(echo $1 | tr -d '.' | tr '/' '_' | tr -d '"')
+        sed -i "s/mem_stacks_B=/$snip mem_stacks_B=/g" $massfile
+        sed -i "s/mem_heap_B=/$snip mem_heap_B=/g" $massfile
         if [ -n "$pst" ]; then
             eval "$pst" 2>&1
         fi
