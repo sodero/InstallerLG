@@ -143,14 +143,10 @@ entry_p m_exit(entry_p contxt)
         HALT();
         RNUM(0);
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
 
-        // Failure.
-        RCUR;
-    }
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -233,14 +229,10 @@ entry_p m_trap(entry_p contxt)
         // Dummy.
         RNUM(1);
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
 
-        // Failure.
-        RCUR;
-    }
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------

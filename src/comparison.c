@@ -58,12 +58,10 @@ entry_p m_eq(entry_p contxt)
             !h_cmp(CARG(1), CARG(2)) ? 1 : 0
         );
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -84,12 +82,10 @@ entry_p m_gt(entry_p contxt)
             h_cmp(CARG(1), CARG(2)) > 0 ? 1 : 0
         );
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -110,12 +106,10 @@ entry_p m_gte(entry_p contxt)
             h_cmp(CARG(1), CARG(2)) >= 0 ? 1 : 0
         );
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -136,12 +130,10 @@ entry_p m_lt(entry_p contxt)
             h_cmp(CARG(1), CARG(2)) < 0 ? 1 : 0
         );
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -162,12 +154,10 @@ entry_p m_lte(entry_p contxt)
             h_cmp(CARG(1), CARG(2)) <= 0 ? 1 : 0
         );
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -188,10 +178,8 @@ entry_p m_neq(entry_p contxt)
             h_cmp(CARG(1), CARG(2)) ? 1 : 0
         );
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }

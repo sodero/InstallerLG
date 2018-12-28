@@ -374,11 +374,9 @@ entry_p m_pathonly(entry_p contxt)
 
                     RSTR(r);
                 }
-                else
-                {
-                    // Out of memory.
-                    PANIC(contxt);
-                }
+
+                // Out of memory.
+                PANIC(contxt);
             }
         }
 
@@ -386,12 +384,10 @@ entry_p m_pathonly(entry_p contxt)
         // on failure.
         REST;
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -425,18 +421,15 @@ entry_p m_patmatch(entry_p contxt)
         {
             // We probably had a buffer overflow.
             ERR(ERR_OVERFLOW, p);
-            RNUM(0);
         }
-        #else
-        RNUM(0);
         #endif
+        // Problem or testing.
+        RNUM(0);
     }
-    else
-    {
-        // The parser is broken.
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken.
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -455,12 +448,10 @@ entry_p m_strlen(entry_p contxt)
             (int) strlen(str(CARG(1)))
         );
     }
-    else
-    {
-        // The parser is broken.
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken.
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -499,12 +490,10 @@ entry_p m_substr(entry_p contxt)
                     memcpy(r, s + i, l);
                     RSTR(r);
                 }
-                else
-                {
-                    // Out of memory.
-                    PANIC(contxt);
-                    REST;
-                }
+
+                // Out of memory.
+                PANIC(contxt);
+                REST;
             }
         }
         else
@@ -525,12 +514,10 @@ entry_p m_substr(entry_p contxt)
                         memcpy(r, s + i, l - i);
                         RSTR(r);
                     }
-                    else
-                    {
-                        // Out of memory.
-                        PANIC(contxt);
-                        REST;
-                    }
+
+                    // Out of memory.
+                    PANIC(contxt);
+                    REST;
                 }
 
                 // Return full string.
@@ -573,12 +560,10 @@ entry_p m_tackon(entry_p contxt)
         // on failure.
         REST;
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------

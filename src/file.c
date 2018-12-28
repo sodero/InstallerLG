@@ -76,12 +76,10 @@ entry_p m_expandpath(entry_p contxt)
         // Return empty string.
         REST;
     }
-    else
-    {
-        // Broken parser
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // Broken parser
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -2583,17 +2581,12 @@ entry_p m_fileonly(entry_p contxt)
 {
     if(c_sane(contxt, 1))
     {
-        const char *p = str(CARG(1)),
-                   *f = h_fileonly(contxt, p);
+        RSTR(strdup(h_fileonly(contxt, str(CARG(1)))));
+    }
 
-        RSTR(strdup(f));
-    }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -4177,49 +4170,41 @@ entry_p m_rename(entry_p contxt)
             // Are we going to rename a file/dir?
             if(!disk)
             {
-                // Fail if the target exists.
+                // Rename if target doesn't exist.
                 if(!h_exists(to) && !rename(fr, to))
                 {
                     // Success.
                     h_log(contxt, tr(S_FRND), fr, to);
                     RNUM(-1);
                 }
-                else
-                {
-                    ERR(ERR_RENAME_FILE, fr);
-                    RNUM(0);
-                }
-            }
-            // No, we're going to relabel a volume.
-            else
-            {
-                #ifdef AMIGA
-                // Rename volume.
-                if(!Relabel(fr, to))
-                {
-                    // Failure.
-                    RNUM(0);
-                }
-                #endif
 
-                // Success.
-                h_log(contxt, tr(S_FRND), fr, to);
-                RNUM(-1);
+                // Fail if target exists.
+                ERR(ERR_RENAME_FILE, fr);
+                RNUM(0);
             }
+
+            // No, we're going to relabel a volume.
+            #ifdef AMIGA
+            // Rename volume.
+            if(!Relabel(fr, to))
+            {
+                // Failure.
+                RNUM(0);
+            }
+            #endif
+
+            // Success.
+            h_log(contxt, tr(S_FRND), fr, to);
         }
-        else
-        {
-            // Non safe operations always
-            // succeed in pretend mode.
-            RNUM(-1);
-        }
+
+        // Non safe operation in pretend mode
+        // or normal successful operation.
+        RNUM(-1);
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------

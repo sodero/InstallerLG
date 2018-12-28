@@ -110,8 +110,9 @@ entry_p m_askbool(entry_p contxt)
         }
         else
         {
-            char *m = !prompt ? "prompt" : "help";
-            ERR(ERR_MISSING_OPTION, m);
+            // Missing one or more options.
+            ERR(ERR_MISSING_OPTION, !prompt ?
+                "prompt" : "help");
         }
     }
     else
@@ -313,8 +314,9 @@ entry_p m_askchoice(entry_p contxt)
         }
         else
         {
-            char *m = !prompt ? "prompt" : !help ? "help" : "choices";
-            ERR(ERR_MISSING_OPTION, m);
+            // Missing one or more options.
+            ERR(ERR_MISSING_OPTION, !prompt ?
+                "prompt" : !help ? "help" : "choices");
         }
     }
     else
@@ -410,22 +412,19 @@ entry_p m_askdir(entry_p contxt)
             // We have a file.
             RSTR(strdup(ret));
         }
-        else
-        {
-            char *m = !prompt ? "prompt" : !help ? "help" : "default";
-            ERR(ERR_MISSING_OPTION, m);
-        }
+
+        // What option are we missing?
+        ERR(ERR_MISSING_OPTION, !prompt ?
+            "prompt" : !help ? "help" : "default");
 
         // Return empty string
         // on failure.
         REST;
     }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // Broken parser.
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -589,8 +588,9 @@ entry_p m_askdisk(entry_p contxt)
         }
         else
         {
-            char *m = !prompt ? "prompt" : !help ? "help" : "dest";
-            ERR(ERR_MISSING_OPTION, m);
+            // Missing one or more options.
+            ERR(ERR_MISSING_OPTION, !prompt ?
+                "prompt" : !help ? "help" : "dest");
         }
     }
     else
@@ -686,22 +686,19 @@ entry_p m_askfile(entry_p contxt)
             // We have a file.
             RSTR(strdup(ret));
         }
-        else
-        {
-            char *m = !prompt ? "prompt" : !help ? "help" : "default";
-            ERR(ERR_MISSING_OPTION, m);
-        }
+
+        // Missing one or more options.
+        ERR(ERR_MISSING_OPTION, !prompt ?
+            "prompt" : !help ? "help" : "default");
 
         // Return empty string
         // on failure.
         REST;
     }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // Broken parser.
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -801,8 +798,9 @@ entry_p m_asknumber(entry_p contxt)
         }
         else
         {
-            char *m = !prompt ? "prompt" : !help ? "help" : "default";
-            ERR(ERR_MISSING_OPTION, m);
+            // Missing one or more options.
+            ERR(ERR_MISSING_OPTION, !prompt ?
+                "prompt" : !help ? "help" : "default");
         }
     }
     else
@@ -960,8 +958,9 @@ entry_p m_askoptions(entry_p contxt)
         }
         else
         {
-            char *m = !prompt ? "prompt" : !help ? "help" : "choices";
-            ERR(ERR_MISSING_OPTION, m);
+            // Missing one or more options.
+            ERR(ERR_MISSING_OPTION, !prompt ?
+                "prompt" : !help ? "help" : "choices");
         }
     }
     else
@@ -1048,20 +1047,17 @@ entry_p m_askstring(entry_p contxt)
 
             RSTR(strdup(res));
         }
-        else
-        {
-            char *m = !prompt ? "prompt" : !help ? "help" : "default";
-            ERR(ERR_MISSING_OPTION, m);
-        }
+
+        // Missing one or more options.
+        ERR(ERR_MISSING_OPTION, !prompt ?
+            "prompt" : !help ? "help" : "default");
 
         // Return empty string
         // on failure.
         REST;
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
