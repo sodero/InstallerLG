@@ -212,8 +212,7 @@ entry_p m_message(entry_p contxt)
                         // On abort execute.
                         if(rc == G_ABORT)
                         {
-                            invoke(back);
-                            rc = G_FALSE;
+                            return resolve(back);
                         }
                     }
 

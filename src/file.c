@@ -151,8 +151,8 @@ bool h_confirm(entry_p contxt,
                 // On abort execute.
                 if(rc == G_ABORT)
                 {
-                    invoke(back);
-                    rc = G_FALSE;
+                    rc = resolve(back) ?
+                         G_TRUE : G_ERR;
                 }
             }
         }
@@ -1462,7 +1462,7 @@ entry_p m_copyfiles(entry_p contxt)
                         confirm ? str(help) : NULL,
                         cur,
                         confirm,
-                        back 
+                        back
                     );
                 }
 
@@ -1513,6 +1513,9 @@ entry_p m_copyfiles(entry_p contxt)
                     DNUM = (rc == G_TRUE) ? 1 : 0;
                 }
 
+                // Back return value.
+                entry_p br = NULL;
+
                 // FIXME
                 if(rc != G_TRUE)
                 {
@@ -1528,8 +1531,7 @@ entry_p m_copyfiles(entry_p contxt)
                         // On abort execute.
                         if(rc == G_ABORT)
                         {
-                            invoke(back);
-                            rc = G_FALSE;
+                            br = resolve(back);
                         }
                     }
 
@@ -1550,6 +1552,14 @@ entry_p m_copyfiles(entry_p contxt)
                     free(cur->copy);
                     cur = cur->next;
                     free(tree);
+                }
+
+                // If we've executed any 'back' code,
+                // return its return value instead of
+                // our own.
+                if(br)
+                {
+                    return br;
                 }
             }
         }

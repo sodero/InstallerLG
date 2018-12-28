@@ -93,8 +93,7 @@ entry_p m_askbool(entry_p contxt)
                         // On abort execute.
                         if(rc == G_ABORT)
                         {
-                            invoke(back);
-                            rc = G_FALSE;
+                            return resolve(back);
                         }
                     }
 
@@ -296,8 +295,7 @@ entry_p m_askchoice(entry_p contxt)
                         // On abort execute.
                         if(rc == G_ABORT)
                         {
-                            invoke(back);
-                            rc = G_FALSE;
+                            return resolve(back);
                         }
                     }
 
@@ -384,8 +382,7 @@ entry_p m_askdir(entry_p contxt)
                         // On abort execute.
                         if(rc == G_ABORT)
                         {
-                            invoke(back);
-                            rc = G_FALSE;
+                            return resolve(back);
                         }
                     }
 
@@ -516,8 +513,7 @@ entry_p m_askdisk(entry_p contxt)
                                         // Restore auto request before
                                         // executing the 'back' code.
                                         p->pr_WindowPtr = w;
-                                        invoke(back);
-                                        rc = G_FALSE;
+                                        return resolve(back);
                                     }
                                 }
                                 // FIXME
@@ -662,8 +658,7 @@ entry_p m_askfile(entry_p contxt)
                         // On abort execute.
                         if(rc == G_ABORT)
                         {
-                            invoke(back);
-                            rc = G_FALSE;
+                            return resolve(back);
                         }
                     }
 
@@ -787,8 +782,7 @@ entry_p m_asknumber(entry_p contxt)
                         // On abort execute.
                         if(rc == G_ABORT)
                         {
-                            invoke(back);
-                            rc = G_FALSE;
+                            return resolve(back);
                         }
                     }
 
@@ -948,8 +942,7 @@ entry_p m_askoptions(entry_p contxt)
                         // On abort execute.
                         if(rc == G_ABORT)
                         {
-                            invoke(back);
-                            rc = G_FALSE;
+                            return resolve(back);
                         }
                     }
 
@@ -1028,8 +1021,7 @@ entry_p m_askstring(entry_p contxt)
                         // On abort execute.
                         if(rc == G_ABORT)
                         {
-                            invoke(back);
-                            rc = G_FALSE;
+                            return resolve(back);
                         }
                     }
 

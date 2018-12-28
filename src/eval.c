@@ -134,10 +134,21 @@ entry_p resolve(entry_p entry)
             case NATIVE:
                 return entry->call(entry);
 
-            // Dynamic options are treated like functions.
+            // Special options.
             case OPTION:
-                return entry->id == OPT_DYNOPT ?
-                       entry->call(entry) : entry;
+                switch(entry->id)
+                {
+                    // Dynamic options are treated like functions.
+                    case OPT_DYNOPT:
+                        return entry->call(entry);
+
+                    // Back options are treated like contexts.
+                    case OPT_BACK:
+                        return invoke(entry);
+
+                    default:
+                        return entry;
+                }
 
             // We already have a primitive.
             case NUMBER:
