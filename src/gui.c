@@ -863,18 +863,18 @@ MUIDSP IPTR IGAskFile(Class *cls,
             // Set default file / dir.
             set(str, MUIA_String_Contents, msg->Default);
 
-            // Use 'Abort' or 'Back'?
-            if(msg->Back)
-            {
-                // Set 'Back' button.
-                set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
-            }
-
             // Prepare before adding requester.
             if(DoMethod(my->Ask, MUIM_Group_InitChange))
             {
                 // Add pop up requester.
                 DoMethod(my->Ask, OM_ADDMEMBER, pop);
+
+                // Use 'Abort' or 'Back'?
+                if(msg->Back)
+                {
+                    // Set 'Back' button.
+                    set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
+                }
 
                 // We're done adding things.
                 DoMethod(my->Ask, MUIM_Group_ExitChange);
@@ -917,6 +917,12 @@ MUIDSP IPTR IGAskFile(Class *cls,
                     // Remove pop up requester.
                     DoMethod(my->Ask, OM_REMMEMBER, pop);
 
+                    if(msg->Back)
+                    {
+                        // Restore 'Abort' if needed.
+                        set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
+                    }
+
                     // We're done removing things.
                     DoMethod(my->Ask, MUIM_Group_ExitChange);
 
@@ -926,12 +932,6 @@ MUIDSP IPTR IGAskFile(Class *cls,
                     // Return filename.
                     return rc;
                 }
-            }
-
-            if(msg->Back)
-            {
-                // Restore 'Abort' if needed.
-                set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
             }
 
             // Free ASL requester.
