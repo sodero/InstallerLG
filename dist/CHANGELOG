@@ -183,9 +183,28 @@
 
 0.1.0-alpha.33:
 ===============
+- Improved robustness.
 - Fixed handling of non-integers.
 - (getdiskspace) v44 compliant (WHDLOpener).
-- (openwbobject), (showwbobject) and (closewbobject) implemented (v44).
-- (trace) and (retrace) implemented (v44).
+- (trace) implemented (v44).
+- (retrace) implemented (v44).
+- (openwbobject) implemented (v44).
+- (showwbobject) implemented (v44).
+- (closewbobject) implemented (v44).
 - (reboot) implemented (v44).
-- ?
+- (copyfiles) (back) option implemented (v44).
+- (copylib) (back) option implemented (v44).
+- (delete) (back) option implemented (v44).
+- (execute) (back) option implemented (v44).
+- (makedir) (back) option implemented (v44).
+- (message) (back) option implemented (v44).
+- (rename) (back) option implemented (v44).
+- (textfile) (back) option implemented (v44).
+- (askdir) (back) option implemented (v44).
+- (askfile) (back) option implemented (v44).
+- (askstring) (back) option implemented (v44).
+- (asknumber) (back) option implemented (v44).
+- (askchoice) (back) option implemented (v44).
+- (askoptions) (back) option implemented (v44).
+- (askbool) (back) option implemented (v44).
+- (askdisk) (back) option implemented (v44).
