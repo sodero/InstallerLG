@@ -186,24 +186,26 @@ entry_p m_trace(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_retrace(entry_p contxt)
 {
-    // We need a context with a parent.
-    if(contxt && contxt->parent &&
-       contxt->parent->children)
+    // No children.
+    if(contxt)
     {
-        // Are we contained in an OPTION?
-        if(contxt->parent->type == OPTION &&
-           // Do we have a parent?
-           contxt->parent->parent &&
-           // That is a NATIVE function?
-           contxt->parent->parent->type == NATIVE &&
-           // Which has its own parent?
-           contxt->parent->parent->parent &&
-           // With children of its own?
-           contxt->parent->parent->parent->children)
+        // Find nearest context / user defined
+        // procedure.
+        while(contxt->parent &&
+              contxt->parent->type != CONTXT &&
+              contxt->parent->type != CUSTOM)
         {
-            // The pretend that we belong to the
-            // same scope as the NATIVE function.
-            contxt = contxt->parent->parent;
+            // Climb one generation.
+            contxt = contxt->parent;
+        }
+
+        // This shouldn't happen.
+        if(!contxt->parent ||
+           !contxt->parent->children)
+        {
+            // Nowhere to go.
+            PANIC(contxt);
+            RCUR;
         }
 
         // Iterator and stop.
