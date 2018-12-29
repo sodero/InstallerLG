@@ -731,13 +731,10 @@ entry_p push(entry_p dst, entry_p src)
 
         // Whether symbol or child, the procedure
         // is the same, just append and reparent.
-        if(*dst_p)
+        if(*dst_p && append(dst_p, src))
         {
-            if(append(dst_p, src))
-            {
-                src->parent = dst;
-                return dst;
-            }
+            src->parent = dst;
+            return dst;
         }
     }
 

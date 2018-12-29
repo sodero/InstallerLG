@@ -56,7 +56,7 @@ entry_p m_set(entry_p contxt)
                     // Copy name string if such exists.
                     if(res->name)
                     {
-                        res->name = strdup(res->name);
+                        res->name = DBG_ALLOC(strdup(res->name));
 
                         if(!res->name)
                         {

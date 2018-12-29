@@ -237,14 +237,10 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                     chdir(cwd);
                 }
 
-                // OK == 0.
-                if(DNUM)
+                // OK == 0. Only fail in 'strict' mode.
+                if(DNUM && get_numvar(contxt, "@strict"))
                 {
-                    // Only fail if we're in 'strict' mode.
-                    if(get_numvar(contxt, "@strict"))
-                    {
-                        ERR(ERR_EXEC, cmd);
-                    }
+                    ERR(ERR_EXEC, cmd);
                 }
 
                 // Free concatenation.

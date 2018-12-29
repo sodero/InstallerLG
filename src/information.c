@@ -149,12 +149,10 @@ entry_p m_debug(entry_p contxt)
         // Always.
         RNUM(1);
     }
-    else
-    {
-        // The parser is broken.
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken.
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -268,12 +266,10 @@ entry_p m_user(entry_p contxt)
         // Return the old.
         RNUM(old);
     }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // Broken parser.
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------
@@ -402,11 +398,9 @@ entry_p m_working(entry_p contxt)
                     // Success.
                     RNUM(1);
                 }
-                else
-                {
-                    // Free the children buffer.
-                    free(msg);
-                }
+
+                // Free the children buffer.
+                free(msg);
             }
             else
             {

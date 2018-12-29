@@ -39,19 +39,19 @@ void *dbg_alloc(int line, const char *file, const char *func, void *mem);
 //----------------------------------------------------------------------------
 #define DCUR    contxt->resolved
 #define DNUM    contxt->resolved->id
-#define RCUR    { return contxt ? contxt->resolved : NULL; }
-#define RNUM(X) { contxt->resolved->id = X; return contxt->resolved; }
-#define RSTR(X) { char *rstr = X; if(rstr) { free(contxt->resolved->name); contxt->resolved->name = rstr;} else { PANIC(contxt); contxt->resolved->name[0] = '\0'; }; return contxt->resolved; }
-#define REST    { if(contxt->resolved->name) contxt->resolved->name[0] = '\0'; return contxt->resolved; }
-#define CARG(X) (contxt->children[X - 1])
-#define CSYM(X) (contxt->symbols[X - 1])
+#define RCUR    if(contxt) return contxt->resolved; return NULL
+#define RNUM(X) contxt->resolved->id = X; return contxt->resolved
+#define RSTR(X) char *rstr = X; if(rstr) { free(contxt->resolved->name); contxt->resolved->name = rstr;} else { PANIC(contxt); contxt->resolved->name[0] = '\0'; }; return contxt->resolved
+#define REST    if(contxt->resolved->name) { contxt->resolved->name[0] = '\0'; } return contxt->resolved
+#define CARG(X) contxt->children[(X) - 1]
+#define CSYM(X) contxt->symbols[(X) - 1]
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, __func__, M)
 #define HERE printf("%s:%s:%d\n", __FILE__, __func__, __LINE__)
 
 #ifdef __AROS__
 #define B_TO_CSTR(S) AROS_BSTR_ADDR(S)
 #else
-#define B_TO_CSTR(S) (*((char *) BADDR(S)) ? (((char *) BADDR(S)) + 1) : ((char *) BADDR(S))) //(*S ? (((char *) S) + 1) : BADDR(S))
+#define B_TO_CSTR(S) (*((char *) BADDR(S)) ? (((char *) BADDR(S)) + 1) : ((char *) BADDR(S)))
 #endif
 
 #endif

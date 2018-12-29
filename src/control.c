@@ -86,12 +86,10 @@ entry_p m_select(entry_p contxt)
         ERR(ERR_NO_ITEM, str(CARG(1)));
         RNUM(0);
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-        RCUR;
-    }
+
+    // The parser is broken
+    PANIC(contxt);
+    RCUR;
 }
 
 //----------------------------------------------------------------------------

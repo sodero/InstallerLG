@@ -241,6 +241,7 @@ int h_exists(const char *n)
                     // installer documentation.
                     return 1;
                 }
+
                 // A directory?
                 if(S_ISDIR(fs.st_mode))
                 {
