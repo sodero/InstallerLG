@@ -123,6 +123,10 @@ static char *strduptr(const char *str);
 "tackon"                { return TACKON;         }
 "transcript"            { return TRANSCRIPT;     }
 "complete"              { return COMPLETE;       }
+"closemedia"            { return CLOSEMEDIA;     }
+"effect"                { return EFFECT;         }
+"setmedia"              { return SETMEDIA;       }
+"showmedia"             { return SHOWMEDIA;      }
 "user"                  { return USER;           }
 "working"               { return WORKING;        }
 "welcome"               { return WELCOME;        }

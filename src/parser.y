@@ -42,6 +42,7 @@
 %token /* file.c|h       */ COPYFILES COPYLIB DELETE EXISTS FILEONLY FOREACH MAKEASSIGN MAKEDIR PROTECT
        /*                */ STARTUP TEXTFILE TOOLTYPE TRANSCRIPT RENAME
 %token /* information.c  */ COMPLETE DEBUG MESSAGE USER WELCOME WORKING
+%token /* media.c        */ CLOSEMEDIA EFFECT SETMEDIA SHOWMEDIA
 %token /* probe.c|h      */ DATABASE EARLIER GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM
        /*                */ GETVERSION ICONINFO
 %token /* procedure.c|h  */ CUS DCL
@@ -67,10 +68,10 @@
        /*                */ abort copyfiles copylib database debug delete execute exit foreach makeassign
        /*                */ makedir message onerror protect rename rexx run startup textfile tooltype
        /*                */ trap reboot all append assigns choices command compression confirm default mul
-       /*                */ delopts dest disk files fonts help infos include newname newpath optional
+       /*                */ delopts dest disk files fonts help infos include newname newpath optional back
        /*                */ nogauge noposition noreq pattern prompt quiet range safe resident override
        /*                */ setdefaulttool setposition setstack settooltype source swapcolors openwbobject
-       /*                */ showwbobject closewbobject trace retrace back
+       /*                */ showwbobject closewbobject trace retrace closemedia effect setmedia showmedia
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- destruction --------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Use the destructor of the start symbol to set of  */
@@ -92,7 +93,8 @@
                             assigns choices command compression confirm default delopts dest disk lt lte neq
                             files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append
-                            openwbobject showwbobject closewbobject trace retrace back
+                            openwbobject showwbobject closewbobject trace retrace back closemedia effect setmedia
+                            showmedia
 %%
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- start --------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -232,6 +234,10 @@ ivp:            add        /* arithmetic.c|h */  |
                 user                             |
                 welcome                          |
                 working                          |
+                closemedia      /* media.c|h */  |
+                effect                           |
+                setmedia                         |
+                showmedia                        |
                 database        /* probe.c|h */  |
                 earlier                          |
                 getassign                        |
@@ -375,6 +381,12 @@ user:           '(' USER p ')'                   { $$ = new_native(strdup("user"
 welcome:        '(' WELCOME ps ')'               { $$ = new_native(strdup("welcome"), LINE, m_welcome, $3, NUMBER); } |
                 '(' WELCOME ')'                  { $$ = new_native(strdup("welcome"), LINE, m_welcome, NULL, NUMBER); };
 working:        '(' WORKING ps ')'               { $$ = new_native(strdup("working"), LINE, m_working, $3, NUMBER); };
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* media.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+closemedia:     '(' CLOSEMEDIA p ')'             { $$ = new_native(strdup("closemedia"), LINE, m_closemedia, push(new_contxt(), $3), NUMBER); };
+effect:         '(' EFFECT STR STR INT INT ')'   { $$ = new_native(strdup("effect"), LINE, m_effect, push(push(push(push(new_contxt(), new_string($3)), new_string($4)), new_number($5)), new_number($6)), NUMBER); };
+setmedia:       '(' SETMEDIA ps ')'              { $$ = new_native(strdup("setmedia"), LINE, m_setmedia, $3, NUMBER); };
+showmedia:      '(' SHOWMEDIA ps ')'             { $$ = new_native(strdup("showmedia"), LINE, m_showmedia, $3, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* probe.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 database:       '(' DATABASE p ')'               { $$ = new_native(strdup("database"), LINE, m_database, push(new_contxt(), $3), STRING); } |
