@@ -116,7 +116,7 @@ entry_p m_effect(entry_p contxt)
         */
 
 		// Dummy.
-		pretty_print(contxt);
+		// pretty_print(contxt);
     }
     else
     {
