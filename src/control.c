@@ -114,8 +114,7 @@ static entry_p h_whunt(entry_p contxt, int m)
 
         // Use XOR to support both 'while' and 'until'. Break
         // the loop if something goes wrong inside.
-        while((m ^ tru(CARG(1))) &&
-              !DID_ERR())
+        while((m ^ tru(CARG(1))) && !DID_ERR)
         {
             // Save the return value of the last function
             // in the CONTXT
@@ -222,10 +221,14 @@ entry_p m_retrace(entry_p contxt)
         // unless we're first in line.
         if(*c != s)
         {
-            // Find trace point.
-            while(*(--c) != s && (*c)->call != m_trace)
+            // Find first trace point.
+            while(*(--c) != s)
             {
-                // Do nothing.
+                if((*c)->call == m_trace)
+                {
+                    // Found it.
+                    break;
+                }
             }
 
             // Look for the second trace point,
@@ -233,9 +236,13 @@ entry_p m_retrace(entry_p contxt)
             if(*c != s)
             {
                 // Find the second point.
-                while(*(--c) != s && (*c)->call != m_trace)
+                while(*(--c) != s)
                 {
-                    // Do nothing.
+                    if((*c)->call == m_trace)
+                    {
+                        // Found it.
+                        break;
+                    }
                 }
             }
         }
@@ -254,12 +261,12 @@ entry_p m_retrace(entry_p contxt)
             // invoke if we're beyond MAXDEP.
             if(dep++ < MAXDEP)
             {
-                for(; !DID_ERR(); c = t)
+                for(; !DID_ERR; c = t)
                 {
                     // As long as no one fails, resolve
                     // all children and save the return
                     // value of the last one.
-                    while(*c && *c != end() && !DID_ERR())
+                    while(*c && *c != end() && !DID_ERR)
                     {
                         // Resolve and proceed.
                         r = resolve(*c);

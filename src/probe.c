@@ -908,16 +908,15 @@ entry_p m_getversion(entry_p contxt)
                 DNUM = ver != -1 ? ver : 0;
             }
         }
+        #ifdef AMIGA
         else
         {
             // No arguments, return version of Exec.
-            #ifdef AMIGA
             extern struct ExecBase *SysBase;
-
             DNUM = (SysBase->LibNode.lib_Version << 16) |
                     SysBase->SoftVer;
-            #endif
         }
+        #endif
     }
     else
     {
@@ -972,9 +971,8 @@ entry_p m_iconinfo(entry_p contxt)
             {
                 // Iterate over all options or until
                 // we run into resource problems.
-                for(size_t i = 0;
-                    tt[i] != end() &&
-                    !DID_ERR(); i++)
+                for(size_t i = 0; tt[i] != end() &&
+                    !DID_ERR; i++)
                 {
                     // If we have an option of any kind.
                     if(tt[i])

@@ -15,13 +15,13 @@
 //----------------------------------------------------------------------------
 // Macros
 //----------------------------------------------------------------------------
-#define HALT() error(NULL, 0, ERR_HALT, __func__)
-#define RESET() error(NULL, 0, ERR_RESET, __func__)
+#define HALT error(NULL, 0, ERR_HALT, __func__)
+#define RESET error(NULL, 0, ERR_RESET, __func__)
 #define PANIC(C) error((C), __LINE__, ERR_PANIC, __func__)
 #define ERR_C(C,T,I) error((C), (C)->id, T, I)
 #define ERR(T,I) ERR_C(contxt,T,I)
-#define DID_ERR() (error(NULL, 0, ERR_NONE, NULL) != 0)
-#define DID_HALT() (error(NULL, 0, ERR_NONE, NULL) == ERR_HALT)
+#define DID_ERR (error(NULL, 0, ERR_NONE, NULL) != 0)
+#define DID_HALT (error(NULL, 0, ERR_NONE, NULL) == ERR_HALT)
 
 //----------------------------------------------------------------------------
 // Error types

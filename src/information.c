@@ -190,7 +190,7 @@ entry_p m_message(entry_p contxt)
             {
                 // If we could resolve all our children,
                 // show the result of the concatenation.
-                if(!DID_ERR())
+                if(!DID_ERR)
                 {
                     // Show message dialog.
                     inp_t rc = gui_message(msg, back);
@@ -217,7 +217,7 @@ entry_p m_message(entry_p contxt)
                     // FIXME
                     if(rc == G_ABORT || rc == G_EXIT)
                     {
-                        HALT();
+                        HALT;
                     }
 
                     // Translate response.
@@ -306,7 +306,7 @@ entry_p m_welcome(entry_p contxt)
         {
             // If we could resolve all our children,
             // show the result of the concatenation.
-            if(!DID_ERR())
+            if(!DID_ERR)
             {
                 // Show welcome dialog.
                 inp_t rc = gui_welcome
@@ -330,7 +330,7 @@ entry_p m_welcome(entry_p contxt)
                 else
                 {
                     // Abort.
-                    HALT();
+                    HALT;
                 }
             }
 
@@ -370,7 +370,7 @@ entry_p m_working(entry_p contxt)
         {
             // Only proceed if we could resolve all
             // our children.
-            if(!DID_ERR())
+            if(!DID_ERR)
             {
                 // Standard prefix.
                 const char *pre = tr(S_WRKN);

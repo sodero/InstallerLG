@@ -53,7 +53,7 @@ entry_p m_cat(entry_p contxt)
 
                 // If we couldn't resolve the current argument,
                 // return an empty string.
-                if(DID_ERR())
+                if(DID_ERR)
                 {
                     free(buf);
                     REST;
@@ -138,40 +138,39 @@ entry_p m_fmt(entry_p contxt)
         // Scan the format string.
         for(; fmt[i]; i++)
         {
-            // If we have a specifier,
-            if(fmt[i] == '%')
+            // If we have a specifier that's
+            // not preceeded by an escape.
+            if(fmt[i] == '%' &&
+              (!i || fmt[i - 1] != '\\'))
             {
-                // that's not preceeded by an escape.
-                if(!i || fmt[i - 1] != '\\')
+                // The type is next.
+                i++;
+
+                // If this is a specifier that we recognize,
+                // then allocate a new string with just this
+                // specifier, nothing else.
+                if(fmt[i] == 's' || (
+                   fmt[i++] == 'l' &&
+                   fmt[i] == 'd'))
                 {
-                    i++;
+                    sct[k] = DBG_ALLOC(calloc(i - j + 2, 1));
 
-                    // If this is a specifier that we recognize,
-                    // then allocate a new string with just this
-                    // specifier, nothing else.
-                    if(fmt[i] == 's' || (
-                       fmt[i++] == 'l' &&
-                       fmt[i] == 'd'))
+                    if(sct[k])
                     {
-                        sct[k] = DBG_ALLOC(calloc(i - j + 2, 1));
-
-                        if(sct[k])
-                        {
-                            memcpy(sct[k], fmt + j, i - j + 1);
-                            j = i + 1;
-                            k++;
-                        }
-                        else
-                        {
-                            // Out of memory
-                            PANIC(contxt);
-                        }
+                        memcpy(sct[k], fmt + j, i - j + 1);
+                        j = i + 1;
+                        k++;
                     }
                     else
                     {
-                        ERR(ERR_FMT_INVALID, contxt->name);
-                        break;
+                        // Out of memory
+                        PANIC(contxt);
                     }
+                }
+                else
+                {
+                    ERR(ERR_FMT_INVALID, contxt->name);
+                    break;
                 }
             }
         }
@@ -190,7 +189,7 @@ entry_p m_fmt(entry_p contxt)
 
                     // Bail out if we didn't manage to
                     // resolve the current argument.
-                    if(DID_ERR())
+                    if(DID_ERR)
                     {
                         arg = NULL;
                         break;
@@ -621,16 +620,13 @@ char *h_tackon(entry_p contxt,
             }
 
             // If the filename ends with a delimiter,
-            // it's not a valid filename.
-            if(f[lf - 1] == '/' ||
-               f[lf - 1] == ':')
+            // it's not a valid filename. Only fail
+            // in 'strict' mode.
+            if((f[lf - 1] == '/' || f[lf - 1] == ':') &&
+               get_numvar(contxt, "@strict"))
             {
-                 // Only fail if we're in 'strict' mode.
-                if(get_numvar(contxt, "@strict"))
-                {
-                    ERR(ERR_NOT_A_FILE, f);
-                    return NULL;
-                }
+                ERR(ERR_NOT_A_FILE, f);
+                return NULL;
             }
 
             // Allocate memory to hold path, filename,

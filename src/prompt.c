@@ -76,7 +76,7 @@ entry_p m_askbool(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!DID_ERR())
+                if(!DID_ERR)
                 {
                     // Prompt user.
                     inp_t rc = gui_bool(p, h, yes, no, back);
@@ -100,7 +100,7 @@ entry_p m_askbool(entry_p contxt)
                     // FIXME
                     if(rc == G_ABORT || rc == G_EXIT)
                     {
-                        HALT();
+                        HALT;
                     }
 
                     // Translate return code.
@@ -264,7 +264,7 @@ entry_p m_askchoice(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!DID_ERR())
+                if(!DID_ERR)
                 {
                     // Skipper.
                     int d = 0;
@@ -303,7 +303,7 @@ entry_p m_askchoice(entry_p contxt)
                     // FIXME
                     if(rc == G_ABORT || rc == G_EXIT)
                     {
-                        HALT();
+                        HALT;
                     }
                 }
             }
@@ -366,7 +366,7 @@ entry_p m_askdir(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!DID_ERR())
+                if(!DID_ERR)
                 {
                     // Prompt user.
                     inp_t rc = gui_askdir(p, h, newpath, disk, assigns,
@@ -391,7 +391,7 @@ entry_p m_askdir(entry_p contxt)
                     // FIXME
                     if(rc == G_ABORT || rc == G_EXIT)
                     {
-                        HALT();
+                        HALT;
                         REST;
                     }
                 }
@@ -456,7 +456,7 @@ entry_p m_askdisk(entry_p contxt)
 
             // Append ':' to turn 'dest' into something
             // we can 'Lock'.
-            snprintf(n, PATH_MAX, "%s:", str(dest));
+            snprintf(n, sizeof(n), "%s:", str(dest));
 
             // Volume names must be > 0 characters long.
             if(strlen(n) > 1)
@@ -482,7 +482,7 @@ entry_p m_askdisk(entry_p contxt)
 
                     // Only show requester if we could
                     // resolve all options.
-                    if(!DID_ERR())
+                    if(!DID_ERR)
                     {
                         // Retry until we can get a lock or the
                         // user aborts.
@@ -518,7 +518,7 @@ entry_p m_askdisk(entry_p contxt)
                                 // FIXME
                                 if(rc == G_ABORT || rc == G_EXIT)
                                 {
-                                    HALT();
+                                    HALT;
                                 }
 
                                 // User abort or err.
@@ -640,7 +640,7 @@ entry_p m_askfile(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!DID_ERR())
+                if(!DID_ERR)
                 {
                     // Prompt user.
                     inp_t rc = gui_askfile(p, h, newpath, disk,
@@ -665,7 +665,7 @@ entry_p m_askfile(entry_p contxt)
                     // FIXME
                     if(rc == G_ABORT || rc == G_EXIT)
                     {
-                        HALT();
+                        HALT;
                         REST;
                     }
                 }
@@ -762,7 +762,7 @@ entry_p m_asknumber(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!DID_ERR())
+                if(!DID_ERR)
                 {
                     // Prompt user.
                     inp_t rc = gui_number(p, h, min, max, d, back, &DNUM);
@@ -786,7 +786,7 @@ entry_p m_asknumber(entry_p contxt)
                     // FIXME
                     if(rc == G_ABORT || rc == G_EXIT)
                     {
-                        HALT();
+                        HALT;
                     }
                 }
             }
@@ -923,7 +923,7 @@ entry_p m_askoptions(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!DID_ERR())
+                if(!DID_ERR)
                 {
                     // Prompt user.
                     inp_t rc = gui_options(p, h, chs, i, back, &DNUM);
@@ -947,7 +947,7 @@ entry_p m_askoptions(entry_p contxt)
                     // FIXME
                     if(rc == G_ABORT || rc == G_EXIT)
                     {
-                        HALT();
+                        HALT;
                     }
                 }
             }
@@ -1003,7 +1003,7 @@ entry_p m_askstring(entry_p contxt)
 
                 // Only show requester if we could
                 // resolve all options.
-                if(!DID_ERR())
+                if(!DID_ERR)
                 {
                     // Prompt user.
                     inp_t rc = gui_string(p, h, d, back, &res);
@@ -1027,7 +1027,7 @@ entry_p m_askstring(entry_p contxt)
                     // FIXME
                     if(rc == G_ABORT || rc == G_EXIT)
                     {
-                        HALT();
+                        HALT;
                         REST;
                     }
                 }

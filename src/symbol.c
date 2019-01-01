@@ -44,7 +44,7 @@ entry_p m_set(entry_p contxt)
 
             // If we manage to resolve the right hand
             // side, create a copy of its contents.
-            if(!DID_ERR())
+            if(!DID_ERR)
             {
                 entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
 
@@ -148,7 +148,7 @@ entry_p m_symbolset(entry_p contxt)
             entry_p rhs = resolve(*cur++);
 
             // Could we resolve both lhs and rhs?
-            if(!DID_ERR())
+            if(!DID_ERR)
             {
                 // Create a copy of the evaluated rhs.
                 entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
@@ -290,7 +290,7 @@ entry_p m_symbolval(entry_p contxt)
 
         // Return the resolved value if
         // the symbol could be found.
-        if(!DID_ERR())
+        if(!DID_ERR)
         {
             return r;
         }

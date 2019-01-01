@@ -275,22 +275,17 @@ int num(entry_p entry)
 //----------------------------------------------------------------------------
 int tru(entry_p entry)
 {
-    // Is there anything to resolve?
+    // Anything to resolve?
     if(entry)
     {
         // Attempt to resolve it.
         entry_p e = resolve(entry);
 
-        // Evaluate on success.
-        if(!DID_ERR())
+        // Only numerals and strings can be true.
+        if(((e->type == STRING && *(e->name)) ||
+            (e->type == NUMBER && e->id)) && !DID_ERR)
         {
-            // Only numerical values and strings
-            // can be true.
-            if((e->type == NUMBER && e->id) ||
-               (e->type == STRING && *(e->name)))
-            {
-                return 1;
-            }
+            return 1;
         }
     }
     else
@@ -444,7 +439,7 @@ entry_p invoke(entry_p entry)
             // As long as no one fails, resolve
             // all children and save the return
             // value of the last one.
-            while(*c && *c != end() && !DID_ERR())
+            while(*c && *c != end() && !DID_ERR)
             {
                 // Resolve and proceed.
                 r = resolve(*c);
@@ -482,7 +477,7 @@ void run(entry_p entry)
 
         // Execute the (onerror) function
         // on failure.
-        if(DID_ERR() && !DID_HALT())
+        if(DID_ERR && !DID_HALT)
         {
             status = m_onerror(entry);
         }

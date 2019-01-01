@@ -50,7 +50,7 @@ entry_p m_expandpath(entry_p contxt)
         // Short path.
         char *pth = str(CARG(1));
 
-        if(!DID_ERR())
+        if(!DID_ERR)
         {
             #ifdef AMIGA
             BPTR lock = (BPTR) Lock(pth, ACCESS_READ);
@@ -158,7 +158,7 @@ bool h_confirm(entry_p contxt,
         // FIXME
         if(rc == G_ABORT || rc == G_EXIT)
         {
-            HALT();
+            HALT;
         }
 
         // FIXME
@@ -383,32 +383,31 @@ static pnode_p h_choices(entry_p contxt,
                 // files will be skipped during file copy anyway.
                 if(node->type || !get_numvar(contxt, "@strict"))
                 {
-                    if(node->type == 2)
+                    if(node->type == 2
+                       #ifndef AMIGA
+                       && strcmp(f_nam, ".")
+                       && strcmp(f_nam, "..")
+                       #endif
+                       )
                     {
-                        #ifndef AMIGA
-                        if(strcmp(f_nam, ".") &&
-                           strcmp(f_nam, ".."))
-                        #endif
-                        {
-                            // Get tree of subdirectory.
-                            // Don't promote (choices).
-                            node->next = h_filetree
-                            (
-                                contxt,
-                                node->name,
-                                node->copy,
-                                NULL,
-                                NULL,
-                                NULL,
-                                NULL
-                            );
+                        // Get tree of subdirectory.
+                        // Don't promote (choices).
+                        node->next = h_filetree
+                        (
+                            contxt,
+                            node->name,
+                            node->copy,
+                            NULL,
+                            NULL,
+                            NULL,
+                            NULL
+                        );
 
-                            // Fast forward to the end of
-                            // the list.
-                            while(node->next)
-                            {
-                                node = node->next;
-                            }
+                        // Fast forward to the end of
+                        // the list.
+                        while(node->next)
+                        {
+                            node = node->next;
                         }
                     }
 
@@ -605,35 +604,34 @@ static pnode_p h_filetree(entry_p contxt,
                             if(type == 2)
                             {
                                 // Unless the (files) option is set.
-                                if(!files)
+                                if(!files
+                                   #ifndef AMIGA
+                                   && strcmp(entry->d_name, ".")
+                                   && strcmp(entry->d_name, "..")
+                                   #endif
+                                  )
                                 {
-                                    #ifndef AMIGA
-                                    if(strcmp(entry->d_name, ".") &&
-                                       strcmp(entry->d_name, ".."))
-                                    #endif
-                                    {
-                                        // Get tree of subdirectory.
-                                        // Don't promote (choices),
-                                        // dirs will be assumed to
-                                        // be files and things will
-                                        // break.
-                                        node->next = h_filetree
-                                        (
-                                            contxt,
-                                            n_src,
-                                            n_dst,
-                                            files,
-                                            fonts,
-                                            NULL,
-                                            pattern
-                                        );
+                                    // Get tree of subdirectory.
+                                    // Don't promote (choices),
+                                    // dirs will be assumed to
+                                    // be files and things will
+                                    // break.
+                                    node->next = h_filetree
+                                    (
+                                        contxt,
+                                        n_src,
+                                        n_dst,
+                                        files,
+                                        fonts,
+                                        NULL,
+                                        pattern
+                                    );
 
-                                        // Fast forward to the end of
-                                        // the list.
-                                        while(node->next)
-                                        {
-                                            node = node->next;
-                                        }
+                                    // Fast forward to the end of
+                                    // the list.
+                                    while(node->next)
+                                    {
+                                        node = node->next;
                                     }
                                 }
 
@@ -966,26 +964,23 @@ static inp_t h_copyfile(entry_p contxt,
                         chmod(dst, S_IRWXU);
                     }
                     else
-                    // Ask for confirmation if (askuser).
-                    if(mde & CF_ASKUSER)
+                    // Ask for confirmation if (askuser) unless
+                    // we're running in novice mode and (force)
+                    // at the same time.
+                    if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
+                        get_numvar(contxt, "@user-level")))
                     {
-                        // Unless we're running in novice mode
-                        // and use (force) at the same time.
-                        if((mde & CF_FORCE) ||
-                            get_numvar(contxt, "@user-level"))
+                        if(h_confirm(contxt, "", tr(S_OWRT), dst))
                         {
-                            if(h_confirm(contxt, "", tr(S_OWRT), dst))
-                            {
-                                // Unprotect file.
-                                chmod(dst, S_IRWXU);
-                            }
-                            else
-                            {
-                                // Skip file or abort.
-                                fclose(fs);
-                                return DID_HALT() ?
-                                       G_ABORT : G_TRUE;
-                            }
+                            // Unprotect file.
+                            chmod(dst, S_IRWXU);
+                        }
+                        else
+                        {
+                            // Skip file or abort.
+                            fclose(fs);
+                            return DID_HALT ?
+                                   G_ABORT : G_TRUE;
                         }
                     }
                 }
@@ -1093,12 +1088,12 @@ static inp_t h_copyfile(entry_p contxt,
                         }
 
                         // Reset error codes if necessary.
-                        if(DID_ERR())
+                        if(DID_ERR)
                         {
                             if(mde & CF_NOFAIL)
                             {
                                 // Forget all errors.
-                                RESET();
+                                RESET;
                             }
                             else
                             {
@@ -1153,7 +1148,7 @@ static inp_t h_copyfile(entry_p contxt,
         }
         else
         {
-            HALT();
+            HALT;
             h_log(contxt, tr(S_ACPY), src, dst);
         }
 
@@ -1401,16 +1396,13 @@ entry_p m_copyfiles(entry_p contxt)
                 inp_t rc = G_TRUE;
                 pnode_p cur = tree;
 
-                if(newname)
+                // Replace file name if single file and
+                // the 'newname' option is set
+                if(newname && cur->next && cur->type == 2 &&
+                   cur->next->type == 1 && !cur->next->next)
                 {
-                    // Replace file name if single file and
-                    // the 'newname' option is set
-                    if(cur->next && cur->type == 2 &&
-                       cur->next->type == 1 && !cur->next->next)
-                    {
-                        free(cur->next->copy);
-                        cur->next->copy = h_tackon(contxt, dst, str(newname));
-                    }
+                    free(cur->next->copy);
+                    cur->next->copy = h_tackon(contxt, dst, str(newname));
                 }
 
                 // Do we need confirmation?
@@ -1485,14 +1477,17 @@ entry_p m_copyfiles(entry_p contxt)
                         // Copy file / create dir / skip if zero:ed
                         switch(cur->type)
                         {
+                            // Exclude.
                             case 0:
                                 continue;
 
+                            // A file.
                             case 1:
                                 rc = h_copyfile(contxt, cur->name,
                                                 cur->copy, back, md);
                                 break;
 
+                            // A directory.
                             case 2:
                                 // Make dir and make sure the protection
                                 // bits of the new one matches the old.
@@ -1502,6 +1497,12 @@ entry_p m_copyfiles(entry_p contxt)
                                 {
                                     rc = G_FALSE;
                                 }
+                                break;
+
+                            // Invalid type.
+                            default:
+                                PANIC(contxt);
+                                break;
                         }
                     }
 
@@ -1537,7 +1538,7 @@ entry_p m_copyfiles(entry_p contxt)
                     // FIXME
                     if(rc == G_ABORT || rc == G_EXIT)
                     {
-                        HALT();
+                        HALT;
                     }
                 }
 
@@ -1665,26 +1666,20 @@ entry_p m_copylib(entry_p contxt)
                     RNUM(1);
                 }
 
-                if(vs < 0)
+                // Only fail if we're in 'strict' mode.
+                if(vs < 0 && get_numvar(contxt, "@strict"))
                 {
-                    // Only fail if we're in 'strict' mode.
-                    if(get_numvar(contxt, "@strict"))
-                    {
-                        // Could not find version string.
-                        ERR(ERR_NO_VERSION, s);
-                        RCUR;
-                    }
+                    // Could not find version string.
+                    ERR(ERR_NO_VERSION, s);
+                    RCUR;
                 }
 
-                if(dt == 1)
+                // Only fail if we're in 'strict' mode.
+                if(dt == 1 && get_numvar(contxt, "@strict"))
                 {
-                    // Only fail if we're in 'strict' mode.
-                    if(get_numvar(contxt, "@strict"))
-                    {
-                        // Destination is a file, not a dir.
-                        ERR(ERR_NOT_A_DIR, d);
-                        RCUR;
-                    }
+                    // Destination is a file, not a dir.
+                    ERR(ERR_NOT_A_DIR, d);
+                    RCUR;
                 }
 
                 // Do we need confirmation?
@@ -1960,24 +1955,21 @@ entry_p m_copylib(entry_p contxt)
                                     // number than the existing one, and we're in
                                     // expert mode, ask the user to confirm. If we
                                     // get a confirmation, overwrite.
-                                    if(level == 2)
+                                    if(level == 2 && h_confirm(
+                                        contxt,
+                                        "",
+                                        "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
+                                        str(prompt),
+                                        tr(S_VINS),
+                                        vs >> 16,
+                                        vs & 0xffff,
+                                        tr(S_VCUR),
+                                        vf >> 16,
+                                        vf & 0xffff,
+                                        tr(S_DDRW),
+                                        d))
                                     {
-                                        if(h_confirm(
-                                            contxt,
-                                            "",
-                                            "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
-                                            str(prompt),
-                                            tr(S_VINS),
-                                            vs >> 16,
-                                            vs & 0xffff,
-                                            tr(S_VCUR),
-                                            vf >> 16,
-                                            vf & 0xffff,
-                                            tr(S_DDRW),
-                                            d))
-                                        {
-                                            rc = h_copyfile(contxt, s, f, back, md);
-                                        }
+                                        rc = h_copyfile(contxt, s, f, back, md);
                                     }
                                 }
                             }
@@ -2485,17 +2477,25 @@ entry_p m_delete(entry_p contxt)
                 {
                     switch(h_exists(w))
                     {
-                        case 2:
-                            DNUM = h_delete_dir(contxt, w);
+                        // Doesn't exist.
+                        case 0:
+                            h_log(contxt, tr(S_NSFL), w);
                             break;
 
+                        // A file.
                         case 1:
                             DNUM = h_delete_file(contxt, w);
                             break;
 
-                        case 0:
-                            h_log(contxt, tr(S_NSFL), w);
-                            DNUM = 0;
+                        // A directory.
+                        case 2:
+                            DNUM = h_delete_dir(contxt, w);
+                            break;
+
+                        // Invalid type.
+                        default:
+                            PANIC(contxt);
+                            break;
                     }
                 }
             }
@@ -2619,124 +2619,121 @@ entry_p m_foreach(entry_p contxt)
             char *cwd = get_buf();
             struct dirent *ent = readdir(dir);
 
-            // Save the current working directory.
-            if(getcwd(cwd, buf_size()) == cwd)
+            // Save the current working directory and
+            // enter the directory <drawer name>
+            if(getcwd(cwd, buf_size()) == cwd && !chdir(dn))
             {
-                // Enter the directory <drawer name>
-                if(!chdir(dn))
+                // Allocate memory for the start node.
+                pnode_p cur;
+                top = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+
+                #ifdef AMIGA
+                // This file info block will be used for all files
+                // and subdirs in the directory.
+                struct FileInfoBlock *fib = (struct FileInfoBlock *)
+                       AllocDosObject(DOS_FIB, NULL);
+
+                // Use cur as a gatekeeper. If set to NULL, nothing
+                // will take place except clean ups.
+                cur = fib ? top : NULL;
+                #else
+                // No pattern matching = no fib.
+                cur = top;
+                #endif
+
+                // The dir might be empty but that's not an
+                // error.
+                err = 0;
+
+                // Iterate over all entries in dir.
+                while(ent && cur && !err)
                 {
-                    // Allocate memory for the start node.
-                    pnode_p cur;
-                    top = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+                    // Name of file / dir.
+                    const char *fn = ent->d_name;
 
-                    #ifdef AMIGA
-                    // This file info block will be used for all files
-                    // and subdirs in the directory.
-                    struct FileInfoBlock *fib = (struct FileInfoBlock *)
-                           AllocDosObject(DOS_FIB, NULL);
-
-                    // Use cur as a gatekeeper. If set to NULL, nothing
-                    // will take place except clean ups.
-                    cur = fib ? top : NULL;
-                    #else
-                    // No pattern matching = no fib.
-                    cur = top;
+                    #ifndef AMIGA
+                    // Filter out the magic on non-Amigas.
+                    if(strcmp(fn, ".") &&
+                       strcmp(fn, ".."))
                     #endif
-
-                    // The dir might be empty but that's not an
-                    // error.
-                    err = 0;
-
-                    // Iterate over all entries in dir.
-                    while(ent && cur && !err)
                     {
-                        // Name of file / dir.
-                        const char *fn = ent->d_name;
-
-                        #ifndef AMIGA
-                        // Filter out the magic on non-Amigas.
-                        if(strcmp(fn, ".") &&
-                           strcmp(fn, ".."))
-                        #endif
-                        {
-                            #ifdef AMIGA
-                            // The dir is not empty, we should be able
-                            // to go all the way here. Assume failure.
-                            err = 1;
-
-                            // Lock and get the information we need
-                            // from the current entry
-                            BPTR lock = (BPTR) Lock(fn, ACCESS_READ);
-
-                            if(lock)
-                            {
-                                if(Examine(lock, fib))
-                                {
-                                    // Please note that if we fail to
-                                    // lock and examine cur->name will
-                                    // be NULL.
-                                    cur->type = fib->fib_DirEntryType;
-                                    cur->name = strdup(fn);
-
-                                    // We're probably good. PANIC:s will
-                                    // be caught further down.
-                                    err = 0;
-                                }
-
-                                UnLock(lock);
-                            }
-                            #else
-                            cur->type = h_exists(fn);
-                            cur->name = strdup(fn);
-                            #endif
-
-                            // An empty name indicates a PANIC only if
-                            // we didn't have any locking problems.
-                            if(!cur->name)
-                            {
-                                // Setting cur to NULL will generate a
-                                // PANIC further down.
-                                if(!err)
-                                {
-                                    cur = NULL;
-                                }
-
-                                // Always bail out.
-                                break;
-                            }
-                        }
-
-                        // Get next entry.
-                        ent = readdir(dir);
-
-                        // We need to check for cur->name here, or else the
-                        // the filtering of '.' and '..' would not work, we
-                        // would get entries without names.
-                        if(ent && cur->name)
-                        {
-                            cur->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-                            cur = cur->next;
-                        }
-                    }
-
-                    #ifdef AMIGA
-                    // If dir is empty, fib will be NULL.
-                    if(fib)
-                    {
-                        FreeDosObject(DOS_FIB, fib);
-                    }
-                    #endif
-
-                    if(!cur)
-                    {
-                        // Out of memory.
-                        PANIC(contxt);
+                        #ifdef AMIGA
+                        // The dir is not empty, we should be able
+                        // to go all the way here. Assume failure.
                         err = 1;
+
+                        // Lock and get the information we need
+                        // from the current entry
+                        BPTR lock = (BPTR) Lock(fn, ACCESS_READ);
+
+                        if(lock)
+                        {
+                            if(Examine(lock, fib))
+                            {
+                                // Please note that if we fail to
+                                // lock and examine cur->name will
+                                // be NULL.
+                                cur->type = fib->fib_DirEntryType;
+                                cur->name = strdup(fn);
+
+                                // We're probably good. PANIC:s will
+                                // be caught further down.
+                                err = 0;
+                            }
+
+                            UnLock(lock);
+                        }
+                        #else
+                        cur->type = h_exists(fn);
+                        cur->name = strdup(fn);
+                        #endif
+
+                        // An empty name indicates a PANIC only if
+                        // we didn't have any locking problems.
+                        if(!cur->name)
+                        {
+                            // Setting cur to NULL will generate a
+                            // PANIC further down.
+                            if(!err)
+                            {
+                                cur = NULL;
+                            }
+
+                            // Always bail out.
+                            break;
+                        }
                     }
 
-                    // Go back where we started.
-                    chdir(cwd);
+                    // Get next entry.
+                    ent = readdir(dir);
+
+                    // We need to check for cur->name here, or else the
+                    // the filtering of '.' and '..' would not work, we
+                    // would get entries without names.
+                    if(ent && cur->name)
+                    {
+                        cur->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+                        cur = cur->next;
+                    }
                 }
+
+                #ifdef AMIGA
+                // If dir is empty, fib will be NULL.
+                if(fib)
+                {
+                    FreeDosObject(DOS_FIB, fib);
+                }
+                #endif
+
+                if(!cur)
+                {
+                    // Out of memory.
+                    PANIC(contxt);
+                    err = 1;
+                }
+
+                // Go back where we started.
+                chdir(cwd);
             }
 
             // Done.
@@ -3158,6 +3155,7 @@ entry_p m_protect(entry_p contxt)
                             case 'w': b = 1 << 2; break;
                             case 'e': b = 1 << 1; break;
                             case 'd': b = 1 << 0; break;
+                            default: break;
                         }
 
                         // Adding or subtracting?
@@ -3166,6 +3164,7 @@ entry_p m_protect(entry_p contxt)
                             case 0: DNUM = b; m = 1; break;
                             case 1: DNUM |= b; break;
                             case 2: DNUM &= ~b; break;
+                            default: break;
                         }
                     }
 
@@ -3255,14 +3254,11 @@ entry_p m_startup(entry_p contxt)
         // be set by h_confirm. Confirmation is needed
         // when user level is not novice or (confirm)
         // is used.
-        if(get_opt(CARG(2), OPT_CONFIRM) ||
-           get_numvar(contxt, "@user-level") > 0)
+        if((get_opt(CARG(2), OPT_CONFIRM) ||
+           get_numvar(contxt, "@user-level") > 0) &&
+           !h_confirm(CARG(2), str(help), str(prompt)))
         {
-            if(!h_confirm(CARG(2),
-               str(help), str(prompt)))
-            {
-                RCUR;
-            }
+            RCUR;
         }
 
         // We're done if executing in pretend mode.
@@ -4082,7 +4078,7 @@ entry_p m_transcript(entry_p contxt)
             // write the result of the concatenation
             // to the log file (unless logging is
             // disabled).
-            if(!DID_ERR())
+            if(!DID_ERR)
             {
                 DNUM = h_log(contxt, "%s\n", msg) ? 1 : 0;
             }

@@ -107,7 +107,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             // FIXME
             if(rc == G_ABORT || rc == G_EXIT)
             {
-                HALT();
+                HALT;
             }
 
             // FIXME

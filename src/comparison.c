@@ -19,13 +19,13 @@
 // < <= == >= >
 //     helper function for m_eq, m_gt, m_gte, m_lt, m_lte, m_ne.
 //----------------------------------------------------------------------------
-static int h_cmp(entry_p a, entry_p b)
+static int h_cmp(entry_p l, entry_p r)
 {
     // Resolve both arguments. We don't need
     // to check for failures; we will always
     // get something to compare.
-    a = resolve(a);
-    b = resolve(b);
+    entry_p a = resolve(l);
+    entry_p b = resolve(r);
 
     // If both arguments are strings then use
     // string comparison.
