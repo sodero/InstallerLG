@@ -73,16 +73,17 @@ entry_p local(entry_p e)
 {
     // Go upwards until we find what we're
     // looking for, or hit the (broken) top.
-    for(; e &&
-        e->type != CONTXT &&
-        e->type != CUSTOM
-        ; e = e->parent)
+    for(entry_p c = e; c; c = c->parent)
     {
-        // Do nothing.
+        if(c->type == CONTXT ||
+           c->type == CUSTOM)
+        {
+            return c;
+        }
     }
 
-    // Something or NULL:
-    return e;
+    // Nothing:
+    return NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -94,17 +95,25 @@ entry_p local(entry_p e)
 //----------------------------------------------------------------------------
 entry_p global(entry_p e)
 {
-    // Go upwards until we can't go
-    // any further.
-    for(e = local(e);
-        e && local(e->parent);
-        e = local(e->parent))
+    // Go all the way up.
+    for(entry_p c = local(e); c; )
     {
-        // Do nothing.
+        // Find the next context.
+        entry_p n = local(c->parent);
+
+        // If there is no higher context, we're
+        // at the global level.
+        if(!n)
+        {
+            return c;
+        }
+
+        // Next level.
+        c = n;
     }
 
-    // Something or NULL:
-    return e;
+    // Nothing:
+    return NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -179,14 +188,12 @@ entry_p get_opt(entry_p c, opt_t t)
 
     // If in non strict mode, allow the absense
     // of (prompt) and (help).
-    if(!get_numvar(c, "@strict"))
+    if((t == OPT_PROMPT || t == OPT_HELP)
+       && !get_numvar(c, "@strict"))
     {
-        if(t == OPT_PROMPT || t == OPT_HELP)
-        {
-            // This will be resolved as an
-            // emtpy string.
-            return end();
-        }
+        // This will be resolved as an
+        // emtpy string.
+        return end();
     }
 
     // Nothing found.
@@ -347,18 +354,14 @@ void set_numvar(entry_p c, char *v, int n)
         // Find whatever 'v' is.
         entry_p s = find_symbol(&ref);
 
-        // This should be a symbol.
-        if(s && s->type == SYMBOL)
+        // This should be a symbol. And it
+        // should be a resolved numerical one.
+        if(s && s->type == SYMBOL && s->resolved &&
+           s->resolved->type == NUMBER)
         {
-            // And it should be a resolved
-            // numerical one.
-            if(s->resolved &&
-               s->resolved->type == NUMBER)
-            {
-                // Success.
-                s->resolved->id = n;
-                return;
-            }
+            // Success.
+            s->resolved->id = n;
+            return;
         }
     }
 
@@ -392,17 +395,13 @@ int get_numvar(entry_p c, char *v)
         // Find whatever 'v' is.
         s = find_symbol(&ref);
 
-        // This should be a symbol.
-        if(s && s->type == SYMBOL)
+        // This should be a symbol. And it
+        // should be a resolved numerical one.
+        if(s && s->type == SYMBOL && s->resolved &&
+           s->resolved->type == NUMBER)
         {
-            // And it should be a resolved
-            // numerical one.
-            if(s->resolved &&
-               s->resolved->type == NUMBER)
-            {
-                // Success.
-                return s->resolved->id;
-            }
+            // Success.
+            return s->resolved->id;
         }
     }
 
@@ -437,18 +436,14 @@ char *get_strvar(entry_p c, char *v)
         // Find whatever 'v' is.
         s = find_symbol(&ref);
 
-        // This should be a symbol.
-        if(s && s->type == SYMBOL)
+        // This should be a symbol. And it
+        // should be a resolved string.
+        if(s && s->type == SYMBOL &&
+           s->resolved && s->resolved->name &&
+           s->resolved->type == STRING)
         {
-            // And it should be a resolved
-            // string.
-            if(s->resolved &&
-               s->resolved->name &&
-               s->resolved->type == STRING)
-            {
-                // Success.
-                return s->resolved->name;
-            }
+            // Success.
+            return s->resolved->name;
         }
     }
 
@@ -669,18 +664,14 @@ void set_strvar(entry_p c, char *v, char *n)
         // Find whatever 'v' is.
         s = find_symbol(&ref);
 
-        // This should be a symbol.
-        if(s && s->type == SYMBOL)
+        // This should be a symbol. And it
+        // should be a resolved string.
+        if(s && s->type == SYMBOL && s->resolved &&
+           s->resolved->type == STRING)
         {
-            // And it should be a resolved
-            // STRING.
-            if(s->resolved &&
-               s->resolved->type == STRING)
-            {
-                // Taking ownership of 'n'.
-                free(s->resolved->name);
-                s->resolved->name = n;
-            }
+            // Taking ownership of 'n'.
+            free(s->resolved->name);
+            s->resolved->name = n;
         }
     }
 }
