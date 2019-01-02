@@ -717,6 +717,16 @@ entry_p push(entry_p dst, entry_p src)
                 // also true for normal variables.
                 if(!strcasecmp(old, new))
                 {
+                    // Variables set without (set) own
+                    // themselves (refer to init() and
+                    // init_num / str) must be killed
+                    // before the reference is updated
+                    // or else we will leak memory.
+                    if(dst->symbols[u]->parent == dst)
+                    {
+                        kill(dst->symbols[u]);
+                    }
+
                     dst->symbols[u] = src;
                     return dst;
                 }

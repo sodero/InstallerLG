@@ -3,6 +3,10 @@
 *.ll
 *.plist
 *.swp
-build/Installer
 build/_*
+build/Installer
+build/Installer.tmp.*
+build/massif.out.*
+build/leak.tmp.*
+build/err.tmp.*
 build/Catalogs/

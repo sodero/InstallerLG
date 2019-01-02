@@ -1,23 +1,14 @@
-- file.c : h_choices LEAK CHECK
-- Check GUI list mgmt for leaks.
+- Retest tooltypes / cli args
+- Improve (back) and (retrace) test coverage.
 
 - >= V44
 -- (closemedia <media>)
 -- (effect <position> <effect> <color 1> <color 2>)
 -- (setmedia <media> <action> [parameter])
 -- (showmedia <medianame> <filename> <position> <size> <borderflag> ...)
--- (back <code>)
-   -- DONE: askoptions, askchoice, asknumber, askstring
-   -- TODO: copyfiles, copylib, delete, execute, makedir, message, rename, textfile
--- (retrace)
-   -- Done, except depth and exit.
-
--- DONE - Compare with OS3.9:
--- (trace)
--- (openwbobject <argument> ...)
--- (showwbobject <argument>)
--- (closewbobject <argument>)
--- (reboot)
 
 - Some kind of uninstaller, see http://aminet.net/package/util/wb/Uninstaller
 - (copylib) - compare with OS3.9 - Show filename or assume it's included in prompt text?
+
+- file.c : h_choices LEAK CHECK
+- Check GUI list mgmt for leaks.

@@ -220,8 +220,7 @@ int c_sane(entry_p c, size_t n)
     if(c && c->children)
     {
         // Expect atleast n children.
-        for(size_t i = 0;
-            i < n; i++)
+        for(size_t i = 0; i < n; i++)
         {
             // Assume failure;
             status = 0;
@@ -252,6 +251,18 @@ int c_sane(entry_p c, size_t n)
             if(c->type == NATIVE && !c->resolved)
             {
                 DBG("c->type == NATIVE && !c->resolved\n");
+                break;
+            }
+
+            // Make sure that all objects except CONTXTs
+            // and NUMBERs have a name.
+            if(!c->children[i]->name &&
+                c->children[i]->type != CONTXT &&
+                c->children[i]->type != NUMBER)
+            {
+                DBG("!c->children[i]->name && "
+                    "c->children[i]->type != CONTXT && "
+                    "c->children[i]->type != NUMBER\n");
                 break;
             }
 
@@ -287,8 +298,7 @@ int s_sane(entry_p c, size_t n)
     if(c && c->symbols)
     {
         // Expect atleast n symbols.
-        for(size_t i = 0;
-            i < n; i++)
+        for(size_t i = 0; i < n; i++)
         {
             // Assume failure;
             status = 0;
@@ -304,6 +314,13 @@ int s_sane(entry_p c, size_t n)
             if(c->symbols[i] == end())
             {
                 DBG("c->symbols[%d] == end()\n", (int) i);
+                break;
+            }
+
+            // Make sure that it has a name.
+            if(!c->symbols[i]->name)
+            {
+                DBG("!c->symbols[%d]->name\n", (int) i);
                 break;
             }
 

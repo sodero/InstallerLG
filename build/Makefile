@@ -12,7 +12,7 @@ EXE := Installer
 ifeq ($(OS),Linux)
 CWRN = -Wall -Wextra
 CGEN = -g -std=c99
-CDEF = -D_DEFAULT_SOURCE
+CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE
 else
 ifeq ($(OS),Darwin)
 CGEN = -g -std=c99
