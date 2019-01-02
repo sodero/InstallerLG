@@ -13,6 +13,7 @@
 #include "exit.h"
 #include "information.h"
 #include "init.h"
+#include "media.h"
 #include "procedure.h"
 #include "symbol.h"
 #include "util.h"
@@ -88,7 +89,8 @@ entry_p init(entry_p contxt)
         // Set default values.
         int defusr = 1, minusr = 0,
             nolog = arg_get(ARG_NOLOG) ? 1 : 0,
-            nopretend = arg_get(ARG_NOPRETEND) ? 1 : 0;
+            nopretend = arg_get(ARG_NOPRETEND) ? 1 : 0,
+            effect = 0, color_1 = 0, color_2 = 0;
 
         #ifdef AMIGA
         if(!a_loc)
@@ -187,6 +189,27 @@ entry_p init(entry_p contxt)
             #endif
         }
 
+        // Is there an 'effect' statement?
+        e = native_exists(contxt, m_effect);
+
+        // Make sure that it's sane.
+        if(e && c_sane(e, 4) &&
+           e->children[0]->name &&
+           e->children[1]->name)
+        {
+            // Get type and position bitpattern.
+            effect |= strcasestr(e->children[0]->name, "upper") ? 1 << 0 : 0;
+            effect |= strcasestr(e->children[0]->name, "lower") ? 1 << 1 : 0;
+            effect |= strcasestr(e->children[0]->name, "left") ? 1 << 2 : 0;
+            effect |= strcasestr(e->children[0]->name, "right") ? 1 << 3 : 0;
+            effect |= strcasecmp(e->children[1]->name, "radial") ? 0 : 1 << 4;
+            effect |= strcasecmp(e->children[1]->name, "horizontal") ? 0 : 1 << 5;
+
+            // Get gradient color range.
+            color_1 = e->children[2]->id;
+            color_2 = e->children[3]->id;
+        }
+
         // Create default error handler, it simply returns '0'
         // without doing anything.
         e = new_native
@@ -240,6 +263,7 @@ entry_p init(entry_p contxt)
         (
             // All the numerical values.
             strdup("set"), __LINE__, m_set,
+            push(push(push(push(push(push(
             push(push(push(push(push(push(
             push(push(push(push(push(push(
             push(push(push(push(push(push(
@@ -343,7 +367,24 @@ entry_p init(entry_p contxt)
                 Toggle 'debug' mode.
                 */
             ),
-
+                new_symbol(strdup("@effect"))),
+                new_number(effect)
+                /*
+                Effect type.
+                */
+            ),
+                new_symbol(strdup("@color_1"))),
+                new_number(color_1)
+                /*
+                Effect color 1.
+                */
+            ),
+                new_symbol(strdup("@color_2"))),
+                new_number(color_2)
+                /*
+                Effect color 2.
+                */
+            ),
             NUMBER
         );
 
