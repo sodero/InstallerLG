@@ -23,6 +23,9 @@
 
 #ifdef AMIGA
 #include <proto/locale.h>
+#ifdef __MORPHOS__
+char *strcasestr(const char *, const char *);
+#endif
 #endif
 
 //----------------------------------------------------------------------------
