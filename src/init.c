@@ -323,16 +323,17 @@ entry_p init(entry_p contxt)
             DANGLE
         );
 
-        // Add to the root and reparent.
+        // Unless we're out of memory.
         if(e)
         {
+            // Add to the root and reparent.
             append(&contxt->children, e);
             e->parent = contxt;
+
+            // Rotate to put it on top.
+            ror(contxt->children);
         }
 
-        // Rotate right to make it end up on top.
-        ror(contxt->children);
-        
         // Create default (exit). Line numbers and
         // naming are for debugging purposes only.
         e = new_native
