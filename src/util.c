@@ -831,7 +831,7 @@ size_t buf_size(void)
 
 //----------------------------------------------------------------------------
 // Name:        dbg_alloc
-// Description: Used by the DBG_ALLOC macro to provide more info when failing
+// Description: Used by the DBG_ALLOX macro to provide more info when failing
 //              to allocate memory. And to fail deliberately when testing.
 // Input:       int line: Source code line.
 //              const char *file: Source code file.
