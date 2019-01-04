@@ -11,8 +11,11 @@
 #include "error.h"
 #include "eval.h"
 #include "file.h"
+#include "gui.h"
 #include "media.h"
 #include "util.h"
+
+#include <string.h>
 
 //----------------------------------------------------------------------------
 // (closemedia <media>)
@@ -115,8 +118,33 @@ entry_p m_effect(entry_p contxt)
         the second color. All effects fades from color 1 to color 2.
         */
 
-		// Dummy.
-		// pretty_print(contxt);
+        char *est = str(CARG(2)),
+             *eps = str(CARG(1));
+
+        int ic1 = num(CARG(3)),
+            ic2 = num(CARG(4)),
+
+            cef = get_numvar(contxt, "@effect"),
+            cc1 = get_numvar(contxt, "@color_1"),
+            cc2 = get_numvar(contxt, "@color_2"),
+
+            ief = (strcasestr(eps, "upper") ? 1 << 0 : 0) |
+                  (strcasestr(eps, "lower") ? 1 << 1 : 0) |
+                  (strcasestr(eps, "left") ? 1 << 2 : 0) |
+                  (strcasestr(eps, "right") ? 1 << 3 : 0) |
+                  (strcasecmp(est, "radial") ? 0 : 1 << 4) |
+                  (strcasecmp(est, "horizontal") ? 0 : 1 << 5);
+
+        if(ief != cef || ic1 != cc1 || ic2 != cc2)
+        {
+            gui_effect(ief, ic1, ic2);
+
+            set_numvar(contxt, "@effect", ief);
+            set_numvar(contxt, "@color_1", ic1);
+            set_numvar(contxt, "@color_2", ic2);
+
+            RNUM(1);
+        }
     }
     else
     {

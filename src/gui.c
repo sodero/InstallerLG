@@ -3074,3 +3074,18 @@ void gui_error(int id,
     fprintf(stderr, tr(S_LERR), id, type, info);
     #endif
 }
+
+//----------------------------------------------------------------------------
+// Name:        gui_effect
+// Description: Show custom screen gradient.
+// Input:       int eff:            Type and position.
+//              int cl1:            Color 1.
+//              int cl2:            Color 2.
+// Return:      -
+//----------------------------------------------------------------------------
+void gui_effect(int eff, int cl1, int cl2)
+{
+    // Testing purposes.
+    printf("%d:%d:%d\n", eff, cl1, cl2);
+}
+
