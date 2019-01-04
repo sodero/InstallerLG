@@ -231,7 +231,7 @@ entry_p m_database(entry_p contxt)
             ret = strcmp(ret, str(CARG(2))) ? "0" : "1";
         }
 
-        RSTR(strdup(ret));
+        RSTR(DBG_ALLOC(strdup(ret)));
     }
 
     // The parser is broken.
@@ -510,7 +510,7 @@ entry_p m_getdevice(entry_p contxt)
                         // strdup(NULL) is undefined.
                         if(n)
                         {
-                            RSTR(strdup(n));
+                            RSTR(DBG_ALLOC(strdup(n)();
                         }
                         else
                         {
@@ -647,7 +647,7 @@ entry_p m_getenv(entry_p contxt)
         if(e)
         {
             // Return what we found.
-            RSTR(strdup(e));
+            RSTR(DBG_ALLOC(strdup(e)));
         }
 
         // Nothing found, return empty
@@ -1033,7 +1033,7 @@ entry_p m_iconinfo(entry_p contxt)
                                 #endif
 
                                 // Always a valid (string).
-                                val = new_string(strdup(svl));
+                                val = new_string(DBG_ALLOC(strdup(svl)));
 
                                 if(val)
                                 {
@@ -1066,7 +1066,7 @@ entry_p m_iconinfo(entry_p contxt)
                                     // context.
                                     if(val)
                                     {
-                                        entry_p sym = new_symbol(strdup(n));
+                                        entry_p sym = new_symbol(DBG_ALLOC(strdup(n)));
 
                                         if(sym)
                                         {

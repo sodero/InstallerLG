@@ -297,7 +297,7 @@ entry_p m_fmt(entry_p contxt)
         // is the return value.
         if(!k)
         {
-            ret = strdup(fmt);
+            ret = DBG_ALLOC(strdup(fmt));
         }
 
         // Fail if the number of arguments and the number
@@ -593,7 +593,7 @@ char *h_tackon(entry_p contxt,
             // equals the filename.
             if(!lp)
             {
-                r = strdup(f);
+                r = DBG_ALLOC(strdup(f));
 
                 if(!r)
                 {
@@ -608,7 +608,7 @@ char *h_tackon(entry_p contxt,
             // equals the path.
             if(!lf)
             {
-                r = strdup(p);
+                r = DBG_ALLOC(strdup(p));
 
                 if(!r)
                 {

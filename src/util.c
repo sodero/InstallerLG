@@ -633,7 +633,7 @@ char *get_chlstr(entry_p c)
                 else
                 {
                     // No data to concatenate.
-                    r = strdup("");
+                    r = DBG_ALLOC(strdup(""));
                 }
 
                 // Free the references before
@@ -644,7 +644,7 @@ char *get_chlstr(entry_p c)
         else
         {
             // No children to concatenate.
-            r = strdup("");
+            r = DBG_ALLOC(strdup(""));
         }
     }
 
