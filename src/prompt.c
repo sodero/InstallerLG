@@ -410,7 +410,7 @@ entry_p m_askdir(entry_p contxt)
             }
 
             // We have a file.
-            RSTR(strdup(ret));
+            RSTR(DBG_ALLOC(strdup(ret)));
         }
 
         // What option are we missing?
@@ -684,7 +684,7 @@ entry_p m_askfile(entry_p contxt)
             }
 
             // We have a file.
-            RSTR(strdup(ret));
+            RSTR(DBG_ALLOC(strdup(ret)));
         }
 
         // Missing one or more options.
@@ -1045,7 +1045,7 @@ entry_p m_askstring(entry_p contxt)
                 res = str(deflt);
             }
 
-            RSTR(strdup(res));
+            RSTR(DBG_ALLOC(strdup(res)));
         }
 
         // Missing one or more options.

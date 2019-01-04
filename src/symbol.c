@@ -161,7 +161,7 @@ entry_p m_symbolset(entry_p contxt)
                     // Do a deep copy if necessary.
                     if(res->name)
                     {
-                        res->name = strdup(res->name);
+                        res->name = DBG_ALLOC(strdup(res->name));
 
                         if(!res->name)
                         {
@@ -208,7 +208,7 @@ entry_p m_symbolset(entry_p contxt)
                     // Is this is a new symbol?
                     if(ret != res)
                     {
-                        entry_p nsm = new_symbol(strdup(lhs));
+                        entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs)));
 
                         if(nsm)
                         {
