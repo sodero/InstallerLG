@@ -277,7 +277,7 @@ entry_p init(entry_p contxt)
             // Set type and position bitpattern.
             init_num
             (
-                contxt, "@effect", 
+                contxt, "@effect",
                 (strcasestr(e->children[0]->name, "upper") ? 1 << 0 : 0) |
                 (strcasestr(e->children[0]->name, "lower") ? 1 << 1 : 0) |
                 (strcasestr(e->children[0]->name, "left") ? 1 << 2 : 0) |
