@@ -138,18 +138,13 @@ entry_p m_fmt(entry_p contxt)
         // Scan the format string.
         for(; fmt[i]; i++)
         {
-            // If we have a specifier that's
-            // not preceeded by an escape.
-            if(fmt[i] == '%' &&
-              (!i || fmt[i - 1] != '\\'))
+            // A specifier not preceeded by an escape?
+            if(fmt[i] == '%' && (!i || fmt[i - 1] != '\\'))
             {
-                // The type is next.
-                i++;
-
                 // If this is a specifier that we recognize,
                 // then allocate a new string with just this
                 // specifier, nothing else.
-                if(fmt[i] == 's' || (
+                if(fmt[++i] == 's' || (
                    fmt[i++] == 'l' &&
                    fmt[i] == 'd'))
                 {
@@ -196,8 +191,7 @@ entry_p m_fmt(entry_p contxt)
                     }
 
                     // Format string.
-                    if(sct[k][oln - 1] == 's' &&
-                       cur->type == STRING)
+                    if(sct[k][oln - 1] == 's' && cur->type == STRING)
                     {
                         size_t nln = oln + strlen(cur->name);
                         char *new = DBG_ALLOC(calloc(nln + 1, 1));
@@ -216,6 +210,7 @@ entry_p m_fmt(entry_p contxt)
                         {
                             // Out of memory
                             PANIC(contxt);
+                            l = 0;
                         }
                     }
                     // Format numeric value.
@@ -239,6 +234,7 @@ entry_p m_fmt(entry_p contxt)
                         {
                             // Out of memory
                             PANIC(contxt);
+                            l = 0;
                         }
                     }
                     else
@@ -291,6 +287,7 @@ entry_p m_fmt(entry_p contxt)
             free(sct[k]);
         }
 
+        // Free scatter list.
         free(sct);
 
         // Without format specifiers, the format string
