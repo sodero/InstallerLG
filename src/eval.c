@@ -470,7 +470,11 @@ void run(entry_p entry)
 
     // Initialize GUI before starting the execution.
     // If (effect) type is set, use a custom screen.
-    if(gui_init(get_numvar(entry, "@effect") & 48))
+    
+    // FIXME
+    //if(gui_init(get_numvar(entry, "@effect") & 48))
+
+    if(gui_init(false))
     {
         // Execute the script.
         entry_p status = invoke(entry);
