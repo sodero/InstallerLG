@@ -510,7 +510,7 @@ entry_p m_getdevice(entry_p contxt)
                         // strdup(NULL) is undefined.
                         if(n)
                         {
-                            RSTR(DBG_ALLOC(strdup(n)();
+                            RSTR(DBG_ALLOC(strdup(n)));
                         }
                         else
                         {
