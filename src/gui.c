@@ -74,7 +74,7 @@
 #define INFO(S) if(LLVL>1) GPUT("INFO",S)
 
 //----------------------------------------------------------------------------
-// The installer window
+// IG - Installer window
 //----------------------------------------------------------------------------
 Object *Win;
 
@@ -85,6 +85,9 @@ CLASS_DEF(IG)
 {
     // Timer.
     struct MUI_InputHandlerNode Ticker;
+
+    // Custom screen.
+    struct Screen *Scr;
 
     // Widgets.
     Object *ExpertLevel, *UserLevel, *Progress,
@@ -121,6 +124,11 @@ CLASS_DEF(IG)
 #define MUIM_IG_PageSet          (TAGBASE_LG + 120)
 #define MUIM_IG_Finish           (TAGBASE_LG + 121)
 #define MUIM_IG_Working          (TAGBASE_LG + 122)
+
+//----------------------------------------------------------------------------
+// IG - Attributes
+//----------------------------------------------------------------------------
+#define MUIA_IG_UseCustomScreen  (TAGBASE_LG + 201)
 
 //----------------------------------------------------------------------------
 // IG - Init parameters
@@ -377,10 +385,6 @@ struct MUIP_IG_PageSet
 #define B_OK                               4
 #define B_NONE                             5
 
-
-
-
-  
 //----------------------------------------------------------------------------
 // IGTrans - [PRIVATE] -
 // Input:    ULONG signal:  -
@@ -411,10 +415,8 @@ MUIDSP ULONG IGTrans(ULONG signal)
 
         default:
             return G_ERR;
-
     }
 }
-
 
 //----------------------------------------------------------------------------
 // IGWait - [PRIVATE] Wait for notification(s)
@@ -523,11 +525,11 @@ MUIDSP ULONG IGWait(Object *obj, ULONG notif, ULONG range)
 
 //----------------------------------------------------------------------------
 // IGInit - Initialize all the things
-// Input:             -
-// Return:            On success TRUE, FALSE otherwise.
+// Input:   -
+// Return:  On success TRUE, FALSE otherwise.
 //----------------------------------------------------------------------------
 MUIDSP IPTR IGInit(Class *cls,
-                             Object *obj)
+                   Object *obj)
 {
     static ULONG i = MUIV_IG_FirstButton;
 
@@ -595,8 +597,8 @@ MUIDSP IPTR IGInit(Class *cls,
 //----------------------------------------------------------------------------
 //
 MUIDSP IPTR IGPageSet(Class *cls,
-                                Object *obj,
-                                struct MUIP_IG_PageSet *msg)
+                      Object *obj,
+                      struct MUIP_IG_PageSet *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -734,8 +736,6 @@ MUIDSP IPTR IGWelcome(Class *cls,
         // Wait for proceed or abort.
         inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
 
-KPrintF("rc1:%d\n", rc);
-
         if(rc == G_TRUE)
         {
             // Get the selected user level value. If we have
@@ -789,7 +789,6 @@ KPrintF("rc1:%d\n", rc);
                     // Wait for proceed or abort.
                     rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
 
-KPrintF("rc2:%d\n", rc);
                     if(rc == G_TRUE)
                     {
                         // Get pretend and log settings.
@@ -806,7 +805,6 @@ KPrintF("rc2:%d\n", rc);
             }
         }
 
-KPrintF("rcfinal:%d\n", rc);
         // 'Proceed', 'Abort' or 'Exit'.
         return rc;
     }
@@ -1315,12 +1313,6 @@ MUIDSP IPTR IGWorking(Class *cls,
     }
 }
 
-
-
-
-
-
-
 //----------------------------------------------------------------------------
 // IGMessage - Show message
 // Input:      Message - The prompt
@@ -1547,6 +1539,8 @@ MUIDSP IPTR IGBool(Class *cls,
        msg->Help, P_MESSAGE, B_YES_NO_ABORT))
     {
         struct IGData *my = INST_DATA(cls, obj);
+
+        // Return code.
         inp_t rc;
 
         // Set values of true and false.
@@ -1785,7 +1779,7 @@ MUIDSP IPTR IGCheckBoxes(Class *cls,
 
                     // We're done modifying the group.
                     DoMethod(my->Empty, MUIM_Group_ExitChange);
-                    return 0;
+                    return G_ERR;
                 }
             }
 
@@ -1842,20 +1836,21 @@ MUIDSP IPTR IGComplete(Class *cls,
                        struct MUIP_IG_Complete *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
+
+    // Return code.
     inp_t rc = G_TRUE;
 
     if(msg->Progress > 100)
     {
-        rc = G_FALSE;
         msg->Progress = 100;
+        rc = G_FALSE;
     }
 
-    // Set (caped) value and show the gauge.
+    // Set (capped) value and show gauge.
     set(my->Complete, MUIA_Gauge_Current, msg->Progress);
     set(my->Complete, MUIA_ShowMe, TRUE);
 
-    // Return value set.
-// Return:     G_TRUE / G_ERR.
+    // Nothing to wait for.
     return rc;
 }
 
@@ -1893,6 +1888,7 @@ MUIDSP IPTR IGConfirm(Class *cls,
             if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
                         msg->Help, P_MESSAGE, B_PROCEED_SKIP_ABORT))
             {
+                // Return code.
                 inp_t rc;
 
                 // Use 'Abort' or 'Back'?
@@ -1940,12 +1936,12 @@ MUIDSP IPTR IGConfirm(Class *cls,
 
 //----------------------------------------------------------------------------
 // IGNew - Overloading OM_NEW
-// Input:            See BOOPSI docs
-// Return:           See BOOPSI docs
+// Input:  See BOOPSI docs
+// Return: See BOOPSI docs
 //----------------------------------------------------------------------------
 MUIDSP IPTR IGNew(Class *cls,
-			                Object *obj,
-			                struct opSet *msg)
+                  Object *obj,
+                  struct opSet *msg)
 {
     // Silence.
     (void) msg;
@@ -1980,6 +1976,21 @@ MUIDSP IPTR IGNew(Class *cls,
     log[0] = tr(S_NOLG); // No logging
     log[1] = tr(S_SILG); // Log to file
 
+    // Custom screen.
+    struct Screen *scr = NULL;
+
+    // Open screen on demand.
+    if(GetTagData(MUIA_IG_UseCustomScreen, FALSE, msg->ops_AttrList))
+    {
+        scr = OpenScreenTags
+        (
+            NULL,
+            SA_LikeWorkbench, TRUE,
+            SA_Type, CUSTOM,
+            TAG_END
+        );
+    }
+
     // The GUI is, as far as possible, a static
     // construct. We're not constructing things
     // on the fly, instead we use paging to let
@@ -1989,6 +2000,7 @@ MUIDSP IPTR IGNew(Class *cls,
         cls, obj,
         MUIA_Window_Title, tr(S_INST),
         MUIA_Window_AppWindow, TRUE,
+        scr ? MUIA_Window_Screen : TAG_IGNORE, scr,
         MUIA_Window_RootObject, MUI_NewObject(
             MUIC_Group,
             MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
@@ -2275,6 +2287,9 @@ MUIDSP IPTR IGNew(Class *cls,
         my->Ticker.ihn_Method = MUIM_IG_Ticker;
         my->Ticker.ihn_Millis = 10;
 
+        // Save screen.
+        my->Scr = scr;
+
         // Save widgets.
         if(el && ul && fp && cm && pr &&
            st && nm && bp && em && tx &&
@@ -2316,12 +2331,12 @@ MUIDSP IPTR IGNew(Class *cls,
 
 //----------------------------------------------------------------------------
 // IGSetup - Overloading MUIM_Setup
-// Input:              See MUI docs
-// Return:             See MUI docs
+// Input:    See MUI docs
+// Return:   See MUI docs
 //----------------------------------------------------------------------------
 MUIDSP IPTR IGSetup(Class *cls,
-                              Object *obj,
-                              struct MUI_RenderInfo *msg)
+                    Object *obj,
+                    struct MUI_RenderInfo *msg)
 {
     // Let our parent set itself up first
     if(!DoSuperMethodA (cls, obj, (Msg) msg))
@@ -2338,32 +2353,42 @@ MUIDSP IPTR IGSetup(Class *cls,
 
 //----------------------------------------------------------------------------
 // IGDispose - Overloading OM_DISPOSE
-// Input:                See BOOPSI docs
-// Return:               See BOOPSI docs
+// Input:      See BOOPSI docs
+// Return:     See BOOPSI docs
 //----------------------------------------------------------------------------
 MUIDSP IPTR IGDispose (Class *cls,
-                                 Object *obj,
-                                 Msg msg)
+                       Object *obj,
+                       Msg msg)
 {
-    return (IPTR) DoSuperMethodA(cls, obj, msg);
+
+    struct IGData *my = INST_DATA(cls, obj);
+
+    // Close custom screen if we have one.
+    if(my->Scr)
+    {
+        CloseScreen(my->Scr);
+    }
+
+    return DoSuperMethodA(cls, obj, msg);
+
 }
 
 //----------------------------------------------------------------------------
 // IGCleanup - Overloading MUIM_Cleanup
-// Input:                See MUI docs
-// Return:               See MUI docs
+// Input:      See MUI docs
+// Return:     See MUI docs
 //----------------------------------------------------------------------------
 MUIDSP IPTR IGCleanup (Class *cls,
-                                 Object *obj,
-                                 Msg msg)
+                       Object *obj,
+                       Msg msg)
 {
     return (IPTR) DoSuperMethodA(cls, obj, (Msg) msg);
 }
 
 //----------------------------------------------------------------------------
 // IGDispatch - MUI custom class dispatcher
-// Input:                 pass through
-// Return:                pass through
+// Input:       Pass through
+// Return:      Pass through
 //----------------------------------------------------------------------------
 DISPATCH(IG)
 {
@@ -2480,14 +2505,13 @@ DISPATCH(IG)
 //############################################################################
 //############################################################################
 
-
 //----------------------------------------------------------------------------
 // Name:        gui_init
 // Description: Initialize and show GUI.
-// Input:       -
+// Input:       bool scr: Use custom screen. 
 // Return:      inp_t: G_TRUE / G_ERR.
 //----------------------------------------------------------------------------
-inp_t gui_init(void)
+inp_t gui_init(bool scr)
 {
     // Amiga style version string.
     static char version[] __attribute__((used)) = VERSION_STRING;
@@ -2498,7 +2522,7 @@ inp_t gui_init(void)
     // Create our GUI class.
     IGClass = (struct MUI_CustomClass *) MUI_CreateCustomClass
     (
-	    NULL, MUIC_Window, NULL,
+        NULL, MUIC_Window, NULL,
         sizeof (struct CLASS_DATA(IG)),
         (APTR) DISPATCH_GATE (IG)
     );
@@ -2519,6 +2543,7 @@ inp_t gui_init(void)
         MUIA_Application_HelpFile, "Installer.guide",
         MUIA_Application_Window, Win = (Object *) NewObject(
             IGClass->mcc_Class, NULL,
+            MUIA_IG_UseCustomScreen, scr ? TRUE : FALSE,
             TAG_END),
         TAG_END
     );

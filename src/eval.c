@@ -468,9 +468,9 @@ void run(entry_p entry)
 {
     locale_init();
 
-    // Initialize GUI before starting
-    // the execution.
-    if(gui_init())
+    // Initialize GUI before starting the execution.
+    // If (effect) type is set, use a custom screen.
+    if(gui_init(get_numvar(entry, "@effect") & 48))
     {
         // Execute the script.
         entry_p status = invoke(entry);
