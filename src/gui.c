@@ -2508,7 +2508,7 @@ DISPATCH(IG)
 //----------------------------------------------------------------------------
 // Name:        gui_init
 // Description: Initialize and show GUI.
-// Input:       bool scr: Use custom screen. 
+// Input:       bool scr: Use custom screen.
 // Return:      inp_t: G_TRUE / G_ERR.
 //----------------------------------------------------------------------------
 inp_t gui_init(bool scr)
@@ -2572,6 +2572,7 @@ inp_t gui_init(bool scr)
     return G_TRUE;
     #else
     // Testing purposes.
+    (void) scr;
     return strlen(version + 1) ? G_TRUE : G_ERR;
     #endif
 }
