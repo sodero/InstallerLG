@@ -20,12 +20,12 @@
 #include <proto/debug.h>
 # else
 #include <clib/debug_protos.h>
-#include <clib/utility_protos.h>
 # endif
 #include <proto/exec.h>
 #include <proto/graphics.h>
 #include <proto/intuition.h>
 #include <proto/muimaster.h>
+#include <proto/utility.h>
 #endif /* AMIGA */
 
 #include <stdio.h>
