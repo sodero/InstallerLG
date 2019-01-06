@@ -16,9 +16,6 @@
 #include "util.h"
 
 #include <string.h>
-#ifdef __MORPHOS__
-char *strcasestr(const char *, const char *);
-#endif
 
 //----------------------------------------------------------------------------
 // (closemedia <media>)
