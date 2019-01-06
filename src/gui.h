@@ -29,7 +29,7 @@ void gui_abort(const char *msg);
 void gui_error(int id, const char *type, const char *info);
 void gui_copyfiles_end(void);
 void gui_effect(int eff, int cl1, int cl2);
-inp_t gui_init(void);
+inp_t gui_init(bool scr);
 inp_t gui_message(const char *msg, bool bck);
 inp_t gui_finish(const char *msg);
 inp_t gui_working(const char *msg);
