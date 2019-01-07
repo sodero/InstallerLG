@@ -11,6 +11,7 @@
 #include "args.h"
 #include "control.h"
 #include "exit.h"
+#include "gui.h"
 #include "information.h"
 #include "init.h"
 #include "media.h"
@@ -278,13 +279,19 @@ entry_p init(entry_p contxt)
             init_num
             (
                 contxt, "@effect",
-                (strcasestr(e->children[0]->name, "upper") ? 1 << 0 : 0) |
-                (strcasestr(e->children[0]->name, "lower") ? 1 << 1 : 0) |
-                (strcasestr(e->children[0]->name, "left") ? 1 << 2 : 0) |
-                (strcasestr(e->children[0]->name, "right") ? 1 << 3 : 0) |
-                (strcasecmp(e->children[1]->name, "radial") ? 0 : 1 << 4) |
-                (strcasecmp(e->children[1]->name, "horizontal") ? 0 : 1 << 5)
+                (strcasestr(e->children[0]->name, "upper") ? G_UPPER : 0) |
+                (strcasestr(e->children[0]->name, "lower") ? G_LOWER : 0) |
+                (strcasestr(e->children[0]->name, "left") ? G_LEFT : 0) |
+                (strcasestr(e->children[0]->name, "right") ? G_RIGHT : 0) |
+                (strcasecmp(e->children[1]->name, "radial") ? 0 : G_RADIAL) |
+                (strcasecmp(e->children[1]->name, "horizontal") ? 0 : G_HORIZONTAL)
             );
+        }
+        else
+        {
+            init_num(contxt, "@effect", 0);
+            init_num(contxt, "@color_1", 0);
+            init_num(contxt, "@color_2", 0);
         }
 
         // Create default error handler, it simply returns '0'

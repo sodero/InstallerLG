@@ -14,6 +14,7 @@
 
 #include <stdbool.h>
 
+// Gui return codes.
 typedef enum
 {
     G_ERR,   // Panic
@@ -22,6 +23,25 @@ typedef enum
     G_ABORT, // Abort / Back
     G_EXIT   // Quit
 } inp_t;
+
+// Gui effect bits.
+enum
+{
+    G_UPPER_BIT,
+    G_LOWER_BIT,
+    G_LEFT_BIT,
+    G_RIGHT_BIT,
+    G_RADIAL_BIT,
+    G_HORIZONTAL_BIT
+};
+
+#define G_UPPER (1 << G_UPPER_BIT)
+#define G_LOWER (1 << G_LOWER_BIT)
+#define G_LEFT (1 << G_LEFT_BIT)
+#define G_RIGHT (1 << G_RIGHT_BIT)
+#define G_RADIAL (1 << G_RADIAL_BIT)
+#define G_HORIZONTAL (1 << G_HORIZONTAL_BIT)
+#define G_EFFECT (G_RADIAL | G_HORIZONTAL)
 
 void gui_exit(void);
 void gui_complete(int com);
