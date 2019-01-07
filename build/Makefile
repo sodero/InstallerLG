@@ -11,11 +11,11 @@ EXE := Installer
 #---------------------------------------------------------------------------------#
 ifeq ($(OS),Linux)
 CWRN = -Wall -Wextra
-CGEN = -g -std=c99
+CGEN = -Os -std=c99
 CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE
 else
 ifeq ($(OS),Darwin)
-CGEN = -g -std=c99
+CGEN = -Os -std=c99
 CWRN += -Werror -Weverything -Wno-format-nonliteral -Wno-date-time
 else
 CC := gcc
