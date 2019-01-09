@@ -636,24 +636,60 @@ entry_p merge(entry_p dst, entry_p src)
     if(dst && dst->children &&
        src && src->children)
     {
-        entry_p *s = src->children;
-        entry_p **d = &dst->children;
+        // Number of children.
+        size_t n = 0;
 
-        // For all children in the source
-        // context append to destination
-        // and reparent.
-        while(*s && *s != end())
+        // Count the number of source children.
+        for(size_t i = 0; src->children[i] &&
+            src->children[i] != end(); i++)
         {
-            // We might run out of memory
-            // but in that case append( )
-            // will PANIC.
-            if(append(d, *s))
+            n++;
+        }
+
+        // Add the number of current children.
+        for(size_t i = 0; dst->children[i] &&
+            dst->children[i] != end(); i++)
+        {
+            n++;
+        }
+
+        // We rely on everything being set to '0'.
+        // Make the new array big enough to hold
+        // both source and (current) destination.
+        entry_p *new = DBG_ALLOC(calloc(n + 1,
+                       sizeof(entry_p)));
+
+        if(new)
+        {
+            // Start over.
+            n = 0;
+
+            // Copy current destination children.
+            for(size_t i = 0; dst->children[i] &&
+                dst->children[i] != end(); i++)
             {
-                (*s)->parent = dst;
+                new[n] = dst->children[i];
+                new[n++]->parent = dst;
             }
 
-            // Next child.
-            s++;
+            // Append children of the source.
+            for(size_t i = 0; src->children[i] &&
+                src->children[i] != end(); i++)
+            {
+                new[n] = src->children[i];
+                new[n++]->parent = dst;
+            }
+
+            // Replace the old with the new and
+            // add array sentinel.
+            free(dst->children);
+            dst->children = new;
+            new[n] = end();
+        }
+        else
+        {
+            // Out of memory.
+            PANIC(NULL);
         }
     }
     else
