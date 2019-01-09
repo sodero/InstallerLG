@@ -25,6 +25,7 @@
 #include <proto/graphics.h>
 #include <proto/intuition.h>
 #include <proto/muimaster.h>
+#include <proto/utility.h>
 #endif /* AMIGA */
 
 #include <stdio.h>
@@ -2572,7 +2573,7 @@ inp_t gui_init(bool scr)
     return G_TRUE;
     #else
     // Testing purposes.
-    (void) scr;
+    puts(scr ? "e" : "");
     return strlen(version + 1) ? G_TRUE : G_ERR;
     #endif
 }

@@ -80,6 +80,12 @@ entry_p local(entry_p e)
         {
             return c;
         }
+
+        if(c->parent == c)
+        {
+            pretty_print(c);
+            break;
+        }
     }
 
     // Nothing:
