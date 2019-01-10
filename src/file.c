@@ -356,8 +356,8 @@ static pnode_p h_choices(entry_p contxt,
         {
             // We already know the type of the
             // first element; it's a directory.
-            node->name = strdup(src);
-            node->copy = strdup(dst);
+            node->name = DBG_ALLOC(strdup(src));
+            node->copy = DBG_ALLOC(strdup(dst));
             node->type = 2;
 
             // Not necessary to check the return value.
@@ -445,7 +445,7 @@ static pnode_p h_choices(entry_p contxt,
                             {
                                 // We already have the font name, create the
                                 // copy and set type, always a file.
-                                node->name = strdup(get_buf());
+                                node->name = DBG_ALLOC(strdup(get_buf()));
                                 node->copy = h_tackon(contxt, dst, h_fileonly(contxt, get_buf()));
                                 node->type = 1;
 
@@ -539,8 +539,8 @@ static pnode_p h_filetree(entry_p contxt,
 
                     // We already know the type of the
                     // first element; it's a directory.
-                    node->name = strdup(src);
-                    node->copy = strdup(dst);
+                    node->name = DBG_ALLOC(strdup(src));
+                    node->copy = DBG_ALLOC(strdup(dst));
                     node->type = 2;
 
                     // Iterate over all entries in the source
@@ -694,8 +694,8 @@ static pnode_p h_filetree(entry_p contxt,
 
             if(head && file)
             {
-                n_src = strdup(src);
-                n_dst = strdup(dst);
+                n_src = DBG_ALLOC(strdup(src));
+                n_dst = DBG_ALLOC(strdup(dst));
 
                 if(n_src && n_dst)
                 {
@@ -710,7 +710,7 @@ static pnode_p h_filetree(entry_p contxt,
 
                     // Create destination file path.
                     n_dst = h_tackon(contxt, dst, h_fileonly(contxt, src));
-                    n_src = strdup(src);
+                    n_src = DBG_ALLOC(strdup(src));
 
                     if(n_src && n_dst)
                     {
@@ -731,7 +731,7 @@ static pnode_p h_filetree(entry_p contxt,
 
                                 if(font)
                                 {
-                                    font->name = strdup(get_buf());
+                                    font->name = DBG_ALLOC(strdup(get_buf()));
                                     font->copy = h_tackon(contxt, dst, h_fileonly(contxt, get_buf()));
 
                                     // Add the font to the list.
@@ -1183,7 +1183,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
         }
 
         // Create working copy.
-        dir = strdup(dst);
+        dir = DBG_ALLOC(strdup(dst));
 
         if(dir)
         {
@@ -2674,7 +2674,7 @@ entry_p m_foreach(entry_p contxt)
                                 // lock and examine cur->name will
                                 // be NULL.
                                 cur->type = fib->fib_DirEntryType;
-                                cur->name = strdup(fn);
+                                cur->name = DBG_ALLOC(strdup(fn));
 
                                 // We're probably good. PANIC:s will
                                 // be caught further down.
@@ -2685,7 +2685,7 @@ entry_p m_foreach(entry_p contxt)
                         }
                         #else
                         cur->type = h_exists(fn);
-                        cur->name = strdup(fn);
+                        cur->name = DBG_ALLOC(strdup(fn));
                         #endif
 
                         // An empty name indicates a PANIC only if
