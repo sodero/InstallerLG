@@ -78,7 +78,7 @@ static entry_p native_exists(entry_p contxt, call_t f)
 static void init_num(entry_p contxt, char *sym, int num)
 {
     // Create SYMBOL VALUE tuple.
-    entry_p s = new_symbol(strdup(sym)),
+    entry_p s = new_symbol(DBG_ALLOC(strdup(sym))),
             n = new_number(num);
 
     // Unless we're OOM, init tuple.
@@ -112,8 +112,8 @@ static void init_num(entry_p contxt, char *sym, int num)
 static void init_str(entry_p contxt, char *sym, char *str)
 {
     // Create SYMBOL VALUE tuple.
-    entry_p s = new_symbol(strdup(sym)),
-            n = new_string(strdup(str));
+    entry_p s = new_symbol(DBG_ALLOC(strdup(sym))),
+            n = new_string(DBG_ALLOC(strdup(str)));
 
     // Unless we're OOM, init tuple.
     if(s && n)
@@ -239,11 +239,11 @@ entry_p init(entry_p contxt)
             // purposes only.
             e = new_native
             (
-                strdup("welcome"), __LINE__, m_welcome,
+                DBG_ALLOC(strdup("welcome")), __LINE__, m_welcome,
                 push
                 (
                     new_contxt(),
-                    new_string(strdup("Welcome"))
+                    new_string(DBG_ALLOC(strdup("Welcome")))
                 ),
                 NUMBER
             );
@@ -298,19 +298,19 @@ entry_p init(entry_p contxt)
         // without doing anything.
         e = new_native
         (
-            strdup("onerror"), __LINE__, m_procedure,
+            DBG_ALLOC(strdup("onerror")), __LINE__, m_procedure,
             push
             (
                 new_contxt(),
                 new_custom
                 (
-                    strdup("@onerror"), __LINE__, NULL,
+                    DBG_ALLOC(strdup("@onerror")), __LINE__, NULL,
                     push
                     (
                         new_contxt(),
                         new_native
                         (
-                            strdup("select"), __LINE__, m_select,
+                            DBG_ALLOC(strdup("select")), __LINE__, m_select,
                             push(push
                             (
                                 new_contxt(),
@@ -345,7 +345,7 @@ entry_p init(entry_p contxt)
         // naming are for debugging purposes only.
         e = new_native
         (
-            strdup("exit"), __LINE__,
+            DBG_ALLOC(strdup("exit")), __LINE__,
             m_exit, NULL, NUMBER
         );
 
