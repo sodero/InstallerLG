@@ -31,8 +31,8 @@ entry_p m_closemedia(entry_p contxt)
     // We need 1 argument.
     if(c_sane(contxt, 1))
     {
-		// Dummy.
-		pretty_print(contxt);
+        // Dummy.
+        pretty_print(contxt);
     }
     else
     {
@@ -55,82 +55,20 @@ entry_p m_effect(entry_p contxt)
     // We need 4 arguments.
     if(c_sane(contxt, 4))
     {
-        /*
-        From the Installer.guide:
-
-           The effect statement is special because it is interpreted before all
-        other commands in the script - independently of its position in the
-        script. Its arguments must be literals (string and integer constants)
-        and cannot be evaluated.
-
-           If an effect is used Installer opens a new screen that is a clone of
-        the default public screen (Workbench screen).
-
-           position sets the position of the installer window and must be one
-        of the following strings:
-
-        `upper_left'
-             The window is placed in the upper left corner of the screen.
-
-        `upper_center'
-             The window is horizontally centered in the upper part of the
-             screen.
-
-        `upper_right'
-             The window is placed in the upper right corner of the screen.
-
-        `center_left'
-             The window is  vertically centered on the left side of the screen.
-
-        `center'
-             The window is centered on the screen.
-
-        `center_right'
-             The window is vertically centered on the right side of the screen.
-
-        `lower_left'
-             The window is placed in the lower left corner of the screen.
-
-        `lower_center'
-             The window is horizontally centered in the lower part of the
-             screen.
-
-        `lower_right'
-             The window is placed in the lower right corner of the screen.
-
-           effect sets the graphical effect that is used for the background. It
-        is one of the following strings:
-
-        `horizontal'
-             A fade from color 1 to color 2 with horizontal lines is drawn
-
-        `radial'
-             A fade from color 1 to color 2 with circles around a point in the
-             upper right corner of the screen is drawn.
-
-           If the effect cannot be drawn due to the number of colors in the
-        screen the effect is replaced with an effect thats uses less colors. The
-        radial effect (only possible at true color screens) is replaced with
-        the horizontal fade. If the horizontal effect is not displayable it is
-        replaced with an animated fade.
-
-           color 1 is an integer and sets the 24 bit RGB value that is used as
-        the first color. Typically a hexadecimal number is used.
-
-           color 2 is an integer and sets the 24 bit RGB value that is used as
-        the second color. All effects fades from color 1 to color 2.
-        */
-
+        // Position and type.
         char *est = str(CARG(2)),
              *eps = str(CARG(1));
 
+        // Gradient color values.
         int ic1 = num(CARG(3)),
             ic2 = num(CARG(4)),
 
+            // Previous gradient, if any.
             cef = get_numvar(contxt, "@effect"),
             cc1 = get_numvar(contxt, "@color_1"),
             cc2 = get_numvar(contxt, "@color_2"),
 
+            // Translate type and position.
             ief = (strcasestr(eps, "upper") ? G_UPPER : 0) |
                   (strcasestr(eps, "lower") ? G_LOWER : 0) |
                   (strcasestr(eps, "left") ? G_LEFT : 0) |
@@ -138,24 +76,28 @@ entry_p m_effect(entry_p contxt)
                   (strcasecmp(est, "radial") ? 0 : G_RADIAL) |
                   (strcasecmp(est, "horizontal") ? 0 : G_HORIZONTAL);
 
+        // Don't do anything if nothing changed.
         if(ief != cef || ic1 != cc1 || ic2 != cc2)
         {
+            // Show gradient.
             gui_effect(ief, ic1, ic2);
 
+            // Save current values. We're not using
+            // this, maybe we should? Or remove it?
             set_numvar(contxt, "@effect", ief);
             set_numvar(contxt, "@color_1", ic1);
             set_numvar(contxt, "@color_2", ic2);
 
+            // Always.
             RNUM(1);
         }
-    }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
+
+        // Did nothing.
+        RNUM(0);
     }
 
-    // Success, failure or panic.
+    // Broken parser.
+    PANIC(contxt);
     RCUR;
 }
 
@@ -218,8 +160,8 @@ entry_p m_setmedia(entry_p contxt)
              example).
         */
 
-		// Dummy.
-		pretty_print(contxt);
+        // Dummy.
+        pretty_print(contxt);
     }
     else
     {
@@ -344,8 +286,8 @@ entry_p m_showmedia(entry_p contxt)
              any datatype)
         */
 
-		// Dummy.
-		pretty_print(contxt);
+        // Dummy.
+        pretty_print(contxt);
     }
     else
     {

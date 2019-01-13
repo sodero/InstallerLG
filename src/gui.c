@@ -13,6 +13,7 @@
 #include "resource.h"
 
 #ifdef AMIGA
+#include <graphics/rpattr.h>
 #include <libraries/asl.h>
 #include <libraries/mui.h>
 #include <proto/alib.h>
@@ -87,8 +88,9 @@ CLASS_DEF(IG)
     // Timer.
     struct MUI_InputHandlerNode Ticker;
 
-    // Custom screen.
+    // Backdrop screen / window.
     struct Screen *Scr;
+    struct Window *Win;
 
     // Widgets.
     Object *ExpertLevel, *UserLevel, *Progress,
@@ -125,6 +127,7 @@ CLASS_DEF(IG)
 #define MUIM_IG_PageSet          (TAGBASE_LG + 120)
 #define MUIM_IG_Finish           (TAGBASE_LG + 121)
 #define MUIM_IG_Working          (TAGBASE_LG + 122)
+#define MUIM_IG_Effect           (TAGBASE_LG + 123)
 
 //----------------------------------------------------------------------------
 // IG - Attributes
@@ -242,6 +245,17 @@ struct MUIP_IG_Working
 {
     ULONG MethodID;
     ULONG Message;
+};
+
+//----------------------------------------------------------------------------
+// IG - Effect parameters
+//----------------------------------------------------------------------------
+struct MUIP_IG_Effect
+{
+    ULONG MethodID;
+    ULONG Effect;
+    ULONG ColorStart;
+    ULONG ColorEnd;
 };
 
 //----------------------------------------------------------------------------
@@ -1315,6 +1329,154 @@ MUIDSP IPTR IGWorking(Class *cls,
 }
 
 //----------------------------------------------------------------------------
+// IGEffect -  Show gradient backdrop.
+// Input:      Effect - Type and position
+//             ColorStart - First color in gradient.
+//             ColorEnd - Last color in gradient.
+// Return:     G_TRUE / G_FALSE / G_ERR.
+//----------------------------------------------------------------------------
+MUIDSP IPTR IGEffect(Class *cls,
+                     Object *obj,
+                     struct MUIP_IG_Effect *msg)
+{
+    struct IGData *my = INST_DATA(cls, obj);
+
+    // Do we have anything to do?
+    if(!(msg->Effect & G_EFFECT))
+    {
+        // No effect.
+        return G_FALSE;
+    }
+
+    // Don't trust Init().
+    if(my->Scr && my->Win)
+    {
+        // Allocate pen for the gradient.
+        LONG pn = ObtainPen(my->Scr->ViewPort.ColorMap, -1,
+                  0, 0, 0, PEN_EXCLUSIVE | PEN_NO_SETCOLOR);
+
+        // Valid pen?
+        if(pn != -1)
+        {
+            // Get 8-bit RGB start and stop values.
+            int r1 = msg->ColorStart >> 16,
+                g1 = (msg->ColorStart >> 8) & 0xff,
+                b1 = msg->ColorStart & 0xff,
+                r2 = msg->ColorEnd >> 16,
+                g2 = (msg->ColorEnd >> 8) & 0xff,
+                b2 = msg->ColorEnd & 0xff,
+
+                // Minimum chunk = 1 << ct pixels,
+                // to save time when drawing.
+                ct = 2, s = my->Win->Height >> ct;
+
+            // RGB deltas per chunk.
+            float rd = (r2 - r1) / ((float) s - 1),
+                  gd = (g2 - g1) / ((float) s - 1),
+                  bd = (b2 - b1) / ((float) s - 1);
+
+            // Backdrop big enough?
+            if(s)
+            {
+                // Allocate color vector.
+                ULONG *cv = calloc(s * 3, sizeof(ULONG));
+
+                // Release pen and bail on OOM.
+                if(!cv)
+                {
+                    ReleasePen(my->Scr->ViewPort.ColorMap, pn);
+                    return G_ERR;
+                }
+
+                // Color index.
+                int i = 0;
+
+                // Initial RGB values.
+                float r = r1,
+                      g = g1,
+                      b = b1;
+
+                // Compute gradient.
+                while(i < s * 3)
+                {
+                    cv[i++] = ((ULONG) r) << 24;
+                    cv[i++] = ((ULONG) g) << 24;
+                    cv[i++] = ((ULONG) b) << 24;
+                    r += rd;
+                    g += gd;
+                    b += bd;
+                }
+
+                // Set backdrop pen.
+                SetRPAttrs
+                (
+                    my->Win->RPort,
+                    RPTAG_APen, pn,
+                    RPTAG_BPen, pn,
+                    TAG_END
+                );
+
+                // We need to clear rast port in
+                // case ct + resolution results
+                // in top leftovers.
+                ClearScreen(my->Win->RPort);
+
+                // Draw effect if it's enabled.
+                if(msg->Effect & G_EFFECT)
+                {
+                    // Start from the bottom, one
+                    // delta at a time.
+                    int d = 1 << ct,
+                        v = my->Win->Height;
+
+                    // For all colors in gradient,
+                    // draw rectangle with delta
+                    // height.
+                    while(i)
+                    {
+                        // Go backwards in vector.
+                        i -= 3;
+
+                        // Use the same pen again
+                        // and again.
+                        SetRGB32
+                        (
+                            &my->Scr->ViewPort, pn,
+                            cv[i],
+                            cv[i + 1],
+                            cv[i + 2]
+                        );
+
+                        // From bottom to top.
+                        v -= d;
+
+                        // Draw rectangle.
+                        RectFill
+                        (
+                            my->Win->RPort, 0, v,
+                            my->Win->Width, v + d
+                        );
+                    }
+                }
+
+                // Free color vector.
+                free(cv);
+            }
+
+            // We're done with the pen.
+            ReleasePen(my->Scr->ViewPort.ColorMap, pn);
+
+            // True even if Window is too small.
+            return G_TRUE;
+        }
+    }
+
+    // Unknown error.
+    GERR(tr(S_UNER));
+    return G_ERR;
+}
+
+//----------------------------------------------------------------------------
 // IGMessage - Show message
 // Input:      Message - The prompt
 //             Back - Use 'Back' instead of 'Abort'.
@@ -1944,9 +2106,6 @@ MUIDSP IPTR IGNew(Class *cls,
                   Object *obj,
                   struct opSet *msg)
 {
-    // Silence.
-    (void) msg;
-
     // Temp widgets.
     Object *el, *ul, *fp, *cm, *pr, *st,
            *nm, *bp, *em, *rt, *tx, *ls,
@@ -1977,19 +2136,33 @@ MUIDSP IPTR IGNew(Class *cls,
     log[0] = tr(S_NOLG); // No logging
     log[1] = tr(S_SILG); // Log to file
 
-    // Custom screen.
+    // Screen / window backdrop.
     struct Screen *scr = NULL;
+    struct Window *win = NULL;
 
-    // Open screen on demand.
+    // Open backdrop screen / window on demand.
     if(GetTagData(MUIA_IG_UseCustomScreen, FALSE, msg->ops_AttrList))
     {
         scr = OpenScreenTags
         (
             NULL,
             SA_LikeWorkbench, TRUE,
+            SA_ShowTitle, FALSE,
             SA_Type, CUSTOM,
             TAG_END
         );
+
+        if(scr)
+        {
+            win = OpenWindowTags
+            (
+                NULL,
+                WA_CustomScreen, scr,
+                WA_Borderless, TRUE,
+                WA_Backdrop, TRUE,
+                TAG_END
+            );
+        }
     }
 
     // The GUI is, as far as possible, a static
@@ -2288,8 +2461,9 @@ MUIDSP IPTR IGNew(Class *cls,
         my->Ticker.ihn_Method = MUIM_IG_Ticker;
         my->Ticker.ihn_Millis = 10;
 
-        // Save screen.
+        // Backdrop.
         my->Scr = scr;
+        my->Win = win;
 
         // Save widgets.
         if(el && ul && fp && cm && pr &&
@@ -2364,7 +2538,13 @@ MUIDSP IPTR IGDispose (Class *cls,
 
     struct IGData *my = INST_DATA(cls, obj);
 
-    // Close custom screen if we have one.
+    // Close backdrop window.
+    if(my->Win)
+    {
+        CloseWindow(my->Win);
+    }
+
+    // Close backdrop screen.
     if(my->Scr)
     {
         CloseScreen(my->Scr);
@@ -2445,6 +2625,9 @@ DISPATCH(IG)
 
         case MUIM_IG_Working:
             return IGWorking(cls, obj, (struct MUIP_IG_Working *) msg);
+
+        case MUIM_IG_Effect:
+            return IGEffect(cls, obj, (struct MUIP_IG_Effect *) msg);
 
         case MUIM_IG_Abort:
             return IGAbort(cls, obj, (struct MUIP_IG_Abort *) msg);
@@ -3112,7 +3295,11 @@ void gui_error(int id,
 //----------------------------------------------------------------------------
 void gui_effect(int eff, int cl1, int cl2)
 {
+    #ifdef AMIGA
+    DoMethod(Win, MUIM_IG_Effect, eff, cl1, cl2);
+    #else
     // Testing purposes.
     printf("%d:%d:%d\n", eff, cl1, cl2);
+    #endif
 }
 

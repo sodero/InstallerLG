@@ -42,6 +42,7 @@ enum
 #define G_RADIAL (1 << G_RADIAL_BIT)
 #define G_HORIZONTAL (1 << G_HORIZONTAL_BIT)
 #define G_EFFECT (G_RADIAL | G_HORIZONTAL)
+#define G_POSITION (G_LEFT | G_RIGHT | G_UPPER | G_LOWER)
 
 void gui_exit(void);
 void gui_complete(int com);
