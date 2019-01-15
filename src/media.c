@@ -63,10 +63,12 @@ entry_p m_effect(entry_p contxt)
         int ic1 = num(CARG(3)),
             ic2 = num(CARG(4)),
 
+            /*
             // Previous gradient, if any.
             cef = get_numvar(contxt, "@effect"),
             cc1 = get_numvar(contxt, "@color_1"),
             cc2 = get_numvar(contxt, "@color_2"),
+            */
 
             // Translate type and position.
             ief = (strcasestr(eps, "upper") ? G_UPPER : 0) |
@@ -76,9 +78,11 @@ entry_p m_effect(entry_p contxt)
                   (strcasecmp(est, "radial") ? 0 : G_RADIAL) |
                   (strcasecmp(est, "horizontal") ? 0 : G_HORIZONTAL);
 
+        /*
         // Don't do anything if nothing changed.
         if(ief != cef || ic1 != cc1 || ic2 != cc2)
         {
+        */
             // Show gradient.
             gui_effect(ief, ic1, ic2);
 
@@ -90,10 +94,12 @@ entry_p m_effect(entry_p contxt)
 
             // Always.
             RNUM(1);
+        /*
         }
 
         // Did nothing.
         RNUM(0);
+        */
     }
 
     // Broken parser.
