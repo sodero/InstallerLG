@@ -86,7 +86,8 @@ int error(entry_p contxt, int id, err_t type, const char *info)
                     "Invalid application name",
                     "Invalid name of volume",
                     "Invalid name of assign",
-                    "Options are mutually exclusive"
+                    "Options are mutually exclusive",
+                    "Invalid value"
                 };
 
                 // Error window / console output.
