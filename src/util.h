@@ -34,6 +34,7 @@ void set_strvar(entry_p c, char *v, char *n);
 char *get_buf(void);
 size_t buf_size(void);
 void *dbg_alloc(int line, const char *file, const char *func, void *mem);
+entry_p native_exists(entry_p contxt, call_t f);
 
 //----------------------------------------------------------------------------
 // Utility macros.

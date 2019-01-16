@@ -2146,9 +2146,9 @@ MUIDSP IPTR IGNew(Class *cls,
         scr = OpenScreenTags
         (
             NULL,
+            SA_PubName, "Installer",
             SA_LikeWorkbench, TRUE,
             SA_ShowTitle, FALSE,
-            SA_Type, CUSTOM,
             TAG_END
         );
 

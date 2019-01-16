@@ -885,3 +885,39 @@ void *dbg_alloc(int line, const char *file, const char *func, void *mem)
     return mem;
 }
 
+//----------------------------------------------------------------------------
+// Name:        native_exists
+// Description: Find first occurence of callback in AST.
+// Input:       entry_p contxt:  CONTXT.
+// Return:      entry_p:         NATIVE callback if found, NULL otherwise.
+//----------------------------------------------------------------------------
+entry_p native_exists(entry_p contxt, call_t f)
+{
+    entry_p e = NULL;
+
+    // NULL are valid values.
+    if(contxt && contxt->children)
+    {
+        // Iterate over all children and
+        // recur if needed.
+        for(entry_p *c = contxt->children;
+            *c && *c != end() && !e; c++)
+        {
+            if((*c)->type == NATIVE &&
+               (*c)->call == f)
+            {
+                // We found it.
+                e = *c;
+            }
+            else
+            {
+                // Recur.
+                e = native_exists(*c, f);
+            }
+        }
+    }
+
+    // NULL or callback.
+    return e;
+}
+
