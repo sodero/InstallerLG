@@ -64,7 +64,8 @@ typedef enum
     ERR_INVALID_APP,
     ERR_INVALID_VOLUME,
     ERR_INVALID_ASSIGN,
-    ERR_OPTION_MUTEX
+    ERR_OPTION_MUTEX,
+    ERR_VAL_INVALID
 } err_t;
 
 //----------------------------------------------------------------------------

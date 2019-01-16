@@ -63,43 +63,40 @@ entry_p m_effect(entry_p contxt)
         int ic1 = num(CARG(3)),
             ic2 = num(CARG(4)),
 
-            /*
-            // Previous gradient, if any.
-            cef = get_numvar(contxt, "@effect"),
-            cc1 = get_numvar(contxt, "@color_1"),
-            cc2 = get_numvar(contxt, "@color_2"),
-            */
+        // Translate type and position.
+        ief = (strcasestr(eps, "upper") ? G_UPPER : 0) |
+              (strcasestr(eps, "lower") ? G_LOWER : 0) |
+              (strcasestr(eps, "left") ? G_LEFT : 0) |
+              (strcasestr(eps, "right") ? G_RIGHT : 0) |
+              (strcasecmp(est, "radial") ? 0 : G_RADIAL) |
+              (strcasecmp(est, "horizontal") ? 0 : G_HORIZONTAL);
 
-            // Translate type and position.
-            ief = (strcasestr(eps, "upper") ? G_UPPER : 0) |
-                  (strcasestr(eps, "lower") ? G_LOWER : 0) |
-                  (strcasestr(eps, "left") ? G_LEFT : 0) |
-                  (strcasestr(eps, "right") ? G_RIGHT : 0) |
-                  (strcasecmp(est, "radial") ? 0 : G_RADIAL) |
-                  (strcasecmp(est, "horizontal") ? 0 : G_HORIZONTAL);
+        // Invalid initial values.
+        static int oc1, oc2, oef = G_RADIAL|G_HORIZONTAL;
 
-        /*
-        // Don't do anything if nothing changed.
-        if(ief != cef || ic1 != cc1 || ic2 != cc2)
+        // Known effect type?
+        if(ief & G_EFFECT)
         {
-        */
-            // Show gradient.
-            gui_effect(ief, ic1, ic2);
+            // Only show something if this is the first
+            // invocation or if the input has changed.
+            if(ief != oef || ic1 != oc1 || ic2 != oc2)
+            {
+                // Show gradient.
+                gui_effect(ief, ic1, ic2);
 
-            // Save current values. We're not using
-            // this, maybe we should? Or remove it?
-            set_numvar(contxt, "@effect", ief);
-            set_numvar(contxt, "@color_1", ic1);
-            set_numvar(contxt, "@color_2", ic2);
+                // Save current values.
+                oef = ief;
+                oc1 = ic1;
+                oc2 = ic2;
+            }
 
             // Always.
             RNUM(1);
-        /*
         }
 
-        // Did nothing.
+        // Missing effect type.
+        ERR(ERR_VAL_INVALID, est);
         RNUM(0);
-        */
     }
 
     // Broken parser.

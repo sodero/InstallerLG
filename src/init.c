@@ -30,42 +30,6 @@ char *strcasestr(const char *, const char *);
 #endif
 
 //----------------------------------------------------------------------------
-// Name:        native_exists
-// Description: Init helper; find first occurence of callback in AST.
-// Input:       entry_p contxt:  CONTXT.
-// Return:      entry_p:         NATIVE callback if found, NULL otherwise.
-//----------------------------------------------------------------------------
-static entry_p native_exists(entry_p contxt, call_t f)
-{
-    entry_p e = NULL;
-
-    // NULL are valid values.
-    if(contxt && contxt->children)
-    {
-        // Iterate over all children and
-        // recur if needed.
-        for(entry_p *c = contxt->children;
-            *c && *c != end() && !e; c++)
-        {
-            if((*c)->type == NATIVE &&
-               (*c)->call == f)
-            {
-                // We found it.
-                e = *c;
-            }
-            else
-            {
-                // Recur.
-                e = native_exists(*c, f);
-            }
-        }
-    }
-
-    // NULL or callback.
-    return e;
-}
-
-//----------------------------------------------------------------------------
 // Name:        init_num
 // Description: Init helper; insert numeric variable in CONTXT. This is only
 //              for use in init(), nothing is resolved and duplicates aren't
@@ -264,34 +228,6 @@ entry_p init(entry_p contxt)
             // We're not using this, kill it directly.
             kill(e);
             #endif
-        }
-
-        // Is there an 'effect' statement?
-        e = native_exists(contxt, m_effect);
-
-        if(e && c_sane(e, 4))
-        {
-            // Set pattern and gradient colors.
-            init_num(contxt, "@color_1", e->children[2]->id);
-            init_num(contxt, "@color_2", e->children[3]->id);
-
-            // Set type and position bitpattern.
-            init_num
-            (
-                contxt, "@effect",
-                (strcasestr(e->children[0]->name, "upper") ? G_UPPER : 0) |
-                (strcasestr(e->children[0]->name, "lower") ? G_LOWER : 0) |
-                (strcasestr(e->children[0]->name, "left") ? G_LEFT : 0) |
-                (strcasestr(e->children[0]->name, "right") ? G_RIGHT : 0) |
-                (strcasecmp(e->children[1]->name, "radial") ? 0 : G_RADIAL) |
-                (strcasecmp(e->children[1]->name, "horizontal") ? 0 : G_HORIZONTAL)
-            );
-        }
-        else
-        {
-            init_num(contxt, "@effect", 0);
-            init_num(contxt, "@color_1", 0);
-            init_num(contxt, "@color_2", 0);
         }
 
         // Create default error handler, it simply returns '0'

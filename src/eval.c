@@ -13,6 +13,7 @@
 #include "eval.h"
 #include "exit.h"
 #include "gui.h"
+#include "media.h"
 #include "resource.h"
 #include "util.h"
 
@@ -466,21 +467,38 @@ entry_p invoke(entry_p entry)
 //----------------------------------------------------------------------------
 void run(entry_p entry)
 {
+    // Is there an 'effect' statement in there?
+    entry_p status = native_exists(entry, m_effect);
+
     // i18n setup.
     locale_init();
 
     // Initialize GUI before starting the execution.
     // If (effect) type is set, use a custom screen.
-    if(gui_init(get_numvar(entry, "@effect") & G_EFFECT))
+    if(gui_init(status))
     {
-        // Execute the script.
-        entry_p status = invoke(entry);
-
-        // Execute the (onerror) function
-        // on failure.
-        if(DID_ERR && !DID_HALT)
+        // If an 'effect' statement exists,
+        // execute this first of all.
+        if(status)
         {
-            status = m_onerror(entry);
+            // Since this is not a context, we
+            // must resolve it like a symbol.
+            status = resolve(status);
+        }
+
+        // Execute the script unless there
+        // was an 'effect' statement that
+        // generated an error or a halt.
+        if(!DID_ERR && !DID_HALT)
+        {
+            status = invoke(entry);
+
+            // Execute the (onerror)
+            // function on failure.
+            if(DID_ERR && !DID_HALT)
+            {
+                status = m_onerror(entry);
+            }
         }
 
         // Output what we have unless we're

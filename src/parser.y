@@ -384,7 +384,7 @@ working:        '(' WORKING ps ')'               { $$ = new_native(strdup("worki
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* media.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 closemedia:     '(' CLOSEMEDIA p ')'             { $$ = new_native(strdup("closemedia"), LINE, m_closemedia, push(new_contxt(), $3), NUMBER); };
-effect:         '(' EFFECT STR STR p p ')'   	 { $$ = new_native(strdup("effect"), LINE, m_effect, push(push(push(push(new_contxt(), new_string($3)), new_string($4)), $5), $6), NUMBER); };
+effect:         '(' EFFECT pp pp ')'   	         { $$ = new_native(strdup("effect"), LINE, m_effect, merge($3, $4), NUMBER); };
 setmedia:       '(' SETMEDIA ps ')'              { $$ = new_native(strdup("setmedia"), LINE, m_setmedia, $3, NUMBER); };
 showmedia:      '(' SHOWMEDIA ps ')'             { $$ = new_native(strdup("showmedia"), LINE, m_showmedia, $3, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
