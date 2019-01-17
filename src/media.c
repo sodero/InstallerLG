@@ -31,16 +31,16 @@ entry_p m_closemedia(entry_p contxt)
     // We need 1 argument.
     if(c_sane(contxt, 1))
     {
-        // Dummy.
-        pretty_print(contxt);
-    }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
+        char *mda = str(CARG(1));
+
+        RNUM
+        (
+            gui_closemedia(mda) == G_TRUE ? 1 : 0
+        );
     }
 
-    // Success, failure or panic.
+    // Broken parser.
+    PANIC(contxt);
     RCUR;
 }
 
@@ -104,6 +104,26 @@ entry_p m_effect(entry_p contxt)
     RCUR;
 }
 
+// From datatypesclass.h 44.1 (17.4.1999)
+#ifndef AMIGA
+#define STM_PAUSE          1
+#define STM_PLAY           2
+#define STM_CONTENTS       3
+#define STM_INDEX          4
+#define STM_RETRACE        5
+#define STM_BROWSE_PREV    6
+#define STM_BROWSE_NEXT    7
+#define STM_NEXT_FIELD     8
+#define STM_PREV_FIELD     9
+#define STM_ACTIVATE_FIELD 10
+#define STM_COMMAND        11
+#define STM_REWIND         12
+#define STM_FASTFORWARD    13
+#define STM_STOP           14
+#define STM_RESUME         15
+#define STM_LOCATE         16
+#endif
+
 //----------------------------------------------------------------------------
 // (setmedia <media> <action> [parameter])
 //      perform action on datatype
@@ -116,63 +136,79 @@ entry_p m_setmedia(entry_p contxt)
     if(c_sane(contxt, 2))
     {
         /*
-        From the Installer.guide:
-
-           Using the setmedia statement some action can be performed on the
-        datatype.
-
            media is the variable which is set with the showmedia statement.
         action is one of the following strings:
 
         `pause'
-             Pause playing
-
         `play'
-             Start playing
-
         `contents'
-             Show contents
-
         `index'
-             Show index
-
         `retrace'
-             Goto previous visited node.
-
         `browser_prev'
-             Goto previous node.
-
         `broser_next'
-             Goto next node.
-
         `command'
              Send a command to the datatype. The parameter is the string
              command.
-
         `rewind'
-             Goto beginning
-
         `fastforward'
-             Run forward
-
         `stop'
-             Stop playing
-
         `locate'
              Locate a position. The parameter is an integer (frame number for
              example).
         */
 
-        // Dummy.
-        pretty_print(contxt);
-    }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
+        struct { int v; char *s; } t[] = 
+        { 
+            { STM_PAUSE, "pause" },
+            { STM_PLAY, "play" },
+            { STM_CONTENTS, "contents" },
+            { STM_INDEX, "index" },
+            { STM_RETRACE, "retrace" },
+            { STM_BROWSE_PREV, "browser_prev" },
+            { STM_BROWSE_NEXT, "browser_next" },
+            { STM_COMMAND, "command" },
+            { STM_REWIND, "rewind" },
+            { STM_FASTFORWARD, "fastforward" },
+            { STM_STOP, "stop" },
+            { STM_LOCATE, "locate" },
+            { 0, NULL }
+        };
+
+        char *a = str(CARG(2));
+
+        for(size_t i = 0; t[i].v; i++)
+        {
+            if(!strcasecmp(a, t[i].s))
+            {
+                char *par = NULL;
+                int mid = num(CARG(1));
+
+                if(CARG(3) && CARG(3) != end() &&
+                  (t[i].v == STM_COMMAND ||
+                   t[i].v == STM_LOCATE))
+                {
+                    par = str(CARG(3));
+                }
+
+                inp_t r = gui_setmedia
+                (
+                    mid, t[i].v, par
+                );
+
+                RNUM
+                (
+                    r == G_TRUE ? 1 : 0
+                );
+            }
+        }
+
+        // Invalid action.
+        ERR(ERR_VAL_INVALID, a);
+        RNUM(0);
     }
 
-    // Success, failure or panic.
+    // Broken parser.
+    PANIC(contxt);
     RCUR;
 }
 
@@ -289,15 +325,11 @@ entry_p m_showmedia(entry_p contxt)
              any datatype)
         */
 
-        // Dummy.
-        pretty_print(contxt);
-    }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
+        // Always fail.
+        RNUM(0);
     }
 
-    // Success, failure or panic.
+    // Broken parser.
+    PANIC(contxt);
     RCUR;
 }

@@ -3303,3 +3303,31 @@ void gui_effect(int eff, int cl1, int cl2)
     #endif
 }
 
+//----------------------------------------------------------------------------
+// Name:        gui_closemedia
+// Description: FIXME
+// Input:       const char *mda:    Media file.
+// Return:      FIXME
+//----------------------------------------------------------------------------
+inp_t gui_closemedia(const char *mda)
+{
+    // Testing purposes.
+    printf("%s\n", mda);
+    return G_TRUE;
+}
+
+//----------------------------------------------------------------------------
+// Name:        gui_setmedia
+// Description: FIXME
+// Input:       int mid:            Media ID
+//              int act:            Action
+//              const char* par:    Parameter
+// Return:      FIXME
+//----------------------------------------------------------------------------
+inp_t gui_setmedia(int mid, int act, const char *par)
+{
+    // Testing purposes.
+    printf("%d:%d:%s\n", mid, act, par ? par : "_");
+    return G_TRUE;
+}
+
