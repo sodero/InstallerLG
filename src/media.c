@@ -135,30 +135,9 @@ entry_p m_setmedia(entry_p contxt)
     // We need atleast 2 arguments.
     if(c_sane(contxt, 2))
     {
-        /*
-           media is the variable which is set with the showmedia statement.
-        action is one of the following strings:
-
-        `pause'
-        `play'
-        `contents'
-        `index'
-        `retrace'
-        `browser_prev'
-        `broser_next'
-        `command'
-             Send a command to the datatype. The parameter is the string
-             command.
-        `rewind'
-        `fastforward'
-        `stop'
-        `locate'
-             Locate a position. The parameter is an integer (frame number for
-             example).
-        */
-
-        struct { int v; char *s; } t[] = 
-        { 
+        // All supported commands.
+        struct { int val; char *str; } all[] =
+        {
             { STM_PAUSE, "pause" },
             { STM_PLAY, "play" },
             { STM_CONTENTS, "contents" },
@@ -174,36 +153,43 @@ entry_p m_setmedia(entry_p contxt)
             { 0, NULL }
         };
 
-        char *a = str(CARG(2));
+        // The action to perform.
+        char *act = str(CARG(2));
 
-        for(size_t i = 0; t[i].v; i++)
+        // Iterate over suported actions.
+        for(size_t i = 0; all[i].val; i++)
         {
-            if(!strcasecmp(a, t[i].s))
+            // Is the current supported action
+            // equal the input action?
+            if(!strcasecmp(act, all[i].str))
             {
+                // Extra info.
                 char *par = NULL;
+
+                // Media identifier.
                 int mid = num(CARG(1));
 
+                // The 'command' and 'locate' actions
+                // need an additional parameter.
                 if(CARG(3) && CARG(3) != end() &&
-                  (t[i].v == STM_COMMAND ||
-                   t[i].v == STM_LOCATE))
+                  (all[i].val == STM_COMMAND ||
+                   all[i].val == STM_LOCATE))
                 {
+                    // Resolve extra info.
                     par = str(CARG(3));
                 }
 
-                inp_t r = gui_setmedia
-                (
-                    mid, t[i].v, par
-                );
-
                 RNUM
                 (
-                    r == G_TRUE ? 1 : 0
+                    // Invoke GUI to perform action.
+                    gui_setmedia(mid, all[i].val, par)
+                    == G_TRUE ? 1 : 0
                 );
             }
         }
 
         // Invalid action.
-        ERR(ERR_VAL_INVALID, a);
+        ERR(ERR_VAL_INVALID, act);
         RNUM(0);
     }
 
