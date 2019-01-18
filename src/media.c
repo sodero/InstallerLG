@@ -105,7 +105,9 @@ entry_p m_effect(entry_p contxt)
 }
 
 // From datatypesclass.h 44.1 (17.4.1999)
-#ifndef AMIGA
+#ifdef AMIGA
+#include <datatypes/datatypesclass.h>
+#else
 #define STM_PAUSE          1
 #define STM_PLAY           2
 #define STM_CONTENTS       3
