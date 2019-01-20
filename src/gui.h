@@ -27,14 +27,25 @@ typedef enum
 // Gui effect bits.
 enum
 {
-    G_UPPER_BIT,
-    G_LOWER_BIT,
-    G_LEFT_BIT,
-    G_RIGHT_BIT,
-    G_RADIAL_BIT,
-    G_HORIZONTAL_BIT
+    G_UPPER_BIT,        // 1
+    G_LOWER_BIT,        // 2
+    G_LEFT_BIT,         // 4
+    G_RIGHT_BIT,        // 8
+    G_RADIAL_BIT,       // 16
+    G_HORIZONTAL_BIT,   // 32
+    G_SMALL_BIT,
+    G_MEDIUM_BIT,
+    G_LARGE_BIT,
+    G_LESS_BIT,
+    G_MORE_BIT,
+    G_BORDER_BIT,
+    G_WORDWRAP_BIT,
+    G_PANEL_BIT,
+    G_PLAY_BIT,
+    G_REPEAT_BIT
 };
 
+// Gui effect masks.
 #define G_UPPER (1 << G_UPPER_BIT)
 #define G_LOWER (1 << G_LOWER_BIT)
 #define G_LEFT (1 << G_LEFT_BIT)
@@ -43,6 +54,17 @@ enum
 #define G_HORIZONTAL (1 << G_HORIZONTAL_BIT)
 #define G_EFFECT (G_RADIAL | G_HORIZONTAL)
 #define G_POSITION (G_LEFT | G_RIGHT | G_UPPER | G_LOWER)
+#define G_SMALL (1 << G_SMALL_BIT)
+#define G_MEDIUM (1 << G_MEDIUM_BIT)
+#define G_LARGE (1 << G_LARGE_BIT)
+#define G_LESS (1 << G_LESS_BIT)
+#define G_MORE (1 << G_MORE_BIT)
+#define G_SIZE (G_SMALL | G_MEDIUM | G_LARGE)
+#define G_BORDER (1 << G_BORDER_BIT)
+#define G_WORDWRAP (1 << G_WORDWRAP_BIT)
+#define G_PANEL (1 << G_PANEL_BIT)
+#define G_PLAY (1 << G_PLAY_BIT)
+#define G_REPEAT (1 << G_REPEAT_BIT)
 
 void gui_exit(void);
 void gui_complete(int com);
@@ -52,6 +74,7 @@ void gui_copyfiles_end(void);
 void gui_effect(int eff, int cl1, int cl2);
 inp_t gui_closemedia(const char *mda);
 inp_t gui_setmedia(int mid, int act, const char *par);
+inp_t gui_showmedia(int *mid, const char* mda, int act);
 inp_t gui_init(bool scr);
 inp_t gui_message(const char *msg, bool bck);
 inp_t gui_finish(const char *msg);

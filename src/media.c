@@ -45,6 +45,98 @@ entry_p m_closemedia(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
+// Name:        h_msk
+// Description: Get (effect) and (showmedia) attributes as bitmask.
+// Input:       const char *atr:    Attribute name.
+// Return:      int:                G_* bitmask.
+//----------------------------------------------------------------------------
+static int h_msk(const char *atr)
+{
+    // Bitmask.
+    int msk = 0;
+
+    // (effect) only attributes.
+    struct { int val; char *str; } eff[] =
+    {
+        { G_HORIZONTAL, "horizontal" },
+        { G_RADIAL, "radial" },
+        { 0, NULL }
+    };
+
+    // (effect) and (showmedia) position.
+    struct { int val; char *str; } pos[] =
+    {
+        { G_UPPER, "upper" },
+        { G_LOWER, "lower" },
+        { G_LEFT, "left" },
+        { G_RIGHT, "right" },
+        { 0, NULL }
+    };
+
+    // (showmedia) size and misc.
+    struct { int val; char *str; } sze[] =
+    {
+        { G_SMALL, "small" },
+        { G_SMALL | G_LESS, "small_medium" },
+        { G_SMALL | G_MORE, "small_large" },
+        { G_MEDIUM, "medium" },
+        { G_MEDIUM | G_LESS, "medium_small" },
+        { G_MEDIUM | G_MORE, "medium_large" },
+        { G_LARGE, "large" },
+        { G_LARGE | G_LESS, "large_small" },
+        { G_LARGE | G_MORE, "large_medium" },
+        { G_BORDER, "border" },
+        { G_WORDWRAP, "wordwrap" },
+        { G_PANEL, "panel" },
+        { G_PLAY, "play" },
+        { G_REPEAT, "repeat" },
+        { 0, NULL }
+    };
+
+    // Find (effect/showmedia) position.
+    for(size_t i = 0; pos[i].val; i++)
+    {
+        // Look for substring, we're
+        // being cheap and sloppy here.
+        if(strcasestr(atr, pos[i].str))
+        {
+            // Add bit to mask.
+            msk |= pos[i].val;
+        }
+    }
+
+    // Look for (effect) type.
+    for(size_t i = 0; eff[i].val; i++)
+    {
+        // If we find an (effect)
+        // attribute, we're done. 
+        if(!strcasecmp(atr, eff[i].str))
+        {
+            // Add bit to mask and
+            // return immidiately.
+            msk |= eff[i].val;
+            return msk;
+        }
+    }
+    
+    // Look for (showmedia) size.
+    for(size_t i = 0; sze[i].val; i++)
+    {
+        // We can't be cheap and sloppy
+        // due to the positioning combo.
+        if(!strcasecmp(atr, sze[i].str))
+        {
+            // Add bit to mask.
+            msk |= sze[i].val;
+            break;
+        }
+    }
+
+    // Done.
+    return msk;
+}
+
+//----------------------------------------------------------------------------
 // (effect <position> <effect> <color 1> <color 2>)
 //      open the installer on its own screen
 //
@@ -64,12 +156,7 @@ entry_p m_effect(entry_p contxt)
             ic2 = num(CARG(4)),
 
         // Translate type and position.
-        ief = (strcasestr(eps, "upper") ? G_UPPER : 0) |
-              (strcasestr(eps, "lower") ? G_LOWER : 0) |
-              (strcasestr(eps, "left") ? G_LEFT : 0) |
-              (strcasestr(eps, "right") ? G_RIGHT : 0) |
-              (strcasecmp(est, "radial") ? 0 : G_RADIAL) |
-              (strcasecmp(est, "horizontal") ? 0 : G_HORIZONTAL);
+        ief = h_msk(eps) | h_msk(est);
 
         // Invalid initial values.
         static int oc1, oc2, oef = G_RADIAL|G_HORIZONTAL;
@@ -211,110 +298,13 @@ entry_p m_showmedia(entry_p contxt)
     // We need atleast 5 arguments.
     if(c_sane(contxt, 5))
     {
-        /*
-        From the Installer.guide:
+        // Translate type and position.
+        int mid = 0;
 
-           showmedia opens a datatype (AmigaOS 3.0 is needed) and presents it
-        to the user. With the exception of sound and music datatypes a window
-        is opened with a given position and size to display the datatype. If
-        the datatype cannot be opened 0 is returned, if the datatype is opened
-        1 is returned.
+        gui_showmedia(&mid, "dummy", 0);
 
-           medianame is a string value. The value is used as a name of a
-        variable that gets a handle to the datatype. This variable has to be
-        used in the other media statements.
-
-           filename is the name of the file to show.
-
-           position is one of the following strings:
-
-        `upper_left'
-             The window is placed in the upper left corner of the screen.
-
-        `upper_center'
-             The window is horizontally centered in the upper part of the
-             screen.
-
-        `upper_right'
-             The window is placed in the upper right corner of the screen.
-
-        `center_left'
-             The window is  vertically centered on the left side of the screen.
-
-        `center'
-             The window is centered on the screen.
-
-        `center_right'
-             The window is vertically centered on the right side of the screen.
-
-        `lower_left'
-             The window is placed in the lower left corner of the screen.
-
-        `lower_center'
-             The window is horizontally centered in the lower part of the
-             screen.
-
-        `lower_right'
-             The window is placed in the lower right corner of the screen.
-
-           size is on of the following strings:
-
-        `none'
-             The window gets its size from the datatype (for example the size
-             of the picture).
-
-        `small'
-             The window is small.
-
-        `small_medium'
-             The window has a small width and a medium height.
-
-        `small_large'
-             The window has a small width and a large height.
-
-        `medium_small'
-             The window has a medium width and a small height.
-
-        `medium'
-             The window is medium sized.
-
-        `medium_large'
-             The window has a medium width and a large height.
-
-        `large_small'
-             The window has a large width and a small height.
-
-        `large_medium'
-             The window has a large width and a medium height.
-
-        `large'
-             The window is large.
-
-           If the borderflag is 1 the window gets a border with proprtional
-        sliders and arrows and a size gadget (prefered for Amiga guide files
-        and text files). If the borderflag is 0 the window gets no border at
-        all (prefered for pictures and animations).
-
-           After the bordeflag more strings can follow which sets some
-        attributes of the datatype:
-
-        `wordwrap'
-             A text is displaed using wordwrapping.
-
-        `panel'
-             If the datatype has a control panel it is used (amigaguide and
-             animation)
-
-        `play'
-             The datatype shall start playing immediatly (animation)
-
-        `repeat'
-             The datatype shall repeat playing (seems not to be supported by
-             any datatype)
-        */
-
-        // Always fail.
-        RNUM(0);
+        // Always.
+        RNUM(1);
     }
 
     // Broken parser.

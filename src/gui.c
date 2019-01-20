@@ -3312,7 +3312,9 @@ void gui_effect(int eff, int cl1, int cl2)
 inp_t gui_closemedia(const char *mda)
 {
     // Testing purposes.
+    #ifndef AMIGA
     printf("%s\n", mda);
+    #endif
     return G_TRUE;
 }
 
@@ -3327,7 +3329,24 @@ inp_t gui_closemedia(const char *mda)
 inp_t gui_setmedia(int mid, int act, const char *par)
 {
     // Testing purposes.
+    #ifndef AMIGA
     printf("%d:%d:%s\n", mid, act, par ? par : "_");
+    #endif
+    return G_TRUE;
+}
+
+//----------------------------------------------------------------------------
+// Name:        gui_showmedia
+// Description: FIXME
+// Input:       FIXME
+// Return:      FIXME
+//----------------------------------------------------------------------------
+inp_t gui_showmedia(int *mid, const char* mda, int act)
+{
+    // Testing purposes.
+    #ifndef AMIGA
+    printf("%d:%d:%s\n", *mid, act, mda ? mda : "_");
+    #endif
     return G_TRUE;
 }
 
