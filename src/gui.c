@@ -128,6 +128,9 @@ CLASS_DEF(IG)
 #define MUIM_IG_Finish           (TAGBASE_LG + 121)
 #define MUIM_IG_Working          (TAGBASE_LG + 122)
 #define MUIM_IG_Effect           (TAGBASE_LG + 123)
+#define MUIM_IG_CloseMedia       (TAGBASE_LG + 124)
+#define MUIM_IG_SetMedia         (TAGBASE_LG + 125)
+#define MUIM_IG_ShowMedia        (TAGBASE_LG + 126)
 
 //----------------------------------------------------------------------------
 // IG - Attributes
@@ -256,6 +259,33 @@ struct MUIP_IG_Effect
     ULONG Effect;
     ULONG ColorStart;
     ULONG ColorEnd;
+};
+
+//----------------------------------------------------------------------------
+// IG - CloseMedia parameters
+//----------------------------------------------------------------------------
+struct MUIP_IG_CloseMedia
+{
+    ULONG MethodID;
+    ULONG MediaID;
+};
+
+//----------------------------------------------------------------------------
+// IG - SetMedia parameters
+//----------------------------------------------------------------------------
+struct MUIP_IG_SetMedia
+{
+    ULONG MethodID;
+    ULONG MediaID;
+};
+
+//----------------------------------------------------------------------------
+// IG - ShowMedia parameters
+//----------------------------------------------------------------------------
+struct MUIP_IG_ShowMedia
+{
+    ULONG MethodID;
+    ULONG MediaID;
 };
 
 //----------------------------------------------------------------------------
@@ -1477,6 +1507,66 @@ MUIDSP IPTR IGEffect(Class *cls,
 }
 
 //----------------------------------------------------------------------------
+// IGCloseMedia -  FIXME
+// Input:          FIXME
+// Return:         G_TRUE / G_FALSE / G_ERR.
+//----------------------------------------------------------------------------
+MUIDSP IPTR IGCloseMedia(Class *cls,
+                         Object *obj,
+                         struct MUIP_IG_CloseMedia *msg)
+{
+    // Do we have anything to do?
+    if(msg->MediaID)
+    {
+        // Dummy.
+        return G_TRUE;
+    }
+
+    // Invalid ID.
+    return G_FALSE;
+}
+
+//----------------------------------------------------------------------------
+// IGSetMedia -  FIXME
+// Input:        FIXME
+// Return:       G_TRUE / G_FALSE / G_ERR.
+//----------------------------------------------------------------------------
+MUIDSP IPTR IGSetMedia(Class *cls,
+                       Object *obj,
+                       struct MUIP_IG_SetMedia *msg)
+{
+    // Do we have anything to do?
+    if(msg->MediaID)
+    {
+        // Dummy.
+        return G_TRUE;
+    }
+
+    // Invalid ID.
+    return G_FALSE;
+}
+
+//----------------------------------------------------------------------------
+// IGShowMedia -  FIXME
+// Input:         FIXME
+// Return:        G_TRUE / G_FALSE / G_ERR.
+//----------------------------------------------------------------------------
+MUIDSP IPTR IGShowMedia(Class *cls,
+                       Object *obj,
+                       struct MUIP_IG_ShowMedia *msg)
+{
+    // Do we have anything to do?
+    if(msg->MediaID)
+    {
+        // Dummy.
+        return G_TRUE;
+    }
+
+    // Invalid ID.
+    return G_FALSE;
+}
+
+//----------------------------------------------------------------------------
 // IGMessage - Show message
 // Input:      Message - The prompt
 //             Back - Use 'Back' instead of 'Abort'.
@@ -2629,6 +2719,15 @@ DISPATCH(IG)
         case MUIM_IG_Effect:
             return IGEffect(cls, obj, (struct MUIP_IG_Effect *) msg);
 
+        case MUIM_IG_CloseMedia:
+            return IGCloseMedia(cls, obj, (struct MUIP_IG_CloseMedia *) msg);
+
+        case MUIM_IG_SetMedia:
+            return IGSetMedia(cls, obj, (struct MUIP_IG_SetMedia *) msg);
+
+        case MUIM_IG_ShowMedia:
+            return IGShowMedia(cls, obj, (struct MUIP_IG_ShowMedia *) msg);
+
         case MUIM_IG_Abort:
             return IGAbort(cls, obj, (struct MUIP_IG_Abort *) msg);
 
@@ -3309,11 +3408,13 @@ void gui_effect(int eff, int cl1, int cl2)
 // Input:       const char *mda:    Media file.
 // Return:      FIXME
 //----------------------------------------------------------------------------
-inp_t gui_closemedia(const char *mda)
+inp_t gui_closemedia(int mid)
 {
     // Testing purposes.
-    #ifndef AMIGA
-    printf("%s\n", mda);
+    #ifdef AMIGA
+    DoMethod(Win, MUIM_IG_CloseMedia, mid);
+    #else
+    printf("%d\n", mid);
     #endif
     return G_TRUE;
 }
@@ -3329,7 +3430,9 @@ inp_t gui_closemedia(const char *mda)
 inp_t gui_setmedia(int mid, int act, const char *par)
 {
     // Testing purposes.
-    #ifndef AMIGA
+    #ifdef AMIGA
+    DoMethod(Win, MUIM_IG_SetMedia, mid);
+    #else
     printf("%d:%d:%s\n", mid, act, par ? par : "_");
     #endif
     return G_TRUE;
@@ -3344,7 +3447,9 @@ inp_t gui_setmedia(int mid, int act, const char *par)
 inp_t gui_showmedia(int *mid, const char* mda, int act)
 {
     // Testing purposes.
-    #ifndef AMIGA
+    #ifdef AMIGA
+    DoMethod(Win, MUIM_IG_ShowMedia, mid);
+    #else
     printf("%d:%d:%s\n", *mid, act, mda ? mda : "_");
     #endif
     return G_TRUE;

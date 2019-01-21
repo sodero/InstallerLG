@@ -31,11 +31,11 @@ entry_p m_closemedia(entry_p contxt)
     // We need 1 argument.
     if(c_sane(contxt, 1))
     {
-        char *mda = str(CARG(1));
+        int mid = num(CARG(1));
 
         RNUM
         (
-            gui_closemedia(mda) == G_TRUE ? 1 : 0
+            gui_closemedia(mid) == G_TRUE ? 1 : 0
         );
     }
 
