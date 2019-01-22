@@ -277,6 +277,8 @@ struct MUIP_IG_SetMedia
 {
     ULONG MethodID;
     ULONG MediaID;
+    ULONG Action;
+    ULONG Parameter;
 };
 
 //----------------------------------------------------------------------------
@@ -286,6 +288,8 @@ struct MUIP_IG_ShowMedia
 {
     ULONG MethodID;
     ULONG MediaID;
+    ULONG Media;
+    ULONG Action;
 };
 
 //----------------------------------------------------------------------------
@@ -3431,7 +3435,7 @@ inp_t gui_setmedia(int mid, int act, const char *par)
 {
     // Testing purposes.
     #ifdef AMIGA
-    DoMethod(Win, MUIM_IG_SetMedia, mid);
+    DoMethod(Win, MUIM_IG_SetMedia, mid, act, par);
     #else
     printf("%d:%d:%s\n", mid, act, par ? par : "_");
     #endif
@@ -3448,7 +3452,7 @@ inp_t gui_showmedia(int *mid, const char* mda, int act)
 {
     // Testing purposes.
     #ifdef AMIGA
-    DoMethod(Win, MUIM_IG_ShowMedia, mid);
+    DoMethod(Win, MUIM_IG_ShowMedia, mid, mda, act);
     #else
     printf("%d:%d:%s\n", *mid, act, mda ? mda : "_");
     #endif

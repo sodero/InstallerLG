@@ -109,7 +109,7 @@ static int h_msk(const char *atr)
     for(size_t i = 0; eff[i].val; i++)
     {
         // If we find an (effect)
-        // attribute, we're done. 
+        // attribute, we're done.
         if(!strcasecmp(atr, eff[i].str))
         {
             // Add bit to mask and
@@ -118,7 +118,7 @@ static int h_msk(const char *atr)
             return msk;
         }
     }
-    
+
     // Look for (showmedia) size.
     for(size_t i = 0; sze[i].val; i++)
     {
