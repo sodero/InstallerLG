@@ -202,14 +202,10 @@ entry_p m_effect(entry_p contxt)
 #define STM_RETRACE        5
 #define STM_BROWSE_PREV    6
 #define STM_BROWSE_NEXT    7
-#define STM_NEXT_FIELD     8
-#define STM_PREV_FIELD     9
-#define STM_ACTIVATE_FIELD 10
 #define STM_COMMAND        11
 #define STM_REWIND         12
 #define STM_FASTFORWARD    13
 #define STM_STOP           14
-#define STM_RESUME         15
 #define STM_LOCATE         16
 #endif
 
@@ -301,7 +297,17 @@ entry_p m_showmedia(entry_p contxt)
         // Translate type and position.
         int mid = 0;
 
-        gui_showmedia(&mid, "dummy", 0);
+        gui_showmedia(&mid, str(CARG(2)), G_BORDER|
+          G_LEFT|G_UPPER 
+          |G_LARGE|G_MORE);
+        //gui_showmedia(&mid, str(CARG(2)), G_LEFT);
+        //gui_showmedia(&mid, str(CARG(2)), G_UPPER|G_BORDER);
+        //gui_showmedia(&mid, str(CARG(2)), G_UPPER|G_BORDER);
+        //gui_showmedia(&mid, str(CARG(2)), G_UPPER);
+
+        //gui_showmedia(&mid, str(CARG(2)), G_RIGHT|G_LOWER);
+        //gui_showmedia(&mid, str(CARG(2)), G_LEFT);
+        //gui_showmedia(&mid, str(CARG(2)), G_UPPER);
 
         // Always.
         RNUM(1);

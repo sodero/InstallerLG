@@ -53,6 +53,8 @@ enum
 #define G_RADIAL (1 << G_RADIAL_BIT)
 #define G_HORIZONTAL (1 << G_HORIZONTAL_BIT)
 #define G_EFFECT (G_RADIAL | G_HORIZONTAL)
+#define G_HORIZ (G_LEFT | G_RIGHT)
+#define G_VERT (G_UPPER | G_LOWER)
 #define G_POSITION (G_LEFT | G_RIGHT | G_UPPER | G_LOWER)
 #define G_SMALL (1 << G_SMALL_BIT)
 #define G_MEDIUM (1 << G_MEDIUM_BIT)
