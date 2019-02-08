@@ -20,6 +20,26 @@
 char *strcasestr(const char *, const char *);
 #endif
 
+#ifdef AMIGA
+#include <datatypes/datatypesclass.h>
+#else
+// From datatypesclass.h 44.1 (17.4.1999)
+#define STM_PAUSE          1
+#define STM_PLAY           2
+#define STM_CONTENTS       3
+#define STM_INDEX          4
+#define STM_RETRACE        5
+#define STM_BROWSE_PREV    6
+#define STM_BROWSE_NEXT    7
+// Skip unused defines to avoid warnings.
+#define STM_COMMAND        11
+#define STM_REWIND         12
+#define STM_FASTFORWARD    13
+#define STM_STOP           14
+// Skip unused defines to avoid warnings.
+#define STM_LOCATE         16
+#endif
+
 //----------------------------------------------------------------------------
 // (closemedia <media>)
 //      close media file and remove it from memory.
@@ -45,95 +65,17 @@ entry_p m_closemedia(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
-// Name:        h_msk
-// Description: Get (effect) and (showmedia) attributes as bitmask.
+// Name:        h_pos
+// Description: Get (effect) and (showmedia) position as bitmask.
 // Input:       const char *atr:    Attribute name.
 // Return:      int:                G_* bitmask.
 //----------------------------------------------------------------------------
-static int h_msk(const char *atr)
+static int h_pos(const char *atr)
 {
-    // Bitmask.
-    int msk = 0;
-
-    // (effect) only attributes.
-    struct { int val; char *str; } eff[] =
-    {
-        { G_HORIZONTAL, "horizontal" },
-        { G_RADIAL, "radial" },
-        { 0, NULL }
-    };
-
-    // (effect) and (showmedia) position.
-    struct { int val; char *str; } pos[] =
-    {
-        { G_UPPER, "upper" },
-        { G_LOWER, "lower" },
-        { G_LEFT, "left" },
-        { G_RIGHT, "right" },
-        { 0, NULL }
-    };
-
-    // (showmedia) size and misc.
-    struct { int val; char *str; } sze[] =
-    {
-        { G_SMALL, "small" },
-        { G_SMALL | G_LESS, "small_medium" },
-        { G_SMALL | G_MORE, "small_large" },
-        { G_MEDIUM, "medium" },
-        { G_MEDIUM | G_LESS, "medium_small" },
-        { G_MEDIUM | G_MORE, "medium_large" },
-        { G_LARGE, "large" },
-        { G_LARGE | G_LESS, "large_small" },
-        { G_LARGE | G_MORE, "large_medium" },
-        { G_BORDER, "border" },
-        { G_WORDWRAP, "wordwrap" },
-        { G_PANEL, "panel" },
-        { G_PLAY, "play" },
-        { G_REPEAT, "repeat" },
-        { 0, NULL }
-    };
-
-    // Find (effect/showmedia) position.
-    for(size_t i = 0; pos[i].val; i++)
-    {
-        // Look for substring, we're
-        // being cheap and sloppy here.
-        if(strcasestr(atr, pos[i].str))
-        {
-            // Add bit to mask.
-            msk |= pos[i].val;
-        }
-    }
-
-    // Look for (effect) type.
-    for(size_t i = 0; eff[i].val; i++)
-    {
-        // If we find an (effect)
-        // attribute, we're done.
-        if(!strcasecmp(atr, eff[i].str))
-        {
-            // Add bit to mask and
-            // return immidiately.
-            msk |= eff[i].val;
-            return msk;
-        }
-    }
-
-    // Look for (showmedia) size.
-    for(size_t i = 0; sze[i].val; i++)
-    {
-        // We can't be cheap and sloppy
-        // due to the positioning combo.
-        if(!strcasecmp(atr, sze[i].str))
-        {
-            // Add bit to mask.
-            msk |= sze[i].val;
-            break;
-        }
-    }
-
-    // Done.
-    return msk;
+    return (strcasestr(atr, "left") ? G_LEFT : 0) |
+           (strcasestr(atr, "right") ? G_RIGHT : 0) |
+           (strcasestr(atr, "upper") ? G_UPPER : 0) |
+           (strcasestr(atr, "lower") ? G_LOWER : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -147,19 +89,19 @@ entry_p m_effect(entry_p contxt)
     // We need 4 arguments.
     if(c_sane(contxt, 4))
     {
-        // Position and type.
+        // Position and effect.
         char *est = str(CARG(2)),
              *eps = str(CARG(1));
 
-        // Gradient color values.
+        // Colors, type and position.
         int ic1 = num(CARG(3)),
             ic2 = num(CARG(4)),
-
-        // Translate type and position.
-        ief = h_msk(eps) | h_msk(est);
+            ief = h_pos(eps) | (
+                  !strcasecmp(est, "radial") ? G_RADIAL :
+                  !strcasecmp(est, "horizontal") ? G_HORIZONTAL : 0);
 
         // Invalid initial values.
-        static int oc1, oc2, oef = G_RADIAL|G_HORIZONTAL;
+        static int oc1, oc2, oef = G_RADIAL | G_HORIZONTAL;
 
         // Known effect type?
         if(ief & G_EFFECT)
@@ -191,24 +133,6 @@ entry_p m_effect(entry_p contxt)
     RCUR;
 }
 
-// From datatypesclass.h 44.1 (17.4.1999)
-#ifdef AMIGA
-#include <datatypes/datatypesclass.h>
-#else
-#define STM_PAUSE          1
-#define STM_PLAY           2
-#define STM_CONTENTS       3
-#define STM_INDEX          4
-#define STM_RETRACE        5
-#define STM_BROWSE_PREV    6
-#define STM_BROWSE_NEXT    7
-#define STM_COMMAND        11
-#define STM_REWIND         12
-#define STM_FASTFORWARD    13
-#define STM_STOP           14
-#define STM_LOCATE         16
-#endif
-
 //----------------------------------------------------------------------------
 // (setmedia <media> <action> [parameter])
 //      perform action on datatype
@@ -220,57 +144,46 @@ entry_p m_setmedia(entry_p contxt)
     // We need atleast 2 arguments.
     if(c_sane(contxt, 2))
     {
-        // All supported commands.
-        struct { int val; char *str; } all[] =
-        {
-            { STM_PAUSE, "pause" },
-            { STM_PLAY, "play" },
-            { STM_CONTENTS, "contents" },
-            { STM_INDEX, "index" },
-            { STM_RETRACE, "retrace" },
-            { STM_BROWSE_PREV, "browser_prev" },
-            { STM_BROWSE_NEXT, "browser_next" },
-            { STM_COMMAND, "command" },
-            { STM_REWIND, "rewind" },
-            { STM_FASTFORWARD, "fastforward" },
-            { STM_STOP, "stop" },
-            { STM_LOCATE, "locate" },
-            { 0, NULL }
-        };
-
-        // The action to perform.
+        // Action to perform.
         char *act = str(CARG(2));
 
-        // Iterate over suported actions.
-        for(size_t i = 0; all[i].val; i++)
+        // Translate action to command.
+        int cmd = !strcasecmp(act, "pause") ? STM_PAUSE :
+                  !strcasecmp(act, "play") ? STM_PLAY :
+                  !strcasecmp(act, "contents") ? STM_CONTENTS :
+                  !strcasecmp(act, "index") ? STM_INDEX :
+                  !strcasecmp(act, "retrace") ? STM_RETRACE :
+                  !strcasecmp(act, "browser_prev") ? STM_BROWSE_PREV :
+                  !strcasecmp(act, "browser_next") ? STM_BROWSE_NEXT :
+                  !strcasecmp(act, "command") ? STM_COMMAND :
+                  !strcasecmp(act, "rewind") ? STM_REWIND :
+                  !strcasecmp(act, "fastforward") ? STM_FASTFORWARD :
+                  !strcasecmp(act, "stop") ? STM_STOP :
+                  !strcasecmp(act, "locate") ? STM_LOCATE : 0;
+
+        // Valid action?
+        if(cmd)
         {
-            // Is the current supported action
-            // equal the input action?
-            if(!strcasecmp(act, all[i].str))
+            // Extra flags.
+            char *par = NULL;
+
+            // If the command requires an extra parameter,
+            // resolved the next argument, if it exists.
+            if((cmd == STM_COMMAND || cmd == STM_LOCATE) &&
+                CARG(3) && CARG(3) != end())
             {
-                // Extra info.
-                char *par = NULL;
-
-                // Media identifier.
-                int mid = num(CARG(1));
-
-                // The 'command' and 'locate' actions
-                // need an additional parameter.
-                if(CARG(3) && CARG(3) != end() &&
-                  (all[i].val == STM_COMMAND ||
-                   all[i].val == STM_LOCATE))
-                {
-                    // Resolve extra info.
-                    par = str(CARG(3));
-                }
-
-                RNUM
-                (
-                    // Invoke GUI to perform action.
-                    gui_setmedia(mid, all[i].val, par)
-                    == G_TRUE ? 1 : 0
-                );
+                // Resolve next.
+                par = str(CARG(3));
             }
+
+            // Media identifier.
+            int mid = num(CARG(1));
+
+            RNUM
+            (
+                // Invoke GUI to perform action.
+                gui_setmedia(mid, cmd, par) == G_TRUE ? 1 : 0
+            );
         }
 
         // Invalid action.
@@ -294,20 +207,38 @@ entry_p m_showmedia(entry_p contxt)
     // We need atleast 5 arguments.
     if(c_sane(contxt, 5))
     {
-        // Translate type and position.
+        // Get size.
+        char *att = str(CARG(4));
+
+        // Set size bitmask.
+        int msk = h_pos(str(CARG(3))) | (num(CARG(5)) ? G_BORDER : 0) | (
+                  !strcasecmp(att, "small") ? G_SMALL :
+                  !strcasecmp(att, "small_medium") ? G_SMALL | G_LESS :
+                  !strcasecmp(att, "small_large") ? G_SMALL | G_MORE :
+                  !strcasecmp(att, "medium") ? G_MEDIUM :
+                  !strcasecmp(att, "medium_small") ? G_MEDIUM | G_LESS :
+                  !strcasecmp(att, "medium_large") ? G_MEDIUM | G_MORE :
+                  !strcasecmp(att, "large") ? G_LARGE :
+                  !strcasecmp(att, "large_small") ? G_LARGE | G_LESS :
+                  !strcasecmp(att, "large_medium") ? G_LARGE | G_MORE : 0);
+
+        // Get the rest of the flags.
+        for(size_t i = 6; CARG(i) && CARG(i) != end(); i++)
+        {
+            // Get current flag.
+            att = str(CARG(i));
+
+            // Translate into bitmask.
+            msk |= (!strcasecmp(att, "wordwrap") ? G_WORDWRAP :
+                    !strcasecmp(att, "panel") ? G_PANEL :
+                    !strcasecmp(att, "play") ? G_PLAY :
+                    !strcasecmp(att, "repeat") ? G_REPEAT : 0);
+        }
+
+        // FIXME.
         int mid = 0;
 
-        gui_showmedia(&mid, str(CARG(2)), G_BORDER|
-          G_LEFT|G_UPPER 
-          |G_LARGE|G_MORE);
-        //gui_showmedia(&mid, str(CARG(2)), G_LEFT);
-        //gui_showmedia(&mid, str(CARG(2)), G_UPPER|G_BORDER);
-        //gui_showmedia(&mid, str(CARG(2)), G_UPPER|G_BORDER);
-        //gui_showmedia(&mid, str(CARG(2)), G_UPPER);
-
-        //gui_showmedia(&mid, str(CARG(2)), G_RIGHT|G_LOWER);
-        //gui_showmedia(&mid, str(CARG(2)), G_LEFT);
-        //gui_showmedia(&mid, str(CARG(2)), G_UPPER);
+        gui_showmedia(&mid, str(CARG(2)), msk);
 
         // Always.
         RNUM(1);
