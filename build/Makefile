@@ -16,7 +16,7 @@ CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE
 else
 ifeq ($(OS),Darwin)
 CGEN = -g -std=c99
-CWRN += -Werror -Weverything -Wno-format-nonliteral -Wno-date-time -Wno-padded
+CWRN += -Werror -Weverything -Wno-format-nonliteral -Wno-date-time
 else
 CC := gcc
 AMIGA = true

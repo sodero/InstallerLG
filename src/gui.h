@@ -33,16 +33,16 @@ enum
     G_RIGHT_BIT,        // 8
     G_RADIAL_BIT,       // 16
     G_HORIZONTAL_BIT,   // 32
-    G_SMALL_BIT,
-    G_MEDIUM_BIT,
-    G_LARGE_BIT,
-    G_LESS_BIT,
-    G_MORE_BIT,
-    G_BORDER_BIT,
-    G_WORDWRAP_BIT,
-    G_PANEL_BIT,
-    G_PLAY_BIT,
-    G_REPEAT_BIT
+    G_SMALL_BIT,        // 64
+    G_MEDIUM_BIT,       // 128
+    G_LARGE_BIT,        // 256
+    G_LESS_BIT,         // 512
+    G_MORE_BIT,         // 1024
+    G_BORDER_BIT,       // 2048
+    G_WORDWRAP_BIT,     // 4096
+    G_PANEL_BIT,        // 8192
+    G_PLAY_BIT,         // 16384
+    G_REPEAT_BIT        // 32768
 };
 
 // Gui effect masks.
