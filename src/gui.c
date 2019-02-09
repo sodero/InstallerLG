@@ -1720,7 +1720,7 @@ MUIDSP IPTR IGShowMedia(Class *cls,
         if(flk)
         {
             // Check datatype before opening the file for real.
-            struct DataType *dtp = ObtainDataTypeA(DTST_FILE, flk, NULL);
+            struct DataType *dtp = ObtainDataTypeA(DTST_FILE, (APTR) flk, NULL);
 
             if(dtp)
             {
