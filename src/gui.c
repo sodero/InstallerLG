@@ -1463,11 +1463,6 @@ MUIDSP IPTR IGEffect(Class *cls,
                     TAG_END
                 );
 
-                // We need to clear rast port in
-                // case ct + resolution results
-                // in top leftovers.
-                ClearScreen(my->Win->RPort);
-
                 // Draw effect if it's enabled.
                 if(msg->Effect & G_EFFECT)
                 {
@@ -1479,7 +1474,7 @@ MUIDSP IPTR IGEffect(Class *cls,
                     // For all colors in gradient,
                     // draw rectangle with delta
                     // height.
-                    while(i)
+                    while(i >= 0)
                     {
                         // Go backwards in vector.
                         i -= 3;
