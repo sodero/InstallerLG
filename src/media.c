@@ -235,16 +235,79 @@ entry_p m_showmedia(entry_p contxt)
                     !strcasecmp(att, "repeat") ? G_REPEAT : 0);
         }
 
-        // FIXME.
-        int mid = 0;
+        // Invalid media ID.
+        int mid = -1;
 
-        gui_showmedia(&mid, str(CARG(2)), msk);
+        if(gui_showmedia(&mid, str(CARG(2)), msk) != G_TRUE)
+        {
+            // Could not open file.
+            RNUM(0);
+        }
 
-        // Always.
-        RNUM(1);
+        // Symbol destination.
+        entry_p dst = global(contxt);
+
+        if(dst)
+        {
+            char *var = str(CARG(1));
+            entry_p *sym = contxt->symbols;
+
+            // Symbol exists already?
+            while(*sym && *sym != end())
+            {
+                // If true, update current symbol.
+                if(!strcasecmp((*sym)->name, var) &&
+                   (*sym)->resolved)
+                {
+                    (*sym)->resolved->id = mid;
+
+                    // Success.
+                    RNUM(1);
+                }
+
+                // Next symbol.
+                sym++;
+            }
+
+            // Create the new media ID.
+            entry_p num = new_number(mid);
+
+            if(num)
+            {
+                // Create new symbol with user defined name.
+                entry_p nsm = new_symbol(DBG_ALLOC(strdup(var)));
+
+                if(nsm)
+                {
+                    // Reparent value.
+                    num->parent = nsm;
+                    nsm->resolved = num;
+
+                    // Append the symbol to the current
+                    // context and create a global ref.
+                    if(append(&contxt->symbols, nsm))
+                    {
+                        // Reparent symbol.
+                        push(dst, nsm);
+                        nsm->parent = contxt;
+
+                        // Success.
+                        RNUM(1);
+                    }
+
+                    // Out of memory.
+                    kill(nsm);
+                }
+                else
+                {
+                    // Out of memory.
+                    kill(num);
+                }
+            }
+        }
     }
 
-    // Broken parser.
+    // Broken parser / OOM.
     PANIC(contxt);
     RCUR;
 }

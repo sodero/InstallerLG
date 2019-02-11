@@ -3701,6 +3701,8 @@ inp_t gui_showmedia(int *mid, const char* mda, int act)
     #ifdef AMIGA
     DoMethod(Win, MUIM_IG_ShowMedia, mid, mda, act);
     #else
+    static int n;
+    *mid = n++;
     printf("%d:%d:%s\n", *mid, act, mda ? mda : "_");
     #endif
     return G_TRUE;
