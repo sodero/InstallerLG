@@ -1,4 +1,5 @@
 (symbolset "a" 1) (+ a 1) ; "","2",""
+(symbolset "" 2) ; "","2",""
 (symbolset "a" "1") (+ a 1) ; "","2",""
 (symbolset "a" "1") (+ A 1) ; "","2",""
 (symbolset "A" "1") (+ a 1) ; "","2",""

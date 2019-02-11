@@ -134,6 +134,7 @@ CLASS_DEF(IG)
 #define MUIM_IG_SetMedia         (TAGBASE_LG + 125)
 #define MUIM_IG_ShowMedia        (TAGBASE_LG + 126)
 #define MUIM_IG_ShowPicture      (TAGBASE_LG + 127)
+#define MUIM_IG_GetCustomScreen  (TAGBASE_LG + 128)
 
 //----------------------------------------------------------------------------
 // IG - Attributes
@@ -410,6 +411,14 @@ struct MUIP_IG_PageSet
     ULONG Help;
     ULONG Top;
     ULONG Bottom;
+};
+
+//----------------------------------------------------------------------------
+// IG - GetCustomScreen parameters
+//----------------------------------------------------------------------------
+struct MUIP_IG_GetCustomScreen
+{
+    ULONG MethodID;
 };
 
 //----------------------------------------------------------------------------
@@ -1463,11 +1472,6 @@ MUIDSP IPTR IGEffect(Class *cls,
                     TAG_END
                 );
 
-                // We need to clear rast port in
-                // case ct + resolution results
-                // in top leftovers.
-                ClearScreen(my->Win->RPort);
-
                 // Draw effect if it's enabled.
                 if(msg->Effect & G_EFFECT)
                 {
@@ -1479,7 +1483,7 @@ MUIDSP IPTR IGEffect(Class *cls,
                     // For all colors in gradient,
                     // draw rectangle with delta
                     // height.
-                    while(i)
+                    while(i >= 0)
                     {
                         // Go backwards in vector.
                         i -= 3;
@@ -1532,6 +1536,10 @@ MUIDSP IPTR IGCloseMedia(Class *cls,
                          Object *obj,
                          struct MUIP_IG_CloseMedia *msg)
 {
+    // Silence.
+    (void) cls;
+    (void) obj;
+
     // Do we have anything to do?
     if(msg->MediaID)
     {
@@ -1552,6 +1560,10 @@ MUIDSP IPTR IGSetMedia(Class *cls,
                        Object *obj,
                        struct MUIP_IG_SetMedia *msg)
 {
+    // Silence.
+    (void) cls;
+    (void) obj;
+
     // Do we have anything to do?
     if(msg->MediaID)
     {
@@ -1564,6 +1576,18 @@ MUIDSP IPTR IGSetMedia(Class *cls,
 }
 
 //----------------------------------------------------------------------------
+// IGGetCustomScreen - Get custom screen.
+// Input:            -
+// Return:             struct Screen * if open, NULL otherwise.
+//----------------------------------------------------------------------------
+MUIDSP IPTR IGGetCustomScreen(Class *cls,
+                              Object *obj)
+{
+    struct IGData *my = INST_DATA(cls, obj);
+    return (IPTR) my->Scr;
+}
+
+//----------------------------------------------------------------------------
 // IGShowPicture -  FIXME
 // Input:           Picture - Image file.
 //                  Action - FIXME
@@ -1573,6 +1597,9 @@ MUIDSP IPTR IGShowPicture(Class *cls,
                           Object *obj,
                           struct MUIP_IG_ShowPicture *msg)
 {
+    // Silence.
+    (void) cls;
+
     Object *win = NULL;
 
     // We need something to show.
@@ -1711,7 +1738,10 @@ MUIDSP IPTR IGShowMedia(Class *cls,
                         Object *obj,
                         struct MUIP_IG_ShowMedia *msg)
 {
-    // We need a file.
+    // Silence.
+    (void) cls;
+
+    // Media file?
     if(msg->Media)
     {
         // And we need permission to read from the file.
@@ -2841,14 +2871,7 @@ MUIDSP IPTR IGDispose (Class *cls,
         CloseWindow(my->Win);
     }
 
-    // Close backdrop screen.
-    if(my->Scr)
-    {
-        CloseScreen(my->Scr);
-    }
-
     return DoSuperMethodA(cls, obj, msg);
-
 }
 
 //----------------------------------------------------------------------------
@@ -2889,6 +2912,9 @@ DISPATCH(IG)
 
         case MUIM_IG_Init:
             return IGInit(cls, obj);
+
+        case MUIM_IG_GetCustomScreen:
+            return IGGetCustomScreen(cls, obj);
 
         case MUIM_IG_Welcome:
             return IGWelcome(cls, obj, (struct MUIP_IG_Welcome *) msg);
@@ -3079,15 +3105,30 @@ inp_t gui_init(bool scr)
 void gui_exit(void)
 {
     #ifdef AMIGA
-    // Close window and destroy app
-    set(Win, MUIA_Window_Open, FALSE);
-    MUI_DisposeObject(_app(Win));
-
-    // Destroy custom class. Must check for NULL.
+    // Must check for NULL. Class creation might have failed.
     if(IGClass)
     {
+        // Save screen if we're using a custom one.
+        struct Screen *scr = (struct Screen *)
+        DoMethod(Win, MUIM_IG_GetCustomScreen);
+
+        // Close window.
+        set(Win, MUIA_Window_Open, FALSE);
+
+        // Destroy application.
+        MUI_DisposeObject(_app(Win));
+
+        // Destroy custom class.
         MUI_DeleteCustomClass(IGClass);
+
+        // Have we used a custom screen?
+        if(scr)
+        {
+            // It's no longer needed.
+            CloseScreen(scr);
+        }
     }
+
     #endif
 }
 
