@@ -142,6 +142,12 @@ CLASS_DEF(IG)
 #define MUIA_IG_UseCustomScreen  (TAGBASE_LG + 201)
 
 //----------------------------------------------------------------------------
+// IG - Media ID
+//----------------------------------------------------------------------------
+#define MUIA_IG_MediaBase        (TAGBASE_LG + 301)
+#define MUIA_IG_MediaMax         (TAGBASE_LG + 399)
+
+//----------------------------------------------------------------------------
 // IG - Init parameters
 //----------------------------------------------------------------------------
 struct MUIP_IG_Init
@@ -302,6 +308,7 @@ struct MUIP_IG_ShowMedia
 struct MUIP_IG_ShowPicture
 {
     ULONG MethodID;
+    ULONG MediaID;
     ULONG Picture;
     ULONG Action;
 };
@@ -1340,8 +1347,8 @@ MUIDSP IPTR IGCopyFilesAdd(Class *cls,
 
 //----------------------------------------------------------------------------
 // IGExit - Say goodbye and close GUI
-// Input:             Message - The prompt
-// Return:            TRUE
+// Input    Message - The prompt
+// Return:  TRUE
 //----------------------------------------------------------------------------
 MUIDSP IPTR IGExit(Class *cls,
                    Object *obj,
@@ -1530,7 +1537,7 @@ MUIDSP IPTR IGEffect(Class *cls,
 //----------------------------------------------------------------------------
 // IGCloseMedia -  FIXME
 // Input:          FIXME
-// Return:         G_TRUE / G_FALSE / G_ERR.
+// Return:         G_TRUE / G_FALSE
 //----------------------------------------------------------------------------
 MUIDSP IPTR IGCloseMedia(Class *cls,
                          Object *obj,
@@ -1538,16 +1545,28 @@ MUIDSP IPTR IGCloseMedia(Class *cls,
 {
     // Silence.
     (void) cls;
-    (void) obj;
 
-    // Do we have anything to do?
-    if(msg->MediaID)
+    // Compute user data value.
+    ULONG mid = msg->MediaID + MUIA_IG_MediaBase;
+
+    // Is the media ID valid?
+    if(mid <= MUIA_IG_MediaMax)
     {
-        // Dummy.
-        return G_TRUE;
+        // Is the ID in use?
+        Object *win = (Object *) DoMethod
+        (
+            _app(obj), MUIM_FindUData, mid
+        );
+
+        // If it's in use, close the window.
+        if(win)
+        {
+            set(win, MUIA_Window_Open, FALSE);
+            return G_TRUE;
+        }
     }
 
-    // Invalid ID.
+    // Invalid / non existing ID.
     return G_FALSE;
 }
 
@@ -1670,6 +1689,7 @@ MUIDSP IPTR IGShowPicture(Class *cls,
                 MUIC_Window,
                 MUIA_Window_TopEdge, yp,
                 MUIA_Window_LeftEdge, xp,
+                MUIA_UserData, msg->MediaID,
                 xs ? MUIA_Window_Width : TAG_IGNORE, xs,
                 ys ? MUIA_Window_Height : TAG_IGNORE, ys,
                 MUIA_Window_Activate, FALSE,
@@ -1696,12 +1716,13 @@ MUIDSP IPTR IGShowPicture(Class *cls,
                 MUIC_Window,
                 MUIA_Window_TopEdge, yp,
                 MUIA_Window_LeftEdge, xp,
-                MUIA_Window_Borderless, TRUE,
-                MUIA_Window_Activate, FALSE,
-                MUIA_Window_CloseGadget, FALSE,
-                MUIA_Window_SizeGadget, FALSE,
-                MUIA_Window_DepthGadget, FALSE,
                 MUIA_Window_DragBar, FALSE,
+                MUIA_UserData, msg->MediaID,
+                MUIA_Window_Activate, FALSE,
+                MUIA_Window_Borderless, TRUE,
+                MUIA_Window_SizeGadget, FALSE,
+                MUIA_Window_CloseGadget, FALSE,
+                MUIA_Window_DepthGadget, FALSE,
                 MUIA_Window_RootObject, (Object *) MUI_NewObject(
                     MUIC_Dtpic,
                     MUIA_Dtpic_Name, msg->Picture,
@@ -1741,8 +1762,12 @@ MUIDSP IPTR IGShowMedia(Class *cls,
     // Silence.
     (void) cls;
 
-    // Media file?
-    if(msg->Media)
+    // ID counter.
+    static int mid;
+
+    // Test name and cap the number of open files.
+    if(mid + MUIA_IG_MediaBase <= MUIA_IG_MediaMax
+       && msg->Media)
     {
         // And we need permission to read from the file.
         BPTR flk = Lock((STRPTR) msg->Media, ACCESS_READ);
@@ -1768,10 +1793,17 @@ MUIDSP IPTR IGShowMedia(Class *cls,
                     DoMethod
                     (
                         obj, MUIM_IG_ShowPicture,
+                        mid + MUIA_IG_MediaBase,
                         msg->Media, msg->Action
                     );
 
-                    // FIXME - ID?.
+                    // Return current media ID.
+                    *((int *) msg->MediaID) = mid;
+
+                    // Next ID.
+                    mid++;
+
+                    // FIXME.
                     return G_TRUE;
                 }
                 else
@@ -3656,7 +3688,7 @@ void gui_effect(int eff, int cl1, int cl2)
 //----------------------------------------------------------------------------
 // Name:        gui_closemedia
 // Description: FIXME
-// Input:       const char *mda:    Media file.
+// Input:       int mid:    Media ID.
 // Return:      FIXME
 //----------------------------------------------------------------------------
 inp_t gui_closemedia(int mid)
