@@ -358,6 +358,7 @@ char *str(entry_p entry)
                         // OOM.
                         PANIC(entry);
                 }
+                /* FALLTHRU */
 
             // Dangling entries and options
             // are considered empty strings
