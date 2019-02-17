@@ -10,8 +10,8 @@
 #ifndef VERSION_H_
 #define VERSION_H_
 
-#define MAJOR 43
-#define MINOR 3
+#define MAJOR 44
+#define MINOR 10
 #define BUILD 34
 #define PHASE "ALPHA"
 
