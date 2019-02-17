@@ -304,7 +304,7 @@ entry_p init(entry_p contxt)
 
         // Get tooltype / cli arguments.
         init_tooltypes(contxt);
-      
+
         // Set misc numerical values.
         init_num(contxt, "@pretend", 0);
         init_num(contxt, "@installer-version", (MAJOR << 16) | MINOR);
