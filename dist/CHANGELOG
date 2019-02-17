@@ -212,4 +212,7 @@
 0.1.0-alpha.34:
 ===============
 - (effect) partial (no radial / position) implementation (v44).
+- (showmedia) partial implementation (image support) (v44).
+- (closemedia) implemented (v44).
+- (tackon) parent fix (WormWars).
 - ?

@@ -586,8 +586,26 @@ char *h_tackon(entry_p contxt,
         {
             char *r = NULL;
 
-            // If the path is empty, the result
-            // equals the filename.
+            // If the filename ends with a delimiter,
+            // it's not a valid filename. Only fail if
+            // we're running in 'strict' mode.
+            if(lf && (f[lf - 1] == '/' || f[lf - 1] == ':')
+               && get_numvar(contxt, "@strict"))
+            {
+                ERR(ERR_NOT_A_FILE, f);
+                return NULL;
+            }
+
+            // Ignore the path part if the file part is
+            // an absolute Amiga style path.
+            if(strchr(f, ':'))
+            {
+                // Empty path.
+                lp = 0;
+            }
+
+            // If the path is empty, the result equals
+            // the filename.
             if(!lp)
             {
                 r = DBG_ALLOC(strdup(f));
@@ -614,16 +632,6 @@ char *h_tackon(entry_p contxt,
                 }
 
                 return r;
-            }
-
-            // If the filename ends with a delimiter,
-            // it's not a valid filename. Only fail
-            // in 'strict' mode.
-            if((f[lf - 1] == '/' || f[lf - 1] == ':') &&
-               get_numvar(contxt, "@strict"))
-            {
-                ERR(ERR_NOT_A_FILE, f);
-                return NULL;
             }
 
             // Allocate memory to hold path, filename,
