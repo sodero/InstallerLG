@@ -347,7 +347,7 @@ char *str(entry_p entry)
                         // (help) and (prompt) may have multiple
                         // childred that must be concatenated.
                         free(entry->name);
-                        entry->name = get_chlstr(entry);
+                        entry->name = get_chlstr(entry, false);
 
                         // On OOM, fall through.
                         if(entry->name)

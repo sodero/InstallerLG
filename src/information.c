@@ -183,7 +183,7 @@ entry_p m_message(entry_p contxt)
         if(level > 0 || all)
         {
             // Concatenate all children.
-            char *msg = get_chlstr(contxt);
+            char *msg = get_chlstr(contxt, false);
 
             // Did we manage to concatenate something?
             if(msg)
@@ -298,7 +298,7 @@ entry_p m_welcome(entry_p contxt)
            c_sane(contxt, 1))
         {
             // Concatenate all children.
-            msg = get_chlstr(contxt);
+            msg = get_chlstr(contxt, false);
         }
 
         // Did we manage to concatenate something?
@@ -363,7 +363,7 @@ entry_p m_working(entry_p contxt)
     if(c_sane(contxt, 1))
     {
         // Concatenate all children.
-        char *msg = get_chlstr(contxt);
+        char *msg = get_chlstr(contxt, false);
 
         // Did we manage to concatenate something?
         if(msg)
