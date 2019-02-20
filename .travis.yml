@@ -2,7 +2,8 @@ language:
     - c
 
 script:
-    - cd build && (timeout 120s ./fail.sh; exit 0)
+    - cd build && ./fail.sh
+
 addons:
   apt:
     packages:

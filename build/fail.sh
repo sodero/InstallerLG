@@ -11,7 +11,6 @@ echo "Memory allocation fault injection in $file line $line"
 echo "---------------------------------------------------------------------"
 make clean &> /dev/null
 make CFLAGS="-I . -I ../src -g -std=c99 -D_DEFAULT_SOURCE -DFAIL_LINE=$line -DFAIL_FILE='\"$file\"'" &> /dev/null
-exit 1
 make test | grep '^->'
 ls leak.tmp.* &> /dev/null && cat leak.tmp.* && exit 1
 ls err.tmp.* &> /dev/null && echo $(ls -l err.tmp.* 2> /dev/null | wc -l) "error(s) handled without leaks." && exit 0
