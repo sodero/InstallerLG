@@ -4066,7 +4066,7 @@ entry_p m_transcript(entry_p contxt)
     if(c_sane(contxt, 1))
     {
         // Concatenate all children.
-        char *msg = get_chlstr(contxt);
+        char *msg = get_chlstr(contxt, false);
 
         // Assume failure.
         DNUM = 0;
