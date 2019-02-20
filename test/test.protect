@@ -36,5 +36,3 @@
 (protect "_pt_" "240" (override $ff)) ; "","240",""
 (protect "_pt_" %11110000 (override $00)) ; "","240",""
 (protect "_pt_" 128 (override $00)) ; "","128",""
-
-
