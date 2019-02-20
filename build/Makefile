@@ -86,6 +86,7 @@ cat:
 .PHONY: test
 test: $(EXE)
 ifneq ($(AMIGA),true)
+	@$(RM) $(EXE).tmp.* leak.* err.* massif.*
 	@sh ../test/run.sh ./$(EXE) ../test $(REXTRA)
 else
 	@echo "[SKIPPED] @sh ../test/run.sh ./$(EXE) ../test $(REXTRA)"

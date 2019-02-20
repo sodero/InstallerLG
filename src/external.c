@@ -121,8 +121,9 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         // in pretend mode?
         if(safe || !get_numvar(contxt, "@pretend"))
         {
-            // Command / script. Merge all.
-            char *cmd = get_chlstr(contxt);
+            // Command / script. Merge all and insert
+            // space between arguments.
+            char *cmd = get_chlstr(contxt, true);
 
             if(cmd)
             {

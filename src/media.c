@@ -20,6 +20,26 @@
 char *strcasestr(const char *, const char *);
 #endif
 
+#ifdef AMIGA
+#include <datatypes/datatypesclass.h>
+#else
+// From datatypesclass.h 44.1 (17.4.1999)
+#define STM_PAUSE          1
+#define STM_PLAY           2
+#define STM_CONTENTS       3
+#define STM_INDEX          4
+#define STM_RETRACE        5
+#define STM_BROWSE_PREV    6
+#define STM_BROWSE_NEXT    7
+// Skip unused defines to avoid warnings.
+#define STM_COMMAND        11
+#define STM_REWIND         12
+#define STM_FASTFORWARD    13
+#define STM_STOP           14
+// Skip unused defines to avoid warnings.
+#define STM_LOCATE         16
+#endif
+
 //----------------------------------------------------------------------------
 // (closemedia <media>)
 //      close media file and remove it from memory.
@@ -31,17 +51,31 @@ entry_p m_closemedia(entry_p contxt)
     // We need 1 argument.
     if(c_sane(contxt, 1))
     {
-        // Dummy.
-        pretty_print(contxt);
-    }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
+        int mid = num(CARG(1));
+
+        RNUM
+        (
+            gui_closemedia(mid) == G_TRUE ? 1 : 0
+        );
     }
 
-    // Success, failure or panic.
+    // Broken parser.
+    PANIC(contxt);
     RCUR;
+}
+
+//----------------------------------------------------------------------------
+// Name:        h_pos
+// Description: Get (effect) and (showmedia) position as bitmask.
+// Input:       const char *atr:    Attribute name.
+// Return:      int:                G_* bitmask.
+//----------------------------------------------------------------------------
+static int h_pos(const char *atr)
+{
+    return (strcasestr(atr, "left") ? G_LEFT : 0) |
+           (strcasestr(atr, "right") ? G_RIGHT : 0) |
+           (strcasestr(atr, "upper") ? G_UPPER : 0) |
+           (strcasestr(atr, "lower") ? G_LOWER : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -55,24 +89,19 @@ entry_p m_effect(entry_p contxt)
     // We need 4 arguments.
     if(c_sane(contxt, 4))
     {
-        // Position and type.
+        // Position and effect.
         char *est = str(CARG(2)),
              *eps = str(CARG(1));
 
-        // Gradient color values.
+        // Colors, type and position.
         int ic1 = num(CARG(3)),
             ic2 = num(CARG(4)),
-
-        // Translate type and position.
-        ief = (strcasestr(eps, "upper") ? G_UPPER : 0) |
-              (strcasestr(eps, "lower") ? G_LOWER : 0) |
-              (strcasestr(eps, "left") ? G_LEFT : 0) |
-              (strcasestr(eps, "right") ? G_RIGHT : 0) |
-              (strcasecmp(est, "radial") ? 0 : G_RADIAL) |
-              (strcasecmp(est, "horizontal") ? 0 : G_HORIZONTAL);
+            ief = h_pos(eps) | (
+                  !strcasecmp(est, "radial") ? G_RADIAL :
+                  !strcasecmp(est, "horizontal") ? G_HORIZONTAL : 0);
 
         // Invalid initial values.
-        static int oc1, oc2, oef = G_RADIAL|G_HORIZONTAL;
+        static int oc1, oc2, oef = G_RADIAL | G_HORIZONTAL;
 
         // Known effect type?
         if(ief & G_EFFECT)
@@ -115,64 +144,55 @@ entry_p m_setmedia(entry_p contxt)
     // We need atleast 2 arguments.
     if(c_sane(contxt, 2))
     {
-        /*
-        From the Installer.guide:
+        // Action to perform.
+        char *act = str(CARG(2));
 
-           Using the setmedia statement some action can be performed on the
-        datatype.
+        // Translate action to command.
+        int cmd = !strcasecmp(act, "pause") ? STM_PAUSE :
+                  !strcasecmp(act, "play") ? STM_PLAY :
+                  !strcasecmp(act, "contents") ? STM_CONTENTS :
+                  !strcasecmp(act, "index") ? STM_INDEX :
+                  !strcasecmp(act, "retrace") ? STM_RETRACE :
+                  !strcasecmp(act, "browser_prev") ? STM_BROWSE_PREV :
+                  !strcasecmp(act, "browser_next") ? STM_BROWSE_NEXT :
+                  !strcasecmp(act, "command") ? STM_COMMAND :
+                  !strcasecmp(act, "rewind") ? STM_REWIND :
+                  !strcasecmp(act, "fastforward") ? STM_FASTFORWARD :
+                  !strcasecmp(act, "stop") ? STM_STOP :
+                  !strcasecmp(act, "locate") ? STM_LOCATE : 0;
 
-           media is the variable which is set with the showmedia statement.
-        action is one of the following strings:
+        // Valid action?
+        if(cmd)
+        {
+            // Extra flags.
+            char *par = NULL;
 
-        `pause'
-             Pause playing
+            // If the command requires an extra parameter,
+            // resolved the next argument, if it exists.
+            if((cmd == STM_COMMAND || cmd == STM_LOCATE) &&
+                CARG(3) && CARG(3) != end())
+            {
+                // Resolve next.
+                par = str(CARG(3));
+            }
 
-        `play'
-             Start playing
+            // Media identifier.
+            int mid = num(CARG(1));
 
-        `contents'
-             Show contents
+            RNUM
+            (
+                // Invoke GUI to perform action.
+                gui_setmedia(mid, cmd, par) == G_TRUE ? 1 : 0
+            );
+        }
 
-        `index'
-             Show index
-
-        `retrace'
-             Goto previous visited node.
-
-        `browser_prev'
-             Goto previous node.
-
-        `broser_next'
-             Goto next node.
-
-        `command'
-             Send a command to the datatype. The parameter is the string
-             command.
-
-        `rewind'
-             Goto beginning
-
-        `fastforward'
-             Run forward
-
-        `stop'
-             Stop playing
-
-        `locate'
-             Locate a position. The parameter is an integer (frame number for
-             example).
-        */
-
-        // Dummy.
-        pretty_print(contxt);
-    }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
+        // Invalid action.
+        ERR(ERR_VAL_INVALID, act);
+        RNUM(0);
     }
 
-    // Success, failure or panic.
+    // Broken parser.
+    PANIC(contxt);
     RCUR;
 }
 
@@ -187,117 +207,107 @@ entry_p m_showmedia(entry_p contxt)
     // We need atleast 5 arguments.
     if(c_sane(contxt, 5))
     {
-        /*
-        From the Installer.guide:
+        // Get size.
+        char *att = str(CARG(4));
 
-           showmedia opens a datatype (AmigaOS 3.0 is needed) and presents it
-        to the user. With the exception of sound and music datatypes a window
-        is opened with a given position and size to display the datatype. If
-        the datatype cannot be opened 0 is returned, if the datatype is opened
-        1 is returned.
+        // Set size bitmask.
+        int msk = h_pos(str(CARG(3))) | (num(CARG(5)) ? G_BORDER : 0) | (
+                  !strcasecmp(att, "small") ? G_SMALL :
+                  !strcasecmp(att, "small_medium") ? G_SMALL | G_LESS :
+                  !strcasecmp(att, "small_large") ? G_SMALL | G_MORE :
+                  !strcasecmp(att, "medium") ? G_MEDIUM :
+                  !strcasecmp(att, "medium_small") ? G_MEDIUM | G_LESS :
+                  !strcasecmp(att, "medium_large") ? G_MEDIUM | G_MORE :
+                  !strcasecmp(att, "large") ? G_LARGE :
+                  !strcasecmp(att, "large_small") ? G_LARGE | G_LESS :
+                  !strcasecmp(att, "large_medium") ? G_LARGE | G_MORE : 0);
 
-           medianame is a string value. The value is used as a name of a
-        variable that gets a handle to the datatype. This variable has to be
-        used in the other media statements.
+        // Get the rest of the flags.
+        for(size_t i = 6; CARG(i) && CARG(i) != end(); i++)
+        {
+            // Get current flag.
+            att = str(CARG(i));
 
-           filename is the name of the file to show.
+            // Translate into bitmask.
+            msk |= (!strcasecmp(att, "wordwrap") ? G_WORDWRAP :
+                    !strcasecmp(att, "panel") ? G_PANEL :
+                    !strcasecmp(att, "play") ? G_PLAY :
+                    !strcasecmp(att, "repeat") ? G_REPEAT : 0);
+        }
 
-           position is one of the following strings:
+        // Invalid media ID.
+        int mid = -1;
 
-        `upper_left'
-             The window is placed in the upper left corner of the screen.
+        if(gui_showmedia(&mid, str(CARG(2)), msk) != G_TRUE)
+        {
+            // Could not open file.
+            RNUM(0);
+        }
 
-        `upper_center'
-             The window is horizontally centered in the upper part of the
-             screen.
+        // Symbol destination.
+        entry_p dst = global(contxt);
 
-        `upper_right'
-             The window is placed in the upper right corner of the screen.
+        if(dst)
+        {
+            char *var = str(CARG(1));
+            entry_p *sym = contxt->symbols;
 
-        `center_left'
-             The window is  vertically centered on the left side of the screen.
+            // Symbol exists already?
+            while(*sym && *sym != end())
+            {
+                // If true, update current symbol.
+                if(!strcasecmp((*sym)->name, var) &&
+                   (*sym)->resolved)
+                {
+                    (*sym)->resolved->id = mid;
 
-        `center'
-             The window is centered on the screen.
+                    // Success.
+                    RNUM(1);
+                }
 
-        `center_right'
-             The window is vertically centered on the right side of the screen.
+                // Next symbol.
+                sym++;
+            }
 
-        `lower_left'
-             The window is placed in the lower left corner of the screen.
+            // Create the new media ID.
+            entry_p num = new_number(mid);
 
-        `lower_center'
-             The window is horizontally centered in the lower part of the
-             screen.
+            if(num)
+            {
+                // Create new symbol with user defined name.
+                entry_p nsm = new_symbol(DBG_ALLOC(strdup(var)));
 
-        `lower_right'
-             The window is placed in the lower right corner of the screen.
+                if(nsm)
+                {
+                    // Reparent value.
+                    num->parent = nsm;
+                    nsm->resolved = num;
 
-           size is on of the following strings:
+                    // Append the symbol to the current
+                    // context and create a global ref.
+                    if(append(&contxt->symbols, nsm))
+                    {
+                        // Reparent symbol.
+                        push(dst, nsm);
+                        nsm->parent = contxt;
 
-        `none'
-             The window gets its size from the datatype (for example the size
-             of the picture).
+                        // Success.
+                        RNUM(1);
+                    }
 
-        `small'
-             The window is small.
-
-        `small_medium'
-             The window has a small width and a medium height.
-
-        `small_large'
-             The window has a small width and a large height.
-
-        `medium_small'
-             The window has a medium width and a small height.
-
-        `medium'
-             The window is medium sized.
-
-        `medium_large'
-             The window has a medium width and a large height.
-
-        `large_small'
-             The window has a large width and a small height.
-
-        `large_medium'
-             The window has a large width and a medium height.
-
-        `large'
-             The window is large.
-
-           If the borderflag is 1 the window gets a border with proprtional
-        sliders and arrows and a size gadget (prefered for Amiga guide files
-        and text files). If the borderflag is 0 the window gets no border at
-        all (prefered for pictures and animations).
-
-           After the bordeflag more strings can follow which sets some
-        attributes of the datatype:
-
-        `wordwrap'
-             A text is displaed using wordwrapping.
-
-        `panel'
-             If the datatype has a control panel it is used (amigaguide and
-             animation)
-
-        `play'
-             The datatype shall start playing immediatly (animation)
-
-        `repeat'
-             The datatype shall repeat playing (seems not to be supported by
-             any datatype)
-        */
-
-        // Dummy.
-        pretty_print(contxt);
-    }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
+                    // Out of memory.
+                    kill(nsm);
+                }
+                else
+                {
+                    // Out of memory.
+                    kill(num);
+                }
+            }
+        }
     }
 
-    // Success, failure or panic.
+    // Broken parser / OOM.
+    PANIC(contxt);
     RCUR;
 }

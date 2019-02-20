@@ -1,0 +1,7 @@
+(closemedia) ; "","Line 1: syntax error, unexpected ')' ')'",""
+(closemedia media) ; "","Line 1: Undefined variable 'media' 0 0",""
+(debug (closemedia media)) ; "","Line 1: Undefined variable 'media' 0 1 0",""
+(set @strict 0) (closemedia media) ; "","0 1",""
+(set media 2) (closemedia media) ; "","2 1",""
+(closemedia 2) ; "","2 1",""
+(closemedia 2 err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
