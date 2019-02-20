@@ -523,7 +523,7 @@ char *get_optstr(entry_p c, opt_t t)
                    (*e)->type == OPTION)
                 {
                     // Sum up the length.
-                    char *cur = get_chlstr(*e);
+                    char *cur = get_chlstr(*e, false);
 
                     if(cur)
                     {
@@ -569,10 +569,11 @@ char *get_optstr(entry_p c, opt_t t)
 // Description: Concatenate the string representations of all non context
 //              children of a context.
 // Input:       entry_p c:  The context.
+//              bool p:     Whitespace padding.
 // Return:      char *:     The concatenation of the string representations
 //                          of all non context children of 'c'.
 //----------------------------------------------------------------------------
-char *get_chlstr(entry_p c)
+char *get_chlstr(entry_p c, bool p)
 {
     // Concatenation.
     char *r = NULL;
@@ -614,6 +615,13 @@ char *get_chlstr(entry_p c)
                     {
                         v[--n] = str(cur);
                         l += strlen(v[n]);
+
+                        // Insert whitespace between strings?
+                        if(p)
+                        {
+                            // Make room for whitespace.
+                            l++;
+                        }
                     }
                 }
 
@@ -633,6 +641,14 @@ char *get_chlstr(entry_p c)
                         {
                             strncat(r, v[n], l + 1 - strlen(r));
                             n++;
+
+                            // Is padding enabled and is this not
+                            // the final string?
+                            if(p && v[n])
+                            {
+                                // Insert whitespace.
+                                strncat(r, " ", l + 1 - strlen(r));
+                            }
                         }
                     }
                 }

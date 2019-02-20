@@ -36,7 +36,7 @@ entry_p m_abort(entry_p contxt)
     if(c_sane(contxt, 0))
     {
         // Concatenate all children.
-        char *msg = get_chlstr(contxt);
+        char *msg = get_chlstr(contxt, false);
 
         // Did we manage to concatenate something?
         if(msg)
@@ -87,7 +87,7 @@ entry_p m_exit(entry_p contxt)
         if(contxt->children)
         {
             // Concatenate all children.
-            char *msg = get_chlstr(contxt);
+            char *msg = get_chlstr(contxt, false);
 
             // Did we manage to concatenate something?
             if(msg)

@@ -387,7 +387,7 @@ closemedia:     '(' CLOSEMEDIA p ')'             { $$ = new_native(strdup("close
 effect:         '(' EFFECT pp pp ')'   	         { $$ = new_native(strdup("effect"), LINE, m_effect, merge($3, $4), NUMBER); };
 setmedia:       '(' SETMEDIA pp ')'              { $$ = new_native(strdup("setmedia"), LINE, m_setmedia, $3, NUMBER); } |
                 '(' SETMEDIA pp p ')'            { $$ = new_native(strdup("setmedia"), LINE, m_setmedia, push($3, $4), NUMBER); };
-showmedia:      '(' SHOWMEDIA pp pp p ')'        { $$ = new_native(strdup("showmedia"), LINE, m_showmedia, push(merge($3, $4), $5), NUMBER); };
+showmedia:      '(' SHOWMEDIA pp pp ps ')'       { $$ = new_native(strdup("showmedia"), LINE, m_showmedia, merge(merge($3, $4), $5), NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* probe.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 database:       '(' DATABASE p ')'               { $$ = new_native(strdup("database"), LINE, m_database, push(new_contxt(), $3), STRING); } |
