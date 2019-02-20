@@ -2732,8 +2732,12 @@ entry_p m_foreach(entry_p contxt)
                     err = 1;
                 }
 
-                // Go back where we started.
-                chdir(cwd);
+                // Go back to where we started.
+                if(chdir(cwd))
+                {
+                    // The rug was swept away from us.
+                    ERR(ERR_NO_SUCH_FILE_OR_DIR, cwd);
+                }
             }
 
             // Done.
