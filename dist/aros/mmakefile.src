@@ -4,7 +4,7 @@
 include $(SRCDIR)/config/aros.cfg
 
 EXEDIR := $(AROSDIR)/Utilities
-FILES := alloc args arithmetic bitwise comparison control error eval exit external file gui information init lexer parser probe procedure prompt resource strop symbol util wb
+FILES := alloc args arithmetic bitwise comparison control error eval exit external file gui information init lexer media parser probe procedure prompt resource strop symbol util wb
 USER_CFLAGS := -std=gnu99 $(NOWARN_UNUSED_FUNCTION)
 
 #MM- workbench-utilities : workbench-utilities-installerlg
