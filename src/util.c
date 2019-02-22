@@ -539,24 +539,25 @@ char *get_optstr(entry_p c, opt_t t)
 
             if(r)
             {
-                // Concatenate and free
-                // substrings in one go.
+                // Concatenate substrings.
                 for(size_t i = 0; cs[i]; i++)
                 {
                     strncat(r, cs[i], ln - strlen(r));
-                    free(cs[i]);
                 }
-
-                // Free references.
-                free(cs);
-
-                // Done.
-                return r;
             }
 
-            // Out of memory.
+            // Free substrings.
+            for(size_t i = 0; cs[i]; i++)
+            {
+                free(cs[i]);
+            }
+
             free(cs);
+
+            // Done.
+            return r;
         }
+
         // Out of memory
     }
 

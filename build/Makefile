@@ -10,7 +10,7 @@ EXE := Installer
 # OS
 #---------------------------------------------------------------------------------#
 ifeq ($(OS),Linux)
-CWRN = -Wall -Wextra
+CWRN = -Wall -Wextra -Werror
 CGEN = -g -std=c99
 CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE
 else
