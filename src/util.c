@@ -29,35 +29,35 @@
 // Input:       entry_p *e: Array of entries.
 // Return:      -
 //----------------------------------------------------------------------------
-void ror(entry_p *e)
+void ror(entry_p *entry)
 {
     // We have an array and it contains something.
-    if(e && *e)
+    if(entry && *entry)
     {
-        int i = 0;
+        int lst = 0;
 
-        // Let 'i' be the index of the last entry.
-        while(e[i] && e[i] != end())
+        // Let 'lst' be the index of the last entry.
+        while(entry[lst] && entry[lst] != end())
         {
-            i++;
+            lst++;
         }
-        i--;
+        lst--;
 
         // Nothing to do if we have < 2 entries.
-        if(i > 0)
+        if(lst > 0)
         {
             // Save the last entry.
-            entry_p f = e[i];
+            entry_p last = entry[lst];
 
             // Shift the rest to the right.
-            while(i)
+            while(lst)
             {
-                e[i] = e[i - 1];
-                i--;
+                entry[lst] = entry[lst - 1];
+                lst--;
             }
 
             // Put the saved entry first.
-            e[0] = f;
+            entry[0] = last;
         }
     }
 }
@@ -65,25 +65,26 @@ void ror(entry_p *e)
 //----------------------------------------------------------------------------
 // Name:        local
 // Description: Find the next context going upwards in the tree.
-// Input:       entry_p e:  The starting point.
-// Return:      entry_p:    The closest context found, or
-//                          NULL if no context was found.
+// Input:       entry_p entry:  The starting point.
+// Return:      entry_p:        The closest context found, or
+//                              NULL if no context was found.
 //----------------------------------------------------------------------------
-entry_p local(entry_p e)
+entry_p local(entry_p entry)
 {
     // Go upwards until we find what we're
     // looking for, or hit the (broken) top.
-    for(entry_p c = e; c; c = c->parent)
+    for(entry_p contxt = entry; contxt;
+        contxt = contxt->parent)
     {
-        if(c->type == CONTXT ||
-           c->type == CUSTOM)
+        if(contxt->type == CONTXT ||
+           contxt->type == CUSTOM)
         {
-            return c;
+            return contxt;
         }
 
-        if(c->parent == c)
+        if(contxt->parent == contxt)
         {
-            pretty_print(c);
+            pretty_print(contxt);
             break;
         }
     }
@@ -95,27 +96,27 @@ entry_p local(entry_p e)
 //----------------------------------------------------------------------------
 // Name:        global
 // Description: Find the root context.
-// Input:       entry_p e:  The starting point.
-// Return:      entry_p:    The root context, or NULL
-//                          if no context was found.
+// Input:       entry_p entry:  The starting point.
+// Return:      entry_p:        The root context, or NULL
+//                              if no context was found.
 //----------------------------------------------------------------------------
-entry_p global(entry_p e)
+entry_p global(entry_p entry)
 {
     // Go all the way up.
-    for(entry_p c = local(e); c; )
+    for(entry_p contxt = local(entry); contxt;)
     {
         // Find the next context.
-        entry_p n = local(c->parent);
+        entry_p next = local(contxt->parent);
 
         // If there is no higher context, we're
         // at the global level.
-        if(!n)
+        if(!next)
         {
-            return c;
+            return contxt;
         }
 
         // Next level.
-        c = n;
+        contxt = next;
     }
 
     // Nothing:
@@ -125,77 +126,77 @@ entry_p global(entry_p e)
 //----------------------------------------------------------------------------
 // Name:        get_opt
 // Description: Find option of a given type in a context.
-// Input:       entry_p c:  The context to search in.
-//              opt_t t:    The type of option to search for.
-// Return:      entry_p:    An OPTION entry if found, NULL otherwise.
+// Input:       entry_p contxt:  The context to search in.
+//              opt_t type:      The type of option to search for.
+// Return:      entry_p:         An OPTION entry if found, NULL otherwise.
 //----------------------------------------------------------------------------
-entry_p get_opt(entry_p c, opt_t t)
+entry_p get_opt(entry_p contxt, opt_t type)
 {
     // We need a context.
-    if(c && c != end() &&
-       c->children)
+    if(contxt && contxt != end() &&
+       contxt->children)
     {
         // And we need children.
-        entry_p *v = c->children;
+        entry_p *child = contxt->children;
 
         // Real option or (optional)?
-        if(c->type != OPTION)
+        if(contxt->type != OPTION)
         {
             // Iterate over all options.
-            while(*v && *v != end())
+            while(*child && *child != end())
             {
-                entry_p e = *v;
+                entry_p entry = *child;
 
                 // ID == the type of option.
-                if(e->type == OPTION)
+                if(entry->type == OPTION)
                 {
                     // Dynamic options need to
                     // be resolved before eval.
-                    if(e->id == OPT_DYNOPT)
+                    if(entry->id == OPT_DYNOPT)
                     {
                         // Replace dummy with
                         // its resolved value.
-                        e = resolve(e);
+                        entry = resolve(entry);
                     }
 
                     // Have we found the right
                     // type of option?
-                    if(e->id == (int32_t) t)
+                    if(entry->id == (int32_t) type)
                     {
                         // We found it.
-                        return e;
+                        return entry;
                     }
                 }
 
                 // Nope, next.
-                v++;
+                child++;
             }
         }
         // An (optional) string.
         else
         {
             // Iterate over all strings.
-            while(*v && *v != end())
+            while(*child && *child != end())
             {
-                if((t == OPT_FAIL && !strcmp(str(*v), "fail")) ||
-                   (t == OPT_FORCE && !strcmp(str(*v), "force")) ||
-                   (t == OPT_NOFAIL && !strcmp(str(*v), "nofail")) ||
-                   (t == OPT_ASKUSER && !strcmp(str(*v), "askuser")) ||
-                   (t == OPT_OKNODELETE && !strcmp(str(*v), "oknodelete")))
+                if((type == OPT_FAIL && !strcmp(str(*child), "fail")) ||
+                   (type == OPT_FORCE && !strcmp(str(*child), "force")) ||
+                   (type == OPT_NOFAIL && !strcmp(str(*child), "nofail")) ||
+                   (type == OPT_ASKUSER && !strcmp(str(*child), "askuser")) ||
+                   (type == OPT_OKNODELETE && !strcmp(str(*child), "oknodelete")))
                 {
-                    return *v;
+                    return *child;
                 }
 
                 // Nope, next.
-                v++;
+                child++;
             }
         }
     }
 
     // If in non strict mode, allow the absense
     // of (prompt) and (help).
-    if((t == OPT_PROMPT || t == OPT_HELP)
-       && !get_numvar(c, "@strict"))
+    if((type == OPT_PROMPT || type == OPT_HELP)
+        && !get_numvar(contxt, "@strict"))
     {
         // This will be resolved as an
         // emtpy string.
@@ -212,63 +213,64 @@ entry_p get_opt(entry_p c, opt_t t)
 //              that we have atleast the number of children needed and that
 //              these are valid. If this fails, it typically, but not always,
 //              means that we have a parser problem.
-// Input:       entry_p c:  The context.
-//              size_t n:   The number of children necessary.
-// Return:      int:        1 if context is valid, 0 otherwise.
+// Input:       entry_p contxt:  The context.
+//              size_t num:      The number of children necessary.
+// Return:      int:             1 if context is valid, 0 otherwise.
 //----------------------------------------------------------------------------
-int c_sane(entry_p c, size_t n)
+int c_sane(entry_p contxt, size_t num)
 {
     // Assume success;
     int status = 1;
 
     // All contexts used by NATIVE functions must allocate an
     // array for children, it could be empty though.
-    if(c && c->children)
+    if(contxt && contxt->children)
     {
         // Expect atleast n children.
-        for(size_t i = 0; i < n; i++)
+        for(size_t i = 0; i < num; i++)
         {
             // Assume failure;
             status = 0;
 
             // Make sure that something exists.
-            if(c->children[i] == NULL)
+            if(contxt->children[i] == NULL)
             {
-                DBG("c->children[%d] == NULL\n", (int) i);
+                DBG("contxt->children[%d] == NULL\n", (int) i);
                 break;
             }
 
             // Make sure that it's not a sentinel.
-            if(c->children[i] == end())
+            if(contxt->children[i] == end())
             {
-                DBG("c->children[%d] == end()\n", (int) i);
+                DBG("contxt->children[%d] == end()\n", (int) i);
                 break;
             }
 
             // Make sure that it belongs to us.
-            if(c->children[i]->parent != c)
+            if(contxt->children[i]->parent != contxt)
             {
-                DBG("c->children[%d]->parent != %p\n", (int) i, (void *) c);
+                DBG("contxt->children[%d]->parent != %p\n", (int) i,
+                    (void *) contxt);
                 break;
             }
 
             // Make sure that all NATIVE functions have
             // a default return value.
-            if(c->type == NATIVE && !c->resolved)
+            if(contxt->type == NATIVE && !contxt->resolved)
             {
-                DBG("c->type == NATIVE && !c->resolved\n");
+                DBG("contxt->type == NATIVE && !contxt->resolved\n");
                 break;
             }
 
             // Make sure that all objects except CONTXTs
             // and NUMBERs have a name.
-            if(!c->children[i]->name &&
-                c->children[i]->type != CONTXT &&
-                c->children[i]->type != NUMBER)
+            if(!contxt->children[i]->name &&
+                contxt->children[i]->type != CONTXT &&
+                contxt->children[i]->type != NUMBER)
             {
-                DBG("!c->children[i]->name && "
-                    "c->children[i]->type != CONTXT && "
-                    "c->children[i]->type != NUMBER\n");
+                DBG("!contxt->children[i]->name && "
+                    "contxt->children[i]->type != CONTXT && "
+                    "contxt->children[i]->type != NUMBER\n");
                 break;
             }
 
@@ -280,7 +282,7 @@ int c_sane(entry_p c, size_t n)
     {
         // Badly broken.
         status = 0;
-        DBG("!c || !c->children\n");
+        DBG("!contxt || !contxt->children\n");
     }
 
     return status;
@@ -292,48 +294,49 @@ int c_sane(entry_p c, size_t n)
 //              that we have atleast the number of symbols needed and that
 //              these are valid. If this fails it typically, but not always,
 //              means that we have a parser problem.
-// Input:       entry_p c:  The context.
-//              size_t n:   The number of symbols necessary.
-// Return:      int:        1 if context is valid, 0 otherwise.
+// Input:       entry_p contxt:  The context.
+//              size_t num:      The number of symbols necessary.
+// Return:      int:             1 if context is valid, 0 otherwise.
 //----------------------------------------------------------------------------
-int s_sane(entry_p c, size_t n)
+int s_sane(entry_p contxt, size_t num)
 {
     // Assume success;
     int status = 1;
 
-    if(c && c->symbols)
+    if(contxt && contxt->symbols)
     {
-        // Expect atleast n symbols.
-        for(size_t i = 0; i < n; i++)
+        // Expect atleast num symbols.
+        for(size_t i = 0; i < num; i++)
         {
             // Assume failure;
             status = 0;
 
             // Make sure that somethings exists.
-            if(c->symbols[i] == NULL)
+            if(contxt->symbols[i] == NULL)
             {
-                DBG("c->symbols[%d] == NULL\n", (int) i);
+                DBG("contxt->symbols[%d] == NULL\n", (int) i);
                 break;
             }
 
             // Make sure that it's not a sentinel.
-            if(c->symbols[i] == end())
+            if(contxt->symbols[i] == end())
             {
-                DBG("c->symbols[%d] == end()\n", (int) i);
+                DBG("contxt->symbols[%d] == end()\n", (int) i);
                 break;
             }
 
             // Make sure that it has a name.
-            if(!c->symbols[i]->name)
+            if(!contxt->symbols[i]->name)
             {
-                DBG("!c->symbols[%d]->name\n", (int) i);
+                DBG("!contxt->symbols[%d]->name\n", (int) i);
                 break;
             }
 
             // Make sure that it belongs to us.
-            if(c->symbols[i]->parent != c)
+            if(contxt->symbols[i]->parent != contxt)
             {
-                DBG("c->symbols[%d]->parent != %p\n", (int) i, (void *) c);
+                DBG("contxt->symbols[%d]->parent != %p\n", (int) i,
+                    (void *) contxt);
                 break;
             }
 
@@ -345,7 +348,7 @@ int s_sane(entry_p c, size_t n)
     {
         // Badly broken.
         status = 0;
-        DBG("!c || !c->symbols\n");
+        DBG("!contxt || !contxt->symbols\n");
     }
 
     return status;
@@ -357,33 +360,33 @@ int s_sane(entry_p c, size_t n)
 //              that the variable must exist and that the current resolved
 //              value must be a NUMBER, if not, this function will silently
 //              fail.
-// Input:       entry_p c:  The context.
-//              char *v:    The name of the variable.
-//              int n:      The new value of the variable.
+// Input:       entry_p contxt:  The context.
+//              char *var:       The name of the variable.
+//              int val:         The new value of the variable.
 // Return:      -
 //----------------------------------------------------------------------------
-void set_numvar(entry_p c, char *v, int n)
+void set_numvar(entry_p contxt, char *var, int val)
 {
     // Dummy reference used for searching.
     static entry_t ref = { .type = SYMREF };
 
     // We need a name and a context.
-    if(c && v)
+    if(contxt && var)
     {
         // Name and reparent.
-        ref.parent = c;
-        ref.name = v;
+        ref.parent = contxt;
+        ref.name = var;
 
-        // Find whatever 'v' is.
-        entry_p s = find_symbol(&ref);
+        // Find whatever 'var' is.
+        entry_p sym = find_symbol(&ref);
 
         // This should be a symbol. And it
         // should be a resolved numerical one.
-        if(s && s->type == SYMBOL && s->resolved &&
-           s->resolved->type == NUMBER)
+        if(sym && sym->type == SYMBOL && sym->resolved &&
+           sym->resolved->type == NUMBER)
         {
             // Success.
-            s->resolved->id = n;
+            sym->resolved->id = val;
             return;
         }
     }
@@ -396,35 +399,35 @@ void set_numvar(entry_p c, char *v, int n)
 // Description: Get the value of an existing numerical variable. Please note
 //              that the variable must exist and that the current resolved
 //              value must be a NUMBER.
-// Input:       entry_p c:  The context.
-//              char *v:    The name of the variable.
-// Return:      int:        The value of the variable or zero if the variable
-//                          can't be found.
+// Input:       entry_p contxt:  The context.
+//              char *var:       The name of the variable.
+// Return:      int:             The value of the variable or zero if the
+//                               variable can't be found.
 //----------------------------------------------------------------------------
-int get_numvar(entry_p c, char *v)
+int get_numvar(entry_p contxt, char *var)
 {
     // We need a name and a context.
-    if(c && v)
+    if(contxt && var)
     {
         // Dummy reference used to find
         // the variable.
-        entry_p s;
+        entry_p sym;
         static entry_t ref = { .type = SYMREF };
 
         // Name and reparent dummy.
-        ref.name = v;
-        ref.parent = c;
+        ref.name = var;
+        ref.parent = contxt;
 
-        // Find whatever 'v' is.
-        s = find_symbol(&ref);
+        // Find whatever 'var' is.
+        sym = find_symbol(&ref);
 
         // This should be a symbol. And it
         // should be a resolved numerical one.
-        if(s && s->type == SYMBOL && s->resolved &&
-           s->resolved->type == NUMBER)
+        if(sym && sym->type == SYMBOL && sym->resolved &&
+           sym->resolved->type == NUMBER)
         {
             // Success.
-            return s->resolved->id;
+            return sym->resolved->id;
         }
     }
 
@@ -437,36 +440,36 @@ int get_numvar(entry_p c, char *v)
 // Description: Get the value of an existing string variable. Please note
 //              that the variable must exist and that the current resolved
 //              value must be a STRING.
-// Input:       entry_p c:  The context.
-//              char *v:    The name of the variable.
-// Return:      char *:     The value of the variable or an empty string if
-//                          the variable can't be found.
+// Input:       entry_p contxt:  The context.
+//              char *var:       The name of the variable.
+// Return:      char *:          The value of the variable or an empty string
+//                               if the variable can't be found.
 //----------------------------------------------------------------------------
-char *get_strvar(entry_p c, char *v)
+char *get_strvar(entry_p contxt, char *var)
 {
     // We need a name and a context.
-    if(c && v)
+    if(contxt && var)
     {
         // Dummy reference used to find
         // the variable.
-        entry_p s;
+        entry_p sym;
         static entry_t ref = { .type = SYMREF };
 
         // Name and reparent dummy.
-        ref.name = v;
-        ref.parent = c;
+        ref.name = var;
+        ref.parent = contxt;
 
         // Find whatever 'v' is.
-        s = find_symbol(&ref);
+        sym = find_symbol(&ref);
 
         // This should be a symbol. And it
         // should be a resolved string.
-        if(s && s->type == SYMBOL &&
-           s->resolved && s->resolved->name &&
-           s->resolved->type == STRING)
+        if(sym && sym->type == SYMBOL &&
+           sym->resolved && sym->resolved->name &&
+           sym->resolved->type == STRING)
         {
             // Success.
-            return s->resolved->name;
+            return sym->resolved->name;
         }
     }
 
@@ -478,84 +481,84 @@ char *get_strvar(entry_p c, char *v)
 // Name:        get_optstr
 // Description: Concatenate all the strings in all the options of a given
 //              type in contxt.
-// Input:       entry_p c:         Context.
-//              opt_t t:           The option type.
+// Input:       entry_p contxt:    The context.
+//              opt_t type:        The option type.
 // Return:      char *:            A concatenation of all the strings found.
 //----------------------------------------------------------------------------
-char *get_optstr(entry_p c, opt_t t)
+char *get_optstr(entry_p contxt, opt_t type)
 {
-    size_t n = 0;
-    entry_p *e = c->children;
+    size_t num = 0;
+    entry_p *child = contxt->children;
 
     // Count the number of children
     // of the given option type.
-    while(*e && *e != end())
+    while(*child && *child != end())
     {
-        if((*e)->type == OPTION &&
-           (*e)->id == (int32_t) t)
+        if((*child)->type == OPTION &&
+           (*child)->id == (int32_t) type)
         {
-            n++;
+            num++;
         }
 
         // Next child.
-        e++;
+        child++;
     }
 
     // Did we find the right type?
-    if(n)
+    if(num)
     {
         // References to string evaluations of all
         // options of the right type.
-        char **cs = DBG_ALLOC(calloc(n + 1, sizeof(char *)));
+        char **str = DBG_ALLOC(calloc(num + 1, sizeof(char *)));
 
-        if(cs)
+        if(str)
         {
             // Empty string.
-            e = c->children;
-            size_t ln = 1;
+            child = contxt->children;
+            size_t len = 1;
 
             // For all children, evaluate them
             // once and save string pointers.
-            for(size_t i = 0; i < n &&
-                *e && *e != end(); e++)
+            for(size_t i = 0; i < num && *child
+                && *child != end(); child++)
             {
-                if((*e)->id == (int32_t) t &&
-                   (*e)->type == OPTION)
+                if((*child)->id == (int32_t) type &&
+                   (*child)->type == OPTION)
                 {
                     // Sum up the length.
-                    char *cur = get_chlstr(*e, false);
+                    char *cur = get_chlstr(*child, false);
 
                     if(cur)
                     {
-                        cs[i++] = cur;
-                        ln += strlen(cur);
+                        str[i++] = cur;
+                        len += strlen(cur);
                     }
                 }
             }
 
             // Allocate memory to hold the
             // concatenation of all strings.
-            char *r = DBG_ALLOC(calloc(ln, 1));
+            char *ret = DBG_ALLOC(calloc(len, 1));
 
-            if(r)
+            if(ret)
             {
                 // Concatenate substrings.
-                for(size_t i = 0; cs[i]; i++)
+                for(size_t i = 0; str[i]; i++)
                 {
-                    strncat(r, cs[i], ln - strlen(r));
+                    strncat(ret, str[i], len - strlen(ret));
                 }
             }
 
             // Free substrings.
-            for(size_t i = 0; cs[i]; i++)
+            for(size_t i = 0; str[i]; i++)
             {
-                free(cs[i]);
+                free(str[i]);
             }
 
-            free(cs);
+            free(str);
 
             // Done.
-            return r;
+            return ret;
         }
 
         // Out of memory
@@ -569,86 +572,86 @@ char *get_optstr(entry_p c, opt_t t)
 // Name:        get_chlst
 // Description: Concatenate the string representations of all non context
 //              children of a context.
-// Input:       entry_p c:  The context.
-//              bool p:     Whitespace padding.
-// Return:      char *:     The concatenation of the string representations
-//                          of all non context children of 'c'.
+// Input:       entry_p contxt:  The context.
+//              bool pad:        Whitespace padding.
+// Return:      char *:          The concatenation of the string representations
+//                               of all non context children of 'contxt'.
 //----------------------------------------------------------------------------
-char *get_chlstr(entry_p c, bool p)
+char *get_chlstr(entry_p contxt, bool pad)
 {
     // Concatenation.
-    char *r = NULL;
+    char *ret = NULL;
 
     // We don't really need anything to
     // concatenate but we expect a sane
     // contxt.
-    if(c_sane(c, 0))
+    if(c_sane(contxt, 0))
     {
-        size_t n = 0;
-        entry_p *e = c->children;
+        size_t num = 0;
+        entry_p *child = contxt->children;
 
         // Count the number of non context children.
-        while(*e && *e != end())
+        while(*child && *child != end())
         {
-            n += ((*e)->type != CONTXT) ? 1 : 0;
-            e++;
+            num += ((*child)->type != CONTXT) ? 1 : 0;
+            child++;
         }
 
-        if(n)
+        if(num)
         {
             // Allocate memory to hold a string pointer
             // for each child.
-            char **v = DBG_ALLOC(calloc(n + 1, sizeof(char *)));
+            char **stv = DBG_ALLOC(calloc(num + 1, sizeof(char *)));
 
-            if(v)
+            if(stv)
             {
                 // Total length.
-                size_t l = 0;
+                size_t len = 0;
 
                 // Save all string pointers so that we don't
                 // evaluate children twice and thereby set of
                 // side effects more than once.
-                while(n > 0)
+                while(num > 0)
                 {
-                    entry_p cur = *(--e);
+                    entry_p cur = *(--child);
 
                     if(cur->type != CONTXT)
                     {
-                        v[--n] = str(cur);
-                        l += strlen(v[n]);
+                        stv[--num] = str(cur);
+                        len += strlen(stv[num]);
 
                         // Insert whitespace between strings?
-                        if(p)
+                        if(pad)
                         {
                             // Make room for whitespace.
-                            l++;
+                            len++;
                         }
                     }
                 }
 
                 // If the total length is non zero, we will
                 // concatenate all children.
-                if(l)
+                if(len)
                 {
                     // Allocate memory to hold the full
                     // concatenated string.
-                    r = DBG_ALLOC(calloc(l + 1, 1));
+                    ret = DBG_ALLOC(calloc(len + 1, 1));
 
-                    if(r)
+                    if(ret)
                     {
-                        // The actual concatenation. The
-                        // 'v' array is null terminated.
-                        while(v[n])
+                        // The concatenation. The 'stv'
+                        // array is null terminated.
+                        while(stv[num])
                         {
-                            strncat(r, v[n], l + 1 - strlen(r));
-                            n++;
+                            strncat(ret, stv[num], len + 1 - strlen(ret));
+                            num++;
 
                             // Is padding enabled and is this not
                             // the final string?
-                            if(p && v[n])
+                            if(pad && stv[num])
                             {
                                 // Insert whitespace.
-                                strncat(r, " ", l + 1 - strlen(r));
+                                strncat(ret, " ", len + 1 - strlen(ret));
                             }
                         }
                     }
@@ -656,24 +659,24 @@ char *get_chlstr(entry_p c, bool p)
                 else
                 {
                     // No data to concatenate.
-                    r = DBG_ALLOC(strdup(""));
+                    ret = DBG_ALLOC(strdup(""));
                 }
 
                 // Free the references before
                 // returning.
-                free(v);
+                free(stv);
             }
         }
         else
         {
             // No children to concatenate.
-            r = DBG_ALLOC(strdup(""));
+            ret = DBG_ALLOC(strdup(""));
         }
     }
 
     // We could be in any state
     // here, success or panic.
-    return r;
+    return ret;
 }
 
 //----------------------------------------------------------------------------
@@ -682,36 +685,37 @@ char *get_chlstr(entry_p c, bool p)
 //              that the variable must exist and that the current resolved
 //              value must be a STRING, if not, this function will silently
 //              fail.
-// Input:       entry_p c:  The context.
-//              char *v:    The name of the variable.
-//              char *n:    The new value of the variable.
+// Input:       entry_p contxt:  The context.
+//              char *var:       The name of the variable.
+//              char *val:       The new value of the variable.
 // Return:      -
 //----------------------------------------------------------------------------
-void set_strvar(entry_p c, char *v, char *n)
+void set_strvar(entry_p contxt, char *var, char *val)
 {
     // We need a name and a context.
-    if(c && v)
+    if(contxt && var)
     {
         // Dummy reference used to find
         // the variable.
-        entry_p s;
+        entry_p sym;
         static entry_t ref = { .type = SYMREF };
 
         // Name and reparent dummy.
-        ref.name = v;
-        ref.parent = c;
+        ref.name = var;
+        ref.parent = contxt;
 
         // Find whatever 'v' is.
-        s = find_symbol(&ref);
+        sym = find_symbol(&ref);
 
         // This should be a symbol. And it
         // should be a resolved string.
-        if(s && s->type == SYMBOL && s->resolved &&
-           s->resolved->type == STRING)
+        if(sym && sym->type == SYMBOL &&
+           sym->resolved &&
+           sym->resolved->type == STRING)
         {
-            // Taking ownership of 'n'.
-            free(s->resolved->name);
-            s->resolved->name = n;
+            // Taking ownership of 'val'.
+            free(sym->resolved->name);
+            sym->resolved->name = val;
         }
     }
 }
@@ -726,14 +730,14 @@ void set_strvar(entry_p c, char *v, char *n)
 static void pp_aux(entry_p entry, int indent)
 {
     // Indentation galore.
-    char t[16] = "\t\t\t\t"
-                 "\t\t\t\t"
-                 "\t\t\t\t"
-                 "\t\t\t\0";
+    char ind[16] = "\t\t\t\t"
+                   "\t\t\t\t"
+                   "\t\t\t\t"
+                   "\t\t\t\0";
 
     // Going backwards to go forward.
-    char *ts = t + sizeof(t) - 1 - indent;
-    ts = ts < t ? t : ts;
+    char *type = ind + sizeof(ind) - 1 - indent;
+    type = type < ind ? ind : type;
 
     // NULL is a valid value.
     if(entry)
@@ -756,26 +760,26 @@ static void pp_aux(entry_p entry, int indent)
 
         // All entries have a type, a parent and an ID.
         DBG("%s\n", tps[entry->type]);
-        DBG("%sThis:%p\n", ts, (void *) entry);
-        DBG("%sParent:%p\n", ts, (void *) entry->parent);
-        DBG("%sId:\t%d\n", ts, entry->id);
+        DBG("%sThis:%p\n", type, (void *) entry);
+        DBG("%sParent:%p\n", type, (void *) entry->parent);
+        DBG("%sId:\t%d\n", type, entry->id);
 
         // Most, but not all, have a name.
         if(entry->name)
         {
-            DBG("%sName:\t%s\n", ts, entry->name);
+            DBG("%sName:\t%s\n", type, entry->name);
         }
 
          // Natives and cusrefs have callbacks.
         if(entry->call)
         {
-            DBG("%sCall:\t%p\n", ts, (void *) entry->call);
+            DBG("%sCall:\t%p\n", type, (void *) entry->call);
         }
 
         // Functions / symbols can be 'resolved'.
         if(entry->resolved)
         {
-            DBG("%sRes:\t", ts);
+            DBG("%sRes:\t", type);
 
             // Pretty print the 'resolved' entry,
             // last / default return value and
@@ -786,26 +790,26 @@ static void pp_aux(entry_p entry, int indent)
         // Pretty print all children.
         if(entry->children)
         {
-            entry_p *e = entry->children;
+            entry_p *child = entry->children;
 
-            while(*e && *e != end())
+            while(*child && *child != end())
             {
-                DBG("%sChl:\t", ts);
-                pp_aux(*e, indent + 1);
-                e++;
+                DBG("%sChl:\t", type);
+                pp_aux(*child, indent + 1);
+                child++;
             }
         }
 
         // Pretty print all symbols.
         if(entry->symbols)
         {
-            entry_p *e = entry->symbols;
+            entry_p *sym = entry->symbols;
 
-            while(*e && *e != end())
+            while(*sym && *sym != end())
             {
-                DBG("%sSym:\t", ts);
-                pp_aux(*e, indent + 1);
-                e++;
+                DBG("%sSym:\t", type);
+                pp_aux(*sym, indent + 1);
+                sym++;
             }
         }
     }
@@ -908,9 +912,9 @@ void *dbg_alloc(int line, const char *file, const char *func, void *mem)
 // Input:       entry_p contxt:  CONTXT.
 // Return:      entry_p:         NATIVE callback if found, NULL otherwise.
 //----------------------------------------------------------------------------
-entry_p native_exists(entry_p contxt, call_t f)
+entry_p native_exists(entry_p contxt, call_t func)
 {
-    entry_p e = NULL;
+    entry_p entry = NULL;
 
     // NULL are valid values.
     if(contxt && contxt->children)
@@ -918,23 +922,23 @@ entry_p native_exists(entry_p contxt, call_t f)
         // Iterate over all children and
         // recur if needed.
         for(entry_p *c = contxt->children;
-            *c && *c != end() && !e; c++)
+            *c && *c != end() && !entry; c++)
         {
             if((*c)->type == NATIVE &&
-               (*c)->call == f)
+               (*c)->call == func)
             {
                 // We found it.
-                e = *c;
+                entry = *c;
             }
             else
             {
                 // Recur.
-                e = native_exists(*c, f);
+                entry = native_exists(*c, func);
             }
         }
     }
 
     // NULL or callback.
-    return e;
+    return entry;
 }
 

@@ -280,11 +280,11 @@ int tru(entry_p entry)
     if(entry)
     {
         // Attempt to resolve it.
-        entry_p e = resolve(entry);
+        entry_p val = resolve(entry);
 
         // Only numerals and strings can be true.
-        if(((e->type == STRING && *(e->name)) ||
-            (e->type == NUMBER && e->id)) && !DID_ERR)
+        if(((val->type == STRING && *(val->name)) ||
+            (val->type == NUMBER && val->id)) && !DID_ERR)
         {
             return 1;
         }
@@ -427,37 +427,37 @@ char *str(entry_p entry)
 entry_p invoke(entry_p entry)
 {
     // Expect failure.
-    entry_p r = end();
+    entry_p ret = end();
 
     if(entry)
     {
         // Iterator.
-        entry_p *c = entry->children;
+        entry_p *cur = entry->children;
 
         // Empty procedures are allowed, there
         // might be no children at all.
-        if(c)
+        if(cur)
         {
             // As long as no one fails, resolve
             // all children and save the return
             // value of the last one.
-            while(*c && *c != end() && !DID_ERR)
+            while(*cur && *cur != end() && !DID_ERR)
             {
                 // Resolve and proceed.
-                r = resolve(*c);
-                c++;
+                ret = resolve(*cur);
+                cur++;
             }
         }
 
         // Return the last value.
-        return r;
+        return ret;
     }
 
     // Bad input.
     PANIC(entry);
 
     // Failure.
-    return r;
+    return ret;
 }
 
 //----------------------------------------------------------------------------

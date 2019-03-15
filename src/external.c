@@ -48,7 +48,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         {
             // The default threshold is expert.
             int level = get_numvar(contxt, "@user-level");
-            int th = 2;
+            int thres = 2;
 
             // If the (confirm ...) option contains
             // something that can be translated into
@@ -58,13 +58,13 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                confirm->children[0] != end())
             {
                 // ...then do so.
-                th = num(confirm);
+                thres = num(confirm);
             }
 
             // If we are below the threshold value,
             // don't care about getting confirmation
             // from the user.
-            if(level < th)
+            if(level < thres)
             {
                 confirm = NULL;
             }
@@ -76,9 +76,8 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             // valid code so lets fail anyway.
             if(!prompt || !help)
             {
-                char *m = prompt ? "help" : "prompt";
-
-                ERR(ERR_MISSING_OPTION, m);
+                char *opt = prompt ? "help" : "prompt";
+                ERR(ERR_MISSING_OPTION, opt);
                 RCUR;
             }
         }
@@ -86,7 +85,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         // Did we need it? (confirmation)
         if(confirm)
         {
-            inp_t rc = gui_confirm(str(prompt), str(help), back);
+            inp_t grc = gui_confirm(str(prompt), str(help), back);
 
             // Is the back option available?
             if(back)
@@ -94,24 +93,24 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 // Fake input?
                 if(get_numvar(contxt, "@back"))
                 {
-                    rc = G_ABORT;
+                    grc = G_ABORT;
                 }
 
                 // On abort execute.
-                if(rc == G_ABORT)
+                if(grc == G_ABORT)
                 {
                     return resolve(back);
                 }
             }
 
             // FIXME
-            if(rc == G_ABORT || rc == G_EXIT)
+            if(grc == G_ABORT || grc == G_EXIT)
             {
                 HALT;
             }
 
             // FIXME
-            if(rc != G_TRUE)
+            if(grc != G_TRUE)
             {
                 RCUR;
             }
@@ -133,15 +132,15 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 // DOS / Arexx script?
                 if(pre)
                 {
-                    size_t cl = strlen(cmd) + strlen(pre) + 2;
-                    char *t = DBG_ALLOC(malloc(cl));
+                    size_t len = strlen(cmd) + strlen(pre) + 2;
+                    char *tmp = DBG_ALLOC(malloc(len));
 
-                    if(t)
+                    if(tmp)
                     {
                         // Prepend prefix to command string.
-                        snprintf(t, cl, "%s %s", pre, cmd);
+                        snprintf(tmp, len, "%s %s", pre, cmd);
                         free(cmd);
-                        cmd = t;
+                        cmd = tmp;
                     }
                     else
                     {

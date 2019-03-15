@@ -278,21 +278,21 @@ entry_p m_symbolval(entry_p contxt)
     // of the symbol.
     if(c_sane(contxt, 1))
     {
-        static entry_t e = { .type = SYMREF };
-        entry_p r;
+        static entry_t entry = { .type = SYMREF };
+        entry_p ret;
 
         // Initialize and resolve dummy.
-        e.parent = contxt;
-        e.id = contxt->id;
-        e.name = str(CARG(1));
+        entry.parent = contxt;
+        entry.id = contxt->id;
+        entry.name = str(CARG(1));
 
-        r = resolve(&e);
+        ret = resolve(&entry);
 
         // Return the resolved value if
         // the symbol could be found.
         if(!DID_ERR)
         {
-            return r;
+            return ret;
         }
 
         // Symbol not found.

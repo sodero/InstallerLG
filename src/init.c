@@ -42,24 +42,24 @@ char *strcasestr(const char *, const char *);
 static void init_num(entry_p contxt, char *sym, int num)
 {
     // Create SYMBOL VALUE tuple.
-    entry_p s = new_symbol(DBG_ALLOC(strdup(sym))),
-            n = new_number(num);
+    entry_p var = new_symbol(DBG_ALLOC(strdup(sym))),
+            val = new_number(num);
 
     // Unless we're OOM, init tuple.
-    if(s && n)
+    if(var && val)
     {
-        s->parent = contxt;
-        s->resolved = n;
-        n->parent = s;
+        var->parent = contxt;
+        var->resolved = val;
+        val->parent = var;
 
         // Insert result in CONTXT.
-        append(&contxt->symbols, s);
+        append(&contxt->symbols, var);
     }
     else
     {
         // Don't leak on OOM.
-        kill(s);
-        kill(n);
+        kill(var);
+        kill(val);
     }
 }
 
@@ -76,24 +76,24 @@ static void init_num(entry_p contxt, char *sym, int num)
 static void init_str(entry_p contxt, char *sym, char *str)
 {
     // Create SYMBOL VALUE tuple.
-    entry_p s = new_symbol(DBG_ALLOC(strdup(sym))),
-            n = new_string(DBG_ALLOC(strdup(str)));
+    entry_p var = new_symbol(DBG_ALLOC(strdup(sym))),
+            val = new_string(DBG_ALLOC(strdup(str)));
 
     // Unless we're OOM, init tuple.
-    if(s && n)
+    if(var && val)
     {
-        s->parent = contxt;
-        s->resolved = n;
-        n->parent = s;
+        var->parent = contxt;
+        var->resolved = val;
+        val->parent = var;
 
         // Insert result in CONTXT.
-        append(&contxt->symbols, s);
+        append(&contxt->symbols, var);
     }
     else
     {
         // Don't leak on OOM.
-        kill(s);
-        kill(n);
+        kill(var);
+        kill(val);
     }
 }
 
