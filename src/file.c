@@ -1065,7 +1065,7 @@ static inp_t h_copyfile(entry_p contxt,
                                         if(!PutDiskObject(dst, obj))
                                         {
                                             // We failed for some unknown reason.
-                                            ERR(ERR_WRITE_FILE, id);
+                                            ERR(ERR_WRITE_FILE, copy);
                                             grc = G_FALSE;
                                         }
 
@@ -2395,7 +2395,7 @@ entry_p m_delete(entry_p contxt)
         char *file = str(CARG(1));
 
         #ifdef AMIGA
-        wild = ParsePattern(w, get_buf(), buf_size());
+        wild = ParsePattern(file, get_buf(), buf_size());
         #endif
 
         // Assume failure.
