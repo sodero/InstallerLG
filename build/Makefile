@@ -4,7 +4,7 @@
 VPATH := ../src
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 OS := $(shell uname)
-DATE := $(shell date +%d.%m.%Y)
+DATE := $(shell date +%d.%m.%Y || echo Unknown)
 EXE := Installer
 
 #---------------------------------------------------------------------------------#
