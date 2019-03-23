@@ -723,7 +723,8 @@ entry_p push(entry_p dst, entry_p src)
         // are treated as symbols.
         if((src->type == SYMBOL ||
             src->type == CUSTOM) &&
-            dst->type == CONTXT)
+           (dst->type == CONTXT ||
+            dst->type == CUSTOM))
         {
             // We can't have multiple references
             // with the same name.
