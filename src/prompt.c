@@ -472,7 +472,7 @@ entry_p m_askdisk(entry_p contxt)
                 p->pr_WindowPtr = (APTR) -1L;
 
                 // Is this volume present already?
-                BPTR l = (BPTR) Lock(n, ACCESS_READ);
+                BPTR l = (BPTR) Lock(dsk, ACCESS_READ);
                 if(!l)
                 {
                     const char *msg = str(prompt),
@@ -493,7 +493,7 @@ entry_p m_askdisk(entry_p contxt)
 
                             if(grc == G_TRUE)
                             {
-                                l = (BPTR) Lock(n, ACCESS_READ);
+                                l = (BPTR) Lock(dsk, ACCESS_READ);
                             }
                             else
                             {

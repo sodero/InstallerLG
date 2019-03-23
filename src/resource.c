@@ -114,9 +114,9 @@ const char *tr(res_t res)
 
     #ifdef AMIGA
     if(loc.li_LocaleBase &&
-       loc.li_Catalog && i > S_NONE)
+       loc.li_Catalog && cur > S_NONE)
     {
-        return GetCatalogStr(loc.li_Catalog, i - 1, str[i]);
+        return GetCatalogStr(loc.li_Catalog, cur - 1, str[cur]);
     }
     #endif
 
@@ -154,8 +154,8 @@ void locale_exit(void)
     if(loc.li_LocaleBase)
     {
         #ifdef AMIGA
-        CloseCatalog(li.li_Catalog);
-        CloseLibrary(li.li_LocaleBase);
+        CloseCatalog(loc.li_Catalog);
+        CloseLibrary(loc.li_LocaleBase);
         #else
         loc.li_LocaleBase = loc.li_Catalog = (APTR) 0;
         #endif
