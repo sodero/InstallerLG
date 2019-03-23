@@ -220,4 +220,5 @@
 0.1.0-alpha.35:
 ===============
 - Improved robustness.
-- ?
+- Local variables handling fix.
+- File permission workaround/cheat.

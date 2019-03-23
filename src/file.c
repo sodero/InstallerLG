@@ -830,9 +830,18 @@ static int h_protect_get(entry_p contxt,
             // Did everything above succeed?
             if(!done)
             {
-                // No, fail and set impossible mask.
-                ERR(ERR_GET_PERM, file);
-                *mask = -1;
+                // Only fail if we're in 'strict' mode.
+                if(get_numvar(contxt, "@strict"))
+                {
+                    // No, fail and set impossible mask.
+                    ERR(ERR_GET_PERM, file);
+                    *mask = -1;
+                }
+                else
+                {
+                    // Fallback to RWED.
+                    *mask = 0;
+                }
             }
 
             // If enabled, write to log file.
