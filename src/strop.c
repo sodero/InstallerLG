@@ -132,28 +132,28 @@ entry_p m_fmt(entry_p contxt)
 
     if(sct)
     {
-        size_t cur = 0, off = 0, num = 0, len = 0;
+        size_t ndx = 0, off = 0, num = 0, len = 0;
         entry_p *arg = contxt->children;
 
         // Scan the format string.
-        for(; fmt[cur]; cur++)
+        for(; fmt[ndx]; ndx++)
         {
             // A specifier not preceeded by an escape?
-            if(fmt[cur] == '%' && (!cur || fmt[cur - 1] != '\\'))
+            if(fmt[ndx] == '%' && (!ndx || fmt[ndx - 1] != '\\'))
             {
                 // If this is a specifier that we recognize,
                 // then allocate a new string with just this
                 // specifier, nothing else.
-                if(fmt[++cur] == 's' || (
-                   fmt[cur++] == 'l' &&
-                   fmt[cur] == 'd'))
+                if(fmt[++ndx] == 's' || (
+                   fmt[ndx++] == 'l' &&
+                   fmt[ndx] == 'd'))
                 {
-                    sct[num] = DBG_ALLOC(calloc(cur - off + 2, 1));
+                    sct[num] = DBG_ALLOC(calloc(ndx - off + 2, 1));
 
                     if(sct[num])
                     {
-                        memcpy(sct[num], fmt + off, cur - off + 1);
-                        off = cur + 1;
+                        memcpy(sct[num], fmt + off, ndx - off + 1);
+                        off = ndx + 1;
                         num++;
                     }
                     else

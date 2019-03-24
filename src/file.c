@@ -830,9 +830,18 @@ static int h_protect_get(entry_p contxt,
             // Did everything above succeed?
             if(!done)
             {
-                // No, fail and set impossible mask.
-                ERR(ERR_GET_PERM, file);
-                *mask = -1;
+                // Only fail if we're in 'strict' mode.
+                if(get_numvar(contxt, "@strict"))
+                {
+                    // No, fail and set impossible mask.
+                    ERR(ERR_GET_PERM, file);
+                    *mask = -1;
+                }
+                else
+                {
+                    // Fallback to RWED.
+                    *mask = 0;
+                }
             }
 
             // If enabled, write to log file.
@@ -1655,7 +1664,7 @@ entry_p m_copylib(entry_p contxt)
                 type = h_exists(dst);
 
                 // Destination file.
-                char *name;
+                char *name = NULL;
 
                 // A non safe operation in pretend mode
                 // always succeeds.
@@ -1740,13 +1749,12 @@ entry_p m_copylib(entry_p contxt)
                 }
 
                 // If we're not out of memory and destination dir
-                // and / or destination file is non empty, f will
-                // be <> 0.
+                // and / or destination file is non empty, name
+                // will be <> 0.
                 if(name)
                 {
-                    // Get f type info and set copy mode.
-                    int type = h_exists(name),
-                        mode = CF_SILENT |
+                    // Set copy mode.
+                    int mode = CF_SILENT |
                                (infos ? CF_INFOS : 0) |
                                (noposition ? CF_NOPOSITION : 0) |
                                (nogauge ? CF_NOGAUGE : 0) |
@@ -1754,6 +1762,9 @@ entry_p m_copylib(entry_p contxt)
                                (oknodelete ? CF_OKNODELETE : 0) |
                                (force ? CF_FORCE : 0) |
                                (askuser ? CF_ASKUSER : 0);
+
+                    // Get 'name' type info.
+                    type = h_exists(name);
 
                     // Currently there is no way to abort a
                     // file copy, but we need to handle the
@@ -3586,9 +3597,9 @@ entry_p m_textfile(entry_p contxt)
             {
                 // Overwrite existing file.
                 const char *name = str(dest);
-                FILE *dest = fopen(name, "w");
+                FILE *file = fopen(name, "w");
 
-                if(dest)
+                if(file)
                 {
                     // Assume success.
                     DNUM = 1;
@@ -3605,7 +3616,7 @@ entry_p m_textfile(entry_p contxt)
                             // Log operation.
                             h_log(contxt, tr(S_APND), app, name);
 
-                            if(fputs(app, dest) == EOF)
+                            if(fputs(app, file) == EOF)
                             {
                                 ERR(ERR_WRITE_FILE, name);
                                 DNUM = 0;
@@ -3644,7 +3655,7 @@ entry_p m_textfile(entry_p contxt)
                             while(num)
                             {
                                 // Write to destination file.
-                                if(fwrite(buf, 1, num, dest) != num)
+                                if(fwrite(buf, 1, num, file) != num)
                                 {
                                     ERR(ERR_WRITE_FILE, name);
                                     DNUM = 0;
@@ -3663,7 +3674,7 @@ entry_p m_textfile(entry_p contxt)
 
                     // We're done writing to the newly
                     // created file.
-                    fclose(dest);
+                    fclose(file);
 
                     // We must append and / or include,
                     // or else this doesn't make sense.

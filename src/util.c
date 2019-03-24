@@ -124,6 +124,37 @@ entry_p global(entry_p entry)
 }
 
 //----------------------------------------------------------------------------
+// Name:        custom
+// Description: Find CUSTOM parent if such exists.
+// Input:       entry_p entry:  The starting point.
+// Return:      entry_p:        The CUSTUM entry, or NULL
+//                              if no CUSTOM was found.
+//----------------------------------------------------------------------------
+entry_p custom(entry_p entry)
+{
+    // Go all the way up.
+    for(entry_p cur = local(entry); cur; )
+    {
+        // Find the next context.
+        entry_p next = local(cur->parent);
+
+        // If we found somethins, is it
+        // a CUSTOM procedure?
+        if(next && next->type == CUSTOM)
+        {
+            // Found it.
+            return next;
+        }
+
+        // Next level.
+        cur = next;
+    }
+
+    // Nothing:
+    return NULL;
+}
+
+//----------------------------------------------------------------------------
 // Name:        get_opt
 // Description: Find option of a given type in a context.
 // Input:       entry_p contxt:  The context to search in.

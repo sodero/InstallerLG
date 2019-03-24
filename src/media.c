@@ -100,12 +100,12 @@ entry_p m_effect(entry_p contxt)
                   !strcasecmp(est, "radial") ? G_RADIAL :
                   !strcasecmp(est, "horizontal") ? G_HORIZONTAL : 0);
 
-        // Invalid initial values.
-        static int oc1, oc2, oef = G_RADIAL | G_HORIZONTAL;
-
         // Known effect type?
         if(ief & G_EFFECT)
         {
+            // Invalid initial values.
+            static int oc1, oc2, oef = G_RADIAL | G_HORIZONTAL;
+
             // Only show something if this is the first
             // invocation or if the input has changed.
             if(ief != oef || ic1 != oc1 || ic2 != oc2)
