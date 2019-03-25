@@ -2541,7 +2541,8 @@ entry_p m_exists(entry_p contxt)
     if(c_sane(contxt, 1))
     {
         // Supress volume requester?
-        if(get_opt(contxt, OPT_NOREQ))
+        if(get_opt(contxt, OPT_NOREQ) ||
+           get_opt(contxt, OPT_QUIET))
         {
             #ifdef AMIGA
             struct Process *p = (struct Process *)

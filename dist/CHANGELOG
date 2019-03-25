@@ -222,3 +222,5 @@
 - Improved robustness.
 - Local variables handling fix.
 - File permission workaround/cheat.
+- (exists) support undocumented (quiet) == (noreq) (CubicIDE_HW80).
+- ?
