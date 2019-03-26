@@ -38,6 +38,10 @@
 #include <limits.h>
 #include <sys/time.h>
 
+#ifndef __GNUC__
+#define __attribute__(a)
+#endif
+
 #ifdef AMIGA
 //----------------------------------------------------------------------------
 // MUI helper macros
