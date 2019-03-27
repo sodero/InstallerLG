@@ -6,11 +6,18 @@
 CC= vc +aos68k
 OBJS= arithmetic.o procedure.o exit.o alloc.o control.o error.o eval.o \
       external.o file.o information.o media.o probe.o prompt.o resource.o \
-      strop.o symbol.o util.o wb.o args.o bitwise.o comparison.o gui.o init.o
-CFLAGS= -c99 -Ivbcc:PosixLib/include
+      strop.o symbol.o util.o wb.o args.o bitwise.o comparison.o gui.o init.o \
+      strcasestr.o ../build/parser.o ../build/lexer.o
+CFLAGS= -c99 -Ivbcc:PosixLib/include -I. -I../build -O -DAMIGA
 
 Installer: $(OBJS)
-	$(CC) -o $@ $(OBJS)
+	$(CC) -o /$@68k $(OBJS) -Lvbcc:PosixLib/AmigaOS3 -lposix -lamiga
+
+../build/lexer.o: ../build/lexer.c
+	$(CC) -o /build/lexer.o -c $(CFLAGS) $?
+
+../build/parser.o: ../build/parser.c
+	$(CC) -o /build/parser.o -c $(CFLAGS) $?
 
 arithmetic.o: arithmetic.c alloc.h arithmetic.h error.h eval.h util.h types.h
 

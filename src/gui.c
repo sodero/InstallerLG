@@ -16,9 +16,13 @@
 #include <graphics/rpattr.h>
 #include <libraries/asl.h>
 #include <libraries/mui.h>
+# ifndef __VBCC__
 #include <proto/alib.h>
+# endif
 # ifndef __MORPHOS__
+#  ifndef __VBCC__
 #include <proto/debug.h>
+#  endif
 # else
 #include <clib/debug_protos.h>
 # endif

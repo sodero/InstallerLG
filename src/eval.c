@@ -476,7 +476,7 @@ void run(entry_p entry)
 
     // Initialize GUI before starting the execution.
     // If (effect) type is set, use a custom screen.
-    if(gui_init(status))
+    if(gui_init(status != false))
     {
         // If an 'effect' statement exists,
         // execute this first of all.

@@ -135,7 +135,7 @@ bool h_confirm(entry_p contxt,
         {
             entry_p back = get_opt(contxt, OPT_BACK);
 
-            grc = gui_confirm(get_buf(), hlp, back);
+            grc = gui_confirm(get_buf(), hlp, back != false);
 
             // Is the back option available?
             if(back)
@@ -1459,8 +1459,8 @@ entry_p m_copyfiles(entry_p contxt)
                         prompt ? str(prompt) : NULL,
                         confirm ? str(help) : NULL,
                         cur,
-                        confirm,
-                        back
+                        confirm != false,
+                        back != false
                     );
                 }
 
@@ -1491,7 +1491,7 @@ entry_p m_copyfiles(entry_p contxt)
                             // A file.
                             case 1:
                                 grc = h_copyfile(contxt, cur->name,
-                                                 cur->copy, back, mode);
+                                                 cur->copy, back != false, mode);
                                 break;
 
                             // A directory.
@@ -1794,7 +1794,7 @@ entry_p m_copylib(entry_p contxt)
                                     tr(S_DDRW),
                                     dst))
                                 {
-                                    grc = h_copyfile(contxt, src, name, back, mode);
+                                    grc = h_copyfile(contxt, src, name, back != false, mode);
                                 }
                             }
                             // The version of the source file
@@ -1813,14 +1813,14 @@ entry_p m_copylib(entry_p contxt)
                                     tr(S_DDRW),
                                     dst))
                                 {
-                                    grc = h_copyfile(contxt, src, name, back, mode);
+                                    grc = h_copyfile(contxt, src, name, back != false, mode);
                                 }
                             }
                         }
                         else
                         {
                             // No confirmation needed.
-                            grc = h_copyfile(contxt, src, name, back, mode);
+                            grc = h_copyfile(contxt, src, name, back != false, mode);
                         }
                     }
                     else
@@ -1947,7 +1947,7 @@ entry_p m_copylib(entry_p contxt)
                                     tr(S_DDRW),
                                     dst))
                                 {
-                                    grc = h_copyfile(contxt, src, name, back, mode);
+                                    grc = h_copyfile(contxt, src, name, back != false, mode);
                                 }
                             }
                             else
@@ -1956,7 +1956,7 @@ entry_p m_copylib(entry_p contxt)
                                 // number than the existing one, overwrite.
                                 if(new > old)
                                 {
-                                    grc = h_copyfile(contxt, src, name, back, mode);
+                                    grc = h_copyfile(contxt, src, name, back != false, mode);
                                 }
                                 else
                                 {
@@ -1978,7 +1978,7 @@ entry_p m_copylib(entry_p contxt)
                                         tr(S_DDRW),
                                         dst))
                                     {
-                                        grc = h_copyfile(contxt, src, name, back, mode);
+                                        grc = h_copyfile(contxt, src, name, back != false, mode);
                                     }
                                 }
                             }

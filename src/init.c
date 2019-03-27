@@ -212,14 +212,15 @@ entry_p init(entry_p contxt)
                 NUMBER
             );
 
+            #ifdef AMIGA
             // Only on Amiga, otherwise tests will break,
             // they don't expect any default (welcome).
-            #ifdef AMIGA
+
             // Add to the root and reparent.
-            if(e)
+            if(entry)
             {
-                append(&contxt->children, e);
-                e->parent = contxt;
+                append(&contxt->children, entry);
+                entry->parent = contxt;
             }
 
             // Rotate right to make it end up on top.
@@ -290,10 +291,10 @@ entry_p init(entry_p contxt)
         // break, they don't expect any default (exit).
 
         // Add to the root and reparent.
-        if(e)
+        if(entry)
         {
-            append(&contxt->children, e);
-            e->parent = contxt;
+            append(&contxt->children, entry);
+            entry->parent = contxt;
         }
 
         // No rotation. Default (exit) should be last.
@@ -353,4 +354,3 @@ entry_p init(entry_p contxt)
 
     return contxt;
 }
-

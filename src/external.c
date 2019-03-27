@@ -85,7 +85,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         // Did we need it? (confirmation)
         if(confirm)
         {
-            inp_t grc = gui_confirm(str(prompt), str(help), back);
+            inp_t grc = gui_confirm(str(prompt), str(help), back != false);
 
             // Is the back option available?
             if(back)
