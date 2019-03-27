@@ -194,14 +194,14 @@ entry_p init(entry_p contxt)
        s_sane(contxt, 0))
     {
         // Is there a (welcome) already?
-        entry_p e = native_exists(contxt, m_welcome);
+        entry_p entry = native_exists(contxt, m_welcome);
 
         // If not, insert a default (welcome).
-        if(!e)
+        if(!entry)
         {
             // The line numbers and naming are for debugging
             // purposes only.
-            e = new_native
+            entry = new_native
             (
                 DBG_ALLOC(strdup("welcome")), __LINE__, m_welcome,
                 push
@@ -226,13 +226,13 @@ entry_p init(entry_p contxt)
             ror(contxt->children);
             #else
             // We're not using this, kill it directly.
-            kill(e);
+            kill(entry);
             #endif
         }
 
         // Create default error handler, it simply returns '0'
         // without doing anything.
-        e = new_native
+        entry = new_native
         (
             DBG_ALLOC(strdup("onerror")), __LINE__, m_procedure,
             push
@@ -267,11 +267,11 @@ entry_p init(entry_p contxt)
         );
 
         // Unless we're out of memory.
-        if(e)
+        if(entry)
         {
             // Add to the root and reparent.
-            append(&contxt->children, e);
-            e->parent = contxt;
+            append(&contxt->children, entry);
+            entry->parent = contxt;
 
             // Rotate to put it on top.
             ror(contxt->children);
@@ -279,7 +279,7 @@ entry_p init(entry_p contxt)
 
         // Create default (exit). Line numbers and
         // naming are for debugging purposes only.
-        e = new_native
+        entry = new_native
         (
             DBG_ALLOC(strdup("exit")), __LINE__,
             m_exit, NULL, NUMBER
@@ -299,7 +299,7 @@ entry_p init(entry_p contxt)
         // No rotation. Default (exit) should be last.
         #else
         // We're not using this, kill it directly.
-        kill(e);
+        kill(entry);
         #endif
 
         // Get tooltype / cli arguments.

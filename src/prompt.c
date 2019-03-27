@@ -190,15 +190,11 @@ entry_p m_askchoice(entry_p contxt)
                     //    choices with a special escape sequence `"<ESC>[2p"'. This escape
                     //    sequence allows proportional rendering. It is wise to specify this
                     //    only in the first choice of the list. Note this well.  (V42)
-                    if(strlen(opt) > 3)
+                    if(strlen(opt) > 3 && !memcmp("\x1B[2p", opt, 4))
                     {
                         // We rely on Zune / MUI for #2. Hide
                         // this control sequence if it exists.
-                        if(!memcmp("\x1B[2p", opt, 4))
-                        {
-                            // Skip sequence.
-                            opt += 4;
-                        }
+                        opt += 4;
                     }
 
                     // Make sure that the removal of the control
@@ -862,15 +858,11 @@ entry_p m_askoptions(entry_p contxt)
                 // choices with a special escape sequence `"<ESC>[2p"'. This escape
                 // sequence allows proportional rendering. It is wise to specify this
                 // only in the first choice of the list. Note this well.  (V42)
-                if(strlen(cur) > 3)
+                if(strlen(cur) > 3 && !memcmp("\x1B[2p", cur, 4))
                 {
                     // We rely on Zune / MUI for #2. Hide
                     // this control sequence if it exists.
-                    if(!memcmp("\x1B[2p", cur, 4))
-                    {
-                        // Skip sequence.
-                        cur += 4;
-                    }
+                    cur += 4;
                 }
 
                 // Save choice.

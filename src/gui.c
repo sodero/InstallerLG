@@ -2408,7 +2408,7 @@ MUIDSP IPTR IGConfirm(Class *cls,
         if(ost)
         {
             // Copy the current message.
-            memcpy(ost, (void *) str, osz);
+            memcpy(ost, (void *) (uintptr_t) str, osz);
 
             // Prompt for confirmation.
             if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
