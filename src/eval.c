@@ -59,12 +59,13 @@ entry_p find_symbol(entry_p entry)
                 if(ret->type == SYMBOL &&
                    !strcasecmp(ret->name, entry->name))
                 {
-                    // Rearrange symbols to make the
-                    // next lookup (if any) faster.
-                    // Don't do this on user defined
-                    // procedures though, symbols in
-                    // those are positional (args).
-                    if(ret->parent->type != CUSTOM)
+                    // Rearrange symbols to make the next
+                    // lookup faster. Don't do this unless
+                    // we're at the root and not in a user
+                    // defined procedure. This would break
+                    // all positional symbols (arguments).
+                    if(!ret->parent->parent &&
+                        ret->parent->type != CUSTOM)
                     {
                         *tmp = *(con->symbols);
                         *(con->symbols) = ret;
