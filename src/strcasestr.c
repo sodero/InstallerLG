@@ -1,3 +1,4 @@
+#ifndef __GNUC__
 #include <string.h>
 
 /* case-independent string matching, similar to strstr but
@@ -19,3 +20,4 @@ char * strcasestr(char* haystack, char* needle) {
   /* substring not found */
   return NULL;
 }
+#endif
