@@ -85,7 +85,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         // Did we need it? (confirmation)
         if(confirm)
         {
-            inp_t grc = gui_confirm(str(prompt), str(help), back);
+            inp_t grc = gui_confirm(str(prompt), str(help), back != false);
 
             // Is the back option available?
             if(back)
@@ -161,16 +161,14 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                     // Use the global buffer.
                     char *buf = get_buf();
 
-                    // Try to get current working dir.
-                    if(getcwd(buf, buf_size()) == buf)
+                    // Try to get current working dir
+                    // before changing to the new dir
+                    // Save the old one so that we can
+                    // go back afterwards.
+                    if(getcwd(buf, buf_size()) == buf
+                       && !chdir(dir))
                     {
-                        // Try to change to the new dir
-                        // and save the old one so that
-                        // we can go back afterwards.
-                        if(!chdir(dir))
-                        {
-                            cwd = buf;
-                        }
+                        cwd = buf;
                     }
                 }
 

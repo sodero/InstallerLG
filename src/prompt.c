@@ -79,7 +79,7 @@ entry_p m_askbool(entry_p contxt)
                 if(!DID_ERR)
                 {
                     // Prompt user.
-                    inp_t grc = gui_bool(prt, hlp, yes, nay, back);
+                    inp_t grc = gui_bool(prt, hlp, yes, nay, back != false);
 
                     // Is the back option available?
                     if(back)
@@ -190,15 +190,11 @@ entry_p m_askchoice(entry_p contxt)
                     //    choices with a special escape sequence `"<ESC>[2p"'. This escape
                     //    sequence allows proportional rendering. It is wise to specify this
                     //    only in the first choice of the list. Note this well.  (V42)
-                    if(strlen(opt) > 3)
+                    if(strlen(opt) > 3 && !memcmp("\x1B[2p", opt, 4))
                     {
                         // We rely on Zune / MUI for #2. Hide
                         // this control sequence if it exists.
-                        if(!memcmp("\x1B[2p", opt, 4))
-                        {
-                            // Skip sequence.
-                            opt += 4;
-                        }
+                        opt += 4;
                     }
 
                     // Make sure that the removal of the control
@@ -278,7 +274,7 @@ entry_p m_askchoice(entry_p contxt)
                     }
 
                     // Prompt user. Subtract skipper from default.
-                    inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back, &DNUM);
+                    inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back != false, &DNUM);
 
                     // Add skipper. Don't trust the GUI.
                     DNUM += ((DNUM < 32 && DNUM >= 0) ?
@@ -369,8 +365,8 @@ entry_p m_askdir(entry_p contxt)
                 if(!DID_ERR)
                 {
                     // Prompt user.
-                    inp_t grc = gui_askdir(prt, hlp, newpath, disk, assigns,
-                                           def, back, &ret);
+                    inp_t grc = gui_askdir(prt, hlp, newpath != false, disk != false, assigns != false,
+                                           def, back != false, &ret);
 
                     // Is the back option available?
                     if(back)
@@ -489,7 +485,7 @@ entry_p m_askdisk(entry_p contxt)
                         while(!l)
                         {
                             // Prompt user.
-                            inp_t grc = gui_bool(msg, hlp, bt1, bt2, back);
+                            inp_t grc = gui_bool(msg, hlp, bt1, bt2, back != false);
 
                             if(grc == G_TRUE)
                             {
@@ -643,8 +639,8 @@ entry_p m_askfile(entry_p contxt)
                 if(!DID_ERR)
                 {
                     // Prompt user.
-                    inp_t grc = gui_askfile(prt, hlp, newpath, disk,
-                                            def, back, &ret);
+                    inp_t grc = gui_askfile(prt, hlp, newpath != false, disk != false,
+                                            def, back != false, &ret);
 
                     // Is the back option available?
                     if(back)
@@ -765,7 +761,7 @@ entry_p m_asknumber(entry_p contxt)
                 if(!DID_ERR)
                 {
                     // Prompt user.
-                    inp_t grc = gui_number(prt, hlp, min, max, def, back, &DNUM);
+                    inp_t grc = gui_number(prt, hlp, min, max, def, back != false, &DNUM);
 
                     // Is the back option available?
                     if(back)
@@ -862,15 +858,11 @@ entry_p m_askoptions(entry_p contxt)
                 // choices with a special escape sequence `"<ESC>[2p"'. This escape
                 // sequence allows proportional rendering. It is wise to specify this
                 // only in the first choice of the list. Note this well.  (V42)
-                if(strlen(cur) > 3)
+                if(strlen(cur) > 3 && !memcmp("\x1B[2p", cur, 4))
                 {
                     // We rely on Zune / MUI for #2. Hide
                     // this control sequence if it exists.
-                    if(!memcmp("\x1B[2p", cur, 4))
-                    {
-                        // Skip sequence.
-                        cur += 4;
-                    }
+                    cur += 4;
                 }
 
                 // Save choice.
@@ -926,7 +918,7 @@ entry_p m_askoptions(entry_p contxt)
                 if(!DID_ERR)
                 {
                     // Prompt user.
-                    inp_t grc = gui_options(prt, hlp, chs, ndx, back, &DNUM);
+                    inp_t grc = gui_options(prt, hlp, chs, ndx, back != false, &DNUM);
 
                     // Is the back option available?
                     if(back)
@@ -1006,7 +998,7 @@ entry_p m_askstring(entry_p contxt)
                 if(!DID_ERR)
                 {
                     // Prompt user.
-                    inp_t grc = gui_string(prt, hlp, def, back, &res);
+                    inp_t grc = gui_string(prt, hlp, def, back != false, &res);
 
                     // Is the back option available?
                     if(back)

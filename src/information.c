@@ -193,7 +193,7 @@ entry_p m_message(entry_p contxt)
                 if(!DID_ERR)
                 {
                     // Show message dialog.
-                    inp_t grc = gui_message(msg, back);
+                    inp_t grc = gui_message(msg, back != false);
 
                     // Free the temporary buffer.
                     free(msg);

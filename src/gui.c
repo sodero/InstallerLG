@@ -16,9 +16,13 @@
 #include <graphics/rpattr.h>
 #include <libraries/asl.h>
 #include <libraries/mui.h>
+# ifndef __VBCC__
 #include <proto/alib.h>
+# endif
 # ifndef __MORPHOS__
+#  ifndef __VBCC__
 #include <proto/debug.h>
+#  endif
 # else
 #include <clib/debug_protos.h>
 # endif
@@ -37,6 +41,10 @@
 #include <unistd.h>
 #include <limits.h>
 #include <sys/time.h>
+
+#ifndef __GNUC__
+#define __attribute__(a)
+#endif
 
 #ifdef AMIGA
 //----------------------------------------------------------------------------
@@ -2404,7 +2412,7 @@ MUIDSP IPTR IGConfirm(Class *cls,
         if(ost)
         {
             // Copy the current message.
-            memcpy(ost, (void *) str, osz);
+            memcpy(ost, (void *) (uintptr_t) str, osz);
 
             // Prompt for confirmation.
             if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,

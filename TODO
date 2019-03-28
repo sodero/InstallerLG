@@ -1,6 +1,7 @@
 - Retest tooltypes / cli args
 - Make sure that @language is OK.
 - Improve (back) and (retrace) test coverage.
+- Retest (confirm)
 
 - >= V44
 -- (closemedia <media>)
