@@ -132,25 +132,18 @@ entry_p global(entry_p entry)
 //----------------------------------------------------------------------------
 entry_p custom(entry_p entry)
 {
-    // Go all the way up.
-    for(entry_p cur = local(entry); cur; )
+    // Check current level then go all the way up.
+    for(entry_p cur = entry; cur; cur = cur->parent)
     {
-        // Find the next context.
-        entry_p next = local(cur->parent);
-
-        // If we found somethins, is it
-        // a CUSTOM procedure?
-        if(next && next->type == CUSTOM)
+        // Is this a CUSTOM procedure?
+        if(cur->type == CUSTOM)
         {
             // Found it.
-            return next;
+            return cur;
         }
-
-        // Next level.
-        cur = next;
     }
 
-    // Nothing:
+    // Not inside CUSTOM.
     return NULL;
 }
 
