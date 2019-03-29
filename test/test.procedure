@@ -1,3 +1,7 @@
+(set d "X") (procedure fnc a b ((debug a b d) (set c a) (set a b) (set b c) (fnc a b))) (fnc "a" "b"); "","Line 1: Max recursion depth exceeded 'fnc' a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X 0",""
+(procedure fnc a b ((debug a b) (set c a) (set a b) (set b c) (fnc a b))) (fnc "a" "b"); "","Line 1: Max recursion depth exceeded 'fnc' a b b a a b b a a b b a a b b a a b b a a b b a a b b a a b b a a b b a a b b a a b b a a b b a a b b a a b b a a b b a a b b a 0",""
+(procedure fnc a b ((debug a b) (set a "b") (fnc a b))) (fnc "a" "b"); "","Line 1: Max recursion depth exceeded 'fnc' a b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b 0",""
+(procedure fnc a b ((debug a) (fnc a b))) (fnc "a" "b"); "","Line 1: Max recursion depth exceeded 'fnc' a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 0",""
 (procedure f1); "","f1",""
 (procedure f1) (f1); "","",""
 (procedure f1) (+ (f1)); "","0",""
