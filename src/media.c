@@ -16,7 +16,7 @@
 #include "util.h"
 
 #include <string.h>
-#ifdef __MORPHOS__
+#if defined(__MORPHOS__) || defined(__VBCC__)
 char *strcasestr(const char *, const char *);
 #endif
 

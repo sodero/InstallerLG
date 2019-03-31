@@ -1,0 +1,4 @@
+This is a temporary solution to generate a flat build tree
+without tests and testdata suitable for integration in the
+AROS build tree. In the parent of this dir, make clean and
+then make arosm will fill this dir up with what you need.
