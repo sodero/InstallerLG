@@ -59,12 +59,13 @@ entry_p find_symbol(entry_p entry)
                 if(ret->type == SYMBOL &&
                    !strcasecmp(ret->name, entry->name))
                 {
-                    // Rearrange symbols to make the
-                    // next lookup (if any) faster.
-                    // Don't do this on user defined
-                    // procedures though, symbols in
-                    // those are positional (args).
-                    if(ret->parent->type != CUSTOM)
+                    // Rearrange symbols to make the next
+                    // lookup faster. Don't do this unless
+                    // we're at the root and not in a user
+                    // defined procedure. This would break
+                    // all positional symbols (arguments).
+                    if(!ret->parent->parent &&
+                        ret->parent->type != CUSTOM)
                     {
                         *tmp = *(con->symbols);
                         *(con->symbols) = ret;
@@ -280,11 +281,11 @@ int tru(entry_p entry)
     if(entry)
     {
         // Attempt to resolve it.
-        entry_p e = resolve(entry);
+        entry_p val = resolve(entry);
 
         // Only numerals and strings can be true.
-        if(((e->type == STRING && *(e->name)) ||
-            (e->type == NUMBER && e->id)) && !DID_ERR)
+        if(((val->type == STRING && *(val->name)) ||
+            (val->type == NUMBER && val->id)) && !DID_ERR)
         {
             return 1;
         }
@@ -427,37 +428,37 @@ char *str(entry_p entry)
 entry_p invoke(entry_p entry)
 {
     // Expect failure.
-    entry_p r = end();
+    entry_p ret = end();
 
     if(entry)
     {
         // Iterator.
-        entry_p *c = entry->children;
+        entry_p *cur = entry->children;
 
         // Empty procedures are allowed, there
         // might be no children at all.
-        if(c)
+        if(cur)
         {
             // As long as no one fails, resolve
             // all children and save the return
             // value of the last one.
-            while(*c && *c != end() && !DID_ERR)
+            while(*cur && *cur != end() && !DID_ERR)
             {
                 // Resolve and proceed.
-                r = resolve(*c);
-                c++;
+                ret = resolve(*cur);
+                cur++;
             }
         }
 
         // Return the last value.
-        return r;
+        return ret;
     }
 
     // Bad input.
     PANIC(entry);
 
     // Failure.
-    return r;
+    return ret;
 }
 
 //----------------------------------------------------------------------------
@@ -476,7 +477,7 @@ void run(entry_p entry)
 
     // Initialize GUI before starting the execution.
     // If (effect) type is set, use a custom screen.
-    if(gui_init(status))
+    if(gui_init(status != false))
     {
         // If an 'effect' statement exists,
         // execute this first of all.

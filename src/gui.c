@@ -16,9 +16,13 @@
 #include <graphics/rpattr.h>
 #include <libraries/asl.h>
 #include <libraries/mui.h>
+# ifndef __VBCC__
 #include <proto/alib.h>
+# endif
 # ifndef __MORPHOS__
+#  ifndef __VBCC__
 #include <proto/debug.h>
+#  endif
 # else
 #include <clib/debug_protos.h>
 # endif
@@ -37,6 +41,10 @@
 #include <unistd.h>
 #include <limits.h>
 #include <sys/time.h>
+
+#ifndef __GNUC__
+#define __attribute__(a)
+#endif
 
 #ifdef AMIGA
 //----------------------------------------------------------------------------
@@ -1775,7 +1783,7 @@ MUIDSP IPTR IGShowMedia(Class *cls,
         if(flk)
         {
             // Check datatype before opening the file for real.
-            struct DataType *dtp = ObtainDataTypeA(DTST_FILE, flk, NULL);
+            struct DataType *dtp = ObtainDataTypeA(DTST_FILE, (APTR) flk, NULL);
 
             if(dtp)
             {
@@ -2404,7 +2412,7 @@ MUIDSP IPTR IGConfirm(Class *cls,
         if(ost)
         {
             // Copy the current message.
-            memcpy(ost, (void *) str, osz);
+            memcpy(ost, (void *) (uintptr_t) str, osz);
 
             // Prompt for confirmation.
             if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
@@ -3263,7 +3271,7 @@ inp_t gui_choice(const char *msg,
                  bool bck,
                  int *ret)
 {
-    inp_t r =
+    inp_t grc =
     #ifdef AMIGA
     (inp_t) DoMethod
     (
@@ -3273,9 +3281,9 @@ inp_t gui_choice(const char *msg,
     #else
     // Testing purposes.
     printf("%s%s%s%d%d\n", msg, hlp, *nms, def, bck) ? G_TRUE : G_ERR;
-    *ret = (r == G_TRUE) ? def : 0;
+    *ret = (grc == G_TRUE) ? def : 0;
     #endif
-    return r;
+    return grc;
 }
 
 //----------------------------------------------------------------------------
@@ -3297,7 +3305,7 @@ inp_t gui_options(const char *msg,
                   bool bck,
                   int *ret)
 {
-    inp_t r =
+    inp_t grc =
     #ifdef AMIGA
     (inp_t) DoMethod
     (
@@ -3307,9 +3315,9 @@ inp_t gui_options(const char *msg,
     #else
     // Testing purposes.
     printf("%s%s%s%d%d%d\n", msg, hlp, *nms, def, *ret, bck) ? G_TRUE : G_ERR;
-    *ret = (r == G_TRUE) ? def : 0;
+    *ret = (grc == G_TRUE) ? def : 0;
     #endif
-    return r;
+    return grc;
 }
 
 //----------------------------------------------------------------------------
@@ -3318,14 +3326,14 @@ inp_t gui_options(const char *msg,
 // Input:       const char *msg: Message shown to the user.
 //              const char *hlp: Help text.
 //              const char *yes: True string.
-//              const char *no: False string.
+//              const char *nay: False string.
 //              bool bck: Enable back mode.
 // Return:      inp_t: G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //----------------------------------------------------------------------------
 inp_t gui_bool(const char *msg,
                const char *hlp,
                const char *yes,
-               const char *no,
+               const char *nay,
                bool bck)
 {
     return
@@ -3333,11 +3341,11 @@ inp_t gui_bool(const char *msg,
     (inp_t) DoMethod
     (
         Win, MUIM_IG_Bool,
-        msg, hlp, yes, no, bck
+        msg, hlp, yes, nay, bck
     );
     #else
     // Testing purposes.
-    printf("%s%s%s%s%d\n", msg, hlp, yes, no, bck) ? G_TRUE : G_ERR;
+    printf("%s%s%s%s%d\n", msg, hlp, yes, nay, bck) ? G_TRUE : G_ERR;
     #endif
 }
 
@@ -3357,7 +3365,7 @@ inp_t gui_string(const char *msg,
                  bool bck,
                  const char **ret)
 {
-    inp_t r =
+    inp_t grc =
     #ifdef AMIGA
     (inp_t) DoMethod
     (
@@ -3367,9 +3375,9 @@ inp_t gui_string(const char *msg,
     #else
     // Testing purposes.
     printf("%s%s%s%d\n", msg, hlp, def, bck) ? G_TRUE : G_ERR;
-    *ret = (r == G_TRUE) ? def : "";
+    *ret = (grc == G_TRUE) ? def : "";
     #endif
-    return r;
+    return grc;
 }
 
 //----------------------------------------------------------------------------
@@ -3392,7 +3400,7 @@ inp_t gui_number(const char *msg,
                  bool bck,
                  int *ret)
 {
-    inp_t r =
+    inp_t grc =
     #ifdef AMIGA
     (inp_t) DoMethod
     (
@@ -3402,9 +3410,9 @@ inp_t gui_number(const char *msg,
     #else
     // Testing purposes.
     printf("%s%s%d%d%d\n", msg, hlp, min, max, bck) ? G_TRUE : G_ERR;
-    *ret = (r == G_TRUE) ? def : 0;
+    *ret = (grc == G_TRUE) ? def : 0;
     #endif
-    return r;
+    return grc;
 }
 
 //----------------------------------------------------------------------------
@@ -3638,12 +3646,12 @@ inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 //----------------------------------------------------------------------------
 // Name:        gui_error
 // Description: Show error message.
-// Input:       int id: Line number.
+// Input:       int line: Line number.
 //              const char *type: Error description.
 //              const char *info: Extra info, e.g. filename.
 // Return:      -
 //----------------------------------------------------------------------------
-void gui_error(int id,
+void gui_error(int line,
                const char *type,
                const char *info)
 {
@@ -3657,13 +3665,13 @@ void gui_error(int id,
 
     es.es_Title = (UBYTE *) tr(S_ERRS);
     es.es_GadgetFormat = (UBYTE *) tr(S_OKEY);
-    snprintf(err, sizeof(err), tr(S_LERR), id, type, info);
+    snprintf(err, sizeof(err), tr(S_LERR), line, type, info);
 
     // We don't have any way of knowing
     // whether this really works out...
     EasyRequest(NULL, &es, NULL);
     #else
-    fprintf(stderr, tr(S_LERR), id, type, info);
+    fprintf(stderr, tr(S_LERR), line, type, info);
     #endif
 }
 
@@ -3733,8 +3741,8 @@ inp_t gui_showmedia(int *mid, const char* mda, int act)
     #ifdef AMIGA
     DoMethod(Win, MUIM_IG_ShowMedia, mid, mda, act);
     #else
-    static int n;
-    *mid = n++;
+    static int num;
+    *mid = num++;
     printf("%d:%d:%s\n", *mid, act, mda ? mda : "_");
     #endif
     return G_TRUE;

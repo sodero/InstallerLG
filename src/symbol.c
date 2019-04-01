@@ -25,14 +25,19 @@
 entry_p m_set(entry_p contxt)
 {
     // Symbol destination.
-    entry_p dst = global(contxt);
+    entry_p glb = global(contxt);
 
     // We need atleast one symbol and one value.
-    if(c_sane(contxt, 1) &&
-       s_sane(contxt, 1) && dst)
+    if(c_sane(contxt, 1) && s_sane(contxt, 1))
     {
+        // Function argument tuples.
         entry_p *sym = contxt->symbols,
                 *val = contxt->children;
+
+        // The custom procedure contxt if
+        // we're in one. If so we need to
+        // handle local variables (args).
+        entry_p cus = custom(contxt);
 
         // Iterate over all symbol -> value tuples
         while(*sym && *sym != end() &&
@@ -41,6 +46,27 @@ entry_p m_set(entry_p contxt)
             // We need to resolve the right hand side
             // before setting the symbol value.
             entry_p rhs = resolve(*val);
+            entry_p dst = glb;
+
+            // Are we within the contxt of a custom procedure?
+            if(cus)
+            {
+                // If so determine if this particular symbol
+                // is one of the local ones (arguments), if
+                // it is, rather than the clobal context, the
+                // local context should be the target..
+                for(entry_p *cur = cus->symbols;
+                    cur && *cur && *cur != end(); cur++)
+                {
+                    // As always with symbols, ignore the case.
+                    if(!strcasecmp((*cur)->name, (*sym)->name))
+                    {
+                        // Set destination to the local context
+                        // when we have a match.
+                        dst = cus;
+                    }
+                }
+            }
 
             // If we manage to resolve the right hand
             // side, create a copy of its contents.
@@ -278,21 +304,21 @@ entry_p m_symbolval(entry_p contxt)
     // of the symbol.
     if(c_sane(contxt, 1))
     {
-        static entry_t e = { .type = SYMREF };
-        entry_p r;
+        static entry_t entry = { .type = SYMREF };
+        entry_p ret;
 
         // Initialize and resolve dummy.
-        e.parent = contxt;
-        e.id = contxt->id;
-        e.name = str(CARG(1));
+        entry.parent = contxt;
+        entry.id = contxt->id;
+        entry.name = str(CARG(1));
 
-        r = resolve(&e);
+        ret = resolve(&entry);
 
         // Return the resolved value if
         // the symbol could be found.
         if(!DID_ERR)
         {
-            return r;
+            return ret;
         }
 
         // Symbol not found.

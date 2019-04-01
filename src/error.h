@@ -71,6 +71,6 @@ typedef enum
 //----------------------------------------------------------------------------
 // Don't use this function directly, use the macros above instead.
 //----------------------------------------------------------------------------
-int error(entry_p contxt, int id, err_t type, const char *info);
+int error(entry_p contxt, int line, err_t type, const char *info);
 
 #endif

@@ -4,13 +4,14 @@
 VPATH := ../src
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 OS := $(shell uname)
+DATE := $(shell date +%d.%m.%Y || echo Unknown)
 EXE := Installer
 
 #---------------------------------------------------------------------------------#
 # OS
 #---------------------------------------------------------------------------------#
 ifeq ($(OS),Linux)
-CWRN = -Wall -Wextra
+CWRN = -Wall -Wextra -Werror
 CGEN = -g -std=c99
 CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE
 else
@@ -34,6 +35,7 @@ DD = ..
 endif
 
 CINC += -I . -I $(VPATH)
+CDEF += -D__AMIGADATE__="\"$(DATE)\""
 CFLAGS += $(CINC) $(CGEN) $(CWRN) $(CDEF)
 
 #---------------------------------------------------------------------------------#
@@ -65,7 +67,7 @@ else
 endif
 
 gui.o: gui.c gui.h version.h
-	$(CC) -Os -c $< -DLLVL=2 $(CWRN)
+	$(CC) -Os -c $< -DLLVL=2 $(CWRN) $(CDEF)
 
 #---------------------------------------------------------------------------------#
 # Catalogs

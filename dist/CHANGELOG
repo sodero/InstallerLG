@@ -216,4 +216,14 @@
 - (closemedia) implemented (v44).
 - (tackon) parent fix (WormWars).
 - @installer-version bumped from 43.3 to 44.10
+
+0.1.0-alpha.35:
+===============
+- Improved robustness.
+- Local variables handling / recursion fix.
+- File permission workaround / cheat.
+- (exists) support undocumented (quiet) == (noreq) (CubicIDE_HW80).
+
+0.1.0-alpha.36:
+===============
 - ?

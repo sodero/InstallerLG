@@ -71,7 +71,7 @@ enum
 void gui_exit(void);
 void gui_complete(int com);
 void gui_abort(const char *msg);
-void gui_error(int id, const char *type, const char *info);
+void gui_error(int line, const char *type, const char *info);
 void gui_copyfiles_end(void);
 void gui_effect(int eff, int cl1, int cl2);
 inp_t gui_closemedia(int mid);
@@ -81,7 +81,7 @@ inp_t gui_init(bool scr);
 inp_t gui_message(const char *msg, bool bck);
 inp_t gui_finish(const char *msg);
 inp_t gui_working(const char *msg);
-inp_t gui_bool(const char *msg, const char *hlp, const char *yes, const char *no, bool bck);
+inp_t gui_bool(const char *msg, const char *hlp, const char *yes, const char *nay, bool bck);
 inp_t gui_string(const char *msg, const char *hlp, const char *def, bool bck, const char **ret);
 inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret);
 inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret);
