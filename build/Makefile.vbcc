@@ -74,10 +74,11 @@ init.o: init.c alloc.h args.h control.h exit.h gui.h information.h init.h \
         media.h procedure.h symbol.h util.h version.h types.h file.h
 
 
-# 1058 test(s) failed
-# 1542 test(s) passed
+# 1051 test(s) failed
+# 1549 test(s) passed
 test:
 	sh ../test/run.sh ../Installer68k ../test $(REXTRA)
 
 clean:
 	delete $(OBJS) /build/parser.o /build/lexer.o
+	delete FORCE err.tmp.* _st_* _??_
