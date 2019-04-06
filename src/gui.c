@@ -48,7 +48,7 @@
 
 #ifdef AMIGA
 //----------------------------------------------------------------------------
-// MUI helper macros
+// MUI macros
 //----------------------------------------------------------------------------
 #ifdef __MORPHOS__
 # define DISPATCH_GATE(C) &C ## Gate
@@ -75,15 +75,13 @@
 #define DISPATCH(C) static IPTR C ## Dispatch (DISPATCH_ARGS)
 #define CLASS_DATA(C) C ## Data
 #define TAGBASE_LG (TAG_USER | 27<<16)
-#define MUIDSP static inline __attribute__((always_inline))
+#define CAST(P,T) ((T) ((uintptr_t) P))
 
 //----------------------------------------------------------------------------
 // Debug and logging macros
 //----------------------------------------------------------------------------
 #define GPUT(E,S) KPrintF((CONST_STRPTR)"%s:\t%s\t(%s)\n",E,S,__func__)
 #define GERR(S) GPUT("ERR",S)
-#define WARN(S) if(LLVL>0) GPUT("WARN",S)
-#define INFO(S) if(LLVL>1) GPUT("INFO",S)
 
 //----------------------------------------------------------------------------
 // IG - Installer window
@@ -476,7 +474,7 @@ struct MUIP_IG_GetCustomScreen
 // Input:    ULONG signal:  -
 // Return:   Gui ret val.
 //----------------------------------------------------------------------------
-MUIDSP ULONG IGTrans(ULONG signal)
+static inline ULONG IGTrans(ULONG signal)
 {
     switch(signal)
     {
@@ -510,7 +508,7 @@ MUIDSP ULONG IGTrans(ULONG signal)
 //                    ULONG range:  Number of values to check for
 // Return:            Notifcation val. / zero on return id quit
 //----------------------------------------------------------------------------
-MUIDSP ULONG IGWait(Object *obj, ULONG notif, ULONG range)
+static inline ULONG IGWait(Object *obj, ULONG notif, ULONG range)
 {
     ULONG sig = 0,
           ret = 0, n;
@@ -614,8 +612,7 @@ MUIDSP ULONG IGWait(Object *obj, ULONG notif, ULONG range)
 // Input:   -
 // Return:  On success TRUE, FALSE otherwise.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGInit(Class *cls,
-                   Object *obj)
+static inline IPTR IGInit(Class *cls, Object *obj)
 {
     static ULONG i = MUIV_IG_FirstButton;
 
@@ -682,15 +679,15 @@ MUIDSP IPTR IGInit(Class *cls,
 // Return:               TRUE on success, FALSE otherwise
 //----------------------------------------------------------------------------
 //
-MUIDSP IPTR IGPageSet(Class *cls,
-                      Object *obj,
-                      struct MUIP_IG_PageSet *msg)
+static inline IPTR IGPageSet(Class *cls,
+                             Object *obj,
+                             struct MUIP_IG_PageSet *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
     // Always a valid message string.
     const char *src = msg->Message ? (const char *)
-                      msg->Message : "";
+                      CAST(msg->Message, const char *) : "";
 
     // Select top and buttons.
     set(my->Top, MUIA_Group_ActivePage, msg->Top);
@@ -786,9 +783,9 @@ MUIDSP IPTR IGPageSet(Class *cls,
 //             NoLog - Disable logging
 // Return:     G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGWelcome(Class *cls,
-                      Object *obj,
-                      struct MUIP_IG_Welcome *msg)
+static inline IPTR IGWelcome(Class *cls,
+                             Object *obj,
+                             struct MUIP_IG_Welcome *msg)
 {
     // Show welcome page.
     if(DoMethod(obj, MUIM_IG_PageSet,
@@ -813,11 +810,11 @@ MUIDSP IPTR IGWelcome(Class *cls,
             set(my->ExpertLevel, MUIA_ShowMe, TRUE);
 
             // Take minimum user level into account.
-            set(my->ExpertLevel, MUIA_Radio_Active, *((int *) msg->Level) - 1);
+            set(my->ExpertLevel, MUIA_Radio_Active, *CAST(msg->Level, int *) - 1);
         }
 
         // Set the current user level.
-        set(my->UserLevel, MUIA_Radio_Active, *((int *) msg->Level));
+        set(my->UserLevel, MUIA_Radio_Active, *CAST(msg->Level, int *));
 
         // Wait for proceed or abort.
         inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
@@ -831,13 +828,13 @@ MUIDSP IPTR IGWelcome(Class *cls,
             if(msg->MinLevel == 1)
             {
                 // Minimum user level 'average'.
-                get(my->ExpertLevel, MUIA_Radio_Active, (int *) msg->Level);
-                (*((int *) msg->Level))++;
+                get(my->ExpertLevel, MUIA_Radio_Active, CAST(msg->Level, int *));
+                (*CAST(msg->Level, int *))++;
             }
             else
             {
                 // Minimum user level 'novice' or 'expert'.
-                get(my->UserLevel, MUIA_Radio_Active, (int *) msg->Level);
+                get(my->UserLevel, MUIA_Radio_Active, CAST(msg->Level, int *));
             }
 
             // Disable the pretend choice if the NOPRETEND
@@ -847,7 +844,7 @@ MUIDSP IPTR IGWelcome(Class *cls,
             (
                 my->Pretend,
                 MUIA_Radio_Active,
-                msg->NoPretend ? 0 : *((int *) msg->Pretend),
+                msg->NoPretend ? 0 : *CAST(msg->Pretend, int *),
                 MUIA_Disabled, msg->NoPretend ? TRUE : FALSE,
                 TAG_END
             );
@@ -859,14 +856,14 @@ MUIDSP IPTR IGWelcome(Class *cls,
             (
                 my->Log,
                 MUIA_Radio_Active,
-                msg->NoLog ? 0 : *((int *) msg->Log),
+                msg->NoLog ? 0 : *CAST(msg->Log, int *),
                 MUIA_Disabled, msg->NoLog ? TRUE : FALSE,
                 TAG_END
             );
 
             // Don't show logging and pretend mode settings
             // to 'Novice' users.
-            if(*((int *) msg->Level))
+            if(*CAST(msg->Level, int *))
             {
                 // Show pretend / log page.
                 if(DoMethod(obj, MUIM_IG_PageSet, NULL,
@@ -878,8 +875,8 @@ MUIDSP IPTR IGWelcome(Class *cls,
                     if(rc == G_TRUE)
                     {
                         // Get pretend and log settings.
-                        get(my->Pretend, MUIA_Radio_Active, (int *) msg->Pretend);
-                        get(my->Log, MUIA_Radio_Active, (int *) msg->Log);
+                        get(my->Pretend, MUIA_Radio_Active, CAST(msg->Pretend, int *));
+                        get(my->Log, MUIA_Radio_Active, CAST(msg->Log, int *));
                     }
                 }
                 else
@@ -915,9 +912,9 @@ MUIDSP IPTR IGWelcome(Class *cls,
 //             File - File / dir return value.
 // Return:     G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGAskFile(Class *cls,
-                      Object *obj,
-                      struct MUIP_IG_AskFile *msg)
+static inline IPTR IGAskFile(Class *cls,
+                             Object *obj,
+                             struct MUIP_IG_AskFile *msg)
 {
     // Show file requester page.
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
@@ -969,25 +966,25 @@ MUIDSP IPTR IGAskFile(Class *cls,
                 if(rc == G_TRUE)
                 {
                     // Get filename from requester.
-                    get(str, MUIA_String_Contents, (char **) msg->File);
+                    get(str, MUIA_String_Contents, CAST(msg->File, char **));
 
-                    if(*((char **) msg->File))
+                    if(*CAST(msg->File, char **))
                     {
                         // We need to create a copy of the filename
                         // string since we're about to free the pop
                         // up requester.
                         int n = snprintf(my->Buf, sizeof(my->Buf), "%s",
-                                         *((char **) msg->File));
+                                         *CAST(msg->File, char **));
 
                         // Make sure that we succeded in creating a
                         // copy of the filename.
                         if(n >= 0 && ((size_t) n < sizeof(my->Buf)))
                         {
-                            *((char **) msg->File) = my->Buf;
+                            *CAST(msg->File, char **) = my->Buf;
                         }
                     }
 
-                    if(!*((char **) msg->File))
+                    if(!*CAST(msg->File, char **))
                     {
                         // Unknown error.
                         GERR(tr(S_UNER));
@@ -1035,15 +1032,15 @@ MUIDSP IPTR IGAskFile(Class *cls,
 //                    Confirm - User confirmation
 // Return:            G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGCopyFilesStart(Class *cls,
-                             Object *obj,
-                             struct MUIP_IG_CopyFilesStart *msg)
+static inline IPTR IGCopyFilesStart(Class *cls,
+                                    Object *obj,
+                                    struct MUIP_IG_CopyFilesStart *msg)
 {
 
     struct IGData *my = INST_DATA(cls, obj);
 
     int n = 0;
-    pnode_p cur = (pnode_p) msg->List,
+    pnode_p cur = CAST(msg->List, pnode_p),
             lst = cur;
 
     // For all files and directories to be copied; count
@@ -1202,14 +1199,14 @@ MUIDSP IPTR IGCopyFilesStart(Class *cls,
 //                     Back - Use 'Back' instead of 'Abort'.
 // Return:             G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGCopyFilesSetCur(Class *cls,
-                              Object *obj,
-                              struct MUIP_IG_CopyFilesSetCur *msg)
+static inline IPTR IGCopyFilesSetCur(Class *cls,
+                                     Object *obj,
+                                     struct MUIP_IG_CopyFilesSetCur *msg)
 {
     if(msg->File)
     {
         struct IGData *my = INST_DATA(cls, obj);
-        char *file = (char *) msg->File;
+        char *file = CAST(msg->File, char *);
         size_t len = strlen(file);
         struct TextExtent ext;
         static ULONG back;
@@ -1303,8 +1300,7 @@ MUIDSP IPTR IGCopyFilesSetCur(Class *cls,
 // Input:           -
 // Return:          G_TRUE
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGCopyFilesEnd(Class *cls,
-                           Object *obj)
+static inline IPTR IGCopyFilesEnd(Class *cls, Object *obj)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -1331,7 +1327,7 @@ MUIDSP IPTR IGCopyFilesEnd(Class *cls,
 // Input:           File - Name of file (or dir)
 // Return:          TRUE
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGCopyFilesAdd(Class *cls,
+static inline IPTR IGCopyFilesAdd(Class *cls,
                            Object *obj,
                            struct MUIP_IG_CopyFilesAdd *msg)
 {
@@ -1358,9 +1354,9 @@ MUIDSP IPTR IGCopyFilesAdd(Class *cls,
 // Input    Message - The prompt
 // Return:  TRUE
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGExit(Class *cls,
-                   Object *obj,
-                   struct MUIP_IG_Exit *msg)
+static inline IPTR IGExit(Class *cls,
+                          Object *obj,
+                          struct MUIP_IG_Exit *msg)
 {
     // Silence.
     (void) cls;
@@ -1376,9 +1372,9 @@ MUIDSP IPTR IGExit(Class *cls,
 // Input:      Message - The message
 // Return:     G_TRUE / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGWorking(Class *cls,
-                      Object *obj,
-                      struct MUIP_IG_Working *msg)
+static inline IPTR IGWorking(Class *cls,
+                             Object *obj,
+                             struct MUIP_IG_Working *msg)
 {
     // Silence.
     (void) cls;
@@ -1406,9 +1402,9 @@ MUIDSP IPTR IGWorking(Class *cls,
 //             ColorEnd - Last color in gradient.
 // Return:     G_TRUE / G_FALSE / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGEffect(Class *cls,
-                     Object *obj,
-                     struct MUIP_IG_Effect *msg)
+static inline IPTR IGEffect(Class *cls,
+                            Object *obj,
+                            struct MUIP_IG_Effect *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -1547,9 +1543,9 @@ MUIDSP IPTR IGEffect(Class *cls,
 // Input:          FIXME
 // Return:         G_TRUE / G_FALSE
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGCloseMedia(Class *cls,
-                         Object *obj,
-                         struct MUIP_IG_CloseMedia *msg)
+static inline IPTR IGCloseMedia(Class *cls,
+                                Object *obj,
+                                struct MUIP_IG_CloseMedia *msg)
 {
     // Silence.
     (void) cls;
@@ -1583,9 +1579,9 @@ MUIDSP IPTR IGCloseMedia(Class *cls,
 // Input:        FIXME
 // Return:       G_TRUE / G_FALSE / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGSetMedia(Class *cls,
-                       Object *obj,
-                       struct MUIP_IG_SetMedia *msg)
+static inline IPTR IGSetMedia(Class *cls,
+                              Object *obj,
+                              struct MUIP_IG_SetMedia *msg)
 {
     // Silence.
     (void) cls;
@@ -1607,8 +1603,7 @@ MUIDSP IPTR IGSetMedia(Class *cls,
 // Input:            -
 // Return:             struct Screen * if open, NULL otherwise.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGGetCustomScreen(Class *cls,
-                              Object *obj)
+static inline IPTR IGGetCustomScreen(Class *cls, Object *obj)
 {
     struct IGData *my = INST_DATA(cls, obj);
     return (IPTR) my->Scr;
@@ -1620,9 +1615,9 @@ MUIDSP IPTR IGGetCustomScreen(Class *cls,
 //                  Action - FIXME
 // Return:          FIXME
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGShowPicture(Class *cls,
-                          Object *obj,
-                          struct MUIP_IG_ShowPicture *msg)
+static inline IPTR IGShowPicture(Class *cls,
+                                 Object *obj,
+                                 struct MUIP_IG_ShowPicture *msg)
 {
     // Silence.
     (void) cls;
@@ -1763,9 +1758,9 @@ MUIDSP IPTR IGShowPicture(Class *cls,
 //                Action - FIXME
 // Return:        G_TRUE / G_FALSE / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGShowMedia(Class *cls,
-                        Object *obj,
-                        struct MUIP_IG_ShowMedia *msg)
+static inline IPTR IGShowMedia(Class *cls,
+                               Object *obj,
+                               struct MUIP_IG_ShowMedia *msg)
 {
     // Silence.
     (void) cls;
@@ -1778,7 +1773,7 @@ MUIDSP IPTR IGShowMedia(Class *cls,
        && msg->Media)
     {
         // And we need permission to read from the file.
-        BPTR flk = Lock((STRPTR) msg->Media, ACCESS_READ);
+        BPTR flk = Lock(CAST(msg->Media, STRPTR), ACCESS_READ);
 
         if(flk)
         {
@@ -1806,7 +1801,7 @@ MUIDSP IPTR IGShowMedia(Class *cls,
                     );
 
                     // Return current media ID.
-                    *((int *) msg->MediaID) = mid;
+                    *CAST(msg->MediaID, int *) = mid;
 
                     // Next ID.
                     mid++;
@@ -1849,9 +1844,9 @@ MUIDSP IPTR IGShowMedia(Class *cls,
 //             Back - Use 'Back' instead of 'Abort'.
 // Return:     G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGMessage(Class *cls,
-                      Object *obj,
-                      struct MUIP_IG_Message *msg)
+static inline IPTR IGMessage(Class *cls,
+                             Object *obj,
+                             struct MUIP_IG_Message *msg)
 {
     // Set correct page and button combination.
     if(DoMethod(obj, MUIM_IG_PageSet,
@@ -1896,9 +1891,9 @@ MUIDSP IPTR IGMessage(Class *cls,
 // Input:     Message - The message
 // Return:    G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGFinish(Class *cls,
-                     Object *obj,
-                     struct MUIP_IG_Finish *msg)
+static inline IPTR IGFinish(Class *cls,
+                            Object *obj,
+                            struct MUIP_IG_Finish *msg)
 {
     // Silence.
     (void) cls;
@@ -1923,9 +1918,9 @@ MUIDSP IPTR IGFinish(Class *cls,
 // Input:    Message - The message to be shown
 // Return:   G_ABORT / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGAbort(Class *cls,
-                    Object *obj,
-                    struct MUIP_IG_Abort *msg)
+static inline IPTR IGAbort(Class *cls,
+                           Object *obj,
+                           struct MUIP_IG_Abort *msg)
 {
     // Silence.
     (void) cls;
@@ -1955,14 +1950,14 @@ MUIDSP IPTR IGAbort(Class *cls,
 //           Select - Zero index representing the selected button
 // Return:   G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGRadio(Class *cls,
-                    Object *obj,
-                    struct MUIP_IG_Radio *msg)
+static inline IPTR IGRadio(Class *cls,
+                           Object *obj,
+                           struct MUIP_IG_Radio *msg)
 {
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
                 msg->Help, P_MESSAGE, B_PROCEED_ABORT))
     {
-        char **nms = (char **) msg->Names;
+        char **nms = CAST(msg->Names, char **);
 
         if(nms && *nms)
         {
@@ -2033,7 +2028,7 @@ MUIDSP IPTR IGRadio(Class *cls,
 
                         // Get value from buttons and then kill them.
                         // A halt above will not make any difference.
-                        GetAttr(MUIA_Radio_Active, r, (IPTR *) msg->Select);
+                        GetAttr(MUIA_Radio_Active, r, CAST(msg->Select, IPTR *));
                         MUI_DisposeObject(r);
 
                         // Unknown status. 
@@ -2061,9 +2056,9 @@ MUIDSP IPTR IGRadio(Class *cls,
 //          Back - Use 'Back' instead of 'Abort'.
 // Return:  G_TRUE / G_FALSE / G_ABORT / G_ERR
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGBool(Class *cls,
-                   Object *obj,
-                   struct MUIP_IG_Bool *msg)
+static inline IPTR IGBool(Class *cls,
+                          Object *obj,
+                          struct MUIP_IG_Bool *msg)
 {
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
        msg->Help, P_MESSAGE, B_YES_NO_ABORT))
@@ -2113,9 +2108,9 @@ MUIDSP IPTR IGBool(Class *cls,
 //            String - String return value
 // Return:    G_TRUE / G_FALSE / G_ABORT / G_ERR
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGString(Class *cls,
-                     Object *obj,
-                     struct MUIP_IG_String *msg)
+static inline IPTR IGString(Class *cls,
+                            Object *obj,
+                            struct MUIP_IG_String *msg)
 {
     // Show string widget page.
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
@@ -2148,7 +2143,7 @@ MUIDSP IPTR IGString(Class *cls,
         }
 
         // No matter what, get string.
-        get(my->String, MUIA_String_Contents, (ULONG *) msg->String);
+        get(my->String, MUIA_String_Contents, CAST(msg->String, ULONG *));
 
         // Return status.
         return rc;
@@ -2172,9 +2167,9 @@ MUIDSP IPTR IGString(Class *cls,
 //            Number - Return value
 // Return:    G_TRUE / G_ABORT / G_EXIT / G_ERR
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGNumber(Class *cls,
-                     Object *obj,
-                     struct MUIP_IG_Number *msg)
+static inline IPTR IGNumber(Class *cls,
+                            Object *obj,
+                            struct MUIP_IG_Number *msg)
 {
     // Show slider.
     if(DoMethod(obj, MUIM_IG_PageSet,
@@ -2209,7 +2204,7 @@ MUIDSP IPTR IGNumber(Class *cls,
         }
 
         // No matter what, get numerical value.
-        get(my->Number, MUIA_Numeric_Value, (IPTR *) msg->Number);
+        get(my->Number, MUIA_Numeric_Value, CAST(msg->Number, ULONG *));
 
         // Success or halt.
         return rc;
@@ -2232,9 +2227,9 @@ MUIDSP IPTR IGNumber(Class *cls,
 //                Bitmap - A bitmask representing the selected button(s)
 // Return:        G_TRUE / G_ABORT / G_EXIT / G_ERR
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGCheckBoxes(Class *cls,
-                         Object *obj,
-                         struct MUIP_IG_CheckBoxes *msg)
+static inline IPTR IGCheckBoxes(Class *cls,
+                                Object *obj,
+                                struct MUIP_IG_CheckBoxes *msg)
 {
     if(DoMethod(obj, MUIM_IG_PageSet,
        msg->Message, msg->Help, P_MESSAGE, B_PROCEED_ABORT))
@@ -2248,7 +2243,7 @@ MUIDSP IPTR IGCheckBoxes(Class *cls,
         {
             size_t i = 0;
             static Object *cb[33];
-            const char **cs = (const char **) msg->Names;
+            char **cs = CAST(msg->Names, char **);
 
             // Use 'Abort' or 'Back'?
             if(msg->Back)
@@ -2329,14 +2324,14 @@ MUIDSP IPTR IGCheckBoxes(Class *cls,
             if(DoMethod(my->Empty, MUIM_Group_InitChange))
             {
                 // The return value.
-                *((ULONG *) msg->Bitmap) = 0;
+                *CAST(msg->Bitmap, ULONG *) = 0;
 
                 while(i--)
                 {
                     ULONG sel = 0;
 
                     get(cb[i], MUIA_Selected, &sel);
-                    *((ULONG *) msg->Bitmap) |= (sel ? (1 << i) : 0);
+                    *CAST(msg->Bitmap, ULONG *) |= (sel ? (1 << i) : 0);
 
                     DoMethod(my->Empty, OM_REMMEMBER, cb[i]);
                     MUI_DisposeObject(cb[i]);
@@ -2361,9 +2356,9 @@ MUIDSP IPTR IGCheckBoxes(Class *cls,
 // Input:       Progress - Installer progress in %
 // Return:      G_TRUE / G_FALSE.
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGComplete(Class *cls,
-                       Object *obj,
-                       struct MUIP_IG_Complete *msg)
+static inline IPTR IGComplete(Class *cls,
+                              Object *obj,
+                              struct MUIP_IG_Complete *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -2391,7 +2386,7 @@ MUIDSP IPTR IGComplete(Class *cls,
 //             Back - Use 'Back' instead of 'Abort'.
 // Return:     '1' = proceed, '0' = skip, '-1' = abort
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGConfirm(Class *cls,
+static inline IPTR IGConfirm(Class *cls,
                       Object *obj,
                       struct MUIP_IG_Confirm *msg)
 {
@@ -2406,13 +2401,13 @@ MUIDSP IPTR IGConfirm(Class *cls,
     {
         // Allocate memory to hold a copy of the
         // current message.
-        size_t osz = strlen((char *) str) + 1;
+        size_t osz = strlen(CAST(str, char *)) + 1;
         char *ost = calloc(osz, 1);
 
         if(ost)
         {
             // Copy the current message.
-            memcpy(ost, (void *) (uintptr_t) str, osz);
+            memcpy(ost, CAST(str, char *), osz);
 
             // Prompt for confirmation.
             if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
@@ -2469,9 +2464,9 @@ MUIDSP IPTR IGConfirm(Class *cls,
 // Input:  See BOOPSI docs
 // Return: See BOOPSI docs
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGNew(Class *cls,
-                  Object *obj,
-                  struct opSet *msg)
+static inline IPTR IGNew(Class *cls,
+                         Object *obj,
+                         struct opSet *msg)
 {
     // Temp widgets.
     Object *el, *ul, *fp, *cm, *pr, *st,
@@ -2876,9 +2871,9 @@ MUIDSP IPTR IGNew(Class *cls,
 // Input:    See MUI docs
 // Return:   See MUI docs
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGSetup(Class *cls,
-                    Object *obj,
-                    struct MUI_RenderInfo *msg)
+static inline IPTR IGSetup(Class *cls,
+                           Object *obj,
+                           struct MUI_RenderInfo *msg)
 {
     // Let our parent set itself up first
     if(!DoSuperMethodA (cls, obj, (Msg) msg))
@@ -2898,9 +2893,7 @@ MUIDSP IPTR IGSetup(Class *cls,
 // Input:      See BOOPSI docs
 // Return:     See BOOPSI docs
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGDispose (Class *cls,
-                       Object *obj,
-                       Msg msg)
+static inline IPTR IGDispose (Class *cls, Object *obj, Msg msg)
 {
 
     struct IGData *my = INST_DATA(cls, obj);
@@ -2919,9 +2912,7 @@ MUIDSP IPTR IGDispose (Class *cls,
 // Input:      See MUI docs
 // Return:     See MUI docs
 //----------------------------------------------------------------------------
-MUIDSP IPTR IGCleanup (Class *cls,
-                       Object *obj,
-                       Msg msg)
+static inline IPTR IGCleanup (Class *cls, Object *obj, Msg msg)
 {
     return (IPTR) DoSuperMethodA(cls, obj, (Msg) msg);
 }
