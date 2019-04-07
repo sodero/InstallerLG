@@ -1,5 +1,6 @@
-#ifndef __GNUC__
 #include <string.h>
+
+#ifndef __GNUC__
 
 /* case-independent string matching, similar to strstr but
  * matching */
