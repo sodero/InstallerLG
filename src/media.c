@@ -270,9 +270,9 @@ entry_p m_showmedia(entry_p contxt)
             }
 
             // Create the new media ID.
-            entry_p num = new_number(mid);
+            entry_p nid = new_number(mid);
 
-            if(num)
+            if(nid)
             {
                 // Create new symbol with user defined name.
                 entry_p nsm = new_symbol(DBG_ALLOC(strdup(var)));
@@ -280,8 +280,8 @@ entry_p m_showmedia(entry_p contxt)
                 if(nsm)
                 {
                     // Reparent value.
-                    num->parent = nsm;
-                    nsm->resolved = num;
+                    nid->parent = nsm;
+                    nsm->resolved = nid;
 
                     // Append the symbol to the current
                     // context and create a global ref.
@@ -301,7 +301,7 @@ entry_p m_showmedia(entry_p contxt)
                 else
                 {
                     // Out of memory.
-                    kill(num);
+                    kill(nid);
                 }
             }
         }

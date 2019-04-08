@@ -511,7 +511,7 @@ char *get_strvar(entry_p contxt, char *var)
 //----------------------------------------------------------------------------
 char *get_optstr(entry_p contxt, opt_t type)
 {
-    size_t num = 0;
+    size_t cnt = 0;
     entry_p *child = contxt->children;
 
     // Count the number of children
@@ -521,7 +521,7 @@ char *get_optstr(entry_p contxt, opt_t type)
         if((*child)->type == OPTION &&
            (*child)->id == (int32_t) type)
         {
-            num++;
+            cnt++;
         }
 
         // Next child.
@@ -529,13 +529,13 @@ char *get_optstr(entry_p contxt, opt_t type)
     }
 
     // Did we find the right type?
-    if(num)
+    if(cnt)
     {
         // References to string evaluations of all
         // options of the right type.
-        char **str = DBG_ALLOC(calloc(num + 1, sizeof(char *)));
+        char **val = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
 
-        if(str)
+        if(val)
         {
             // Empty string.
             child = contxt->children;
@@ -543,7 +543,7 @@ char *get_optstr(entry_p contxt, opt_t type)
 
             // For all children, evaluate them
             // once and save string pointers.
-            for(size_t i = 0; i < num && *child
+            for(size_t i = 0; i < cnt && *child
                 && *child != end(); child++)
             {
                 if((*child)->id == (int32_t) type &&
@@ -554,7 +554,7 @@ char *get_optstr(entry_p contxt, opt_t type)
 
                     if(cur)
                     {
-                        str[i++] = cur;
+                        val[i++] = cur;
                         len += strlen(cur);
                     }
                 }
@@ -567,19 +567,19 @@ char *get_optstr(entry_p contxt, opt_t type)
             if(ret)
             {
                 // Concatenate substrings.
-                for(size_t i = 0; str[i]; i++)
+                for(size_t i = 0; val[i]; i++)
                 {
-                    strncat(ret, str[i], len - strlen(ret));
+                    strncat(ret, val[i], len - strlen(ret));
                 }
             }
 
             // Free substrings.
-            for(size_t i = 0; str[i]; i++)
+            for(size_t i = 0; val[i]; i++)
             {
-                free(str[i]);
+                free(val[i]);
             }
 
-            free(str);
+            free(val);
 
             // Done.
             return ret;
@@ -611,21 +611,21 @@ char *get_chlstr(entry_p contxt, bool pad)
     // contxt.
     if(c_sane(contxt, 0))
     {
-        size_t num = 0;
+        size_t cnt = 0;
         entry_p *child = contxt->children;
 
         // Count the number of non context children.
         while(*child && *child != end())
         {
-            num += ((*child)->type != CONTXT) ? 1 : 0;
+            cnt += ((*child)->type != CONTXT) ? 1 : 0;
             child++;
         }
 
-        if(num)
+        if(cnt)
         {
             // Allocate memory to hold a string pointer
             // for each child.
-            char **stv = DBG_ALLOC(calloc(num + 1, sizeof(char *)));
+            char **stv = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
 
             if(stv)
             {
@@ -635,14 +635,14 @@ char *get_chlstr(entry_p contxt, bool pad)
                 // Save all string pointers so that we don't
                 // evaluate children twice and thereby set of
                 // side effects more than once.
-                while(num > 0)
+                while(cnt > 0)
                 {
                     entry_p cur = *(--child);
 
                     if(cur->type != CONTXT)
                     {
-                        stv[--num] = str(cur);
-                        len += strlen(stv[num]);
+                        stv[--cnt] = str(cur);
+                        len += strlen(stv[cnt]);
 
                         // Insert whitespace between strings?
                         if(pad)
@@ -665,14 +665,14 @@ char *get_chlstr(entry_p contxt, bool pad)
                     {
                         // The concatenation. The 'stv'
                         // array is null terminated.
-                        while(stv[num])
+                        while(stv[cnt])
                         {
-                            strncat(ret, stv[num], len + 1 - strlen(ret));
-                            num++;
+                            strncat(ret, stv[cnt], len + 1 - strlen(ret));
+                            cnt++;
 
                             // Is padding enabled and is this not
                             // the final string?
-                            if(pad && stv[num])
+                            if(pad && stv[cnt])
                             {
                                 // Insert whitespace.
                                 strncat(ret, " ", len + 1 - strlen(ret));
@@ -908,10 +908,10 @@ void *dbg_alloc(int line, const char *file, const char *func, void *mem)
     #endif
 
     // Do we have a line number restriction?
-    if(!fail_line || (line == fail_line))
+    if(!fail_line || line == fail_line)
     {
         // Do we have a file restriction?
-        if(!fail_file || (fail_file && !strcmp(file, fail_file)))
+        if(!fail_file || !strcmp(file, fail_file))
         {
             // Free memory and pass NULL to the calling function.
             free(mem);

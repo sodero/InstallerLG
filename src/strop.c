@@ -35,8 +35,8 @@ entry_p m_cat(entry_p contxt)
     if(c_sane(contxt, 1))
     {
         // Start with a string length of 64.
-        size_t num = 64;
-        char *buf = DBG_ALLOC(calloc(num + 1, 1));
+        size_t cnt = 64;
+        char *buf = DBG_ALLOC(calloc(cnt + 1, 1));
 
         if(buf)
         {
@@ -69,21 +69,21 @@ entry_p m_cat(entry_p contxt)
 
                     // If we're about to exceed the current buffer,
                     // allocate a new one big enough.
-                    if(len > num)
+                    if(len > cnt)
                     {
                         char *tmp;
 
                         // Double up until we have enough.
-                        while(num && num < len)
+                        while(cnt && cnt < len)
                         {
-                            num = num << 1;
+                            cnt = cnt << 1;
                         }
 
-                        tmp = DBG_ALLOC(calloc(num + 1, 1));
+                        tmp = DBG_ALLOC(calloc(cnt + 1, 1));
 
                         // Copy the contents to the new buffer
                         // and free the old one.
-                        if(tmp && num)
+                        if(tmp && cnt)
                         {
                             memcpy(tmp, buf, len - alen + 1);
                             free(buf);
@@ -100,7 +100,7 @@ entry_p m_cat(entry_p contxt)
                     }
 
                     // By now we're ready to append.
-                    strncat(buf, arg, num - strlen(buf));
+                    strncat(buf, arg, cnt - strlen(buf));
                 }
             }
 
@@ -132,7 +132,7 @@ entry_p m_fmt(entry_p contxt)
 
     if(sct)
     {
-        size_t ndx = 0, off = 0, num = 0, len = 0;
+        size_t ndx = 0, off = 0, cnt = 0, len = 0;
         entry_p *arg = contxt->children;
 
         // Scan the format string.
@@ -148,13 +148,13 @@ entry_p m_fmt(entry_p contxt)
                    fmt[ndx++] == 'l' &&
                    fmt[ndx] == 'd'))
                 {
-                    sct[num] = DBG_ALLOC(calloc(ndx - off + 2, 1));
+                    sct[cnt] = DBG_ALLOC(calloc(ndx - off + 2, 1));
 
-                    if(sct[num])
+                    if(sct[cnt])
                     {
-                        memcpy(sct[num], fmt + off, ndx - off + 1);
+                        memcpy(sct[cnt], fmt + off, ndx - off + 1);
                         off = ndx + 1;
-                        num++;
+                        cnt++;
                     }
                     else
                     {
@@ -172,14 +172,14 @@ entry_p m_fmt(entry_p contxt)
 
         // Iterate over all format specifiers and arguments and do
         // the appropriate conversions and formating.
-        if(num)
+        if(cnt)
         {
-            for(num = 0; sct[num]; num++)
+            for(cnt = 0; sct[cnt]; cnt++)
             {
                 if(arg && *arg &&
                    *arg != end())
                 {
-                    size_t oln = strlen(sct[num]);
+                    size_t oln = strlen(sct[cnt]);
                     entry_p cur = resolve(*arg);
 
                     // Bail out if we didn't manage to
@@ -191,7 +191,7 @@ entry_p m_fmt(entry_p contxt)
                     }
 
                     // Format string.
-                    if(sct[num][oln - 1] == 's' && cur->type == STRING)
+                    if(sct[cnt][oln - 1] == 's' && cur->type == STRING)
                     {
                         size_t nln = oln + strlen(cur->name);
                         char *new = DBG_ALLOC(calloc(nln + 1, 1));
@@ -200,11 +200,11 @@ entry_p m_fmt(entry_p contxt)
                         // the corresponding formated string.
                         if(new)
                         {
-                            int sln = snprintf(new, nln, sct[num], cur->name);
+                            int sln = snprintf(new, nln, sct[cnt], cur->name);
 
                             len += sln > 0 ? (size_t) sln : 0;
-                            free(sct[num]);
-                            sct[num] = new;
+                            free(sct[cnt]);
+                            sct[cnt] = new;
                         }
                         else
                         {
@@ -214,7 +214,7 @@ entry_p m_fmt(entry_p contxt)
                         }
                     }
                     // Format numeric value.
-                    else if(sct[num][oln - 1] == 'd' &&
+                    else if(sct[cnt][oln - 1] == 'd' &&
                             cur->type == NUMBER)
                     {
                         size_t nln = oln + NUMLEN;
@@ -224,11 +224,11 @@ entry_p m_fmt(entry_p contxt)
                         // the corresponding formated string.
                         if(new)
                         {
-                            int sln = snprintf(new, nln, sct[num], cur->id);
+                            int sln = snprintf(new, nln, sct[cnt], cur->id);
 
                             len += sln > 0 ? (size_t) sln : 0;
-                            free(sct[num]);
-                            sct[num] = new;
+                            free(sct[cnt]);
+                            sct[cnt] = new;
                         }
                         else
                         {
@@ -257,7 +257,7 @@ entry_p m_fmt(entry_p contxt)
         }
 
         // Concatenate all formated strings.
-        if(num && len)
+        if(cnt && len)
         {
             // Allocate memory to hold all of them.
             len += strlen(fmt + off) + 1;
@@ -266,9 +266,9 @@ entry_p m_fmt(entry_p contxt)
             if(ret)
             {
                 // All format strings.
-                for(num = 0; sct[num]; num++)
+                for(cnt = 0; sct[cnt]; cnt++)
                 {
-                    strncat(ret, sct[num], len - strlen(ret));
+                    strncat(ret, sct[cnt], len - strlen(ret));
                 }
 
                 // Suffix.
@@ -282,9 +282,9 @@ entry_p m_fmt(entry_p contxt)
         }
 
         // Free all temporary format strings.
-        for(num = 0; sct[num]; num++)
+        for(cnt = 0; sct[cnt]; cnt++)
         {
-            free(sct[num]);
+            free(sct[cnt]);
         }
 
         // Free scatter list.
@@ -292,7 +292,7 @@ entry_p m_fmt(entry_p contxt)
 
         // Without format specifiers, the format string
         // is the return value.
-        if(!num)
+        if(!cnt)
         {
             ret = DBG_ALLOC(strdup(fmt));
         }
