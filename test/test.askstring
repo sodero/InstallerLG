@@ -1,6 +1,6 @@
 (set c 1) (askstring (prompt "p") (help "h") (if c (default "d") (default "b"))) ; "","phd0 d",""
 (set c 0) (askstring (prompt "p") (help "h") (if c (default "d") (default "b"))) ; "","phb0 b",""
-(askstring) ; "","Line 1: Missing option 'prompt' 0",""
+(askstring) ; "","Line 1: Missing option 'default' 0",""
 (askstring (prompt "p") ) ; "","Line 1: Missing option 'help' 0",""
 (askstring (prompt "p") (help "h")) ; "","Line 1: Missing option 'default' 0",""
 (set @strict 0) (askstring) ; "","Line 1: Missing option 'default' 0",""

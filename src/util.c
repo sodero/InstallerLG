@@ -164,7 +164,26 @@ entry_p get_opt(entry_p contxt, opt_t type)
         entry_p *child = contxt->children;
 
         // Real option or (optional)?
-        if(contxt->type != OPTION)
+        if(contxt->type == OPTION)
+        {
+            // Iterate over all strings.
+            while(*child && *child != end())
+            {
+                if((type == OPT_FAIL && !strcmp(str(*child), "fail")) ||
+                   (type == OPT_FORCE && !strcmp(str(*child), "force")) ||
+                   (type == OPT_NOFAIL && !strcmp(str(*child), "nofail")) ||
+                   (type == OPT_ASKUSER && !strcmp(str(*child), "askuser")) ||
+                   (type == OPT_OKNODELETE && !strcmp(str(*child), "oknodelete")))
+                {
+                    return *child;
+                }
+
+                // Nope, next.
+                child++;
+            }
+        }
+        // An (optional) string.
+        else
         {
             // Iterate over all options.
             while(*child && *child != end())
@@ -190,25 +209,6 @@ entry_p get_opt(entry_p contxt, opt_t type)
                         // We found it.
                         return entry;
                     }
-                }
-
-                // Nope, next.
-                child++;
-            }
-        }
-        // An (optional) string.
-        else
-        {
-            // Iterate over all strings.
-            while(*child && *child != end())
-            {
-                if((type == OPT_FAIL && !strcmp(str(*child), "fail")) ||
-                   (type == OPT_FORCE && !strcmp(str(*child), "force")) ||
-                   (type == OPT_NOFAIL && !strcmp(str(*child), "nofail")) ||
-                   (type == OPT_ASKUSER && !strcmp(str(*child), "askuser")) ||
-                   (type == OPT_OKNODELETE && !strcmp(str(*child), "oknodelete")))
-                {
-                    return *child;
                 }
 
                 // Nope, next.
