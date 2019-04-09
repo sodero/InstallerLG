@@ -1,3 +1,8 @@
+(askchoice (help "h") (choices "a")) ; "","Line 1: Missing option 'prompt' 0",""
+(askchoice (prompt "p") (choices "a")) ; "","Line 1: Missing option 'help' 0",""
+(askchoice (prompt "p") (help "h")) ; "","Line 1: Missing option 'choices' 0",""
+(askchoice (prompt "p")) ; "","Line 1: Missing option 'help' 0",""
+(set @strict 0) (askchoice (choices "a")) ; "","a00 0",""
 (set x "y") (askchoice (prompt "p" "p" x) (help "h" "h" "h") (choices "a" "b" "c")) ; "","ppyhhha00 0",""
 (set x "y") (askchoice (prompt "p" "p" (x)) (help "h" "h" "h") (choices "a" "b" "c")) ; "","Line 1: Undefined function 'x' 0",""
 (set @strict 0) (set x "y") (askchoice (prompt "p" "p" (x)) (help "h" "h" "h") (choices "a" "b" "c")) ; "","ppyhhha00 0",""

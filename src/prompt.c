@@ -46,73 +46,72 @@ entry_p m_askbool(entry_p contxt)
         // Default = 'no'.
         DNUM = 0;
 
-        if(prompt && help)
+        // Do we have both prompt and help text?
+        if(!prompt || !help)
         {
-            // Do we have a choice option?
-            if(choices)
-            {
-                // Unless the parser is broken,
-                // we will have >= one child.
-                entry_p *entry = choices->children;
-
-                // Pick up whatever we can, use the default
-                // value if we only have a single choice.
-                yes = *entry && *entry != end() ? str(*entry) : yes;
-                nay = *(++entry) && *entry != end() ? str(*entry) : nay;
-            }
-
-            // Do we have a user specified default?
-            if(deflt)
-            {
-                DNUM = num(deflt);
-            }
-
-            // Show requester unless we're executing in
-            // 'novice' mode.
-            if(get_numvar(contxt, "@user-level") > 0)
-            {
-                const char *prt = str(prompt),
-                           *hlp = str(help);
-
-                // Only show requester if we could
-                // resolve all options.
-                if(!DID_ERR)
-                {
-                    // Prompt user.
-                    inp_t grc = gui_bool(prt, hlp, yes, nay, back != false);
-
-                    // Is the back option available?
-                    if(back)
-                    {
-                        // Fake input?
-                        if(get_numvar(contxt, "@back"))
-                        {
-                            grc = G_ABORT;
-                        }
-
-                        // On abort execute.
-                        if(grc == G_ABORT)
-                        {
-                            return resolve(back);
-                        }
-                    }
-
-                    // FIXME
-                    if(grc == G_ABORT || grc == G_EXIT)
-                    {
-                        HALT;
-                    }
-
-                    // Translate return code.
-                    DNUM = (grc == G_TRUE) ? 1 : 0;
-                }
-            }
+            // Missing one or more.
+            ERR(ERR_MISSING_OPTION, prompt ? "help" : "prompt");
+            RCUR;
         }
-        else
+
+        // Do we have a choice option?
+        if(choices)
         {
-            // Missing one or more options.
-            ERR(ERR_MISSING_OPTION, !prompt ?
-                "prompt" : "help");
+            // Unless the parser is broken,
+            // we will have >= one child.
+            entry_p *entry = choices->children;
+
+            // Pick up whatever we can, use the default
+            // value if we only have a single choice.
+            yes = *entry && *entry != end() ? str(*entry) : yes;
+            nay = *(++entry) && *entry != end() ? str(*entry) : nay;
+        }
+
+        // Do we have a user specified default?
+        if(deflt)
+        {
+            DNUM = num(deflt);
+        }
+
+        // Show requester unless we're executing in
+        // 'novice' mode.
+        if(get_numvar(contxt, "@user-level") > 0)
+        {
+            const char *prt = str(prompt),
+                       *hlp = str(help);
+
+            // Only show requester if we could
+            // resolve all options.
+            if(!DID_ERR)
+            {
+                // Prompt user.
+                inp_t grc = gui_bool(prt, hlp, yes, nay, back != false);
+
+                // Is the back option available?
+                if(back)
+                {
+                    // Fake input?
+                    if(get_numvar(contxt, "@back"))
+                    {
+                        grc = G_ABORT;
+                    }
+
+                    // On abort execute.
+                    if(grc == G_ABORT)
+                    {
+                        return resolve(back);
+                    }
+                }
+
+                // FIXME
+                if(grc == G_ABORT || grc == G_EXIT)
+                {
+                    HALT;
+                }
+
+                // Translate return code.
+                DNUM = (grc == G_TRUE) ? 1 : 0;
+            }
         }
     }
     else
@@ -149,170 +148,170 @@ entry_p m_askchoice(entry_p contxt)
 
         DNUM = 0;
 
-        // Are all mandatory options (!?) present?
-        if(prompt && help && choices)
+        // We need something to choose from,
+        // a help text and a prompt text.
+        if(!prompt || !help || !choices)
         {
-            // Unless the parser is broken,
-            // we will have >= one child.
-            entry_p *entry = choices->children;
+            // Missing one or more.
+            ERR(ERR_MISSING_OPTION, prompt ? help ?
+                "choices" : "help" : "prompt");
+            RCUR;
+        }
 
-            // The choice is represented by a bitmask of
-            // 32 bits, refer to Install.guide. Thus, we
-            // need room for 32 pointers + NULL.
-            static const char *chs[33];
-            static int add[32];
+        // Unless the parser is broken,
+        // we will have >= one child.
+        entry_p *entry = choices->children;
 
-            // Indices
-            int ndx = 0, off = 0;
+        // The choice is represented by a bitmask of
+        // 32 bits, refer to Install.guide. Thus, we
+        // need room for 32 pointers + NULL.
+        static const char *chs[33];
+        static int add[32];
 
-            // Pick up a string representation of all
-            // the options.
-            while(*entry && *entry != end() && off < 32)
+        // Indices
+        int ndx = 0, off = 0;
+
+        // Pick up a string representation of all
+        // the options.
+        while(*entry && *entry != end() && off < 32)
+        {
+            // Resolve once.
+            char *opt = str(*entry);
+
+            // Save skip deltas. See (1).
+            add[ndx] = off - ndx;
+
+            // From the Installer.guide:
+            //
+            // 1. If you use an empty string as choice descriptor, the choice will
+            //    be invisible to the user, i.e. it will not be displayed on screen.
+            //    By using variables you can easily set up a programable number of
+            //    choices then while retaining the bit numbering.
+            if(*opt)
             {
-                // Resolve once.
-                char *opt = str(*entry);
+                // 2. Previous versions of Installer did not support proportional fonts
+                //    well and some people depended on the non proportional layout of
+                //    the display for table like choices.  So Installer will continue to
+                //    render choices non proportional unless you start one of the
+                //    choices with a special escape sequence `"<ESC>[2p"'. This escape
+                //    sequence allows proportional rendering. It is wise to specify this
+                //    only in the first choice of the list. Note this well.  (V42)
+                if(strlen(opt) > 3 && !memcmp("\x1B[2p", opt, 4))
+                {
+                    // We rely on Zune / MUI for #2. Hide
+                    // this control sequence if it exists.
+                    opt += 4;
+                }
 
-                // Save skip deltas. See (1).
-                add[ndx] = off - ndx;
-
-                // From the Installer.guide:
-                //
-                // 1. If you use an empty string as choice descriptor, the choice will
-                //    be invisible to the user, i.e. it will not be displayed on screen.
-                //    By using variables you can easily set up a programable number of
-                //    choices then while retaining the bit numbering.
+                // Make sure that the removal of the control
+                // sequence hasn't cleared the string.
                 if(*opt)
                 {
-                    // 2. Previous versions of Installer did not support proportional fonts
-                    //    well and some people depended on the non proportional layout of
-                    //    the display for table like choices.  So Installer will continue to
-                    //    render choices non proportional unless you start one of the
-                    //    choices with a special escape sequence `"<ESC>[2p"'. This escape
-                    //    sequence allows proportional rendering. It is wise to specify this
-                    //    only in the first choice of the list. Note this well.  (V42)
-                    if(strlen(opt) > 3 && !memcmp("\x1B[2p", opt, 4))
-                    {
-                        // We rely on Zune / MUI for #2. Hide
-                        // this control sequence if it exists.
-                        opt += 4;
-                    }
-
-                    // Make sure that the removal of the control
-                    // sequence hasn't cleared the string.
-                    if(*opt)
-                    {
-                        // Something to show.
-                        chs[ndx++] = opt;
-                    }
+                    // Something to show.
+                    chs[ndx++] = opt;
                 }
-
-                // Invisible items are valid as default
-                // values, so we need to count these as
-                // well.
-                off++;
-
-                // Next option.
-                entry++;
             }
 
-            // Exit if there's nothing to show.
-            if(!ndx)
+            // Invisible items are valid as default
+            // values, so we need to count these as
+            // well.
+            off++;
+
+            // Next option.
+            entry++;
+        }
+
+        // Exit if there's nothing to show.
+        if(!ndx)
+        {
+            // Use the default value if such
+            // exists.
+            RNUM(deflt ? num(deflt) : 0);
+        }
+
+        // Terminate array.
+        chs[ndx] = NULL;
+
+        // Do we have default option?
+        if(deflt)
+        {
+            // Is there such a choice?
+            int def = num(deflt);
+
+            // Check for negative values
+            // as well.
+            if(def < 0 || def >= off)
             {
-                // Use the default value if such
-                // exists.
-                RNUM(deflt ? num(deflt) : 0);
+                // Nope, out of range.
+                ERR(ERR_NO_ITEM, str(deflt));
+                RNUM(0);
             }
 
-            // Terminate array.
-            chs[ndx] = NULL;
+            // Yes, use the default
+            // value given.
+            ndx = def;
+        }
+        else
+        {
+            // No default = 0
+            ndx = 0;
+        }
 
-            // Do we have default option?
-            if(deflt)
+        // Show requester unless we're executing in
+        // 'novice' mode.
+        if(get_numvar(contxt, "@user-level") > 0)
+        {
+            const char *prt = str(prompt),
+                       *hlp = str(help);
+
+            // Only show requester if we could
+            // resolve all options.
+            if(!DID_ERR)
             {
-                // Is there such a choice?
-                int def = num(deflt);
+                // Skipper.
+                int del = 0;
 
-                // Check for negative values
-                // as well.
-                if(def < 0 || def >= off)
+                // Cap / compute skipper.
+                if(ndx > 0 && ndx < 31 &&
+                   ndx - add[ndx - 1] > 0 &&
+                   ndx + add[ndx - 1] < 31)
                 {
-                    // Nope, out of range.
-                    ERR(ERR_NO_ITEM, str(deflt));
-                    RNUM(0);
+                    del = add[ndx - 1];
                 }
 
-                // Yes, use the default
-                // value given.
-                ndx = def;
-            }
-            else
-            {
-                // No default = 0
-                ndx = 0;
-            }
+                // Prompt user. Subtract skipper from default.
+                inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back != false, &DNUM);
 
-            // Show requester unless we're executing in
-            // 'novice' mode.
-            if(get_numvar(contxt, "@user-level") > 0)
-            {
-                const char *prt = str(prompt),
-                           *hlp = str(help);
+                // Add skipper. Don't trust the GUI.
+                DNUM += ((DNUM < 32 && DNUM >= 0) ?
+                        add[DNUM] : 0);
 
-                // Only show requester if we could
-                // resolve all options.
-                if(!DID_ERR)
+                // Is the back option available?
+                if(back)
                 {
-                    // Skipper.
-                    int del = 0;
-
-                    // Cap / compute skipper.
-                    if(ndx > 0 && ndx < 31 &&
-                       ndx - add[ndx - 1] > 0 &&
-                       ndx + add[ndx - 1] < 31)
+                    // Fake input?
+                    if(get_numvar(contxt, "@back"))
                     {
-                        del = add[ndx - 1];
+                        grc = G_ABORT;
                     }
 
-                    // Prompt user. Subtract skipper from default.
-                    inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back != false, &DNUM);
-
-                    // Add skipper. Don't trust the GUI.
-                    DNUM += ((DNUM < 32 && DNUM >= 0) ?
-                            add[DNUM] : 0);
-
-                    // Is the back option available?
-                    if(back)
+                    // On abort execute.
+                    if(grc == G_ABORT)
                     {
-                        // Fake input?
-                        if(get_numvar(contxt, "@back"))
-                        {
-                            grc = G_ABORT;
-                        }
-
-                        // On abort execute.
-                        if(grc == G_ABORT)
-                        {
-                            return resolve(back);
-                        }
-                    }
-
-                    // FIXME
-                    if(grc == G_ABORT || grc == G_EXIT)
-                    {
-                        HALT;
+                        return resolve(back);
                     }
                 }
-            }
-            else
-            {
-                DNUM = ndx;
+
+                // FIXME
+                if(grc == G_ABORT || grc == G_EXIT)
+                {
+                    HALT;
+                }
             }
         }
         else
         {
-            // Missing one or more options.
-            ERR(ERR_MISSING_OPTION, !prompt ?
-                "prompt" : !help ? "help" : "choices");
+            DNUM = ndx;
         }
     }
     else
@@ -360,41 +359,37 @@ entry_p m_askdir(entry_p contxt)
                            *hlp = str(help),
                            *def = str(deflt);
 
-                // Only show requester if we could
-                // resolve all options.
-                if(!DID_ERR)
+                // Could we resolve all options?
+                if(DID_ERR)
                 {
-                    // Prompt user.
-                    inp_t grc = gui_askdir(prt, hlp, newpath != false, disk != false, assigns != false,
-                                           def, back != false, &ret);
+                    // Return empty string.
+                    REST;
+                }
 
-                    // Is the back option available?
-                    if(back)
+                // Prompt user.
+                inp_t grc = gui_askdir(prt, hlp, newpath != false, disk != false,
+                                       assigns != false, def, back != false, &ret);
+
+                // Is the back option available?
+                if(back)
+                {
+                    // Fake input?
+                    if(get_numvar(contxt, "@back"))
                     {
-                        // Fake input?
-                        if(get_numvar(contxt, "@back"))
-                        {
-                            grc = G_ABORT;
-                        }
-
-                        // On abort execute.
-                        if(grc == G_ABORT)
-                        {
-                            return resolve(back);
-                        }
+                        grc = G_ABORT;
                     }
 
-                    // FIXME
-                    if(grc == G_ABORT || grc == G_EXIT)
+                    // On abort execute.
+                    if(grc == G_ABORT)
                     {
-                        HALT;
-                        REST;
+                        return resolve(back);
                     }
                 }
-                else
+
+                // FIXME
+                if(grc == G_ABORT || grc == G_EXIT)
                 {
-                    // Could not resolve one
-                    // or more options.
+                    HALT;
                     REST;
                 }
             }
@@ -410,11 +405,10 @@ entry_p m_askdir(entry_p contxt)
         }
 
         // What option are we missing?
-        ERR(ERR_MISSING_OPTION, !prompt ?
-            "prompt" : !help ? "help" : "default");
+        ERR(ERR_MISSING_OPTION, prompt ? help ?
+            "default" : "help" : "prompt");
 
-        // Return empty string
-        // on failure.
+        // Return empty string on failure.
         REST;
     }
 
@@ -585,8 +579,8 @@ entry_p m_askdisk(entry_p contxt)
         else
         {
             // Missing one or more options.
-            ERR(ERR_MISSING_OPTION, !prompt ?
-                "prompt" : !help ? "help" : "dest");
+            ERR(ERR_MISSING_OPTION, prompt ? help ?
+                "dest" : "help" : "prompt");
         }
     }
     else
@@ -634,41 +628,37 @@ entry_p m_askfile(entry_p contxt)
                            *hlp = str(help),
                            *def = str(deflt);
 
-                // Only show requester if we could
-                // resolve all options.
-                if(!DID_ERR)
+                // Could we resolve all options?
+                if(DID_ERR)
                 {
-                    // Prompt user.
-                    inp_t grc = gui_askfile(prt, hlp, newpath != false, disk != false,
-                                            def, back != false, &ret);
+                    // Return empty string.
+                    REST;
+                }
 
-                    // Is the back option available?
-                    if(back)
+                // Prompt user.
+                inp_t grc = gui_askfile(prt, hlp, newpath != false, disk != false,
+                                        def, back != false, &ret);
+
+                // Is the back option available?
+                if(back)
+                {
+                    // Fake input?
+                    if(get_numvar(contxt, "@back"))
                     {
-                        // Fake input?
-                        if(get_numvar(contxt, "@back"))
-                        {
-                            grc = G_ABORT;
-                        }
-
-                        // On abort execute.
-                        if(grc == G_ABORT)
-                        {
-                            return resolve(back);
-                        }
+                        grc = G_ABORT;
                     }
 
-                    // FIXME
-                    if(grc == G_ABORT || grc == G_EXIT)
+                    // On abort execute.
+                    if(grc == G_ABORT)
                     {
-                        HALT;
-                        REST;
+                        return resolve(back);
                     }
                 }
-                else
+
+                // FIXME
+                if(grc == G_ABORT || grc == G_EXIT)
                 {
-                    // Could not resolve one
-                    // or more options.
+                    HALT;
                     REST;
                 }
             }
@@ -684,8 +674,8 @@ entry_p m_askfile(entry_p contxt)
         }
 
         // Missing one or more options.
-        ERR(ERR_MISSING_OPTION, !prompt ?
-            "prompt" : !help ? "help" : "default");
+        ERR(ERR_MISSING_OPTION, prompt ? help ?
+            "default" : "help" : "prompt");
 
         // Return empty string
         // on failure.
@@ -795,8 +785,8 @@ entry_p m_asknumber(entry_p contxt)
         else
         {
             // Missing one or more options.
-            ERR(ERR_MISSING_OPTION, !prompt ?
-                "prompt" : !help ? "help" : "default");
+            ERR(ERR_MISSING_OPTION, prompt ? help ?
+                "default" : "help" : "prompt");
         }
     }
     else
@@ -951,8 +941,8 @@ entry_p m_askoptions(entry_p contxt)
         else
         {
             // Missing one or more options.
-            ERR(ERR_MISSING_OPTION, !prompt ?
-                "prompt" : !help ? "help" : "choices");
+            ERR(ERR_MISSING_OPTION, prompt ? help ?
+                "choices" : "help" : "prompt");
         }
     }
     else
@@ -993,41 +983,36 @@ entry_p m_askstring(entry_p contxt)
                            *hlp = str(help),
                            *def = str(deflt);
 
-                // Only show requester if we could
-                // resolve all options.
-                if(!DID_ERR)
+                // Could we resolve all options?
+                if(DID_ERR)
                 {
-                    // Prompt user.
-                    inp_t grc = gui_string(prt, hlp, def, back != false, &res);
+                    // Return empty string.
+                    REST;
+                }
 
-                    // Is the back option available?
-                    if(back)
+                // Prompt user.
+                inp_t grc = gui_string(prt, hlp, def, back != false, &res);
+
+                // Is the back option available?
+                if(back)
+                {
+                    // Fake input?
+                    if(get_numvar(contxt, "@back"))
                     {
-                        // Fake input?
-                        if(get_numvar(contxt, "@back"))
-                        {
-                            grc = G_ABORT;
-                        }
-
-                        // On abort execute.
-                        if(grc == G_ABORT)
-                        {
-                            return resolve(back);
-                        }
+                        grc = G_ABORT;
                     }
 
-                    // FIXME
-                    if(grc == G_ABORT || grc == G_EXIT)
+                    // On abort execute.
+                    if(grc == G_ABORT)
                     {
-                        HALT;
-                        REST;
+                        return resolve(back);
                     }
                 }
-                else
+
+                // FIXME
+                if(grc == G_ABORT || grc == G_EXIT)
                 {
-                    // Could not resolve all
-                    // options. Error set by
-                    // str().
+                    HALT;
                     REST;
                 }
             }
@@ -1041,8 +1026,8 @@ entry_p m_askstring(entry_p contxt)
         }
 
         // Missing one or more options.
-        ERR(ERR_MISSING_OPTION, !prompt ?
-            "prompt" : !help ? "help" : "default");
+        ERR(ERR_MISSING_OPTION, prompt ? help ?
+            "default" : "help" : "default");
 
         // Return empty string
         // on failure.

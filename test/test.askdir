@@ -4,6 +4,7 @@
 (askdir) ; "","Line 1: Missing option 'prompt' 0",""
 (askdir (prompt "p")) ; "","Line 1: Missing option 'help' 0",""
 (askdir (prompt "p") (help "h")) ; "","Line 1: Missing option 'default' 0",""
+(set @strict 0) (askdir (default "d")) ; "","000d0 d",""
 (askdir (prompt "p") (help "h") (default "d")) ; "","ph000d0 d",""
 (askdir (prompt "p") (help) (default "d")) ; "","pNULL000d0 d",""
 (askdir (prompt "p") (help "h") (default "d") (newpath)) ; "","ph100d0 d",""

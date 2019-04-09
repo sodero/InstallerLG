@@ -948,7 +948,7 @@ static inp_t h_copyfile(entry_p contxt,
         {
             static char buf[BUFSIZ];
             FILE *file = fopen(src, "r");
-            size_t num = file ? fread(buf, 1, BUFSIZ, file) : 0;
+            size_t cnt = file ? fread(buf, 1, BUFSIZ, file) : 0;
             int err =
                 #ifdef AMIGA
                 IoErr();
@@ -999,9 +999,9 @@ static inp_t h_copyfile(entry_p contxt,
                 {
                     // Read and write until there is nothing more
                     // to read.
-                    while(num)
+                    while(cnt)
                     {
-                        if(fwrite(buf, 1, num, dest) == num)
+                        if(fwrite(buf, 1, cnt, dest) == cnt)
                         {
                             // Update GUI unless we're in silent mode.
                             if(!(mde & CF_SILENT))
@@ -1011,7 +1011,7 @@ static inp_t h_copyfile(entry_p contxt,
 
                             if(grc == G_TRUE)
                             {
-                                num = fread(buf, 1, sizeof(buf), file);
+                                cnt = fread(buf, 1, sizeof(buf), file);
                             }
                             else
                             {
@@ -1032,7 +1032,7 @@ static inp_t h_copyfile(entry_p contxt,
 
                     // The number of bytes read and not written
                     // should be zero.
-                    if(!num)
+                    if(!cnt)
                     {
                         // Write to the log file (if logging is
                         // enabled).
@@ -3344,14 +3344,14 @@ entry_p m_startup(entry_p contxt)
                                 // Do we already have an entry in
                                 // the current file?
                                 char *beg = strstr(buf, pre),
-                                     *end = strstr(buf, pst);
+                                     *fin = strstr(buf, pst);
 
                                 // Replace the current entry by inserting
                                 // the new one at the same location.
-                                if(beg && end)
+                                if(beg && fin)
                                 {
                                     // Move the tail of the buffer to the right place.
-                                    memmove(beg + len + ins, end, (buf + osz) - end + 1);
+                                    memmove(beg + len + ins, fin, (buf + osz) - fin + 1);
 
                                     // Insert the command string.
                                     memcpy(beg + len + 1, cmd, ins - 2);
@@ -3540,7 +3540,7 @@ entry_p m_textfile(entry_p contxt)
         entry_p prompt   = get_opt(contxt, OPT_PROMPT),
                 help     = get_opt(contxt, OPT_HELP),
                 dest     = get_opt(contxt, OPT_DEST),
-                append   = get_opt(contxt, OPT_APPEND),
+                post     = get_opt(contxt, OPT_APPEND),
                 include  = get_opt(contxt, OPT_INCLUDE),
                 confirm  = get_opt(contxt, OPT_CONFIRM),
                 safe     = get_opt(contxt, OPT_SAFE);
@@ -3611,7 +3611,7 @@ entry_p m_textfile(entry_p contxt)
 
                     // Append to empty file. This is strange
                     // but it's how the CBM installer works.
-                    if(append)
+                    if(post)
                     {
                         // Gather and merge all (append) strings.
                         char *app = get_optstr(contxt, OPT_APPEND);
@@ -3651,16 +3651,16 @@ entry_p m_textfile(entry_p contxt)
                             // Use the global buffer.
                             char *buf = get_buf();
                             size_t siz = buf_size(),
-                                   num = fread(buf, 1, siz, finc);
+                                   cnt = fread(buf, 1, siz, finc);
 
                             // Log operation.
                             h_log(contxt, tr(S_INCL), incl, name);
 
                             // Copy the whole file.
-                            while(num)
+                            while(cnt)
                             {
                                 // Write to destination file.
-                                if(fwrite(buf, 1, num, file) != num)
+                                if(fwrite(buf, 1, cnt, file) != cnt)
                                 {
                                     ERR(ERR_WRITE_FILE, name);
                                     DNUM = 0;
@@ -3668,7 +3668,7 @@ entry_p m_textfile(entry_p contxt)
                                 }
 
                                 // Do we have more data?
-                                num = fread(buf, 1, siz, finc);
+                                cnt = fread(buf, 1, siz, finc);
                             }
 
                             // We're done reading from
@@ -3683,7 +3683,7 @@ entry_p m_textfile(entry_p contxt)
 
                     // We must append and / or include,
                     // or else this doesn't make sense.
-                    if(!append && !include)
+                    if(!post && !include)
                     {
                         ERR(ERR_NOTHING_TO_DO, contxt->name);
                         DNUM = 0;
@@ -4238,21 +4238,21 @@ int h_log(entry_p contxt, const char *fmt, ...)
 
             // Don't care about existing files, just append.
             FILE *file = fopen(log, "a");
-            int num = -1;
+            int cnt = -1;
 
             if(file)
             {
                 // Line number and function name as prefix.
-                num = fprintf(file, "[%d:%s] ", contxt->id, contxt->name);
+                cnt = fprintf(file, "[%d:%s] ", contxt->id, contxt->name);
 
                 // Append formatted string.
-                if(num > 0)
+                if(cnt > 0)
                 {
                     // Use whatever format and arguments we get
                     va_list arg;
 
                     va_start(arg, fmt);
-                    num = vfprintf(file, fmt, arg);
+                    cnt = vfprintf(file, fmt, arg);
                     va_end(arg);
                 }
 
@@ -4260,13 +4260,13 @@ int h_log(entry_p contxt, const char *fmt, ...)
             }
 
             // Could we open the file AND write all data to it?
-            if(num < 0)
+            if(cnt < 0)
             {
                 ERR(ERR_WRITE_FILE, log);
-                num = 0;
+                cnt = 0;
             }
 
-            return num;
+            return cnt;
         }
 
         // We suceeded doing
