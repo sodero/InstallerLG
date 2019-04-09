@@ -53,12 +53,11 @@ static char *h_cpu_name(void)
                               "68040", "68060", "x86", "x84_64" };
     uint32_t arc = ERR;
 
-    #ifdef __MORPHOS__
+    #if defined(__MORPHOS__) && !defined(LG_TEST)
     // On MorphOS, there is only PPC (for now) (and no define).
     NewGetSystemAttrs(&arc, sizeof(arc), SYSTEMINFOTYPE_MACHINE);
     arc = arc == 1 ? PPC : ERR;
-    #else
-    #ifdef __AROS__
+    #elif defined(__AROS__) && !defined(LG_TEST)
     // On AROS, everything is possible.
     APTR ProcessorBase = OpenResource("processor.resource");
 
@@ -117,8 +116,7 @@ static char *h_cpu_name(void)
 
             }
     }
-    #else
-    #ifdef AMIGA
+    #elif defined(AMIGA) && !defined(LG_TEST)
     // AmigaOS3 - Beware, not tested.
     struct ExecBase *AbsSysBase = *((struct ExecBase **)4);
     UWORD flags = AbsSysBase->AttnFlags;
@@ -147,8 +145,6 @@ static char *h_cpu_name(void)
     {
         arc = M68000;
     }
-    #endif
-    #endif
     #endif
 
     // CPU or 'Unknown'.
@@ -180,7 +176,7 @@ entry_p m_database(entry_p contxt)
         if(!strcmp(feat, "os"))
         {
             // Get OS name.
-            #ifdef AMIGA
+            #if defined(AMIGA) && !defined(LG_TEST)
             if(FindResident("MorphOS"))
             {
                 ret = "MorphOS";
@@ -202,7 +198,7 @@ entry_p m_database(entry_p contxt)
         if(!strcmp(feat, "graphics-mem"))
         {
             memf =
-            #ifdef AMIGA
+            #if defined(AMIGA) && !defined(LG_TEST)
             AvailMem(MEMF_CHIP);
             #else
             524288;
@@ -212,7 +208,7 @@ entry_p m_database(entry_p contxt)
         if(!strcmp(feat, "total-mem"))
         {
             memf =
-            #ifdef AMIGA
+            #if defined(AMIGA) && !defined(LG_TEST)
             AvailMem(MEMF_ANY);
             #else
             524288;
@@ -293,8 +289,9 @@ entry_p m_getassign(entry_p contxt)
     // We need one or more arguments.
     if(c_sane(contxt, 1))
     {
-        // On non Amiga systems this is a stub.
-        #ifdef AMIGA
+        // On non Amiga systems, or in test mode,
+        // this is a stub.
+        #if defined(AMIGA) && !defined(LG_TEST)
 	    struct DosList *dl;
         const char *asn = str(CARG(1));
         size_t asnl = strlen(asn);
@@ -470,7 +467,7 @@ entry_p m_getdevice(entry_p contxt)
     // We need a path.
     if(c_sane(contxt, 1))
     {
-        #ifdef AMIGA
+        #if defined(AMIGA) && !defined(LG_TEST)
         // Attempt to lock path.
         BPTR lock = (BPTR) Lock(str(CARG(1)), ACCESS_READ);
 
@@ -551,7 +548,7 @@ entry_p m_getdiskspace(entry_p contxt)
     // We need a path.
     if(c_sane(contxt, 1))
     {
-        #ifdef AMIGA
+        #if defined(AMIGA) && !defined(LG_TEST)
         // Attempt to lock path.
         const char *n = str(CARG(1));
         BPTR lock = (BPTR) Lock(n, ACCESS_READ);
@@ -871,7 +868,7 @@ entry_p m_getversion(entry_p contxt)
             // A resident library or device?
             if(get_opt(contxt, OPT_RESIDENT))
             {
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 struct Resident *res =
                     (struct Resident *) FindResident(name);
 
@@ -910,7 +907,7 @@ entry_p m_getversion(entry_p contxt)
                 DNUM = ver != -1 ? ver : 0;
             }
         }
-        #ifdef AMIGA
+        #if defined(AMIGA) && !defined(LG_TEST)
         else
         {
             // No arguments, return version of Exec.
@@ -961,7 +958,7 @@ entry_p m_iconinfo(entry_p contxt)
             // Something is 'dst'.info
             char *file = str(dst);
 
-            #ifdef AMIGA
+            #if defined(AMIGA) && !defined(LG_TEST)
             // Get icon information.
             struct DiskObject *obj = (struct DiskObject *)
                 GetDiskObject(file);
@@ -995,7 +992,7 @@ entry_p m_iconinfo(entry_p contxt)
                                 char *svl = NULL;
                                 entry_p val;
 
-                                #ifdef AMIGA
+                                #if defined(AMIGA) && !defined(LG_TEST)
                                 // Is this a numerical value?
                                 if(type == OPT_GETSTACK ||
                                    type == OPT_GETPOSITION)
@@ -1093,7 +1090,7 @@ entry_p m_iconinfo(entry_p contxt)
                     }
                 }
 
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 FreeDiskObject(obj);
                 #endif
             }

@@ -397,7 +397,7 @@ entry_p m_patmatch(entry_p contxt)
     // We need two arguments
     if(c_sane(contxt, 2))
     {
-        #ifdef AMIGA
+        #if defined(AMIGA) && !defined(LG_TEST)
         // Use the global buffer.
         char *buf = get_buf(),
              *p = str(CARG(1)),

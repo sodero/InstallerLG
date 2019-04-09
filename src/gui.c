@@ -3066,7 +3066,7 @@ inp_t gui_init(bool scr)
     // Amiga style version string.
     static char version[] __attribute__((used)) = VERSION_STRING;
 
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     Object *App;
 
     // Create our GUI class.
@@ -3135,7 +3135,7 @@ inp_t gui_init(bool scr)
 //----------------------------------------------------------------------------
 void gui_exit(void)
 {
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     // Must check for NULL. Class creation might have failed.
     if(IGClass)
     {
@@ -3159,7 +3159,6 @@ void gui_exit(void)
             CloseScreen(scr);
         }
     }
-
     #endif
 }
 
@@ -3173,7 +3172,7 @@ void gui_exit(void)
 inp_t gui_message(const char *msg, bool bck)
 {
     return
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod
     (
         Win, MUIM_IG_Message, msg, bck
@@ -3193,7 +3192,7 @@ inp_t gui_message(const char *msg, bool bck)
 inp_t gui_finish(const char *msg)
 {
     return
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod
     (
         Win, MUIM_IG_Finish, msg
@@ -3213,7 +3212,7 @@ inp_t gui_finish(const char *msg)
 inp_t gui_working(const char *msg)
 {
     return
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod
     (
         Win, MUIM_IG_Working, msg
@@ -3232,7 +3231,7 @@ inp_t gui_working(const char *msg)
 //----------------------------------------------------------------------------
 void gui_abort(const char *msg)
 {
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod
     (
         Win, MUIM_IG_Abort,
@@ -3263,7 +3262,7 @@ inp_t gui_choice(const char *msg,
                  int *ret)
 {
     inp_t grc =
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod
     (
         Win, MUIM_IG_Radio, msg,
@@ -3297,7 +3296,7 @@ inp_t gui_options(const char *msg,
                   int *ret)
 {
     inp_t grc =
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod
     (
         Win, MUIM_IG_CheckBoxes, msg,
@@ -3328,7 +3327,7 @@ inp_t gui_bool(const char *msg,
                bool bck)
 {
     return
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod
     (
         Win, MUIM_IG_Bool,
@@ -3357,7 +3356,7 @@ inp_t gui_string(const char *msg,
                  const char **ret)
 {
     inp_t grc =
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod
     (
         Win, MUIM_IG_String,
@@ -3392,7 +3391,7 @@ inp_t gui_number(const char *msg,
                  int *ret)
 {
     inp_t grc =
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod
     (
         Win, MUIM_IG_Number, msg,
@@ -3429,7 +3428,7 @@ inp_t gui_welcome(const char *msg,
                   bool nlg)
 {
     return
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod
     (
         Win, MUIM_IG_Welcome, msg,
@@ -3468,7 +3467,7 @@ inp_t gui_askdir(const char *msg,
                  bool bck,
                  const char **ret)
 {
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod
     (
         Win, MUIM_IG_AskFile,
@@ -3507,7 +3506,7 @@ inp_t gui_askfile(const char *msg,
                   bool bck,
                   const char **ret)
 {
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod
     (
         Win, MUIM_IG_AskFile,
@@ -3539,7 +3538,7 @@ inp_t gui_askfile(const char *msg,
 //----------------------------------------------------------------------------
 inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, bool cnf, bool bck)
 {
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod
     (
         Win, MUIM_IG_CopyFilesStart,
@@ -3571,7 +3570,7 @@ inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, bool cn
 //----------------------------------------------------------------------------
 inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
 {
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod
     (
         Win, MUIM_IG_CopyFilesSetCur,
@@ -3594,7 +3593,7 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
 //----------------------------------------------------------------------------
 void gui_copyfiles_end(void)
 {
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CopyFilesEnd);
     #endif
 }
@@ -3607,7 +3606,7 @@ void gui_copyfiles_end(void)
 //----------------------------------------------------------------------------
 void gui_complete(int com)
 {
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_Complete, com);
     #else
     // Testing purposes.
@@ -3626,7 +3625,7 @@ void gui_complete(int com)
 inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 {
     return
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod(Win, MUIM_IG_Confirm, msg, hlp, bck);
     #else
     // Testing purposes.
@@ -3646,7 +3645,7 @@ void gui_error(int line,
                const char *type,
                const char *info)
 {
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     static char err[BUFSIZ];
     static struct EasyStruct es =
     {
@@ -3676,7 +3675,7 @@ void gui_error(int line,
 //----------------------------------------------------------------------------
 void gui_effect(int eff, int cl1, int cl2)
 {
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_Effect, eff, cl1, cl2);
     #else
     // Testing purposes.
@@ -3693,7 +3692,7 @@ void gui_effect(int eff, int cl1, int cl2)
 inp_t gui_closemedia(int mid)
 {
     // Testing purposes.
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CloseMedia, mid);
     #else
     printf("%d\n", mid);
@@ -3712,7 +3711,7 @@ inp_t gui_closemedia(int mid)
 inp_t gui_setmedia(int mid, int act, const char *par)
 {
     // Testing purposes.
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_SetMedia, mid, act, par);
     #else
     printf("%d:%d:%s\n", mid, act, par ? par : "_");
@@ -3729,7 +3728,7 @@ inp_t gui_setmedia(int mid, int act, const char *par)
 inp_t gui_showmedia(int *mid, const char* mda, int act)
 {
     // Testing purposes.
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_ShowMedia, mid, mda, act);
     #else
     static int num;

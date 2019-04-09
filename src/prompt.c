@@ -451,7 +451,7 @@ entry_p m_askdisk(entry_p contxt)
             // Volume names must be > 0 characters long.
             if(strlen(dsk) > 1)
             {
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 struct Process *p = (struct Process *)
                     FindTask(NULL);
 
@@ -562,7 +562,8 @@ entry_p m_askdisk(entry_p contxt)
                 // Restore auto request.
                 p->pr_WindowPtr = w;
                 #else
-                // On non-Amiga systems we always succeed.
+                // On non-Amiga systems, or in test mode,
+                // we always succeed.
                 DNUM = 1;
 
                 // For testing purposes only.

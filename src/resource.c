@@ -112,7 +112,7 @@ const char *tr(res_t res)
         "GONE"
     };
 
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     if(loc.li_LocaleBase &&
        loc.li_Catalog && cur > S_NONE)
     {
@@ -134,7 +134,7 @@ void locale_init(void)
 {
     if(!loc.li_LocaleBase)
     {
-        #ifdef AMIGA
+        #if defined(AMIGA) && !defined(LG_TEST)
         loc.li_LocaleBase = OpenLibrary("locale.library", 37);
         loc.li_Catalog = OpenCatalog(NULL, "Installer.catalog", TAG_DONE);
         #else
@@ -153,7 +153,7 @@ void locale_exit(void)
 {
     if(loc.li_LocaleBase)
     {
-        #ifdef AMIGA
+        #if defined(AMIGA) && !defined(LG_TEST)
         CloseCatalog(loc.li_Catalog);
         CloseLibrary(loc.li_LocaleBase);
         #else

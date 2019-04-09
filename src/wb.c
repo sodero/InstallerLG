@@ -82,7 +82,7 @@ entry_p m_openwbobject(entry_p contxt)
 
         if(!confirm || h_confirm(CARG(2), str(help), str(prompt)))
         {
-            #ifdef AMIGA
+            #if defined(AMIGA) && !defined(LG_TEST)
             DNUM = OpenWorkbenchObjectA(str(CARG(1)), NULL) ? 1 : 0;
             #else
             // If not supported by workbench.library -1 is to be returned.
@@ -118,7 +118,7 @@ entry_p m_showwbobject(entry_p contxt)
     // We need a single argument.
     if(c_sane(contxt, 1))
     {
-        #ifdef AMIGA
+        #if defined(AMIGA) && !defined(LG_TEST)
         DNUM = MakeWorkbenchObjectVisibleA(str(CARG(1)), NULL) ? 1 : 0;
         #else
         // If not supported by workbench.library -1 is to be returned.
@@ -149,7 +149,7 @@ entry_p m_closewbobject(entry_p contxt)
     // We need a single argument.
     if(c_sane(contxt, 1))
     {
-        #ifdef AMIGA
+        #if defined(AMIGA) && !defined(LG_TEST)
         DNUM = CloseWorkbenchObjectA(str(CARG(1)), NULL) ? 1 : 0;
         #else
         // If not supported by workbench.library -1 is to be returned.

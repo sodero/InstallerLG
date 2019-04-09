@@ -252,7 +252,8 @@ entry_p m_reboot(entry_p contxt)
         }
         else
         {
-            #ifdef AMIGA
+            // In test mode, don't reboot.
+            #if defined(AMIGA) && !defined(LG_TEST)
             // Hard reset.
             ColdReboot();
             #else
