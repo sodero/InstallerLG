@@ -129,12 +129,12 @@ static void init_tooltypes(entry_p contxt)
     if(a_min)
     {
         // NOVICE (0) is implicit.
-        if(!strcasecmp("AVERAGE", a_min))
+        if(strcasecmp("AVERAGE", a_min) == 0)
         {
             l_min = 1;
         }
         else
-        if(!strcasecmp("EXPERT", a_min))
+        if(strcasecmp("EXPERT", a_min) == 0)
         {
             l_min = 2;
         }
@@ -144,12 +144,12 @@ static void init_tooltypes(entry_p contxt)
     if(a_def)
     {
         // AVERAGE (1) is implicit.
-        if(!strcasecmp("NOVICE", a_def))
+        if(strcasecmp("NOVICE", a_def) == 0)
         {
             l_def = 0;
         }
         else
-        if(!strcasecmp("EXPERT", a_def))
+        if(strcasecmp("EXPERT", a_def) == 0)
         {
             l_def = 2;
         }
@@ -159,7 +159,11 @@ static void init_tooltypes(entry_p contxt)
     init_num(contxt, "@user-level", l_def < l_min ? l_min : l_def);
     init_num(contxt, "@user-min", l_min);
 
-    if(!a_lng)
+    if(a_lng)
+    {
+        init_str(contxt, "@language", arg_get(ARG_LANGUAGE));
+    }
+    else
     {
         // Don't use locale if in test mode, doing so
         // would break tests using built in strings.
@@ -176,10 +180,6 @@ static void init_tooltypes(entry_p contxt)
         #else
         init_str(contxt, "@language", "english");
         #endif
-    }
-    else
-    {
-        init_str(contxt, "@language", arg_get(ARG_LANGUAGE));
     }
 }
 

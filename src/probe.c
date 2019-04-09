@@ -167,13 +167,13 @@ entry_p m_database(entry_p contxt)
         char *feat = str(CARG(1)),
               *ret = "Unknown";
 
-        if(!strcmp(feat, "cpu"))
+        if(strcmp(feat, "cpu") == 0)
         {
             // Get host CPU name.
             ret = h_cpu_name();
         }
         else
-        if(!strcmp(feat, "os"))
+        if(strcmp(feat, "os") == 0)
         {
             // Get OS name.
             #if defined(AMIGA) && !defined(LG_TEST)
@@ -195,7 +195,7 @@ entry_p m_database(entry_p contxt)
 
         }
         else
-        if(!strcmp(feat, "graphics-mem"))
+        if(strcmp(feat, "graphics-mem") == 0)
         {
             memf =
             #if defined(AMIGA) && !defined(LG_TEST)
@@ -904,7 +904,7 @@ entry_p m_getversion(entry_p contxt)
             else
             {
                 int ver = h_getversion(contxt, name);
-                DNUM = ver != -1 ? ver : 0;
+                DNUM = ver == -1 ? 0 : ver;
             }
         }
         #if defined(AMIGA) && !defined(LG_TEST)

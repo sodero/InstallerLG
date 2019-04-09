@@ -188,11 +188,15 @@ entry_p m_message(entry_p contxt)
             // Did we manage to concatenate something?
             if(msg)
             {
-                // If we could resolve all our children,
-                // show the result of the concatenation.
-                if(!DID_ERR)
+                // Did we fail while resolving children?
+                if(DID_ERR)
                 {
-                    // Show message dialog.
+                    // Free the temporary buffer.
+                    free(msg);
+                }
+                else
+                {
+                    // Show the result of the concatenation.
                     inp_t grc = gui_message(msg, back != false);
 
                     // Free the temporary buffer.
@@ -222,11 +226,6 @@ entry_p m_message(entry_p contxt)
 
                     // Translate response.
                     DNUM = (grc == G_TRUE) ? 1 : 0;
-                }
-                else
-                {
-                    // Free the temporary buffer.
-                    free(msg);
                 }
 
                 // Success or failure.
@@ -368,46 +367,44 @@ entry_p m_working(entry_p contxt)
         // Did we manage to concatenate something?
         if(msg)
         {
-            // Only proceed if we could resolve all
-            // our children.
-            if(!DID_ERR)
+            // Did we fail while resolving one or
+            // more of our children?
+            if(DID_ERR)
             {
-                // Standard prefix.
-                const char *pre = tr(S_WRKN);
-                size_t len = strlen(pre) +
-                             strlen(msg) + 1;
-
-                // Memory to hold prefix and children.
-                char *con = DBG_ALLOC(calloc(len, 1));
-
-                if(con)
-                {
-                    // Concatenate prefix and children.
-                    snprintf(con, len, "%s%s", pre, msg);
-
-                    // Free the children buffer.
-                    free(msg);
-
-                    // Show the result. Return immediately.
-                    // No waiting for any events.
-                    gui_working(con);
-
-                    // Free the final message buffer.
-                    free(con);
-
-                    // Success.
-                    RNUM(1);
-                }
-
-                // Free the children buffer.
-                free(msg);
-            }
-            else
-            {
-                // Could not resolve children.
+                // We own msg.
                 free(msg);
                 RNUM(0);
             }
+
+            // Standard prefix.
+            const char *pre = tr(S_WRKN);
+            size_t len = strlen(pre) +
+                         strlen(msg) + 1;
+
+            // Memory to hold prefix and children.
+            char *con = DBG_ALLOC(calloc(len, 1));
+
+            if(con)
+            {
+                // Concatenate prefix and children.
+                snprintf(con, len, "%s%s", pre, msg);
+
+                // Free the children buffer.
+                free(msg);
+
+                // Show the result. Return immediately.
+                // No waiting for any events.
+                gui_working(con);
+
+                // Free the final message buffer.
+                free(con);
+
+                // Success.
+                RNUM(1);
+            }
+
+            // Free the children buffer.
+            free(msg);
         }
     }
 

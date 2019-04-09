@@ -97,8 +97,8 @@ entry_p m_effect(entry_p contxt)
         int ic1 = num(CARG(3)),
             ic2 = num(CARG(4)),
             ief = h_pos(eps) | (
-                  !strcasecmp(est, "radial") ? G_RADIAL :
-                  !strcasecmp(est, "horizontal") ? G_HORIZONTAL : 0);
+                  strcasecmp(est, "radial") == 0 ? G_RADIAL :
+                  strcasecmp(est, "horizontal") == 0 ? G_HORIZONTAL : 0);
 
         // Known effect type?
         if(ief & G_EFFECT)
@@ -148,18 +148,18 @@ entry_p m_setmedia(entry_p contxt)
         char *act = str(CARG(2));
 
         // Translate action to command.
-        int cmd = !strcasecmp(act, "pause") ? STM_PAUSE :
-                  !strcasecmp(act, "play") ? STM_PLAY :
-                  !strcasecmp(act, "contents") ? STM_CONTENTS :
-                  !strcasecmp(act, "index") ? STM_INDEX :
-                  !strcasecmp(act, "retrace") ? STM_RETRACE :
-                  !strcasecmp(act, "browser_prev") ? STM_BROWSE_PREV :
-                  !strcasecmp(act, "browser_next") ? STM_BROWSE_NEXT :
-                  !strcasecmp(act, "command") ? STM_COMMAND :
-                  !strcasecmp(act, "rewind") ? STM_REWIND :
-                  !strcasecmp(act, "fastforward") ? STM_FASTFORWARD :
-                  !strcasecmp(act, "stop") ? STM_STOP :
-                  !strcasecmp(act, "locate") ? STM_LOCATE : 0;
+        int cmd = strcasecmp(act, "pause") == 0 ? STM_PAUSE :
+                  strcasecmp(act, "play") == 0 ? STM_PLAY :
+                  strcasecmp(act, "contents") == 0 ? STM_CONTENTS :
+                  strcasecmp(act, "index") == 0 ? STM_INDEX :
+                  strcasecmp(act, "retrace") == 0 ? STM_RETRACE :
+                  strcasecmp(act, "browser_prev") == 0 ? STM_BROWSE_PREV :
+                  strcasecmp(act, "browser_next") == 0 ? STM_BROWSE_NEXT :
+                  strcasecmp(act, "command") == 0 ? STM_COMMAND :
+                  strcasecmp(act, "rewind") == 0 ? STM_REWIND :
+                  strcasecmp(act, "fastforward") == 0 ? STM_FASTFORWARD :
+                  strcasecmp(act, "stop") == 0 ? STM_STOP :
+                  strcasecmp(act, "locate") == 0 ? STM_LOCATE : 0;
 
         // Valid action?
         if(cmd)
@@ -212,15 +212,15 @@ entry_p m_showmedia(entry_p contxt)
 
         // Set size bitmask.
         int msk = h_pos(str(CARG(3))) | (num(CARG(5)) ? G_BORDER : 0) | (
-                  !strcasecmp(att, "small") ? G_SMALL :
-                  !strcasecmp(att, "small_medium") ? G_SMALL | G_LESS :
-                  !strcasecmp(att, "small_large") ? G_SMALL | G_MORE :
-                  !strcasecmp(att, "medium") ? G_MEDIUM :
-                  !strcasecmp(att, "medium_small") ? G_MEDIUM | G_LESS :
-                  !strcasecmp(att, "medium_large") ? G_MEDIUM | G_MORE :
-                  !strcasecmp(att, "large") ? G_LARGE :
-                  !strcasecmp(att, "large_small") ? G_LARGE | G_LESS :
-                  !strcasecmp(att, "large_medium") ? G_LARGE | G_MORE : 0);
+                  strcasecmp(att, "small") == 0 ? G_SMALL :
+                  strcasecmp(att, "small_medium") == 0 ? G_SMALL | G_LESS :
+                  strcasecmp(att, "small_large") == 0 ? G_SMALL | G_MORE :
+                  strcasecmp(att, "medium") == 0 ? G_MEDIUM :
+                  strcasecmp(att, "medium_small") == 0 ? G_MEDIUM | G_LESS :
+                  strcasecmp(att, "medium_large") == 0 ? G_MEDIUM | G_MORE :
+                  strcasecmp(att, "large") == 0 ? G_LARGE :
+                  strcasecmp(att, "large_small") == 0 ? G_LARGE | G_LESS :
+                  strcasecmp(att, "large_medium") == 0 ? G_LARGE | G_MORE : 0);
 
         // Get the rest of the flags.
         for(size_t i = 6; CARG(i) && CARG(i) != end(); i++)
@@ -229,10 +229,10 @@ entry_p m_showmedia(entry_p contxt)
             att = str(CARG(i));
 
             // Translate into bitmask.
-            msk |= (!strcasecmp(att, "wordwrap") ? G_WORDWRAP :
-                    !strcasecmp(att, "panel") ? G_PANEL :
-                    !strcasecmp(att, "play") ? G_PLAY :
-                    !strcasecmp(att, "repeat") ? G_REPEAT : 0);
+            msk |= (strcasecmp(att, "wordwrap") == 0 ? G_WORDWRAP :
+                    strcasecmp(att, "panel") == 0 ? G_PANEL :
+                    strcasecmp(att, "play") == 0 ? G_PLAY :
+                    strcasecmp(att, "repeat") == 0 ? G_REPEAT : 0);
         }
 
         // Invalid media ID.
