@@ -172,7 +172,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                     }
                 }
 
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 // No input needed.
                 BPTR inp = (BPTR) Open("NIL:", MODE_OLDFILE);
 

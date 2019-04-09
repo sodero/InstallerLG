@@ -52,7 +52,7 @@ entry_p m_expandpath(entry_p contxt)
 
         if(!DID_ERR)
         {
-            #ifdef AMIGA
+            #if defined(AMIGA) && !defined(LG_TEST)
             BPTR lock = (BPTR) Lock(pth, ACCESS_READ);
 
             if(lock)
@@ -186,7 +186,7 @@ int h_exists(const char *file)
         // Empty string = current dir.
         if(*file)
         {
-            #ifdef AMIGA
+            #if defined(AMIGA) && !defined(LG_TEST)
             int r = 0;
             struct FileInfoBlock *fib = (struct FileInfoBlock *)
                    AllocDosObject(DOS_FIB, NULL);
@@ -559,7 +559,7 @@ static pnode_p h_filetree(entry_p contxt,
                                 // of stack if we use long patterns, so
                                 // let's not get rid of this limitation.
                                 static char pat[BUFSIZ];
-                                #ifdef AMIGA
+                                #if defined(AMIGA) && !defined(LG_TEST)
                                 LONG w = ParsePattern(str(pattern), pat, sizeof(pat));
 
                                 // Can we parse the pattern?
@@ -800,8 +800,9 @@ static int h_protect_get(entry_p contxt,
 {
     if(contxt && mask && file)
     {
-        // On non Amiga systems, this is a stub.
-        #ifdef AMIGA
+        // On non Amiga systems, or in test mode,
+        // this is a stub.
+        #if defined(AMIGA) && !defined(LG_TEST)
         struct FileInfoBlock *fib = (struct FileInfoBlock *)
             AllocDosObject(DOS_FIB, NULL);
 
@@ -876,8 +877,9 @@ static int h_protect_set(entry_p contxt,
 {
     if(contxt && file)
     {
-        // On non Amiga systems this is a stub.
-        #ifdef AMIGA
+        // On non Amiga systems, or in test mode,
+        // this is a stub.
+        #if defined(AMIGA) && !defined(LG_TEST)
         size_t len = strlen(file);
 
         // Filter out volumes.
@@ -950,7 +952,7 @@ static inp_t h_copyfile(entry_p contxt,
             FILE *file = fopen(src, "r");
             size_t cnt = file ? fread(buf, 1, BUFSIZ, file) : 0;
             int err =
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 IoErr();
                 #else
                 file ? ferror(file) : 0;
@@ -1060,7 +1062,7 @@ static inp_t h_copyfile(entry_p contxt,
                                 // Reset icon position?
                                 if(grc == G_TRUE && mde & CF_NOPOSITION)
                                 {
-                                    #ifdef AMIGA
+                                    #if defined(AMIGA) && !defined(LG_TEST)
                                     struct DiskObject *obj = (struct DiskObject *)
                                         GetDiskObject(dst);
 
@@ -2317,8 +2319,9 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
 {
     if(contxt && pat)
     {
-        // Pattern matching is only done on Amiga like OS:es
-        #ifdef AMIGA
+        // Pattern matching is only done on Amiga systems
+        // in non test mode.
+        #if defined(AMIGA) && !defined(LG_TEST)
         struct AnchorPath *ap =
             DBG_ALLOC(calloc(1, sizeof(struct AnchorPath) + PATH_MAX));
 
@@ -2405,7 +2408,7 @@ entry_p m_delete(entry_p contxt)
         int wild = 0;
         char *file = str(CARG(1));
 
-        #ifdef AMIGA
+        #if defined(AMIGA) && !defined(LG_TEST)
         wild = ParsePattern(file, get_buf(), buf_size());
         #endif
 
@@ -2544,7 +2547,7 @@ entry_p m_exists(entry_p contxt)
         if(get_opt(contxt, OPT_NOREQ) ||
            get_opt(contxt, OPT_QUIET))
         {
-            #ifdef AMIGA
+            #if defined(AMIGA) && !defined(LG_TEST)
             struct Process *p = (struct Process *)
                 FindTask(NULL);
 
@@ -2558,7 +2561,7 @@ entry_p m_exists(entry_p contxt)
             // Get type (file / dir / 0)
             DNUM = h_exists(str(CARG(1)));
 
-            #ifdef AMIGA
+            #if defined(AMIGA) && !defined(LG_TEST)
             // Restore auto request.
             p->pr_WindowPtr = w;
             #endif
@@ -2609,8 +2612,9 @@ entry_p m_foreach(entry_p contxt)
     if(c_sane(contxt, 3))
     {
         // Pattern matching is not done
-        // on non-Amiga systems.
-        #ifdef AMIGA
+        // on non-Amiga systems and not
+        // in test mode.
+        #if defined(AMIGA) && !defined(LG_TEST)
         const char *pt = str(CARG(2));
         #endif
 
@@ -2635,7 +2639,7 @@ entry_p m_foreach(entry_p contxt)
                 pnode_p cur;
                 top = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 // This file info block will be used for all files
                 // and subdirs in the directory.
                 struct FileInfoBlock *fib = (struct FileInfoBlock *)
@@ -2665,7 +2669,7 @@ entry_p m_foreach(entry_p contxt)
                        strcmp(name, ".."))
                     #endif
                     {
-                        #ifdef AMIGA
+                        #if defined(AMIGA) && !defined(LG_TEST)
                         // The dir is not empty, we should be able
                         // to go all the way here. Assume failure.
                         err = 1;
@@ -2725,7 +2729,7 @@ entry_p m_foreach(entry_p contxt)
                     }
                 }
 
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 // If dir is empty, fib will be NULL.
                 if(fib)
                 {
@@ -2767,7 +2771,7 @@ entry_p m_foreach(entry_p contxt)
             // 'Export' name and type info if we have a name.
             if(top->name)
             {
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 if(!err)
                 {
                     // Use global buffer.
@@ -2854,7 +2858,7 @@ entry_p m_makeassign(entry_p contxt)
                 // The destination.
                 char *dst = str(CARG(2));
 
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 BPTR lock = (BPTR) Lock(dst, ACCESS_READ);
                 if(lock)
                 {
@@ -2878,7 +2882,7 @@ entry_p m_makeassign(entry_p contxt)
             }
             else
             {
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 // Remove assign.
                 DNUM = AssignLock(str(CARG(1)), (BPTR) NULL) ? 1 : 0;
                 #else
@@ -2997,7 +3001,7 @@ entry_p m_makedir(entry_p contxt)
             // as well?
             if(infos && DNUM)
             {
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 // Get the default drawer icon from the OS.
                 struct DiskObject *obj = (struct DiskObject *)
                     GetDefDiskObject(WBDRAWER);
@@ -3802,7 +3806,7 @@ entry_p m_tooltype(entry_p contxt)
             if(!confirm ||
                h_confirm(contxt, str(help), str(prompt)))
             {
-                #ifdef AMIGA
+                #if defined(AMIGA) && !defined(LG_TEST)
                 // Get icon information.
                 struct DiskObject *obj = (struct DiskObject *)
                     GetDiskObject(file);
@@ -4189,7 +4193,7 @@ entry_p m_rename(entry_p contxt)
             }
 
             // No, we're going to relabel a volume.
-            #ifdef AMIGA
+            #if defined(AMIGA) && !defined(LG_TEST)
             // Rename volume.
             if(!Relabel(old, new))
             {

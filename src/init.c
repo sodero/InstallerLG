@@ -161,7 +161,9 @@ static void init_tooltypes(entry_p contxt)
 
     if(!a_lng)
     {
-        #ifdef AMIGA
+        // Don't use locale if in test mode, doing so
+        // would break tests using built in strings.
+        #if defined(AMIGA) && !defined(LG_TEST)
         // Open the current default locale.
         struct Locale *loc = OpenLocale(NULL);
 
@@ -212,8 +214,8 @@ entry_p init(entry_p contxt)
                 NUMBER
             );
 
-            #ifdef AMIGA
-            // Only on Amiga, otherwise tests will break,
+            #if defined(AMIGA) && !defined(LG_TEST)
+            // Not in test mode, else tests will break,
             // they don't expect any default (welcome).
 
             // Add to the root and reparent.
@@ -286,9 +288,9 @@ entry_p init(entry_p contxt)
             m_exit, NULL, NUMBER
         );
 
-        #ifdef AMIGA
-        // Insert only on Amiga, otherwise tests will
-        // break, they don't expect any default (exit).
+        #if defined(AMIGA) && !defined(LG_TEST)
+        // Not in test mode, else tests will break,
+        // they don't expect any default (exit).
 
         // Add to the root and reparent.
         if(entry)
@@ -318,7 +320,8 @@ entry_p init(entry_p contxt)
         init_num(contxt, "@each-type", 0);
         init_num(contxt, "@debug", 0);
         init_num(contxt, "@strict",
-                         #ifdef AMIGA
+                         // In test mode, strict is default.
+                         #if defined(AMIGA) && !defined(LG_TEST)
                          0
                          #else
                          1

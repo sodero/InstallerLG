@@ -43,13 +43,13 @@ int arg_init(int argc, char **argv)
     // we are invoked from CLI or WB.
     arg_argc(argc);
 
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     // Invoked from the command line.
     if(argc)
     {
         // Use the builtin parser.
         rda = (struct RDArgs *)
-    #ifdef __VBCC__
+        #ifdef __VBCC__
         ReadArgs
         (
             "SCRIPT/A,"
@@ -63,7 +63,7 @@ int arg_init(int argc, char **argv)
             (LONG *) args,
             NULL
         );
-    #else
+        #else
         ReadArgs
         (
             "SCRIPT/A,"
@@ -77,7 +77,7 @@ int arg_init(int argc, char **argv)
             (IPTR *) args,
             NULL
         );
-    #endif
+        #endif
     }
     else
     // Invoked from Workbench. Examine 'tooltypes'.
@@ -198,8 +198,8 @@ int arg_init(int argc, char **argv)
     // or an rda, otherwise we have failed.
     return (rda || dob) ? 1 : 0;
     #else
-    // On non-AMIGA systems, only the script
-    // name is supported.
+    // On non-AMIGA systems, or in test mode, only
+    // the script name is supported.
     if(argc >= 2)
     {
         args[ARG_SCRIPT] = argv[1];
@@ -267,7 +267,7 @@ void arg_done(void)
     // that we don't do this twice by setting
     // all pointers to NULL.
 
-    #ifdef AMIGA
+    #if defined(AMIGA) && !defined(LG_TEST)
     // From Workbench.
     if(dob)
     {
