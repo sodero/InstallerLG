@@ -52,10 +52,10 @@ entry_p m_eq(entry_p contxt)
     if(c_sane(contxt, 2))
     {
         // Turn the result of h_cmp
-        // into 0 or 1.
+        // into 1 or 0.
         RNUM
         (
-            !h_cmp(CARG(1), CARG(2)) ? 1 : 0
+            h_cmp(CARG(1), CARG(2)) ? 0 : 1
         );
     }
 
