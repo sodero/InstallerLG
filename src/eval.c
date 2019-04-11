@@ -37,66 +37,71 @@ entry_p find_symbol(entry_p entry)
     // let's not do it.
     entry_p con = local(entry);
 
-    if(con)
-    {
-        do
-        {
-            // Current.
-            entry_p *tmp;
-
-            // Iterate over all symbols in the current
-            // context.
-            for(tmp = con->symbols;
-                tmp && *tmp && *tmp != end();
-                tmp++)
-            {
-                // Return value.
-                entry_p ret = *tmp;
-
-                // The current item might be a CUSTOM
-                // Only match SYMBOL:s, return if we
-                // find a match.
-                if(ret->type == SYMBOL &&
-                   !strcasecmp(ret->name, entry->name))
-                {
-                    // Rearrange symbols to make the next
-                    // lookup faster. Don't do this unless
-                    // we're at the root and not in a user
-                    // defined procedure. This would break
-                    // all positional symbols (arguments).
-                    if(!ret->parent->parent &&
-                        ret->parent->type != CUSTOM)
-                    {
-                        *tmp = *(con->symbols);
-                        *(con->symbols) = ret;
-                    }
-
-                    // Symbol found.
-                    return ret;
-                }
-            }
-
-            // Nothing found in the current context.
-            // Climb one scope higher and try again.
-            con = local(con->parent);
-        }
-        while(con);
-
-        // Only fail if we're in 'strict' mode. Never
-        // recur when looking for @strict, it might not
-        // be there if we're OOM. If we do so, we will
-        // run out of stack as well.
-        if(strcasecmp(entry->name, "@strict") &&
-           get_numvar(global(entry), "@strict"))
-        {
-            // We found nothing.
-            ERR_C(entry, ERR_UNDEF_VAR, entry->name);
-        }
-    }
-    else
+    // Something is really broken if we're
+    // missing a context.
+    if(!con)
     {
         // Bad input.
         PANIC(entry);
+        return end();
+    }
+
+    // Traverse tree until we reach the top.
+    do
+    {
+        // Current level.
+        entry_p *tmp;
+
+        // Iterate over all symbols in the current
+        // context.
+        for(tmp = con->symbols; tmp && *tmp
+            && *tmp != end(); tmp++)
+        {
+            // Return value.
+            entry_p ret = *tmp;
+
+            // The current entry might be a CUSTOM
+            // Ignore everything but SYMBOLS.
+            if(ret->type != SYMBOL || 
+               strcasecmp(ret->name, entry->name))
+            {
+                // Next entry;
+                continue;
+            }
+            else
+            {
+                // Rearrange symbols to make the next
+                // lookup faster. Don't do this unless
+                // we're at the root and not in a user
+                // defined procedure. This would break
+                // all positional symbols (arguments).
+                if(!ret->parent->parent &&
+                    ret->parent->type != CUSTOM)
+                {
+                    *tmp = *(con->symbols);
+                    *(con->symbols) = ret;
+                }
+
+                // Symbol found.
+                return ret;
+            }
+        }
+
+        // Nothing found in the current context.
+        // Climb one scope higher and try again.
+        con = local(con->parent);
+    }
+    while(con);
+
+    // Only fail if we're in 'strict' mode. Never
+    // recur when looking for @strict, it might not
+    // be there if we're OOM. If we do so, we will
+    // run out of stack as well.
+    if(strcasecmp(entry->name, "@strict") &&
+       get_numvar(global(entry), "@strict"))
+    {
+        // We found nothing.
+        ERR_C(entry, ERR_UNDEF_VAR, entry->name);
     }
 
     // A failure will be evaluated as
@@ -138,19 +143,19 @@ entry_p resolve(entry_p entry)
 
             // Special options.
             case OPTION:
-                switch(entry->id)
+                // Dynamic options are treated like functions.
+                if(entry->id == OPT_DYNOPT)
                 {
-                    // Dynamic options are treated like functions.
-                    case OPT_DYNOPT:
-                        return entry->call(entry);
-
-                    // Back options are treated like contexts.
-                    case OPT_BACK:
-                        return invoke(entry);
-
-                    default:
-                        return entry;
+                    return entry->call(entry);
                 }
+                else
+                // Back options are treated like contexts.
+                if(entry->id == OPT_BACK)
+                {
+                    return invoke(entry);
+                }
+                // Ordinary options.
+                return entry;
 
             // We already have a primitive.
             case NUMBER:
@@ -184,29 +189,30 @@ static int opt_to_int(entry_p entry)
     // Resolve once.
     char *opt = str(entry);
 
-    // Special treatment of (confirm).
-    if(entry->id == OPT_CONFIRM)
+    // Is this an ordinary option?
+    if(entry->id != OPT_CONFIRM)
     {
-        // Ignore case.
-        if(!strcasecmp(opt, "novice"))
-        {
-            // Refer to Installer.guide.
-            return 0;
-        }
+        // No translation needed.
+        return atoi(opt);
+    }
 
-        // Ignore case.
-        if(!strcasecmp(opt, "average"))
-        {
-            // Refer to Installer.guide.
-            return 1;
-        }
-
-        // Ignore case.
-        if(!strcasecmp(opt, "expert"))
-        {
-            // Refer to Installer.guide.
-            return 2;
-        }
+    // Special treatment of (confirm).
+    if(strcasecmp(opt, "novice") == 0)
+    {
+        // Refer to Installer.guide.
+        return 0;
+    }
+    else
+    if(strcasecmp(opt, "average") == 0)
+    {
+        // Refer to Installer.guide.
+        return 1;
+    }
+    else
+    if(strcasecmp(opt, "expert") == 0)
+    {
+        // Refer to Installer.guide.
+        return 2;
     }
 
     // Fall through.
@@ -358,6 +364,10 @@ char *str(entry_p entry)
 
                         // OOM.
                         PANIC(entry);
+                        break;
+
+                    default:
+                        break;
                 }
                 /* FALLTHRU */
 
@@ -402,6 +412,7 @@ char *str(entry_p entry)
                     snprintf(entry->name, NUMLEN, "%d", entry->id);
                     return entry->name;
                 }
+                break;
 
             // We should never end up here.
             case CONTXT:

@@ -112,9 +112,11 @@ static entry_p h_whunt(entry_p contxt, int mode)
         // function if the expression is false from the start.
         entry_p ret = contxt->resolved;
 
-        // Use XOR to support both 'while' and 'until'. Break
-        // the loop if something goes wrong inside.
-        while((mode ^ tru(CARG(1))) && !DID_ERR)
+        // Use XOR to support both 'while' and 'until'.
+        // Break the loop if something goes wrong inside.
+        for(int cont = mode ^ tru(CARG(1));
+                cont && !DID_ERR;
+                cont = mode ^ tru(CARG(1)))
         {
             // Save the return value of the last function
             // in the CONTXT
@@ -185,34 +187,36 @@ entry_p m_trace(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_retrace(entry_p contxt)
 {
-    // No children.
-    if(contxt)
+    // Starting point.
+    entry_p con = contxt;
+
+    if(con)
     {
         // Find nearest context / user defined
         // procedure.
-        while(contxt->parent &&
-              contxt->parent->type != CONTXT &&
-              contxt->parent->type != CUSTOM)
+        while(con->parent &&
+              con->parent->type != CONTXT &&
+              con->parent->type != CUSTOM)
         {
             // Climb one generation.
-            contxt = contxt->parent;
+            con = con->parent;
         }
 
         // This shouldn't happen.
-        if(!contxt->parent ||
-           !contxt->parent->children)
+        if(!con->parent ||
+           !con->parent->children)
         {
             // Nowhere to go.
-            PANIC(contxt);
+            PANIC(con);
             RCUR;
         }
 
         // Iterator and stop.
-        entry_p *chl = contxt->parent->children;
+        entry_p *chl = con->parent->children;
         entry_p top = *chl;
 
         // Locate ourselves.
-        while(*chl != contxt)
+        while(*chl != con)
         {
             chl++;
         }
@@ -282,13 +286,13 @@ entry_p m_retrace(entry_p contxt)
             }
 
             // We risk running out of stack.
-            ERR(ERR_MAX_DEPTH, contxt->name);
+            ERR(ERR_MAX_DEPTH, con->name);
         }
     }
     else
     {
         // The parser is broken.
-        PANIC(contxt);
+        PANIC(con);
     }
 
     // Nowhere to go or panic.

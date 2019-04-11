@@ -229,23 +229,28 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
                 }
             }
 
-            // If we have children, adopt them.
-            if(chl && chl->children)
+
+            // We're finished if we dont't have any
+            // children to adopt.
+            if(!chl || !chl->children)
             {
-                // Transfer and kill the input.
-                entry->children = chl->children;
-                chl->children = NULL;
-                kill(chl);
+                // Success.
+                return entry;
+            }
 
-                // Iter.
-                cur = entry->children;
+            // Transfer children and free the input.
+            entry->children = chl->children;
+            chl->children = NULL;
+            kill(chl);
 
-                // Adopt all children.
-                while(*cur && *cur != end())
-                {
-                    (*cur)->parent = entry;
-                    cur++;
-                }
+            // Iter.
+            cur = entry->children;
+
+            // Adopt all children.
+            while(*cur && *cur != end())
+            {
+                (*cur)->parent = entry;
+                cur++;
             }
 
             // Success.
