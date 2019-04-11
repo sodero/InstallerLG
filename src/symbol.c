@@ -48,6 +48,13 @@ entry_p m_set(entry_p contxt)
             entry_p rhs = resolve(*val);
             entry_p dst = glb;
 
+            // Did we manage to resolve the rhs?
+            if(DID_ERR)
+            {
+                // Ignore the rest of the tuples.
+                break;
+            }
+
             // Are we within the contxt of a custom procedure?
             if(cus)
             {
@@ -66,13 +73,6 @@ entry_p m_set(entry_p contxt)
                         dst = cus;
                     }
                 }
-            }
-
-            // Did we manage to resolve the rhs?
-            if(DID_ERR)
-            {
-                // Ignore the rest of the tuples.
-                break;
             }
 
             // Create a copy of the contents of the rhs.

@@ -156,63 +156,58 @@ entry_p custom(entry_p entry)
 //----------------------------------------------------------------------------
 entry_p get_opt(entry_p contxt, opt_t type)
 {
-    // We need a context.
-    if(contxt && contxt != end() &&
-       contxt->children)
+
+    // We need a context to search.
+    if(!contxt || !contxt->children || contxt == end())
     {
-        // And we need children.
-        entry_p *child = contxt->children;
+        // Nowhere.
+        return NULL;
+    }
 
-        // Real option or (optional)?
-        if(contxt->type == OPTION)
+    // Real option or (optional)?
+    if(contxt->type == OPTION)
+    {
+        // Iterate over all strings.
+        for(entry_p *child = contxt->children;
+           *child && *child != end(); child++)
         {
-            // Iterate over all strings.
-            while(*child && *child != end())
+            if((type == OPT_FAIL && !strcmp(str(*child), "fail")) ||
+               (type == OPT_FORCE && !strcmp(str(*child), "force")) ||
+               (type == OPT_NOFAIL && !strcmp(str(*child), "nofail")) ||
+               (type == OPT_ASKUSER && !strcmp(str(*child), "askuser")) ||
+               (type == OPT_OKNODELETE && !strcmp(str(*child), "oknodelete")))
             {
-                if((type == OPT_FAIL && !strcmp(str(*child), "fail")) ||
-                   (type == OPT_FORCE && !strcmp(str(*child), "force")) ||
-                   (type == OPT_NOFAIL && !strcmp(str(*child), "nofail")) ||
-                   (type == OPT_ASKUSER && !strcmp(str(*child), "askuser")) ||
-                   (type == OPT_OKNODELETE && !strcmp(str(*child), "oknodelete")))
-                {
-                    return *child;
-                }
-
-                // Nope, next.
-                child++;
+                return *child;
             }
         }
-        // An (optional) string.
-        else
+    }
+    // An (optional) string.
+    else
+    {
+        // Iterate over all options.
+        for(entry_p *child = contxt->children;
+           *child && *child != end(); child++)
         {
-            // Iterate over all options.
-            while(*child && *child != end())
+            entry_p entry = *child;
+
+            // ID == the type of option.
+            if(entry->type == OPTION)
             {
-                entry_p entry = *child;
-
-                // ID == the type of option.
-                if(entry->type == OPTION)
+                // Dynamic options need to
+                // be resolved before eval.
+                if(entry->id == OPT_DYNOPT)
                 {
-                    // Dynamic options need to
-                    // be resolved before eval.
-                    if(entry->id == OPT_DYNOPT)
-                    {
-                        // Replace dummy with
-                        // its resolved value.
-                        entry = resolve(entry);
-                    }
-
-                    // Have we found the right
-                    // type of option?
-                    if(entry->id == (int32_t) type)
-                    {
-                        // We found it.
-                        return entry;
-                    }
+                    // Replace dummy with
+                    // its resolved value.
+                    entry = resolve(entry);
                 }
 
-                // Nope, next.
-                child++;
+                // Option found?
+                if(entry->id == (int32_t) type)
+                {
+                    // We found it.
+                    return entry;
+                }
             }
         }
     }
@@ -222,8 +217,7 @@ entry_p get_opt(entry_p contxt, opt_t type)
     if((type == OPT_PROMPT || type == OPT_HELP)
         && !get_numvar(contxt, "@strict"))
     {
-        // This will be resolved as an
-        // emtpy string.
+        // Will be resolved as "".
         return end();
     }
 
