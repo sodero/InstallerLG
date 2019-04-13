@@ -31,8 +31,8 @@
 //----------------------------------------------------------------------------
 void ror(entry_p *entry)
 {
-    // We have an array and it contains something.
-    if(entry && *entry)
+    // Something to rotate?
+    if(entry)
     {
         int lst = 0;
 
@@ -41,10 +41,9 @@ void ror(entry_p *entry)
         {
             lst++;
         }
-        lst--;
 
         // Nothing to do if we have < 2 entries.
-        if(lst > 0)
+        if(--lst > 0)
         {
             // Save the last entry.
             entry_p last = entry[lst];

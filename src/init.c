@@ -191,8 +191,9 @@ static void init_tooltypes(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p init(entry_p contxt)
 {
-    // Sanity check.
-    if(c_sane(contxt, 0) &&
+    // Sanity check. We need atleast one child. Anything
+    // else is OOM since empty string == syntax error.
+    if(c_sane(contxt, 1) &&
        s_sane(contxt, 0))
     {
         // Is there a (welcome) already?
