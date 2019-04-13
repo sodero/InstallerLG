@@ -257,7 +257,14 @@ int num(entry_p entry)
 
             // Attempt to convert string.
             case STRING:
-                return atoi(entry->name);
+                // Don't trust string, we might
+                // be out of memory.
+                if(entry->name)
+                {
+                    return atoi(entry->name);
+                }
+                // Panic.
+                break;
 
             // We should never end up here.
             case CONTXT:

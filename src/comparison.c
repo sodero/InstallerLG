@@ -28,9 +28,11 @@ static int h_cmp(entry_p lhs, entry_p rhs)
     entry_p beta = resolve(rhs);
 
     // If both arguments are strings then use
-    // string comparison.
+    // string comparison. Don't trust strings
+    // since we might be out of memory.
     if(alfa->type == STRING &&
-       beta->type == STRING)
+       beta->type == STRING &&
+       alfa->name && beta->name)
     {
         return strcmp(alfa->name, beta->name);
     }
