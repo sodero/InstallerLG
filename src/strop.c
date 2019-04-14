@@ -343,36 +343,33 @@ entry_p m_pathonly(entry_p contxt)
         // Scan backwards.
         while(len--)
         {
-            // If we find a delimiter, then
-            // we have the path to the left
-            // of it.
-            if(arg[len] == '/' ||
-               arg[len] == ':' )
+            // If we find a delimiter, then we
+            // have the path to the left of it.
+            if(arg[len] == '/' || arg[len] == ':' )
             {
                 // Get termination for free.
                 char *ret = DBG_ALLOC(calloc(len + 2, 1));
 
-                if(ret)
+                if(!ret)
                 {
-                    // Copy full path.
-                    memcpy(ret, arg, len + 1);
-
-                    // Cut trailing '/' if preceeded
-                    // by something absolute, dir or
-                    // volume.
-                    if(len > 1 &&
-                       ret[len] == '/' &&
-                       ret[len - 1] != '/' &&
-                       ret[len - 1] != ':')
-                    {
-                        ret[len] = '\0';
-                    }
-
-                    RSTR(ret);
+                    // Out of memory.
+                    PANIC(contxt);
+                    break;
                 }
 
-                // Out of memory.
-                PANIC(contxt);
+                // Copy full path.
+                memcpy(ret, arg, len + 1);
+
+                // Cut trailing '/' if preceeded by
+                // something absolute, dir or vol.
+                if(len > 1 && ret[len] == '/' &&
+                   ret[len - 1] != '/' &&
+                   ret[len - 1] != ':')
+                {
+                    ret[len] = '\0';
+                }
+
+                RSTR(ret);
             }
         }
 
