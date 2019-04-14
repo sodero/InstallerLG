@@ -189,24 +189,27 @@ entry_p get_opt(entry_p contxt, opt_t type)
         {
             entry_p entry = *child;
 
-            // ID == the type of option.
-            if(entry->type == OPTION)
+            // Skip non options.
+            if(entry->type != OPTION)
             {
-                // Dynamic options need to
-                // be resolved before eval.
-                if(entry->id == OPT_DYNOPT)
-                {
-                    // Replace dummy with
-                    // its resolved value.
-                    entry = resolve(entry);
-                }
+                // Next.
+                continue;
+            }
 
-                // Option found?
-                if(entry->id == (int32_t) type)
-                {
-                    // We found it.
-                    return entry;
-                }
+            // Dynamic options need to
+            // be resolved before eval.
+            if(entry->id == OPT_DYNOPT)
+            {
+                // Replace dummy with
+                // its resolved value.
+                entry = resolve(entry);
+            }
+
+            // Option found?
+            if(entry->id == (int32_t) type)
+            {
+                // We found it.
+                return entry;
             }
         }
     }
@@ -507,13 +510,13 @@ char *get_optstr(entry_p contxt, opt_t type)
     size_t cnt = 0;
     entry_p *child = contxt->children;
 
-    // Count the number of children
-    // of the given option type.
+    // Count options of the given type.
     while(*child && *child != end())
     {
         if((*child)->type == OPTION &&
            (*child)->id == (int32_t) type)
         {
+            // Found one.
             cnt++;
         }
 
@@ -522,67 +525,66 @@ char *get_optstr(entry_p contxt, opt_t type)
     }
 
     // Did we find the right type?
-    if(cnt)
+    if(!cnt)
     {
-        // References to string evaluations of all
-        // options of the right type.
-        char **val = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
-
-        if(val)
-        {
-            // Empty string.
-            child = contxt->children;
-            size_t len = 1;
-
-            // For all children, evaluate them
-            // once and save string pointers.
-            for(size_t i = 0; i < cnt && *child
-                && *child != end(); child++)
-            {
-                if((*child)->id == (int32_t) type &&
-                   (*child)->type == OPTION)
-                {
-                    // Sum up the length.
-                    char *cur = get_chlstr(*child, false);
-
-                    if(cur)
-                    {
-                        val[i++] = cur;
-                        len += strlen(cur);
-                    }
-                }
-            }
-
-            // Allocate memory to hold the
-            // concatenation of all strings.
-            char *ret = DBG_ALLOC(calloc(len, 1));
-
-            if(ret)
-            {
-                // Concatenate substrings.
-                for(size_t i = 0; val[i]; i++)
-                {
-                    strncat(ret, val[i], len - strlen(ret));
-                }
-            }
-
-            // Free substrings.
-            for(size_t i = 0; val[i]; i++)
-            {
-                free(val[i]);
-            }
-
-            free(val);
-
-            // Done.
-            return ret;
-        }
-
-        // Out of memory
+        // Not found.
+        return NULL;
     }
 
-    // Not found / OOM.
-    return NULL;
+    // References to strings of options of the right type.
+    char **val = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
+
+    if(!val)
+    {
+        // Out of memory.
+        return NULL;
+    }
+
+    // Empty string.
+    child = contxt->children;
+    size_t len = 1;
+
+    // Evaluate options once and save strings.
+    for(size_t i = 0; i < cnt && *child
+        && *child != end(); child++)
+    {
+        if((*child)->id == (int32_t) type &&
+           (*child)->type == OPTION)
+        {
+            // Sum up the length.
+            char *cur = get_chlstr(*child, false);
+
+            if(cur)
+            {
+                val[i++] = cur;
+                len += strlen(cur);
+            }
+        }
+    }
+
+    // Memory for the sum of all strings.
+    char *ret = DBG_ALLOC(calloc(len, 1));
+
+    if(ret)
+    {
+        // Concatenate substrings.
+        for(size_t i = 0; val[i]; i++)
+        {
+            strncat(ret, val[i], len - strlen(ret));
+        }
+    }
+
+    // Free substrings.
+    for(size_t i = 0; val[i]; i++)
+    {
+        free(val[i]);
+    }
+
+    // Free references.
+    free(val);
+
+    // Success or out of memory.
+    return ret;
 }
 
 //----------------------------------------------------------------------------
