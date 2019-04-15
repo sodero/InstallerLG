@@ -78,7 +78,7 @@ entry_p m_set(entry_p contxt)
             // Create a copy of the contents of the rhs.
             entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
 
-            if(!rhs)
+            if(!res)
             {
                 // Out of memory.
                 PANIC(contxt);
