@@ -199,9 +199,6 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
 
         if(entry)
         {
-            // Iter.
-            entry_p *cur;
-
             // Top level.
             entry->id = line;
             entry->name = name;
@@ -217,18 +214,15 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
                 sym->symbols = NULL;
                 kill(sym);
 
-                // Iter.
-                cur = entry->symbols;
-
-                // Adopt and reset symbols.
-                while(*cur && *cur != end())
+                // Reparent all symbols. The return
+                // value will be dangeling for now.
+                for(entry_p *cur = entry->symbols;
+                    *cur && *cur != end(); cur++)
                 {
                     (*cur)->parent = entry;
                     (*cur)->resolved = end();
-                    cur++;
                 }
             }
-
 
             // We're finished if we dont't have any
             // children to adopt.
@@ -243,14 +237,10 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
             chl->children = NULL;
             kill(chl);
 
-            // Iter.
-            cur = entry->children;
-
-            // Adopt all children.
-            while(*cur && *cur != end())
+            for(entry_p *cur = entry->children;
+                *cur && *cur != end(); cur++)
             {
                 (*cur)->parent = entry;
-                cur++;
             }
 
             // Success.
@@ -374,8 +364,7 @@ static void move_contxt(entry_p dst, entry_p src)
 //----------------------------------------------------------------------------
 entry_p new_native(char *name, int line, call_t call, entry_p chl, type_t type)
 {
-    // Even though not strictly necessary, we require
-    // a name and a line number.
+    // We require a name and a line number.
     if(call && name && (line > 0))
     {
         // We rely on everything being set to '0'
@@ -383,26 +372,16 @@ entry_p new_native(char *name, int line, call_t call, entry_p chl, type_t type)
 
         if(entry)
         {
-            // Allocate default return value if we
-            // have a sane return value data type.
-            if(type == NUMBER)
-            {
-                entry->resolved = new_number(0);
-            }
-            else if(type == STRING)
-            {
-                entry->resolved = new_string(strdup(""));
-            }
-            else if(type == DANGLE)
-            {
-                entry->resolved = end();
-            }
+            // Allocate default return value.
+            entry->resolved = type == NUMBER ? new_number(0) :
+                              type == STRING ?
+                              new_string(DBG_ALLOC(strdup(""))) :
+                              end();
 
             // Do we have a valid default return type?
             if(entry->resolved)
             {
-                // ID and name are for debugging purposes
-                // only.
+                // ID and name are for debug only.
                 entry->id = line;
                 entry->call = call;
                 entry->type = NATIVE;
@@ -414,28 +393,22 @@ entry_p new_native(char *name, int line, call_t call, entry_p chl, type_t type)
                     move_contxt(entry, chl);
                 }
 
-                // The function is the parent of the
-                // return value.
+                // Set parent of return value.
                 entry->resolved->parent = entry;
                 return entry;
             }
 
             // Out of memory.
-            PANIC(NULL);
             free(entry);
         }
     }
 
-    // All or nothing. Since we own 'name' and,
-    // 'chl' we need to free them, or else we
-    // will leak when OOM.
+    // We own 'name' and 'chl'.
     free(name);
     kill(chl);
 
-    // Bad input.
+    // Bad input or OOM.
     PANIC(NULL);
-
-    // Failure.
     return NULL;
 }
 
@@ -467,22 +440,18 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
             entry->type = OPTION;
             entry->name = name;
 
-            // Adopt whatever is in the optional
-            // CONTXT, if any.
+            // Adopt contents of CONTXT, if there is any.
             if(chl && chl->type == CONTXT)
             {
-                // This is for options that contain
-                // more information than just 1 / 0.
-                // E.g delopts and command.
+                // This is for options that contain more info
+                // than just 1 / 0, e.g delopts and command.
                 move_contxt(entry, chl);
             }
 
-            // If this is a dynamic option, it must
-            // be resolved to be used.
+            // Dynamic options must be resolved.
             if(type == OPT_DYNOPT)
             {
-                // Set callback for resolving. Only
-                // (if) statements are allowed.
+                // Set callback. Only (if) is allowed.
                 entry->call = m_if;
             }
 
@@ -491,16 +460,13 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
         }
     }
 
-    // All or nothing. Since we own 'name' and,
-    // 'chl' we need to free them, or else we
-    // will leak when OOM.
+    // All or nothing. Since we own 'name' and 'chl' we
+    // need to free them, or else we will leak when OOM.
     free(name);
     kill(chl);
 
-    // Out of memory / invalid input.
+    // Out of memory / bad input.
     PANIC(NULL);
-
-    // Failure.
     return NULL;
 }
 
@@ -517,9 +483,8 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
 //----------------------------------------------------------------------------
 entry_p new_cusref(char *name, int line, entry_p arg)
 {
-    // A real line number is required, used
-    // in error messages when invoking a non
-    // existant procedure.
+    // A line number is required. It's used in error
+    // messages when invoking an undefined procedure.
     if(name && (line > 0))
     {
         // We rely on everything being set to '0'
@@ -527,14 +492,13 @@ entry_p new_cusref(char *name, int line, entry_p arg)
 
         if(entry)
         {
-            // The m_gosub function is used
-            // as a trampoline.
+            // The m_gosub is used as a trampoline.
             entry->id = line;
             entry->name = name;
             entry->call = m_gosub;
             entry->type = CUSREF;
 
-            // Adopt function arguments, if any.
+            // Adopt function arguments if any.
             if(arg && arg->type == CONTXT)
             {
                 move_contxt(entry, arg);
@@ -545,16 +509,13 @@ entry_p new_cusref(char *name, int line, entry_p arg)
         }
     }
 
-    // All or nothing. Since we own 'name' and,
-    // 'arg' we need to free them, or else we
-    // will leak when OOM.
+    // All or nothing. Since we own 'name' and 'arg' we
+    // need to free them, or else we will leak when OOM.
     free(name);
     kill(arg);
 
-    // Out of memory / invalid input.
+    // Out of memory / bad input.
     PANIC(NULL);
-
-    // Failure.
     return NULL;
 }
 
@@ -724,38 +685,24 @@ entry_p push(entry_p dst, entry_p src)
         // Assume we're dealing with a child.
         entry_p **dst_p = &dst->children;
 
-        // Symbols and user-defined procedures
-        // are treated as symbols.
-        if((src->type == SYMBOL ||
-            src->type == CUSTOM) &&
-           (dst->type == CONTXT ||
-            dst->type == CUSTOM))
+        // Symbols and user-defined are the same.
+        if((src->type == SYMBOL || src->type == CUSTOM) &&
+           (dst->type == CONTXT || dst->type == CUSTOM))
         {
-            // We can't have multiple references
-            // with the same name.
+            // We can't have multiple references.
             for(size_t ndx = 0; dst->symbols[ndx] &&
                 dst->symbols[ndx] != end(); ndx++)
             {
-                char *old = dst->symbols[ndx]->name,
-                     *new = src->name;
-
-                // If we have multiple references
-                // with the same name. Just update
-                // the reference, don't create a
-                // new one. Multiple references
-                // is not OK, multiple referents
-                // is OK. This implies that you can
-                // redefine procedures dynamically,
-                // refer to @onerror for an example.
-                // Needless to say, this is ofcourse
+                // On duplicate references, just update the existing one,
+                // don't create a new one. Multiple references aren't OK,
+                // multiple referents are. This means that you can redefine
+                // procedures dynamically, e.g @onerror. This is of course
                 // also true for normal variables.
-                if(!strcasecmp(old, new))
+                if(!strcasecmp(dst->symbols[ndx]->name, src->name))
                 {
-                    // Variables set without (set) own
-                    // themselves (refer to init() and
-                    // init_num / str) must be killed
-                    // before the reference is updated
-                    // or else we will leak memory.
+                    // Variables set without (set) own themselves (refer to
+                    // init() and init_num()) and must be killed before the
+                    // reference is updated or else we will leak memory.
                     if(dst->symbols[ndx]->parent == dst)
                     {
                         kill(dst->symbols[ndx]);
@@ -764,10 +711,6 @@ entry_p push(entry_p dst, entry_p src)
                     dst->symbols[ndx] = src;
                     return dst;
                 }
-
-                // Next symbols / user-defined
-                // procedure.
-            //    u++;
             }
 
             dst_p = &dst->symbols;
@@ -782,15 +725,12 @@ entry_p push(entry_p dst, entry_p src)
         }
     }
 
-    // All or nothing. Since we own 'src',
-    // we need to free it, or else we will
-    // leak when OOM.
+    // All or nothing. Since we own 'src', we need
+    // to free it, or else we will leak when OOM.
     kill(src);
 
     // Out of memory / bad input.
     PANIC(NULL);
-
-    // Failure.
     return dst;
 }
 
