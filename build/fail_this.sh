@@ -1,11 +1,15 @@
 #!/bin/bash
-
+if [ $# -ne 2 ]
+then
+    echo "Usage: fail_this file line"
+    exit 1
+fi
 numb=$(grep DBG_ALLOC ../src/*.c -n | wc -l)
 file=$(grep DBG_ALLOC ../src/*.c -n | awk -F: '{print $1}')
 line=$(grep DBG_ALLOC ../src/*.c -n | awk -F: '{print $2}')
 numb=$(awk -v min=1 -v max="$numb" 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
-file=../src/util.c
-line=538
+file=$1
+line=$2
 echo "---------------------------------------------------------------------"
 echo "Memory allocation fault injection in $file line $line"
 echo "---------------------------------------------------------------------"
