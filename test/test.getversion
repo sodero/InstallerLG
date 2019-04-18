@@ -4,7 +4,7 @@
 (= (shiftright (getversion "./Installer") 16) 44) ; "","1",""
 (= (shiftright (getversion "./Installer") 16) 44.10) ; "","1",""
 (getversion "./Installer") ; "","2883594",""
-(getversion "_gv_") ; "","Line 1: Could not read from file '_gv_' 0",""
+(getversion "_gv_") ; "","0",""
 (set @strict 0) (getversion "_gv_") ; "","0",""
 (getversion "_gv_" (resident)) ; "","0",""
 (getversion "_gv_" (resident) (safe)) ; "","Line 1: syntax error, unexpected '(', expecting ')' '('",""

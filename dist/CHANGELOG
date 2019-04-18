@@ -226,4 +226,6 @@
 
 0.1.0-alpha.36:
 ===============
+- Improved robustness.
+- (getversion) fix.
 - ?

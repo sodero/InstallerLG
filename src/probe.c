@@ -181,7 +181,9 @@ entry_p m_database(entry_p contxt)
             {
                 ret = "MorphOS";
             }
-            else if(FindResident("processor.resource"))
+            else
+            // TODO - Try to open aros.library instead?
+            if(FindResident("processor.resource"))
             {
                 ret = "AROS";
             }
@@ -751,95 +753,165 @@ entry_p m_getsum(entry_p contxt)
 }
 
 //----------------------------------------------------------------------------
-// getversion helper
-//
-// FIXME - description
+// Name:        h_getversion_dev
+// Description: Helper for m_getversion.
+// Input:       char *name: filename.
+// Return:      int: file version.
 //----------------------------------------------------------------------------
-int h_getversion(entry_p contxt, const char *name)
+static int h_getversion_dev(const char *name)
 {
-    // Try to open whatever we have
-    // in read only mode.
-    FILE *file = fopen(name, "r");
+    int ver = -1;
+    (void) name;
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    #endif
+
+    return ver;
+}
+
+//----------------------------------------------------------------------------
+// Name:        h_getversion_lib
+// Description: Helper for m_getversion.
+// Input:       char *name: filename.
+// Return:      int: file version.
+//----------------------------------------------------------------------------
+static int h_getversion_lib(const char *name)
+{
+    int ver = -1;
+    (void) name;
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    #endif
+
+    return ver;
+}
+
+//----------------------------------------------------------------------------
+// Name:        h_getversion_res
+// Description: Helper for m_getversion.
+// Input:       char *name: filename.
+// Return:      int: file version.
+//----------------------------------------------------------------------------
+static int h_getversion_res(const char *name)
+{
     int ver = -1;
 
-    // Could we open the file?
-    if(file)
+    #if defined(AMIGA) && !defined(LG_TEST)
+    struct Resident *res = (struct Resident *)
+        FindResident(name);
+
+    if(res)
     {
-        int ndx = 0, chr = 0;
+        // Version string pattern.
+        const char *pat = "%*[^0123456789]%d.%d%*[^\0]";
+        const char *ids = res->rt_IdString;
 
-        // Version key.
-        int key[] = {'$','V','E','R',':', ' ', 0};
+        // Major and revision.
+        int maj, rev;
 
-        // Read one byte at a time to find the
-        // location of the version key if any.
-        while(chr != EOF && key[ndx])
+        // Try to find the revision, if any, in the id
+        // string. The major part of our parsed result
+        // should match rt_Version.
+        if(sscanf(ids, pat, &maj, &rev) == 2 &&
+           maj == res->rt_Version)
         {
-            chr = fgetc(file);
-            ndx = chr == key[ndx] ? ndx + 1 : 0;
-        }
-
-        // If we found the key, we have reached
-        // the terminating 0, ergo found a match.
-        if(!key[ndx])
-        {
-            // Fill up buffer with enough data to
-            // hold any realistic version string.
-            fread(get_buf(), 1, buf_size(), file);
-
-            // Do we have data in the buffer?
-            if(!ferror(file))
-            {
-                // Begin search after first ws.
-                char *data = strchr(get_buf(), ' ');
-
-                // If there's no ws we fail.
-                if(data)
-                {
-                    // Major and revision.
-                    int maj = 0, rev = 0;
-
-                    // Version string pattern.
-                    const char *pat = "%*[^0123456789]%d.%d%*[^\0]";
-
-                    // Try to find version string.
-                    if(sscanf(data, pat, &maj, &rev) == 2)
-                    {
-                        // We found something.
-                        ver = (maj << 16) | rev;
-                    }
-                }
-            }
-        }
-
-        // Did we have any reading problems?
-        if(ferror(file))
-        {
-            // Could not read from file. This
-            // will pick up problems from both
-            // fgetc() and fread() above.
-            ERR(ERR_READ_FILE, name);
-        }
-
-        // We don't need the file anymore.
-        fclose(file);
-    }
-    else
-    {
-        // Only fail if we're in 'strict' mode.
-        if(get_numvar(contxt, "@strict"))
-        {
-            // Could not read from file.
-            ERR(ERR_READ_FILE, name);
+            // We found both major and revision.
+            ver = (maj << 16) | rev;
         }
         else
         {
-            // In non strict mode a non existing
-            // file has version 0.
-            ver = 0;
+            // We can't trust the parsed result. Use
+            // what we know, ignore the revision.
+            ver = res->rt_Version << 16;
+        }
+    }
+    #else
+    (void) name;
+    #endif
+
+    return ver;
+}
+
+//----------------------------------------------------------------------------
+// Name:        h_getversion_dev
+// Description: Helper for m_getversion.
+// Input:       char *name: filename.
+// Return:      int: file version.
+//----------------------------------------------------------------------------
+int h_getversion_file(const char *name)
+{
+    FILE *file = NULL;
+
+    // File path prefixes.
+    const char *pre[] = {"", "LIBS:", NULL};
+
+    for(size_t ndx = 0; !file && pre[ndx]; ndx++)
+    {
+        // Use global buffer.
+        char *buf = get_buf();
+
+        // Format path string..
+        snprintf(buf, buf_size(), "%s%s", pre[ndx], name);
+
+        // Attempt to open file.
+        file = fopen(buf, "r");
+    }
+
+    // Invalid version.
+    int ver = -1;
+
+    // Bail out on error.
+    if(!file)
+    {
+        // Failure.
+        return ver;
+    }
+
+    // Version key string.
+    int key[] = {'$','V','E','R',':', ' ', 0};
+    size_t ndx = 0;
+
+    // Find position of the version key.
+    for(int chr = 0; chr != EOF && key[ndx];
+        ndx = chr == key[ndx] ? ndx + 1 : 0)
+    {
+        chr = fgetc(file);
+    }
+
+    // Did we find the key?
+    if(!key[ndx])
+    {
+        // Use global buffer.
+        char *buf = get_buf();
+
+        // Fill up buffer with enough data to
+        // hold any realistic version string.
+        fread(buf, 1, buf_size(), file);
+
+        // Begin after whitespace.
+        char *data = strchr(buf, ' ');
+
+        if(data)
+        {
+            // Major and revision.
+            int maj = 0, rev = 0;
+
+            // Version string pattern.
+            const char *pat = "%*[^0123456789]%d.%d%*[^\0]";
+
+            // Try to find version string.
+            if(sscanf(data, pat, &maj, &rev) == 2)
+            {
+                // We found something.
+                ver = (maj << 16) | rev;
+            }
         }
     }
 
-    // Version or -1.
+    // We're done.
+    fclose(file);
+
+    // Version or -1;
     return ver;
 }
 
@@ -854,9 +926,6 @@ entry_p m_getversion(entry_p contxt)
     // All we need is a context.
     if(contxt)
     {
-        // Unknown version.
-        DNUM = 0;
-
         // Any arguments given?
         if(contxt->children &&
            c_sane(contxt, 1))
@@ -865,57 +934,51 @@ entry_p m_getversion(entry_p contxt)
             // get the version information from.
             const char *name = str(CARG(1));
 
-            // A resident library or device?
+            // Invalid version.
+            DNUM = -1;
+
+            // Get resident module version.
             if(get_opt(contxt, OPT_RESIDENT))
             {
-                #if defined(AMIGA) && !defined(LG_TEST)
-                struct Resident *res =
-                    (struct Resident *) FindResident(name);
-
-                if(res)
-                {
-                    int v, r;
-                    const char *id = res->rt_IdString;
-
-                    // Version string pattern.
-                    const char *p = "%*[^0123456789]%d.%d%*[^\0]";
-
-                    // Try to find the revision, if any, in
-                    // the id string. The major part of our
-                    // parsed result should match rt_Version.
-                    if(sscanf(id, p, &v, &r) == 2 &&
-                       v == res->rt_Version)
-                    {
-                        // We found something.
-                        DNUM = (v << 16) | r;
-                    }
-                    else
-                    {
-                        // We can't trust the parsed result.
-                        // Use what we know, ignore revision.
-                        DNUM = res->rt_Version << 16;
-                    }
-                }
-                #else
-                DNUM = 0;
-                #endif
+                DNUM =  h_getversion_res(name);
             }
-            // A file of some sort, on disk, not resident.
-            else
+
+            // Get file version.
+            if(DNUM == -1)
             {
-                int ver = h_getversion(contxt, name);
-                DNUM = ver == -1 ? 0 : ver;
+                DNUM = h_getversion_file(name);
             }
+
+            // Get library version.
+            if(DNUM == -1)
+            {
+                DNUM = h_getversion_lib(name);
+            }
+
+            // Get device version.
+            if(DNUM == -1)
+            {
+                DNUM = h_getversion_dev(name);
+            }
+
+            // Did all of the above fail?
+            if(DNUM == -1)
+            {
+                DNUM = 0;
+            }
+
         }
-        #if defined(AMIGA) && !defined(LG_TEST)
         else
         {
+            #if defined(AMIGA) && !defined(LG_TEST)
             // No arguments, return version of Exec.
             extern struct ExecBase *SysBase;
             DNUM = (SysBase->LibNode.lib_Version << 16) |
                     SysBase->SoftVer;
+            #else
+            DNUM = 0;
+            #endif
         }
-        #endif
     }
     else
     {
