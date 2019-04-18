@@ -1660,7 +1660,7 @@ entry_p m_copylib(entry_p contxt)
                 int level = get_numvar(contxt, "@user-level"),
 
                 // Source file version.
-                new = h_getversion(contxt, src),
+                new = h_getversion_file(src),
 
                 // Destination type.
                 type = h_exists(dst);
@@ -1830,7 +1830,7 @@ entry_p m_copylib(entry_p contxt)
                     if(type == 1)
                     {
                         // Get version of existing file.
-                        int old = h_getversion(contxt, name);
+                        int old = h_getversion_file(name);
 
                         // Is the version of the existing file
                         // unknown?
