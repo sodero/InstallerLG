@@ -773,7 +773,6 @@ static void pp_aux(entry_p entry, int indent)
             "CUSTOM",
             "CUSREF",
             "CONTXT",
-            "STATUS",
             "DANGLE"
         };
 
