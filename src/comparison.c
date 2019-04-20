@@ -37,6 +37,23 @@ static int h_cmp(entry_p lhs, entry_p rhs)
         return strcmp(alfa->name, beta->name);
     }
 
+    // Quirky treatment of comparisons between
+    // '0' and non-empty strings, in this case
+    // '0' equals "".
+    if((alfa == lhs && !alfa->id &&
+        alfa->type == NUMBER &&
+        beta->type == STRING &&
+        beta->name && *(beta->name)) ||
+
+       (beta == lhs && !beta->id &&
+        beta->type == NUMBER &&
+        alfa->type == STRING &&
+        alfa->name && *(alfa->name)))
+    {
+        // Non-empty string.
+        return 1;
+    }
+
     // Otherwise convert whatever we have to
     // numerical values and subtract.
     return num(alfa) - num(beta);

@@ -845,6 +845,17 @@ int h_getversion_file(const char *name)
     // File path prefixes.
     const char *pre[] = {"", "LIBS:", NULL};
 
+    #if defined(AMIGA) && !defined(LG_TEST)
+    struct Process *pro = (struct Process *)
+        FindTask(NULL);
+
+    // Save the current window ptr.
+    APTR win = pro->pr_WindowPtr;
+
+    // Disable auto request.
+    pro->pr_WindowPtr = (APTR) -1L;
+    #endif
+
     for(size_t ndx = 0; !file && pre[ndx]; ndx++)
     {
         // Use global buffer.
@@ -856,6 +867,11 @@ int h_getversion_file(const char *name)
         // Attempt to open file.
         file = fopen(buf, "r");
     }
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Restore auto request.
+    pro->pr_WindowPtr = win;
+    #endif
 
     // Invalid version.
     int ver = -1;
