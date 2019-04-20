@@ -203,8 +203,7 @@ entry_p m_retrace(entry_p contxt)
         }
 
         // This shouldn't happen.
-        if(!con->parent ||
-           !con->parent->children)
+        if(!con->parent || !con->parent->children)
         {
             // Nowhere to go.
             PANIC(con);

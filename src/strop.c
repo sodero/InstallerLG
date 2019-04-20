@@ -128,8 +128,8 @@ entry_p m_fmt(entry_p contxt)
     // The format string is in the name of this contxt. It will hold
     // a maximum of length / 2 of specifiers.
     char *ret = NULL, *fmt = contxt ? contxt->name : NULL;
-    char **sct = fmt ? DBG_ALLOC(calloc((strlen(fmt) >> 1) + 1, sizeof(char *))) : NULL;
-
+    char **sct = fmt ? DBG_ALLOC(calloc((strlen(fmt) >> 1) + 1,
+                                 sizeof(char *))) : NULL;
     if(sct)
     {
         size_t ndx = 0, off = 0, cnt = 0, len = 0;
@@ -141,12 +141,9 @@ entry_p m_fmt(entry_p contxt)
             // A specifier not preceeded by an escape?
             if(fmt[ndx] == '%' && (!ndx || fmt[ndx - 1] != '\\'))
             {
-                // If this is a specifier that we recognize,
-                // then allocate a new string with just this
-                // specifier, nothing else.
-                if(fmt[++ndx] == 's' || (
-                   fmt[ndx++] == 'l' &&
-                   fmt[ndx] == 'd'))
+                // If this is a specifier that we recognize, then allocate a
+                // new string with just this specifier, nothing else.
+                if(fmt[++ndx] == 's' || (fmt[ndx++] == 'l' && fmt[ndx] == 'd'))
                 {
                     sct[cnt] = DBG_ALLOC(calloc(ndx - off + 2, 1));
 
@@ -176,32 +173,23 @@ entry_p m_fmt(entry_p contxt)
         {
             for(cnt = 0; sct[cnt]; cnt++)
             {
-                if(arg && *arg &&
-                   *arg != end())
+                if(arg && *arg && *arg != end())
                 {
+                    // Original string length.
                     size_t oln = strlen(sct[cnt]);
-                    entry_p cur = resolve(*arg);
-
-                    // Bail out if we didn't manage to
-                    // resolve the current argument.
-                    if(DID_ERR)
-                    {
-                        arg = NULL;
-                        break;
-                    }
 
                     // Format string.
-                    if(sct[cnt][oln - 1] == 's' && cur->type == STRING)
+                    if(sct[cnt][oln - 1] == 's')
                     {
-                        size_t nln = oln + strlen(cur->name);
+                        char *val = str(*arg);
+                        size_t nln = oln + strlen(val);
                         char *new = DBG_ALLOC(calloc(nln + 1, 1));
 
                         // Replace the current format string with
                         // the corresponding formated string.
                         if(new)
                         {
-                            int sln = snprintf(new, nln, sct[cnt], cur->name);
-
+                            int sln = snprintf(new, nln, sct[cnt], val);
                             len += sln > 0 ? (size_t) sln : 0;
                             free(sct[cnt]);
                             sct[cnt] = new;
@@ -213,10 +201,11 @@ entry_p m_fmt(entry_p contxt)
                             len = 0;
                         }
                     }
+                    else
                     // Format numeric value.
-                    else if(sct[cnt][oln - 1] == 'd' &&
-                            cur->type == NUMBER)
+                    if(sct[cnt][oln - 1] == 'd')
                     {
+                        int val = num(*arg);
                         size_t nln = oln + NUMLEN;
                         char *new = DBG_ALLOC(calloc(nln + 1, 1));
 
@@ -224,8 +213,7 @@ entry_p m_fmt(entry_p contxt)
                         // the corresponding formated string.
                         if(new)
                         {
-                            int sln = snprintf(new, nln, sct[cnt], cur->id);
-
+                            int sln = snprintf(new, nln, sct[cnt], val);
                             len += sln > 0 ? (size_t) sln : 0;
                             free(sct[cnt]);
                             sct[cnt] = new;
@@ -239,7 +227,7 @@ entry_p m_fmt(entry_p contxt)
                     }
                     else
                     {
-                        // Fail on argument -> specifier mismatch.
+                        // Argument <-> specifier mismatch.
                         ERR(ERR_FMT_MISMATCH, contxt->name);
                     }
 
