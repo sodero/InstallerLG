@@ -41,3 +41,7 @@
 (set @strict 0) (= "no" a); "","1",""
 (set @strict 0) (= a yes); "","1",""
 (set @strict 0) (= a no); "","1",""
+(set @strict 0) (= 0 a) ; "","1",""
+(set @strict 0 a "0") (= 0 a) ; "","0",""
+(set @strict 0 a "0") (= 1 a) ; "","0",""
+(set @strict 0 a "1") (= 1 a) ; "","1",""
