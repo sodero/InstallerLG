@@ -27,5 +27,7 @@
 (set a 1) ("prefix-%s-postfix" a) ; "","prefix-1-postfix",""
 (set @strict 0) ("prefix-%ld-postfix" a) ; "","prefix-0-postfix",""
 (set @strict 0) ("prefix-%s-postfix" a) ; "","prefix--postfix",""
+("prefix-%ld-postfix" a) ; "","Line 1: Undefined variable 'a' 0",""
+("prefix-%s-postfix" a) ; "","Line 1: Undefined variable 'a' 0",""
 ("%s" ("prefix-%ld-postfix" 1)) ; "","prefix-1-postfix",""
 (set i 1) (set i (+ 1 i)) ("%ld" i) ; "","2",""
