@@ -38,20 +38,28 @@ static int h_cmp(entry_p lhs, entry_p rhs)
     }
 
     // Quirky treatment of comparisons between
-    // '0' and non-empty strings, in this case
-    // '0' equals "".
+    // the constant 0 and strings. The original
+    // implementation is not very stringent when
+    // evaluating strings. Let's create the same
+    // mess here to be fully compatible.
     if((alfa == lhs && !alfa->id &&
         alfa->type == NUMBER &&
         beta->type == STRING &&
-        beta->name && *(beta->name)) ||
-
+        beta->name) ||
        (beta == lhs && !beta->id &&
         beta->type == NUMBER &&
         alfa->type == STRING &&
-        alfa->name && *(alfa->name)))
+        alfa->name))
     {
-        // Non-empty string.
-        return 1;
+        char *val = alfa->type == STRING ?
+                    alfa->name : beta->name;
+
+        // Strings not equal to "0" are != 0.
+        if(!val[0] || (!val[1] && val[0] != '0'))
+        {
+            // Not 0.
+            return 1;
+        }
     }
 
     // Otherwise convert whatever we have to
