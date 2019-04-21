@@ -128,8 +128,7 @@ entry_p m_fmt(entry_p contxt)
     // The format string is in the name of this contxt. It will hold
     // a maximum of length / 2 of specifiers.
     char *ret = NULL, *fmt = contxt ? contxt->name : NULL;
-    char **sct = fmt ? DBG_ALLOC(calloc((strlen(fmt) >> 1) + 1,
-                                 sizeof(char *))) : NULL;
+    char **sct = fmt ? DBG_ALLOC(calloc((strlen(fmt) >> 1) + 1, sizeof(char *))) : NULL;
     if(sct)
     {
         size_t ndx = 0, off = 0, cnt = 0, len = 0;
@@ -199,6 +198,7 @@ entry_p m_fmt(entry_p contxt)
                             // Out of memory
                             PANIC(contxt);
                             len = 0;
+                            break;
                         }
                     }
                     else
@@ -223,6 +223,7 @@ entry_p m_fmt(entry_p contxt)
                             // Out of memory
                             PANIC(contxt);
                             len = 0;
+                            break;
                         }
                     }
                     else
