@@ -1661,7 +1661,7 @@ static inline IPTR IGShowPicture(Class *cls,
         if(msg->Action & G_HORIZ)
         {
             xp = msg->Action & G_LEFT ? 0 :
-            #ifndef __AROS__
+            #if !defined(__AROS__) && !defined(__VBCC__)
                 // This doesn't work on AROS.
                 MUIV_Window_LeftEdge_Right(0);
             #else
@@ -1673,7 +1673,7 @@ static inline IPTR IGShowPicture(Class *cls,
         if(msg->Action & G_VERT)
         {
             yp = msg->Action & G_UPPER ? 0 :
-            #ifndef __AROS__
+            #if !defined(__AROS__) && !defined(__VBCC__)
                 // This doesn't work on AROS.
                  MUIV_Window_TopEdge_Bottom(0);
             #else
@@ -2028,7 +2028,9 @@ static inline IPTR IGRadio(Class *cls,
 
                         // Get value from buttons and then kill them.
                         // A halt above will not make any difference.
+#ifndef __VBCC__
                         GetAttr(MUIA_Radio_Active, r, CAST(msg->Select, IPTR *));
+#endif
                         MUI_DisposeObject(r);
 
                         // Unknown status. 
@@ -2531,6 +2533,7 @@ static inline IPTR IGNew(Class *cls,
     // construct. We're not constructing things
     // on the fly, instead we use paging to let
     // widgets become visible / disappear.
+#ifndef __VBCC__
     obj = (Object *) DoSuperNew
     (
         cls, obj,
@@ -2811,6 +2814,7 @@ static inline IPTR IGNew(Class *cls,
             TAG_END),
         TAG_END
     );
+#endif
 
     // Initialize the rest if the parent is OK.
     if(obj)
