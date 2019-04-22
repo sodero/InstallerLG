@@ -228,4 +228,6 @@
 ===============
 - Improved robustness.
 - (getversion) fix.
+- Less strict string formating. Just like CBM wanted it.
+- String evaluation fix (IBrowse).
 - ?
