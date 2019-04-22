@@ -8,10 +8,10 @@ OBJS= arithmetic.o procedure.o exit.o alloc.o control.o error.o eval.o \
       external.o file.o information.o media.o probe.o prompt.o resource.o \
       strop.o symbol.o util.o wb.o args.o bitwise.o comparison.o gui.o init.o \
       strcasestr.o ../build/parser.o ../build/lexer.o
-CFLAGS= -c99 -Ivbcc:PosixLib/include -I. -I../build -O #-DAMIGA
+CFLAGS= -c99 -Ivbcc:PosixLib/include -I. -I../build -O -DAMIGA -Dinline= -DMUIA_Dtpic_Name=0x80423d72 -DKPrintF=printf #-DLG_TEST
 
 Installer: $(OBJS)
-	$(CC) -o /$@68k $(OBJS) -Lvbcc:PosixLib/AmigaOS3 -lposix -lamiga
+	$(CC) -o /$@68k $(OBJS) -Lvbcc:PosixLib/AmigaOS3 -lposix -lamiga -lauto -lmieee
 
 ../build/lexer.o: ../build/lexer.c
 	$(CC) -o /build/lexer.o -c $(CFLAGS) -DYYERROR_VERBOSE $?
@@ -74,8 +74,8 @@ init.o: init.c alloc.h args.h control.h exit.h gui.h information.h init.h \
         media.h procedure.h symbol.h util.h version.h types.h file.h
 
 
-# 1051 test(s) failed
-# 1549 test(s) passed
+# 1055 test(s) failed
+# 1581 test(s) passed
 test:
 	sh ../test/run.sh ../Installer68k ../test $(REXTRA)
 
