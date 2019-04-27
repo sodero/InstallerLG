@@ -92,10 +92,7 @@ entry_p m_expandpath(entry_p contxt)
 // Return:      bool:               If confirmed 'true' else 'false'. Both
 //                                  skip and abort will return 'false'.
 //----------------------------------------------------------------------------
-bool h_confirm(entry_p contxt,
-               const char *hlp,
-               const char *msg,
-               ...)
+bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 {
     if(contxt)
     {
@@ -271,8 +268,7 @@ int h_exists(const char *file)
 // Return:      const char *:       On success, file part of path, otherwise
 //                                  empty string.
 //----------------------------------------------------------------------------
-static const char *h_fileonly(entry_p contxt,
-                              const char *path)
+static const char *h_fileonly(entry_p contxt, const char *path)
 {
     if(path)
     {
@@ -280,14 +276,14 @@ static const char *h_fileonly(entry_p contxt,
 
         // Do we have a string that doesn't
         // look like a directory / volume?
-        if(len-- && path[len] != '/' &&
-           path[len] != ':' )
+        if(len-- && path[len] != '/'
+           && path[len] != ':' )
         {
             // Go backwards until we find a
             // delimiter or the beginning of
             // the string.
-            while(len && path[len - 1] != '/' &&
-                  path[len - 1] != ':' )
+            while(len && path[len - 1] != '/'
+                  && path[len - 1] != ':' )
             {
                 len--;
             }
@@ -309,8 +305,7 @@ static const char *h_fileonly(entry_p contxt,
         PANIC(contxt);
     }
 
-    // Always return a valid
-    // string pointer.
+    // Always return a valid string.
     return "";
 }
 
@@ -334,11 +329,8 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 //              const char *dst:    Destination directory.
 // Return:      entry_p:            A linked list of file and dir pairs.
 //----------------------------------------------------------------------------
-static pnode_p h_choices(entry_p contxt,
-                         entry_p choices,
-                         entry_p fonts,
-                         const char *src,
-                         const char *dst)
+static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
+                         const char *src, const char *dst)
 {
     if(contxt && choices && src && dst)
     {
@@ -496,16 +488,11 @@ static pnode_p h_choices(entry_p contxt,
 //
 // Return:      entry_p:            A linked list of file and dir pairs.
 //----------------------------------------------------------------------------
-static pnode_p h_filetree(entry_p contxt,
-                         const char *src,
-                         const char *dst,
-                         entry_p files,
-                         entry_p fonts,
-                         entry_p choices,
-                         entry_p pattern)
+static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
+                          entry_p files, entry_p fonts, entry_p choices,
+                          entry_p pattern)
 {
-    char *n_src = NULL,
-         *n_dst = NULL;
+    char *n_src = NULL, *n_dst = NULL;
 
     if(src && dst)
     {
@@ -718,41 +705,39 @@ static pnode_p h_filetree(entry_p contxt,
                         file->name = n_src;
                         file->copy = n_dst;
 
-                        if(fonts)
-                        {
-                            // Font = file + .font.
-                            snprintf(get_buf(), buf_size(), "%s.font", n_src);
-
-                            if(h_exists(get_buf()) == 1)
-                            {
-                                pnode_p font = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-
-                                if(font)
-                                {
-                                    font->name = DBG_ALLOC(strdup(get_buf()));
-                                    font->copy = h_tackon(contxt, dst, h_fileonly(contxt, get_buf()));
-
-                                    // Add the font to the list.
-                                    if(font->name && font->copy)
-                                    {
-                                        font->type = 1;
-                                        file->next = font;
-
-                                        // The list is complete.
-                                        return head;
-                                    }
-
-                                    // Out of memory.
-                                    free(font->name);
-                                    free(font->copy);
-                                    free(font);
-                                }
-                            }
-                        }
-                        else
+                        if(!fonts)
                         {
                             // The list is complete.
                             return head;
+                        }
+
+                        // Font = file + .font.
+                        snprintf(get_buf(), buf_size(), "%s.font", n_src);
+
+                        if(h_exists(get_buf()) == 1)
+                        {
+                            pnode_p font = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+
+                            if(font)
+                            {
+                                font->name = DBG_ALLOC(strdup(get_buf()));
+                                font->copy = h_tackon(contxt, dst, h_fileonly(contxt, get_buf()));
+
+                                // Add the font to the list.
+                                if(font->name && font->copy)
+                                {
+                                    font->type = 1;
+                                    file->next = font;
+
+                                    // The list is complete.
+                                    return head;
+                                }
+
+                                // Out of memory.
+                                free(font->name);
+                                free(font->copy);
+                                free(font);
+                            }
                         }
                     }
 
@@ -794,9 +779,7 @@ static pnode_p h_filetree(entry_p contxt,
 //              int32_t *mask:      Pointer to the result.
 // Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
-static int h_protect_get(entry_p contxt,
-                         char *file,
-                         int32_t *mask)
+static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
 {
     if(contxt && mask && file)
     {
@@ -804,7 +787,7 @@ static int h_protect_get(entry_p contxt,
         // this is a stub.
         #if defined(AMIGA) && !defined(LG_TEST)
         struct FileInfoBlock *fib = (struct FileInfoBlock *)
-            AllocDosObject(DOS_FIB, NULL);
+               AllocDosObject(DOS_FIB, NULL);
 
         if(fib)
         {
@@ -871,9 +854,7 @@ static int h_protect_get(entry_p contxt,
 //              LONG mask:          Protection bits
 // Return:      int:                On success '1', else '0'.
 //----------------------------------------------------------------------------
-static int h_protect_set(entry_p contxt,
-                         const char *file,
-                         LONG mask)
+static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 {
     if(contxt && file)
     {
@@ -927,11 +908,8 @@ static int h_protect_set(entry_p contxt,
 //              bool bck:           Enable back mode.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //----------------------------------------------------------------------------
-static inp_t h_copyfile(entry_p contxt,
-                        char *src,
-                        char *dst,
-                        bool bck,
-                        int mde)
+static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
+                        bool bck, int mde)
 {
     if(contxt && src && dst)
     {
@@ -1635,8 +1613,7 @@ entry_p m_copylib(entry_p contxt)
            (nofail && (fail || oknodelete)) ||
            (oknodelete && (nofail || fail)))
         {
-            ERR(ERR_OPTION_MUTEX,
-                "fail/nofail/oknodelete");
+            ERR(ERR_OPTION_MUTEX, "fail/nofail/oknodelete");
             RCUR;
         }
 
@@ -1647,8 +1624,7 @@ entry_p m_copylib(entry_p contxt)
         // Installer guide says so, and it makes sense, so
         // let's do it this way until we know for sure that
         // this will break existing scripts.
-        if(source && dest &&
-           prompt && help)
+        if(source && dest && prompt && help)
         {
             char *src = str(source),
                  *dst = str(dest);
@@ -2138,7 +2114,7 @@ static int h_delete_file(entry_p contxt, const char *file)
         // Unknown error.
         PANIC(contxt);
     }
-    
+
     // Failure.
     return 0;
 }

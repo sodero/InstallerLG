@@ -129,10 +129,12 @@ entry_p m_cat(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_fmt(entry_p contxt)
 {
-    // The format string is in the name of this contxt. It will hold
-    // a maximum of length / 2 of specifiers.
+    // The format string is in the name of this contxt.
+    // It will hold a maximum length of specifiers / 2.
     char *ret = NULL, *fmt = contxt ? contxt->name : NULL;
-    char **sct = fmt ? DBG_ALLOC(calloc((strlen(fmt) >> 1) + 1, sizeof(char *))) : NULL;
+    char **sct = fmt ? DBG_ALLOC(calloc((strlen(fmt) >> 1) + 1,
+                                 sizeof(char *))) : NULL;
+
     if(sct)
     {
         size_t ndx = 0, off = 0, cnt = 0, len = 0;
@@ -142,7 +144,7 @@ entry_p m_fmt(entry_p contxt)
         for(; fmt[ndx]; ndx++)
         {
             // A format specifier?
-            if(fmt[ndx] == '%'/* && (!ndx || (fmt[ndx - 1] != '\\'))*/)
+            if(fmt[ndx] == '%')
             {
                 // If escape translate into fprintf escape and skip.
                 if(ndx && fmt[ndx - 1] == '\\')

@@ -89,28 +89,23 @@ entry_p m_exit(entry_p contxt)
             // Concatenate all children.
             char *msg = get_chlstr(contxt, false);
 
-            // Did we manage to concatenate something?
-            if(msg)
-            {
-                // If we could resolve all our children,
-                // show the result of the concatenation
-                // unless we have an empty string.
-                if(*msg && !DID_ERR)
-                {
-                    gui_finish(msg);
-                }
-
-                // Free the temporary buffer.
-                free(msg);
-            }
-            else
+            if(!msg)
             {
                 // Out of memory
                 PANIC(contxt);
-
-                // Failure.
                 RCUR;
             }
+
+            // If we could resolve all our children,
+            // show the result of the concatenation
+            // unless we have an empty string.
+            if(*msg && !DID_ERR)
+            {
+                gui_finish(msg);
+            }
+
+            // Free the temporary buffer.
+            free(msg);
         }
 
         // Show final message unless 'quiet' is set.
@@ -124,8 +119,7 @@ entry_p m_exit(entry_p contxt)
             // if we know the name and location of the application.
             if(*app && *dst)
             {
-                snprintf(get_buf(), buf_size(),
-                         tr(S_CBFI), tr(S_ICPL),
+                snprintf(get_buf(), buf_size(), tr(S_CBFI), tr(S_ICPL),
                          app, dst);
 
                 // Display the full message.
