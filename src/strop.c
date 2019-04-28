@@ -62,46 +62,50 @@ entry_p m_cat(entry_p contxt)
                 // Get length of the current argument.
                 alen = strlen(arg);
 
-                // If the length is > 0, append to the result.
-                if(alen)
+                // Is the current string empty?
+                if(!alen)
                 {
-                    len += strlen(arg);
+                    // Proceed with the next argument.
+                    continue;
+                }
 
-                    // If we're about to exceed the current buffer,
-                    // allocate a new one big enough.
-                    if(len > cnt)
+                // Increase the total string length.
+                len += strlen(arg);
+
+                // If we're about to exceed the current buffer,
+                // allocate a new one big enough.
+                if(len > cnt)
+                {
+                    char *tmp;
+
+                    // Double up until we have enough.
+                    while(cnt && cnt < len)
                     {
-                        char *tmp;
-
-                        // Double up until we have enough.
-                        while(cnt && cnt < len)
-                        {
-                            cnt = cnt << 1;
-                        }
-
-                        tmp = DBG_ALLOC(calloc(cnt + 1, 1));
-
-                        // Copy the contents to the new buffer
-                        // and free the old one.
-                        if(tmp && cnt)
-                        {
-                            memcpy(tmp, buf, len - alen + 1);
-                            free(buf);
-                            buf = tmp;
-                        }
-                        else
-                        {
-                            // Out of memory.
-                            PANIC(contxt);
-                            free(tmp);
-                            free(buf);
-                            REST;
-                        }
+                        cnt = cnt << 1;
                     }
 
-                    // By now we're ready to append.
-                    strncat(buf, arg, cnt - strlen(buf));
+                    tmp = DBG_ALLOC(calloc(cnt + 1, 1));
+
+                    // Copy the contents to the new buffer
+                    // and free the old one.
+                    if(tmp && cnt)
+                    {
+                        memcpy(tmp, buf, len - alen + 1);
+                        free(buf);
+                        buf = tmp;
+                    }
+                    else
+                    {
+                        // Out of memory.
+                        PANIC(contxt);
+                        free(tmp);
+                        free(buf);
+                        REST;
+                    }
                 }
+
+                // By now we're ready to append.
+                strncat(buf, arg, cnt - strlen(buf));
             }
 
             // Unless we're out of memory, buf will
@@ -125,10 +129,12 @@ entry_p m_cat(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_fmt(entry_p contxt)
 {
-    // The format string is in the name of this contxt. It will hold
-    // a maximum of length / 2 of specifiers.
+    // The format string is in the name of this contxt.
+    // It will hold a maximum length of specifiers / 2.
     char *ret = NULL, *fmt = contxt ? contxt->name : NULL;
-    char **sct = fmt ? DBG_ALLOC(calloc((strlen(fmt) >> 1) + 1, sizeof(char *))) : NULL;
+    char **sct = fmt ? DBG_ALLOC(calloc((strlen(fmt) >> 1) + 1,
+                                 sizeof(char *))) : NULL;
+
     if(sct)
     {
         size_t ndx = 0, off = 0, cnt = 0, len = 0;
@@ -137,9 +143,16 @@ entry_p m_fmt(entry_p contxt)
         // Scan the format string.
         for(; fmt[ndx]; ndx++)
         {
-            // A specifier not preceeded by an escape?
-            if(fmt[ndx] == '%' && (!ndx || fmt[ndx - 1] != '\\'))
+            // A format specifier?
+            if(fmt[ndx] == '%')
             {
+                // If escape translate into fprintf escape and skip.
+                if(ndx && fmt[ndx - 1] == '\\')
+                {
+                    fmt[ndx - 1] = '%';
+                    continue;
+                }
+
                 // If this is a specifier that we recognize, then allocate a
                 // new string with just this specifier, nothing else.
                 if(fmt[++ndx] == 's' || (fmt[ndx++] == 'l' && fmt[ndx] == 'd'))
@@ -240,6 +253,7 @@ entry_p m_fmt(entry_p contxt)
                     // Fail if the number of arguments and the number
                     // of specifiers don't match.
                     ERR(ERR_FMT_MISSING, contxt->name);
+                    len = 0;
                     break;
                 }
             }

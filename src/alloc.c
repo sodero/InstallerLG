@@ -532,20 +532,16 @@ entry_p append(entry_p **dest, entry_p entry)
     {
         size_t num = 0;
 
-        // Find the first 'free' slot,
-        // if there is one.
-        while((*dest)[num] &&
-              (*dest)[num] != end())
+        // Find the first 'free' slot, if there is one.
+        while((*dest)[num] && (*dest)[num] != end())
         {
             num++;
         }
 
-        // No free slot available. We need
-        // to allocate more memory.
+        // No free slot available. More memory needed.
         if((*dest)[num])
         {
-            // We rely on everything being set to '0'. Make the
-            // new array twice as big.
+            // Everything must be set to '0'. Make the array twice as big.
             entry_p *new = DBG_ALLOC(calloc((num << 1) + 1, sizeof(entry_p)));
 
             // Move everything to the new array.
@@ -565,9 +561,7 @@ entry_p append(entry_p **dest, entry_p entry)
                 kill((*dest)[0]);
                 (*dest)[0] = entry;
 
-                PANIC(NULL);
-
-                // Failure.
+                PANIC(entry);
                 return entry;
             }
         }
@@ -579,8 +573,6 @@ entry_p append(entry_p **dest, entry_p entry)
 
     // Bad input.
     PANIC(NULL);
-
-    // Failure.
     return NULL;
 }
 

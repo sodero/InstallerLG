@@ -275,8 +275,6 @@ int num(entry_p entry)
 
     // Bad input.
     PANIC(entry);
-
-    // Failure.
     return 0;
 }
 
@@ -497,24 +495,21 @@ void run(entry_p entry)
     // If (effect) type is set, use a custom screen.
     if(gui_init(status != false))
     {
-        // If an 'effect' statement exists,
-        // execute this first of all.
+        // If an 'effect' statement exists, execute
+        // this first of all.
         if(status)
         {
-            // Since this is not a context, we
-            // must resolve it like a symbol.
+            // Resolve 'effect' like a symbol.
             status = resolve(status);
         }
 
-        // Execute the script unless there
-        // was an 'effect' statement that
-        // generated an error or a halt.
+        // Execute the script unless 'effect' failed
+        // or halted.
         if(!DID_ERR && !DID_HALT)
         {
             status = invoke(entry);
 
-            // Execute the (onerror)
-            // function on failure.
+            // Execute (onerror) on failure.
             if(DID_ERR && !DID_HALT)
             {
                 status = m_onerror(entry);

@@ -89,10 +89,8 @@ int error(entry_p contxt, int line, err_t type, const char *info)
     // Error window / console output.
     gui_error(line, des[type], info);
 
-    // If this is a PANIC, or if we're in
-    // debug mode, do a context dump.
-    if(type == ERR_PANIC ||
-       get_numvar(contxt, "@debug"))
+    // Do a context dump if we're in PANIC or debug mode.
+    if(type == ERR_PANIC || get_numvar(contxt, "@debug"))
     {
         pretty_print(contxt);
     }

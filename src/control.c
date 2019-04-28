@@ -190,41 +190,59 @@ entry_p m_retrace(entry_p contxt)
     // Starting point.
     entry_p con = contxt;
 
-    if(con)
+    if(!con)
     {
-        // Find nearest context / user defined
-        // procedure.
-        while(con->parent &&
-              con->parent->type != CONTXT &&
-              con->parent->type != CUSTOM)
+        // The parser is broken.
+        PANIC(con);
+        RCUR;
+    }
+
+    // Find context or user procedure.
+    while(con->parent &&
+          con->parent->type != CONTXT &&
+          con->parent->type != CUSTOM)
+    {
+        // Climb one generation.
+        con = con->parent;
+    }
+
+    // This shouldn't happen.
+    if(!con->parent || !con->parent->children)
+    {
+        // Nowhere to go.
+        PANIC(con);
+        RCUR;
+    }
+
+    // Iterator and stop.
+    entry_p *chl = con->parent->children;
+    entry_p top = *chl;
+
+    // Locate ourselves.
+    while(*chl != con)
+    {
+        chl++;
+    }
+
+    // Locate the first trace point,
+    // unless we're first in line.
+    if(*chl != top)
+    {
+        // Find first trace point.
+        while(*(--chl) != top)
         {
-            // Climb one generation.
-            con = con->parent;
+            if((*chl)->call == m_trace)
+            {
+                // Found it.
+                break;
+            }
         }
 
-        // This shouldn't happen.
-        if(!con->parent || !con->parent->children)
-        {
-            // Nowhere to go.
-            PANIC(con);
-            RCUR;
-        }
-
-        // Iterator and stop.
-        entry_p *chl = con->parent->children;
-        entry_p top = *chl;
-
-        // Locate ourselves.
-        while(*chl != con)
-        {
-            chl++;
-        }
-
-        // Locate the first trace point,
-        // unless we're first in line.
+        // Look for the second trace point,
+        // unless we're at the top by now.
         if(*chl != top)
         {
-            // Find first trace point.
+            // Find the second point.
             while(*(--chl) != top)
             {
                 if((*chl)->call == m_trace)
@@ -233,67 +251,47 @@ entry_p m_retrace(entry_p contxt)
                     break;
                 }
             }
-
-            // Look for the second trace point,
-            // unless we're at the top by now.
-            if(*chl != top)
-            {
-                // Find the second point.
-                while(*(--chl) != top)
-                {
-                    if((*chl)->call == m_trace)
-                    {
-                        // Found it.
-                        break;
-                    }
-                }
-            }
         }
+    }
 
-        // Backtrack if we found two trace points.
-        if((*chl)->call == m_trace)
+    // Backtrack if we found two trace points.
+    if((*chl)->call == m_trace)
+    {
+        // Expect failure.
+        entry_p ret = end();
+        entry_p *org = chl;
+
+        // Stack frame counter.
+        static int dep = 0;
+
+        // Keep track of the recursion depth.
+        if(++dep > MAXDEP)
         {
-            // Expect failure.
-            entry_p ret = end();
-            entry_p *org = chl;
-
-            // Frame counter.
-            static int dep = 0;
-
-            // Keep track of the recursion depth. Do not
-            // invoke if we're beyond MAXDEP.
-            if(dep++ < MAXDEP)
-            {
-                for(; !DID_ERR; chl = org)
-                {
-                    // As long as no one fails, resolve
-                    // all children and save the return
-                    // value of the last one.
-                    while(*chl && *chl != end() && !DID_ERR)
-                    {
-                        // Resolve and proceed.
-                        ret = resolve(*chl);
-                        chl++;
-                    }
-                }
-
-                // Leaving frame.
-                dep--;
-
-                // Return the last value.
-                return ret;
-            }
-
             // We risk running out of stack.
             ERR(ERR_MAX_DEPTH, con->name);
+            RCUR;
         }
-    }
-    else
-    {
-        // The parser is broken.
-        PANIC(con);
+
+        for(; !DID_ERR; chl = org)
+        {
+            // As long as no one fails, resolve
+            // all children and save the return
+            // value of the last one.
+            while(*chl && *chl != end() && !DID_ERR)
+            {
+                // Resolve and proceed.
+                ret = resolve(*chl);
+                chl++;
+            }
+        }
+
+        // Leaving frame.
+        dep--;
+
+        // Return the last value.
+        return ret;
     }
 
-    // Nowhere to go or panic.
+    // Nowhere to go.
     RCUR;
 }

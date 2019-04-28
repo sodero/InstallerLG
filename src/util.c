@@ -8,6 +8,7 @@
 //----------------------------------------------------------------------------
 
 #include "alloc.h"
+#include "error.h"
 #include "eval.h"
 #include "util.h"
 
@@ -427,28 +428,32 @@ void set_numvar(entry_p contxt, char *var, int val)
 int get_numvar(entry_p contxt, char *var)
 {
     // We need a name and a context.
-    if(contxt && var)
+    if(!contxt || !var)
     {
-        // Dummy reference used to find
-        // the variable.
-        entry_p sym;
-        static entry_t ref = { .type = SYMREF };
+        // This shouldn't happen.
+        PANIC(contxt);
+        return 0;
+    }
 
-        // Name and reparent dummy.
-        ref.name = var;
-        ref.parent = contxt;
+    // Dummy reference used to find
+    // the variable.
+    entry_p sym;
+    static entry_t ref = { .type = SYMREF };
 
-        // Find whatever 'var' is.
-        sym = find_symbol(&ref);
+    // Name and reparent dummy.
+    ref.name = var;
+    ref.parent = contxt;
 
-        // This should be a symbol. And it
-        // should be a resolved numerical one.
-        if(sym && sym->type == SYMBOL && sym->resolved &&
-           sym->resolved->type == NUMBER)
-        {
-            // Success.
-            return sym->resolved->id;
-        }
+    // Find whatever 'var' is.
+    sym = find_symbol(&ref);
+
+    // This should be a symbol. And it
+    // should be a resolved numerical one.
+    if(sym && sym->type == SYMBOL && sym->resolved &&
+       sym->resolved->type == NUMBER)
+    {
+        // Success.
+        return sym->resolved->id;
     }
 
     // Failure.
@@ -468,29 +473,33 @@ int get_numvar(entry_p contxt, char *var)
 char *get_strvar(entry_p contxt, char *var)
 {
     // We need a name and a context.
-    if(contxt && var)
+    if(!contxt || !var)
     {
-        // Dummy reference used to find
-        // the variable.
-        entry_p sym;
-        static entry_t ref = { .type = SYMREF };
+        // This shouldn't happen.
+        PANIC(contxt);
+        return "";
+    }
 
-        // Name and reparent dummy.
-        ref.name = var;
-        ref.parent = contxt;
+    // Dummy reference used to find
+    // the variable.
+    entry_p sym;
+    static entry_t ref = { .type = SYMREF };
 
-        // Find whatever 'v' is.
-        sym = find_symbol(&ref);
+    // Name and reparent dummy.
+    ref.name = var;
+    ref.parent = contxt;
 
-        // This should be a symbol. And it
-        // should be a resolved string.
-        if(sym && sym->type == SYMBOL &&
-           sym->resolved && sym->resolved->name &&
-           sym->resolved->type == STRING)
-        {
-            // Success.
-            return sym->resolved->name;
-        }
+    // Find whatever 'v' is.
+    sym = find_symbol(&ref);
+
+    // This should be a symbol. And it
+    // should be a resolved string.
+    if(sym && sym->type == SYMBOL &&
+       sym->resolved && sym->resolved->name &&
+       sym->resolved->type == STRING)
+    {
+        // Success.
+        return sym->resolved->name;
     }
 
     // Failure.
@@ -849,7 +858,8 @@ void pretty_print(entry_p entry)
     pp_aux(entry, 0);
 }
 
-#define LG_BUFSIZ ((BUFSIZ > PATH_MAX ? BUFSIZ : PATH_MAX) + 1)
+#define LG_BUFSIZ (BUFSIZ + PATH_MAX + 1)
+static char buf[LG_BUFSIZ];
 
 //----------------------------------------------------------------------------
 // Name:        get_buf
@@ -859,7 +869,6 @@ void pretty_print(entry_p entry)
 //----------------------------------------------------------------------------
 char *get_buf(void)
 {
-    static char buf[LG_BUFSIZ];
     return buf;
 }
 
@@ -935,24 +944,27 @@ entry_p native_exists(entry_p contxt, call_t func)
     entry_p entry = NULL;
 
     // NULL are valid values.
-    if(contxt && contxt->children)
+    if(!contxt || !contxt->children)
     {
-        // Iterate over all children and
-        // recur if needed.
-        for(entry_p *c = contxt->children;
-            *c && *c != end() && !entry; c++)
+        // Doesn't exists.
+        return entry;
+    }
+
+    // Iterate over all children and
+    // recur if needed.
+    for(entry_p *c = contxt->children;
+        *c && *c != end() && !entry; c++)
+    {
+        if((*c)->type == NATIVE &&
+           (*c)->call == func)
         {
-            if((*c)->type == NATIVE &&
-               (*c)->call == func)
-            {
-                // We found it.
-                entry = *c;
-            }
-            else
-            {
-                // Recur.
-                entry = native_exists(*c, func);
-            }
+            // We found it.
+            entry = *c;
+        }
+        else
+        {
+            // Recur.
+            entry = native_exists(*c, func);
         }
     }
 
