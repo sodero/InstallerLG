@@ -1037,10 +1037,10 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
                                 // Recur without info set.
                                 grc = h_copyfile(contxt, icon, copy, bck, mde & ~CF_INFOS);
 
+                                #if defined(AMIGA) && !defined(LG_TEST)
                                 // Reset icon position?
                                 if(grc == G_TRUE && mde & CF_NOPOSITION)
                                 {
-                                    #if defined(AMIGA) && !defined(LG_TEST)
                                     struct DiskObject *obj = (struct DiskObject *)
                                         GetDiskObject(dst);
 
@@ -1060,8 +1060,8 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
 
                                         FreeDiskObject(obj);
                                     }
-                                    #endif
                                 }
+                                #endif
                             }
                         }
 
@@ -2915,7 +2915,9 @@ entry_p m_makedir(entry_p contxt)
     {
         entry_p prompt   = get_opt(CARG(2), OPT_PROMPT),
                 help     = get_opt(CARG(2), OPT_HELP),
+                #if defined(AMIGA) && !defined(LG_TEST)
                 infos    = get_opt(CARG(2), OPT_INFOS),
+                #endif
                 confirm  = get_opt(CARG(2), OPT_CONFIRM),
                 safe     = get_opt(CARG(2), OPT_SAFE);
 
@@ -2977,11 +2979,11 @@ entry_p m_makedir(entry_p contxt)
             // Create the directory.
             DNUM = h_makedir(contxt, dir, 0 /* FIXME */);
 
+            #if defined(AMIGA) && !defined(LG_TEST)
             // Are we supposed to create an icon
             // as well?
             if(infos && DNUM)
             {
-                #if defined(AMIGA) && !defined(LG_TEST)
                 // Get the default drawer icon from the OS.
                 struct DiskObject *obj = (struct DiskObject *)
                     GetDefDiskObject(WBDRAWER);
@@ -3012,8 +3014,8 @@ entry_p m_makedir(entry_p contxt)
                     LONG ioe = IoErr();
                     set_numvar(contxt, "@ioerr", ioe);
                 }
-                #endif
             }
+            #endif
         }
         else
         {
