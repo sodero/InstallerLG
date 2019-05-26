@@ -64,38 +64,32 @@ entry_p m_debug(entry_p contxt)
     // Sanity check.
     if(contxt && contxt->resolved)
     {
-        // Children are optional. Doesn't
-        // make sense, but that's how it's
-        // done in 3.9.
+        // Children are optional. Doesn't make sense, but that's
+        // how it's done in 3.9.
         if(contxt->children)
         {
             entry_p *cur = contxt->children;
 
-            // For all children, print the string
-            // representation, to stdout if we're
-            // running in a shell or to the debug
-            // log when invoked from Workbench.
+            // For all children, print the string representation, to
+            // stdout if we're running in a shell or to the log when
+            // invoked from Workbench.
             while(*cur && *cur != end())
             {
                 char *val = NULL;
 
-                // If this is a variable, test if it's
-                // defined, and if not, print <NIL>.
+                // Test if variable is defined, if not print <NIL>.
                 if((*cur)->type == SYMREF)
                 {
                     // Save level of strictness.
                     entry_p res;
                     int mode = get_numvar(contxt, "@strict");
 
-                    // Set non strict mode and search
-                    // for symbol. By doing it this way
-                    // we repress the error message that
-                    // is shown when symbols are missing.
+                    // Set non strict mode and search for symbol. By doing
+                    // it this way we supress error messages, if any.
                     set_numvar(contxt, "@strict", 0);
                     res = find_symbol(*cur);
 
-                    // If the symbol is missing, we will
-                    // have a DANGLE entry that is false.
+                    // If symbol is missing, we will have a (false) DANGLE.
                     if(res->type == DANGLE && !tru(res))
                     {
                         // As prescribed.
@@ -378,22 +372,18 @@ entry_p m_working(entry_p contxt)
 
             // Standard prefix.
             const char *pre = tr(S_WRKN);
-            size_t len = strlen(pre) +
-                         strlen(msg) + 1;
+            size_t len = strlen(pre) + strlen(msg) + 1;
 
             // Memory to hold prefix and children.
             char *con = DBG_ALLOC(calloc(len, 1));
 
             if(con)
             {
-                // Concatenate prefix and children.
+                // Concatenate and free buffer.
                 snprintf(con, len, "%s%s", pre, msg);
-
-                // Free the children buffer.
                 free(msg);
 
-                // Show the result. Return immediately.
-                // No waiting for any events.
+                // Show the result and eturn immediately.
                 gui_working(con);
 
                 // Free the final message buffer.
@@ -408,8 +398,7 @@ entry_p m_working(entry_p contxt)
         }
     }
 
-    // Broken parser /
-    // out of memory.
+    // Broken parser / out of memory.
     PANIC(contxt);
     RCUR;
 }

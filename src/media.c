@@ -101,7 +101,10 @@ entry_p m_effect(entry_p contxt)
                   strcasecmp(est, "horizontal") == 0 ? G_HORIZONTAL : 0);
 
         // Known effect type?
-        if(ief & G_EFFECT)
+        bool effect = ief & G_EFFECT;
+
+        // Known effect type?
+        if(effect)
         {
             // Invalid initial values.
             static int oc1, oc2, oef = G_RADIAL | G_HORIZONTAL;
