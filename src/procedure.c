@@ -148,33 +148,36 @@ entry_p m_gosub(entry_p contxt)
                 }
             }
 
-            // No failure this far?
-            if(!res)
+            // We should have no result yet.
+            if(res)
             {
-                // Save the old name. We need to do this
-                // in order to resolve the format string
-                // multiple times when needed.
-                char *old = contxt->name;
-
-                // Set format string, type and callback
-                // to mimic a real ("%ld" ..) function.
-                contxt->call = m_fmt;
-                contxt->type = NATIVE;
-                contxt->name = get_strvar(contxt, contxt->name);
-
-                // Get the resolved value of the things
-                // we've stitched together.
-                res = resolve(contxt);
-
-                // Restore everything so that we can do
-                // this again, once again resolving the
-                // format string.
-                contxt->name = old;
-                contxt->call = m_gosub;
-                contxt->type = CUSREF;
+                // Failure.
+                return res;
             }
 
-            // Success or failure.
+            // Save the old name. We need to do this
+            // in order to resolve the format string
+            // multiple times when needed.
+            char *old = contxt->name;
+
+            // Set format string, type and callback
+            // to mimic a real ("%ld" ..) function.
+            contxt->call = m_fmt;
+            contxt->type = NATIVE;
+            contxt->name = get_strvar(contxt, contxt->name);
+
+            // Get the resolved value of the things
+            // we've stitched together.
+            res = resolve(contxt);
+
+            // Restore everything so that we can do
+            // this again, once again resolving the
+            // format string.
+            contxt->name = old;
+            contxt->call = m_gosub;
+            contxt->type = CUSREF;
+
+            // Success.
             return res;
         }
 
