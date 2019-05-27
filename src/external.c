@@ -228,11 +228,12 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 printf("%s%s", cmd, dir ? dir : "");
                 #endif
 
-                // Have we changed the working dir?
-                if(cwd)
+                // Go back to where we started if we've
+                // changed directory.
+                if(cwd && chdir(cwd))
                 {
-                    // Go back to where we started.
-                    chdir(cwd);
+                    // The rug was swept away from us.
+                    ERR(ERR_NO_SUCH_FILE_OR_DIR, cwd);
                 }
 
                 // OK == 0. Only fail in 'strict' mode.
