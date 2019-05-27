@@ -1052,116 +1052,119 @@ entry_p m_iconinfo(entry_p contxt)
                 for(size_t i = 0; types[i] != end() &&
                     !DID_ERR; i++)
                 {
-                    // If we have an option of any kind.
-                    if(types[i])
+                    // Is the current option not set?
+                    if(!types[i])
                     {
-                        // Iterate over all its children.
-                        for(size_t j = 0;
-                            types[i]->children[j] &&
-                            types[i]->children[j] != end(); j++)
+                        // Next option.
+                        continue;
+                    }
+
+                    // Iterate over all its children.
+                    for(size_t j = 0;
+                        types[i]->children[j] &&
+                        types[i]->children[j] != end(); j++)
+                    {
+                        // Get variable name and option type.
+                        int type = types[i]->id;
+                        char *name = str(types[i]->children[j]);
+
+                        // Variable names must be atleast one
+                        // character long.
+                        if(*name)
                         {
-                            // Get variable name and option type.
-                            int type = types[i]->id;
-                            char *name = str(types[i]->children[j]);
+                            char *svl = NULL;
+                            entry_p val;
 
-                            // Variable names must be atleast one
-                            // character long.
-                            if(*name)
+                            #if defined(AMIGA) && !defined(LG_TEST)
+                            // Is this a numerical value?
+                            if(type == OPT_GETSTACK ||
+                               type == OPT_GETPOSITION)
                             {
-                                char *svl = NULL;
-                                entry_p val;
+                                int v =
+                                (
+                                    type == OPT_GETSTACK ?
+                                    obj->do_StackSize : j == 0 ?
+                                    obj->do_CurrentX : obj->do_CurrentY
+                                );
 
-                                #if defined(AMIGA) && !defined(LG_TEST)
-                                // Is this a numerical value?
-                                if(type == OPT_GETSTACK ||
-                                   type == OPT_GETPOSITION)
-                                {
-                                    int v =
-                                    (
-                                        type == OPT_GETSTACK ?
-                                        obj->do_StackSize : j == 0 ?
-                                        obj->do_CurrentX : obj->do_CurrentY
-                                    );
-
-                                    snprintf(get_buf(), buf_size(), "%d", v);
-                                    svl = get_buf();
-                                }
-                                else
-                                if(type == OPT_GETDEFAULTTOOL &&
-                                   obj->do_DefaultTool)
-                                {
-                                    svl = obj->do_DefaultTool;
-                                }
-                                else
-                                if(type == OPT_GETTOOLTYPE &&
-                                   obj->do_ToolTypes)
-                                {
-                                    svl = (char *) FindToolType(obj->do_ToolTypes, name);
-                                    name = str(types[i]->children[++j]);
-                                }
-
-                                // Always a valid value.
-                                svl = svl ? svl : "";
-                                #else
-                                // Testing purposes only.
-                                snprintf(get_buf(), buf_size(), "%d:%zu", type, j);
+                                snprintf(get_buf(), buf_size(), "%d", v);
                                 svl = get_buf();
-                                #endif
+                            }
+                            else
+                            if(type == OPT_GETDEFAULTTOOL &&
+                               obj->do_DefaultTool)
+                            {
+                                svl = obj->do_DefaultTool;
+                            }
+                            else
+                            if(type == OPT_GETTOOLTYPE &&
+                               obj->do_ToolTypes)
+                            {
+                                svl = (char *) FindToolType(obj->do_ToolTypes, name);
+                                name = str(types[i]->children[++j]);
+                            }
 
-                                // Always a valid (string).
-                                val = new_string(DBG_ALLOC(strdup(svl)));
+                            // Always a valid value.
+                            svl = svl ? svl : "";
+                            #else
+                            // Testing purposes only.
+                            snprintf(get_buf(), buf_size(), "%d:%zu", type, j);
+                            svl = get_buf();
+                            #endif
 
-                                if(val)
+                            // Always a valid (string).
+                            val = new_string(DBG_ALLOC(strdup(svl)));
+
+                            if(val)
+                            {
+                                // If we already have a symbol of the same
+                                // same as in the option, replace the value
+                                // of the old one with the new value.
+                                if(contxt->symbols)
                                 {
-                                    // If we already have a symbol of the same
-                                    // same as in the option, replace the value
-                                    // of the old one with the new value.
-                                    if(contxt->symbols)
+                                    for(size_t k = 0;
+                                        contxt->symbols[k] &&
+                                        contxt->symbols[k] != end();
+                                        k++)
                                     {
-                                        for(size_t k = 0;
-                                            contxt->symbols[k] &&
-                                            contxt->symbols[k] != end();
-                                            k++)
+                                        if(!strcasecmp(contxt->symbols[k]->name, name))
                                         {
-                                            if(!strcasecmp(contxt->symbols[k]->name, name))
-                                            {
-                                                kill(contxt->symbols[k]->resolved);
-                                                contxt->symbols[k]->resolved = val;
-                                                push(global(contxt), contxt->symbols[k]);
-                                                val->parent = contxt->symbols[k];
+                                            kill(contxt->symbols[k]->resolved);
+                                            contxt->symbols[k]->resolved = val;
+                                            push(global(contxt), contxt->symbols[k]);
+                                            val->parent = contxt->symbols[k];
 
-                                                // We no longer own 'val'.
-                                                val = NULL;
-                                                break;
-                                            }
+                                            // We no longer own 'val'.
+                                            val = NULL;
+                                            break;
                                         }
                                     }
+                                }
 
-                                    // No, this is a new symbol. Create, append
-                                    // to this function and push to the global
-                                    // context.
-                                    if(val)
+                                // No, this is a new symbol. Create, append
+                                // to this function and push to the global
+                                // context.
+                                if(val)
+                                {
+                                    entry_p sym = new_symbol(DBG_ALLOC(strdup(name)));
+
+                                    if(sym)
                                     {
-                                        entry_p sym = new_symbol(DBG_ALLOC(strdup(name)));
+                                        // Adopt the value found above.
+                                        val->parent = sym;
+                                        sym->resolved = val;
 
-                                        if(sym)
+                                        if(append(&contxt->symbols, sym))
                                         {
-                                            // Adopt the value found above.
-                                            val->parent = sym;
-                                            sym->resolved = val;
-
-                                            if(append(&contxt->symbols, sym))
-                                            {
-                                                push(global(contxt), sym);
-                                                sym->parent = contxt;
-                                            }
+                                            push(global(contxt), sym);
+                                            sym->parent = contxt;
                                         }
-                                        else
-                                        {
-                                            // Out of memory. Do not
-                                            // leak 'val'.
-                                            kill(val);
-                                        }
+                                    }
+                                    else
+                                    {
+                                        // Out of memory. Do not
+                                        // leak 'val'.
+                                        kill(val);
                                     }
                                 }
                             }

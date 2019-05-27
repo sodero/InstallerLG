@@ -2343,7 +2343,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
             free(ap);
 
             // Is there nothing left?
-            if(err == ERROR_NO_MORE_ENTRIES)
+            if(!err || err == ERROR_NO_MORE_ENTRIES)
             {
                 // Done.
                 return 1;
@@ -2354,6 +2354,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
                 // here, so will MatchFirst / MatchNext()
                 // problems.
                 ERR(ERR_DELETE_FILE, pat);
+                return 0;
             }
         }
         #else
