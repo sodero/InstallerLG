@@ -62,7 +62,7 @@ entry_p find_symbol(entry_p entry)
 
             // The current entry might be a CUSTOM
             // Ignore everything but SYMBOLS.
-            if(ret->type != SYMBOL || 
+            if(ret->type != SYMBOL ||
                strcasecmp(ret->name, entry->name))
             {
                 // Next entry;
