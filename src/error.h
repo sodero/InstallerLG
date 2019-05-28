@@ -29,43 +29,43 @@
 typedef enum
 {
     ERR_NONE = 0,
-    ERR_HALT,
-    ERR_ABORT,
-    ERR_RESET,
-    ERR_PARSE,
-    ERR_PANIC,
-    ERR_OVERFLOW,
-    ERR_READ,
-    ERR_READ_FILE,
-    ERR_READ_DIR,
-    ERR_WRITE_FILE,
-    ERR_WRITE_DIR,
-    ERR_RENAME_FILE,
-    ERR_DELETE_FILE,
-    ERR_NO_VERSION,
-    ERR_NOT_A_FILE,
-    ERR_NOT_A_DIR,
-    ERR_NO_SUCH_FILE_OR_DIR,
-    ERR_GET_PERM,
-    ERR_SET_PERM,
-    ERR_EXEC,
-    ERR_ASSIGN,
-    ERR_UNDEF_FNC,
-    ERR_UNDEF_VAR,
-    ERR_MAX_DEPTH,
-    ERR_MISSING_OPTION,
-    ERR_NOTHING_TO_DO,
-    ERR_DIV_BY_ZERO,
-    ERR_FMT_INVALID,
-    ERR_FMT_MISMATCH,
-    ERR_FMT_MISSING,
-    ERR_FMT_UNUSED,
-    ERR_NO_ITEM,
-    ERR_INVALID_APP,
-    ERR_INVALID_VOLUME,
-    ERR_INVALID_ASSIGN,
-    ERR_OPTION_MUTEX,
-    ERR_VAL_INVALID
+    ERR_HALT,                   // 1
+    ERR_ABORT,                  // 2
+    ERR_RESET,                  // 3
+    ERR_PARSE,                  // 4
+    ERR_PANIC,                  // 5
+    ERR_OVERFLOW,               // 6
+    ERR_READ,                   // 7
+    ERR_READ_FILE,              // 8
+    ERR_READ_DIR,               // 9
+    ERR_WRITE_FILE,             // 10
+    ERR_WRITE_DIR,              // 11
+    ERR_RENAME_FILE,            // 12
+    ERR_DELETE_FILE,            // 13
+    ERR_NO_VERSION,             // 14
+    ERR_NOT_A_FILE,             // 15
+    ERR_NOT_A_DIR,              // 16
+    ERR_NO_SUCH_FILE_OR_DIR,    // 17
+    ERR_GET_PERM,               // 18
+    ERR_SET_PERM,               // 19
+    ERR_EXEC,                   // 20
+    ERR_ASSIGN,                 // 21
+    ERR_UNDEF_FNC,              // 22
+    ERR_UNDEF_VAR,              // 23
+    ERR_MAX_DEPTH,              // 24
+    ERR_MISSING_OPTION,         // 25
+    ERR_NOTHING_TO_DO,          // 26
+    ERR_DIV_BY_ZERO,            // 27
+    ERR_FMT_INVALID,            // 28
+    ERR_FMT_MISMATCH,           // 29
+    ERR_FMT_MISSING,            // 30
+    ERR_FMT_UNUSED,             // 31
+    ERR_NO_ITEM,                // 32
+    ERR_INVALID_APP,            // 33
+    ERR_INVALID_VOLUME,         // 34
+    ERR_INVALID_ASSIGN,         // 35
+    ERR_OPTION_MUTEX,           // 36
+    ERR_VAL_INVALID             // 37
 } err_t;
 
 //----------------------------------------------------------------------------

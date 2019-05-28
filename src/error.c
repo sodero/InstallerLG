@@ -28,10 +28,9 @@ int error(entry_p contxt, int line, err_t type, const char *info)
     // Last error.
     static err_t last;
 
-    // Get state?
+    // Get current state?
     if(type == ERR_NONE)
     {
-        // Current.
         return last;
     }
 
@@ -46,44 +45,21 @@ int error(entry_p contxt, int line, err_t type, const char *info)
     // Show 'real' errors to the user.
     static const char *des[] =
     {
-        NULL,
-        "Halt",
-        "Abort",
-        "Reset",
-        "Parse error",
-        "Internal error",
-        "Buffer overflow",
-        "Read error",
-        "Could not read from file",
-        "Could not read directory",
-        "Could not write to file",
-        "Could not create directory",
-        "Could not rename file",
-        "Could not delete file",
-        "Version string not found",
-        "Not a file",
-        "Not a directory",
-        "No such file or directory",
-        "Could not get file / dir permissions",
-        "Could not set file / dir permissions",
-        "Could not execute command",
-        "Could not create / remove assign",
-        "Undefined function",
-        "Undefined variable",
-        "Max recursion depth exceeded",
-        "Missing option",
-        "Nothing to do",
-        "Division by zero",
-        "Invalid format string",
-        "Format string type mismatch",
-        "Missing format string arguments",
-        "Unused format string arguments",
-        "No such item",
-        "Invalid application name",
-        "Invalid name of volume",
-        "Invalid name of assign",
-        "Options are mutually exclusive",
-        "Invalid value"
+        /*0*/ NULL, /*1*/ "Halt", /*2*/ "Abort", /*3*/ "Reset", /*4*/ "Parse error",
+        /*5*/ "Internal error", /*6*/ "Buffer overflow", /*7*/ "Read error",
+        /*8*/ "Could not read from file", /*9*/ "Could not read directory",
+        /*10*/ "Could not write to file", /*11*/ "Could not create directory",
+        /*12*/ "Could not rename file", /*13*/ "Could not delete file", /*14*/ "Version not found",
+        /*15*/ "Not a file", /*16*/ "Not a directory",
+        /*17*/ "No such file or directory", /*18*/ "Could not get file / dir permissions",
+        /*19*/ "Could not set file / dir permissions", /*20*/ "Could not execute command",
+        /*21*/ "Could not create / remove assign", /*22*/ "Undefined function",
+        /*23*/ "Undefined variable", /*24*/ "Max recursion depth exceeded", /*25*/ "Missing option",
+        /*26*/ "Nothing to do", /*27*/ "Division by zero", /*28*/ "Invalid format string",
+        /*29*/ "Format string type mismatch", /*30*/ "Missing format string arguments",
+        /*31*/ "Unused format string arguments", /*32*/ "No such item",
+        /*33*/ "Invalid application name", /*34*/ "Invalid name of volume",
+        /*35*/ "Invalid assign", /*36*/ "Options are mutually exclusive", /*37*/ "Invalid value"
     };
 
     // Error window / console output.
