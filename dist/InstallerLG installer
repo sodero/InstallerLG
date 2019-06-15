@@ -1,5 +1,5 @@
 ; InstallerLG
-; $VER: InstallerLG 0.1.0-alpha.36
+; $VER: InstallerLG 0.1.0-alpha.37
 
 (set #app-bin "Installer")
 (set @app-name "InstallerLG")
