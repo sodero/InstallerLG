@@ -310,10 +310,73 @@ static const char *h_fileonly(entry_p contxt, const char *path)
 }
 
 //----------------------------------------------------------------------------
+// Name:        h_suffix
+// Description: Append file / directory suffix.
+// Input:       char *name:     Name of file or directory.
+//              char *suffix:   Suffix to append.
+// Return:      char *:         File or directory with suffix.
+//----------------------------------------------------------------------------
+static char *h_suffix(char *name, char *suffix)
+{
+    // Use global buffer.
+    char *buf = get_buf();
+    size_t len = buf_size();
+
+    // Don't trust the input.
+    if(name && suffix)
+    {
+        // Append suffix.
+        snprintf(buf, len, "%s.%s", name, suffix);
+    }
+
+    // Success or failure.
+    return buf;
+}
+
+//----------------------------------------------------------------------------
+// Name:        h_suffix_append
+// Description: Append file / directory suffix and append the result to a
+//              node list. If the resulting file / directory doesn't exist,
+//              nothing will be appended.
+// Input:       entry_p node:   List tail.
+//              char *suffix:   Suffix to append.
+// Return:      entry_p:        New tail.
+//----------------------------------------------------------------------------
+static pnode_p h_suffix_append(pnode_p node, char *suffix)
+{
+    // Save the type of the suffixed result, it might not
+    // be the same as that of the original node.
+    int type = h_exists(h_suffix(node->name, suffix));
+    pnode_p tail = node;
+
+    // The suffixed result might not exist.
+    if(tail && !tail->next && type)
+    {
+        // It's not necessary to check the return value.
+        tail->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+
+        // New list tail.
+        tail = tail->next;
+
+        // Fill out the details.
+        if(tail)
+        {
+            tail->name = DBG_ALLOC(strdup(h_suffix(node->name, suffix)));
+            tail->copy = DBG_ALLOC(strdup(h_suffix(node->copy, suffix)));
+            tail->type = type;
+        }
+    }
+
+    // New tail or the input node.
+    return tail;
+}
+
+//----------------------------------------------------------------------------
 // Forward declaration needed by h_choices.
 static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                           entry_p files, entry_p fonts, entry_p choices,
-                          entry_p pattern);
+                          entry_p pattern, entry_p infos);
+
 //----------------------------------------------------------------------------
 // Name:        h_choices
 // Description: Helper fo h_filetree taking care of (choices). Generating a
@@ -322,6 +385,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 // Input:       entry_p contxt:     The execution context.
 //              entry_p choices:    * List of files.
 //              entry_p fonts:      * Include fonts.
+//              entry_p infos:      * Include icons.
 //
 //              * Refer to the Installer.guide.
 //
@@ -330,7 +394,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 // Return:      entry_p:            A linked list of file and dir pairs.
 //----------------------------------------------------------------------------
 static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
-                         const char *src, const char *dst)
+                         entry_p infos, const char *src, const char *dst)
 {
     if(contxt && choices && src && dst)
     {
@@ -373,7 +437,26 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
                 // files will be skipped during file copy anyway.
                 if(node->type || !get_numvar(contxt, "@strict"))
                 {
-                    if(node->type == 2
+                    // Save current name and type in case we need
+                    // to append icon or font.
+                    long type = node->type;
+                    char *name = node->name, *copy = node->copy;
+
+                    // Create .info node if necessary.
+                    if(infos)
+                    {
+                        node = h_suffix_append(node, "info");
+                    }
+
+                    // Create .font node if necessary.
+                    if(fonts)
+                    {
+                        node = h_suffix_append(node, "font");
+                    }
+
+                    // Traverse (old, if info or font) directory
+                    // if applicable.
+                    if(type == 2
                        #ifndef AMIGA
                        && strcmp(f_nam, ".")
                        && strcmp(f_nam, "..")
@@ -385,8 +468,9 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
                         node->next = h_filetree
                         (
                             contxt,
-                            node->name,
-                            node->copy,
+                            name,
+                            copy,
+                            NULL,
                             NULL,
                             NULL,
                             NULL,
@@ -407,48 +491,6 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
                     {
                         // Not necessary to check the return value.
                         node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-                    }
-
-                    // Copy the font (if any) as well?
-                    if(fonts)
-                    {
-                        // Font = file + .font.
-                        snprintf(get_buf(), buf_size(), "%s.font", node->name);
-
-                        // Only if the font is a file.
-                        if(h_exists(get_buf()) == 1)
-                        {
-                            // This might be the last file / dir.
-                            // If true, no next element will exist
-                            // at this point so we need to create it.
-                            if(!node->next)
-                            {
-                                // Not necessary to check the return value.
-                                node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-                            }
-
-                            // Proceed with font.
-                            node = node->next;
-
-                            // Fill out the details.
-                            if(node)
-                            {
-                                // We already have the font name, create the
-                                // copy and set type, always a file.
-                                node->name = DBG_ALLOC(strdup(get_buf()));
-                                node->copy = h_tackon(contxt, dst, h_fileonly(contxt, get_buf()));
-                                node->type = 1;
-
-                                // Unless we ran out of memory, and there are
-                                // more files / dirs, create new list element.
-                                if(node->name && node->copy
-                                   && *chl && *chl != end())
-                                {
-                                    // Not necessary to check the return value.
-                                    node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-                                }
-                            }
-                        }
                     }
                 }
                 else
@@ -483,6 +525,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 //              entry_p fonts:      * Skip fonts.
 //              entry_p choices:    * List of files.
 //              entry_p pattern:    * File / dir pattern.
+//              entry_p infos:      * Include icons (choices).
 //
 //              * Refer to the Installer.guide.
 //
@@ -490,7 +533,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 //----------------------------------------------------------------------------
 static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                           entry_p files, entry_p fonts, entry_p choices,
-                          entry_p pattern)
+                          entry_p pattern, entry_p infos)
 {
     char *n_src = NULL, *n_dst = NULL;
 
@@ -502,7 +545,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
             // No need for recursion. Handle
             // enumerations separately.
             return h_choices(contxt, choices,
-                             fonts, src, dst);
+                             fonts, infos, src, dst);
         }
 
         int type = h_exists(src);
@@ -609,7 +652,8 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                                         files,
                                         fonts,
                                         NULL,
-                                        pattern
+                                        pattern,
+                                        NULL
                                     );
 
                                     // Fast forward to the end of
@@ -1372,7 +1416,8 @@ entry_p m_copyfiles(entry_p contxt)
                 files,
                 fonts,
                 choices,
-                pattern
+                pattern,
+                infos
             );
 
             // Unless we ran out of memory when traversing
