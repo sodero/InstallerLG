@@ -124,6 +124,31 @@ entry_p global(entry_p entry)
 }
 
 //----------------------------------------------------------------------------
+// Name:        parent
+// Description: Find parent of a given type if such exists.
+// Input:       entry_p entry:  The starting point.
+//              type_t type:    The parent type.
+// Return:      entry_p:        The parent, or NULL if no parent of the given
+//                              type was found.
+//----------------------------------------------------------------------------
+static entry_p parent(entry_p entry, type_t type)
+{
+    // Check current level then go all the way up.
+    for(entry_p cur = entry; cur; cur = cur->parent)
+    {
+        // Is this parent of the correct type?
+        if(cur->type == type)
+        {
+            // Found it.
+            return cur;
+        }
+    }
+
+    // Parent not found.
+    return NULL;
+}
+
+//----------------------------------------------------------------------------
 // Name:        custom
 // Description: Find CUSTOM parent if such exists.
 // Input:       entry_p entry:  The starting point.
@@ -132,19 +157,81 @@ entry_p global(entry_p entry)
 //----------------------------------------------------------------------------
 entry_p custom(entry_p entry)
 {
-    // Check current level then go all the way up.
-    for(entry_p cur = entry; cur; cur = cur->parent)
+    return parent(entry, CUSTOM);
+}
+
+//----------------------------------------------------------------------------
+// Name:        native
+// Description: Find NATIVE parent if such exists.
+// Input:       entry_p entry:  The starting point.
+// Return:      entry_p:        The NATIVE entry, or NULL
+//                              if no NATIVE was found.
+//----------------------------------------------------------------------------
+entry_p native(entry_p entry)
+{
+    return parent(entry, NATIVE);
+}
+
+//.OS.TEST
+static entry_p get_opt_string(entry_p contxt, opt_t type)
+{
+    // Iterate over all strings.
+    for(entry_p *child = contxt->children;
+       *child && *child != end(); child++)
     {
-        // Is this a CUSTOM procedure?
-        if(cur->type == CUSTOM)
+        if((type == OPT_FAIL && !strcmp(str(*child), "fail")) ||
+           (type == OPT_FORCE && !strcmp(str(*child), "force")) ||
+           (type == OPT_NOFAIL && !strcmp(str(*child), "nofail")) ||
+           (type == OPT_ASKUSER && !strcmp(str(*child), "askuser")) ||
+           (type == OPT_OKNODELETE && !strcmp(str(*child), "oknodelete")))
         {
-            // Found it.
-            return cur;
+            // Option found.
+            return *child;
         }
     }
 
-    // Not inside CUSTOM.
+    // Not found.
     return NULL;
+}
+
+//.OS.TEST
+static entry_p opt_verify_confirm(entry_p contxt, entry_p confirm)
+{
+    entry_p prompt = get_opt(contxt, OPT_PROMPT),
+            help   = get_opt(contxt, OPT_HELP);
+
+    // Make sure that we a prompt and help string.
+    if(!prompt || !help)
+    {
+        char * msg = prompt ? "help" : "prompt";
+        ERR_C(native(contxt), ERR_MISSING_OPTION, msg);
+    }
+
+    // The default threshold is expert.
+    int level = get_numvar(contxt, "@user-level"),
+        thres = 2;
+
+    // If the (confirm ...) option contains
+    // something that can be translated into
+    // a new threshold value...
+    if(confirm->children &&
+       confirm->children[0] &&
+       confirm->children[0] != end())
+    {
+        // ...then do so.
+        thres = num(confirm);
+    }
+
+    // If we are below the threshold value, or
+    // user input has been short-circuited by
+    // @yes, skip confirmation.
+    if(level < thres || get_numvar(contxt, "@yes"))
+    {
+        return NULL;
+    }
+
+    // Confirmation needed.
+    return confirm;
 }
 
 //----------------------------------------------------------------------------
@@ -156,32 +243,19 @@ entry_p custom(entry_p entry)
 //----------------------------------------------------------------------------
 entry_p get_opt(entry_p contxt, opt_t type)
 {
-
-    // We need a context to search.
+    // We need a context without any previous errors.
     if(!contxt || !contxt->children || contxt == end())
     {
         // Nowhere.
         return NULL;
     }
 
-    // Real option or (optional)?
+    // An (optional) string.
     if(contxt->type == OPTION)
     {
-        // Iterate over all strings.
-        for(entry_p *child = contxt->children;
-           *child && *child != end(); child++)
-        {
-            if((type == OPT_FAIL && !strcmp(str(*child), "fail")) ||
-               (type == OPT_FORCE && !strcmp(str(*child), "force")) ||
-               (type == OPT_NOFAIL && !strcmp(str(*child), "nofail")) ||
-               (type == OPT_ASKUSER && !strcmp(str(*child), "askuser")) ||
-               (type == OPT_OKNODELETE && !strcmp(str(*child), "oknodelete")))
-            {
-                return *child;
-            }
-        }
+        return get_opt_string(contxt, type);
     }
-    // An (optional) string.
+    // Real option.
     else
     {
         // Iterate over all options.
@@ -206,10 +280,16 @@ entry_p get_opt(entry_p contxt, opt_t type)
                 entry = resolve(entry);
             }
 
-            // Option found?
+            // Did we find it?
             if(entry->id == (int32_t) type)
             {
-                // We found it.
+                if(type == OPT_CONFIRM)
+                {
+                    // Is confirmation really needed?
+                    return opt_verify_confirm(contxt, entry);
+                }
+
+                // Option found.
                 return entry;
             }
         }

@@ -35,49 +35,16 @@ entry_p m_openwbobject(entry_p contxt)
                 confirm    = get_opt(CARG(2), OPT_CONFIRM),
                 safe       = get_opt(CARG(2), OPT_SAFE);
 
+        if(DID_ERR)
+        {
+            RCUR;
+        }
+
         // A non safe operation in pretend mode
         // always succeeds.
         if(get_numvar(contxt, "@pretend") && !safe)
         {
             RNUM(1);
-        }
-
-        // Do we need confirmation?
-        if(confirm)
-        {
-            // The default threshold is expert.
-            int level = get_numvar(contxt, "@user-level"),
-                thld = 2;
-
-            // If the (confirm ...) option contains
-            // something that can be translated into
-            // a new threshold value...
-            if(confirm->children &&
-               confirm->children[0] &&
-               confirm->children[0] != end())
-            {
-                // ...then do so.
-                thld = num(confirm);
-            }
-
-            // If we are below the threshold value, or
-            // user input has been short-circuited by
-            // @yes, skip confirmation.
-            if(level < thld ||
-               get_numvar(contxt, "@yes"))
-            {
-                confirm = NULL;
-            }
-
-            // Make sure that we have the prompt and
-            // help texts that we need if 'confirm'
-            // is set.
-            if(!prompt || !help)
-            {
-                char * msg = prompt ? "help" : "prompt";
-                ERR(ERR_MISSING_OPTION, msg);
-                RNUM(0);
-            }
         }
 
         if(!confirm || h_confirm(CARG(2), str(help), str(prompt)))

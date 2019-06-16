@@ -23,6 +23,7 @@ void ror(entry_p *e);
 entry_p local(entry_p e);
 entry_p global(entry_p e);
 entry_p custom(entry_p e);
+entry_p native(entry_p e);
 int c_sane(entry_p c, size_t n);
 int s_sane(entry_p c, size_t n);
 void pretty_print(entry_p entry);

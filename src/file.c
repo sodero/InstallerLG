@@ -1344,6 +1344,11 @@ entry_p m_copyfiles(entry_p contxt)
 
         DNUM = 0;
 
+        if(DID_ERR)
+        {
+            RCUR;
+        }
+
         // The (pattern) (choices) and (all) options
         // are mutually exclusive.
         if((pattern && (choices || all)) ||
@@ -1435,44 +1440,6 @@ entry_p m_copyfiles(entry_p contxt)
                 {
                     free(cur->next->copy);
                     cur->next->copy = h_tackon(contxt, dst, str(newname));
-                }
-
-                // Do we need confirmation?
-                if(confirm)
-                {
-                    // The default threshold is expert.
-                    int level = get_numvar(contxt, "@user-level"),
-                        thres = 2;
-
-                    // If the (confirm ...) option contains
-                    // something that can be translated into
-                    // a new threshold value...
-                    if(confirm->children &&
-                       confirm->children[0] &&
-                       confirm->children[0] != end())
-                    {
-                        // ...then do so.
-                        thres = num(confirm);
-                    }
-
-                    // If we are below the threshold value, or
-                    // user input has been short-circuited by
-                    // @yes, skip confirmation.
-                    if(level < thres ||
-                       get_numvar(contxt, "@yes"))
-                    {
-                        confirm = NULL;
-                    }
-
-                    // Make sure that we have the prompt and
-                    // help texts that we need if 'confirm'
-                    // is set.
-                    if(!prompt || !help)
-                    {
-                        char * msg = prompt ? "help" : "prompt";
-                        ERR(ERR_MISSING_OPTION, msg);
-                        cur = NULL;
-                    }
                 }
 
                 // Initialize GUI, set up file lists, events,
@@ -1652,6 +1619,11 @@ entry_p m_copylib(entry_p contxt)
 
         DNUM = 0;
 
+        if(DID_ERR)
+        {
+            RCUR;
+        }
+
         // The (fail) (nofail) and (oknodelete) options
         // are mutually exclusive.
         if((fail && (nofail || oknodelete)) ||
@@ -1710,33 +1682,6 @@ entry_p m_copylib(entry_p contxt)
                     // Destination is a file, not a dir.
                     ERR(ERR_NOT_A_DIR, dst);
                     RCUR;
-                }
-
-                // Do we need confirmation?
-                if(confirm)
-                {
-                    // The default threshold is expert.
-                    int thres = 2;
-
-                    // If the (confirm ...) option contains
-                    // something that can be translated into
-                    // a new threshold value...
-                    if(confirm->children &&
-                       confirm->children[0] &&
-                       confirm->children[0] != end())
-                    {
-                        // ...then do so.
-                        thres = num(confirm);
-                    }
-
-                    // If we are below the threshold value, or
-                    // user input has been short-circuited by
-                    // @yes, skip confirmation.
-                    if(level < thres ||
-                       get_numvar(contxt, "@yes"))
-                    {
-                        confirm = NULL;
-                    }
                 }
 
                 if(!type)
@@ -2445,41 +2390,9 @@ entry_p m_delete(entry_p contxt)
                     confirm  = get_opt(CARG(2), OPT_CONFIRM),
                     safe     = get_opt(CARG(2), OPT_SAFE);
 
-            // Do we need confirmation?
-            if(confirm)
+            if(DID_ERR)
             {
-                // The default threshold is expert.
-                int level = get_numvar(contxt, "@user-level"),
-                    thres = 2;
-
-                // If the (confirm ...) option contains
-                // something that can be translated into
-                // a new threshold value...
-                if(confirm->children &&
-                   confirm->children[0] &&
-                   confirm->children[0] != end())
-                {
-                    // ...then do so.
-                    thres = num(confirm);
-                }
-
-                // If we are below the threshold value,
-                // don't care about getting confirmation
-                // from the user.
-                if(level < thres)
-                {
-                    confirm = NULL;
-                }
-
-                // Make sure that we have the prompt and
-                // help texts that we need if 'confirm'
-                // is set.
-                if(!prompt || !help)
-                {
-                    char *opt = prompt ? "help" : "prompt";
-                    ERR(ERR_MISSING_OPTION, opt);
-                    RCUR;
-                }
+                RCUR;
             }
 
             // If we need confirmation and the user skips
@@ -2965,41 +2878,9 @@ entry_p m_makedir(entry_p contxt)
 
         DNUM = 0;
 
-        // Do we need confirmation?
-        if(confirm)
+        if(DID_ERR)
         {
-            // The default threshold is expert.
-            int level = get_numvar(contxt, "@user-level"),
-                thres = 2;
-
-            // If the (confirm ...) option contains
-            // something that can be translated into
-            // a new threshold value...
-            if(confirm->children &&
-               confirm->children[0] &&
-               confirm->children[0] != end())
-            {
-                // ...then do so.
-                thres = num(confirm);
-            }
-
-            // If we are below the threshold value,
-            // don't care about getting confirmation
-            // from the user.
-            if(level < thres)
-            {
-                confirm = NULL;
-            }
-
-            // Make sure that we have the prompt and
-            // help texts that we need if 'confirm'
-            // is set.
-            if(!prompt || !help)
-            {
-                char *opt = prompt ? "help" : "prompt";
-                ERR(ERR_MISSING_OPTION, opt);
-                RCUR;
-            }
+            RCUR;
         }
 
         // If we need confirmation and the user skips
@@ -3571,46 +3452,13 @@ entry_p m_textfile(entry_p contxt)
 
         DNUM = 0;
 
+        if(DID_ERR)
+        {
+            RCUR;
+        }
+
         if(dest)
         {
-            // Do we need confirmation?
-            if(confirm)
-            {
-                // The default threshold is expert.
-                int level = get_numvar(contxt, "@user-level"),
-                    thres = 2;
-
-                // If the (confirm ...) option contains
-                // something that can be translated into
-                // a new threshold value...
-                if(confirm->children &&
-                   confirm->children[0] &&
-                   confirm->children[0] != end())
-                {
-                    // ...then do so.
-                    thres = num(confirm);
-                }
-
-                // If we are below the threshold value,
-                // don't care about getting confirmation
-                // from the user.
-                if(level < thres)
-                {
-                    confirm = NULL;
-                }
-
-                // Make sure that we have the prompt and
-                // help texts that we need if 'confirm'
-                // is set.
-                if(!prompt || !help)
-                {
-                    char *opt = prompt ? "help" : "prompt";
-                    ERR(ERR_MISSING_OPTION, opt);
-                    RCUR;
-                }
-            }
-
-
             // If we need confirmation and the user skips
             // or aborts, return. On abort, the HALT will
             // be set by h_confirm.
@@ -3767,48 +3615,16 @@ entry_p m_tooltype(entry_p contxt)
 
         DNUM = 0;
 
+        if(DID_ERR)
+        {
+            RCUR;
+        }
+
         // We need something to work with.
         if(dest)
         {
             // Something is 'dest'.info
             char *file = str(dest);
-
-            // Do we need confirmation?
-            if(confirm)
-            {
-                // The default threshold is expert.
-                int level = get_numvar(contxt, "@user-level"),
-                    thres = 2;
-
-                // If the (confirm ...) option contains
-                // something that can be translated into
-                // a new threshold value...
-                if(confirm->children &&
-                   confirm->children[0] &&
-                   confirm->children[0] != end())
-                {
-                    // ...then do so.
-                    thres = num(confirm);
-                }
-
-                // If we are below the threshold value,
-                // don't care about getting confirmation
-                // from the user.
-                if(level < thres)
-                {
-                    confirm = NULL;
-                }
-
-                // Make sure that we have the prompt and
-                // help texts that we need if 'confirm'
-                // is set.
-                if(!prompt || !help)
-                {
-                    char *opt = prompt ? "help" : "prompt";
-                    ERR(ERR_MISSING_OPTION, opt);
-                    RCUR;
-                }
-            }
 
             // The (noposition) and (setposition)
             // options are mutually exclusive.
@@ -4147,45 +3963,13 @@ entry_p m_rename(entry_p contxt)
                 disk    = get_opt(CARG(3), OPT_DISK),
                 safe    = get_opt(CARG(3), OPT_SAFE);
 
+        if(DID_ERR)
+        {
+            RCUR;
+        }
+
         const char *old  = str(CARG(1)),
                    *new  = str(CARG(2));
-
-        // Do we need confirmation?
-        if(confirm)
-        {
-            // The default threshold is expert.
-            int level = get_numvar(contxt, "@user-level");
-            int thres = 2;
-
-            // If the (confirm ...) option contains
-            // something that can be translated into
-            // a new threshold value...
-            if(confirm->children &&
-               confirm->children[0] &&
-               confirm->children[0] != end())
-            {
-                // ...then do so.
-                thres = num(confirm);
-            }
-
-            // If we are below the threshold value,
-            // don't care about getting confirmation
-            // from the user.
-            if(level < thres)
-            {
-                confirm = NULL;
-            }
-
-            // Make sure that we have the prompt and
-            // help texts that we need if 'confirm'
-            // is set.
-            if(!prompt || !help)
-            {
-                char *opt = prompt ? "help" : "prompt";
-                ERR(ERR_MISSING_OPTION, opt);
-                RNUM(0);
-            }
-        }
 
         // If we need confirmation and the user skips
         // or aborts, return. On abort, the HALT will

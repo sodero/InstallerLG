@@ -43,46 +43,12 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 
         DNUM = 0;
 
-        // Find out if we need confirmation.
-        if(confirm)
+        if(DID_ERR)
         {
-            // The default threshold is expert.
-            int level = get_numvar(contxt, "@user-level");
-            int thres = 2;
-
-            // If the (confirm ...) option contains
-            // something that can be translated into
-            // a new threshold value...
-            if(confirm->children &&
-               confirm->children[0] &&
-               confirm->children[0] != end())
-            {
-                // ...then do so.
-                thres = num(confirm);
-            }
-
-            // If we are below the threshold value,
-            // don't care about getting confirmation
-            // from the user.
-            if(level < thres)
-            {
-                confirm = NULL;
-            }
-
-            // Make sure that we have the prompt and
-            // help texts that we need if 'confirm'
-            // is set. It's not strictly necessary
-            // if 'confirm' is not set, but it's not
-            // valid code so lets fail anyway.
-            if(!prompt || !help)
-            {
-                char *opt = prompt ? "help" : "prompt";
-                ERR(ERR_MISSING_OPTION, opt);
-                RCUR;
-            }
+            RCUR;
         }
 
-        // Did we need it? (confirmation)
+        // Do we need confirmation?
         if(confirm)
         {
             inp_t grc = gui_confirm(str(prompt), str(help), back != false);
