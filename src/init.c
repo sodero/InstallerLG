@@ -19,7 +19,6 @@
 #include "symbol.h"
 #include "util.h"
 #include "version.h"
-
 #include <string.h>
 
 #ifdef AMIGA

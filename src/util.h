@@ -11,7 +11,6 @@
 #define UTIL_H_
 
 #include "types.h"
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +25,7 @@ entry_p custom(entry_p e);
 entry_p native(entry_p e);
 int c_sane(entry_p c, size_t n);
 int s_sane(entry_p c, size_t n);
-void pretty_print(entry_p entry);
+void dump(entry_p entry);
 int get_numvar(entry_p c, char *v);
 entry_p get_opt(entry_p c, opt_t t);
 char *get_strvar(entry_p c, char *v);

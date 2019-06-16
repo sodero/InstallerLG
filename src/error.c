@@ -10,7 +10,6 @@
 #include "error.h"
 #include "gui.h"
 #include "util.h"
-
 #include <stdio.h>
 
 //----------------------------------------------------------------------------
@@ -62,13 +61,16 @@ int error(entry_p contxt, int line, err_t type, const char *info)
         /*35*/ "Invalid assign", /*36*/ "Options are mutually exclusive", /*37*/ "Invalid value"
     };
 
-    // Error window / console output.
-    gui_error(line, des[type], info);
-
-    // Do a context dump if we're in PANIC or debug mode.
-    if(type == ERR_PANIC || get_numvar(contxt, "@debug"))
+    // Dump context if in PANIC.
+    if(type == ERR_PANIC)
     {
-        pretty_print(contxt);
+        dump(contxt);
+    }
+    // Don't show GUI if in PANIC.
+    else
+    {
+        // Error window / console output.
+        gui_error(line, des[type], info);
     }
 
     // Current state.

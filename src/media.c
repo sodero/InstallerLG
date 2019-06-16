@@ -14,7 +14,6 @@
 #include "gui.h"
 #include "media.h"
 #include "util.h"
-
 #include <string.h>
 #if defined(__MORPHOS__) || defined(__VBCC__)
 char *strcasestr(const char *, const char *);

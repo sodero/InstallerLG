@@ -15,7 +15,6 @@
 #include "information.h"
 #include "resource.h"
 #include "util.h"
-
 #include <stdio.h>
 #include <string.h>
 

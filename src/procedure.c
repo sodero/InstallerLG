@@ -13,7 +13,6 @@
 #include "procedure.h"
 #include "strop.h"
 #include "util.h"
-
 #include <string.h>
 
 //----------------------------------------------------------------------------

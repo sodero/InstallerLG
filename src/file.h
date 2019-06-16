@@ -11,7 +11,6 @@
 #define FILE_H_
 
 #include "types.h"
-
 #include <stdbool.h>
 
 entry_p m_copyfiles(entry_p contxt);

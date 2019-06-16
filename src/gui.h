@@ -11,7 +11,6 @@
 #define GUI_H_
 
 #include "file.h"
-
 #include <stdbool.h>
 
 // Gui return codes.

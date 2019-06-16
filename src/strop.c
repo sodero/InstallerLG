@@ -12,7 +12,6 @@
 #include "eval.h"
 #include "strop.h"
 #include "util.h"
-
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>

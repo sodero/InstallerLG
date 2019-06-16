@@ -12,7 +12,6 @@
 #include "eval.h"
 #include "symbol.h"
 #include "util.h"
-
 #include <stdlib.h>
 #include <string.h>
 

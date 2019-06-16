@@ -15,7 +15,6 @@
 #include "gui.h"
 #include "resource.h"
 #include "util.h"
-
 #include <stdio.h>
 #include <unistd.h>
 

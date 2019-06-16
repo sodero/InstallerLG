@@ -11,7 +11,6 @@
 #include "error.h"
 #include "eval.h"
 #include "util.h"
-
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -84,7 +83,7 @@ entry_p local(entry_p entry)
 
         if(contxt->parent == contxt)
         {
-            pretty_print(contxt);
+            dump(contxt);
             break;
         }
     }
@@ -309,150 +308,114 @@ entry_p get_opt(entry_p contxt, opt_t type)
 }
 
 //----------------------------------------------------------------------------
+// Name:        x_sane
+// Description: Sanity check to verify that we have the required number of
+//              children or symbols needed and that these are valid. This
+//              might fail if we're out of memory or if the parser is broken.
+// Input:       entry_p contxt:  The context.
+//              type_t:          NATIVE or SYMBOL.
+//              size_t num:      The number of children / symbols needed.
+// Return:      int:             1 if context is valid, 0 otherwise.
+//----------------------------------------------------------------------------
+static int x_sane(entry_p contxt, type_t type, size_t num)
+{
+    // We need a context.
+    if(contxt)
+    {
+        // Assume verification of symbols.
+        entry_p *vec = contxt->symbols;
+
+        // Are we going to verify children?
+        if(type == NATIVE)
+        {
+            vec = contxt->children;
+
+            // All NATIVE have a default return value.
+            if(contxt->type == NATIVE && !contxt->resolved)
+            {
+                dump(contxt);
+                return 0;
+            }
+        }
+
+        // We should have an array here.
+        if(!vec)
+        {
+            dump(contxt);
+            return 0;
+        }
+
+        // Expect at least num children.
+        for(size_t i = 0; i < num; i++)
+        {
+            // Make sure we have something.
+            if(!vec[i])
+            {
+                dump(contxt);
+                return 0;
+            }
+
+            // It should not be a sentinel.
+            if(vec[i] == end())
+            {
+                dump(contxt);
+                return 0;
+            }
+
+            // Make sure that it belongs to us.
+            if(vec[i]->parent != contxt)
+            {
+                dump(contxt);
+                return 0;
+            }
+
+            // All but CONTXT / NUMBER are named.
+            if(!vec[i]->name &&
+                vec[i]->type != CONTXT &&
+                vec[i]->type != NUMBER)
+            {
+                dump(contxt);
+                return 0;
+            }
+        }
+
+        // We're OK;
+        return 1;
+    }
+
+    // Badly broken.
+    dump(contxt);
+    return 0;
+}
+
+//----------------------------------------------------------------------------
 // Name:        c_sane
 // Description: Context sanity check used by the NATIVE functions to verify
 //              that we have atleast the number of children needed and that
-//              these are valid. If this fails, it typically, but not always,
-//              means that we have a parser problem.
+//              these are valid. If this fails it means that we have a parser
+//              or an out of memory problem.
 // Input:       entry_p contxt:  The context.
 //              size_t num:      The number of children necessary.
 // Return:      int:             1 if context is valid, 0 otherwise.
 //----------------------------------------------------------------------------
 int c_sane(entry_p contxt, size_t num)
 {
-    // Assume success;
-    int status = 1;
-
-    // All contexts used by NATIVE functions must allocate an
-    // array for children, it could be empty though.
-    if(contxt && contxt->children)
-    {
-        // Expect atleast n children.
-        for(size_t i = 0; i < num; i++)
-        {
-            // Assume failure;
-            status = 0;
-
-            // Make sure that something exists.
-            if(contxt->children[i] == NULL)
-            {
-                DBG("contxt->children[%d] == NULL\n", (int) i);
-                break;
-            }
-
-            // Make sure that it's not a sentinel.
-            if(contxt->children[i] == end())
-            {
-                DBG("contxt->children[%d] == end()\n", (int) i);
-                break;
-            }
-
-            // Make sure that it belongs to us.
-            if(contxt->children[i]->parent != contxt)
-            {
-                DBG("contxt->children[%d]->parent != %p\n", (int) i,
-                    (void *) contxt);
-                break;
-            }
-
-            // Make sure that all NATIVE functions have
-            // a default return value.
-            if(contxt->type == NATIVE && !contxt->resolved)
-            {
-                DBG("contxt->type == NATIVE && !contxt->resolved\n");
-                break;
-            }
-
-            // Make sure that all objects except CONTXTs
-            // and NUMBERs have a name.
-            if(!contxt->children[i]->name &&
-                contxt->children[i]->type != CONTXT &&
-                contxt->children[i]->type != NUMBER)
-            {
-                DBG("!contxt->children[i]->name && "
-                    "contxt->children[i]->type != CONTXT && "
-                    "contxt->children[i]->type != NUMBER\n");
-                break;
-            }
-
-            // We're OK;
-            status = 1;
-        }
-    }
-    else
-    {
-        // Badly broken.
-        status = 0;
-        DBG("!contxt || !contxt->children\n");
-    }
-
-    return status;
+    return x_sane(contxt, NATIVE, num);
 }
 
 //----------------------------------------------------------------------------
 // Name:        s_sane
 // Description: Context sanity check used by the NATIVE functions to verify
 //              that we have atleast the number of symbols needed and that
-//              these are valid. If this fails it typically, but not always,
-//              means that we have a parser problem.
+//              these are valid. If this fails it means that we have a parser
+//              or an out of memory problem.
 // Input:       entry_p contxt:  The context.
 //              size_t num:      The number of symbols necessary.
 // Return:      int:             1 if context is valid, 0 otherwise.
 //----------------------------------------------------------------------------
 int s_sane(entry_p contxt, size_t num)
 {
-    // Assume success;
-    int status = 1;
-
-    if(contxt && contxt->symbols)
-    {
-        // Expect atleast num symbols.
-        for(size_t i = 0; i < num; i++)
-        {
-            // Assume failure;
-            status = 0;
-
-            // Make sure that somethings exists.
-            if(contxt->symbols[i] == NULL)
-            {
-                DBG("contxt->symbols[%d] == NULL\n", (int) i);
-                break;
-            }
-
-            // Make sure that it's not a sentinel.
-            if(contxt->symbols[i] == end())
-            {
-                DBG("contxt->symbols[%d] == end()\n", (int) i);
-                break;
-            }
-
-            // Make sure that it has a name.
-            if(!contxt->symbols[i]->name)
-            {
-                DBG("!contxt->symbols[%d]->name\n", (int) i);
-                break;
-            }
-
-            // Make sure that it belongs to us.
-            if(contxt->symbols[i]->parent != contxt)
-            {
-                DBG("contxt->symbols[%d]->parent != %p\n", (int) i,
-                    (void *) contxt);
-                break;
-            }
-
-            // We're OK;
-            status = 1;
-        }
-    }
-    else
-    {
-        // Badly broken.
-        status = 0;
-        DBG("!contxt || !contxt->symbols\n");
-    }
-
-    return status;
+    return x_sane(contxt, SYMBOL, num);
 }
 
 //----------------------------------------------------------------------------
@@ -829,13 +792,13 @@ void set_strvar(entry_p contxt, char *var, char *val)
 }
 
 //----------------------------------------------------------------------------
-// Name:        pp_aux
-// Description: Refer to pretty_print below.
+// Name:        dump_indent
+// Description: Refer to dump below.
 // Input:       entry_p entry:  The tree to print.
 //              int indent:     Indentation level.
 // Return:      -
 //----------------------------------------------------------------------------
-static void pp_aux(entry_p entry, int indent)
+static void dump_indent(entry_p entry, int indent)
 {
     // Indentation galore.
     char ind[16] = "\t\t\t\t"
@@ -891,7 +854,7 @@ static void pp_aux(entry_p entry, int indent)
             // Pretty print the 'resolved' entry,
             // last / default return value and
             // values refered to by symbols.
-            pp_aux(entry->resolved, indent + 1);
+            dump_indent(entry->resolved, indent + 1);
         }
 
         // Pretty print all children.
@@ -902,7 +865,7 @@ static void pp_aux(entry_p entry, int indent)
             while(*child && *child != end())
             {
                 DBG("%sChl:\t", type);
-                pp_aux(*child, indent + 1);
+                dump_indent(*child, indent + 1);
                 child++;
             }
         }
@@ -915,7 +878,7 @@ static void pp_aux(entry_p entry, int indent)
             while(*sym && *sym != end())
             {
                 DBG("%sSym:\t", type);
-                pp_aux(*sym, indent + 1);
+                dump_indent(*sym, indent + 1);
                 sym++;
             }
         }
@@ -927,15 +890,15 @@ static void pp_aux(entry_p entry, int indent)
 }
 
 //----------------------------------------------------------------------------
-// Name:        pretty_print
+// Name:        dump
 // Description: Pretty print the complete tree in 'entry'.
 // Input:       entry_p entry:  The tree to print.
 // Return:      -
 //----------------------------------------------------------------------------
-void pretty_print(entry_p entry)
+void dump(entry_p entry)
 {
     // Start with no indentation.
-    pp_aux(entry, 0);
+    dump_indent(entry, 0);
 }
 
 #define LG_BUFSIZ (BUFSIZ + PATH_MAX + 1)
@@ -960,13 +923,13 @@ char *get_buf(void)
 //----------------------------------------------------------------------------
 size_t buf_size(void)
 {
-    return LG_BUFSIZ - 1;
+    return sizeof(buf) - 1;
 }
 
 //----------------------------------------------------------------------------
 // Name:        dbg_alloc
-// Description: Used by the DBG_ALLOX macro to provide more info when failing
-//              to allocate memory. And to fail deliberately when testing.
+// Description: Used by DBG_ALLOC to provide more info when failing to
+//              allocate memory and to fail deliberately when testing.
 // Input:       int line: Source code line.
 //              const char *file: Source code file.
 //              const char *func: Source code function.

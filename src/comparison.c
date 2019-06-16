@@ -12,7 +12,6 @@
 #include "error.h"
 #include "eval.h"
 #include "util.h"
-
 #include <string.h>
 
 //----------------------------------------------------------------------------

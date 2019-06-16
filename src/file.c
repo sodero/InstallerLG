@@ -16,7 +16,6 @@
 #include "resource.h"
 #include "strop.h"
 #include "util.h"
-
 #include <dirent.h>
 #include <limits.h>
 #include <stdarg.h>
