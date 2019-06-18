@@ -2,7 +2,7 @@
 //----------------------------------------------------------------------------
 // lexer.l:
 //
-// InstallerNG tokenizer
+// InstallerLG tokenizer
 //----------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
@@ -19,7 +19,7 @@
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* strduptr(const char *str) - Duplicate string and translate */
-/* escpate characters according to the Installer V42.6 guide  */
+/* escape characters according to the Installer V42.6 guide   */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 static char *strduptr(const char *str);
 %}

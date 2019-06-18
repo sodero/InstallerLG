@@ -3046,7 +3046,7 @@ DISPATCH(IG)
 //
 //
 // The gui_* functions below serve as glue between the platform independent
-// parts of InstallerNG and the Amiga specific Zune / MUI parts. On non Amiga
+// parts of InstallerLG and the Amiga specific Zune / MUI parts. On non Amiga
 // systems, arguments are written to stdout to facilitate testing.
 //
 //
