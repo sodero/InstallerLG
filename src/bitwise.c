@@ -24,27 +24,22 @@
 //----------------------------------------------------------------------------
 entry_p m_and(entry_p contxt)
 {
-    // We need atleast two arguments.
-    if(c_sane(contxt, 2))
-    {
-        // Evaluate all children, if any of
-        // them are false, return false.
-        for(entry_p *cur = contxt->children;
-            *cur && *cur != end(); cur++)
-        {
-            if(!num(*cur))
-            {
-                RNUM(0);
-            }
-        }
+    // Two or more arguments.
+    C_SANE(2, NULL);
 
-        // All children were true.
-        RNUM(1);
+    // Evaluate all children, if any of
+    // them are false, return false.
+    for(entry_p *cur = contxt->children;
+        *cur && *cur != end(); cur++)
+    {
+        if(!num(*cur))
+        {
+            RNUM(0);
+        }
     }
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // All children are true.
+    RNUM(1);
 }
 
 //----------------------------------------------------------------------------
@@ -55,19 +50,11 @@ entry_p m_and(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_bitand(entry_p contxt)
 {
-    // We need two arguments.
-    if(c_sane(contxt, 2))
-    {
-        RNUM
-        (
-            num(CARG(1)) &
-            num(CARG(2))
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Set and return.
+    RNUM(num(CARG(1)) & num(CARG(2)));
 }
 
 //----------------------------------------------------------------------------
@@ -78,18 +65,11 @@ entry_p m_bitand(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_bitnot(entry_p contxt)
 {
-    // We need a single argument.
-    if(c_sane(contxt, 1))
-    {
-        RNUM
-        (
-            ~num(CARG(1))
-        );
-    }
+    // One argument.
+    C_SANE(1, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Set and return.
+    RNUM(~num(CARG(1)));
 }
 
 //----------------------------------------------------------------------------
@@ -100,19 +80,11 @@ entry_p m_bitnot(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_bitor(entry_p contxt)
 {
-    // We need two arguments.
-    if(c_sane(contxt, 2))
-    {
-        RNUM
-        (
-            num(CARG(1)) |
-            num(CARG(2))
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Set and return.
+    RNUM(num(CARG(1)) | num(CARG(2)));
 }
 
 //----------------------------------------------------------------------------
@@ -123,19 +95,11 @@ entry_p m_bitor(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_bitxor(entry_p contxt)
 {
-    // We need two arguments.
-    if(c_sane(contxt, 2))
-    {
-        RNUM
-        (
-            num(CARG(1)) ^
-            num(CARG(2))
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Set and return.
+    RNUM(num(CARG(1)) ^ num(CARG(2)));
 }
 
 //----------------------------------------------------------------------------
@@ -146,18 +110,11 @@ entry_p m_bitxor(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_not(entry_p contxt)
 {
-    // We need a single argument.
-    if(c_sane(contxt, 1))
-    {
-        RNUM
-        (
-            !num(CARG(1))
-        );
-    }
+    // One argument.
+    C_SANE(1, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Set and return.
+    RNUM(!num(CARG(1)));
 }
 
 //----------------------------------------------------------------------------
@@ -168,34 +125,23 @@ entry_p m_not(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_in(entry_p contxt)
 {
-    // We need atleast two arguments.
-    if(c_sane(contxt, 2))
+    // Two or more arguments.
+    C_SANE(2, NULL);
+
+    // Bitmask.
+    int mask = 0;
+
+    // Create the bitmask of all children.
+    for(entry_p *cur = CARG(2)->children;
+        *cur && *cur != end(); cur++)
     {
-        DNUM = 0;
-
-        // For all the children in the context
-        // of the second argument, create the
-        // corresponding bitmask.
-        entry_p *cur = CARG(2)->children;
-
-        while(*cur && *cur != end())
-        {
-            DNUM += 1 << num(*cur);
-            cur++;
-        }
-
-        // Apply the bitmask to the first
-        // argument and return the result.
-        RNUM
-        (
-            num(CARG(1)) &
-            DNUM
-        );
+        // Add current bit to the mask.
+        mask += 1 << num(*cur);
     }
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Apply the bitmask to the first
+    // argument and return the result.
+    RNUM(num(CARG(1)) & mask);
 }
 
 //----------------------------------------------------------------------------
@@ -209,27 +155,23 @@ entry_p m_in(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_or(entry_p contxt)
 {
-    // We need atleast two arguments.
-    if(c_sane(contxt, 2))
-    {
-        // Evaluate all children, if any of
-        // them are true, return true.
-        for(entry_p *cur = contxt->children;
-            *cur && *cur != end(); cur++)
-        {
-            if(num(*cur))
-            {
-                RNUM(1);
-            }
-        }
+    // Two or more arguments.
+    C_SANE(2, NULL);
 
-        // All children were false.
-        RNUM(0);
+    // Evaluate all children, if any of
+    // them are true, return true.
+    for(entry_p *cur = contxt->children;
+        *cur && *cur != end(); cur++)
+    {
+        if(num(*cur))
+        {
+            // True.
+            RNUM(1);
+        }
     }
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // All children were false.
+    RNUM(0);
 }
 
 //----------------------------------------------------------------------------
@@ -240,19 +182,11 @@ entry_p m_or(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_shiftleft(entry_p contxt)
 {
-    // We need two arguments.
-    if(c_sane(contxt, 2))
-    {
-        RNUM
-        (
-            num(CARG(1)) <<
-            num(CARG(2))
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Set and return.
+    RNUM(num(CARG(1)) << num(CARG(2)));
 }
 
 //----------------------------------------------------------------------------
@@ -263,19 +197,11 @@ entry_p m_shiftleft(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_shiftright(entry_p contxt)
 {
-    // We need two arguments.
-    if(c_sane(contxt, 2))
-    {
-        RNUM
-        (
-            num(CARG(1)) >>
-            num(CARG(2))
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Set and return.
+    RNUM(num(CARG(1)) >> num(CARG(2)));
 }
 
 //----------------------------------------------------------------------------
@@ -286,24 +212,13 @@ entry_p m_shiftright(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_xor(entry_p contxt)
 {
-    // We need two arguments.
-    if(c_sane(contxt, 2))
-    {
-        RNUM
-        (
-            (
-                num(CARG(1)) &&
-                !num(CARG(2))
-            )
-            ||
-            (
-                num(CARG(2)) &&
-                !num(CARG(1))
-            )
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Two possible combinations.
+    bool alfa = num(CARG(1)) && !num(CARG(2)),
+         beta = num(CARG(2)) && !num(CARG(1));
+
+    // Set and return.
+    RNUM(alfa || beta);
 }

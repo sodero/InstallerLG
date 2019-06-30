@@ -74,20 +74,11 @@ static int h_cmp(entry_p lhs, entry_p rhs)
 //----------------------------------------------------------------------------
 entry_p m_eq(entry_p contxt)
 {
-    // We should have two arguments
-    if(c_sane(contxt, 2))
-    {
-        // Turn the result of h_cmp
-        // into 1 or 0.
-        RNUM
-        (
-            h_cmp(CARG(1), CARG(2)) ? 0 : 1
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Turn the result of h_cmp into 1 or 0.
+    RNUM(h_cmp(CARG(1), CARG(2)) ? 0 : 1);
 }
 
 //----------------------------------------------------------------------------
@@ -98,20 +89,11 @@ entry_p m_eq(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_gt(entry_p contxt)
 {
-    // We should have two arguments
-    if(c_sane(contxt, 2))
-    {
-        // Turn the result of h_cmp
-        // into 0 or 1.
-        RNUM
-        (
-            h_cmp(CARG(1), CARG(2)) > 0 ? 1 : 0
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Turn the result of h_cmp into 0 or 1.
+    RNUM(h_cmp(CARG(1), CARG(2)) > 0 ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -122,20 +104,11 @@ entry_p m_gt(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_gte(entry_p contxt)
 {
-    // We should have two arguments
-    if(c_sane(contxt, 2))
-    {
-        // Turn the result of h_cmp
-        // into 0 or 1.
-        RNUM
-        (
-            h_cmp(CARG(1), CARG(2)) >= 0 ? 1 : 0
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Turn the result of h_cmp into 0 or 1.
+    RNUM(h_cmp(CARG(1), CARG(2)) >= 0 ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -146,20 +119,11 @@ entry_p m_gte(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_lt(entry_p contxt)
 {
-    // We should have two arguments
-    if(c_sane(contxt, 2))
-    {
-        // Turn the result of h_cmp
-        // into 0 or 1.
-        RNUM
-        (
-            h_cmp(CARG(1), CARG(2)) < 0 ? 1 : 0
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Turn the result of h_cmp into 0 or 1.
+    RNUM(h_cmp(CARG(1), CARG(2)) < 0 ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -170,20 +134,11 @@ entry_p m_lt(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_lte(entry_p contxt)
 {
-    // We should have two arguments
-    if(c_sane(contxt, 2))
-    {
-        // Turn the result of h_cmp
-        // into 0 or 1.
-        RNUM
-        (
-            h_cmp(CARG(1), CARG(2)) <= 0 ? 1 : 0
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Turn the result of h_cmp into 0 or 1.
+    RNUM(h_cmp(CARG(1), CARG(2)) <= 0 ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -194,18 +149,9 @@ entry_p m_lte(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_neq(entry_p contxt)
 {
-    // We should have two arguments
-    if(c_sane(contxt, 2))
-    {
-        // Turn the result of h_cmp
-        // into 0 or 1.
-        RNUM
-        (
-            h_cmp(CARG(1), CARG(2)) ? 1 : 0
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Turn the result of h_cmp into 0 or 1.
+    RNUM(h_cmp(CARG(1), CARG(2)) ? 1 : 0);
 }

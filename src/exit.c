@@ -30,38 +30,33 @@
 //----------------------------------------------------------------------------
 entry_p m_abort(entry_p contxt)
 {
-    // We need a sane context. Arguments
-    // are optional though.
-    if(c_sane(contxt, 0))
+    // Arguments are optional.
+    C_SANE(0, NULL);
+
+    // Concatenate all children.
+    char *msg = get_chlstr(contxt, false);
+
+    // Did we manage to concatenate something?
+    if(msg)
     {
-        // Concatenate all children.
-        char *msg = get_chlstr(contxt, false);
-
-        // Did we manage to concatenate something?
-        if(msg)
+        // If we could resolve all our children,
+        // show the result of the concatenation
+        // unless we have an empty string.
+        if(*msg && !DID_ERR)
         {
-            // If we could resolve all our children,
-            // show the result of the concatenation
-            // unless we have an empty string.
-            if(*msg && !DID_ERR)
-            {
-                gui_abort(msg);
-            }
-
-            // Free the temporary buffer.
-            free(msg);
-
-            // Set abort state. Will make
-            // invoke() halt.
-            error(contxt, -3, ERR_ABORT, __func__);
-            RNUM(0);
+            gui_abort(msg);
         }
+
+        // Free the temporary buffer.
+        free(msg);
+
+        // Set abort. Will make invoke() halt.
+        error(contxt, -3, ERR_ABORT, __func__);
+        RNUM(0);
     }
 
-    // Broken parser / OOM
+    // Out of memory.
     PANIC(contxt);
-
-    // Failure.
     RCUR;
 }
 
@@ -108,7 +103,7 @@ entry_p m_exit(entry_p contxt)
         }
 
         // Show final message unless 'quiet' is set.
-        if(!DID_ERR && !get_opt(contxt, OPT_QUIET))
+        if(!get_opt(contxt, OPT_QUIET) && !DID_ERR)
         {
             // Get name and location of application.
             const char *app = get_strvar(contxt, "@app-name"),
@@ -160,46 +155,40 @@ entry_p m_onerror(entry_p contxt)
     static entry_t ref = { .type = CUSREF,
                            .name = "@onerror" };
 
-    // We need a context.
-    if(c_sane(contxt, 0))
+    // Zero or more arguments. No options.
+    C_SANE(0, NULL);
+
+    // Global context where the user
+    // defined procedures are found.
+    entry_p con = global(contxt);
+
+    // Make sure that '@onerror' exists. On
+    // OOM it might be missing.
+    entry_p *err = con->symbols;
+
+    while(*err && *err != end())
     {
-        // Global context where the user
-        // defined procedures are found.
-        entry_p con = global(contxt);
-
-        // Make sure that '@onerror' exists. On
-        // OOM it might be missing.
-        entry_p *err = con->symbols;
-
-        while(*err && *err != end())
+        if((*err)->type == CUSTOM &&
+           !strcasecmp((*err)->name, ref.name))
         {
-            if((*err)->type == CUSTOM &&
-               !strcasecmp((*err)->name, ref.name))
-            {
-                // Reset error code otherwise
-                // m_gosub / invoke will halt
-                // immediately.
-                RESET;
+            // Reset error code otherwise
+            // m_gosub / invoke will halt
+            // immediately.
+            RESET;
 
-                // Connect reference to the current context.
-                ref.parent = contxt;
+            // Connect reference to the current context.
+            ref.parent = contxt;
 
-                // Invoke @onerror by calling m_gosub just
-                // like any non-native function call.
-                return m_gosub(&ref);
-            }
-
-            // Next function.
-            err++;
+            // Invoke @onerror by calling m_gosub just
+            // like any non-native function call.
+            return m_gosub(&ref);
         }
-    }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
+
+        // Next function.
+        err++;
     }
 
-    // Failure.
+    // @onerror not found. Init is broken.
     RCUR;
 }
 
@@ -215,16 +204,11 @@ entry_p m_onerror(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_trap(entry_p contxt)
 {
-    // Flags and statement.
-    if(c_sane(contxt, 2))
-    {
-        // Dummy.
-        RNUM(1);
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Dummy.
+    RNUM(1);
 }
 
 //----------------------------------------------------------------------------

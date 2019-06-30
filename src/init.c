@@ -192,8 +192,7 @@ entry_p init(entry_p contxt)
 {
     // Sanity check. We need atleast one child. Anything
     // else is OOM since empty string == syntax error.
-    if(c_sane(contxt, 1) &&
-       s_sane(contxt, 0))
+    if(c_sane(contxt, 1) && s_sane(contxt, 0))
     {
         // Is there a (welcome) already?
         entry_p entry = native_exists(contxt, m_welcome);

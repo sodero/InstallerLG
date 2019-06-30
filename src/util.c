@@ -172,6 +172,7 @@ entry_p native(entry_p entry)
 }
 
 //.OS.TEST
+/*
 static entry_p get_opt_string(entry_p contxt, opt_t type)
 {
     // Iterate over all strings.
@@ -192,8 +193,10 @@ static entry_p get_opt_string(entry_p contxt, opt_t type)
     // Not found.
     return NULL;
 }
+*/
 
 //.OS.TEST
+/*
 static entry_p opt_verify_confirm(entry_p contxt, entry_p confirm)
 {
     entry_p prompt = get_opt(contxt, OPT_PROMPT),
@@ -232,6 +235,168 @@ static entry_p opt_verify_confirm(entry_p contxt, entry_p confirm)
     // Confirmation needed.
     return confirm;
 }
+*/
+
+static void get_fake_opt(entry_p fake, entry_p *cache)
+{
+    // Translate strings to options.
+
+
+    for(size_t i = 0; fake->children[i] &&
+        fake->children[i] != end(); i++)
+    {
+        entry_p cur = fake->children[i];
+        bool del = cur->parent->id == OPT_DELOPTS;
+        char *opt = str(cur);
+       
+        if(!strcmp(opt, "fail"))
+        {
+            cache[OPT_FAIL] = del ? NULL : cur; 
+        }
+        else
+        if(!strcmp(opt, "force"))
+        {
+            cache[OPT_FORCE] = del ? NULL : cur; 
+        }
+        else
+        if(!strcmp(opt, "nofail"))
+        {
+            cache[OPT_NOFAIL] = del ? NULL : cur; 
+        }
+        else
+        if(!strcmp(opt, "askuser"))
+        {
+            cache[OPT_ASKUSER] = del ? NULL : cur; 
+        }
+        else
+        if(!strcmp(opt, "oknodelete"))
+        {
+            cache[OPT_OKNODELETE] = del ? NULL : cur; 
+        }
+    }
+}
+
+static void prune_opt(entry_p contxt, entry_p *cache)
+{
+    if(cache[OPT_CONFIRM])
+    {
+        // Make sure that we a prompt and help string.
+        if(!cache[OPT_PROMPT] || !cache[OPT_HELP])
+        {
+            char * msg = cache[OPT_PROMPT] ? "help" : "prompt";
+            ERR_C(native(contxt), ERR_MISSING_OPTION, msg);
+        }
+
+        // The default threshold is expert.
+        int level = get_numvar(contxt, "@user-level"),
+            thres = 2;
+
+        // If the (cache[OPT_CONFIRM] ...) option contains
+        // something that can be translated into
+        // a new threshold value...
+        if(cache[OPT_CONFIRM]->children &&
+           cache[OPT_CONFIRM]->children[0] &&
+           cache[OPT_CONFIRM]->children[0] != end())
+        {
+            // ...then do so.
+            thres = num(cache[OPT_CONFIRM]);
+        }
+
+        // If we are below the threshold value, or
+        // user input has been short-circuited by
+        // @yes, skip cache[OPT_CONFIRM]ation.
+        if(level < thres || get_numvar(contxt, "@yes"))
+        {
+            cache[OPT_CONFIRM] = NULL;
+        }
+    }
+
+    if(cache[OPT_ALL])
+    {
+        cache[OPT_FILES] = NULL;
+    }
+}
+
+entry_p opt(entry_p contxt, opt_t type)
+{
+    static entry_p cache[OPT_LAST], last;
+
+    // We need a valid context.
+    if(!contxt || !contxt->children)
+    {
+        return NULL;
+    }
+
+    // Return cached value if cache is full.
+    if(contxt == last)
+    {
+        return cache[type];
+    }
+
+    // New context, clear cache.
+    memset(cache, 0, sizeof(cache));
+    cache[OPT_INIT] = end();
+    last = contxt;
+
+    // Iterate over all options to fill up the cache.
+    for(size_t i = 0 /*OPT_FIRST*/; contxt->children[i] &&
+        contxt->children[i] != end() && i < OPT_LAST; i++)
+    {
+        entry_p entry = contxt->children[i];
+
+        // Skip non options.
+        if(entry->type == OPTION)
+        {
+            // Option indentifier. 
+            int option = entry->id;
+
+            // Fake option
+            if(option == OPT_OPTIONAL ||
+               option == OPT_DELOPTS)
+            {
+                // Cast to real options.
+                get_fake_opt(entry, cache);
+            }
+            else
+            // Dynamic options must be resolved.
+            if(option == OPT_DYNOPT)
+            {
+                // Replace with its resolved value.
+                entry_p res = resolve(entry);
+                cache[res->id] = res;
+            }
+            // We have a real option.
+            else
+            {
+                // Save it as it is.
+                cache[option] = entry;
+            }
+        }
+    }
+
+    // If in non strict mode, allow the absense
+    // of (prompt) and (help).
+    if(!get_numvar(contxt, "@strict"))
+    {
+        if(!cache[OPT_HELP])
+        {
+            // Will be resolved as "".
+            cache[OPT_HELP] = end();
+        }
+
+        if(!cache[OPT_PROMPT])
+        {
+            // Will be resolved as "".
+            cache[OPT_PROMPT] = end();
+        }
+    }
+
+    // Prune options.
+    prune_opt(contxt, cache);
+
+    // Use the (full) cache. 
+    return cache[type];
+}
 
 //----------------------------------------------------------------------------
 // Name:        get_opt
@@ -242,6 +407,8 @@ static entry_p opt_verify_confirm(entry_p contxt, entry_p confirm)
 //----------------------------------------------------------------------------
 entry_p get_opt(entry_p contxt, opt_t type)
 {
+    return opt(contxt, type);
+/*
     // We need a context without any previous errors.
     if(!contxt || !contxt->children || contxt == end())
     {
@@ -305,6 +472,7 @@ entry_p get_opt(entry_p contxt, opt_t type)
 
     // Nothing found.
     return NULL;
+*/
 }
 
 //----------------------------------------------------------------------------
@@ -338,8 +506,9 @@ static int x_sane(entry_p contxt, type_t type, size_t num)
             }
         }
 
-        // We should have an array here.
-        if(!vec)
+        // We should have an array here if we're expecting
+        // more than 0 children or symbols.
+        if(num && !vec)
         {
             dump(contxt);
             return 0;
@@ -370,11 +539,17 @@ static int x_sane(entry_p contxt, type_t type, size_t num)
             }
 
             // All but CONTXT / NUMBER are named.
-            if(!vec[i]->name &&
-                vec[i]->type != CONTXT &&
+            if(!vec[i]->name && vec[i]->type != CONTXT &&
                 vec[i]->type != NUMBER)
             {
-                dump(contxt);
+                dump(vec[i]);
+                return 0;
+            }
+
+            // A CONTXT must have room for children.
+            if(vec[i]->type == CONTXT && !vec[i]->children)
+            {
+                dump(vec[i]);
                 return 0;
             }
         }
@@ -661,17 +836,20 @@ char *get_chlstr(entry_p contxt, bool pad)
         size_t cnt = 0;
         entry_p *child = contxt->children;
 
-        // Count the number of non context children.
-        while(*child && *child != end())
+        // We might not have any children.
+        if(child)
         {
-            cnt += ((*child)->type != CONTXT) ? 1 : 0;
-            child++;
+            // Count non context children.
+            while(*child && *child != end())
+            {
+                cnt += ((*child)->type != CONTXT) ? 1 : 0;
+                child++;
+            }
         }
 
         if(cnt)
         {
-            // Allocate memory to hold a string pointer
-            // for each child.
+            // Allocate memory to hold one string pointer per child.
             char **stv = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
 
             if(stv)
@@ -688,15 +866,12 @@ char *get_chlstr(entry_p contxt, bool pad)
 
                     if(cur->type != CONTXT)
                     {
+                        // Go backwards, evaluate and increase
+                        // total string length as we go. Also,
+                        // include padding if necessary.
                         stv[--cnt] = str(cur);
                         len += strlen(stv[cnt]);
-
-                        // Insert whitespace between strings?
-                        if(pad)
-                        {
-                            // Make room for whitespace.
-                            len++;
-                        }
+                        len += pad ? 1 : 0;
                     }
                 }
 
@@ -704,21 +879,18 @@ char *get_chlstr(entry_p contxt, bool pad)
                 // concatenate all children.
                 if(len)
                 {
-                    // Allocate memory to hold the full
-                    // concatenated string.
+                    // Memory to hold the full concatenation.
                     ret = DBG_ALLOC(calloc(len + 1, 1));
 
                     if(ret)
                     {
-                        // The concatenation. The 'stv'
-                        // array is null terminated.
+                        // The concatenation, 'stv' is null terminated.
                         while(stv[cnt])
                         {
                             strncat(ret, stv[cnt], len + 1 - strlen(ret));
                             cnt++;
 
-                            // Is padding enabled and is this not
-                            // the final string?
+                            // Is padding applicable?
                             if(pad && stv[cnt])
                             {
                                 // Insert whitespace.
@@ -733,8 +905,7 @@ char *get_chlstr(entry_p contxt, bool pad)
                     ret = DBG_ALLOC(strdup(""));
                 }
 
-                // Free the references before
-                // returning.
+                // Free references before returning.
                 free(stv);
             }
         }
@@ -897,8 +1068,17 @@ static void dump_indent(entry_p entry, int indent)
 //----------------------------------------------------------------------------
 void dump(entry_p entry)
 {
-    // Start with no indentation.
-    dump_indent(entry, 0);
+    static entry_p last;
+
+    // Don't duplicate.
+    if(entry != last)
+    {
+        // Start with no indentation.
+        dump_indent(entry, 0);
+
+        // Remember this one.
+        last = entry;
+    }
 }
 
 #define LG_BUFSIZ (BUFSIZ + PATH_MAX + 1)

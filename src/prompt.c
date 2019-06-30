@@ -33,95 +33,96 @@
 //----------------------------------------------------------------------------
 entry_p m_askbool(entry_p contxt)
 {
-    if(contxt)
+    // Arguments are optional.
+    C_SANE(0, contxt);
+
+    // FIXME - check if (askbool) really is OK in
+    // non-strict mode. It doesn't make sense but
+    // the CBM Installer might accept it.
+
+    const char *yes = tr(S_AYES), *nay = tr(S_NONO);
+    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+            help     = get_opt(contxt, OPT_HELP),
+            back     = get_opt(contxt, OPT_BACK),
+            deflt    = get_opt(contxt, OPT_DEFAULT),
+            choices  = get_opt(contxt, OPT_CHOICES);
+
+    // Default = 'no'.
+    int ans = 0;
+
+    // Do we have both prompt and help text?
+    if(!prompt || !help)
     {
-        const char *yes = tr(S_AYES), *nay = tr(S_NONO);
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                back     = get_opt(contxt, OPT_BACK),
-                deflt    = get_opt(contxt, OPT_DEFAULT),
-                choices  = get_opt(contxt, OPT_CHOICES);
+        // Missing one or more.
+        ERR(ERR_MISSING_OPTION, prompt ? "help" : "prompt");
+        RNUM(0);
+    }
 
-        // Default = 'no'.
-        DNUM = 0;
+    // Do we have a choice option?
+    if(choices)
+    {
+        // Unless the parser is broken,
+        // we will have >= one child.
+        entry_p *entry = choices->children;
 
-        // Do we have both prompt and help text?
-        if(!prompt || !help)
+        // Pick up whatever we can, use the default
+        // value if we only have a single choice.
+        yes = *entry && *entry != end() ? str(*entry) : yes;
+        nay = *(++entry) && *entry != end() ? str(*entry) : nay;
+    }
+
+    // Do we have a user specified default?
+    if(deflt)
+    {
+        ans = num(deflt);
+    }
+
+    // Show requester unless we're executing in
+    // 'novice' mode.
+    if(get_numvar(contxt, "@user-level") > 0)
+    {
+        const char *prt = str(prompt),
+                   *hlp = str(help);
+
+        // Only show requester if we could
+        // resolve all options.
+        if(!DID_ERR)
         {
-            // Missing one or more.
-            ERR(ERR_MISSING_OPTION, prompt ? "help" : "prompt");
-            RCUR;
-        }
+            // FIXME - Should the default value be promoted
+            // to the GUI? Check CBM Installer.
 
-        // Do we have a choice option?
-        if(choices)
-        {
-            // Unless the parser is broken,
-            // we will have >= one child.
-            entry_p *entry = choices->children;
+            // Prompt user.
+            inp_t grc = gui_bool(prt, hlp, yes, nay, back != false);
 
-            // Pick up whatever we can, use the default
-            // value if we only have a single choice.
-            yes = *entry && *entry != end() ? str(*entry) : yes;
-            nay = *(++entry) && *entry != end() ? str(*entry) : nay;
-        }
-
-        // Do we have a user specified default?
-        if(deflt)
-        {
-            DNUM = num(deflt);
-        }
-
-        // Show requester unless we're executing in
-        // 'novice' mode.
-        if(get_numvar(contxt, "@user-level") > 0)
-        {
-            const char *prt = str(prompt),
-                       *hlp = str(help);
-
-            // Only show requester if we could
-            // resolve all options.
-            if(!DID_ERR)
+            // Is the back option available?
+            if(back)
             {
-                // Prompt user.
-                inp_t grc = gui_bool(prt, hlp, yes, nay, back != false);
-
-                // Is the back option available?
-                if(back)
+                // Fake input?
+                if(get_numvar(contxt, "@back"))
                 {
-                    // Fake input?
-                    if(get_numvar(contxt, "@back"))
-                    {
-                        grc = G_ABORT;
-                    }
-
-                    // On abort execute.
-                    if(grc == G_ABORT)
-                    {
-                        return resolve(back);
-                    }
+                    grc = G_ABORT;
                 }
 
-                // FIXME
-                if(grc == G_ABORT || grc == G_EXIT)
+                // On abort execute.
+                if(grc == G_ABORT)
                 {
-                    HALT;
+                    return resolve(back);
                 }
-
-                // Translate return code.
-                DNUM = (grc == G_TRUE) ? 1 : 0;
             }
+
+            // FIXME
+            if(grc == G_ABORT || grc == G_EXIT)
+            {
+                HALT;
+            }
+
+            // Translate return code.
+            RNUM((grc == G_TRUE) ? 1 : 0);
         }
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-    }
 
-    // Success, failure or
-    // broken parser.
-    RCUR;
+    // Return default value.
+    RNUM(ans);
 }
 
 //----------------------------------------------------------------------------

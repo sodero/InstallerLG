@@ -24,33 +24,28 @@ entry_p m_if(entry_p contxt)
     // Allow empty bodies. If empty, resolve the
     // conditional so that side effects, if any,
     // will come into being.
-    if(c_sane(contxt, 1))
+    C_SANE(1, NULL);
+
+    // Truth value of the condition.
+    int val = tru(CARG(1));
+
+    // Does the body contain anything?
+    if(CARG(2) && CARG(2) != end())
     {
-        // Truth value of the condition.
-        int val = tru(CARG(1));
+        // Select branch to execute.
+        entry_p sel = val ? CARG(2) : CARG(3);
 
-        // Is the body non-empty?
-        if(CARG(2) && CARG(2) != end())
+        // Is there a branch corresponding to the
+        // resolved truth value?
+        if(sel && sel != end())
         {
-            // Select branch to execute.
-            entry_p sel = val ? CARG(2) : CARG(3);
-
-            // Is there a branch corresponding to the
-            // resolved truth value?
-            if(sel && sel != end())
-            {
-                // We execute the branch by resolving it.
-                return resolve(sel);
-            }
+            // Execute the branch by resolving it.
+            return resolve(sel);
         }
-
-        // We have nothing to execute.
-        RNUM(0);
     }
 
-    // The parser is broken.
-    PANIC(contxt);
-    RCUR;
+    // Nothing to resolve.
+    RNUM(0);
 }
 
 //----------------------------------------------------------------------------
@@ -63,33 +58,27 @@ entry_p m_select(entry_p contxt)
 {
     // We need atleast two arguments, the index
     // and the non-empty list of items.
-    if(c_sane(contxt, 2))
+    C_SANE(2, NULL);
+
+    // Index and selection.
+    int ndx = 0, sel = num(CARG(1));
+
+    // Find the n:th (0-indexed) item, go one step
+    // at a time in case no such item exists.
+    for(entry_p *items = CARG(2)->children;
+        items[ndx] && items[ndx] != end(); ndx++)
     {
-        int ndx = 0, sel = num(CARG(1));
-
-        // Find the n:th (0-indexed) item, go one step
-        // at a time in case no such item exist.
-        while(CARG(2)->children[ndx] &&
-              CARG(2)->children[ndx] != end())
+        // Are we there yet?
+        if(ndx == sel)
         {
-            // Return the resolved value of the found
-            // item.
-            if(ndx == sel)
-            {
-                return resolve(CARG(2)->children[ndx]);
-            }
-
-            ndx++;
+            // Return resolved value.
+            return resolve(items[ndx]);
         }
-
-        // No such item, n > the number of items.
-        ERR(ERR_NO_ITEM, str(CARG(1)));
-        RNUM(0);
     }
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // No such item, n > the number of items.
+    ERR(ERR_NO_ITEM, str(CARG(1)));
+    RNUM(0);
 }
 
 //----------------------------------------------------------------------------
@@ -100,38 +89,32 @@ entry_p m_select(entry_p contxt)
 //----------------------------------------------------------------------------
 static entry_p h_whunt(entry_p contxt, int mode)
 {
-    // We always have two arguments, the expression
-    // and the 'contents' of the loop, a CONTXT.
-    if(c_sane(contxt, 2) &&
-       CARG(2)->type == CONTXT)
+    // Two arguments, the expression to be evaluated
+    // and the 'contents' of the loop.
+    C_SANE(2, NULL);
+
+    // Reset return value.
+    DNUM = 0;
+
+    // Prepare to return the resolved value of this
+    // function if the expression is false from the start.
+    entry_p ret = contxt->resolved;
+
+    // Use XOR to support both 'while' and 'until'.
+    // Break the loop if something goes wrong inside.
+    for(int cont = mode ^ tru(CARG(1));
+            cont && !DID_ERR;
+            cont = mode ^ tru(CARG(1)))
     {
-        // Set the return value of this function to zero.
-        DNUM = 0;
-
-        // Prepare to return the resolved value of this
-        // function if the expression is false from the start.
-        entry_p ret = contxt->resolved;
-
-        // Use XOR to support both 'while' and 'until'.
-        // Break the loop if something goes wrong inside.
-        for(int cont = mode ^ tru(CARG(1));
-                cont && !DID_ERR;
-                cont = mode ^ tru(CARG(1)))
-        {
-            // Save the return value of the last function
-            // in the CONTXT
-            ret = invoke(CARG(2));
-        }
-
-        // Return either zero, the value of the resolved
-        // value of this function, or the return value of
-        // the last function in the last iteration.
-        return ret;
+        // Save the return value of the last function
+        // in the CONTXT
+        ret = invoke(CARG(2));
     }
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Return either zero, the value of the resolved
+    // value of this function, or the return value of
+    // the last function in the last iteration.
+    return ret;
 }
 
 //----------------------------------------------------------------------------
@@ -166,17 +149,12 @@ entry_p m_while(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_trace(entry_p contxt)
 {
-    // All we need is a context.
-    if(contxt)
-    {
-        // We're not doing anything
-        // except occupying space.
-        RNUM(1);
-    }
+    // No arguments.
+    C_SANE(0, NULL);
 
-    // The parser is broken.
-    PANIC(contxt);
-    RCUR;
+    // We're not doing anything
+    // except occupying space.
+    RNUM(1);
 }
 
 //----------------------------------------------------------------------------
@@ -187,15 +165,11 @@ entry_p m_trace(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_retrace(entry_p contxt)
 {
+    // No arguments.
+    C_SANE(0, NULL);
+
     // Starting point.
     entry_p con = contxt;
-
-    if(!con)
-    {
-        // The parser is broken.
-        PANIC(con);
-        RCUR;
-    }
 
     // Find context or user procedure.
     while(con->parent &&
@@ -214,7 +188,7 @@ entry_p m_retrace(entry_p contxt)
         RCUR;
     }
 
-    // Iterator and stop.
+    // Iterator and sentinel.
     entry_p *chl = con->parent->children;
     entry_p top = *chl;
 

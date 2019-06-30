@@ -21,31 +21,21 @@
 //----------------------------------------------------------------------------
 entry_p m_add(entry_p contxt)
 {
-    // We should have one or more arguments.
-    if(c_sane(contxt, 1))
-    {
-        // Work directly with our resolved
-        // value.
-        DNUM = 0;
-        entry_p *cur = contxt->children;
+    // One or more arguments.
+    C_SANE(1, NULL);
 
-        // For each child, add the numeric
-        // value to our resolved value.
-        while(*cur && *cur != end())
-        {
-            DNUM += num(*cur);
-            cur++;
-        }
-    }
-    else
+    // The sum.
+    int sum = 0;
+
+    // Sum up the values of all children.
+    for(entry_p *cur = contxt->children;
+        *cur && *cur != end(); cur++)
     {
-        // The parser is broken.
-        PANIC(contxt);
+        sum += num(*cur);
     }
 
-    // Success or broken
-    // parser.
-    RCUR;
+    // Return sum.
+    RNUM(sum);
 }
 
 //----------------------------------------------------------------------------
@@ -56,33 +46,21 @@ entry_p m_add(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_div(entry_p contxt)
 {
-    // We should have exactly two arguments.
-    if(c_sane(contxt, 2))
+    // Two arguments.
+    C_SANE(2, NULL);
+
+    // Let's not divide by zero.
+    int div = num(CARG(2));
+
+    if(!div)
     {
-        // Let's not divide by zero.
-        DNUM = num(CARG(2));
-
-        if(DNUM)
-        {
-            RNUM
-            (
-                num(CARG(1)) /
-                DNUM
-            );
-        }
-
         // Division by zero.
         ERR(ERR_DIV_BY_ZERO, contxt->name);
-    }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
+        RNUM(0);
     }
 
-    // Division by zero or
-    // broken parser.
-    RCUR;
+    // Return quotient.
+    RNUM(num(CARG(1)) / div);
 }
 
 //----------------------------------------------------------------------------
@@ -93,30 +71,21 @@ entry_p m_div(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_mul(entry_p contxt)
 {
-    // We should have one or more arguments.
-    if(c_sane(contxt, 1))
-    {
-        DNUM = 1;
+    // One or more arguments.
+    C_SANE(1, NULL);
 
-        // Multiply all children. The first
-        // is multiplied by 1.
-        entry_p *cur = contxt->children;
+    // The product.
+    int pro = 1;
 
-        while(*cur && *cur != end())
-        {
-            DNUM *= num(*cur);
-            cur++;
-        }
-    }
-    else
+    // Multiply the values of all children.
+    for(entry_p *cur = contxt->children;
+        *cur && *cur != end(); cur++)
     {
-        // The parser is broken
-        PANIC(contxt);
+        pro *= num(*cur);
     }
 
-    // Success or broken
-    // parser.
-    RCUR;
+    // Return product.
+    RNUM(pro);
 }
 
 //----------------------------------------------------------------------------
@@ -127,17 +96,9 @@ entry_p m_mul(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_sub(entry_p contxt)
 {
-    // We should have two arguments
-    if(c_sane(contxt, 2))
-    {
-        RNUM
-        (
-            num(CARG(1)) -
-            num(CARG(2))
-        );
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Return difference.
+    RNUM(num(CARG(1)) - num(CARG(2)));
 }

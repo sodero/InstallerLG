@@ -393,38 +393,35 @@ entry_p m_pathonly(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_patmatch(entry_p contxt)
 {
-    // We need two arguments
-    if(c_sane(contxt, 2))
+    // Two arguments.
+    C_SANE(2, NULL);
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Use the global buffer.
+    char *buf = get_buf(),
+         *pat = str(CARG(1)),
+         *mat = str(CARG(2));
+
+    LONG w = ParsePattern(pat, buf, buf_size());
+
+    // Can we parse the pattern?
+    if(w >= 0)
     {
-        #if defined(AMIGA) && !defined(LG_TEST)
-        // Use the global buffer.
-        char *buf = get_buf(),
-             *p = str(CARG(1)),
-             *m = str(CARG(2));
-
-        LONG w = ParsePattern(p, buf, buf_size());
-
-        // Can we parse the pattern?
-        if(w >= 0)
-        {
-            // Use pattern matching if we have one or more
-            // wildcards, otherwise use plain strcmp().
-            int r = w ? MatchPattern(buf, m) : !strcmp(p, m);
-            RNUM(r ? 1 : 0);
-        }
-        else
-        {
-            // We probably had a buffer overflow.
-            ERR(ERR_OVERFLOW, p);
-        }
-        #endif
-        // Problem or testing.
+        // Use pattern matching if we have one or more
+        // wildcards, otherwise use plain strcmp().
+        int r = w ? MatchPattern(buf, mat) : !strcmp(pat, mat);
+        RNUM(r ? 1 : 0);
+    }
+    else
+    {
+        // We probably had a buffer overflow.
+        ERR(ERR_OVERFLOW, pat);
         RNUM(0);
     }
-
-    // The parser is broken.
-    PANIC(contxt);
-    RCUR;
+    #else
+    // Testing.
+    RNUM(0);
+    #endif
 }
 
 //----------------------------------------------------------------------------
@@ -435,18 +432,11 @@ entry_p m_patmatch(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_strlen(entry_p contxt)
 {
-    // We need one argument, the string.
-    if(c_sane(contxt, 1))
-    {
-        RNUM
-        (
-            (int) strlen(str(CARG(1)))
-        );
-    }
+    // One argument.
+    C_SANE(1, NULL);
 
-    // The parser is broken.
-    PANIC(contxt);
-    RCUR;
+    // Set and return.
+    RNUM((int) strlen(str(CARG(1))));
 }
 
 //----------------------------------------------------------------------------
@@ -540,25 +530,22 @@ entry_p m_substr(entry_p contxt)
 //----------------------------------------------------------------------------
 entry_p m_tackon(entry_p contxt)
 {
-    // We need atleast two arguments, a path
-    // and a file.
-    if(c_sane(contxt, 2))
+    // Two arguments.
+    C_SANE(2, NULL);
+
+    // All work's done by the helper.
+    char *ret = h_tackon(contxt, str(CARG(1)), str(CARG(2)));
+
+    // Did we fail?
+    if(!ret)
     {
-        char *ret = h_tackon(contxt, str(CARG(1)), str(CARG(2)));
-
-        if(ret)
-        {
-            RSTR(ret);
-        }
-
-        // Return empty string
-        // on failure.
+        // Return empty string. Error codes, PANIC:s and
+        // so on are set by h_tackon().
         REST;
     }
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Success.
+    RSTR(ret);
 }
 
 //----------------------------------------------------------------------------

@@ -27,6 +27,7 @@ int c_sane(entry_p c, size_t n);
 int s_sane(entry_p c, size_t n);
 void dump(entry_p entry);
 int get_numvar(entry_p c, char *v);
+entry_p opt(entry_p c, opt_t t);
 entry_p get_opt(entry_p c, opt_t t);
 char *get_strvar(entry_p c, char *v);
 char *get_optstr(entry_p c, opt_t t);
@@ -43,14 +44,15 @@ entry_p native_exists(entry_p contxt, call_t f);
 //----------------------------------------------------------------------------
 #define DCUR    contxt->resolved
 #define DNUM    contxt->resolved->id
-#define RCUR    if(contxt) return contxt->resolved; return NULL
+#define RCUR    if(contxt)return contxt->resolved;return NULL
 #define RNUM(X) contxt->resolved->id = X; return contxt->resolved
-#define RSTR(X) char *rstr = X; if(rstr) { free(contxt->resolved->name); contxt->resolved->name = rstr;} else { PANIC(contxt); contxt->resolved->name[0] = '\0'; }; return contxt->resolved
-#define REST    if(contxt->resolved->name) { contxt->resolved->name[0] = '\0'; } return contxt->resolved
-#define CARG(X) contxt->children[(X) - 1]
-#define CSYM(X) contxt->symbols[(X) - 1]
+#define RSTR(X) char *rstr=X;if(rstr){free(contxt->resolved->name);contxt->resolved->name=rstr;}else{PANIC(contxt);contxt->resolved->name[0]='\0';};return contxt->resolved
+#define REST    if(contxt->resolved->name){contxt->resolved->name[0]='\0';}return contxt->resolved
+#define CARG(X) contxt->children[(X)-1]
+#define CSYM(X) contxt->symbols[(X)-1]
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, __func__, M)
 #define HERE printf("%s:%s:%d\n", __FILE__, __func__, __LINE__)
+#define C_SANE(N,O) if(!c_sane(contxt, N)){PANIC(contxt);RCUR;}else{if(O && get_opt(O,OPT_INIT) && DID_ERR){RCUR;}}
 
 #ifdef __AROS__
 #define B_TO_CSTR(S) AROS_BSTR_ADDR(S)

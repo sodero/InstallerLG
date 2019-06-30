@@ -96,4 +96,5 @@ endif
 
 .PHONY: clean
 clean:
-	$(RM) -R Catalogs *.o $(EXE) $(EXE).tmp.* leak.* err.* massif.* _??_ _???_
+	chmod a+rwx _?* || true
+	$(RM) -R Catalogs *.o $(EXE) $(EXE).tmp.* leak.* err.* massif.* _?*
