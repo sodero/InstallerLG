@@ -3,7 +3,7 @@
 //
 // String operations
 //------------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -177,8 +177,8 @@ entry_p m_fmt(entry_p contxt)
             }
         }
 
-        // Iterate over all format specifiers and arguments and do
-        // the appropriate conversions and formating.
+        // Iterate over all format specifiers and arguments and do the
+        // appropriate conversions and formating.
         if(cnt)
         {
             for(cnt = 0; sct[cnt]; cnt++)
@@ -195,8 +195,8 @@ entry_p m_fmt(entry_p contxt)
                         size_t nln = oln + strlen(val);
                         char *new = DBG_ALLOC(calloc(nln + 1, 1));
 
-                        // Replace the current format string with
-                        // the corresponding formated string.
+                        // Replace the current format string with the
+                        // corresponding formated string.
                         if(new)
                         {
                             int sln = snprintf(new, nln, sct[cnt], val);
@@ -301,8 +301,7 @@ entry_p m_fmt(entry_p contxt)
         // Fail if the number of arguments and the number
         // of specifiers don't match, and we're in strict
         // mode.
-        if(arg && *arg && *arg != end() &&
-           get_numvar(contxt, "@strict"))
+        if(arg && *arg && *arg != end() && get_numvar(contxt, "@strict"))
         {
             ERR(ERR_FMT_UNUSED, contxt->name);
         }

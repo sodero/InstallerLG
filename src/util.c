@@ -3,7 +3,7 @@
 //
 // Misc utility functions primarily used by the 'native' methods.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -236,8 +236,6 @@ static entry_p opt_verify_confirm(entry_p contxt, entry_p confirm)
 static void get_fake_opt(entry_p fake, entry_p *cache)
 {
     // Translate strings to options.
-
-
     for(size_t i = 0; fake->children[i] && fake->children[i] != end(); i++)
     {
         entry_p cur = fake->children[i];

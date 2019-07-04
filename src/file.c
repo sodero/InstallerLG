@@ -3,7 +3,7 @@
 //
 // File operations
 //------------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -440,8 +440,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
                     // Traverse (old, if info or font) directory if applicable.
                     if(type == 2
                        #ifndef AMIGA
-                       && strcmp(f_nam, ".")
-                       && strcmp(f_nam, "..")
+                       && strcmp(f_nam, ".") && strcmp(f_nam, "..")
                        #endif
                        )
                     {
@@ -874,6 +873,7 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
 //------------------------------------------------------------------------------
 static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 {
+    // Sanity check.
     if(contxt && file)
     {
         // On non Amiga systems, or in test mode, this is a stub.
@@ -928,6 +928,7 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
                         bool bck, int mde)
 {
+    // Sanity check.
     if(contxt && src && dst)
     {
         // GUI return code.

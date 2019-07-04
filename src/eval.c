@@ -3,7 +3,7 @@
 //
 // Functions for evaluation of entry_t objects.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -49,16 +49,14 @@ entry_p find_symbol(entry_p entry)
         entry_p *tmp;
 
         // Iterate over all symbols in the current context.
-        for(tmp = con->symbols; tmp && *tmp
-            && *tmp != end(); tmp++)
+        for(tmp = con->symbols; tmp && *tmp && *tmp != end(); tmp++)
         {
             // Return value.
             entry_p ret = *tmp;
 
             // The current entry might be a CUSTOM. Ignore everything but
             // SYMBOLS.
-            if(ret->type != SYMBOL ||
-               strcasecmp(ret->name, entry->name))
+            if(ret->type != SYMBOL || strcasecmp(ret->name, entry->name))
             {
                 // Next entry;
                 continue;
@@ -69,8 +67,7 @@ entry_p find_symbol(entry_p entry)
                 // this unless we're at the root and not in a user defined
                 // procedure. This would break all positional symbols
                 // (procedure arguments).
-                if(!ret->parent->parent &&
-                    ret->parent->type != CUSTOM)
+                if(!ret->parent->parent && ret->parent->type != CUSTOM)
                 {
                     *tmp = *(con->symbols);
                     *(con->symbols) = ret;

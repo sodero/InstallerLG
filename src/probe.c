@@ -3,7 +3,7 @@
 //
 // Environment information retrieval
 //------------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -718,8 +718,7 @@ static int h_getversion_res(const char *name)
 
         // Try to find the revision, if any, in the id string. The major part
         // of our parsed result should match rt_Version.
-        if(sscanf(ids, pat, &maj, &rev) == 2 &&
-           maj == res->rt_Version)
+        if(sscanf(ids, pat, &maj, &rev) == 2 && maj == res->rt_Version)
         {
             // We found both major and revision.
             ver = (maj << 16) | rev;
