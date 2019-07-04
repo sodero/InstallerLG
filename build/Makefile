@@ -37,6 +37,8 @@ endif
 CINC += -I . -I $(VPATH)
 CDEF += -D__AMIGADATE__="\"($(DATE))\""
 CFLAGS += $(CINC) $(CGEN) $(CWRN) $(CDEF)
+YACC = bison
+LEX = flex
 
 #---------------------------------------------------------------------------------#
 # Targets
