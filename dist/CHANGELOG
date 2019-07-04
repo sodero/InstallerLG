@@ -234,3 +234,4 @@
 0.1.0-alpha.37:
 ===============
 - (copyfiles) (choices) + (info) combination fix (MicroDot II 1.4).
+- (startup) confirmation level fix.

@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // init.c:
 //
 // Initilization by means of prepending and appending code.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "alloc.h"
 #include "args.h"
@@ -19,7 +19,6 @@
 #include "symbol.h"
 #include "util.h"
 #include "version.h"
-
 #include <string.h>
 
 #ifdef AMIGA
@@ -29,7 +28,7 @@ char *strcasestr(const char *, const char *);
 #endif
 #endif
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        init_num
 // Description: Init helper; insert numeric variable in CONTXT. This is only
 //              for use in init(), nothing is resolved and duplicates aren't
@@ -38,14 +37,14 @@ char *strcasestr(const char *, const char *);
 //              char *sym:      Name.
 //              int num:        Value.
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static void init_num(entry_p contxt, char *sym, int num)
 {
     // Create SYMBOL VALUE tuple.
     entry_p var = new_symbol(DBG_ALLOC(strdup(sym))),
             val = new_number(num);
 
-    // Unless we're OOM, init tuple.
+    // Unless we're out of memory, init tuple.
     if(var && val)
     {
         var->parent = contxt;
@@ -63,7 +62,7 @@ static void init_num(entry_p contxt, char *sym, int num)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        init_str
 // Description: Init helper; insert string variable in CONTXT. This is only
 //              for use in init(), nothing is resolved and duplicates aren't
@@ -72,7 +71,7 @@ static void init_num(entry_p contxt, char *sym, int num)
 //              char *sym:      Name.
 //              char *str:      Value.
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static void init_str(entry_p contxt, char *sym, char *str)
 {
     // Create SYMBOL VALUE tuple.
@@ -97,12 +96,12 @@ static void init_str(entry_p contxt, char *sym, char *str)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        init_tooltypes
 // Description: Init helper; Promote tooltypes to variables in CONTXT.
 // Input:       entry_p contxt: CONTXT.
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static void init_tooltypes(entry_p contxt)
 {
     // Get tooltype values / cli arguments.
@@ -183,18 +182,17 @@ static void init_tooltypes(entry_p contxt)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        init
 // Description: Prepend / append startup and shutdown code.
 // Input:       entry_p contxt:  The start symbol, refer to the parser.
 // Return:      entry_p:         Start + startup / shutdown additions.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p init(entry_p contxt)
 {
-    // Sanity check. We need atleast one child. Anything
-    // else is OOM since empty string == syntax error.
-    if(c_sane(contxt, 1) &&
-       s_sane(contxt, 0))
+    // Sanity check. We need atleast one child. Anything else means out of
+    // memory since empty string == syntax error.
+    if(c_sane(contxt, 1) && s_sane(contxt, 0))
     {
         // Is there a (welcome) already?
         entry_p entry = native_exists(contxt, m_welcome);
@@ -202,8 +200,7 @@ entry_p init(entry_p contxt)
         // If not, insert a default (welcome).
         if(!entry)
         {
-            // The line numbers and naming are for debugging
-            // purposes only.
+            // The line numbers and naming are for debugging purposes only.
             entry = new_native
             (
                 DBG_ALLOC(strdup("welcome")), __LINE__, m_welcome,
@@ -216,8 +213,8 @@ entry_p init(entry_p contxt)
             );
 
             #if defined(AMIGA) && !defined(LG_TEST)
-            // Not in test mode, else tests will break,
-            // they don't expect any default (welcome).
+            // Not in test mode, else tests will break, they don't expect any
+            // default (welcome).
 
             // Add to the root and reparent.
             if(entry)
@@ -234,8 +231,7 @@ entry_p init(entry_p contxt)
             #endif
         }
 
-        // Create default error handler, it simply returns '0'
-        // without doing anything.
+        // Create default error handler, it simply returns '0' without doing anything.
         entry = new_native
         (
             DBG_ALLOC(strdup("onerror")), __LINE__, m_procedure,
@@ -281,17 +277,14 @@ entry_p init(entry_p contxt)
             ror(contxt->children);
         }
 
-        // Create default (exit). Line numbers and
-        // naming are for debugging purposes only.
-        entry = new_native
-        (
-            DBG_ALLOC(strdup("exit")), __LINE__,
-            m_exit, NULL, NUMBER
-        );
+        // Create default (exit). Line numbers and naming are for debugging
+        // purposes only.
+        entry = new_native(DBG_ALLOC(strdup("exit")), __LINE__, m_exit, NULL,
+                           NUMBER);
 
         #if defined(AMIGA) && !defined(LG_TEST)
-        // Not in test mode, else tests will break,
-        // they don't expect any default (exit).
+        // Not in test mode, else tests will break, they don't expect any
+        // default (exit).
 
         // Add to the root and reparent.
         if(entry)

@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // exit.c:
 //
 // Interuption of program execution
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "alloc.h"
 #include "error.h"
@@ -15,7 +15,6 @@
 #include "procedure.h"
 #include "resource.h"
 #include "util.h"
-
 #include <stdio.h>
 #include <string.h>
 
@@ -23,61 +22,54 @@
 #include <proto/exec.h>
 #endif
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (abort <string1> <string2> ...)
 //     abandon installation
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_abort(entry_p contxt)
 {
-    // We need a sane context. Arguments
-    // are optional though.
-    if(c_sane(contxt, 0))
+    // Arguments are optional.
+    C_SANE(0, NULL);
+
+    // Concatenate all children.
+    char *msg = get_chlstr(contxt, false);
+
+    // Did we manage to concatenate something?
+    if(msg)
     {
-        // Concatenate all children.
-        char *msg = get_chlstr(contxt, false);
-
-        // Did we manage to concatenate something?
-        if(msg)
+        // If we could resolve all our children, show the result of the
+        // concatenation unless we have an empty string.
+        if(*msg && !DID_ERR)
         {
-            // If we could resolve all our children,
-            // show the result of the concatenation
-            // unless we have an empty string.
-            if(*msg && !DID_ERR)
-            {
-                gui_abort(msg);
-            }
-
-            // Free the temporary buffer.
-            free(msg);
-
-            // Set abort state. Will make
-            // invoke() halt.
-            error(contxt, -3, ERR_ABORT, __func__);
-            RNUM(0);
+            gui_abort(msg);
         }
+
+        // Free the temporary buffer.
+        free(msg);
+
+        // Set abort. Will make invoke() halt.
+        error(contxt, -3, ERR_ABORT, __func__);
+        R_NUM(0);
     }
 
-    // Broken parser / OOM
+    // Out of memory.
     PANIC(contxt);
-
-    // Failure.
-    RCUR;
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (exit <string> <string> ... (quiet))
 //     end installation after displaying strings (if provided)
 //
-// This causes normal termination of a script.  If strings are
-// provided, they are displayed.  The 'done with installation'
-// message is then displayed.  The 'onerror' statements are not
-// executed.  If (quiet) is specified, the final report display
-// is skipped.
+// This causes normal termination of a script.  If strings are provided, they
+// are displayed.  The 'done with installation' message is then displayed.  The
+// 'onerror' statements are not executed. If (quiet) is specified, the final
+// report display is skipped.
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_exit(entry_p contxt)
 {
     // All we need is a context.
@@ -93,12 +85,11 @@ entry_p m_exit(entry_p contxt)
             {
                 // Out of memory
                 PANIC(contxt);
-                RCUR;
+                R_CUR;
             }
 
-            // If we could resolve all our children,
-            // show the result of the concatenation
-            // unless we have an empty string.
+            // If we could resolve all our children, show the result of the
+            // concatenation unless we have an empty string.
             if(*msg && !DID_ERR)
             {
                 gui_finish(msg);
@@ -109,14 +100,14 @@ entry_p m_exit(entry_p contxt)
         }
 
         // Show final message unless 'quiet' is set.
-        if(!DID_ERR && !get_opt(contxt, OPT_QUIET))
+        if(!get_opt(contxt, OPT_QUIET) && !DID_ERR)
         {
             // Get name and location of application.
             const char *app = get_strvar(contxt, "@app-name"),
                        *dst = get_strvar(contxt, "@default-dest");
 
-            // Only display the 'the app can be found here' message
-            // if we know the name and location of the application.
+            // Only display the 'the app can be found here' message if we know
+            // the name and location of the application.
             if(*app && *dst)
             {
                 snprintf(get_buf(), buf_size(), tr(S_CBFI), tr(S_ICPL),
@@ -134,106 +125,90 @@ entry_p m_exit(entry_p contxt)
 
         // Make invoke() halt.
         HALT;
-        RNUM(0);
+        R_NUM(0);
     }
 
     // The parser is broken
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (onerror (<statements>))
 //     general error trap
 //
 // ******************************************************
-// In part implemented using m_procedure. This function
-// just invokes the @onerror custom procedure inserted
-// using (onerror) which is a special case of (procedure)
+// In part implemented using m_procedure. This function just invokes the
+// @onerror custom procedure inserted using (onerror) which is a special case of
+// (procedure)
 // ******************************************************
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_onerror(entry_p contxt)
 {
-    // A static reference. We might be out of
-    // heap when this is invoked.
+    // A static reference. We might be out of heap when this is invoked.
     static entry_t ref = { .type = CUSREF,
                            .name = "@onerror" };
 
-    // We need a context.
-    if(c_sane(contxt, 0))
+    // Zero or more arguments. No options.
+    C_SANE(0, NULL);
+
+    // Global context where the user defined procedures are found.
+    entry_p con = global(contxt);
+
+    // Make sure that '@onerror' exists. On out of memory it might be missing.
+    entry_p *err = con->symbols;
+
+    while(*err && *err != end())
     {
-        // Global context where the user
-        // defined procedures are found.
-        entry_p con = global(contxt);
-
-        // Make sure that '@onerror' exists. On
-        // OOM it might be missing.
-        entry_p *err = con->symbols;
-
-        while(*err && *err != end())
+        if((*err)->type == CUSTOM &&
+           !strcasecmp((*err)->name, ref.name))
         {
-            if((*err)->type == CUSTOM &&
-               !strcasecmp((*err)->name, ref.name))
-            {
-                // Reset error code otherwise
-                // m_gosub / invoke will halt
-                // immediately.
-                RESET;
+            // Reset error code otherwise m_gosub / invoke will halt
+            // immediately.
+            RESET;
 
-                // Connect reference to the current context.
-                ref.parent = contxt;
+            // Connect reference to the current context.
+            ref.parent = contxt;
 
-                // Invoke @onerror by calling m_gosub just
-                // like any non-native function call.
-                return m_gosub(&ref);
-            }
-
-            // Next function.
-            err++;
+            // Invoke @onerror by calling m_gosub just like any non-native
+            // function call.
+            return m_gosub(&ref);
         }
-    }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
+
+        // Next function.
+        err++;
     }
 
-    // Failure.
-    RCUR;
+    // @onerror not found. Init is broken.
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (trap <flags> <statements>)
 //     trap errors.  flags: 1-abort, 2-nomem, 3-error, 4-dos, 5-badargs
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //
-// Despite what the Installer.guide says, the implementaion of 'trap' in OS
-// 3.9 seems like a stub, it doesn't work at all. Let's just leave this one
-// empty.
-//----------------------------------------------------------------------------
+// Despite what the Installer.guide says, the implementaion of 'trap' in OS 3.9
+// seems like a stub, it doesn't work at all. Let's just leave this one empty.
+//------------------------------------------------------------------------------
 entry_p m_trap(entry_p contxt)
 {
-    // Flags and statement.
-    if(c_sane(contxt, 2))
-    {
-        // Dummy.
-        RNUM(1);
-    }
+    // Two arguments.
+    C_SANE(2, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Dummy.
+    R_NUM(1);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (reboot)                                                              (V44)
 //     reboot the Amiga
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_reboot(entry_p contxt)
 {
     // All we need is a context.
@@ -242,7 +217,7 @@ entry_p m_reboot(entry_p contxt)
         // Don't reboot in pretend mode.
         if(get_numvar(contxt, "@pretend"))
         {
-            DNUM = 0;
+            D_NUM = 0;
         }
         else
         {
@@ -251,7 +226,7 @@ entry_p m_reboot(entry_p contxt)
             // Hard reset.
             ColdReboot();
             #else
-            DNUM = 1;
+            D_NUM = 1;
             #endif
         }
     }
@@ -262,5 +237,5 @@ entry_p m_reboot(entry_p contxt)
     }
 
     // No reboot.
-    RCUR;
+    R_CUR;
 }
