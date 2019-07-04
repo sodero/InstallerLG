@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // external.c:
 //
 // Execution of external scripts / binaries
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "alloc.h"
 #include "error.h"
@@ -26,9 +26,9 @@
 
 #include <string.h>
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // h_run - m_run / m_execute / m_rexx helper
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 {
     // One or more arguments.
@@ -76,12 +76,10 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         }
     }
 
-    // Is this call safe to run or are we not
-    // in pretend mode?
+    // Is this call safe to run or are we not in pretend mode?
     if(safe || !get_numvar(contxt, "@pretend"))
     {
-        // Command / script. Merge all and insert
-        // space between arguments.
+        // Command / script. Merge all and insert space between arguments.
         char *cmd = get_chlstr(contxt, true);
 
         if(!cmd)
@@ -118,20 +116,16 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             }
         }
 
-        // If we have a valid destination dir,
-        // change to that directory. We're not
-        // treating errors as such.
+        // If we have a valid destination dir, change to that directory. We're
+        // not treating errors as such.
         if(dir && *dir && h_exists(dir))
         {
             // Use the global buffer.
             char *buf = get_buf();
 
-            // Try to get current working dir
-            // before changing to the new dir
-            // Save the old one so that we can
-            // go back afterwards.
-            if(getcwd(buf, buf_size()) == buf
-               && !chdir(dir))
+            // Try to get current working dir before changing to the new dir
+            // Save the old one so that we can go back afterwards.
+            if(getcwd(buf, buf_size()) == buf && !chdir(dir))
             {
                 cwd = buf;
             }
@@ -150,7 +144,6 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             // Can this fail?
             if(out)
             {
-
                 // Execute whatever we have in cmd.
                 D_NUM = SystemTags
                 (
@@ -169,8 +162,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                     set_numvar(contxt, "@ioerr", ioe);
                 }
 
-                // Not sure if we need to close NIL:
-                // but it doesn't hurt.
+                // We probably don't need to close NIL: but it doesn't hurt.
                 Close(out);
             }
             else
@@ -179,8 +171,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 D_NUM = -1;
             }
 
-            // Not sure if we need to close NIL:
-            // but it doesn't hurt.
+            // We probably don't need to close NIL: but it doesn't hurt.
             Close(inp);
         }
         else
@@ -193,8 +184,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         printf("%s%s", cmd, dir ? dir : "");
         #endif
 
-        // Go back to where we started if we've
-        // changed directory.
+        // Go back to where we started if we've changed directory.
         if(cwd && chdir(cwd))
         {
             // The rug was swept away from us.
@@ -211,42 +201,41 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         free(cmd);
     }
 
-    // Write an explanation of what we just did /
-    // tried to do to the log file.
+    // Write an explanation of what we just did / tried to do to the log file.
     h_log(contxt, tr(S_XCTD), str(C_ARG(1)));
 
     // Success or failure.
     R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (execute <arg> (help..) (prompt..) (confirm) (safe))
 //     execute script file
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_execute(entry_p contxt)
 {
     return h_run(contxt, "execute", get_strvar(contxt, "@execute-dir"));
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (rexx <arg> (help..) (prompt..) (confirm..) (safe))
 //     execute ARexx script
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_rexx(entry_p contxt)
 {
     return h_run(contxt, "rx", NULL);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (run <arg> (help..) (prompt..) (confirm..) (safe))
 //     execute program
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_run(entry_p contxt)
 {
     return h_run(contxt, NULL, get_strvar(contxt, "@execute-dir"));

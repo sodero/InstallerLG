@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // strop.c:
 //
 // String operations
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "alloc.h"
 #include "error.h"
@@ -22,12 +22,12 @@
 #include <proto/dos.h>
 #endif
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (cat <string1> <string2>...)
 //     returns concatenation of strings
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_cat(entry_p contxt)
 {
     // We need atleast one string.
@@ -42,8 +42,7 @@ entry_p m_cat(entry_p contxt)
             size_t len = 0, cur = 0;
 
             // Iterate over all arguments.
-            while(contxt->children[cur] &&
-                  contxt->children[cur] != end())
+            while(contxt->children[cur] && contxt->children[cur] != end())
             {
                 // Resolve and get a string representation
                 // of the current argument.
@@ -120,12 +119,12 @@ entry_p m_cat(entry_p contxt)
     R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // ("<fmt>" <expr1> <expr2>)
 //     returns a formatted string
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_fmt(entry_p contxt)
 {
     // The format string is in the name of this contxt.
@@ -315,25 +314,23 @@ entry_p m_fmt(entry_p contxt)
     }
     else
     {
-        // Either something is terribly
-        // broken or we're out of memory
+        // Either something is terribly broken, or we're out of memory
         PANIC(contxt);
         free(sct);
         R_CUR;
     }
 
-    // Return empty string
-    // on failure.
+    // Return empty string on failure.
     free(ret);
     R_EST;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (pathonly <path>)
 //     return dir part of path (see fileonly)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_pathonly(entry_p contxt)
 {
     // We need one argument, a full path.
@@ -345,8 +342,7 @@ entry_p m_pathonly(entry_p contxt)
         // Scan backwards.
         while(len--)
         {
-            // If we find a delimiter, then we
-            // have the path to the left of it.
+            // If we find a delimiter, then we have the path to the left of it.
             if(arg[len] == '/' || arg[len] == ':' )
             {
                 // Get termination for free.
@@ -364,8 +360,7 @@ entry_p m_pathonly(entry_p contxt)
 
                 // Cut trailing '/' if preceeded by
                 // something absolute, dir or vol.
-                if(len > 1 && ret[len] == '/' &&
-                   ret[len - 1] != '/' &&
+                if(len > 1 && ret[len] == '/' && ret[len - 1] != '/' &&
                    ret[len - 1] != ':')
                 {
                     ret[len] = '\0';
@@ -375,8 +370,7 @@ entry_p m_pathonly(entry_p contxt)
             }
         }
 
-        // Return empty string
-        // on failure.
+        // Return empty string on failure.
         R_EST;
     }
 
@@ -385,12 +379,12 @@ entry_p m_pathonly(entry_p contxt)
     R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (patmatch <pattern> <string>)
 //     Does <pattern> match <string> ? TRUE : FALSE
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_patmatch(entry_p contxt)
 {
     // Two arguments.
@@ -407,8 +401,8 @@ entry_p m_patmatch(entry_p contxt)
     // Can we parse the pattern?
     if(w >= 0)
     {
-        // Use pattern matching if we have one or more
-        // wildcards, otherwise use plain strcmp().
+        // Use pattern matching if we have one or more wildcards, otherwise use
+        // plain strcmp().
         int r = w ? MatchPattern(buf, mat) : !strcmp(pat, mat);
         R_NUM(r ? 1 : 0);
     }
@@ -424,12 +418,12 @@ entry_p m_patmatch(entry_p contxt)
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (strlen <string>)
 //     returns string length
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_strlen(entry_p contxt)
 {
     // One argument.
@@ -439,12 +433,12 @@ entry_p m_strlen(entry_p contxt)
     R_NUM((int) strlen(str(C_ARG(1))));
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (substr <string> <start> [<count>])
 //     returns a substring of <string>
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_substr(entry_p contxt)
 {
     if(c_sane(contxt, 2))
@@ -456,20 +450,17 @@ entry_p m_substr(entry_p contxt)
         // Is the number characters limited?
         if(C_ARG(3) && C_ARG(3) != end())
         {
-            // Get the number of characters
-            // to copy.
+            // Get the number of characters to copy.
             int chr = num(C_ARG(3));
 
-            // Use the limitations used by the
-            // CBM installer.
+            // Use the limitations used by the CBM installer.
             if(off < len && chr > 0 && off >= 0)
             {
                 char *ret = DBG_ALLOC(calloc((size_t) len + 1, 1));
 
                 if(ret)
                 {
-                    // Cap all values and do the
-                    // actual copy.
+                    // Cap all values and do the actual copy.
                     len -= off;
                     len = len < chr ? len : chr;
                     memcpy(ret, arg + off, len);
@@ -494,8 +485,7 @@ entry_p m_substr(entry_p contxt)
 
                     if(ret)
                     {
-                        // All values are already
-                        // capped, just copy.
+                        // All values are already capped, just copy.
                         memcpy(ret, arg + off, len - off);
                         R_STR(ret);
                     }
@@ -510,8 +500,7 @@ entry_p m_substr(entry_p contxt)
             }
         }
 
-        // Fall through. Return
-        // empty string.
+        // Fall through. Return empty string.
         R_EST;
     }
 
@@ -522,12 +511,12 @@ entry_p m_substr(entry_p contxt)
     R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (tackon <path> <file>)
 //     return properly concatenated file to path
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_tackon(entry_p contxt)
 {
     // Two arguments.
@@ -548,14 +537,14 @@ entry_p m_tackon(entry_p contxt)
     R_STR(ret);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_tackon
 // Description: Concatenate directory and file strings
 // Input:       entry_p contxt:     The execution context.
 //              const char *pre:    The directory.
 //              const char *suf:    The file.
 // Return:      const char *:       The dir/file concatenation.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 char *h_tackon(entry_p contxt,
                const char *pre,
                const char *suf)
@@ -563,11 +552,9 @@ char *h_tackon(entry_p contxt,
     // We need a path and a file.
     if(pre && suf)
     {
-        size_t lep = strlen(pre),
-               les = strlen(suf);
+        size_t lep = strlen(pre), les = strlen(suf);
 
-        // No point doing this if both
-        // strings are empty.
+        // No point doing this if both strings are empty.
         if(lep || les)
         {
             char *ret = NULL;
@@ -605,8 +592,7 @@ char *h_tackon(entry_p contxt,
                 return ret;
             }
 
-            // If the filename is empty, the result
-            // equals the path.
+            // If the filename is empty, the result equals the path.
             if(!les)
             {
                 ret = DBG_ALLOC(strdup(pre));
@@ -631,8 +617,7 @@ char *h_tackon(entry_p contxt,
                 memcpy(ret, pre, lep);
 
                 // Insert delimiter if none exist.
-                if(pre[lep - 1] != '/' &&
-                   pre[lep - 1] != ':')
+                if(pre[lep - 1] != '/' && pre[lep - 1] != ':')
                 {
                    strncat(ret, "/", let - strlen(ret));
                 }

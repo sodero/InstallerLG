@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // symbol.c:
 //
 // Symbol manipulation
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "alloc.h"
 #include "error.h"
@@ -15,12 +15,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (set <varname> <value> [<varname2> <value2> ...])
 //      sets the variable `<varname>' to the indicated value.
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_set(entry_p contxt)
 {
     // Symbol destination.
@@ -30,8 +30,7 @@ entry_p m_set(entry_p contxt)
     if(c_sane(contxt, 1) && s_sane(contxt, 1))
     {
         // Function argument tuples.
-        entry_p *sym = contxt->symbols,
-                *val = contxt->children;
+        entry_p *sym = contxt->symbols, *val = contxt->children;
 
         // The custom procedure contxt if
         // we're in one. If so we need to
@@ -39,8 +38,7 @@ entry_p m_set(entry_p contxt)
         entry_p cus = custom(contxt);
 
         // Iterate over all symbol -> value tuples
-        while(*sym && *sym != end() &&
-              *val && *val != end())
+        while(*sym && *sym != end() && *val && *val != end())
         {
             // We need to resolve the right hand side
             // before setting the symbol value.
@@ -137,25 +135,23 @@ entry_p m_set(entry_p contxt)
         PANIC(contxt);
     }
 
-    // Unresolvable right hand
-    // side or broken parser.
+    // Unresolvable right hand side or broken parser.
     return end();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (symbolset <symbolname> <expression>)
 //     assign a value to a variable named by the string result of
 //     `<symbolname>' (V42.9)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_symbolset(entry_p contxt)
 {
     // Symbol destination.
     entry_p dst = global(contxt);
 
-    // We need one or more tuples of symbol
-    // name and value.
+    // We need one or more tuples of symbol name and value.
     if(c_sane(contxt, 2) && dst)
     {
         entry_p ret = D_CUR;
@@ -214,12 +210,10 @@ entry_p m_symbolset(entry_p contxt)
                 res->type = STRING;
             }
 
-            // Do we already have a symbol
-            // with this name?
+            // Do we already have a symbol with this name?
             while(*sym && *sym != end())
             {
-                // If true, replace its resolved
-                // value with the copy of the rhs
+                // If true, replace its resolved value with the copy of the rhs.
                 if(!strcasecmp((*sym)->name, lhs))
                 {
                     kill((*sym)->resolved);
@@ -230,8 +224,7 @@ entry_p m_symbolset(entry_p contxt)
                     break;
                 }
 
-                // Iterate over all symbols in
-                // this context.
+                // Iterate over all symbols in this context.
                 sym++;
             }
 
@@ -250,8 +243,8 @@ entry_p m_symbolset(entry_p contxt)
                 res->parent = nsm;
                 nsm->resolved = res;
 
-                // Append the symbol to the current
-                // context and create a global ref.
+                // Append the symbol to the current context and create a global
+                // ref.
                 if(append(&contxt->symbols, nsm))
                 {
                     push(dst, nsm);
@@ -277,17 +270,16 @@ entry_p m_symbolset(entry_p contxt)
     R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (symbolval <symbolname>)
 //     returns the value of the symbol named by the string expression
-//     `<smbolval>' (V42.9)
+//     `<symbolname>' (V42.9)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_symbolval(entry_p contxt)
 {
-    // We need one argument, the name
-    // of the symbol.
+    // We need one argument, the name of the symbol.
     if(c_sane(contxt, 1))
     {
         static entry_t entry = { .type = SYMREF };
@@ -300,8 +292,7 @@ entry_p m_symbolval(entry_p contxt)
 
         ret = resolve(&entry);
 
-        // Return the resolved value if
-        // the symbol could be found.
+        // Return the resolved value if the symbol could be found.
         if(!DID_ERR)
         {
             return ret;

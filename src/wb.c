@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // wb.c:
 //
 // Workbench interaction
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "alloc.h"
 #include "error.h"
@@ -18,13 +18,13 @@
 #include <proto/wb.h>
 #endif
 
-//----------------------------------------------------------------------------
-// (openwbobject <argument> ...)                                         (V44)
+//------------------------------------------------------------------------------
+// (openwbobject <argument> ...)                                           (V44)
 //      open a workbench object which can be a disk, a drawer, a trashcan, a
 //      tool or a project.
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_openwbobject(entry_p contxt)
 {
     // We need a single argument.
@@ -35,8 +35,7 @@ entry_p m_openwbobject(entry_p contxt)
             confirm    = get_opt(C_ARG(2), OPT_CONFIRM),
             safe       = get_opt(C_ARG(2), OPT_SAFE);
 
-    // A non safe operation in pretend mode
-    // always succeeds.
+    // A non safe operation in pretend mode always succeeds.
     if(get_numvar(contxt, "@pretend") && !safe)
     {
         R_NUM(1);
@@ -56,15 +55,15 @@ entry_p m_openwbobject(entry_p contxt)
     R_NUM(0);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (showwbobject <argument>)                                             (V44)
-//      scroll the view of an workbench drawer until the named icon is
-//      visible. The drawer has to be opened before.
+//      scroll the view of an workbench drawer until the named icon is visible.
+//      The drawer has to be opened before.
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //
 // KNOWN BUG: This doesn't seem to work on AROS and MorphOS.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_showwbobject(entry_p contxt)
 {
     // We need a single argument.
@@ -78,15 +77,15 @@ entry_p m_showwbobject(entry_p contxt)
     #endif
 }
 
-//----------------------------------------------------------------------------
-// (closewbobject <argument>)                                            (V44)
-//      close named workbench object. Only disks, trashcans and drawers can
-//      be closed.
+//------------------------------------------------------------------------------
+// (closewbobject <argument>)                                              (V44)
+//      close named workbench object. Only disks, trashcans and drawers can be
+//      closed.
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //
 // KNOWN BUG: This doesn't seem to work on AROS and MorphOS.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_closewbobject(entry_p contxt)
 {
     // We need a single argument.

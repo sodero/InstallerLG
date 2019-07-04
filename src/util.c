@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // util.c:
 //
 // Misc utility functions primarily used by the 'native' methods.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "alloc.h"
 #include "error.h"
@@ -23,12 +23,12 @@
 #define DBG(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        ror
 // Description: Rotate array of entries to the right.
 // Input:       entry_p *e: Array of entries.
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void ror(entry_p *entry)
 {
     // Something to rotate?
@@ -61,22 +61,19 @@ void ror(entry_p *entry)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        local
 // Description: Find the next context going upwards in the tree.
 // Input:       entry_p entry:  The starting point.
 // Return:      entry_p:        The closest context found, or
 //                              NULL if no context was found.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p local(entry_p entry)
 {
-    // Go upwards until we find what we're
-    // looking for, or hit the (broken) top.
-    for(entry_p contxt = entry; contxt;
-        contxt = contxt->parent)
+    // Go upwards until we find what we're looking for, or hit the (broken) top.
+    for(entry_p contxt = entry; contxt; contxt = contxt->parent)
     {
-        if(contxt->type == CONTXT ||
-           contxt->type == CUSTOM)
+        if(contxt->type == CONTXT || contxt->type == CUSTOM)
         {
             return contxt;
         }
@@ -92,13 +89,13 @@ entry_p local(entry_p entry)
     return NULL;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        global
 // Description: Find the root context.
 // Input:       entry_p entry:  The starting point.
 // Return:      entry_p:        The root context, or NULL
 //                              if no context was found.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p global(entry_p entry)
 {
     // Go all the way up.
@@ -107,8 +104,7 @@ entry_p global(entry_p entry)
         // Find the next context.
         entry_p next = local(contxt->parent);
 
-        // If there is no higher context, we're
-        // at the global level.
+        // If there is no higher context, we're at the global level.
         if(!next)
         {
             return contxt;
@@ -122,14 +118,14 @@ entry_p global(entry_p entry)
     return NULL;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        parent
 // Description: Find parent of a given type if such exists.
 // Input:       entry_p entry:  The starting point.
 //              type_t type:    The parent type.
 // Return:      entry_p:        The parent, or NULL if no parent of the given
 //                              type was found.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static entry_p parent(entry_p entry, type_t type)
 {
     // Check current level then go all the way up.
@@ -147,25 +143,25 @@ static entry_p parent(entry_p entry, type_t type)
     return NULL;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        custom
 // Description: Find CUSTOM parent if such exists.
 // Input:       entry_p entry:  The starting point.
 // Return:      entry_p:        The CUSTUM entry, or NULL
 //                              if no CUSTOM was found.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p custom(entry_p entry)
 {
     return parent(entry, CUSTOM);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        native
 // Description: Find NATIVE parent if such exists.
 // Input:       entry_p entry:  The starting point.
 // Return:      entry_p:        The NATIVE entry, or NULL
 //                              if no NATIVE was found.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p native(entry_p entry)
 {
     return parent(entry, NATIVE);
@@ -242,36 +238,35 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
     // Translate strings to options.
 
 
-    for(size_t i = 0; fake->children[i] &&
-        fake->children[i] != end(); i++)
+    for(size_t i = 0; fake->children[i] && fake->children[i] != end(); i++)
     {
         entry_p cur = fake->children[i];
         bool del = cur->parent->id == OPT_DELOPTS;
         char *opt = str(cur);
-       
+
         if(!strcmp(opt, "fail"))
         {
-            cache[OPT_FAIL] = del ? NULL : cur; 
+            cache[OPT_FAIL] = del ? NULL : cur;
         }
         else
         if(!strcmp(opt, "force"))
         {
-            cache[OPT_FORCE] = del ? NULL : cur; 
+            cache[OPT_FORCE] = del ? NULL : cur;
         }
         else
         if(!strcmp(opt, "nofail"))
         {
-            cache[OPT_NOFAIL] = del ? NULL : cur; 
+            cache[OPT_NOFAIL] = del ? NULL : cur;
         }
         else
         if(!strcmp(opt, "askuser"))
         {
-            cache[OPT_ASKUSER] = del ? NULL : cur; 
+            cache[OPT_ASKUSER] = del ? NULL : cur;
         }
         else
         if(!strcmp(opt, "oknodelete"))
         {
-            cache[OPT_OKNODELETE] = del ? NULL : cur; 
+            cache[OPT_OKNODELETE] = del ? NULL : cur;
         }
     }
 }
@@ -288,23 +283,19 @@ static void prune_opt(entry_p contxt, entry_p *cache)
         }
 
         // The default threshold is expert.
-        int level = get_numvar(contxt, "@user-level"),
-            thres = 2;
+        int level = get_numvar(contxt, "@user-level"), thres = 2;
 
-        // If the (cache[OPT_CONFIRM] ...) option contains
-        // something that can be translated into
-        // a new threshold value...
-        if(cache[OPT_CONFIRM]->children &&
-           cache[OPT_CONFIRM]->children[0] &&
+        // If the (cache[OPT_CONFIRM] ...) option contains something that can be
+        // translated into a new threshold value...
+        if(cache[OPT_CONFIRM]->children && cache[OPT_CONFIRM]->children[0] &&
            cache[OPT_CONFIRM]->children[0] != end())
         {
             // ...then do so.
             thres = num(cache[OPT_CONFIRM]);
         }
 
-        // If we are below the threshold value, or
-        // user input has been short-circuited by
-        // @yes, skip cache[OPT_CONFIRM]ation.
+        // If we are below the threshold value, or user input has been
+        // short-circuited by @yes, skip cache[OPT_CONFIRM]ation.
         if(level < thres || get_numvar(contxt, "@yes"))
         {
             cache[OPT_CONFIRM] = NULL;
@@ -339,7 +330,7 @@ entry_p opt(entry_p contxt, opt_t type)
     last = contxt;
 
     // Iterate over all options to fill up the cache.
-    for(size_t i = 0 /*OPT_FIRST*/; contxt->children[i] &&
+    for(size_t i = 0; contxt->children[i] &&
         contxt->children[i] != end() && i < OPT_LAST; i++)
     {
         entry_p entry = contxt->children[i];
@@ -347,12 +338,11 @@ entry_p opt(entry_p contxt, opt_t type)
         // Skip non options.
         if(entry->type == OPTION)
         {
-            // Option indentifier. 
+            // Option indentifier.
             int option = entry->id;
 
             // Fake option
-            if(option == OPT_OPTIONAL ||
-               option == OPT_DELOPTS)
+            if(option == OPT_OPTIONAL || option == OPT_DELOPTS)
             {
                 // Cast to real options.
                 get_fake_opt(entry, cache);
@@ -374,8 +364,7 @@ entry_p opt(entry_p contxt, opt_t type)
         }
     }
 
-    // If in non strict mode, allow the absense
-    // of (prompt) and (help).
+    // If in non strict mode, allow the absense of (prompt) and (help).
     if(!get_numvar(contxt, "@strict"))
     {
         if(!cache[OPT_HELP])
@@ -394,17 +383,17 @@ entry_p opt(entry_p contxt, opt_t type)
     // Prune options.
     prune_opt(contxt, cache);
 
-    // Use the (full) cache. 
+    // Use the (full) cache.
     return cache[type];
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        get_opt
 // Description: Find option of a given type in a context.
 // Input:       entry_p contxt:  The context to search in.
 //              opt_t type:      The type of option to search for.
 // Return:      entry_p:         An OPTION entry if found, NULL otherwise.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p get_opt(entry_p contxt, opt_t type)
 {
     return opt(contxt, type);
@@ -475,7 +464,7 @@ entry_p get_opt(entry_p contxt, opt_t type)
 */
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        x_sane
 // Description: Sanity check to verify that we have the required number of
 //              children or symbols needed and that these are valid. This
@@ -484,7 +473,7 @@ entry_p get_opt(entry_p contxt, opt_t type)
 //              type_t:          NATIVE or SYMBOL.
 //              size_t num:      The number of children / symbols needed.
 // Return:      int:             1 if context is valid, 0 otherwise.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static int x_sane(entry_p contxt, type_t type, size_t num)
 {
     // We need a context.
@@ -506,8 +495,8 @@ static int x_sane(entry_p contxt, type_t type, size_t num)
             }
         }
 
-        // We should have an array here if we're expecting
-        // more than 0 children or symbols.
+        // We should have an array here if we're expecting more than 0 children
+        // or symbols.
         if(num && !vec)
         {
             dump(contxt);
@@ -563,7 +552,7 @@ static int x_sane(entry_p contxt, type_t type, size_t num)
     return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        c_sane
 // Description: Context sanity check used by the NATIVE functions to verify
 //              that we have atleast the number of children needed and that
@@ -572,13 +561,13 @@ static int x_sane(entry_p contxt, type_t type, size_t num)
 // Input:       entry_p contxt:  The context.
 //              size_t num:      The number of children necessary.
 // Return:      int:             1 if context is valid, 0 otherwise.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int c_sane(entry_p contxt, size_t num)
 {
     return x_sane(contxt, NATIVE, num);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        s_sane
 // Description: Context sanity check used by the NATIVE functions to verify
 //              that we have atleast the number of symbols needed and that
@@ -587,13 +576,13 @@ int c_sane(entry_p contxt, size_t num)
 // Input:       entry_p contxt:  The context.
 //              size_t num:      The number of symbols necessary.
 // Return:      int:             1 if context is valid, 0 otherwise.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int s_sane(entry_p contxt, size_t num)
 {
     return x_sane(contxt, SYMBOL, num);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        set_numvar
 // Description: Give an existing numerical variable a new value. Please note
 //              that the variable must exist and that the current resolved
@@ -603,7 +592,7 @@ int s_sane(entry_p contxt, size_t num)
 //              char *var:       The name of the variable.
 //              int val:         The new value of the variable.
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void set_numvar(entry_p contxt, char *var, int val)
 {
     // Dummy reference used for searching.
@@ -633,16 +622,16 @@ void set_numvar(entry_p contxt, char *var, int val)
     // Failure.
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        get_numvar
 // Description: Get the value of an existing numerical variable. Please note
-//              that the variable must exist and that the current resolved
-//              value must be a NUMBER.
+//              that the variable must exist and that the current resolved value
+//              must be a NUMBER.
 // Input:       entry_p contxt:  The context.
 //              char *var:       The name of the variable.
 // Return:      int:             The value of the variable or zero if the
 //                               variable can't be found.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int get_numvar(entry_p contxt, char *var)
 {
     // We need a name and a context.
@@ -653,9 +642,7 @@ int get_numvar(entry_p contxt, char *var)
         return 0;
     }
 
-    // Dummy reference used to find
-    // the variable.
-    entry_p sym;
+    // Dummy reference used to find the variable.
     static entry_t ref = { .type = SYMREF };
 
     // Name and reparent dummy.
@@ -663,10 +650,9 @@ int get_numvar(entry_p contxt, char *var)
     ref.parent = contxt;
 
     // Find whatever 'var' is.
-    sym = find_symbol(&ref);
+    entry_p sym = find_symbol(&ref);
 
-    // This should be a symbol. And it
-    // should be a resolved numerical one.
+    // This should be a symbol. And it should be a resolved numerical one.
     if(sym && sym->type == SYMBOL && sym->resolved &&
        sym->resolved->type == NUMBER)
     {
@@ -678,7 +664,7 @@ int get_numvar(entry_p contxt, char *var)
     return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        get_strvar
 // Description: Get the value of an existing string variable. Please note
 //              that the variable must exist and that the current resolved
@@ -687,7 +673,7 @@ int get_numvar(entry_p contxt, char *var)
 //              char *var:       The name of the variable.
 // Return:      char *:          The value of the variable or an empty string
 //                               if the variable can't be found.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 char *get_strvar(entry_p contxt, char *var)
 {
     // We need a name and a context.
@@ -698,9 +684,7 @@ char *get_strvar(entry_p contxt, char *var)
         return "";
     }
 
-    // Dummy reference used to find
-    // the variable.
-    entry_p sym;
+    // Dummy reference used to find the variable.
     static entry_t ref = { .type = SYMREF };
 
     // Name and reparent dummy.
@@ -708,12 +692,10 @@ char *get_strvar(entry_p contxt, char *var)
     ref.parent = contxt;
 
     // Find whatever 'v' is.
-    sym = find_symbol(&ref);
+    entry_p sym = find_symbol(&ref);
 
-    // This should be a symbol. And it
-    // should be a resolved string.
-    if(sym && sym->type == SYMBOL &&
-       sym->resolved && sym->resolved->name &&
+    // This should be a symbol. And it should be a resolved string.
+    if(sym && sym->type == SYMBOL && sym->resolved && sym->resolved->name &&
        sym->resolved->type == STRING)
     {
         // Success.
@@ -724,14 +706,14 @@ char *get_strvar(entry_p contxt, char *var)
     return "";
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        get_optstr
 // Description: Concatenate all the strings in all the options of a given
 //              type in contxt.
 // Input:       entry_p contxt:    The context.
 //              opt_t type:        The option type.
 // Return:      char *:            A concatenation of all the strings found.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 char *get_optstr(entry_p contxt, opt_t type)
 {
     size_t cnt = 0;
@@ -740,8 +722,7 @@ char *get_optstr(entry_p contxt, opt_t type)
     // Count options of the given type.
     while(*child && *child != end())
     {
-        if((*child)->type == OPTION &&
-           (*child)->id == (int32_t) type)
+        if((*child)->type == OPTION && (*child)->id == (int32_t) type)
         {
             // Found one.
             cnt++;
@@ -772,11 +753,9 @@ char *get_optstr(entry_p contxt, opt_t type)
     size_t len = 1;
 
     // Evaluate options once and save strings.
-    for(size_t i = 0; i < cnt && *child
-        && *child != end(); child++)
+    for(size_t i = 0; i < cnt && *child && *child != end(); child++)
     {
-        if((*child)->id == (int32_t) type &&
-           (*child)->type == OPTION)
+        if((*child)->id == (int32_t) type && (*child)->type == OPTION)
         {
             // Sum up the length.
             char *cur = get_chlstr(*child, false);
@@ -814,7 +793,7 @@ char *get_optstr(entry_p contxt, opt_t type)
     return ret;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        get_chlst
 // Description: Concatenate the string representations of all non context
 //              children of a context.
@@ -822,15 +801,13 @@ char *get_optstr(entry_p contxt, opt_t type)
 //              bool pad:        Whitespace padding.
 // Return:      char *:          The concatenation of the string representations
 //                               of all non context children of 'contxt'.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 char *get_chlstr(entry_p contxt, bool pad)
 {
     // Concatenation.
     char *ret = NULL;
 
-    // We don't really need anything to
-    // concatenate but we expect a sane
-    // contxt.
+    // We don't really need anything to concatenate but we expect a sane contxt.
     if(c_sane(contxt, 0))
     {
         size_t cnt = 0;
@@ -916,12 +893,11 @@ char *get_chlstr(entry_p contxt, bool pad)
         }
     }
 
-    // We could be in any state
-    // here, success or panic.
+    // We could be in any state here, success or panic.
     return ret;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        set_strvar
 // Description: Give an existing string variable a new value. Please note
 //              that the variable must exist and that the current resolved
@@ -931,28 +907,25 @@ char *get_chlstr(entry_p contxt, bool pad)
 //              char *var:       The name of the variable.
 //              char *val:       The new value of the variable.
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void set_strvar(entry_p contxt, char *var, char *val)
 {
     // We need a name and a context.
     if(contxt && var)
     {
-        // Dummy reference used to find
-        // the variable.
-        entry_p sym;
+        // Dummy reference used to find the variable.
         static entry_t ref = { .type = SYMREF };
 
         // Name and reparent dummy.
-        ref.name = var;
         ref.parent = contxt;
+        ref.name = var;
 
         // Find whatever 'v' is.
-        sym = find_symbol(&ref);
+        entry_p sym = find_symbol(&ref);
 
         // This should be a symbol. And it
         // should be a resolved string.
-        if(sym && sym->type == SYMBOL &&
-           sym->resolved &&
+        if(sym && sym->type == SYMBOL && sym->resolved &&
            sym->resolved->type == STRING)
         {
             // Taking ownership of 'val'.
@@ -962,20 +935,17 @@ void set_strvar(entry_p contxt, char *var, char *val)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        dump_indent
 // Description: Refer to dump below.
 // Input:       entry_p entry:  The tree to print.
 //              int indent:     Indentation level.
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static void dump_indent(entry_p entry, int indent)
 {
     // Indentation galore.
-    char ind[16] = "\t\t\t\t"
-                   "\t\t\t\t"
-                   "\t\t\t\t"
-                   "\t\t\t\0";
+    char ind[16] = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\0";
 
     // Going backwards to go forward.
     char *type = ind + sizeof(ind) - 1 - indent;
@@ -985,19 +955,8 @@ static void dump_indent(entry_p entry, int indent)
     if(entry)
     {
         // Data type descriptions.
-        char *tps[] =
-        {
-            "NUMBER",
-            "STRING",
-            "SYMBOL",
-            "SYMREF",
-            "NATIVE",
-            "OPTION",
-            "CUSTOM",
-            "CUSREF",
-            "CONTXT",
-            "DANGLE"
-        };
+        char *tps[] = { "NUMBER", "STRING", "SYMBOL", "SYMREF", "NATIVE",
+                        "OPTION", "CUSTOM", "CUSREF", "CONTXT", "DANGLE" };
 
         // All entries have a type, a parent and an ID.
         DBG("%s\n", tps[entry->type]);
@@ -1022,9 +981,8 @@ static void dump_indent(entry_p entry, int indent)
         {
             DBG("%sRes:\t", type);
 
-            // Pretty print the 'resolved' entry,
-            // last / default return value and
-            // values refered to by symbols.
+            // Pretty print the 'resolved' entry, last / default return value
+            // and values refered to by symbols.
             dump_indent(entry->resolved, indent + 1);
         }
 
@@ -1060,12 +1018,12 @@ static void dump_indent(entry_p entry, int indent)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        dump
 // Description: Pretty print the complete tree in 'entry'.
 // Input:       entry_p entry:  The tree to print.
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void dump(entry_p entry)
 {
     static entry_p last;
@@ -1084,29 +1042,29 @@ void dump(entry_p entry)
 #define LG_BUFSIZ (BUFSIZ + PATH_MAX + 1)
 static char buf[LG_BUFSIZ];
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        get_buf
 // Description: Get pointer to temporary buffer.
 // Input:       -
 // Return:      char *: Buffer pointer.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 char *get_buf(void)
 {
     return buf;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        buf_size
 // Description: Get size of temporary buffer.
 // Input:       -
 // Return:      size_t: Buffer size.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 size_t buf_size(void)
 {
     return sizeof(buf) - 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        dbg_alloc
 // Description: Used by DBG_ALLOC to provide more info when failing to
 //              allocate memory and to fail deliberately when testing.
@@ -1115,7 +1073,7 @@ size_t buf_size(void)
 //              const char *func: Source code function.
 //              void *mem: Pointer to allocated memory.
 // Return:      void *: Pointer to allocated memory.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void *dbg_alloc(int line, const char *file, const char *func, void *mem)
 {
     // Fail deliberately if file or line defines are set.
@@ -1156,12 +1114,12 @@ void *dbg_alloc(int line, const char *file, const char *func, void *mem)
     return mem;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        native_exists
 // Description: Find first occurence of callback in AST.
 // Input:       entry_p contxt:  CONTXT.
 // Return:      entry_p:         NATIVE callback if found, NULL otherwise.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p native_exists(entry_p contxt, call_t func)
 {
     entry_p entry = NULL;
@@ -1173,15 +1131,12 @@ entry_p native_exists(entry_p contxt, call_t func)
         return entry;
     }
 
-    // Iterate over all children and
-    // recur if needed.
-    for(entry_p *c = contxt->children;
-        *c && *c != end() && !entry; c++)
+    // Iterate over all children and recur if needed.
+    for(entry_p *c = contxt->children; *c && *c != end() && !entry; c++)
     {
-        if((*c)->type == NATIVE &&
-           (*c)->call == func)
+        if((*c)->type == NATIVE && (*c)->call == func)
         {
-            // We found it.
+            // Found it.
             entry = *c;
         }
         else

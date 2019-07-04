@@ -1,18 +1,18 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // error.c:
 //
 // Functions for setting, getting and communicating errors.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "error.h"
 #include "gui.h"
 #include "util.h"
 #include <stdio.h>
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        error
 // Description: Function used to set / get / communicate errors.
 // Input:       int line:           Line number.
@@ -21,7 +21,7 @@
 //              const char *info:   A message describing the problem in a way
 //                                  that makes sense to the user.
 // Return:      int:                The current state.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int error(entry_p contxt, int line, err_t type, const char *info)
 {
     // Last error.
@@ -48,8 +48,8 @@ int error(entry_p contxt, int line, err_t type, const char *info)
         /*5*/ "Internal error", /*6*/ "Buffer overflow", /*7*/ "Read error",
         /*8*/ "Could not read from file", /*9*/ "Could not read directory",
         /*10*/ "Could not write to file", /*11*/ "Could not create directory",
-        /*12*/ "Could not rename file", /*13*/ "Could not delete file", /*14*/ "Version not found",
-        /*15*/ "Not a file", /*16*/ "Not a directory",
+        /*12*/ "Could not rename file", /*13*/ "Could not delete file",
+        /*14*/ "Version not found", /*15*/ "Not a file", /*16*/ "Not a directory",
         /*17*/ "No such file or directory", /*18*/ "Could not get file / dir permissions",
         /*19*/ "Could not set file / dir permissions", /*20*/ "Could not execute command",
         /*21*/ "Could not create / remove assign", /*22*/ "Undefined function",

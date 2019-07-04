@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // probe.c:
 //
 // Environment information retrieval
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "alloc.h"
 #include "error.h"
@@ -36,20 +36,20 @@
 #include <workbench/workbench.h>
 #endif
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_cpu_name
 // Description: Helper for m_database. Get host CPU architecture.
-// Input:       -
+// Input:       ---
 // Return:      char *: Host CPU architecture.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static char *h_cpu_name(void)
 {
-    enum { ERR, PPC, ARM, M68000, M68010, M68020,
-           M68030, M68040, M68060, X86, X86_64, ALL };
+    enum { ERR, PPC, ARM, M68000, M68010, M68020, M68030, M68040, M68060, X86,
+           X86_64, ALL };
 
-    static char *cpu[ALL] = { "Unknown", "PowerPC", "ARM",
-                              "68000", "68010", "68020", "68030",
-                              "68040", "68060", "x86", "x84_64" };
+    static char *cpu[ALL] = { "Unknown", "PowerPC", "ARM", "68000", "68010",
+                              "68020", "68030", "68040", "68060", "x86",
+                              "x84_64" };
     uint32_t arc = ERR;
 
     #if defined(__MORPHOS__) && !defined(LG_TEST)
@@ -64,11 +64,8 @@ static char *h_cpu_name(void)
     {
         ULONG fam;
 
-        struct TagItem tags[] =
-        {
-            { GCIT_Family, (IPTR) &fam },
-            { TAG_DONE, TAG_DONE }
-        };
+        struct TagItem tags[] = { { GCIT_Family, (IPTR) &fam },
+                                  { TAG_DONE, TAG_DONE } };
 
         GetCPUInfo(tags);
 
@@ -116,7 +113,7 @@ static char *h_cpu_name(void)
             }
     }
     #elif defined(AMIGA) && !defined(LG_TEST)
-    // AmigaOS3 - Beware, not tested.
+    // AmigaOS3 - Beware, !NOT TESTED!.
     struct ExecBase *AbsSysBase = *((struct ExecBase **)4);
     UWORD flags = AbsSysBase->AttnFlags;
 
@@ -150,13 +147,13 @@ static char *h_cpu_name(void)
     return cpu[arc];
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (database <feature> [<checkvalue>])
 //    return information about the Amiga that the Installer
 //    is running on.
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_database(entry_p contxt)
 {
     // We need atleast one argument
@@ -231,12 +228,12 @@ entry_p m_database(entry_p contxt)
     R_STR(DBG_ALLOC(strdup(ret)));
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (earlier <file1> <file2>)
 //     true if file1 earlier than file2
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_earlier(entry_p contxt)
 {
     // We need two filenames.
@@ -265,20 +262,19 @@ entry_p m_earlier(entry_p contxt)
     R_NUM(old.st_mtime < new.st_mtime ? 1 : 0);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (getassign <name> <opts>)
 //     return value of logical name (no `:') `<opts>': 'v'-volumes,
 //     'a'-assigns, 'd'-devices
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_getassign(entry_p contxt)
 {
     // We need one or more arguments.
     C_SANE(1, NULL);
 
-    // On non Amiga systems, or in test mode,
-    // this is a stub.
+    // On non Amiga systems, or in test mode, this is a stub.
     #if defined(AMIGA) && !defined(LG_TEST)
     struct DosList *dl;
     const char *asn = str(C_ARG(1));
@@ -286,17 +282,15 @@ entry_p m_getassign(entry_p contxt)
 
     if(!asnl)
     {
-        // Invalid name of assign, and
-        // the empty string is how the
-        // CBM installer fails.
+        // Invalid name of assign, and the empty string is how the CBM
+        // installer fails.
         R_EST;
     }
 
     // The second argument is optional.
     entry_p opt = C_ARG(2);
 
-    // The bitmask must contain atleast
-    // this LDF_READ.
+    // The bitmask must contain atleast this LDF_READ.
     ULONG msk = LDF_READ;
 
     // Parse the option string if it exists.
@@ -306,8 +300,7 @@ entry_p m_getassign(entry_p contxt)
 
         if(*o)
         {
-            // Translate from Installer speak to DOS
-            // speak.
+            // Translate from Installer speak to DOS speak.
             while(*o)
             {
                 msk |= (*o == 'v') ? LDF_VOLUMES : 0;
@@ -318,14 +311,14 @@ entry_p m_getassign(entry_p contxt)
         }
         else
         {
-            // The CBM installer returns an empty
-            // string if option string is empty.
+            // The CBM installer returns an empty string if option string is
+            // empty.
             R_EST;
         }
     }
     else
-    // The default behaviour, when no option string is
-    // present, is to look for logical assignments.
+    // The default behaviour, when no option string is present, is to look for
+    // logical assignments.
     {
         msk |= LDF_ASSIGNS;
     }
@@ -335,26 +328,17 @@ entry_p m_getassign(entry_p contxt)
 
     if(dl)
     {
-        ULONG bits[] =
-        {
-            LDF_ASSIGNS,
-            LDF_VOLUMES,
-            LDF_DEVICES,
-            0
-        };
+        ULONG bits[] = { LDF_ASSIGNS, LDF_VOLUMES, LDF_DEVICES, 0 };
 
         // Iterate over all flags.
-        for(size_t i = 0;
-            bits[i]; i++)
+        for(size_t i = 0; bits[i]; i++)
         {
-            // For all flags matching the option
-            // string (or its absence), traverse
-            // the doslist.
+            // For all flags matching the option string (or its absence),
+            // traverse the doslist.
             if(msk & bits[i])
             {
                 struct DosList *dc = (struct DosList *)
-                    NextDosEntry(dl, bits[i]);
-
+                                      NextDosEntry(dl, bits[i]);
                 while(dc)
                 {
                     const char *n = B_TO_CSTR(dc->dol_Name);
@@ -362,19 +346,19 @@ entry_p m_getassign(entry_p contxt)
                     // Ignore case when looking for match.
                     if(!strcasecmp(asn, n))
                     {
-                        // Unlock doslist and allocate enough
-                        // memory to hold any path.
+                        // Unlock doslist and allocate enough memory to hold any
+                        // path.
                         char *r = DBG_ALLOC(calloc(PATH_MAX, 1));
                         UnLockDosList(msk);
 
                         if(r)
                         {
-                            // The form common to all types. Do we
-                            // need to do anything with LDF_VOLUMES?
+                            // The form common to all types. Do we need to do
+                            // anything with LDF_VOLUMES?
                             snprintf(r, PATH_MAX, "%s:", n);
 
-                            // Logical assignments. Get the full path
-                            // from the lock.
+                            // Logical assignments. Get the full path from the
+                            // lock.
                             if(bits[i] == LDF_ASSIGNS)
                             {
                                 BPTR l = (BPTR) Lock(r, ACCESS_READ);
@@ -385,9 +369,9 @@ entry_p m_getassign(entry_p contxt)
                                     UnLock(l);
                                 }
                             }
-                            // Devices. No other options than 'd' are
-                            // allowed in the options string for some
-                            // reason (in the CBM installer).
+                            // Devices. No other options than 'd' are allowed
+                            // in the options string for some reason (in the
+                            // CBM installer).
                             else if(bits[i] == LDF_DEVICES)
                             {
                                 if((bits[i] | LDF_READ) == msk)
@@ -415,8 +399,7 @@ entry_p m_getassign(entry_p contxt)
                     else
                     {
                         // No match. Next list item.
-                        dc = (struct DosList *)
-                            NextDosEntry(dc, bits[i]);
+                        dc = (struct DosList *) NextDosEntry(dc, bits[i]);
                     }
                 }
             }
@@ -427,10 +410,8 @@ entry_p m_getassign(entry_p contxt)
     }
     else
     {
-        // Could not lock doslist. I'm not
-        // sure this can happen. I believe
-        // LockDosList will block until the
-        // end of time if a problem occurs.
+        // Could not lock doslist. I'm not sure this can happen. I believe
+        // LockDosList will block until the end of time if a problem occurs.
         ERR(ERR_READ, asn);
     }
     #endif
@@ -439,12 +420,12 @@ entry_p m_getassign(entry_p contxt)
     R_EST;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (getdevice <path>)
 //     returns name of device upon which <path> resides
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_getdevice(entry_p contxt)
 {
     // We need a path.
@@ -469,20 +450,17 @@ entry_p m_getdevice(entry_p contxt)
                 struct MsgPort *mp = dl->dol_Task;
                 ULONG msk = LDF_READ | LDF_DEVICES;
 
-                // Search for <path> handler in the
-                // list of devices.
+                // Search for <path> handler in the list of devices.
                 dl = (struct DosList *) LockDosList(msk);
 
                 while(dl && mp != dl->dol_Task)
                 {
-                    dl = (struct DosList *)
-                        NextDosEntry(dl, LDF_DEVICES);
+                    dl = (struct DosList *) NextDosEntry(dl, LDF_DEVICES);
                 }
 
                 UnLockDosList(msk);
 
-                // If we found it, we also found the
-                // name of the device.
+                // If we found it, we also found the name of the device.
                 if(dl)
                 {
                     const char *n = B_TO_CSTR(dl->dol_Name);
@@ -492,11 +470,9 @@ entry_p m_getdevice(entry_p contxt)
                     {
                         R_STR(DBG_ALLOC(strdup(n)));
                     }
-                    else
-                    {
-                        // Unknown error.
-                        PANIC(contxt);
-                    }
+
+                    // Unknown error.
+                    PANIC(contxt);
                 }
             }
         }
@@ -514,12 +490,12 @@ entry_p m_getdevice(entry_p contxt)
     R_EST;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (getdiskspace <pathname> [<unit>])                                    (V44)
 //     return available space
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_getdiskspace(entry_p contxt)
 {
     // We need a path.
@@ -538,21 +514,16 @@ entry_p m_getdiskspace(entry_p contxt)
         // Retrieve information from lock.
         if(Info(lock, &id))
         {
-            long long free = (long long)
-                (id.id_NumBlocks -
-                 id.id_NumBlocksUsed) *
-                 id.id_BytesPerBlock;
-
+            long long free = (long long) (id.id_NumBlocks - id.id_NumBlocksUsed)
+                                          * id.id_BytesPerBlock;
             // Release lock ASAP.
             UnLock(lock);
 
             // From the Installer.guide 1.20:
             //
-            // The parameter <unit> is optional and
-            // defines the unit for the returned disk
-            // space: "B" (or omitted) is "Bytes", "K"
-            // is "Kilobytes", "M" is "Megabytes" and
-            // "G" is "Gigabytes".
+            // The parameter <unit> is optional and defines the unit for the
+            // returned disk space: "B" (or omitted) is "Bytes", "K" is
+            // "Kilobytes", "M" is "Megabytes" and "G" is "Gigabytes".
             if(C_ARG(2) && C_ARG(2) != end())
             {
                 switch(*str(C_ARG(2)))
@@ -582,11 +553,8 @@ entry_p m_getdiskspace(entry_p contxt)
         UnLock(lock);
     }
 
-    // For some reason, we could not
-    // acquire a lock on <path>, or,
-    // we could get a lock, but failed
-    // when trying to retrieve info
-    // from the lock.
+    // For some reason, we could not acquire a lock on <path>, or, we could get
+    // a lock, but failed when trying to retrieve info from the lock.
     ERR(ERR_READ, n);
     #endif
 
@@ -594,12 +562,12 @@ entry_p m_getdiskspace(entry_p contxt)
     R_NUM(-1);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (getenv <name>)
 //     return value of environment variable
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_getenv(entry_p contxt)
 {
     // We need a variable name.
@@ -618,12 +586,12 @@ entry_p m_getenv(entry_p contxt)
     R_EST;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (getsize <file>)
 //     return size
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_getsize(entry_p contxt)
 {
     // We need a file name.
@@ -652,12 +620,12 @@ entry_p m_getsize(entry_p contxt)
     R_NUM(0);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (getsum <file>)
 //     return checksum of file for comparison purposes
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_getsum(entry_p contxt)
 {
     // We need a filename.
@@ -668,11 +636,9 @@ entry_p m_getsum(entry_p contxt)
 
     if(file)
     {
-        // This will yield different results
-        // on 32 / 64 bit systems but that's
+        // This will yield different results on 32 / 64 bit systems but that's
         // hardly a problem (or?).
-        int chr = getc(file),
-            alfa = 1, beta = 0;
+        int chr = getc(file), alfa = 1, beta = 0;
 
         // Adler-32 checksum.
         while(chr != EOF)
@@ -694,12 +660,12 @@ entry_p m_getsum(entry_p contxt)
     R_NUM(0);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_getversion_dev
 // Description: Helper for m_getversion.
 // Input:       char *name: filename.
 // Return:      int: file version.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static int h_getversion_dev(const char *name)
 {
     int ver = -1;
@@ -711,12 +677,12 @@ static int h_getversion_dev(const char *name)
     return ver;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_getversion_lib
 // Description: Helper for m_getversion.
 // Input:       char *name: filename.
 // Return:      int: file version.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static int h_getversion_lib(const char *name)
 {
     int ver = -1;
@@ -728,19 +694,18 @@ static int h_getversion_lib(const char *name)
     return ver;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_getversion_res
 // Description: Helper for m_getversion.
 // Input:       char *name: filename.
 // Return:      int: file version.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static int h_getversion_res(const char *name)
 {
     int ver = -1;
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    struct Resident *res = (struct Resident *)
-        FindResident(name);
+    struct Resident *res = (struct Resident *) FindResident(name);
 
     if(res)
     {
@@ -751,9 +716,8 @@ static int h_getversion_res(const char *name)
         // Major and revision.
         int maj, rev;
 
-        // Try to find the revision, if any, in the id
-        // string. The major part of our parsed result
-        // should match rt_Version.
+        // Try to find the revision, if any, in the id string. The major part
+        // of our parsed result should match rt_Version.
         if(sscanf(ids, pat, &maj, &rev) == 2 &&
            maj == res->rt_Version)
         {
@@ -762,8 +726,8 @@ static int h_getversion_res(const char *name)
         }
         else
         {
-            // We can't trust the parsed result. Use
-            // what we know, ignore the revision.
+            // We can't trust the parsed result. Use what we know, ignore the
+            // revision.
             ver = res->rt_Version << 16;
         }
     }
@@ -774,12 +738,12 @@ static int h_getversion_res(const char *name)
     return ver;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_getversion_file
 // Description: Helper for m_getversion.
 // Input:       char *name: filename.
 // Return:      int: file version.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int h_getversion_file(const char *name)
 {
     FILE *file = NULL;
@@ -788,8 +752,7 @@ int h_getversion_file(const char *name)
     const char *pre[] = {"", "LIBS:", NULL};
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    struct Process *pro = (struct Process *)
-        FindTask(NULL);
+    struct Process *pro = (struct Process *) FindTask(NULL);
 
     // Save the current window ptr.
     APTR win = pro->pr_WindowPtr;
@@ -842,8 +805,7 @@ int h_getversion_file(const char *name)
         // Use global buffer.
         char *buf = get_buf();
 
-        // Fill up buffer with enough data to
-        // hold any realistic version string.
+        // Fill up buffer with enough data to hold any realistic version string.
         fread(buf, 1, buf_size(), file);
 
         // Begin after whitespace.
@@ -873,12 +835,12 @@ int h_getversion_file(const char *name)
     return ver;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (getversion <file> (resident))
 //     return version/revision of file, library, etc. as 32 bit num
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_getversion(entry_p contxt)
 {
     // Arguments are optional.
@@ -925,9 +887,8 @@ entry_p m_getversion(entry_p contxt)
         {
             ver = 0;
         }
-        
-        // Return whatever we have, could
-        // be a failure (0) or version and
+
+        // Return whatever we have, could be a failure (0) or version and
         // revision information.
         R_NUM(ver);
     }
@@ -943,7 +904,7 @@ entry_p m_getversion(entry_p contxt)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (iconinfo <parameters>)
 //     return information about an icon (V42.12)
 //
@@ -954,7 +915,7 @@ entry_p m_getversion(entry_p contxt)
 // and mimic the behaviour of the implementation in 3.9. Also, the 3.9
 // implementation deletes tooltypes when (gettooltype) is used. This is
 // assumed to be a bug and therefore not mimiced.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_iconinfo(entry_p contxt)
 {
     // One or more arguments.
@@ -974,18 +935,15 @@ entry_p m_iconinfo(entry_p contxt)
 
         #if defined(AMIGA) && !defined(LG_TEST)
         // Get icon information.
-        struct DiskObject *obj = (struct DiskObject *)
-            GetDiskObject(file);
+        struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
         #else
         char *obj = file;
         #endif
 
         if(obj)
         {
-            // Iterate over all options or until
-            // we run into resource problems.
-            for(size_t i = 0; types[i] != end() &&
-                !DID_ERR; i++)
+            // Iterate over all options or until we run into resource problems.
+            for(size_t i = 0; types[i] != end() && !DID_ERR; i++)
             {
                 // Is the current option not set?
                 if(!types[i])
@@ -995,16 +953,14 @@ entry_p m_iconinfo(entry_p contxt)
                 }
 
                 // Iterate over all its children.
-                for(size_t j = 0;
-                    types[i]->children[j] &&
+                for(size_t j = 0; types[i]->children[j] &&
                     types[i]->children[j] != end(); j++)
                 {
                     // Get variable name and option type.
                     int type = types[i]->id;
                     char *name = str(types[i]->children[j]);
 
-                    // Variable names must be atleast one
-                    // character long.
+                    // Variable names must be atleast one character long.
                     if(*name)
                     {
                         char *svl = NULL;
@@ -1012,28 +968,22 @@ entry_p m_iconinfo(entry_p contxt)
 
                         #if defined(AMIGA) && !defined(LG_TEST)
                         // Is this a numerical value?
-                        if(type == OPT_GETSTACK ||
-                           type == OPT_GETPOSITION)
+                        if(type == OPT_GETSTACK || type == OPT_GETPOSITION)
                         {
-                            int v =
-                            (
-                                type == OPT_GETSTACK ?
-                                obj->do_StackSize : j == 0 ?
-                                obj->do_CurrentX : obj->do_CurrentY
-                            );
+                            int v = (type == OPT_GETSTACK ?
+                                     obj->do_StackSize : j == 0 ?
+                                     obj->do_CurrentX : obj->do_CurrentY);
 
                             snprintf(get_buf(), buf_size(), "%d", v);
                             svl = get_buf();
                         }
                         else
-                        if(type == OPT_GETDEFAULTTOOL &&
-                           obj->do_DefaultTool)
+                        if(type == OPT_GETDEFAULTTOOL && obj->do_DefaultTool)
                         {
                             svl = obj->do_DefaultTool;
                         }
                         else
-                        if(type == OPT_GETTOOLTYPE &&
-                           obj->do_ToolTypes)
+                        if(type == OPT_GETTOOLTYPE && obj->do_ToolTypes)
                         {
                             svl = (char *) FindToolType(obj->do_ToolTypes, name);
                             name = str(types[i]->children[++j]);
@@ -1052,15 +1002,13 @@ entry_p m_iconinfo(entry_p contxt)
 
                         if(val)
                         {
-                            // If we already have a symbol of the same
-                            // same as in the option, replace the value
-                            // of the old one with the new value.
+                            // If we already have a symbol of the same same as
+                            // in the option, replace the value of the old one
+                            // with the new value.
                             if(contxt->symbols)
                             {
-                                for(size_t k = 0;
-                                    contxt->symbols[k] &&
-                                    contxt->symbols[k] != end();
-                                    k++)
+                                for(size_t k = 0; contxt->symbols[k] &&
+                                    contxt->symbols[k] != end(); k++)
                                 {
                                     if(!strcasecmp(contxt->symbols[k]->name, name))
                                     {
@@ -1076,9 +1024,8 @@ entry_p m_iconinfo(entry_p contxt)
                                 }
                             }
 
-                            // No, this is a new symbol. Create, append
-                            // to this function and push to the global
-                            // context.
+                            // No, this is a new symbol. Create, append to this
+                            // function and push to the global context.
                             if(val)
                             {
                                 entry_p sym = new_symbol(DBG_ALLOC(strdup(name)));
@@ -1097,8 +1044,7 @@ entry_p m_iconinfo(entry_p contxt)
                                 }
                                 else
                                 {
-                                    // Out of memory. Do not
-                                    // leak 'val'.
+                                    // Out of memory. Do not leak 'val'.
                                     kill(val);
                                 }
                             }

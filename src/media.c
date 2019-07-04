@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // media.c:
 //
 // Multimedia features
-//----------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+//------------------------------------------------------------------------------
+// Copyright (C) 2018, Ola Söder. All rights reserved
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "alloc.h"
 #include "error.h"
@@ -39,12 +39,12 @@ char *strcasestr(const char *, const char *);
 #define STM_LOCATE         16
 #endif
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (closemedia <media>)
 //      close media file and remove it from memory.
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_closemedia(entry_p contxt)
 {
     // We need 1 argument.
@@ -57,12 +57,12 @@ entry_p m_closemedia(entry_p contxt)
     R_NUM(gui_closemedia(mid) == G_TRUE ? 1 : 0);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_pos
 // Description: Get (effect) and (showmedia) position as bitmask.
 // Input:       const char *atr:    Attribute name.
 // Return:      int:                G_* bitmask.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static int h_pos(const char *atr)
 {
     return (strcasestr(atr, "left") ? G_LEFT : 0) |
@@ -71,12 +71,12 @@ static int h_pos(const char *atr)
            (strcasestr(atr, "lower") ? G_LOWER : 0);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (effect <position> <effect> <color 1> <color 2>)
 //      open the installer on its own screen
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_effect(entry_p contxt)
 {
     // We need 4 arguments.
@@ -99,8 +99,8 @@ entry_p m_effect(entry_p contxt)
         // Invalid initial values.
         static int oc1, oc2, oef = G_RADIAL | G_HORIZONTAL;
 
-        // Only show something if this is the first
-        // invocation or if the input has changed.
+        // Only show something if this is the first invocation or if the input
+        // has changed.
         if(ief != oef || ic1 != oc1 || ic2 != oc2)
         {
             // Show gradient.
@@ -121,12 +121,12 @@ entry_p m_effect(entry_p contxt)
     R_NUM(0);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (setmedia <media> <action> [parameter])
 //      perform action on datatype
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_setmedia(entry_p contxt)
 {
     // We need atleast 2 arguments.
@@ -155,8 +155,8 @@ entry_p m_setmedia(entry_p contxt)
         // Extra flags.
         char *par = NULL;
 
-        // If the command requires an extra parameter,
-        // resolved the next argument, if it exists.
+        // If the command requires an extra parameter, resolved the next
+        // argument, if it exists.
         if((cmd == STM_COMMAND || cmd == STM_LOCATE) &&
             C_ARG(3) && C_ARG(3) != end())
         {
@@ -176,12 +176,12 @@ entry_p m_setmedia(entry_p contxt)
     R_NUM(0);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (showmedia <medianame> <filename> <position> <size> <borderflag> ...)
 //      open datatype and present it to the user.
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_showmedia(entry_p contxt)
 {
     // We need atleast 5 arguments.
@@ -236,12 +236,10 @@ entry_p m_showmedia(entry_p contxt)
         while(*sym && *sym != end())
         {
             // If true, update current symbol.
-            if(!strcasecmp((*sym)->name, var) &&
-               (*sym)->resolved)
+            if(!strcasecmp((*sym)->name, var) && (*sym)->resolved)
             {
-                (*sym)->resolved->id = mid;
-
                 // Success.
+                (*sym)->resolved->id = mid;
                 R_NUM(1);
             }
 
@@ -263,8 +261,8 @@ entry_p m_showmedia(entry_p contxt)
                 nid->parent = nsm;
                 nsm->resolved = nid;
 
-                // Append the symbol to the current
-                // context and create a global ref.
+                // Append the symbol to the current context and create a global
+                // ref.
                 if(append(&contxt->symbols, nsm))
                 {
                     // Reparent symbol.
@@ -286,7 +284,7 @@ entry_p m_showmedia(entry_p contxt)
         }
     }
 
-    // Broken parser / OOM.
+    // Broken parser / out of memory.
     PANIC(contxt);
     R_CUR;
 }
