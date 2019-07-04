@@ -42,17 +42,21 @@ entry_p native_exists(entry_p contxt, call_t f);
 //----------------------------------------------------------------------------
 // Utility macros.
 //----------------------------------------------------------------------------
-#define DCUR    contxt->resolved
-#define DNUM    contxt->resolved->id
-#define RCUR    if(contxt)return contxt->resolved;return NULL
-#define RNUM(X) contxt->resolved->id = X; return contxt->resolved
-#define RSTR(X) char *rstr=X;if(rstr){free(contxt->resolved->name);contxt->resolved->name=rstr;}else{PANIC(contxt);contxt->resolved->name[0]='\0';};return contxt->resolved
-#define REST    if(contxt->resolved->name){contxt->resolved->name[0]='\0';}return contxt->resolved
-#define CARG(X) contxt->children[(X)-1]
-#define CSYM(X) contxt->symbols[(X)-1]
+#define D_CUR    contxt->resolved
+#define D_NUM    contxt->resolved->id
+#define R_CUR    if(contxt)return contxt->resolved;return NULL
+#define R_NUM(X) contxt->resolved->id = X; return contxt->resolved
+#define R_STR(X) char *rstr=X;if(rstr){free(contxt->resolved->name);\
+                 contxt->resolved->name=rstr;}else{PANIC(contxt);\
+                 contxt->resolved->name[0]='\0';};return contxt->resolved
+#define R_EST    if(contxt->resolved->name){contxt->resolved->name[0]='\0';}\
+                 return contxt->resolved
+#define C_ARG(X) contxt->children[(X)-1]
+#define C_SYM(X) contxt->symbols[(X)-1]
+#define C_SANE(N,O)  if(!c_sane(contxt, N)){PANIC(contxt);R_CUR;}else{\
+                     if(O && get_opt(O,OPT_INIT) && DID_ERR){R_CUR;}}
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, __func__, M)
-#define HERE printf("%s:%s:%d\n", __FILE__, __func__, __LINE__)
-#define C_SANE(N,O) if(!c_sane(contxt, N)){PANIC(contxt);RCUR;}else{if(O && get_opt(O,OPT_INIT) && DID_ERR){RCUR;}}
+#define HERE         printf("%s:%s:%d\n", __FILE__, __func__, __LINE__)
 
 #ifdef __AROS__
 #define B_TO_CSTR(S) AROS_BSTR_ADDR(S)

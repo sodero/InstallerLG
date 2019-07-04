@@ -35,7 +35,7 @@ entry_p m_add(entry_p contxt)
     }
 
     // Return sum.
-    RNUM(sum);
+    R_NUM(sum);
 }
 
 //----------------------------------------------------------------------------
@@ -50,17 +50,17 @@ entry_p m_div(entry_p contxt)
     C_SANE(2, NULL);
 
     // Let's not divide by zero.
-    int div = num(CARG(2));
+    int div = num(C_ARG(2));
 
     if(!div)
     {
         // Division by zero.
         ERR(ERR_DIV_BY_ZERO, contxt->name);
-        RNUM(0);
+        R_NUM(0);
     }
 
     // Return quotient.
-    RNUM(num(CARG(1)) / div);
+    R_NUM(num(C_ARG(1)) / div);
 }
 
 //----------------------------------------------------------------------------
@@ -85,7 +85,7 @@ entry_p m_mul(entry_p contxt)
     }
 
     // Return product.
-    RNUM(pro);
+    R_NUM(pro);
 }
 
 //----------------------------------------------------------------------------
@@ -100,5 +100,5 @@ entry_p m_sub(entry_p contxt)
     C_SANE(2, NULL);
 
     // Return difference.
-    RNUM(num(CARG(1)) - num(CARG(2)));
+    R_NUM(num(C_ARG(1)) - num(C_ARG(2)));
 }

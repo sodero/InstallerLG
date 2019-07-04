@@ -55,7 +55,7 @@ entry_p m_askbool(entry_p contxt)
     {
         // Missing one or more.
         ERR(ERR_MISSING_OPTION, prompt ? "help" : "prompt");
-        RNUM(0);
+        R_NUM(0);
     }
 
     // Do we have a choice option?
@@ -117,12 +117,12 @@ entry_p m_askbool(entry_p contxt)
             }
 
             // Translate return code.
-            RNUM((grc == G_TRUE) ? 1 : 0);
+            R_NUM((grc == G_TRUE) ? 1 : 0);
         }
     }
 
     // Return default value.
-    RNUM(ans);
+    R_NUM(ans);
 }
 
 //----------------------------------------------------------------------------
@@ -146,7 +146,7 @@ entry_p m_askchoice(entry_p contxt)
                 choices  = get_opt(contxt, OPT_CHOICES),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
 
-        DNUM = 0;
+        D_NUM = 0;
 
         // We need something to choose from,
         // a help text and a prompt text.
@@ -155,7 +155,7 @@ entry_p m_askchoice(entry_p contxt)
             // Missing one or more.
             ERR(ERR_MISSING_OPTION, prompt ? help ?
                 "choices" : "help" : "prompt");
-            RCUR;
+            R_CUR;
         }
 
         // Unless the parser is broken,
@@ -226,7 +226,7 @@ entry_p m_askchoice(entry_p contxt)
         {
             // Use the default value if such
             // exists.
-            RNUM(deflt ? num(deflt) : 0);
+            R_NUM(deflt ? num(deflt) : 0);
         }
 
         // Terminate array.
@@ -244,7 +244,7 @@ entry_p m_askchoice(entry_p contxt)
             {
                 // Nope, out of range.
                 ERR(ERR_NO_ITEM, str(deflt));
-                RNUM(0);
+                R_NUM(0);
             }
 
             // Yes, use the default
@@ -280,11 +280,11 @@ entry_p m_askchoice(entry_p contxt)
                 }
 
                 // Prompt user. Subtract skipper from default.
-                inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back != false, &DNUM);
+                inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back != false, &D_NUM);
 
                 // Add skipper. Don't trust the GUI.
-                DNUM += ((DNUM < 32 && DNUM >= 0) ?
-                        add[DNUM] : 0);
+                D_NUM += ((D_NUM < 32 && D_NUM >= 0) ?
+                        add[D_NUM] : 0);
 
                 // Is the back option available?
                 if(back)
@@ -311,7 +311,7 @@ entry_p m_askchoice(entry_p contxt)
         }
         else
         {
-            DNUM = ndx;
+            D_NUM = ndx;
         }
     }
     else
@@ -322,7 +322,7 @@ entry_p m_askchoice(entry_p contxt)
 
     // Success, failure or
     // broken parser.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -363,7 +363,7 @@ entry_p m_askdir(entry_p contxt)
                 if(DID_ERR)
                 {
                     // Return empty string.
-                    REST;
+                    R_EST;
                 }
 
                 // Prompt user.
@@ -390,7 +390,7 @@ entry_p m_askdir(entry_p contxt)
                 if(grc == G_ABORT || grc == G_EXIT)
                 {
                     HALT;
-                    REST;
+                    R_EST;
                 }
             }
             else
@@ -401,7 +401,7 @@ entry_p m_askdir(entry_p contxt)
             }
 
             // We have a file.
-            RSTR(DBG_ALLOC(strdup(ret)));
+            R_STR(DBG_ALLOC(strdup(ret)));
         }
 
         // What option are we missing?
@@ -409,12 +409,12 @@ entry_p m_askdir(entry_p contxt)
             "default" : "help" : "prompt");
 
         // Return empty string on failure.
-        REST;
+        R_EST;
     }
 
     // Broken parser.
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -437,7 +437,7 @@ entry_p m_askdisk(entry_p contxt)
                 dest     = get_opt(contxt, OPT_DEST),
                 newname  = get_opt(contxt, OPT_NEWNAME);
 
-        DNUM = 0;
+        D_NUM = 0;
 
         // Are all mandatory options (!?) present?
         if(prompt && help && dest)
@@ -532,14 +532,14 @@ entry_p m_askdisk(entry_p contxt)
                         {
                             // On success, the lock belongs to
                             // the system. Do not UnLock().
-                            DNUM = AssignLock(nn, l) ? 1 : 0;
+                            D_NUM = AssignLock(nn, l) ? 1 : 0;
 
                             // On failure, we need to UnLock()
                             // it ourselves.
-                            if(!DNUM)
+                            if(!D_NUM)
                             {
                                 // Could not create 'newname' assign.
-                                ERR(ERR_ASSIGN, str(CARG(1)));
+                                ERR(ERR_ASSIGN, str(C_ARG(1)));
                                 UnLock(l);
                             }
                         }
@@ -554,7 +554,7 @@ entry_p m_askdisk(entry_p contxt)
                     else
                     {
                         // Sucess.
-                        DNUM = 1;
+                        D_NUM = 1;
                         UnLock(l);
                     }
                 }
@@ -564,7 +564,7 @@ entry_p m_askdisk(entry_p contxt)
                 #else
                 // On non-Amiga systems, or in test mode,
                 // we always succeed.
-                DNUM = 1;
+                D_NUM = 1;
 
                 // For testing purposes only.
                 printf("%d", (newname || back) ? 1 : 0);
@@ -592,7 +592,7 @@ entry_p m_askdisk(entry_p contxt)
 
     // Success, failure or
     // broken parser.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -633,7 +633,7 @@ entry_p m_askfile(entry_p contxt)
                 if(DID_ERR)
                 {
                     // Return empty string.
-                    REST;
+                    R_EST;
                 }
 
                 // Prompt user.
@@ -660,7 +660,7 @@ entry_p m_askfile(entry_p contxt)
                 if(grc == G_ABORT || grc == G_EXIT)
                 {
                     HALT;
-                    REST;
+                    R_EST;
                 }
             }
             else
@@ -671,7 +671,7 @@ entry_p m_askfile(entry_p contxt)
             }
 
             // We have a file.
-            RSTR(DBG_ALLOC(strdup(ret)));
+            R_STR(DBG_ALLOC(strdup(ret)));
         }
 
         // Missing one or more options.
@@ -680,12 +680,12 @@ entry_p m_askfile(entry_p contxt)
 
         // Return empty string
         // on failure.
-        REST;
+        R_EST;
     }
 
     // Broken parser.
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -709,7 +709,7 @@ entry_p m_asknumber(entry_p contxt)
                 range    = get_opt(contxt, OPT_RANGE),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
 
-        DNUM = 0;
+        D_NUM = 0;
 
         if(prompt && help && deflt)
         {
@@ -735,7 +735,7 @@ entry_p m_asknumber(entry_p contxt)
                 {
                     // The parser is broken
                     PANIC(contxt);
-                    RCUR;
+                    R_CUR;
                 }
             }
 
@@ -752,7 +752,7 @@ entry_p m_asknumber(entry_p contxt)
                 if(!DID_ERR)
                 {
                     // Prompt user.
-                    inp_t grc = gui_number(prt, hlp, min, max, def, back != false, &DNUM);
+                    inp_t grc = gui_number(prt, hlp, min, max, def, back != false, &D_NUM);
 
                     // Is the back option available?
                     if(back)
@@ -780,7 +780,7 @@ entry_p m_asknumber(entry_p contxt)
             else
             {
                 // Use the default value.
-                DNUM = num(deflt);
+                D_NUM = num(deflt);
             }
         }
         else
@@ -798,7 +798,7 @@ entry_p m_asknumber(entry_p contxt)
 
     // Success, failure or
     // broken parser.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -817,7 +817,7 @@ entry_p m_askoptions(entry_p contxt)
                 choices  = get_opt(contxt, OPT_CHOICES),
                 deflt    = get_opt(contxt, OPT_DEFAULT);
 
-        DNUM = -1;
+        D_NUM = -1;
 
         // We need everything but a default value.
         if(prompt && help && choices)
@@ -868,7 +868,7 @@ entry_p m_askoptions(entry_p contxt)
             {
                 // Use the default value if such
                 // exists.
-                RNUM(deflt ? num(deflt) : -1);
+                R_NUM(deflt ? num(deflt) : -1);
             }
 
             // Terminate array.
@@ -884,7 +884,7 @@ entry_p m_askoptions(entry_p contxt)
                 {
                     // Nope, out of range.
                     ERR(ERR_NO_ITEM, str(deflt));
-                    RNUM(0);
+                    R_NUM(0);
                 }
 
                 // Yes, use the default
@@ -909,7 +909,7 @@ entry_p m_askoptions(entry_p contxt)
                 if(!DID_ERR)
                 {
                     // Prompt user.
-                    inp_t grc = gui_options(prt, hlp, chs, ndx, back != false, &DNUM);
+                    inp_t grc = gui_options(prt, hlp, chs, ndx, back != false, &D_NUM);
 
                     // Is the back option available?
                     if(back)
@@ -936,7 +936,7 @@ entry_p m_askoptions(entry_p contxt)
             }
             else
             {
-                DNUM = ndx;
+                D_NUM = ndx;
             }
         }
         else
@@ -954,7 +954,7 @@ entry_p m_askoptions(entry_p contxt)
 
     // Success, failure or
     // broken parser.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -988,7 +988,7 @@ entry_p m_askstring(entry_p contxt)
                 if(DID_ERR)
                 {
                     // Return empty string.
-                    REST;
+                    R_EST;
                 }
 
                 // Prompt user.
@@ -1014,7 +1014,7 @@ entry_p m_askstring(entry_p contxt)
                 if(grc == G_ABORT || grc == G_EXIT)
                 {
                     HALT;
-                    REST;
+                    R_EST;
                 }
             }
             else
@@ -1023,19 +1023,18 @@ entry_p m_askstring(entry_p contxt)
                 res = str(deflt);
             }
 
-            RSTR(DBG_ALLOC(strdup(res)));
+            R_STR(DBG_ALLOC(strdup(res)));
         }
 
         // Missing one or more options.
         ERR(ERR_MISSING_OPTION, prompt ? help ?
             "default" : "help" : "default");
 
-        // Return empty string
-        // on failure.
-        REST;
+        // Return empty string on failure.
+        R_EST;
     }
 
     // The parser is broken
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }

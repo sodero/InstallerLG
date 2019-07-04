@@ -163,7 +163,7 @@ entry_p m_database(entry_p contxt)
     C_SANE(1, NULL);
 
     int memf = -1;
-    char *feat = str(CARG(1)), *ret = "Unknown";
+    char *feat = str(C_ARG(1)), *ret = "Unknown";
 
     if(strcmp(feat, "cpu") == 0)
     {
@@ -222,13 +222,13 @@ entry_p m_database(entry_p contxt)
     }
 
     // Are we testing for a specific value?
-    if(CARG(2) && CARG(2) != end())
+    if(C_ARG(2) && C_ARG(2) != end())
     {
-        ret = strcmp(ret, str(CARG(2))) ? "0" : "1";
+        ret = strcmp(ret, str(C_ARG(2))) ? "0" : "1";
     }
 
     // Return string value.
-    RSTR(DBG_ALLOC(strdup(ret)));
+    R_STR(DBG_ALLOC(strdup(ret)));
 }
 
 //----------------------------------------------------------------------------
@@ -246,23 +246,23 @@ entry_p m_earlier(entry_p contxt)
     struct stat old, new;
 
     // Get information about the first file.
-    if(stat(str(CARG(1)), &old))
+    if(stat(str(C_ARG(1)), &old))
     {
         // Could not read from file / dir.
-        ERR(ERR_READ, str(CARG(1)));
-        RNUM(0);
+        ERR(ERR_READ, str(C_ARG(1)));
+        R_NUM(0);
     }
 
     // Get information about the second file.
-    if(stat(str(CARG(2)), &new))
+    if(stat(str(C_ARG(2)), &new))
     {
         // Could not read from file / dir.
-        ERR(ERR_READ, str(CARG(2)));
-        RNUM(0);
+        ERR(ERR_READ, str(C_ARG(2)));
+        R_NUM(0);
     }
 
     // Is the first older than the second one?
-    RNUM(old.st_mtime < new.st_mtime ? 1 : 0);
+    R_NUM(old.st_mtime < new.st_mtime ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -281,7 +281,7 @@ entry_p m_getassign(entry_p contxt)
     // this is a stub.
     #if defined(AMIGA) && !defined(LG_TEST)
     struct DosList *dl;
-    const char *asn = str(CARG(1));
+    const char *asn = str(C_ARG(1));
     size_t asnl = strlen(asn);
 
     if(!asnl)
@@ -289,11 +289,11 @@ entry_p m_getassign(entry_p contxt)
         // Invalid name of assign, and
         // the empty string is how the
         // CBM installer fails.
-        REST;
+        R_EST;
     }
 
     // The second argument is optional.
-    entry_p opt = CARG(2);
+    entry_p opt = C_ARG(2);
 
     // The bitmask must contain atleast
     // this LDF_READ.
@@ -320,7 +320,7 @@ entry_p m_getassign(entry_p contxt)
         {
             // The CBM installer returns an empty
             // string if option string is empty.
-            REST;
+            R_EST;
         }
     }
     else
@@ -403,13 +403,13 @@ entry_p m_getassign(entry_p contxt)
                             }
 
                             // Success.
-                            RSTR(r);
+                            R_STR(r);
                         }
                         else
                         {
                             // Out of memory
                             PANIC(contxt);
-                            REST;
+                            R_EST;
                         }
                     }
                     else
@@ -436,7 +436,7 @@ entry_p m_getassign(entry_p contxt)
     #endif
 
     // Return empty string on failure.
-    REST;
+    R_EST;
 }
 
 //----------------------------------------------------------------------------
@@ -452,7 +452,7 @@ entry_p m_getdevice(entry_p contxt)
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // Attempt to lock path.
-    BPTR lock = (BPTR) Lock(str(CARG(1)), ACCESS_READ);
+    BPTR lock = (BPTR) Lock(str(C_ARG(1)), ACCESS_READ);
 
     if(lock)
     {
@@ -490,7 +490,7 @@ entry_p m_getdevice(entry_p contxt)
                     // strdup(NULL) is undefined.
                     if(n)
                     {
-                        RSTR(DBG_ALLOC(strdup(n)));
+                        R_STR(DBG_ALLOC(strdup(n)));
                     }
                     else
                     {
@@ -507,11 +507,11 @@ entry_p m_getdevice(entry_p contxt)
     }
 
     // Could not get information about <path>.
-    ERR(ERR_READ, str(CARG(1)));
+    ERR(ERR_READ, str(C_ARG(1)));
     #endif
 
     // Return empty string on failure.
-    REST;
+    R_EST;
 }
 
 //----------------------------------------------------------------------------
@@ -527,7 +527,7 @@ entry_p m_getdiskspace(entry_p contxt)
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // Attempt to lock path.
-    const char *n = str(CARG(1));
+    const char *n = str(C_ARG(1));
     BPTR lock = (BPTR) Lock(n, ACCESS_READ);
 
     // Do we have a lock?
@@ -553,9 +553,9 @@ entry_p m_getdiskspace(entry_p contxt)
             // space: "B" (or omitted) is "Bytes", "K"
             // is "Kilobytes", "M" is "Megabytes" and
             // "G" is "Gigabytes".
-            if(CARG(2) && CARG(2) != end())
+            if(C_ARG(2) && C_ARG(2) != end())
             {
-                switch(*str(CARG(2)))
+                switch(*str(C_ARG(2)))
                 {
                     case 'K':
                     case 'k':
@@ -575,7 +575,7 @@ entry_p m_getdiskspace(entry_p contxt)
             }
 
             // Cap the return value.
-            RNUM(free > INT_MAX ? INT_MAX : (int) free);
+            R_NUM(free > INT_MAX ? INT_MAX : (int) free);
         }
 
         // Info() failed. Release lock.
@@ -591,7 +591,7 @@ entry_p m_getdiskspace(entry_p contxt)
     #endif
 
     // Failure.
-    RNUM(-1);
+    R_NUM(-1);
 }
 
 //----------------------------------------------------------------------------
@@ -606,16 +606,16 @@ entry_p m_getenv(entry_p contxt)
     C_SANE(1, NULL);
 
     // Is there such an environment variable?
-    char *env = getenv(str(CARG(1)));
+    char *env = getenv(str(C_ARG(1)));
 
     if(env)
     {
         // Return what we found.
-        RSTR(DBG_ALLOC(strdup(env)));
+        R_STR(DBG_ALLOC(strdup(env)));
     }
 
     // Nothing found, return empty string.
-    REST;
+    R_EST;
 }
 
 //----------------------------------------------------------------------------
@@ -630,7 +630,7 @@ entry_p m_getsize(entry_p contxt)
     C_SANE(1, NULL);
 
     // Open the file in read only mode.
-    FILE *file = fopen(str(CARG(1)), "r");
+    FILE *file = fopen(str(C_ARG(1)), "r");
 
     if(file)
     {
@@ -644,12 +644,12 @@ entry_p m_getsize(entry_p contxt)
         fclose(file);
 
         // Return position.
-        RNUM(res);
+        R_NUM(res);
     }
 
     // Could not read from file.
-    ERR(ERR_READ_FILE, str(CARG(1)));
-    RNUM(0);
+    ERR(ERR_READ_FILE, str(C_ARG(1)));
+    R_NUM(0);
 }
 
 //----------------------------------------------------------------------------
@@ -663,7 +663,7 @@ entry_p m_getsum(entry_p contxt)
     // We need a filename.
     C_SANE(1, NULL);
 
-    const char *name = str(CARG(1));
+    const char *name = str(C_ARG(1));
     FILE *file = fopen(name, "r");
 
     if(file)
@@ -686,12 +686,12 @@ entry_p m_getsum(entry_p contxt)
         fclose(file);
 
         // Return checksum.
-        RNUM((beta << 16) | alfa);
+        R_NUM((beta << 16) | alfa);
     }
 
     // Could not read from file.
     ERR(ERR_READ_FILE, name);
-    RNUM(0);
+    R_NUM(0);
 }
 
 //----------------------------------------------------------------------------
@@ -891,7 +891,7 @@ entry_p m_getversion(entry_p contxt)
         C_SANE(1, contxt);
 
         // Name of file / lib / etc.
-        const char *name = str(CARG(1));
+        const char *name = str(C_ARG(1));
 
         // Invalid version.
         int ver = -1;
@@ -929,16 +929,16 @@ entry_p m_getversion(entry_p contxt)
         // Return whatever we have, could
         // be a failure (0) or version and
         // revision information.
-        RNUM(ver);
+        R_NUM(ver);
     }
     else
     {
         #if defined(AMIGA) && !defined(LG_TEST)
         // No arguments, return version of Exec.
         extern struct ExecBase *SysBase;
-        RNUM((SysBase->LibNode.lib_Version << 16) | SysBase->SoftVer);
+        R_NUM((SysBase->LibNode.lib_Version << 16) | SysBase->SoftVer);
         #else
-        RNUM(0);
+        R_NUM(0);
         #endif
     }
 }
@@ -1115,14 +1115,14 @@ entry_p m_iconinfo(entry_p contxt)
         {
             // More information? IoErr() is nice.
             ERR(ERR_READ_FILE, file);
-            RNUM(0);
+            R_NUM(0);
         }
 
         // Success.
-        RNUM(1);
+        R_NUM(1);
     }
 
     // We need a destination.
     ERR(ERR_MISSING_OPTION, "dest");
-    RNUM(0);
+    R_NUM(0);
 }

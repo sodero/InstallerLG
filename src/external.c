@@ -32,15 +32,15 @@
 static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 {
     // One or more arguments.
-    C_SANE(1, CARG(2));
+    C_SANE(1, C_ARG(2));
 
-    entry_p prompt   = get_opt(CARG(2), OPT_PROMPT),
-            help     = get_opt(CARG(2), OPT_HELP),
-            confirm  = get_opt(CARG(2), OPT_CONFIRM),
-            safe     = get_opt(CARG(2), OPT_SAFE),
-            back     = get_opt(CARG(2), OPT_BACK);
+    entry_p prompt   = get_opt(C_ARG(2), OPT_PROMPT),
+            help     = get_opt(C_ARG(2), OPT_HELP),
+            confirm  = get_opt(C_ARG(2), OPT_CONFIRM),
+            safe     = get_opt(C_ARG(2), OPT_SAFE),
+            back     = get_opt(C_ARG(2), OPT_BACK);
 
-    DNUM = 0;
+    D_NUM = 0;
 
     // Do we need confirmation?
     if(confirm)
@@ -72,7 +72,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         // FIXME
         if(grc != G_TRUE)
         {
-            RCUR;
+            R_CUR;
         }
     }
 
@@ -88,7 +88,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         {
             // Out of memory.
             PANIC(contxt);
-            RCUR;
+            R_CUR;
         }
 
         // Working dir.
@@ -114,7 +114,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 free(cmd);
 
                 // Failure.
-                RCUR;
+                R_CUR;
             }
         }
 
@@ -152,7 +152,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             {
 
                 // Execute whatever we have in cmd.
-                DNUM = SystemTags
+                D_NUM = SystemTags
                 (
                     cmd,
                     SYS_Input, inp,
@@ -161,7 +161,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 );
 
                 // On error, get secondary status.
-                if(DNUM)
+                if(D_NUM)
                 {
                     LONG ioe = IoErr();
 
@@ -176,7 +176,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             else
             {
                 // Unknown error.
-                DNUM = -1;
+                D_NUM = -1;
             }
 
             // Not sure if we need to close NIL:
@@ -186,7 +186,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         else
         {
             // Unknown error.
-            DNUM = -1;
+            D_NUM = -1;
         }
         #else
         // For testing purposes only.
@@ -202,7 +202,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         }
 
         // OK == 0. Only fail in 'strict' mode.
-        if(DNUM && get_numvar(contxt, "@strict"))
+        if(D_NUM && get_numvar(contxt, "@strict"))
         {
             ERR(ERR_EXEC, cmd);
         }
@@ -213,10 +213,10 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 
     // Write an explanation of what we just did /
     // tried to do to the log file.
-    h_log(contxt, tr(S_XCTD), str(CARG(1)));
+    h_log(contxt, tr(S_XCTD), str(C_ARG(1)));
 
     // Success or failure.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------

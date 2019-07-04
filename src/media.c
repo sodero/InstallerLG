@@ -51,10 +51,10 @@ entry_p m_closemedia(entry_p contxt)
     C_SANE(1, NULL);
 
     // Media identifier.
-    int mid = num(CARG(1));
+    int mid = num(C_ARG(1));
 
     // Invoke GUI to close media.
-    RNUM(gui_closemedia(mid) == G_TRUE ? 1 : 0);
+    R_NUM(gui_closemedia(mid) == G_TRUE ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -83,10 +83,10 @@ entry_p m_effect(entry_p contxt)
     C_SANE(4, NULL);
 
     // Position and effect.
-    char *est = str(CARG(2)), *eps = str(CARG(1));
+    char *est = str(C_ARG(2)), *eps = str(C_ARG(1));
 
     // Colors, type and position.
-    int ic1 = num(CARG(3)), ic2 = num(CARG(4)),
+    int ic1 = num(C_ARG(3)), ic2 = num(C_ARG(4)),
         ief = h_pos(eps) | (strcasecmp(est, "radial") == 0 ? G_RADIAL :
         strcasecmp(est, "horizontal") == 0 ? G_HORIZONTAL : 0);
 
@@ -113,12 +113,12 @@ entry_p m_effect(entry_p contxt)
         }
 
         // Always.
-        RNUM(1);
+        R_NUM(1);
     }
 
     // Missing effect type.
     ERR(ERR_VAL_INVALID, est);
-    RNUM(0);
+    R_NUM(0);
 }
 
 //----------------------------------------------------------------------------
@@ -133,7 +133,7 @@ entry_p m_setmedia(entry_p contxt)
     C_SANE(2, NULL);
 
     // Action to perform.
-    char *act = str(CARG(2));
+    char *act = str(C_ARG(2));
 
     // Translate action to command.
     int cmd = strcasecmp(act, "pause") == 0 ? STM_PAUSE :
@@ -158,22 +158,22 @@ entry_p m_setmedia(entry_p contxt)
         // If the command requires an extra parameter,
         // resolved the next argument, if it exists.
         if((cmd == STM_COMMAND || cmd == STM_LOCATE) &&
-            CARG(3) && CARG(3) != end())
+            C_ARG(3) && C_ARG(3) != end())
         {
             // Resolve next.
-            par = str(CARG(3));
+            par = str(C_ARG(3));
         }
 
         // Media identifier.
-        int mid = num(CARG(1));
+        int mid = num(C_ARG(1));
 
         // Invoke GUI to perform action.
-        RNUM(gui_setmedia(mid, cmd, par) == G_TRUE ? 1 : 0);
+        R_NUM(gui_setmedia(mid, cmd, par) == G_TRUE ? 1 : 0);
     }
 
     // Invalid action.
     ERR(ERR_VAL_INVALID, act);
-    RNUM(0);
+    R_NUM(0);
 }
 
 //----------------------------------------------------------------------------
@@ -188,10 +188,10 @@ entry_p m_showmedia(entry_p contxt)
     C_SANE(5, NULL);
 
     // Get size.
-    char *att = str(CARG(4));
+    char *att = str(C_ARG(4));
 
     // Set size bitmask.
-    int msk = h_pos(str(CARG(3))) | (num(CARG(5)) ? G_BORDER : 0) | (
+    int msk = h_pos(str(C_ARG(3))) | (num(C_ARG(5)) ? G_BORDER : 0) | (
               strcasecmp(att, "small") == 0 ? G_SMALL :
               strcasecmp(att, "small_medium") == 0 ? G_SMALL | G_LESS :
               strcasecmp(att, "small_large") == 0 ? G_SMALL | G_MORE :
@@ -203,10 +203,10 @@ entry_p m_showmedia(entry_p contxt)
               strcasecmp(att, "large_medium") == 0 ? G_LARGE | G_MORE : 0);
 
     // Get the rest of the flags.
-    for(size_t i = 6; CARG(i) && CARG(i) != end(); i++)
+    for(size_t i = 6; C_ARG(i) && C_ARG(i) != end(); i++)
     {
         // Get current flag.
-        att = str(CARG(i));
+        att = str(C_ARG(i));
 
         // Translate into bitmask.
         msk |= (strcasecmp(att, "wordwrap") == 0 ? G_WORDWRAP :
@@ -218,10 +218,10 @@ entry_p m_showmedia(entry_p contxt)
     // Invalid media ID.
     int mid = -1;
 
-    if(gui_showmedia(&mid, str(CARG(2)), msk) != G_TRUE)
+    if(gui_showmedia(&mid, str(C_ARG(2)), msk) != G_TRUE)
     {
         // Could not open file.
-        RNUM(0);
+        R_NUM(0);
     }
 
     // Symbol destination.
@@ -229,7 +229,7 @@ entry_p m_showmedia(entry_p contxt)
 
     if(dst)
     {
-        char *var = str(CARG(1));
+        char *var = str(C_ARG(1));
         entry_p *sym = contxt->symbols;
 
         // Symbol exists already?
@@ -242,7 +242,7 @@ entry_p m_showmedia(entry_p contxt)
                 (*sym)->resolved->id = mid;
 
                 // Success.
-                RNUM(1);
+                R_NUM(1);
             }
 
             // Next symbol.
@@ -272,7 +272,7 @@ entry_p m_showmedia(entry_p contxt)
                     nsm->parent = contxt;
 
                     // Success.
-                    RNUM(1);
+                    R_NUM(1);
                 }
 
                 // Out of memory.
@@ -288,5 +288,5 @@ entry_p m_showmedia(entry_p contxt)
 
     // Broken parser / OOM.
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }

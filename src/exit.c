@@ -52,12 +52,12 @@ entry_p m_abort(entry_p contxt)
 
         // Set abort. Will make invoke() halt.
         error(contxt, -3, ERR_ABORT, __func__);
-        RNUM(0);
+        R_NUM(0);
     }
 
     // Out of memory.
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -87,7 +87,7 @@ entry_p m_exit(entry_p contxt)
             {
                 // Out of memory
                 PANIC(contxt);
-                RCUR;
+                R_CUR;
             }
 
             // If we could resolve all our children,
@@ -128,12 +128,12 @@ entry_p m_exit(entry_p contxt)
 
         // Make invoke() halt.
         HALT;
-        RNUM(0);
+        R_NUM(0);
     }
 
     // The parser is broken
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -189,7 +189,7 @@ entry_p m_onerror(entry_p contxt)
     }
 
     // @onerror not found. Init is broken.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -208,7 +208,7 @@ entry_p m_trap(entry_p contxt)
     C_SANE(2, NULL);
 
     // Dummy.
-    RNUM(1);
+    R_NUM(1);
 }
 
 //----------------------------------------------------------------------------
@@ -225,7 +225,7 @@ entry_p m_reboot(entry_p contxt)
         // Don't reboot in pretend mode.
         if(get_numvar(contxt, "@pretend"))
         {
-            DNUM = 0;
+            D_NUM = 0;
         }
         else
         {
@@ -234,7 +234,7 @@ entry_p m_reboot(entry_p contxt)
             // Hard reset.
             ColdReboot();
             #else
-            DNUM = 1;
+            D_NUM = 1;
             #endif
         }
     }
@@ -245,5 +245,5 @@ entry_p m_reboot(entry_p contxt)
     }
 
     // No reboot.
-    RCUR;
+    R_CUR;
 }

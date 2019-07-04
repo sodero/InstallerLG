@@ -27,13 +27,13 @@ entry_p m_if(entry_p contxt)
     C_SANE(1, NULL);
 
     // Truth value of the condition.
-    int val = tru(CARG(1));
+    int val = tru(C_ARG(1));
 
     // Does the body contain anything?
-    if(CARG(2) && CARG(2) != end())
+    if(C_ARG(2) && C_ARG(2) != end())
     {
         // Select branch to execute.
-        entry_p sel = val ? CARG(2) : CARG(3);
+        entry_p sel = val ? C_ARG(2) : C_ARG(3);
 
         // Is there a branch corresponding to the
         // resolved truth value?
@@ -45,7 +45,7 @@ entry_p m_if(entry_p contxt)
     }
 
     // Nothing to resolve.
-    RNUM(0);
+    R_NUM(0);
 }
 
 //----------------------------------------------------------------------------
@@ -61,11 +61,11 @@ entry_p m_select(entry_p contxt)
     C_SANE(2, NULL);
 
     // Index and selection.
-    int ndx = 0, sel = num(CARG(1));
+    int ndx = 0, sel = num(C_ARG(1));
 
     // Find the n:th (0-indexed) item, go one step
     // at a time in case no such item exists.
-    for(entry_p *items = CARG(2)->children;
+    for(entry_p *items = C_ARG(2)->children;
         items[ndx] && items[ndx] != end(); ndx++)
     {
         // Are we there yet?
@@ -77,8 +77,8 @@ entry_p m_select(entry_p contxt)
     }
 
     // No such item, n > the number of items.
-    ERR(ERR_NO_ITEM, str(CARG(1)));
-    RNUM(0);
+    ERR(ERR_NO_ITEM, str(C_ARG(1)));
+    R_NUM(0);
 }
 
 //----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ static entry_p h_whunt(entry_p contxt, int mode)
     C_SANE(2, NULL);
 
     // Reset return value.
-    DNUM = 0;
+    D_NUM = 0;
 
     // Prepare to return the resolved value of this
     // function if the expression is false from the start.
@@ -102,13 +102,13 @@ static entry_p h_whunt(entry_p contxt, int mode)
 
     // Use XOR to support both 'while' and 'until'.
     // Break the loop if something goes wrong inside.
-    for(int cont = mode ^ tru(CARG(1));
+    for(int cont = mode ^ tru(C_ARG(1));
             cont && !DID_ERR;
-            cont = mode ^ tru(CARG(1)))
+            cont = mode ^ tru(C_ARG(1)))
     {
         // Save the return value of the last function
         // in the CONTXT
-        ret = invoke(CARG(2));
+        ret = invoke(C_ARG(2));
     }
 
     // Return either zero, the value of the resolved
@@ -154,7 +154,7 @@ entry_p m_trace(entry_p contxt)
 
     // We're not doing anything
     // except occupying space.
-    RNUM(1);
+    R_NUM(1);
 }
 
 //----------------------------------------------------------------------------
@@ -185,7 +185,7 @@ entry_p m_retrace(entry_p contxt)
     {
         // Nowhere to go.
         PANIC(con);
-        RCUR;
+        R_CUR;
     }
 
     // Iterator and sentinel.
@@ -243,7 +243,7 @@ entry_p m_retrace(entry_p contxt)
         {
             // We risk running out of stack.
             ERR(ERR_MAX_DEPTH, con->name);
-            RCUR;
+            R_CUR;
         }
 
         for(; !DID_ERR; chl = org)
@@ -267,5 +267,5 @@ entry_p m_retrace(entry_p contxt)
     }
 
     // Nowhere to go.
-    RCUR;
+    R_CUR;
 }

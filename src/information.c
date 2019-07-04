@@ -34,13 +34,13 @@ entry_p m_complete(entry_p contxt)
     C_SANE(1, NULL);
 
     // Pass value on.
-    int val = num(CARG(1));
+    int val = num(C_ARG(1));
 
     // Show and update.
     gui_complete(val);
 
     // Success.
-    RNUM(val);
+    R_NUM(val);
 }
 
 //----------------------------------------------------------------------------
@@ -134,12 +134,12 @@ entry_p m_debug(entry_p contxt)
         #endif
 
         // Always.
-        RNUM(1);
+        R_NUM(1);
     }
 
     // The parser is broken.
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -163,12 +163,12 @@ entry_p m_message(entry_p contxt)
 
     int level = get_numvar(contxt, "@user-level");
 
-    DNUM = 0;
+    D_NUM = 0;
 
     if(!level && !all)
     {
         // Silence.
-        RCUR;
+        R_CUR;
     }
 
     // Concatenate all children.
@@ -214,16 +214,16 @@ entry_p m_message(entry_p contxt)
             }
 
             // Translate response.
-            DNUM = (grc == G_TRUE) ? 1 : 0;
+            D_NUM = (grc == G_TRUE) ? 1 : 0;
         }
 
         // Success or failure.
-        RCUR;
+        R_CUR;
     }
 
     // Out of memory.
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -241,10 +241,10 @@ entry_p m_user(entry_p contxt)
     int old = get_numvar(contxt, "@user-level");
 
     // Set new value of @user-level.
-    set_numvar(contxt, "@user-level", num(CARG(1)));
+    set_numvar(contxt, "@user-level", num(C_ARG(1)));
 
     // Return the old.
-    RNUM(old);
+    R_NUM(old);
 }
 
 //----------------------------------------------------------------------------
@@ -306,12 +306,12 @@ entry_p m_welcome(entry_p contxt)
         free(msg);
 
         // Done or halt.
-        RNUM(ret);
+        R_NUM(ret);
     }
 
     // Out of memory.
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -337,7 +337,7 @@ entry_p m_working(entry_p contxt)
         {
             // We own msg.
             free(msg);
-            RNUM(0);
+            R_NUM(0);
         }
 
         // Standard prefix.
@@ -360,7 +360,7 @@ entry_p m_working(entry_p contxt)
             free(con);
 
             // Success.
-            RNUM(1);
+            R_NUM(1);
         }
 
         // Free the children buffer.
@@ -369,5 +369,5 @@ entry_p m_working(entry_p contxt)
 
     // Out of memory.
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }

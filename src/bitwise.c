@@ -34,12 +34,12 @@ entry_p m_and(entry_p contxt)
     {
         if(!num(*cur))
         {
-            RNUM(0);
+            R_NUM(0);
         }
     }
 
     // All children are true.
-    RNUM(1);
+    R_NUM(1);
 }
 
 //----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ entry_p m_bitand(entry_p contxt)
     C_SANE(2, NULL);
 
     // Set and return.
-    RNUM(num(CARG(1)) & num(CARG(2)));
+    R_NUM(num(C_ARG(1)) & num(C_ARG(2)));
 }
 
 //----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ entry_p m_bitnot(entry_p contxt)
     C_SANE(1, NULL);
 
     // Set and return.
-    RNUM(~num(CARG(1)));
+    R_NUM(~num(C_ARG(1)));
 }
 
 //----------------------------------------------------------------------------
@@ -84,7 +84,7 @@ entry_p m_bitor(entry_p contxt)
     C_SANE(2, NULL);
 
     // Set and return.
-    RNUM(num(CARG(1)) | num(CARG(2)));
+    R_NUM(num(C_ARG(1)) | num(C_ARG(2)));
 }
 
 //----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ entry_p m_bitxor(entry_p contxt)
     C_SANE(2, NULL);
 
     // Set and return.
-    RNUM(num(CARG(1)) ^ num(CARG(2)));
+    R_NUM(num(C_ARG(1)) ^ num(C_ARG(2)));
 }
 
 //----------------------------------------------------------------------------
@@ -114,7 +114,7 @@ entry_p m_not(entry_p contxt)
     C_SANE(1, NULL);
 
     // Set and return.
-    RNUM(!num(CARG(1)));
+    R_NUM(!num(C_ARG(1)));
 }
 
 //----------------------------------------------------------------------------
@@ -132,7 +132,7 @@ entry_p m_in(entry_p contxt)
     int mask = 0;
 
     // Create the bitmask of all children.
-    for(entry_p *cur = CARG(2)->children;
+    for(entry_p *cur = C_ARG(2)->children;
         *cur && *cur != end(); cur++)
     {
         // Add current bit to the mask.
@@ -141,7 +141,7 @@ entry_p m_in(entry_p contxt)
 
     // Apply the bitmask to the first
     // argument and return the result.
-    RNUM(num(CARG(1)) & mask);
+    R_NUM(num(C_ARG(1)) & mask);
 }
 
 //----------------------------------------------------------------------------
@@ -166,12 +166,12 @@ entry_p m_or(entry_p contxt)
         if(num(*cur))
         {
             // True.
-            RNUM(1);
+            R_NUM(1);
         }
     }
 
     // All children were false.
-    RNUM(0);
+    R_NUM(0);
 }
 
 //----------------------------------------------------------------------------
@@ -186,7 +186,7 @@ entry_p m_shiftleft(entry_p contxt)
     C_SANE(2, NULL);
 
     // Set and return.
-    RNUM(num(CARG(1)) << num(CARG(2)));
+    R_NUM(num(C_ARG(1)) << num(C_ARG(2)));
 }
 
 //----------------------------------------------------------------------------
@@ -201,7 +201,7 @@ entry_p m_shiftright(entry_p contxt)
     C_SANE(2, NULL);
 
     // Set and return.
-    RNUM(num(CARG(1)) >> num(CARG(2)));
+    R_NUM(num(C_ARG(1)) >> num(C_ARG(2)));
 }
 
 //----------------------------------------------------------------------------
@@ -216,9 +216,9 @@ entry_p m_xor(entry_p contxt)
     C_SANE(2, NULL);
 
     // Two possible combinations.
-    bool alfa = num(CARG(1)) && !num(CARG(2)),
-         beta = num(CARG(2)) && !num(CARG(1));
+    bool alfa = num(C_ARG(1)) && !num(C_ARG(2)),
+         beta = num(C_ARG(2)) && !num(C_ARG(1));
 
     // Set and return.
-    RNUM(alfa || beta);
+    R_NUM(alfa || beta);
 }

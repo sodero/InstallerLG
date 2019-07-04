@@ -28,32 +28,32 @@
 entry_p m_openwbobject(entry_p contxt)
 {
     // We need a single argument.
-    C_SANE(1, CARG(2));
+    C_SANE(1, C_ARG(2));
 
-    entry_p prompt     = get_opt(CARG(2), OPT_PROMPT),
-            help       = get_opt(CARG(2), OPT_HELP),
-            confirm    = get_opt(CARG(2), OPT_CONFIRM),
-            safe       = get_opt(CARG(2), OPT_SAFE);
+    entry_p prompt     = get_opt(C_ARG(2), OPT_PROMPT),
+            help       = get_opt(C_ARG(2), OPT_HELP),
+            confirm    = get_opt(C_ARG(2), OPT_CONFIRM),
+            safe       = get_opt(C_ARG(2), OPT_SAFE);
 
     // A non safe operation in pretend mode
     // always succeeds.
     if(get_numvar(contxt, "@pretend") && !safe)
     {
-        RNUM(1);
+        R_NUM(1);
     }
 
-    if(!confirm || h_confirm(CARG(2), str(help), str(prompt)))
+    if(!confirm || h_confirm(C_ARG(2), str(help), str(prompt)))
     {
         #if defined(AMIGA) && !defined(LG_TEST)
-        RNUM(OpenWorkbenchObjectA(str(CARG(1)), NULL) ? 1 : 0);
+        R_NUM(OpenWorkbenchObjectA(str(C_ARG(1)), NULL) ? 1 : 0);
         #else
         // If not supported by workbench.library -1 is to be returned.
-        RNUM(-1);
+        R_NUM(-1);
         #endif
     }
 
     // User abort.
-    RNUM(0);
+    R_NUM(0);
 }
 
 //----------------------------------------------------------------------------
@@ -71,10 +71,10 @@ entry_p m_showwbobject(entry_p contxt)
     C_SANE(1, NULL);
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    RNUM(MakeWorkbenchObjectVisibleA(str(CARG(1)), NULL) ? 1 : 0);
+    R_NUM(MakeWorkbenchObjectVisibleA(str(C_ARG(1)), NULL) ? 1 : 0);
     #else
     // If not supported by workbench.library -1 is to be returned.
-    RNUM(-1);
+    R_NUM(-1);
     #endif
 }
 
@@ -93,9 +93,9 @@ entry_p m_closewbobject(entry_p contxt)
     C_SANE(1, NULL);
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    RNUM(CloseWorkbenchObjectA(str(CARG(1)), NULL) ? 1 : 0);
+    R_NUM(CloseWorkbenchObjectA(str(C_ARG(1)), NULL) ? 1 : 0);
     #else
     // If not supported by workbench.library -1 is to be returned.
-    RNUM(-1);
+    R_NUM(-1);
     #endif
 }

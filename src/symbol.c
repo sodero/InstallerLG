@@ -158,7 +158,7 @@ entry_p m_symbolset(entry_p contxt)
     // name and value.
     if(c_sane(contxt, 2) && dst)
     {
-        entry_p ret = DCUR;
+        entry_p ret = D_CUR;
         entry_p *cur = contxt->children;
 
         // Iterate over all tuples.
@@ -172,7 +172,7 @@ entry_p m_symbolset(entry_p contxt)
             if(DID_ERR)
             {
                 // Error already set by resolve().
-                RCUR;
+                R_CUR;
             }
 
             // Create a copy of the evaluated rhs.
@@ -182,7 +182,7 @@ entry_p m_symbolset(entry_p contxt)
             {
                 // Out of memory.
                 PANIC(contxt);
-                RCUR;
+                R_CUR;
             }
 
             entry_p *sym = contxt->symbols;
@@ -274,7 +274,7 @@ entry_p m_symbolset(entry_p contxt)
     }
 
     // Broken parser
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -296,7 +296,7 @@ entry_p m_symbolval(entry_p contxt)
         // Initialize and resolve dummy.
         entry.parent = contxt;
         entry.id = contxt->id;
-        entry.name = str(CARG(1));
+        entry.name = str(C_ARG(1));
 
         ret = resolve(&entry);
 
@@ -308,10 +308,10 @@ entry_p m_symbolval(entry_p contxt)
         }
 
         // Symbol not found.
-        RNUM(0);
+        R_NUM(0);
     }
 
     // The parser is broken
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }

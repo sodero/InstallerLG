@@ -47,7 +47,7 @@ entry_p m_expandpath(entry_p contxt)
     C_SANE(1, NULL);
 
     // Short path.
-    char *pth = str(CARG(1));
+    char *pth = str(C_ARG(1));
 
     if(!DID_ERR)
     {
@@ -59,7 +59,7 @@ entry_p m_expandpath(entry_p contxt)
             if(NameFromLock(lock, get_buf(), buf_size()))
             {
                 UnLock(lock);
-                RSTR(strdup(get_buf()));
+                R_STR(strdup(get_buf()));
             }
             else
             {
@@ -68,12 +68,12 @@ entry_p m_expandpath(entry_p contxt)
             }
         }
         #else
-        RSTR(strdup(pth));
+        R_STR(strdup(pth));
         #endif
     }
 
     // Failure, return empty string.
-    REST;
+    R_EST;
 }
 
 //----------------------------------------------------------------------------
@@ -1329,7 +1329,7 @@ entry_p m_copyfiles(entry_p contxt)
             askuser    = get_opt(contxt, OPT_ASKUSER),
             files      = get_opt(contxt, OPT_FILES);
 
-    DNUM = 0;
+    D_NUM = 0;
 
     // The (pattern) (choices) and (all) options
     // are mutually exclusive.
@@ -1339,7 +1339,7 @@ entry_p m_copyfiles(entry_p contxt)
     {
         ERR(ERR_OPTION_MUTEX,
               "pattern/choices/all");
-        RCUR;
+        R_CUR;
     }
 
     // The (fail) (nofail) and (oknodelete) options
@@ -1350,7 +1350,7 @@ entry_p m_copyfiles(entry_p contxt)
     {
         ERR(ERR_OPTION_MUTEX,
               "fail/nofail/oknodelete");
-        RCUR;
+        R_CUR;
     }
 
     // We need a source and a destination dir.
@@ -1368,14 +1368,14 @@ entry_p m_copyfiles(entry_p contxt)
            !all && !choices && !pattern)
         {
             ERR(ERR_MISSING_OPTION, "all/choices/pattern");
-            RCUR;
+            R_CUR;
         }
 
         // A non safe operation in pretend mode
         // always succeeds.
         if(get_numvar(contxt, "@pretend") && !safe)
         {
-            RNUM(1);
+            R_NUM(1);
         }
 
         // Does the destination already exist?
@@ -1491,7 +1491,7 @@ entry_p m_copyfiles(entry_p contxt)
                 gui_copyfiles_end();
 
                 // Translate return code.
-                DNUM = (grc == G_TRUE) ? 1 : 0;
+                D_NUM = (grc == G_TRUE) ? 1 : 0;
             }
 
             // Back return value.
@@ -1552,7 +1552,7 @@ entry_p m_copyfiles(entry_p contxt)
 
     // We don't know if we're successsful,
     // at this point, return what we have.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -1586,7 +1586,7 @@ entry_p m_copylib(entry_p contxt)
             force      = get_opt(contxt, OPT_FORCE),
             askuser    = get_opt(contxt, OPT_ASKUSER);
 
-    DNUM = 0;
+    D_NUM = 0;
 
     // The (fail) (nofail) and (oknodelete) options
     // are mutually exclusive.
@@ -1595,7 +1595,7 @@ entry_p m_copylib(entry_p contxt)
        (oknodelete && (nofail || fail)))
     {
         ERR(ERR_OPTION_MUTEX, "fail/nofail/oknodelete");
-        RCUR;
+        R_CUR;
     }
 
     // We always need a prompt and help since trying
@@ -1629,7 +1629,7 @@ entry_p m_copylib(entry_p contxt)
             // always succeeds.
             if(get_numvar(contxt, "@pretend") && !safe)
             {
-                RNUM(1);
+                R_NUM(1);
             }
 
             // Only fail if we're in 'strict' mode.
@@ -1637,7 +1637,7 @@ entry_p m_copylib(entry_p contxt)
             {
                 // Could not find version string.
                 ERR(ERR_NO_VERSION, src);
-                RCUR;
+                R_CUR;
             }
 
             // Only fail if we're in 'strict' mode.
@@ -1645,7 +1645,7 @@ entry_p m_copylib(entry_p contxt)
             {
                 // Destination is a file, not a dir.
                 ERR(ERR_NOT_A_DIR, dst);
-                RCUR;
+                R_CUR;
             }
 
             if(!type)
@@ -1663,7 +1663,7 @@ entry_p m_copylib(entry_p contxt)
                     // more than 1 level deeper than the
                     // existing path.
                     ERR(ERR_WRITE_DIR, dst);
-                    RCUR;
+                    R_CUR;
                 }
             }
 
@@ -1931,7 +1931,7 @@ entry_p m_copylib(entry_p contxt)
                 free(name);
 
                 // Translate return code.
-                DNUM = (grc == G_TRUE) ? 1 : 0;
+                D_NUM = (grc == G_TRUE) ? 1 : 0;
             }
         }
         else
@@ -1952,7 +1952,7 @@ entry_p m_copylib(entry_p contxt)
     }
 
     // Success or failure.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -1966,9 +1966,9 @@ static int h_delete_file(entry_p contxt, const char *file)
 {
     if(file)
     {
-        entry_p infos    = get_opt(CARG(2), OPT_INFOS),
-                force    = get_opt(CARG(2), OPT_FORCE),
-                askuser  = get_opt(CARG(2), OPT_ASKUSER);
+        entry_p infos    = get_opt(C_ARG(2), OPT_INFOS),
+                force    = get_opt(C_ARG(2), OPT_FORCE),
+                askuser  = get_opt(C_ARG(2), OPT_ASKUSER);
 
         // If (force) is used, give permissions
         // so that delete can succeed.
@@ -2074,10 +2074,10 @@ static int h_delete_dir(entry_p contxt, const char *name)
 {
     if(name)
     {
-        entry_p infos    = get_opt(CARG(2), OPT_INFOS),
-                force    = get_opt(CARG(2), OPT_FORCE),
-                askuser  = get_opt(CARG(2), OPT_ASKUSER),
-                all      = get_opt(CARG(2), OPT_ALL);
+        entry_p infos    = get_opt(C_ARG(2), OPT_INFOS),
+                force    = get_opt(C_ARG(2), OPT_FORCE),
+                askuser  = get_opt(C_ARG(2), OPT_ASKUSER),
+                all      = get_opt(C_ARG(2), OPT_ALL);
 
         if(!force && access(name, W_OK))
         {
@@ -2087,7 +2087,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
                 // Only ask for confirmation if we're not
                 // running in novice mode.
                 if(!get_numvar(contxt, "@user-level") ||
-                   !h_confirm(CARG(2), "", tr(S_DWRD), name))
+                   !h_confirm(C_ARG(2), "", tr(S_DWRD), name))
                 {
                     // Halt will be set by h_confirm. Skip
                     // will result in nothing.
@@ -2320,33 +2320,33 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
 entry_p m_delete(entry_p contxt)
 {
     // One argument and options.
-    C_SANE(1, CARG(2));
+    C_SANE(1, C_ARG(2));
 
     int wild = 0;
-    char *file = str(CARG(1));
+    char *file = str(C_ARG(1));
 
     #if defined(AMIGA) && !defined(LG_TEST)
     wild = ParsePattern(file, get_buf(), buf_size());
     #endif
 
     // Assume failure.
-    DNUM = 0;
+    D_NUM = 0;
 
     // Can we parse the input string?
     if(wild >= 0)
     {
-        entry_p help     = get_opt(CARG(2), OPT_HELP),
-                prompt   = get_opt(CARG(2), OPT_PROMPT),
-                confirm  = get_opt(CARG(2), OPT_CONFIRM),
-                safe     = get_opt(CARG(2), OPT_SAFE);
+        entry_p help     = get_opt(C_ARG(2), OPT_HELP),
+                prompt   = get_opt(C_ARG(2), OPT_PROMPT),
+                confirm  = get_opt(C_ARG(2), OPT_CONFIRM),
+                safe     = get_opt(C_ARG(2), OPT_SAFE);
 
         // If we need confirmation and the user skips
         // or aborts, return. On abort, the HALT will
         // be set by h_confirm.
-        if(confirm && !h_confirm(CARG(2),
+        if(confirm && !h_confirm(C_ARG(2),
            str(help), str(prompt)))
         {
-            RCUR;
+            R_CUR;
         }
 
         // Is this a safe operation or are we not
@@ -2359,7 +2359,7 @@ entry_p m_delete(entry_p contxt)
             {
                 // Delete everything matching the
                 // wildcard pattern.
-                DNUM = h_delete_pattern(contxt, file);
+                D_NUM = h_delete_pattern(contxt, file);
             }
             else
             // No wildcards, delete directory, file
@@ -2374,12 +2374,12 @@ entry_p m_delete(entry_p contxt)
 
                     // A file.
                     case 1:
-                        DNUM = h_delete_file(contxt, file);
+                        D_NUM = h_delete_file(contxt, file);
                         break;
 
                     // A directory.
                     case 2:
-                        DNUM = h_delete_dir(contxt, file);
+                        D_NUM = h_delete_dir(contxt, file);
                         break;
 
                     // Invalid type.
@@ -2393,7 +2393,7 @@ entry_p m_delete(entry_p contxt)
         {
             // A non safe operation in pretend
             // mode always succeeds.
-            DNUM = 1;
+            D_NUM = 1;
         }
     }
     else
@@ -2403,7 +2403,7 @@ entry_p m_delete(entry_p contxt)
     }
 
     // Success or failure.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -2433,7 +2433,7 @@ entry_p m_exists(entry_p contxt)
         #endif
 
         // Get type (file / dir / 0)
-        DNUM = h_exists(str(CARG(1)));
+        D_NUM = h_exists(str(C_ARG(1)));
 
         #if defined(AMIGA) && !defined(LG_TEST)
         // Restore auto request.
@@ -2443,11 +2443,11 @@ entry_p m_exists(entry_p contxt)
     else
     {
         // Get type (file / dir / 0)
-        DNUM = h_exists(str(CARG(1)));
+        D_NUM = h_exists(str(C_ARG(1)));
     }
 
     // Success.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -2462,7 +2462,7 @@ entry_p m_fileonly(entry_p contxt)
     C_SANE(1, NULL);
 
     // Implementation in helper function.
-    RSTR(strdup(h_fileonly(contxt, str(CARG(1)))));
+    R_STR(strdup(h_fileonly(contxt, str(C_ARG(1)))));
 }
 
 //----------------------------------------------------------------------------
@@ -2480,11 +2480,11 @@ entry_p m_foreach(entry_p contxt)
     // on non-Amiga systems and not
     // in test mode.
     #if defined(AMIGA) && !defined(LG_TEST)
-    const char *pt = str(CARG(2));
+    const char *pt = str(C_ARG(2));
     #endif
 
     // Open dir and assume failure.
-    const char *dname = str(CARG(1));
+    const char *dname = str(C_ARG(1));
     DIR *dir = opendir(dname);
     pnode_p top = NULL;
     int err = 1;
@@ -2671,7 +2671,7 @@ entry_p m_foreach(entry_p contxt)
             {
                 // Execute the code contained in
                 // the third argument.
-                invoke(CARG(3));
+                invoke(C_ARG(3));
             }
         }
 
@@ -2681,7 +2681,7 @@ entry_p m_foreach(entry_p contxt)
     }
 
     // Success or failure.
-    RNUM(err ? 0 : 1);
+    R_NUM(err ? 0 : 1);
 }
 
 //----------------------------------------------------------------------------
@@ -2702,17 +2702,17 @@ entry_p m_makeassign(entry_p contxt)
     if(safe || !get_numvar(contxt, "@pretend"))
     {
         // The name of the assign.
-        char *asn = str(CARG(1));
+        char *asn = str(C_ARG(1));
 
         // Assume failure..
-        DNUM = 0;
+        D_NUM = 0;
 
         // Are we going to create an assign?
-        if(CARG(2) && CARG(2) != end() &&
-           CARG(2)->type != OPTION)
+        if(C_ARG(2) && C_ARG(2) != end() &&
+           C_ARG(2)->type != OPTION)
         {
             // The destination.
-            char *dst = str(CARG(2));
+            char *dst = str(C_ARG(2));
 
             #if defined(AMIGA) && !defined(LG_TEST)
             BPTR lock = (BPTR) Lock(dst, ACCESS_READ);
@@ -2721,17 +2721,17 @@ entry_p m_makeassign(entry_p contxt)
                 // Create the assign. After this,
                 // the lock will be owned by the
                 // system, do not unlock or use.
-                DNUM = AssignLock(asn, lock) ? 1 : 0;
+                D_NUM = AssignLock(asn, lock) ? 1 : 0;
             }
             #else
-            DNUM = 1;
+            D_NUM = 1;
             #endif
 
             // Log the outcome.
             h_log
             (
                 contxt,
-                DNUM ? tr(S_ACRT) : tr(S_ACRE),
+                D_NUM ? tr(S_ACRT) : tr(S_ACRE),
                 asn,
                 dst
             );
@@ -2740,34 +2740,34 @@ entry_p m_makeassign(entry_p contxt)
         {
             #if defined(AMIGA) && !defined(LG_TEST)
             // Remove assign.
-            DNUM = AssignLock(str(CARG(1)), (BPTR) NULL) ? 1 : 0;
+            D_NUM = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? 1 : 0;
             #else
-            DNUM = 2;
+            D_NUM = 2;
             #endif
 
             // Log the outcome.
             h_log
             (
                 contxt,
-                DNUM ? tr(S_ADEL) : tr(S_ADLE),
+                D_NUM ? tr(S_ADEL) : tr(S_ADLE),
                 asn
             );
         }
 
-        if(!DNUM)
+        if(!D_NUM)
         {
             // Could not create / rm assign / get lock.
-            ERR(ERR_ASSIGN, str(CARG(1)));
+            ERR(ERR_ASSIGN, str(C_ARG(1)));
         }
     }
     else
     {
         // Pretend.
-        DNUM = 1;
+        D_NUM = 1;
     }
 
     // Failure or success.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -2779,25 +2779,25 @@ entry_p m_makeassign(entry_p contxt)
 entry_p m_makedir(entry_p contxt)
 {
     // One argument and options.
-    C_SANE(1, CARG(2));
+    C_SANE(1, C_ARG(2));
 
-    entry_p prompt   = get_opt(CARG(2), OPT_PROMPT),
-            help     = get_opt(CARG(2), OPT_HELP),
+    entry_p prompt   = get_opt(C_ARG(2), OPT_PROMPT),
+            help     = get_opt(C_ARG(2), OPT_HELP),
             #if defined(AMIGA) && !defined(LG_TEST)
-            infos    = get_opt(CARG(2), OPT_INFOS),
+            infos    = get_opt(C_ARG(2), OPT_INFOS),
             #endif
-            confirm  = get_opt(CARG(2), OPT_CONFIRM),
-            safe     = get_opt(CARG(2), OPT_SAFE);
+            confirm  = get_opt(C_ARG(2), OPT_CONFIRM),
+            safe     = get_opt(C_ARG(2), OPT_SAFE);
 
-    DNUM = 0;
+    D_NUM = 0;
 
     // If we need confirmation and the user skips
     // or aborts, return. On abort, the HALT will
     // be set by h_confirm.
-    if(confirm && !h_confirm(CARG(2),
+    if(confirm && !h_confirm(C_ARG(2),
        str(help), str(prompt)))
     {
-        RCUR;
+        R_CUR;
     }
 
     // Is this a safe operation or are we not
@@ -2805,22 +2805,22 @@ entry_p m_makedir(entry_p contxt)
     if(safe || !get_numvar(contxt, "@pretend"))
     {
         // The name of the directory.
-        char *dir = str(CARG(1));
+        char *dir = str(C_ARG(1));
 
         // Create the directory.
-        DNUM = h_makedir(contxt, dir, 0 /* FIXME */);
+        D_NUM = h_makedir(contxt, dir, 0 /* FIXME */);
 
         #if defined(AMIGA) && !defined(LG_TEST)
         // Are we supposed to create an icon
         // as well?
-        if(infos && DNUM)
+        if(infos && D_NUM)
         {
             // Get the default drawer icon from the OS.
             struct DiskObject *obj = (struct DiskObject *)
                 GetDefDiskObject(WBDRAWER);
 
             // Assume failure.
-            DNUM = 0;
+            D_NUM = 0;
 
             // If we have a default icon, let our newly
             // created directory have it.
@@ -2830,7 +2830,7 @@ entry_p m_makedir(entry_p contxt)
                 if(PutDiskObject(dir, obj))
                 {
                     // Done.
-                    DNUM = 1;
+                    D_NUM = 1;
                 }
 
                 // Free def. icon.
@@ -2840,7 +2840,7 @@ entry_p m_makedir(entry_p contxt)
             // If any of the above failed, ioerr
             // will be set. Export that value as
             // a variable.
-            if(!DNUM)
+            if(!D_NUM)
             {
                 LONG ioe = IoErr();
                 set_numvar(contxt, "@ioerr", ioe);
@@ -2852,11 +2852,11 @@ entry_p m_makedir(entry_p contxt)
     {
         // A non safe operation in pretend
         // mode always succeeds.
-        DNUM = 1;
+        D_NUM = 1;
     }
 
     // Success or failure.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -2883,38 +2883,38 @@ entry_p m_makedir(entry_p contxt)
 entry_p m_protect(entry_p contxt)
 {
     // One or more arguments.
-    C_SANE(1, CARG(2));
+    C_SANE(1, C_ARG(2));
 
-    char *file = str(CARG(1));
-    DNUM = 0;
+    char *file = str(C_ARG(1));
+    D_NUM = 0;
 
-    if(CARG(2) && CARG(2) != end())
+    if(C_ARG(2) && C_ARG(2) != end())
     {
         // Get with option.
-        if(CARG(2)->type == CONTXT)
+        if(C_ARG(2)->type == CONTXT)
         {
-            entry_p override = get_opt(CARG(2), OPT_OVERRIDE);
+            entry_p override = get_opt(C_ARG(2), OPT_OVERRIDE);
 
             if(override)
             {
                 // From user (script).
-                DNUM = num(override);
+                D_NUM = num(override);
             }
             else
             {
                 // From file.
-                h_protect_get(contxt, file, &DNUM);
+                h_protect_get(contxt, file, &D_NUM);
             }
         }
         // Set value.
         else
         {
             // Assume string operation.
-            const char *flg = str(CARG(2));
+            const char *flg = str(C_ARG(2));
             size_t len = strlen(flg);
 
-            entry_p safe = get_opt(CARG(3), OPT_SAFE),
-                    override = get_opt(CARG(3), OPT_OVERRIDE);
+            entry_p safe = get_opt(C_ARG(3), OPT_SAFE),
+                    override = get_opt(C_ARG(3), OPT_OVERRIDE);
 
             // If any numbers are present in the string,
             // treat it as an absolute mask instead.
@@ -2939,20 +2939,20 @@ entry_p m_protect(entry_p contxt)
                 if(!override)
                 {
                     // Get flags from file.
-                    if(!h_protect_get(contxt, file, &DNUM))
+                    if(!h_protect_get(contxt, file, &D_NUM))
                     {
                         // Helper will set proper error
-                        RNUM(-1);
+                        R_NUM(-1);
                     }
                 }
                 else
                 {
                     // Get flags from user (script).
-                    DNUM = num(override);
+                    D_NUM = num(override);
                 }
 
                 // Invert 1-4.
-                DNUM ^= 0x0f;
+                D_NUM ^= 0x0f;
 
                 // For all flags.
                 for(size_t i = 0; i < len; i++)
@@ -2979,20 +2979,20 @@ entry_p m_protect(entry_p contxt)
                     // Adding or subtracting?
                     switch(mode)
                     {
-                        case 0: DNUM = bit; mode = 1; break;
-                        case 1: DNUM |= bit; break;
-                        case 2: DNUM &= ~bit; break;
+                        case 0: D_NUM = bit; mode = 1; break;
+                        case 1: D_NUM |= bit; break;
+                        case 2: D_NUM &= ~bit; break;
                         default: break;
                     }
                 }
 
                 // Invert 1-4.
-                DNUM ^= 0x0f;
+                D_NUM ^= 0x0f;
             }
             else
             {
                 // Use an absolute mask.
-                DNUM = num(CARG(2));
+                D_NUM = num(C_ARG(2));
             }
 
             if(!override)
@@ -3002,13 +3002,13 @@ entry_p m_protect(entry_p contxt)
                 if(safe || !get_numvar(contxt, "@pretend"))
                 {
                     // Helper will set error on failure.
-                    DNUM = h_protect_set(contxt, file, DNUM);
+                    D_NUM = h_protect_set(contxt, file, D_NUM);
                 }
                 else
                 {
                     // A non safe operation in pretend
                     // mode always succeeds.
-                    DNUM = 1;
+                    D_NUM = 1;
                 }
             }
         }
@@ -3016,11 +3016,11 @@ entry_p m_protect(entry_p contxt)
     else
     {
         // Get without options.
-        h_protect_get(contxt, file, &DNUM);
+        h_protect_get(contxt, file, &D_NUM);
     }
 
     // Success or failure.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -3032,30 +3032,30 @@ entry_p m_protect(entry_p contxt)
 entry_p m_startup(entry_p contxt)
 {
     // Two or more arguments / options.
-    C_SANE(2, CARG(2));
+    C_SANE(2, C_ARG(2));
 
     char *cmd = NULL;
-    const char *app = str(CARG(1));
+    const char *app = str(C_ARG(1));
 
-    entry_p command  = get_opt(CARG(2), OPT_COMMAND),
-            help     = get_opt(CARG(2), OPT_HELP),
-            prompt   = get_opt(CARG(2), OPT_PROMPT);
+    entry_p command  = get_opt(C_ARG(2), OPT_COMMAND),
+            help     = get_opt(C_ARG(2), OPT_HELP),
+            prompt   = get_opt(C_ARG(2), OPT_PROMPT);
 
     // Expect failure.
-    DNUM = 0;
+    D_NUM = 0;
 
     // We need a command.
     if(!command)
     {
         ERR(ERR_MISSING_OPTION, "command");
-        RCUR;
+        R_CUR;
     }
 
     // And somewhere to put the command.
     if(!strlen(app))
     {
         ERR(ERR_INVALID_APP, app);
-        RCUR;
+        R_CUR;
     }
 
     // If we need confirmation and the user skips
@@ -3063,21 +3063,21 @@ entry_p m_startup(entry_p contxt)
     // be set by h_confirm. Confirmation is needed
     // when user level is expert or when (confirm)
     // is used.
-    if((get_opt(CARG(2), OPT_CONFIRM) ||
+    if((get_opt(C_ARG(2), OPT_CONFIRM) ||
         get_numvar(contxt, "@user-level") > 1) &&
-       !h_confirm(CARG(2), str(help), str(prompt)))
+       !h_confirm(C_ARG(2), str(help), str(prompt)))
     {
-        RCUR;
+        R_CUR;
     }
 
     // We're done if executing in pretend mode.
     if(get_numvar(contxt, "@pretend"))
     {
-        RNUM(1);
+        R_NUM(1);
     }
 
     // Gather and merge all (command) strings.
-    cmd = get_optstr(CARG(2), OPT_COMMAND);
+    cmd = get_optstr(C_ARG(2), OPT_COMMAND);
 
     if(cmd)
     {
@@ -3255,7 +3255,7 @@ entry_p m_startup(entry_p contxt)
                                 // We're done.
                                 free(tmp);
                                 tmp = NULL;
-                                DNUM = 1;
+                                D_NUM = 1;
                             }
                         }
                         else
@@ -3312,7 +3312,7 @@ entry_p m_startup(entry_p contxt)
     }
 
     // Success, failure or OOM.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -3335,7 +3335,7 @@ entry_p m_textfile(entry_p contxt)
             confirm  = get_opt(contxt, OPT_CONFIRM),
             safe     = get_opt(contxt, OPT_SAFE);
 
-    DNUM = 0;
+    D_NUM = 0;
 
     if(dest)
     {
@@ -3345,7 +3345,7 @@ entry_p m_textfile(entry_p contxt)
         if(confirm && !h_confirm(contxt,
            str(help), str(prompt)))
         {
-            RCUR;
+            R_CUR;
         }
 
         // Is this a safe operation or are we not
@@ -3359,7 +3359,7 @@ entry_p m_textfile(entry_p contxt)
             if(file)
             {
                 // Assume success.
-                DNUM = 1;
+                D_NUM = 1;
 
                 // Append to empty file. This is strange
                 // but it's how the CBM installer works.
@@ -3376,7 +3376,7 @@ entry_p m_textfile(entry_p contxt)
                         if(fputs(app, file) == EOF)
                         {
                             ERR(ERR_WRITE_FILE, name);
-                            DNUM = 0;
+                            D_NUM = 0;
                         }
 
                         // Free concatenation.
@@ -3386,13 +3386,13 @@ entry_p m_textfile(entry_p contxt)
                     {
                         // Out of memory.
                         PANIC(contxt);
-                        DNUM = 0;
+                        D_NUM = 0;
                     }
                 }
 
                 // Are we going to include a file at the
                 // end of the new file (append proper)?
-                if(include && DNUM)
+                if(include && D_NUM)
                 {
                     // File to copy.
                     const char *incl = str(include);
@@ -3415,7 +3415,7 @@ entry_p m_textfile(entry_p contxt)
                             if(fwrite(buf, 1, cnt, file) != cnt)
                             {
                                 ERR(ERR_WRITE_FILE, name);
-                                DNUM = 0;
+                                D_NUM = 0;
                                 break;
                             }
 
@@ -3438,7 +3438,7 @@ entry_p m_textfile(entry_p contxt)
                 if(!post && !include)
                 {
                     ERR(ERR_NOTHING_TO_DO, contxt->name);
-                    DNUM = 0;
+                    D_NUM = 0;
                 }
             }
             else
@@ -3450,7 +3450,7 @@ entry_p m_textfile(entry_p contxt)
         {
             // A non safe operation in pretend
             // mode always succeeds.
-            DNUM = 1;
+            D_NUM = 1;
         }
     }
     else
@@ -3459,7 +3459,7 @@ entry_p m_textfile(entry_p contxt)
     }
 
     // Success or failure.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -3486,7 +3486,7 @@ entry_p m_tooltype(entry_p contxt)
             confirm         = get_opt(contxt, OPT_CONFIRM),
             safe            = get_opt(contxt, OPT_SAFE);
 
-    DNUM = 0;
+    D_NUM = 0;
 
     // We need something to work with.
     if(dest)
@@ -3500,14 +3500,14 @@ entry_p m_tooltype(entry_p contxt)
         {
             ERR(ERR_OPTION_MUTEX,
                 "noposition/setposition");
-            RNUM(0);
+            R_NUM(0);
         }
 
         // A non safe operation in pretend mode
         // always succeeds.
         if(get_numvar(contxt, "@pretend") && !safe)
         {
-            RNUM(1);
+            R_NUM(1);
         }
 
         // Get confirmation if necessary.
@@ -3703,7 +3703,7 @@ entry_p m_tooltype(entry_p contxt)
                 if(PutDiskObject(file, obj))
                 {
                     // Done.
-                    DNUM = 1;
+                    D_NUM = 1;
                 }
                 else
                 {
@@ -3738,7 +3738,7 @@ entry_p m_tooltype(entry_p contxt)
             }
             #else
             // On non-Amiga systems we always succeed.
-            DNUM = 1;
+            D_NUM = 1;
 
             // For testing purposes only.
             printf("%s%d%d%d",
@@ -3751,7 +3751,7 @@ entry_p m_tooltype(entry_p contxt)
         else
         {
             // The user did not confirm.
-            DNUM = 0;
+            D_NUM = 0;
         }
     }
     else
@@ -3761,7 +3761,7 @@ entry_p m_tooltype(entry_p contxt)
     }
 
     // Success or failure.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -3779,7 +3779,7 @@ entry_p m_transcript(entry_p contxt)
     char *msg = get_chlstr(contxt, false);
 
     // Assume failure.
-    DNUM = 0;
+    D_NUM = 0;
 
     // Did we manage to concatenate something?
     if(msg)
@@ -3790,7 +3790,7 @@ entry_p m_transcript(entry_p contxt)
         // disabled).
         if(!DID_ERR)
         {
-            DNUM = h_log(contxt, "%s\n", msg) ? 1 : 0;
+            D_NUM = h_log(contxt, "%s\n", msg) ? 1 : 0;
         }
 
         // Free the temporary buffer and exit.
@@ -3803,7 +3803,7 @@ entry_p m_transcript(entry_p contxt)
     }
 
     // Success, failure or OOM.
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -3815,24 +3815,24 @@ entry_p m_transcript(entry_p contxt)
 entry_p m_rename(entry_p contxt)
 {
     // Two or more arguments / options.
-    C_SANE(2, CARG(3));
+    C_SANE(2, C_ARG(3));
 
-    entry_p help    = get_opt(CARG(3), OPT_HELP),
-            prompt  = get_opt(CARG(3), OPT_PROMPT),
-            confirm = get_opt(CARG(3), OPT_CONFIRM),
-            disk    = get_opt(CARG(3), OPT_DISK),
-            safe    = get_opt(CARG(3), OPT_SAFE);
+    entry_p help    = get_opt(C_ARG(3), OPT_HELP),
+            prompt  = get_opt(C_ARG(3), OPT_PROMPT),
+            confirm = get_opt(C_ARG(3), OPT_CONFIRM),
+            disk    = get_opt(C_ARG(3), OPT_DISK),
+            safe    = get_opt(C_ARG(3), OPT_SAFE);
 
-    const char *old  = str(CARG(1)),
-               *new  = str(CARG(2));
+    const char *old  = str(C_ARG(1)),
+               *new  = str(C_ARG(2));
 
     // If we need confirmation and the user skips
     // or aborts, return. On abort, the HALT will
     // be set by h_confirm.
-    if(confirm && !h_confirm(CARG(3),
+    if(confirm && !h_confirm(C_ARG(3),
        str(help), str(prompt)))
     {
-        RNUM(0);
+        R_NUM(0);
     }
 
     // Is this a safe operation or are we not
@@ -3847,12 +3847,12 @@ entry_p m_rename(entry_p contxt)
             {
                 // Success.
                 h_log(contxt, tr(S_FRND), old, new);
-                RNUM(-1);
+                R_NUM(-1);
             }
 
             // Fail if target exists.
             ERR(ERR_RENAME_FILE, old);
-            RNUM(0);
+            R_NUM(0);
         }
 
         // No, we're going to relabel a volume.
@@ -3861,7 +3861,7 @@ entry_p m_rename(entry_p contxt)
         if(!Relabel(old, new))
         {
             // Failure.
-            RNUM(0);
+            R_NUM(0);
         }
         #endif
 
@@ -3871,7 +3871,7 @@ entry_p m_rename(entry_p contxt)
 
     // Non safe operation in pretend mode
     // or normal successful operation.
-    RNUM(-1);
+    R_NUM(-1);
 }
 
 //----------------------------------------------------------------------------

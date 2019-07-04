@@ -221,5 +221,5 @@ entry_p m_procedure(entry_p contxt)
 
     // Everything is broken.
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }

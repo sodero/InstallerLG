@@ -55,7 +55,7 @@ entry_p m_cat(entry_p contxt)
                 if(DID_ERR)
                 {
                     free(buf);
-                    REST;
+                    R_EST;
                 }
 
                 // Get length of the current argument.
@@ -99,7 +99,7 @@ entry_p m_cat(entry_p contxt)
                         PANIC(contxt);
                         free(tmp);
                         free(buf);
-                        REST;
+                        R_EST;
                     }
                 }
 
@@ -110,14 +110,14 @@ entry_p m_cat(entry_p contxt)
             // Unless we're out of memory, buf will
             // will contain the concatenation of all
             // the children.
-            RSTR(buf);
+            R_STR(buf);
         }
     }
     // The parser isn't necessarily broken
     // if we end up here. We could alse be
     // out of memory.
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -310,7 +310,7 @@ entry_p m_fmt(entry_p contxt)
         else if(ret)
         {
             // Success.
-            RSTR(ret);
+            R_STR(ret);
         }
     }
     else
@@ -319,13 +319,13 @@ entry_p m_fmt(entry_p contxt)
         // broken or we're out of memory
         PANIC(contxt);
         free(sct);
-        RCUR;
+        R_CUR;
     }
 
     // Return empty string
     // on failure.
     free(ret);
-    REST;
+    R_EST;
 }
 
 //----------------------------------------------------------------------------
@@ -339,7 +339,7 @@ entry_p m_pathonly(entry_p contxt)
     // We need one argument, a full path.
     if(c_sane(contxt, 1))
     {
-        const char *arg = str(CARG(1));
+        const char *arg = str(C_ARG(1));
         size_t len = strlen(arg);
 
         // Scan backwards.
@@ -371,18 +371,18 @@ entry_p m_pathonly(entry_p contxt)
                     ret[len] = '\0';
                 }
 
-                RSTR(ret);
+                R_STR(ret);
             }
         }
 
         // Return empty string
         // on failure.
-        REST;
+        R_EST;
     }
 
     // The parser is broken
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -399,8 +399,8 @@ entry_p m_patmatch(entry_p contxt)
     #if defined(AMIGA) && !defined(LG_TEST)
     // Use the global buffer.
     char *buf = get_buf(),
-         *pat = str(CARG(1)),
-         *mat = str(CARG(2));
+         *pat = str(C_ARG(1)),
+         *mat = str(C_ARG(2));
 
     LONG w = ParsePattern(pat, buf, buf_size());
 
@@ -410,17 +410,17 @@ entry_p m_patmatch(entry_p contxt)
         // Use pattern matching if we have one or more
         // wildcards, otherwise use plain strcmp().
         int r = w ? MatchPattern(buf, mat) : !strcmp(pat, mat);
-        RNUM(r ? 1 : 0);
+        R_NUM(r ? 1 : 0);
     }
     else
     {
         // We probably had a buffer overflow.
         ERR(ERR_OVERFLOW, pat);
-        RNUM(0);
+        R_NUM(0);
     }
     #else
     // Testing.
-    RNUM(0);
+    R_NUM(0);
     #endif
 }
 
@@ -436,7 +436,7 @@ entry_p m_strlen(entry_p contxt)
     C_SANE(1, NULL);
 
     // Set and return.
-    RNUM((int) strlen(str(CARG(1))));
+    R_NUM((int) strlen(str(C_ARG(1))));
 }
 
 //----------------------------------------------------------------------------
@@ -449,16 +449,16 @@ entry_p m_substr(entry_p contxt)
 {
     if(c_sane(contxt, 2))
     {
-        char *arg = str(CARG(1));
-        int off = num(CARG(2)),
+        char *arg = str(C_ARG(1));
+        int off = num(C_ARG(2)),
             len = (int) strlen(arg);
 
         // Is the number characters limited?
-        if(CARG(3) && CARG(3) != end())
+        if(C_ARG(3) && C_ARG(3) != end())
         {
             // Get the number of characters
             // to copy.
-            int chr = num(CARG(3));
+            int chr = num(C_ARG(3));
 
             // Use the limitations used by the
             // CBM installer.
@@ -473,12 +473,12 @@ entry_p m_substr(entry_p contxt)
                     len -= off;
                     len = len < chr ? len : chr;
                     memcpy(ret, arg + off, len);
-                    RSTR(ret);
+                    R_STR(ret);
                 }
 
                 // Out of memory.
                 PANIC(contxt);
-                REST;
+                R_EST;
             }
         }
         else
@@ -497,29 +497,29 @@ entry_p m_substr(entry_p contxt)
                         // All values are already
                         // capped, just copy.
                         memcpy(ret, arg + off, len - off);
-                        RSTR(ret);
+                        R_STR(ret);
                     }
 
                     // Out of memory.
                     PANIC(contxt);
-                    REST;
+                    R_EST;
                 }
 
                 // Return full string.
-                return CARG(1);
+                return C_ARG(1);
             }
         }
 
         // Fall through. Return
         // empty string.
-        REST;
+        R_EST;
     }
 
     // The parser isn't necessarily broken
     // if we end up here. We could also be
     // out of memory.
     PANIC(contxt);
-    RCUR;
+    R_CUR;
 }
 
 //----------------------------------------------------------------------------
@@ -534,18 +534,18 @@ entry_p m_tackon(entry_p contxt)
     C_SANE(2, NULL);
 
     // All work's done by the helper.
-    char *ret = h_tackon(contxt, str(CARG(1)), str(CARG(2)));
+    char *ret = h_tackon(contxt, str(C_ARG(1)), str(C_ARG(2)));
 
     // Did we fail?
     if(!ret)
     {
         // Return empty string. Error codes, PANIC:s and
         // so on are set by h_tackon().
-        REST;
+        R_EST;
     }
 
     // Success.
-    RSTR(ret);
+    R_STR(ret);
 }
 
 //----------------------------------------------------------------------------

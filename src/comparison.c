@@ -78,7 +78,7 @@ entry_p m_eq(entry_p contxt)
     C_SANE(2, NULL);
 
     // Turn the result of h_cmp into 1 or 0.
-    RNUM(h_cmp(CARG(1), CARG(2)) ? 0 : 1);
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) ? 0 : 1);
 }
 
 //----------------------------------------------------------------------------
@@ -93,7 +93,7 @@ entry_p m_gt(entry_p contxt)
     C_SANE(2, NULL);
 
     // Turn the result of h_cmp into 0 or 1.
-    RNUM(h_cmp(CARG(1), CARG(2)) > 0 ? 1 : 0);
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) > 0 ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -108,7 +108,7 @@ entry_p m_gte(entry_p contxt)
     C_SANE(2, NULL);
 
     // Turn the result of h_cmp into 0 or 1.
-    RNUM(h_cmp(CARG(1), CARG(2)) >= 0 ? 1 : 0);
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) >= 0 ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -123,7 +123,7 @@ entry_p m_lt(entry_p contxt)
     C_SANE(2, NULL);
 
     // Turn the result of h_cmp into 0 or 1.
-    RNUM(h_cmp(CARG(1), CARG(2)) < 0 ? 1 : 0);
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) < 0 ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -138,7 +138,7 @@ entry_p m_lte(entry_p contxt)
     C_SANE(2, NULL);
 
     // Turn the result of h_cmp into 0 or 1.
-    RNUM(h_cmp(CARG(1), CARG(2)) <= 0 ? 1 : 0);
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) <= 0 ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------
@@ -153,5 +153,5 @@ entry_p m_neq(entry_p contxt)
     C_SANE(2, NULL);
 
     // Turn the result of h_cmp into 0 or 1.
-    RNUM(h_cmp(CARG(1), CARG(2)) ? 1 : 0);
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) ? 1 : 0);
 }
