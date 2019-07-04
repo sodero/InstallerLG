@@ -3,7 +3,7 @@
 //
 // Functions for allocation of entry_t data and closely related functions.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -206,8 +206,7 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
 
                 // Reparent all symbols. The return value will be dangeling
                 // for now.
-                for(entry_p *cur = entry->symbols;
-                    *cur && *cur != end(); cur++)
+                for(entry_p *cur = entry->symbols; *cur && *cur != end(); cur++)
                 {
                     (*cur)->parent = entry;
                     (*cur)->resolved = end();
@@ -226,8 +225,8 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
             chl->children = NULL;
             kill(chl);
 
-            for(entry_p *cur = entry->children;
-                *cur && *cur != end(); cur++)
+            // Reparent all children.
+            for(entry_p *cur = entry->children; *cur && *cur != end(); cur++)
             {
                 (*cur)->parent = entry;
             }
@@ -577,15 +576,13 @@ entry_p merge(entry_p dst, entry_p src)
         size_t num = 0;
 
         // Count the number of source children.
-        for(size_t i = 0; src->children[i] &&
-            src->children[i] != end(); i++)
+        for(size_t i = 0; src->children[i] && src->children[i] != end(); i++)
         {
             num++;
         }
 
         // Add the number of current children.
-        for(size_t i = 0; dst->children[i] &&
-            dst->children[i] != end(); i++)
+        for(size_t i = 0; dst->children[i] && dst->children[i] != end(); i++)
         {
             num++;
         }
@@ -600,16 +597,14 @@ entry_p merge(entry_p dst, entry_p src)
             num = 0;
 
             // Copy current destination children.
-            for(size_t i = 0; dst->children[i] &&
-                dst->children[i] != end(); i++)
+            for(size_t i = 0; dst->children[i] && dst->children[i] != end(); i++)
             {
                 new[num] = dst->children[i];
                 new[num++]->parent = dst;
             }
 
             // Append children of the source.
-            for(size_t i = 0; src->children[i] &&
-                src->children[i] != end(); i++)
+            for(size_t i = 0; src->children[i] && src->children[i] != end(); i++)
             {
                 new[num] = src->children[i];
                 new[num++]->parent = dst;

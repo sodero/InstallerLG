@@ -3,7 +3,7 @@
 //
 // Arithmetic operations
 //------------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -28,8 +28,7 @@ entry_p m_add(entry_p contxt)
     int sum = 0;
 
     // Sum up the values of all children.
-    for(entry_p *cur = contxt->children;
-        *cur && *cur != end(); cur++)
+    for(entry_p *cur = contxt->children; *cur && *cur != end(); cur++)
     {
         sum += num(*cur);
     }
@@ -78,8 +77,7 @@ entry_p m_mul(entry_p contxt)
     int pro = 1;
 
     // Multiply the values of all children.
-    for(entry_p *cur = contxt->children;
-        *cur && *cur != end(); cur++)
+    for(entry_p *cur = contxt->children; *cur && *cur != end(); cur++)
     {
         pro *= num(*cur);
     }

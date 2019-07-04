@@ -3,7 +3,7 @@
 //
 // Interuption of program execution
 //------------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -148,8 +148,7 @@ entry_p m_exit(entry_p contxt)
 entry_p m_onerror(entry_p contxt)
 {
     // A static reference. We might be out of heap when this is invoked.
-    static entry_t ref = { .type = CUSREF,
-                           .name = "@onerror" };
+    static entry_t ref = { .type = CUSREF, .name = "@onerror" };
 
     // Zero or more arguments. No options.
     C_SANE(0, NULL);
@@ -162,8 +161,7 @@ entry_p m_onerror(entry_p contxt)
 
     while(*err && *err != end())
     {
-        if((*err)->type == CUSTOM &&
-           !strcasecmp((*err)->name, ref.name))
+        if((*err)->type == CUSTOM && !strcasecmp((*err)->name, ref.name))
         {
             // Reset error code otherwise m_gosub / invoke will halt
             // immediately.

@@ -3,7 +3,7 @@
 //
 // Control structures
 //------------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -97,9 +97,8 @@ static entry_p h_whunt(entry_p contxt, int mode)
 
     // Use XOR to support both 'while' and 'until'. Break if something goes
     // wrong inside.
-    for(int cont = mode ^ tru(C_ARG(1));
-            cont && !DID_ERR;
-            cont = mode ^ tru(C_ARG(1)))
+    for(int cont = mode ^ tru(C_ARG(1)); cont && !DID_ERR;
+        cont = mode ^ tru(C_ARG(1)))
     {
         // Save the return value of the last function in the CONTXT
         ret = invoke(C_ARG(2));
