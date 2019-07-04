@@ -230,3 +230,8 @@
 - (getversion) fix.
 - Less strict string formating. Just like CBM wanted it.
 - String evaluation fix (IBrowse).
+
+0.1.0-alpha.37:
+===============
+- (copyfiles) (choices) + (info) combination fix (MicroDot II 1.4).
+- (startup) confirmation level fix.

@@ -46,14 +46,13 @@ aros:
 	$(SED) -i 's/FILES :=.*$$/FILES := $(STEMS)/' $(FLT)/mmakefile.src
 
 .PHONY: src
-src: clean aros
+src: clean
 	mkdir $(NAME)
 	cp ../LICENSE $(NAME)
 	cp ../README.md $(NAME)
 	cp -R $(BIN) $(NAME)
 	cp -R $(SRC) $(NAME)
 	cp -R ../test $(NAME)
-	cp -R aros $(NAME)
 	lha $(LHAFLAGS) $(DIR)/$(NAME).src.lha $(NAME)
 
 .PHONY: clean

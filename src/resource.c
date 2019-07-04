@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // resource.c:
 //
 // Encapsulation of resources that we might want to localize later on.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "error.h"
 #include "resource.h"
@@ -22,12 +22,12 @@ struct LocaleInfo
 
 static struct LocaleInfo loc;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        tr
 // Description: Get string from string ID.
 // Input:       A res_t string ID.
 // Return:      The string corresponding to the string ID.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const char *tr(res_t res)
 {
     // Fail nicely if we're out of range.
@@ -113,8 +113,7 @@ const char *tr(res_t res)
     };
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    if(loc.li_LocaleBase &&
-       loc.li_Catalog && cur > S_NONE)
+    if(loc.li_LocaleBase && loc.li_Catalog && cur > S_NONE)
     {
         return GetCatalogStr(loc.li_Catalog, cur - 1, str[cur]);
     }
@@ -124,12 +123,12 @@ const char *tr(res_t res)
     return str[cur];
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        locale_init
 // Description: Initialize and open the catalog.
 // Input:       -
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void locale_init(void)
 {
     if(!loc.li_LocaleBase)
@@ -143,12 +142,12 @@ void locale_init(void)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        locale_exit
 // Description: Close catalog and free locale resources.
 // Input:       -
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void locale_exit(void)
 {
     if(loc.li_LocaleBase)

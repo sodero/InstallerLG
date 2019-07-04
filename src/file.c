@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // file.c:
 //
 // File operations
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Copyright (C) 2018, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "alloc.h"
 #include "error.h"
@@ -16,7 +16,6 @@
 #include "resource.h"
 #include "strop.h"
 #include "util.h"
-
 #include <dirent.h>
 #include <limits.h>
 #include <stdarg.h>
@@ -36,53 +35,48 @@
 #include <workbench/workbench.h>
 #endif
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (expandpath <path>)
 //     Expands a short path to its full path equivalent
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_expandpath(entry_p contxt)
 {
-    // We need one argument, a short path.
-    if(c_sane(contxt, 1))
+    // One argument and no options.
+    C_SANE(1, NULL);
+
+    // Short path.
+    char *pth = str(C_ARG(1));
+
+    if(!DID_ERR)
     {
-        // Short path.
-        char *pth = str(CARG(1));
+        #if defined(AMIGA) && !defined(LG_TEST)
+        BPTR lock = (BPTR) Lock(pth, ACCESS_READ);
 
-        if(!DID_ERR)
+        if(lock)
         {
-            #if defined(AMIGA) && !defined(LG_TEST)
-            BPTR lock = (BPTR) Lock(pth, ACCESS_READ);
-
-            if(lock)
+            if(NameFromLock(lock, get_buf(), buf_size()))
             {
-                if(NameFromLock(lock, get_buf(), buf_size()))
-                {
-                    UnLock(lock);
-                    RSTR(strdup(get_buf()));
-                }
-                else
-                {
-                    ERR(ERR_OVERFLOW, pth);
-                    UnLock(lock);
-                }
+                UnLock(lock);
+                R_STR(strdup(get_buf()));
             }
-            #else
-            RSTR(strdup(pth));
-            #endif
+            else
+            {
+                ERR(ERR_OVERFLOW, pth);
+                UnLock(lock);
+            }
         }
-
-        // Return empty string.
-        REST;
+        #else
+        R_STR(strdup(pth));
+        #endif
     }
 
-    // Broken parser
-    PANIC(contxt);
-    RCUR;
+    // Failure, return empty string.
+    R_EST;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_confirm
 // Description: Ask user for confirmation (proceed / skip / abort).
 // Input:       entry_p contxt:     The execution context.
@@ -91,13 +85,12 @@ entry_p m_expandpath(entry_p contxt)
 //              ...:                Format string varargs.
 // Return:      bool:               If confirmed 'true' else 'false'. Both
 //                                  skip and abort will return 'false'.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 {
     if(contxt)
     {
-        // By setting @yes, @skip or @abort
-        // user behaviour can be simulated.
+        // By setting @yes, @skip or @abort user behaviour can be simulated.
         int yes = get_numvar(contxt, "@yes"),
             skip = get_numvar(contxt, "@skip"),
             abort = get_numvar(contxt, "@abort");
@@ -110,10 +103,9 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
         vsnprintf(get_buf(), buf_size(), msg, ap);
         va_end(ap);
 
-        // If we have any overrides, translate
-        // them to the corresponding gui return
-        // value.
-        if(abort) // || skip || abort)
+        // If we have any overrides, translate them to the corresponding gui
+        // return value.
+        if(abort)
         {
             grc = G_ABORT;
         }
@@ -167,17 +159,16 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
     return false;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_exists
 // Description: Get file / dir info.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   Path to file / dir.
 // Return:      int:                Dir = '2', file = '1' else '0'.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int h_exists(const char *file)
 {
-    // NULL is a valid argument but
-    // this 'file' doesn't exist.
+    // NULL is a valid argument but this 'file' doesn't exist.
     if(file)
     {
         // Empty string = current dir.
@@ -224,9 +215,8 @@ int h_exists(const char *file)
 
             return r;
             #else
-            // This implementation doesn't work on MorphOS.
-            // I have no clue why, it works on AROS. Let's
-            // use the implementation above on all Amiga
+            // This implementation doesn't work on MorphOS. I have no clue why,
+            // it works on AROS. Let's use the implementation above on all Amiga
             // like systems for now.
             struct stat fst;
             if(!stat(file, &fst))
@@ -234,8 +224,7 @@ int h_exists(const char *file)
                 // A file?
                 if(S_ISREG(fst.st_mode))
                 {
-                    // Value according to the CBM
-                    // installer documentation.
+                    // Value according to the CBM Installer documentation.
                     return 1;
                 }
 
@@ -250,8 +239,7 @@ int h_exists(const char *file)
         }
         else
         {
-            // The current dir exists,
-            // and it's a dir, really.
+            // The current dir exists, and it's a dir, really.
             return 2;
         }
     }
@@ -260,30 +248,26 @@ int h_exists(const char *file)
     return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_fileonly
 // Description: Get file part from full path.
 // Input:       entry_p contxt:     The execution context.
 //              const char *path:   Path to file.
 // Return:      const char *:       On success, file part of path, otherwise
 //                                  empty string.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static const char *h_fileonly(entry_p contxt, const char *path)
 {
     if(path)
     {
         size_t len = strlen(path);
 
-        // Do we have a string that doesn't
-        // look like a directory / volume?
-        if(len-- && path[len] != '/'
-           && path[len] != ':' )
+        // Do we have a string that doesn't look like a directory / volume?
+        if(len-- && path[len] != '/' && path[len] != ':' )
         {
-            // Go backwards until we find a
-            // delimiter or the beginning of
-            // the string.
-            while(len && path[len - 1] != '/'
-                  && path[len - 1] != ':' )
+            // Go backwards until we find a delimiter or the beginning of the
+            // string.
+            while(len && path[len - 1] != '/' && path[len - 1] != ':' )
             {
                 len--;
             }
@@ -309,12 +293,75 @@ static const char *h_fileonly(entry_p contxt, const char *path)
     return "";
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Name:        h_suffix
+// Description: Append file / directory suffix.
+// Input:       char *name:     Name of file or directory.
+//              char *suffix:   Suffix to append.
+// Return:      char *:         File or directory with suffix.
+//------------------------------------------------------------------------------
+static char *h_suffix(char *name, char *suffix)
+{
+    // Use global buffer.
+    char *buf = get_buf();
+    size_t len = buf_size();
+
+    // Don't trust the input.
+    if(name && suffix)
+    {
+        // Append suffix.
+        snprintf(buf, len, "%s.%s", name, suffix);
+    }
+
+    // Success or failure.
+    return buf;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_suffix_append
+// Description: Append file / directory suffix and append the result to a
+//              node list. If the resulting file / directory doesn't exist,
+//              nothing will be appended.
+// Input:       entry_p node:   List tail.
+//              char *suffix:   Suffix to append.
+// Return:      entry_p:        New tail.
+//------------------------------------------------------------------------------
+static pnode_p h_suffix_append(pnode_p node, char *suffix)
+{
+    // Save the type of the suffixed result, it might not be the same as that of
+    // the original node.
+    int type = h_exists(h_suffix(node->name, suffix));
+    pnode_p tail = node;
+
+    // The suffixed result might not exist.
+    if(tail && !tail->next && type)
+    {
+        // It's not necessary to check the return value.
+        tail->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+
+        // New list tail.
+        tail = tail->next;
+
+        // Fill out the details.
+        if(tail)
+        {
+            tail->name = DBG_ALLOC(strdup(h_suffix(node->name, suffix)));
+            tail->copy = DBG_ALLOC(strdup(h_suffix(node->copy, suffix)));
+            tail->type = type;
+        }
+    }
+
+    // New tail or the input node.
+    return tail;
+}
+
+//------------------------------------------------------------------------------
 // Forward declaration needed by h_choices.
 static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                           entry_p files, entry_p fonts, entry_p choices,
-                          entry_p pattern);
-//----------------------------------------------------------------------------
+                          entry_p pattern, entry_p infos);
+
+//------------------------------------------------------------------------------
 // Name:        h_choices
 // Description: Helper fo h_filetree taking care of (choices). Generating a
 //              complete file / directory tree with source and destination
@@ -322,20 +369,21 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 // Input:       entry_p contxt:     The execution context.
 //              entry_p choices:    * List of files.
 //              entry_p fonts:      * Include fonts.
+//              entry_p infos:      * Include icons.
 //
 //              * Refer to the Installer.guide.
 //
 //              const char *src:    Source directory.
 //              const char *dst:    Destination directory.
 // Return:      entry_p:            A linked list of file and dir pairs.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
-                         const char *src, const char *dst)
+                         entry_p infos, const char *src, const char *dst)
 {
+    // Sanity check.
     if(contxt && choices && src && dst)
     {
-        // Unless the parser is broken,
-        // we will have >= one child.
+        // Unless the parser is broken, we will have >= one child.
         entry_p *chl = choices->children;
 
         // Create head node.
@@ -344,8 +392,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 
         if(node)
         {
-            // We already know the type of the
-            // first element; it's a directory.
+            // We already know the type of the first element; it's a directory.
             node->name = DBG_ALLOC(strdup(src));
             node->copy = DBG_ALLOC(strdup(dst));
             node->type = 2;
@@ -368,87 +415,62 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
                 // Next file.
                 chl++;
 
-                // Make sure that the file / dir exists. But only
-                // in strict mode, otherwise just go on, missing
-                // files will be skipped during file copy anyway.
+                // Make sure that the file / dir exists. But only in strict
+                // mode, otherwise just go on, missing files will be skipped
+                // during file copy anyway.
                 if(node->type || !get_numvar(contxt, "@strict"))
                 {
-                    if(node->type == 2
+                    // Save current name and type in case we need to append
+                    // icon or font.
+                    long type = node->type;
+                    char *name = node->name, *copy = node->copy;
+
+                    // Create .info node if necessary.
+                    if(infos)
+                    {
+                        node = h_suffix_append(node, "info");
+                    }
+
+                    // Create .font node if necessary.
+                    if(fonts)
+                    {
+                        node = h_suffix_append(node, "font");
+                    }
+
+                    // Traverse (old, if info or font) directory if applicable.
+                    if(type == 2
                        #ifndef AMIGA
                        && strcmp(f_nam, ".")
                        && strcmp(f_nam, "..")
                        #endif
                        )
                     {
-                        // Get tree of subdirectory.
-                        // Don't promote (choices).
+                        // Get tree of subdirectory. Don't promote (choices).
                         node->next = h_filetree
                         (
                             contxt,
-                            node->name,
-                            node->copy,
+                            name,
+                            copy,
+                            NULL,
                             NULL,
                             NULL,
                             NULL,
                             NULL
                         );
 
-                        // Fast forward to the end of
-                        // the list.
+                        // Fast forward to the end of the list.
                         while(node->next)
                         {
                             node = node->next;
                         }
                     }
 
-                    // If there are more files, allocate
-                    // memory for the next node.
+                    // If there are more files, allocate memory for the next
+                    // node.
                     if(*chl && *chl != end())
                     {
                         // Not necessary to check the return value.
                         node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-                    }
-
-                    // Copy the font (if any) as well?
-                    if(fonts)
-                    {
-                        // Font = file + .font.
-                        snprintf(get_buf(), buf_size(), "%s.font", node->name);
-
-                        // Only if the font is a file.
-                        if(h_exists(get_buf()) == 1)
-                        {
-                            // This might be the last file / dir.
-                            // If true, no next element will exist
-                            // at this point so we need to create it.
-                            if(!node->next)
-                            {
-                                // Not necessary to check the return value.
-                                node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-                            }
-
-                            // Proceed with font.
-                            node = node->next;
-
-                            // Fill out the details.
-                            if(node)
-                            {
-                                // We already have the font name, create the
-                                // copy and set type, always a file.
-                                node->name = DBG_ALLOC(strdup(get_buf()));
-                                node->copy = h_tackon(contxt, dst, h_fileonly(contxt, get_buf()));
-                                node->type = 1;
-
-                                // Unless we ran out of memory, and there are
-                                // more files / dirs, create new list element.
-                                if(node->name && node->copy
-                                   && *chl && *chl != end())
-                                {
-                                    // Not necessary to check the return value.
-                                    node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-                                }
-                            }
-                        }
                     }
                 }
                 else
@@ -466,13 +488,12 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
         }
     }
 
-    // Unknown error /
-    // Out of memory.
+    // Unknown error / out of memory.
     PANIC(contxt);
     return NULL;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_filetree
 // Description: Generate a complete file / directory tree with source and
 //              destination tuples. Used by m_copyfiles.
@@ -483,26 +504,26 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 //              entry_p fonts:      * Skip fonts.
 //              entry_p choices:    * List of files.
 //              entry_p pattern:    * File / dir pattern.
+//              entry_p infos:      * Include icons (choices).
 //
 //              * Refer to the Installer.guide.
 //
 // Return:      entry_p:            A linked list of file and dir pairs.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                           entry_p files, entry_p fonts, entry_p choices,
-                          entry_p pattern)
+                          entry_p pattern, entry_p infos)
 {
     char *n_src = NULL, *n_dst = NULL;
 
+    // Sanity check.
     if(src && dst)
     {
         // File enumeration.
         if(choices)
         {
-            // No need for recursion. Handle
-            // enumerations separately.
-            return h_choices(contxt, choices,
-                             fonts, src, dst);
+            // No need for recursion. Handle enumerations separately.
+            return h_choices(contxt, choices, fonts, infos, src, dst);
         }
 
         int type = h_exists(src);
@@ -522,14 +543,13 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                 {
                     struct dirent *entry = readdir(dir);
 
-                    // We already know the type of the
-                    // first element; it's a directory.
+                    // We already know the type of the first element; it's a
+                    // directory.
                     node->name = DBG_ALLOC(strdup(src));
                     node->copy = DBG_ALLOC(strdup(dst));
                     node->type = 2;
 
-                    // Iterate over all entries in the source
-                    // directory.
+                    // Iterate over all entries in the source directory.
                     while(entry)
                     {
                         // Create the source destination tuple
@@ -541,21 +561,23 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                             if(pattern)
                             {
                                 // Use a static buffer, Installer.guide
-                                // restricts pattern length to 64. It
-                                // seems like MatchPattern can use a lot
-                                // of stack if we use long patterns, so
-                                // let's not get rid of this limitation.
+                                // restricts pattern length to 64. It seems
+                                // like MatchPattern can use a lot of stack if
+                                // we use long patterns, so let's not remove
+                                // this limitation.
                                 static char pat[BUFSIZ];
                                 #if defined(AMIGA) && !defined(LG_TEST)
-                                LONG w = ParsePattern(str(pattern), pat, sizeof(pat));
+                                LONG w = ParsePattern(str(pattern), pat,
+                                                      sizeof(pat));
 
                                 // Can we parse the pattern?
                                 if(w >= 0)
                                 {
-                                    // Use pattern matching if we have one or more
-                                    // wildcards, otherwise use plain strcmp().
-                                    if((w && MatchPattern(pat, entry->d_name)) ||
-                                       (w && !strcmp(pat, entry->d_name)))
+                                    // Use pattern matching if we have one or
+                                    // more wildcards, otherwise use plain
+                                    // strcmp().
+                                    if((w && MatchPattern(pat, entry->d_name))
+                                       || (w && !strcmp(pat, entry->d_name)))
                                     {
                                         // Match, get proper type.
                                         type = h_exists(n_src);
@@ -568,8 +590,8 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                                 }
                                 else
                                 {
-                                    // We probably had a buffer overflow.
-                                    // No more pattern matching today.
+                                    // We probably had a buffer overflow. No
+                                    // more pattern matching today.
                                     ERR(ERR_OVERFLOW, str(pattern));
                                     pattern = NULL;
                                 }
@@ -596,11 +618,9 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                                    #endif
                                   )
                                 {
-                                    // Get tree of subdirectory.
-                                    // Don't promote (choices),
-                                    // dirs will be assumed to
-                                    // be files and things will
-                                    // break.
+                                    // Get tree of subdirectory. Don't promote
+                                    // (choices), dirs will be assumed to be
+                                    // files and things will break.
                                     node->next = h_filetree
                                     (
                                         contxt,
@@ -609,25 +629,26 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                                         files,
                                         fonts,
                                         NULL,
-                                        pattern
+                                        pattern,
+                                        NULL
                                     );
 
-                                    // Fast forward to the end of
-                                    // the list.
+                                    // Fast forward to the end of the list.
                                     while(node->next)
                                     {
                                         node = node->next;
                                     }
                                 }
 
-                                // We don't need to store the names
-                                // of directories, release them.
+                                // We don't need to store the names of
+                                // directories, release them.
                                 free(n_src);
                                 free(n_dst);
                             }
                             else
                             {
-                                node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+                                node->next = DBG_ALLOC(calloc(1,
+                                                       sizeof(struct pnode_t)));
 
                                 if(node->next)
                                 {
@@ -684,10 +705,9 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 
                 if(n_src && n_dst)
                 {
-                    // The destination of the head element
-                    // will be a directory even though the
-                    // source is a file. We need somewhere
-                    // to put the file.
+                    // The destination of the head element will be a directory
+                    // even though the source is a file. We need somewhere to
+                    // put the file.
                     head->type = 2;
                     head->next = file;
                     head->name = n_src;
@@ -699,8 +719,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 
                     if(n_src && n_dst)
                     {
-                        // The second element in the list
-                        // will be the file.
+                        // The second element in the list will be the file.
                         file->type = 1;
                         file->name = n_src;
                         file->copy = n_dst;
@@ -721,7 +740,8 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                             if(font)
                             {
                                 font->name = DBG_ALLOC(strdup(get_buf()));
-                                font->copy = h_tackon(contxt, dst, h_fileonly(contxt, get_buf()));
+                                font->copy = h_tackon(contxt, dst,
+                                                      h_fileonly(contxt, get_buf()));
 
                                 // Add the font to the list.
                                 if(font->name && font->copy)
@@ -752,8 +772,8 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
             free(file);
         }
         else
-        // It's neither a directory or a file.
         {
+            // It's neither a directory or a file.
             ERR(ERR_NO_SUCH_FILE_OR_DIR, src);
             return NULL;
         }
@@ -762,29 +782,27 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
     // Out of memory.
     PANIC(contxt);
 
-    // These might leak when OOM
-    // if we don't free them.
+    // These will leak if we don't free them.
     free(n_src);
     free(n_dst);
 
     return NULL;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_protect_get
-// Description: Utility function used by m_protect and m_copyfiles to get
-//              file / dir protection bits.
+// Description: Utility function used by m_protect and m_copyfiles to get file /
+//              dir protection bits.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
 //              int32_t *mask:      Pointer to the result.
 // Return:      int:                On success '1', else '0'.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
 {
     if(contxt && mask && file)
     {
-        // On non Amiga systems, or in test mode,
-        // this is a stub.
+        // On non Amiga systems, or in test mode, this is a stub.
         #if defined(AMIGA) && !defined(LG_TEST)
         struct FileInfoBlock *fib = (struct FileInfoBlock *)
                AllocDosObject(DOS_FIB, NULL);
@@ -845,21 +863,20 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
     return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_protect_set
-// Description: Utility function used by m_protect and m_copyfiles to set
-//              file / dir protection bits.
+// Description: Utility function used by m_protect and m_copyfiles to set file /
+//              dir protection bits.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
 //              LONG mask:          Protection bits
 // Return:      int:                On success '1', else '0'.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 {
     if(contxt && file)
     {
-        // On non Amiga systems, or in test mode,
-        // this is a stub.
+        // On non Amiga systems, or in test mode, this is a stub.
         #if defined(AMIGA) && !defined(LG_TEST)
         size_t len = strlen(file);
 
@@ -898,7 +915,7 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 #define CF_NOPOSITION   (1 << 7)
 #define CF_SILENT       (1 << 8)
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_copyfile
 // Description: Copy file. Helper used by m_copyfiles and m_copylib.
 // Input:       entry_p contxt:     The execution context.
@@ -907,7 +924,7 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 //              int mde:            Copy mode, see CF_*.
 //              bool bck:           Enable back mode.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
                         bool bck, int mde)
 {
@@ -922,8 +939,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
             grc = gui_copyfiles_setcur(src, mde & CF_NOGAUGE, bck);
         }
 
-        // Prepare GUI unless we're in silent mode
-        // as used by copylib.
+        // Prepare GUI unless we're in silent mode as used by copylib.
         if(grc == G_TRUE)
         {
             static char buf[BUFSIZ];
@@ -938,22 +954,19 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
 
             if(file && !err)
             {
-                // Is there an existing destination
-                // file that is write protected?
-                if(!access(dst, F_OK) &&
-                    access(dst, W_OK))
+                // Is there an existing destination file that is write
+                // protected?
+                if(!access(dst, F_OK) && access(dst, W_OK))
                 {
                     // No need to ask if only (force).
-                    if((mde & CF_FORCE) &&
-                      !(mde & CF_ASKUSER))
+                    if((mde & CF_FORCE) && !(mde & CF_ASKUSER))
                     {
                         // Unprotect file.
                         chmod(dst, S_IRWXU);
                     }
                     else
-                    // Ask for confirmation if (askuser) unless
-                    // we're running in novice mode and (force)
-                    // at the same time.
+                    // Ask for confirmation if (askuser) unless we're running
+                    // in novice mode and (force) at the same time.
                     if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
                         get_numvar(contxt, "@user-level")))
                     {
@@ -966,8 +979,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
                         {
                             // Skip file or abort.
                             fclose(file);
-                            return DID_HALT ?
-                                   G_ABORT : G_TRUE;
+                            return DID_HALT ? G_ABORT : G_TRUE;
                         }
                     }
                 }
@@ -977,8 +989,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
 
                 if(dest)
                 {
-                    // Read and write until there is nothing more
-                    // to read.
+                    // Read and write until there is nothing more to read.
                     while(cnt)
                     {
                         if(fwrite(buf, 1, cnt, dest) == cnt)
@@ -1010,12 +1021,10 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
                     fclose(file);
                     fclose(dest);
 
-                    // The number of bytes read and not written
-                    // should be zero.
+                    // The number of bytes read and not written should be zero.
                     if(!cnt)
                     {
-                        // Write to the log file (if logging is
-                        // enabled).
+                        // Write to the log file (if logging is enabled).
                         h_log(contxt, tr(S_CPYD), src, dst);
 
                         // Are we going to copy the icon as well?
@@ -1025,8 +1034,8 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
                             static char icon[PATH_MAX];
                             snprintf(icon, sizeof(icon), "%s.info", src);
 
-                            // Only if it exists, it's not an error
-                            // if it's missing.
+                            // Only if it exists, it's not an error if it's
+                            // missing.
                             if(h_exists(icon) == 1)
                             {
                                 static char copy[PATH_MAX];
@@ -1035,7 +1044,8 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
                                 snprintf(copy, sizeof(copy), "%s.info", dst);
 
                                 // Recur without info set.
-                                grc = h_copyfile(contxt, icon, copy, bck, mde & ~CF_INFOS);
+                                grc = h_copyfile(contxt, icon, copy, bck,
+                                                 mde & ~CF_INFOS);
 
                                 #if defined(AMIGA) && !defined(LG_TEST)
                                 // Reset icon position?
@@ -1065,8 +1075,8 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
                             }
                         }
 
-                        // Preserve file permissions. On err,
-                        // code will be set by h_protect_x().
+                        // Preserve file permissions. On error, code will be set
+                        // by h_protect_x().
                         int32_t prm = 0;
 
                         if(h_protect_get(contxt, src, &prm))
@@ -1095,8 +1105,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
                     // The source handle is open.
                     fclose(file);
 
-                    if((mde & CF_NOFAIL) ||
-                       (mde & CF_OKNODELETE))
+                    if((mde & CF_NOFAIL) || (mde & CF_OKNODELETE))
                     {
                         // Ignore failure.
                         h_log(contxt, tr(S_NCPY), src, dst);
@@ -1135,8 +1144,8 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
         }
         else
         {
-            HALT;
             h_log(contxt, tr(S_ACPY), src, dst);
+            HALT;
         }
 
         // Unknown status.
@@ -1147,14 +1156,14 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
     return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_makedir
 // Description: Create directory / tree of directories.
 // Input:       entry_p contxt:     The execution context.
 //              const char *dst:    The directory.
 //              int mode:           FIXME.
 // Return:      int:                On success '1', else '0'.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static int h_makedir(entry_p contxt, const char *dst, int mode)
 {
     if(contxt && dst)
@@ -1174,8 +1183,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
 
         if(dir)
         {
-            int depth = 1,
-                len = (int) strlen(dir);
+            int depth = 1, len = (int) strlen(dir);
 
             // Get directory depth.
             for(int i = 0; i < len; i++)
@@ -1193,8 +1201,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
                 for(int i = len; i >= 0; i--)
                 {
                     // Is the current char a delimiter?
-                    if(dir[i] == '/' ||
-                       dir[i] == '\0')
+                    if(dir[i] == '/' || dir[i] == '\0')
                     {
                         // Save delimiter.
                         char del = dir[i];
@@ -1215,16 +1222,14 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
                                 return 1;
                             }
 
-                            // Not the full path, reinstate
-                            // delimiter and start all over
-                            // with the full path.
+                            // Not the full path, reinstate delimiter and start
+                            // all over again with the full path.
                             dir[i] = del;
                             break;
                         }
                         else
                         {
-                            // Reinstate delimiter and shrink
-                            // scope.
+                            // Reinstate delimiter and shrink scope.
                             dir[i] = del;
                         }
                     }
@@ -1240,8 +1245,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
                 return 1;
             }
 
-            // For some unknown reason, we can't
-            // create the directory.
+            // For some unknown reason, we can't create the directory.
             ERR(ERR_WRITE_DIR, dst);
         }
         else
@@ -1255,7 +1259,7 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
     return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)
 //     (all) (pattern..) (files) (infos) (confirm..) (safe) (optional
 //     <option> <option> ...) (delopts <option> <option> ...) (nogauge))
@@ -1264,310 +1268,248 @@ static int h_makedir(entry_p contxt, const char *dst, int mode)
 //     subdirectories
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_copyfiles(entry_p contxt)
 {
-    // We need atleast one argument
-    if(c_sane(contxt, 1))
+    // One or more arguments / options.
+    C_SANE(1, contxt);
+
+    entry_p prompt     = get_opt(contxt, OPT_PROMPT),
+            help       = get_opt(contxt, OPT_HELP),
+            source     = get_opt(contxt, OPT_SOURCE),
+            dest       = get_opt(contxt, OPT_DEST),
+            newname    = get_opt(contxt, OPT_NEWNAME),
+            choices    = get_opt(contxt, OPT_CHOICES),
+            all        = get_opt(contxt, OPT_ALL),
+            pattern    = get_opt(contxt, OPT_PATTERN),
+            infos      = get_opt(contxt, OPT_INFOS),
+            confirm    = get_opt(contxt, OPT_CONFIRM),
+            safe       = get_opt(contxt, OPT_SAFE),
+            nogauge    = get_opt(contxt, OPT_NOGAUGE),
+            fonts      = get_opt(contxt, OPT_FONTS),
+            back       = get_opt(contxt, OPT_BACK),
+            fail       = get_opt(contxt, OPT_FAIL),
+            nofail     = get_opt(contxt, OPT_NOFAIL),
+            oknodelete = get_opt(contxt, OPT_OKNODELETE),
+            force      = get_opt(contxt, OPT_FORCE),
+            askuser    = get_opt(contxt, OPT_ASKUSER),
+            files      = get_opt(contxt, OPT_FILES);
+
+    D_NUM = 0;
+
+    // The (pattern) (choices) and (all) options are mutually exclusive.
+    if((pattern && (choices || all)) ||
+       (choices && (pattern || all)) ||
+       (all && (choices || pattern)))
     {
-        entry_p prompt     = get_opt(contxt, OPT_PROMPT),
-                help       = get_opt(contxt, OPT_HELP),
-                source     = get_opt(contxt, OPT_SOURCE),
-                dest       = get_opt(contxt, OPT_DEST),
-                newname    = get_opt(contxt, OPT_NEWNAME),
-                choices    = get_opt(contxt, OPT_CHOICES),
-                all        = get_opt(contxt, OPT_ALL),
-                pattern    = get_opt(contxt, OPT_PATTERN),
-                infos      = get_opt(contxt, OPT_INFOS),
-                confirm    = get_opt(contxt, OPT_CONFIRM),
-                safe       = get_opt(contxt, OPT_SAFE),
-                nogauge    = get_opt(contxt, OPT_NOGAUGE),
-                fonts      = get_opt(contxt, OPT_FONTS),
-                optional   = get_opt(contxt, OPT_OPTIONAL),
-                delopts    = get_opt(contxt, OPT_DELOPTS),
-                back       = get_opt(contxt, OPT_BACK),
-                files      = all ? NULL : get_opt(contxt, OPT_FILES),
-                fail       = get_opt(delopts, OPT_FAIL) ?
-                             NULL : get_opt(optional, OPT_FAIL),
-                nofail     = get_opt(delopts, OPT_NOFAIL) ?
-                             NULL : get_opt(optional, OPT_NOFAIL),
-                oknodelete = get_opt(delopts, OPT_OKNODELETE) ?
-                             NULL : get_opt(optional, OPT_OKNODELETE),
-                force      = get_opt(delopts, OPT_FORCE) ?
-                             NULL : get_opt(optional, OPT_FORCE),
-                askuser    = get_opt(delopts, OPT_ASKUSER) ?
-                             NULL : get_opt(optional, OPT_ASKUSER);
+        ERR(ERR_OPTION_MUTEX, "pattern/choices/all");
+        R_CUR;
+    }
 
-        DNUM = 0;
+    // The (fail) (nofail) and (oknodelete) options are mutually exclusive.
+    if((fail && (nofail || oknodelete)) ||
+       (nofail && (fail || oknodelete)) ||
+       (oknodelete && (nofail || fail)))
+    {
+        ERR(ERR_OPTION_MUTEX, "fail/nofail/oknodelete");
+        R_CUR;
+    }
 
-        // The (pattern) (choices) and (all) options
-        // are mutually exclusive.
-        if((pattern && (choices || all)) ||
-           (choices && (pattern || all)) ||
-           (all && (choices || pattern)))
+    // We need a source and a destination dir.
+    if(source && dest)
+    {
+        // Tree of source / destination tuples.
+        pnode_p tree;
+
+        const char *src = str(source),
+                   *dst = str(dest);
+
+        // If the source is a directory, (all), (choices) or (pattern) must be
+        // used.
+        if(h_exists(src) == 2 && !all && !choices && !pattern)
         {
-            ERR(ERR_OPTION_MUTEX,
-                  "pattern/choices/all");
-            RCUR;
+            ERR(ERR_MISSING_OPTION, "all/choices/pattern");
+            R_CUR;
         }
 
-        // The (fail) (nofail) and (oknodelete) options
-        // are mutually exclusive.
-        if((fail && (nofail || oknodelete)) ||
-           (nofail && (fail || oknodelete)) ||
-           (oknodelete && (nofail || fail)))
+        // A non safe operation in pretend mode always succeeds.
+        if(get_numvar(contxt, "@pretend") && !safe)
         {
-            ERR(ERR_OPTION_MUTEX,
-                  "fail/nofail/oknodelete");
-            RCUR;
+            R_NUM(1);
         }
 
-        // We need a source and a destination dir.
-        if(source && dest)
+        // Does the destination already exist?
+        if(h_exists(dst) == 2)
         {
-            // Tree of source / destination tuples.
-            pnode_p tree;
+            // Don't trust h_exists, this string might be empty.
+            size_t dln = strlen(dst);
 
-            const char *src = str(source),
-                       *dst = str(dest);
-
-            // If the source is a directory, (all),
-            // (choices) or (pattern) must be used.
-            if(h_exists(src) == 2 &&
-               !all && !choices && !pattern)
+            // If it's not a volume, set permission so that overwriting can
+            // succeed.
+            if(dln && dst[dln - 1] != ':')
             {
-                ERR(ERR_MISSING_OPTION, "all/choices/pattern");
-                RCUR;
+                chmod(dst, S_IRWXU);
+            }
+        }
+
+        // Traverse the source directory and create the corresponding
+        // destination strings.
+        tree = h_filetree
+        (
+            contxt,
+            src,
+            dst,
+            files,
+            fonts,
+            choices,
+            pattern,
+            infos
+        );
+
+        // Unless we ran out of memory when traversing the source directory, we
+        // now have a list of source -> destination tuples.
+        if(tree)
+        {
+            inp_t grc = G_TRUE;
+            pnode_p cur = tree;
+
+            // Replace file name if single file and the 'newname' option is set
+            if(newname && cur->next && cur->type == 2 &&
+               cur->next->type == 1 && !cur->next->next)
+            {
+                free(cur->next->copy);
+                cur->next->copy = h_tackon(contxt, dst, str(newname));
             }
 
-            // A non safe operation in pretend mode
-            // always succeeds.
-            if(get_numvar(contxt, "@pretend") && !safe)
+            // Initialize GUI, set up file lists, events, and so on.
+            if(cur)
             {
-                RNUM(1);
+                grc = gui_copyfiles_start
+                (
+                    prompt ? str(prompt) : NULL,
+                    confirm ? str(help) : NULL,
+                    cur,
+                    confirm != false,
+                    back != false
+                );
             }
 
-            // Does the destination already exist?
-            if(h_exists(dst) == 2)
+            // Start copy unless skip / abort / back.
+            if(grc == G_TRUE)
             {
-                // Don't trust h_exists, this string
-                // might be empty.
-                size_t dln = strlen(dst);
+                // Set file copy mode.
+                int mode = (infos ? CF_INFOS : 0) |
+                           (fonts ? CF_FONTS : 0) |
+                           (nogauge ? CF_NOGAUGE : 0) |
+                           (nofail ? CF_NOFAIL : 0) |
+                           (oknodelete ? CF_OKNODELETE : 0) |
+                           (force ? CF_FORCE : 0) |
+                           (askuser ? CF_ASKUSER : 0);
 
-                // If it's not a volume, set permission
-                // so that overwriting can succeed.
-                if(dln && dst[dln - 1] != ':')
+                // For all files / dirs in list, copy / create.
+                for(; cur && grc == G_TRUE; cur = cur->next)
                 {
-                    chmod(dst, S_IRWXU);
+                    int32_t prm = 0;
+
+                    // Copy file / create dir / skip if zero:ed
+                    switch(cur->type)
+                    {
+                        // Exclude.
+                        case 0:
+                            continue;
+
+                        // A file.
+                        case 1:
+                            grc = h_copyfile(contxt, cur->name, cur->copy,
+                                             back != false, mode);
+                            break;
+
+                        // A directory.
+                        case 2:
+                            // Make dir and make sure the protection bits of the
+                            // new one matches the old.
+                            if(!h_makedir(contxt, cur->copy, mode) ||
+                               !h_protect_get(contxt, cur->name, &prm) ||
+                               !h_protect_set(contxt, cur->copy, prm))
+                            {
+                                grc = G_FALSE;
+                            }
+                            break;
+
+                        // Invalid type.
+                        default:
+                            PANIC(contxt);
+                            break;
+                    }
                 }
+
+                // GUI teardown.
+                gui_copyfiles_end();
+
+                // Translate return code.
+                D_NUM = (grc == G_TRUE) ? 1 : 0;
             }
 
-            // Traverse the source directory and create
-            // the corresponding destination strings.
-            tree = h_filetree
-            (
-                contxt,
-                src,
-                dst,
-                files,
-                fonts,
-                choices,
-                pattern
-            );
+            // Back return value.
+            entry_p ret = NULL;
 
-            // Unless we ran out of memory when traversing
-            // the source directory, we now have a list of
-            // source -> destination tuples.
-            if(tree)
+            // FIXME
+            if(grc != G_TRUE)
             {
-                inp_t grc = G_TRUE;
-                pnode_p cur = tree;
-
-                // Replace file name if single file and
-                // the 'newname' option is set
-                if(newname && cur->next && cur->type == 2 &&
-                   cur->next->type == 1 && !cur->next->next)
+                // Is the back option available?
+                if(back)
                 {
-                    free(cur->next->copy);
-                    cur->next->copy = h_tackon(contxt, dst, str(newname));
-                }
-
-                // Do we need confirmation?
-                if(confirm)
-                {
-                    // The default threshold is expert.
-                    int level = get_numvar(contxt, "@user-level"),
-                        thres = 2;
-
-                    // If the (confirm ...) option contains
-                    // something that can be translated into
-                    // a new threshold value...
-                    if(confirm->children &&
-                       confirm->children[0] &&
-                       confirm->children[0] != end())
+                    // Fake input?
+                    if(get_numvar(contxt, "@back"))
                     {
-                        // ...then do so.
-                        thres = num(confirm);
+                        grc = G_ABORT;
                     }
 
-                    // If we are below the threshold value, or
-                    // user input has been short-circuited by
-                    // @yes, skip confirmation.
-                    if(level < thres ||
-                       get_numvar(contxt, "@yes"))
+                    // On abort execute.
+                    if(grc == G_ABORT)
                     {
-                        confirm = NULL;
-                    }
-
-                    // Make sure that we have the prompt and
-                    // help texts that we need if 'confirm'
-                    // is set.
-                    if(!prompt || !help)
-                    {
-                        char * msg = prompt ? "help" : "prompt";
-                        ERR(ERR_MISSING_OPTION, msg);
-                        cur = NULL;
+                        ret = resolve(back);
                     }
                 }
-
-                // Initialize GUI, set up file lists, events,
-                // and so on.
-                if(cur)
-                {
-                    grc = gui_copyfiles_start
-                    (
-                        prompt ? str(prompt) : NULL,
-                        confirm ? str(help) : NULL,
-                        cur,
-                        confirm != false,
-                        back != false
-                    );
-                }
-
-                // Start copy unless skip / abort / back.
-                if(grc == G_TRUE)
-                {
-                    // Set file copy mode.
-                    int mode = (infos ? CF_INFOS : 0) |
-                               (fonts ? CF_FONTS : 0) |
-                               (nogauge ? CF_NOGAUGE : 0) |
-                               (nofail ? CF_NOFAIL : 0) |
-                               (oknodelete ? CF_OKNODELETE : 0) |
-                               (force ? CF_FORCE : 0) |
-                               (askuser ? CF_ASKUSER : 0);
-
-                    // For all files / dirs in list, copy / create.
-                    for(; cur && grc == G_TRUE; cur = cur->next)
-                    {
-                        int32_t prm = 0;
-
-                        // Copy file / create dir / skip if zero:ed
-                        switch(cur->type)
-                        {
-                            // Exclude.
-                            case 0:
-                                continue;
-
-                            // A file.
-                            case 1:
-                                grc = h_copyfile(contxt, cur->name,
-                                                 cur->copy, back != false, mode);
-                                break;
-
-                            // A directory.
-                            case 2:
-                                // Make dir and make sure the protection
-                                // bits of the new one matches the old.
-                                if(!h_makedir(contxt, cur->copy, mode) ||
-                                   !h_protect_get(contxt, cur->name, &prm) ||
-                                   !h_protect_set(contxt, cur->copy, prm))
-                                {
-                                    grc = G_FALSE;
-                                }
-                                break;
-
-                            // Invalid type.
-                            default:
-                                PANIC(contxt);
-                                break;
-                        }
-                    }
-
-                    // GUI teardown.
-                    gui_copyfiles_end();
-
-                    // Translate return code.
-                    DNUM = (grc == G_TRUE) ? 1 : 0;
-                }
-
-                // Back return value.
-                entry_p ret = NULL;
 
                 // FIXME
-                if(grc != G_TRUE)
+                if(grc == G_ABORT || grc == G_EXIT)
                 {
-                    // Is the back option available?
-                    if(back)
-                    {
-                        // Fake input?
-                        if(get_numvar(contxt, "@back"))
-                        {
-                            grc = G_ABORT;
-                        }
-
-                        // On abort execute.
-                        if(grc == G_ABORT)
-                        {
-                            ret = resolve(back);
-                        }
-                    }
-
-                    // FIXME
-                    if(grc == G_ABORT || grc == G_EXIT)
-                    {
-                        HALT;
-                    }
-                }
-
-                cur = tree;
-
-                // Free list of files / dirs.
-                while(cur)
-                {
-                    tree = cur;
-                    free(cur->name);
-                    free(cur->copy);
-                    cur = cur->next;
-                    free(tree);
-                }
-
-                // If we've executed any 'back' code,
-                // return its return value instead of
-                // our own.
-                if(ret)
-                {
-                    return ret;
+                    HALT;
                 }
             }
-        }
-        else
-        {
-            char *opt = !source ? "source" : "dest";
-            ERR(ERR_MISSING_OPTION, opt);
+
+            cur = tree;
+
+            // Free list of files / dirs.
+            while(cur)
+            {
+                tree = cur;
+                free(cur->name);
+                free(cur->copy);
+                cur = cur->next;
+                free(tree);
+            }
+
+            // If we've executed any 'back' code, return its return value
+            // instead of our own.
+            if(ret)
+            {
+                return ret;
+            }
         }
     }
     else
     {
-        // The parser is broken
-        PANIC(contxt);
+        char *opt = !source ? "source" : "dest";
+        ERR(ERR_MISSING_OPTION, opt);
     }
 
-    // We don't know if we're successsful,
-    // at this point, return what we have.
-    RCUR;
+    // We don't know if we're successsful, at this point, return what we have.
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (copylib (prompt..) (help..) (source..) (dest..) (newname..) (infos)
 //     (confirm) (safe) (optional <option> <option> ...) (delopts <option>
 //     <option> ...) (nogauge))
@@ -1575,343 +1517,323 @@ entry_p m_copyfiles(entry_p contxt)
 //     install a library if newer version
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_copylib(entry_p contxt)
 {
-    // We need atleast one argument
-    if(c_sane(contxt, 1))
+    // One or more arguments / options.
+    C_SANE(1, contxt);
+
+    entry_p prompt     = get_opt(contxt, OPT_PROMPT),
+            help       = get_opt(contxt, OPT_HELP),
+            source     = get_opt(contxt, OPT_SOURCE),
+            dest       = get_opt(contxt, OPT_DEST),
+            newname    = get_opt(contxt, OPT_NEWNAME),
+            infos      = get_opt(contxt, OPT_INFOS),
+            confirm    = get_opt(contxt, OPT_CONFIRM),
+            safe       = get_opt(contxt, OPT_SAFE),
+            nogauge    = get_opt(contxt, OPT_NOGAUGE),
+            noposition = get_opt(contxt, OPT_NOPOSITION),
+            back       = get_opt(contxt, OPT_BACK),
+            fail       = get_opt(contxt, OPT_FAIL),
+            nofail     = get_opt(contxt, OPT_NOFAIL),
+            oknodelete = get_opt(contxt, OPT_OKNODELETE),
+            force      = get_opt(contxt, OPT_FORCE),
+            askuser    = get_opt(contxt, OPT_ASKUSER);
+
+    D_NUM = 0;
+
+    // The (fail) (nofail) and (oknodelete) options are mutually exclusive.
+    if((fail && (nofail || oknodelete)) ||
+       (nofail && (fail || oknodelete)) ||
+       (oknodelete && (nofail || fail)))
     {
-        entry_p prompt     = get_opt(contxt, OPT_PROMPT),
-                help       = get_opt(contxt, OPT_HELP),
-                source     = get_opt(contxt, OPT_SOURCE),
-                dest       = get_opt(contxt, OPT_DEST),
-                newname    = get_opt(contxt, OPT_NEWNAME),
-                infos      = get_opt(contxt, OPT_INFOS),
-                confirm    = get_opt(contxt, OPT_CONFIRM),
-                safe       = get_opt(contxt, OPT_SAFE),
-                nogauge    = get_opt(contxt, OPT_NOGAUGE),
-                noposition = get_opt(contxt, OPT_NOPOSITION),
-                optional   = get_opt(contxt, OPT_OPTIONAL),
-                delopts    = get_opt(contxt, OPT_DELOPTS),
-                back       = get_opt(contxt, OPT_BACK),
-                fail       = get_opt(delopts, OPT_FAIL) ?
-                             NULL : get_opt(optional, OPT_FAIL),
-                nofail     = get_opt(delopts, OPT_NOFAIL) ?
-                             NULL : get_opt(optional, OPT_NOFAIL),
-                oknodelete = get_opt(delopts, OPT_OKNODELETE) ?
-                             NULL : get_opt(optional, OPT_OKNODELETE),
-                force      = get_opt(delopts, OPT_FORCE) ?
-                             NULL : get_opt(optional, OPT_FORCE),
-                askuser    = get_opt(delopts, OPT_ASKUSER) ?
-                             NULL : get_opt(optional, OPT_ASKUSER);
+        ERR(ERR_OPTION_MUTEX, "fail/nofail/oknodelete");
+        R_CUR;
+    }
 
-        DNUM = 0;
+    // We always need a prompt and help since trying to overwrite new files
+    // with older ones will force a confirm if we're in expert mode. The CBM
+    // Installer doesn't behave this way, but the Installer guide says so, and
+    // it makes sense, so let's do it this way until we know for sure that this
+    // will break existing scripts.
+    if(source && dest && prompt && help)
+    {
+        char *src = str(source),
+             *dst = str(dest);
 
-        // The (fail) (nofail) and (oknodelete) options
-        // are mutually exclusive.
-        if((fail && (nofail || oknodelete)) ||
-           (nofail && (fail || oknodelete)) ||
-           (oknodelete && (nofail || fail)))
+        // Does the source file exist?
+        if(h_exists(src) == 1)
         {
-            ERR(ERR_OPTION_MUTEX, "fail/nofail/oknodelete");
-            RCUR;
-        }
+            // User level.
+            int level = get_numvar(contxt, "@user-level"),
 
-        // We always need a prompt and help since trying
-        // to overwrite new files with older ones will
-        // force a confirm if we're in expert mode. The
-        // CBM installer doesn't behave this way, but the
-        // Installer guide says so, and it makes sense, so
-        // let's do it this way until we know for sure that
-        // this will break existing scripts.
-        if(source && dest && prompt && help)
-        {
-            char *src = str(source),
-                 *dst = str(dest);
+            // Source file version.
+            new = h_getversion_file(src),
 
-            // Does the source file exist?
-            if(h_exists(src) == 1)
+            // Destination type.
+            type = h_exists(dst);
+
+            // Destination file.
+            char *name = NULL;
+
+            // A non safe operation in pretend mode always succeeds.
+            if(get_numvar(contxt, "@pretend") && !safe)
             {
-                // User level.
-                int level = get_numvar(contxt, "@user-level"),
+                R_NUM(1);
+            }
 
-                // Source file version.
-                new = h_getversion_file(src),
+            // Only fail if we're in 'strict' mode.
+            if(new < 0 && get_numvar(contxt, "@strict"))
+            {
+                // Could not find version string.
+                ERR(ERR_NO_VERSION, src);
+                R_CUR;
+            }
 
-                // Destination type.
-                type = h_exists(dst);
+            // Only fail if we're in 'strict' mode.
+            if(type == 1 && get_numvar(contxt, "@strict"))
+            {
+                // Destination is a file, not a dir.
+                ERR(ERR_NOT_A_DIR, dst);
+                R_CUR;
+            }
 
-                // Destination file.
-                char *name = NULL;
-
-                // A non safe operation in pretend mode
-                // always succeeds.
-                if(get_numvar(contxt, "@pretend") && !safe)
+            if(!type)
+            {
+                // Directory doesn't exist, create it. One level deep only.
+                if(!mkdir(dst, 0777))
                 {
-                    RNUM(1);
-                }
-
-                // Only fail if we're in 'strict' mode.
-                if(new < 0 && get_numvar(contxt, "@strict"))
-                {
-                    // Could not find version string.
-                    ERR(ERR_NO_VERSION, src);
-                    RCUR;
-                }
-
-                // Only fail if we're in 'strict' mode.
-                if(type == 1 && get_numvar(contxt, "@strict"))
-                {
-                    // Destination is a file, not a dir.
-                    ERR(ERR_NOT_A_DIR, dst);
-                    RCUR;
-                }
-
-                // Do we need confirmation?
-                if(confirm)
-                {
-                    // The default threshold is expert.
-                    int thres = 2;
-
-                    // If the (confirm ...) option contains
-                    // something that can be translated into
-                    // a new threshold value...
-                    if(confirm->children &&
-                       confirm->children[0] &&
-                       confirm->children[0] != end())
-                    {
-                        // ...then do so.
-                        thres = num(confirm);
-                    }
-
-                    // If we are below the threshold value, or
-                    // user input has been short-circuited by
-                    // @yes, skip confirmation.
-                    if(level < thres ||
-                       get_numvar(contxt, "@yes"))
-                    {
-                        confirm = NULL;
-                    }
-                }
-
-                if(!type)
-                {
-                    // Directory doesn't exist, create
-                    // it. One level deep only.
-                    if(!mkdir(dst, 0777))
-                    {
-                        // Log the success.
-                        h_log(contxt, tr(S_CRTD), dst);
-                    }
-                    else
-                    {
-                        // Permission problems or the dir is
-                        // more than 1 level deeper than the
-                        // existing path.
-                        ERR(ERR_WRITE_DIR, dst);
-                        RCUR;
-                    }
-                }
-
-                // Are we renaming the file?
-                if(newname)
-                {
-                    // Yes, append the new name to the path.
-                    name = h_tackon(contxt, dst, str(newname));
+                    // Log the success.
+                    h_log(contxt, tr(S_CRTD), dst);
                 }
                 else
                 {
-                    // No, append the file part of the (possibly)
-                    // full source path to the destination path.
-                    name = h_tackon(contxt, dst, h_fileonly(contxt, src));
+                    // Permission problems or the dir is more than 1 level
+                    // deeper than the existing path.
+                    ERR(ERR_WRITE_DIR, dst);
+                    R_CUR;
                 }
+            }
 
-                // If we're not out of memory and destination dir
-                // and / or destination file is non empty, name
-                // will be <> 0.
-                if(name)
+            // Are we renaming the file?
+            if(newname)
+            {
+                // Yes, append the new name to the path.
+                name = h_tackon(contxt, dst, str(newname));
+            }
+            else
+            {
+                // No, append the file part of the (possibly) full source path
+                // to the destination path.
+                name = h_tackon(contxt, dst, h_fileonly(contxt, src));
+            }
+
+            // If we're not out of memory and destination dir and / or
+            // destination file is non empty, name will be <> 0.
+            if(name)
+            {
+                // Set copy mode.
+                int mode = CF_SILENT | (infos ? CF_INFOS : 0) |
+                           (noposition ? CF_NOPOSITION : 0) |
+                           (nogauge ? CF_NOGAUGE : 0) |
+                           (nofail ? CF_NOFAIL : 0) |
+                           (oknodelete ? CF_OKNODELETE : 0) |
+                           (force ? CF_FORCE : 0) |
+                           (askuser ? CF_ASKUSER : 0);
+
+                // Get 'name' type info.
+                type = h_exists(name);
+
+                // Currently there is no way to abort a file copy, but we need
+                // to handle the GUI return values anyway.
+                inp_t grc = G_FALSE;
+
+                // Are we overwriting a file?
+                if(!type)
                 {
-                    // Set copy mode.
-                    int mode = CF_SILENT |
-                               (infos ? CF_INFOS : 0) |
-                               (noposition ? CF_NOPOSITION : 0) |
-                               (nogauge ? CF_NOGAUGE : 0) |
-                               (nofail ? CF_NOFAIL : 0) |
-                               (oknodelete ? CF_OKNODELETE : 0) |
-                               (force ? CF_FORCE : 0) |
-                               (askuser ? CF_ASKUSER : 0);
-
-                    // Get 'name' type info.
-                    type = h_exists(name);
-
-                    // Currently there is no way to abort a
-                    // file copy, but we need to handle the
-                    // GUI return values anyway.
-                    inp_t grc = G_FALSE;
-
-                    // Are we overwriting a file?
-                    if(!type)
+                    // No such file, copy source to the destination directory.
+                    // If needed get confirmation.
+                    if(confirm)
                     {
-                        // No such file, copy source to the
-                        // destination directory. If needed
-                        // get confirmation.
-                        if(confirm)
+                        // Is the version of the source file unknown?
+                        if(new < 0)
                         {
-                            // Is the version of the source file
-                            // unknown?
+                            if(h_confirm(
+                                contxt,
+                                "",
+                                "%s\n\n%s: %s\n%s\n\n%s: %s",
+                                str(prompt),
+                                tr(S_VINS),
+                                tr(S_VUNK),
+                                tr(S_NINS),
+                                tr(S_DDRW),
+                                dst))
+                            {
+                                grc = h_copyfile(contxt, src, name, back != false, mode);
+                            }
+                        }
+                        // The version of the source file is known.
+                        else
+                        {
+                            if(h_confirm(
+                                contxt,
+                                "",
+                                "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
+                                str(prompt),
+                                tr(S_VINS),
+                                new >> 16,
+                                new & 0xffff,
+                                tr(S_NINS),
+                                tr(S_DDRW),
+                                dst))
+                            {
+                                grc = h_copyfile(contxt, src, name, back != false, mode);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // No confirmation needed.
+                        grc = h_copyfile(contxt, src, name, back != false, mode);
+                    }
+                }
+                else
+                // It's a file.
+                if(type == 1)
+                {
+                    // Get version of existing file.
+                    int old = h_getversion_file(name);
+
+                    // Is the version of the existing file unknown?
+                    if(old < 0)
+                    {
+                        // Only fail if we're in 'strict' mode.
+                        if(get_numvar(contxt, "@strict"))
+                        {
+                            // Could not find version string.
+                            ERR(ERR_NO_VERSION, name);
+                            new = old;
+                        }
+                        else
+                        {
+                            // Is the version of the source file unknown?
                             if(new < 0)
                             {
+                                // Both target and source file have an unknown
+                                // version.
                                 if(h_confirm(
                                     contxt,
                                     "",
-                                    "%s\n\n%s: %s\n%s\n\n%s: %s",
+                                    "%s\n\n%s: %s\n%s: %s\n\n%s: %s",
                                     str(prompt),
                                     tr(S_VINS),
                                     tr(S_VUNK),
-                                    tr(S_NINS),
+                                    tr(S_VCUR),
+                                    tr(S_VUNK),
                                     tr(S_DDRW),
                                     dst))
                                 {
-                                    grc = h_copyfile(contxt, src, name, back != false, mode);
+                                    new = old + 1;
+                                }
+                                else
+                                {
+                                    new = old;
                                 }
                             }
-                            // The version of the source file
-                            // is known.
                             else
                             {
+                                // The version of the source file is known, the
+                                // target version is unknown.
                                 if(h_confirm(
                                     contxt,
                                     "",
-                                    "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
+                                    "%s\n\n%s: %d.%d\n%s: %s\n\n%s: %s",
                                     str(prompt),
                                     tr(S_VINS),
                                     new >> 16,
                                     new & 0xffff,
-                                    tr(S_NINS),
+                                    tr(S_VCUR),
+                                    tr(S_VUNK),
                                     tr(S_DDRW),
                                     dst))
                                 {
-                                    grc = h_copyfile(contxt, src, name, back != false, mode);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // No confirmation needed.
-                            grc = h_copyfile(contxt, src, name, back != false, mode);
-                        }
-                    }
-                    else
-                    // It's a file.
-                    if(type == 1)
-                    {
-                        // Get version of existing file.
-                        int old = h_getversion_file(name);
-
-                        // Is the version of the existing file
-                        // unknown?
-                        if(old < 0)
-                        {
-                            // Only fail if we're in 'strict' mode.
-                            if(get_numvar(contxt, "@strict"))
-                            {
-                                // Could not find version string.
-                                ERR(ERR_NO_VERSION, name);
-                                new = old;
-                            }
-                            else
-                            {
-                                // Is the version of the source
-                                // file unknown?
-                                if(new < 0)
-                                {
-                                    // Both target and source file
-                                    // have an unknown version.
-                                    if(h_confirm(
-                                        contxt,
-                                        "",
-                                        "%s\n\n%s: %s\n%s: %s\n\n%s: %s",
-                                        str(prompt),
-                                        tr(S_VINS),
-                                        tr(S_VUNK),
-                                        tr(S_VCUR),
-                                        tr(S_VUNK),
-                                        tr(S_DDRW),
-                                        dst))
-                                    {
-                                        new = old + 1;
-                                    }
-                                    else
-                                    {
-                                        new = old;
-                                    }
+                                    new = old + 1;
                                 }
                                 else
                                 {
-                                    // The version of the source
-                                    // file is known, the target
-                                    // version is unknown.
-                                    if(h_confirm(
-                                        contxt,
-                                        "",
-                                        "%s\n\n%s: %d.%d\n%s: %s\n\n%s: %s",
-                                        str(prompt),
-                                        tr(S_VINS),
-                                        new >> 16,
-                                        new & 0xffff,
-                                        tr(S_VCUR),
-                                        tr(S_VUNK),
-                                        tr(S_DDRW),
-                                        dst))
-                                    {
-                                        new = old + 1;
-                                    }
-                                    else
-                                    {
-                                        new = old;
-                                    }
-                                }
-
-                                if(new > old)
-                                {
-                                    confirm = NULL;
+                                    new = old;
                                 }
                             }
+
+                            if(new > old)
+                            {
+                                confirm = NULL;
+                            }
                         }
-                        // The target file version is
-                        // known.
-                        else
+                    }
+                    // The target file version is known.
+                    else
+                    {
+                        // Is the version of the source file unknown?
+                        if(new < 0 && h_confirm(
+                            contxt,
+                            "",
+                            "%s\n\n%s: %s\n%s: %d.%d\n\n%s: %s",
+                            str(prompt),
+                            tr(S_VINS),
+                            tr(S_VUNK),
+                            tr(S_VCUR),
+                            old >> 16,
+                            old & 0xffff,
+                            tr(S_DDRW),
+                            dst))
                         {
-                            // Is the version of the source
-                            // file unknown?
-                            if(new < 0 && h_confirm(
+                            new = old + 1;
+                            confirm = NULL;
+                        }
+                    }
+
+                    // Did we find a version not equal to that of the current
+                    // file?
+                    if(new != old)
+                    {
+                        // If we ask for confirmation and get it, copy the file
+                        // no matter what version it (and the existing
+                        // destination file) has.
+                        if(confirm)
+                        {
+                            if(h_confirm(
                                 contxt,
                                 "",
-                                "%s\n\n%s: %s\n%s: %d.%d\n\n%s: %s",
+                                "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
                                 str(prompt),
                                 tr(S_VINS),
-                                tr(S_VUNK),
+                                new >> 16,
+                                new & 0xffff,
                                 tr(S_VCUR),
                                 old >> 16,
                                 old & 0xffff,
                                 tr(S_DDRW),
                                 dst))
                             {
-                                new = old + 1;
-                                confirm = NULL;
+                                grc = h_copyfile(contxt, src, name, back != false, mode);
                             }
                         }
-
-                        // Did we find a version not equal to
-                        // that of the current file?
-                        if(new != old)
+                        else
                         {
-                            // If we ask for confirmation and get it, copy
-                            // the file no matter what version it (and the
-                            // existing destination file) has.
-                            if(confirm)
+                            // If the file to be copied has a higher version
+                            // number than the existing one, overwrite.
+                            if(new > old)
                             {
-                                if(h_confirm(
+                                grc = h_copyfile(contxt, src, name, back != false, mode);
+                            }
+                            else
+                            {
+                                // If the file to be copied has a lower version
+                                // number than the existing one, and we're in
+                                // expert mode, ask the user to confirm. If we
+                                // get a confirmation, overwrite.
+                                if(level == 2 && h_confirm(
                                     contxt,
                                     "",
                                     "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
@@ -1928,111 +1850,67 @@ entry_p m_copylib(entry_p contxt)
                                     grc = h_copyfile(contxt, src, name, back != false, mode);
                                 }
                             }
-                            else
-                            {
-                                // If the file to be copied has a higher version
-                                // number than the existing one, overwrite.
-                                if(new > old)
-                                {
-                                    grc = h_copyfile(contxt, src, name, back != false, mode);
-                                }
-                                else
-                                {
-                                    // If the file to be copied has a lower version
-                                    // number than the existing one, and we're in
-                                    // expert mode, ask the user to confirm. If we
-                                    // get a confirmation, overwrite.
-                                    if(level == 2 && h_confirm(
-                                        contxt,
-                                        "",
-                                        "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
-                                        str(prompt),
-                                        tr(S_VINS),
-                                        new >> 16,
-                                        new & 0xffff,
-                                        tr(S_VCUR),
-                                        old >> 16,
-                                        old & 0xffff,
-                                        tr(S_DDRW),
-                                        dst))
-                                    {
-                                        grc = h_copyfile(contxt, src, name, back != false, mode);
-                                    }
-                                }
-                            }
                         }
                     }
-                    // It's a dir.
-                    else
-                    {
-                        // Only fail if we're in 'strict' mode.
-                        if(get_numvar(contxt, "@strict"))
-                        {
-                            // Dest file exists, but is a directory.
-                            ERR(ERR_NOT_A_FILE, name);
-                        }
-                    }
-
-                    // Free memory allocated by h_tackon.
-                    free(name);
-
-                    // Translate return code.
-                    DNUM = (grc == G_TRUE) ? 1 : 0;
                 }
-            }
-            else
-            {
-                // Only fail if we're in 'strict' mode.
-                if(get_numvar(contxt, "@strict"))
+                // It's a dir.
+                else
                 {
-                    // No file, doesn't exist or is dir.
-                    ERR(ERR_NOT_A_FILE, src);
+                    // Only fail if we're in 'strict' mode.
+                    if(get_numvar(contxt, "@strict"))
+                    {
+                        // Dest file exists, but is a directory.
+                        ERR(ERR_NOT_A_FILE, name);
+                    }
                 }
+
+                // Free memory allocated by h_tackon.
+                free(name);
+
+                // Translate return code.
+                D_NUM = (grc == G_TRUE) ? 1 : 0;
             }
         }
         else
         {
-            char *opt = !source ? "source" : !dest ? "dest" :
-                        !prompt ? "prompt" : "help";
-            ERR(ERR_MISSING_OPTION, opt);
+            // Only fail if we're in 'strict' mode.
+            if(get_numvar(contxt, "@strict"))
+            {
+                // No file, doesn't exist or is dir.
+                ERR(ERR_NOT_A_FILE, src);
+            }
         }
     }
     else
     {
-        // The parser is broken
-        PANIC(contxt);
+        ERR(ERR_MISSING_OPTION, !source ? "source" : !dest ? "dest" : !prompt ?
+            "prompt" :"help");
     }
 
     // Success or failure.
-    RCUR;
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_delete_file
 // Description: Delete file. Helper used by m_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File to delete.
 // Return:      int:                On success '1', else '0'.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static int h_delete_file(entry_p contxt, const char *file)
 {
     if(file)
     {
-        entry_p infos    = get_opt(CARG(2), OPT_INFOS),
-                optional = get_opt(CARG(2), OPT_OPTIONAL),
-                delopts  = get_opt(CARG(2), OPT_DELOPTS),
-                force    = get_opt(delopts, OPT_FORCE) ? NULL :
-                           get_opt(optional, OPT_FORCE),
-                askuser  = get_opt(delopts, OPT_ASKUSER) ? NULL :
-                           get_opt(optional, OPT_ASKUSER);
+        entry_p infos    = get_opt(C_ARG(2), OPT_INFOS),
+                force    = get_opt(C_ARG(2), OPT_FORCE),
+                askuser  = get_opt(C_ARG(2), OPT_ASKUSER);
 
-        // If (force) is used, give permissions
-        // so that delete can succeed.
+        // If (force) is used, give permissions so that delete can succeed.
         if(force)
         {
-            // No need to bother with the return
-            // value since errors will be caught
-            // below.
+            // No need to bother with the return value since errors will be
+            // caught below.
             chmod(file, S_IRWXU);
         }
         else
@@ -2042,21 +1920,19 @@ static int h_delete_file(entry_p contxt, const char *file)
                 // Do we need to ask for confirmation?
                 if(askuser)
                 {
-                    // Only ask for confirmation if we're not
-                    // running in novice mode.
+                    // Ask for confirmation if we're not running in novice mode.
                     if(get_numvar(contxt, "@user-level") &&
                        h_confirm(contxt, "", tr(S_DWRT), file))
                     {
-                        // Give permissions so that delete
-                        // can succeed. No need to bother with
-                        // the return value since errors will
-                        // be caught below.
+                        // Give permissions so that delete can succeed. No need
+                        // to bother with the return value since errors will be
+                        // caught below.
                         chmod(file, S_IRWXU);
                     }
                     else
                     {
-                        // Halt will be set by h_confirm. Skip
-                        // will result in nothing.
+                        // Halt will be set by h_confirm. Skip will result in
+                        // nothing.
                         return 0;
                     }
                 }
@@ -2068,8 +1944,7 @@ static int h_delete_file(entry_p contxt, const char *file)
             }
         }
 
-        // If yes, this must succeed, otherwise we
-        // will abort with an error.
+        // If yes, this must succeed, otherwise we will abort with an error.
         if(!remove(file))
         {
             // The file has been deleted.
@@ -2084,8 +1959,7 @@ static int h_delete_file(entry_p contxt, const char *file)
 
                 if(h_exists(info) == 1)
                 {
-                    // Set permissions so that delete can
-                    // succeed.
+                    // Set permissions so that delete can succeed.
                     chmod(info, S_IRWXU);
 
                     // Delete the info file.
@@ -2119,35 +1993,31 @@ static int h_delete_file(entry_p contxt, const char *file)
     return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_delete_dir
 // Description: Delete directory. Helper used by m_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *name:   Directory to delete.
 // Return:      int:                On success '1', else '0'.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static int h_delete_dir(entry_p contxt, const char *name)
 {
+    // Sanity check.
     if(name)
     {
-        entry_p infos    = get_opt(CARG(2), OPT_INFOS),
-                optional = get_opt(CARG(2), OPT_OPTIONAL),
-                delopts  = get_opt(CARG(2), OPT_DELOPTS),
-                all      = get_opt(CARG(2), OPT_ALL),
-                force    = get_opt(delopts, OPT_FORCE) ? NULL :
-                           get_opt(optional, OPT_FORCE),
-                askuser  = get_opt(delopts, OPT_FORCE) ? NULL :
-                           get_opt(optional, OPT_ASKUSER);
+        entry_p infos    = get_opt(C_ARG(2), OPT_INFOS),
+                force    = get_opt(C_ARG(2), OPT_FORCE),
+                askuser  = get_opt(C_ARG(2), OPT_ASKUSER),
+                all      = get_opt(C_ARG(2), OPT_ALL);
 
         if(!force && access(name, W_OK))
         {
             // Do we need to ask for confirmation?
             if(askuser)
             {
-                // Only ask for confirmation if we're not
-                // running in novice mode.
+                // Ask for confirmation if we're not running in novice mode.
                 if(!get_numvar(contxt, "@user-level") ||
-                   !h_confirm(CARG(2), "", tr(S_DWRD), name))
+                   !h_confirm(C_ARG(2), "", tr(S_DWRD), name))
                 {
                     // Halt will be set by h_confirm. Skip
                     // will result in nothing.
@@ -2161,9 +2031,8 @@ static int h_delete_dir(entry_p contxt, const char *name)
             }
         }
 
-        // Give permissions so that delete can succeed.
-        // No need to bother with the return value since
-        // errors will be caught below.
+        // Give permissions so that delete can succeed. No need to bother with
+        // the return value since errors will be caught below.
         chmod(name, S_IRWXU);
 
         if(rmdir(name))
@@ -2201,8 +2070,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
                     rewinddir(dir);
                     entry = readdir(dir);
 
-                    // Find all subdirectories in the
-                    // directory.
+                    // Find all subdirectories in the directory.
                     while(entry)
                     {
                         #ifndef AMIGA
@@ -2255,8 +2123,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
 
             if(h_exists(info) == 1)
             {
-                // Set permissions so that delete can
-                // succeed.
+                // Set permissions so that delete can succeed.
                 chmod(info, S_IRWXU);
 
                 // Delete the info file.
@@ -2284,19 +2151,18 @@ static int h_delete_dir(entry_p contxt, const char *name)
     return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_delete_pattern
 // Description: Delete file / dir matching pattern. Helper used by m_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *pat:    Pattern.
 // Return:      int:                On success '1', else '0'.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static int h_delete_pattern(entry_p contxt, const char *pat)
 {
     if(contxt && pat)
     {
-        // Pattern matching is only done on Amiga systems
-        // in non test mode.
+        // Pattern matching is only done on Amiga systems in non test mode.
         #if defined(AMIGA) && !defined(LG_TEST)
         struct AnchorPath *ap =
             DBG_ALLOC(calloc(1, sizeof(struct AnchorPath) + PATH_MAX));
@@ -2306,10 +2172,8 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
             int err;
             ap->ap_Strlen = PATH_MAX;
 
-            // For all matches, invoke the appropriate
-            // function for deletion.
-            for(err = MatchFirst(pat, ap); !err;
-                err = MatchNext(ap))
+            // For all matches, invoke the appropriate function for deletion.
+            for(err = MatchFirst(pat, ap); !err; err = MatchNext(ap))
             {
                 // ST_FILE         -3
                 // ST_LINKFILE     -4
@@ -2317,8 +2181,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
                 {
                     if(!h_delete_file(contxt, ap->ap_Buf))
                     {
-                        // Break out on trouble / user
-                        // abort.
+                        // Break out on trouble / user abort.
                         break;
                     }
                 }
@@ -2331,8 +2194,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
                 {
                     if(!h_delete_dir(contxt, ap->ap_Buf))
                     {
-                        // Break out on trouble / user
-                        // abort.
+                        // Break out on trouble / user abort.
                         break;
                     }
                 }
@@ -2350,9 +2212,8 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
             }
             else
             {
-                // Please note that 'breaks' will take us
-                // here, so will MatchFirst / MatchNext()
-                // problems.
+                // Please note that 'breaks' will take us here, so will
+                // MatchFirst / MatchNext() problems.
                 ERR(ERR_DELETE_FILE, pat);
                 return 0;
             }
@@ -2368,7 +2229,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
     return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (delete file (help..) (prompt..) (confirm..)
 //     (infos) (optional <option> <option> ...) (all)
 //     (delopts <option> <option> ...) (safe))
@@ -2376,667 +2237,515 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
 //     delete file
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_delete(entry_p contxt)
 {
-    // We need atleast one argument
-    if(c_sane(contxt, 1))
+    // One argument and options.
+    C_SANE(1, C_ARG(2));
+
+    int wild = 0;
+    char *file = str(C_ARG(1));
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    wild = ParsePattern(file, get_buf(), buf_size());
+    #endif
+
+    // Assume failure.
+    D_NUM = 0;
+
+    // Can we parse the input string?
+    if(wild >= 0)
     {
-        int wild = 0;
-        char *file = str(CARG(1));
+        entry_p help     = get_opt(C_ARG(2), OPT_HELP),
+                prompt   = get_opt(C_ARG(2), OPT_PROMPT),
+                confirm  = get_opt(C_ARG(2), OPT_CONFIRM),
+                safe     = get_opt(C_ARG(2), OPT_SAFE);
 
-        #if defined(AMIGA) && !defined(LG_TEST)
-        wild = ParsePattern(file, get_buf(), buf_size());
-        #endif
-
-        // Assume failure.
-        DNUM = 0;
-
-        // Can we parse the input string?
-        if(wild >= 0)
+        // If we need confirmation and the user skips or aborts, return. On
+        // abort, the HALT will be set by h_confirm.
+        if(confirm && !h_confirm(C_ARG(2), str(help), str(prompt)))
         {
-            entry_p help     = get_opt(CARG(2), OPT_HELP),
-                    prompt   = get_opt(CARG(2), OPT_PROMPT),
-                    confirm  = get_opt(CARG(2), OPT_CONFIRM),
-                    safe     = get_opt(CARG(2), OPT_SAFE);
+            R_CUR;
+        }
 
-            // Do we need confirmation?
-            if(confirm)
+        // Is this a safe operation or are we not running in pretend mode?
+        if(safe || !get_numvar(contxt, "@pretend"))
+        {
+            // Did the input string contain any wildcards?
+            if(wild)
             {
-                // The default threshold is expert.
-                int level = get_numvar(contxt, "@user-level"),
-                    thres = 2;
-
-                // If the (confirm ...) option contains
-                // something that can be translated into
-                // a new threshold value...
-                if(confirm->children &&
-                   confirm->children[0] &&
-                   confirm->children[0] != end())
-                {
-                    // ...then do so.
-                    thres = num(confirm);
-                }
-
-                // If we are below the threshold value,
-                // don't care about getting confirmation
-                // from the user.
-                if(level < thres)
-                {
-                    confirm = NULL;
-                }
-
-                // Make sure that we have the prompt and
-                // help texts that we need if 'confirm'
-                // is set.
-                if(!prompt || !help)
-                {
-                    char *opt = prompt ? "help" : "prompt";
-                    ERR(ERR_MISSING_OPTION, opt);
-                    RCUR;
-                }
-            }
-
-            // If we need confirmation and the user skips
-            // or aborts, return. On abort, the HALT will
-            // be set by h_confirm.
-            if(confirm && !h_confirm(CARG(2),
-               str(help), str(prompt)))
-            {
-                RCUR;
-            }
-
-            // Is this a safe operation or are we not
-            // running in pretend mode?
-            if(safe || !get_numvar(contxt, "@pretend"))
-            {
-                // Did the input string contain any
-                // wildcards?
-                if(wild)
-                {
-                    // Delete everything matching the
-                    // wildcard pattern.
-                    DNUM = h_delete_pattern(contxt, file);
-                }
-                else
-                // No wildcards, delete directory, file
-                // or something that doesn't exist.
-                {
-                    switch(h_exists(file))
-                    {
-                        // Doesn't exist.
-                        case 0:
-                            h_log(contxt, tr(S_NSFL), file);
-                            break;
-
-                        // A file.
-                        case 1:
-                            DNUM = h_delete_file(contxt, file);
-                            break;
-
-                        // A directory.
-                        case 2:
-                            DNUM = h_delete_dir(contxt, file);
-                            break;
-
-                        // Invalid type.
-                        default:
-                            PANIC(contxt);
-                            break;
-                    }
-                }
+                // Delete everything matching the wildcard pattern.
+                D_NUM = h_delete_pattern(contxt, file);
             }
             else
+            // No wildcards, delete directory, file or something that doesn't
+            // exist.
             {
-                // A non safe operation in pretend
-                // mode always succeeds.
-                DNUM = 1;
+                switch(h_exists(file))
+                {
+                    // Doesn't exist.
+                    case 0:
+                        h_log(contxt, tr(S_NSFL), file);
+                        break;
+
+                    // A file.
+                    case 1:
+                        D_NUM = h_delete_file(contxt, file);
+                        break;
+
+                    // A directory.
+                    case 2:
+                        D_NUM = h_delete_dir(contxt, file);
+                        break;
+
+                    // Invalid type.
+                    default:
+                        PANIC(contxt);
+                        break;
+                }
             }
         }
         else
         {
-            // We probably had a buffer overflow.
-            ERR(ERR_OVERFLOW, file);
+            // A non safe operation in pretend mode always succeeds.
+            D_NUM = 1;
         }
     }
     else
     {
-        // The parser is broken
-        PANIC(contxt);
+        // We probably had a buffer overflow.
+        ERR(ERR_OVERFLOW, file);
     }
 
-    // Success or broken
-    // parser.
-    RCUR;
+    // Success or failure.
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (exists <filename> (noreq))
 //     0 if no, 1 if file, 2 if dir
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_exists(entry_p contxt)
 {
-    if(c_sane(contxt, 1))
+    // One argument and option.
+    C_SANE(1, contxt);
+
+    // Supress volume requester?
+    if(get_opt(contxt, OPT_NOREQ) || get_opt(contxt, OPT_QUIET))
     {
-        // Supress volume requester?
-        if(get_opt(contxt, OPT_NOREQ) ||
-           get_opt(contxt, OPT_QUIET))
-        {
-            #if defined(AMIGA) && !defined(LG_TEST)
-            struct Process *p = (struct Process *)
-                FindTask(NULL);
+        #if defined(AMIGA) && !defined(LG_TEST)
+        struct Process *p = (struct Process *) FindTask(NULL);
 
-            // Save the current window ptr.
-            APTR w = p->pr_WindowPtr;
+        // Save the current window ptr.
+        APTR w = p->pr_WindowPtr;
 
-            // Disable auto request.
-            p->pr_WindowPtr = (APTR) -1L;
-            #endif
+        // Disable auto request.
+        p->pr_WindowPtr = (APTR) -1L;
+        #endif
 
-            // Get type (file / dir / 0)
-            DNUM = h_exists(str(CARG(1)));
+        // Get type (file / dir / 0)
+        D_NUM = h_exists(str(C_ARG(1)));
 
-            #if defined(AMIGA) && !defined(LG_TEST)
-            // Restore auto request.
-            p->pr_WindowPtr = w;
-            #endif
-        }
-        else
-        {
-            // Get type (file / dir / 0)
-            DNUM = h_exists(str(CARG(1)));
-        }
+        #if defined(AMIGA) && !defined(LG_TEST)
+        // Restore auto request.
+        p->pr_WindowPtr = w;
+        #endif
     }
     else
     {
-        // The parser is broken
-        PANIC(contxt);
+        // Get type (file / dir / 0)
+        D_NUM = h_exists(str(C_ARG(1)));
     }
 
-    // Success or broken
-    // parser.
-    RCUR;
+    // Success.
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (fileonly <path>)
 //     return file part of path (see pathonly)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_fileonly(entry_p contxt)
 {
-    if(c_sane(contxt, 1))
-    {
-        RSTR(strdup(h_fileonly(contxt, str(CARG(1)))));
-    }
+    // One argument and no options.
+    C_SANE(1, NULL);
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Implementation in helper function.
+    R_STR(strdup(h_fileonly(contxt, str(C_ARG(1)))));
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (foreach <dir> <pattern> <statements>)
 //     do for entries in directory
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_foreach(entry_p contxt)
 {
-    if(c_sane(contxt, 3))
+    // Three arguments and no options.
+    C_SANE(3, NULL);
+
+    // Pattern matching is not done
+    // on non-Amiga systems and not
+    // in test mode.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    const char *pt = str(C_ARG(2));
+    #endif
+
+    // Open dir and assume failure.
+    const char *dname = str(C_ARG(1));
+    DIR *dir = opendir(dname);
+    pnode_p top = NULL;
+    int err = 1;
+
+    // Permission to read?
+    if(dir)
     {
-        // Pattern matching is not done
-        // on non-Amiga systems and not
-        // in test mode.
-        #if defined(AMIGA) && !defined(LG_TEST)
-        const char *pt = str(CARG(2));
-        #endif
+        // Use global buffer.
+        char *cwd = get_buf();
+        struct dirent *ent = readdir(dir);
 
-        // Open dir and assume failure.
-        const char *dname = str(CARG(1));
-        DIR *dir = opendir(dname);
-        pnode_p top = NULL;
-        int err = 1;
-
-        // Permission to read?
-        if(dir)
+        // Save current working directory and enter the directory <drawer name>
+        if(getcwd(cwd, buf_size()) == cwd && !chdir(dname))
         {
-            // Use global buffer.
-            char *cwd = get_buf();
-            struct dirent *ent = readdir(dir);
+            // Allocate memory for the start node.
+            pnode_p cur;
+            top = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
-            // Save the current working directory and
-            // enter the directory <drawer name>
-            if(getcwd(cwd, buf_size()) == cwd && !chdir(dname))
+            #if defined(AMIGA) && !defined(LG_TEST)
+            // This file info block will be used for all files and subdirs in
+            // the directory.
+            struct FileInfoBlock *fib = (struct FileInfoBlock *)
+                   AllocDosObject(DOS_FIB, NULL);
+
+            // Use cur as a gatekeeper. If set to NULL, nothing will take place
+            // except clean ups.
+            cur = fib ? top : NULL;
+            #else
+            // No pattern matching = no fib.
+            cur = top;
+            #endif
+
+            // The dir might be empty but that's not an error.
+            err = 0;
+
+            // Iterate over all entries in dir.
+            while(ent && cur && !err)
             {
-                // Allocate memory for the start node.
-                pnode_p cur;
-                top = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+                // Name of file / dir.
+                const char *name = ent->d_name;
 
-                #if defined(AMIGA) && !defined(LG_TEST)
-                // This file info block will be used for all files
-                // and subdirs in the directory.
-                struct FileInfoBlock *fib = (struct FileInfoBlock *)
-                       AllocDosObject(DOS_FIB, NULL);
-
-                // Use cur as a gatekeeper. If set to NULL, nothing
-                // will take place except clean ups.
-                cur = fib ? top : NULL;
-                #else
-                // No pattern matching = no fib.
-                cur = top;
+                #ifndef AMIGA
+                // Filter out the magic on non-Amigas.
+                if(strcmp(name, ".") && strcmp(name, ".."))
                 #endif
-
-                // The dir might be empty but that's not an
-                // error.
-                err = 0;
-
-                // Iterate over all entries in dir.
-                while(ent && cur && !err)
                 {
-                    // Name of file / dir.
-                    const char *name = ent->d_name;
-
-                    #ifndef AMIGA
-                    // Filter out the magic on non-Amigas.
-                    if(strcmp(name, ".") &&
-                       strcmp(name, ".."))
-                    #endif
-                    {
-                        #if defined(AMIGA) && !defined(LG_TEST)
-                        // The dir is not empty, we should be able
-                        // to go all the way here. Assume failure.
-                        err = 1;
-
-                        // Lock and get the information we need
-                        // from the current entry
-                        BPTR lock = (BPTR) Lock(name, ACCESS_READ);
-
-                        if(lock)
-                        {
-                            if(Examine(lock, fib))
-                            {
-                                // Please note that if we fail to
-                                // lock and examine cur->name will
-                                // be NULL.
-                                cur->type = fib->fib_DirEntryType;
-                                cur->name = DBG_ALLOC(strdup(name));
-
-                                // We're probably good. PANIC:s will
-                                // be caught further down.
-                                err = 0;
-                            }
-
-                            UnLock(lock);
-                        }
-                        #else
-                        cur->type = h_exists(name);
-                        cur->name = DBG_ALLOC(strdup(name));
-                        #endif
-
-                        // An empty name indicates a PANIC only if
-                        // we didn't have any locking problems.
-                        if(!cur->name)
-                        {
-                            // Setting cur to NULL will generate a
-                            // PANIC further down.
-                            if(!err)
-                            {
-                                cur = NULL;
-                            }
-
-                            // Always bail out.
-                            break;
-                        }
-                    }
-
-                    // Get next entry.
-                    ent = readdir(dir);
-
-                    // We need to check for cur->name here, or else the
-                    // the filtering of '.' and '..' would not work, we
-                    // would get entries without names.
-                    if(ent && cur->name)
-                    {
-                        cur->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-                        cur = cur->next;
-                    }
-                }
-
-                #if defined(AMIGA) && !defined(LG_TEST)
-                // If dir is empty, fib will be NULL.
-                if(fib)
-                {
-                    FreeDosObject(DOS_FIB, fib);
-                }
-                #endif
-
-                if(!cur)
-                {
-                    // Out of memory.
-                    PANIC(contxt);
+                    #if defined(AMIGA) && !defined(LG_TEST)
+                    // The dir is not empty, we should be able to go all the way
+                    // here. Assume failure.
                     err = 1;
-                }
 
-                // Go back to where we started.
-                if(chdir(cwd))
-                {
-                    // The rug was swept away from us.
-                    ERR(ERR_NO_SUCH_FILE_OR_DIR, cwd);
-                }
-            }
+                    // Lock and get the information we need from the current
+                    // entry
+                    BPTR lock = (BPTR) Lock(name, ACCESS_READ);
 
-            // Done.
-            closedir(dir);
-        }
-
-        if(err)
-        {
-            // We could end up here for a number
-            // of reasons. More details perhaps?
-            ERR(ERR_READ_DIR, dname);
-        }
-
-        // Iterate over the entire list of files / dirs and
-        // free entries one by one. If the pattern matches
-        // the current entry, set variables and execute what
-        // we have in argument 3.
-        while(top)
-        {
-            int skip = err;
-            pnode_p old = top;
-
-            // 'Export' name and type info if we have a name.
-            if(top->name)
-            {
-                #if defined(AMIGA) && !defined(LG_TEST)
-                if(!err)
-                {
-                    // Use global buffer.
-                    char *buf = get_buf();
-
-                    // Parse pattern.
-                    switch(ParsePattern(pt, buf, buf_size()))
+                    if(lock)
                     {
-                        // If we have any wildcards, try to match.
-                        case 1:
-                            skip = MatchPattern(buf, top->name) ? 0 : 1;
-                            break;
+                        if(Examine(lock, fib))
+                        {
+                            // Please note that if we fail to lock and examine
+                            // cur->name will be NULL.
+                            cur->type = fib->fib_DirEntryType;
+                            cur->name = DBG_ALLOC(strdup(name));
 
-                        // If no wildcards, do a simple string comparsion.
-                        case 0:
-                            skip = strcmp(top->name, pt);
-                            break;
+                            // We're probably good. PANIC:s will be caught
+                            // further down.
+                            err = 0;
+                        }
 
-                        // We probably had a buffer overflow.
-                        default:
-                            ERR(ERR_OVERFLOW, pt);
-                            err = 1;
+                        UnLock(lock);
+                    }
+                    #else
+                    cur->type = h_exists(name);
+                    cur->name = DBG_ALLOC(strdup(name));
+                    #endif
+
+                    // An empty name indicates a PANIC only if we didn't have
+                    // any locking problems.
+                    if(!cur->name)
+                    {
+                        // Reset cur to NULL will generate a PANIC further down.
+                        if(!err)
+                        {
+                            cur = NULL;
+                        }
+
+                        // Always bail out.
+                        break;
                     }
                 }
-                #endif
 
-                // We always export, for memory management reasons.
-                set_numvar(contxt, "@each-type", (int) top->type);
-                set_strvar(contxt, "@each-name", top->name);
+                // Get next entry.
+                ent = readdir(dir);
 
-                if(!skip)
+                // We need to check for cur->name here, or else the the
+                // filtering of '.' and '..' would not work, we would get
+                // entries without names.
+                if(ent && cur->name)
                 {
-                    // Execute the code contained in
-                    // the third argument.
-                    invoke(CARG(3));
+                    cur->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+                    cur = cur->next;
                 }
             }
 
-            // Free current entry and proceed with the next.
-            top = top->next;
-            free(old);
+            #if defined(AMIGA) && !defined(LG_TEST)
+            // If dir is empty, fib will be NULL.
+            if(fib)
+            {
+                FreeDosObject(DOS_FIB, fib);
+            }
+            #endif
+
+            if(!cur)
+            {
+                // Out of memory.
+                PANIC(contxt);
+                err = 1;
+            }
+
+            // Go back where we started.
+            chdir(cwd);
         }
 
-        // Set return value.
-        DNUM = err ? 0 : 1;
-    }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
+        // Done.
+        closedir(dir);
     }
 
-    // Success or broken
-    // parser.
-    RCUR;
+    if(err)
+    {
+        // We could end up here for a number of reasons. More details perhaps?
+        ERR(ERR_READ_DIR, dname);
+    }
+
+    // Iterate over the entire list of files / dirs and free entries one by one.
+    // If the pattern matches the current entry, set variables and execute what
+    // we have in argument 3.
+    while(top)
+    {
+        int skip = err;
+        pnode_p old = top;
+
+        // 'Export' name and type info if we have a name.
+        if(top->name)
+        {
+            #if defined(AMIGA) && !defined(LG_TEST)
+            if(!err)
+            {
+                // Use global buffer.
+                char *buf = get_buf();
+
+                // Parse pattern.
+                switch(ParsePattern(pt, buf, buf_size()))
+                {
+                    // If we have any wildcards, try to match.
+                    case 1:
+                        skip = MatchPattern(buf, top->name) ? 0 : 1;
+                        break;
+
+                    // If no wildcards, do a simple string comparsion.
+                    case 0:
+                        skip = strcmp(top->name, pt);
+                        break;
+
+                    // We probably had a buffer overflow.
+                    default:
+                        ERR(ERR_OVERFLOW, pt);
+                        err = 1;
+                }
+            }
+            #endif
+
+            // We always export, for memory management reasons.
+            set_numvar(contxt, "@each-type", (int) top->type);
+            set_strvar(contxt, "@each-name", top->name);
+
+            if(!skip)
+            {
+                // Execute the code contained in the third argument.
+                invoke(C_ARG(3));
+            }
+        }
+
+        // Free current entry and proceed with the next.
+        top = top->next;
+        free(old);
+    }
+
+    // Success or failure.
+    R_NUM(err ? 0 : 1);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (makeassign <assign> [<path>] (safe)) ; note: <assign> doesn't need `:''
 //     create an assignment
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_makeassign(entry_p contxt)
 {
-    if(c_sane(contxt, 1))
+    // One or more arguments and option.
+    C_SANE(1, contxt);
+
+    entry_p safe = get_opt(contxt, OPT_SAFE);
+
+    // Is this a safe operation or are we not running in pretend mode?
+    if(safe || !get_numvar(contxt, "@pretend"))
     {
-        entry_p safe = get_opt(contxt, OPT_SAFE);
+        // The name of the assign.
+        char *asn = str(C_ARG(1));
 
-        // Is this a safe operation or are we not
-        // running in pretend mode?
-        if(safe || !get_numvar(contxt, "@pretend"))
+        // Assume failure..
+        D_NUM = 0;
+
+        // Are we going to create an assign?
+        if(C_ARG(2) && C_ARG(2) != end() &&
+           C_ARG(2)->type != OPTION)
         {
-            // The name of the assign.
-            char *asn = str(CARG(1));
+            // The destination.
+            char *dst = str(C_ARG(2));
 
-            // Assume failure..
-            DNUM = 0;
-
-            // Are we going to create an assign?
-            if(CARG(2) && CARG(2) != end() &&
-               CARG(2)->type != OPTION)
+            #if defined(AMIGA) && !defined(LG_TEST)
+            BPTR lock = (BPTR) Lock(dst, ACCESS_READ);
+            if(lock)
             {
-                // The destination.
-                char *dst = str(CARG(2));
-
-                #if defined(AMIGA) && !defined(LG_TEST)
-                BPTR lock = (BPTR) Lock(dst, ACCESS_READ);
-                if(lock)
-                {
-                    // Create the assign. After this,
-                    // the lock will be owned by the
-                    // system, do not unlock or use.
-                    DNUM = AssignLock(asn, lock) ? 1 : 0;
-                }
-                #else
-                DNUM = 1;
-                #endif
-
-                // Log the outcome.
-                h_log
-                (
-                    contxt,
-                    DNUM ? tr(S_ACRT) : tr(S_ACRE),
-                    asn,
-                    dst
-                );
+                // Create the assign. After this, the lock will be owned by the
+                // system, do not unlock or use.
+                D_NUM = AssignLock(asn, lock) ? 1 : 0;
             }
-            else
-            {
-                #if defined(AMIGA) && !defined(LG_TEST)
-                // Remove assign.
-                DNUM = AssignLock(str(CARG(1)), (BPTR) NULL) ? 1 : 0;
-                #else
-                DNUM = 2;
-                #endif
+            #else
+            D_NUM = 1;
+            #endif
 
-                // Log the outcome.
-                h_log
-                (
-                    contxt,
-                    DNUM ? tr(S_ADEL) : tr(S_ADLE),
-                    asn
-                );
-            }
-
-            if(!DNUM)
-            {
-                // Could not create / rm assign / get lock.
-                ERR(ERR_ASSIGN, str(CARG(1)));
-            }
+            // Log the outcome.
+            h_log(contxt, D_NUM ? tr(S_ACRT) : tr(S_ACRE), asn, dst);
         }
         else
         {
-            // Pretend.
-            DNUM = 1;
+            #if defined(AMIGA) && !defined(LG_TEST)
+            // Remove assign.
+            D_NUM = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? 1 : 0;
+            #else
+            D_NUM = 2;
+            #endif
+
+            // Log the outcome.
+            h_log(contxt, D_NUM ? tr(S_ADEL) : tr(S_ADLE), asn);
+        }
+
+        if(!D_NUM)
+        {
+            // Could not create / rm assign / get lock.
+            ERR(ERR_ASSIGN, str(C_ARG(1)));
         }
     }
     else
     {
-        // The parser is broken
-        PANIC(contxt);
+        // Pretend.
+        D_NUM = 1;
     }
 
-    // Return what we have. Could
-    // be a failure or a success.
-    RCUR;
+    // Failure or success.
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (makedir <name> (prompt..) (help..) (infos) (confirm..) (safe))
 //     make a directory
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_makedir(entry_p contxt)
 {
-    // We need atleast one argument, the name
-    // of the directory to be created.
-    if(c_sane(contxt, 1))
-    {
-        entry_p prompt   = get_opt(CARG(2), OPT_PROMPT),
-                help     = get_opt(CARG(2), OPT_HELP),
-                #if defined(AMIGA) && !defined(LG_TEST)
-                infos    = get_opt(CARG(2), OPT_INFOS),
-                #endif
-                confirm  = get_opt(CARG(2), OPT_CONFIRM),
-                safe     = get_opt(CARG(2), OPT_SAFE);
+    // One argument and options.
+    C_SANE(1, C_ARG(2));
 
-        DNUM = 0;
-
-        // Do we need confirmation?
-        if(confirm)
-        {
-            // The default threshold is expert.
-            int level = get_numvar(contxt, "@user-level"),
-                thres = 2;
-
-            // If the (confirm ...) option contains
-            // something that can be translated into
-            // a new threshold value...
-            if(confirm->children &&
-               confirm->children[0] &&
-               confirm->children[0] != end())
-            {
-                // ...then do so.
-                thres = num(confirm);
-            }
-
-            // If we are below the threshold value,
-            // don't care about getting confirmation
-            // from the user.
-            if(level < thres)
-            {
-                confirm = NULL;
-            }
-
-            // Make sure that we have the prompt and
-            // help texts that we need if 'confirm'
-            // is set.
-            if(!prompt || !help)
-            {
-                char *opt = prompt ? "help" : "prompt";
-                ERR(ERR_MISSING_OPTION, opt);
-                RCUR;
-            }
-        }
-
-        // If we need confirmation and the user skips
-        // or aborts, return. On abort, the HALT will
-        // be set by h_confirm.
-        if(confirm && !h_confirm(CARG(2),
-           str(help), str(prompt)))
-        {
-            RCUR;
-        }
-
-        // Is this a safe operation or are we not
-        // running in pretend mode?
-        if(safe || !get_numvar(contxt, "@pretend"))
-        {
-            // The name of the directory.
-            char *dir = str(CARG(1));
-
-            // Create the directory.
-            DNUM = h_makedir(contxt, dir, 0 /* FIXME */);
-
+    entry_p prompt   = get_opt(C_ARG(2), OPT_PROMPT),
+            help     = get_opt(C_ARG(2), OPT_HELP),
             #if defined(AMIGA) && !defined(LG_TEST)
-            // Are we supposed to create an icon
-            // as well?
-            if(infos && DNUM)
-            {
-                // Get the default drawer icon from the OS.
-                struct DiskObject *obj = (struct DiskObject *)
-                    GetDefDiskObject(WBDRAWER);
-
-                // Assume failure.
-                DNUM = 0;
-
-                // If we have a default icon, let our newly
-                // created directory have it.
-                if(obj)
-                {
-                    // Create new .info.
-                    if(PutDiskObject(dir, obj))
-                    {
-                        // Done.
-                        DNUM = 1;
-                    }
-
-                    // Free def. icon.
-                    FreeDiskObject(obj);
-                }
-
-                // If any of the above failed, ioerr
-                // will be set. Export that value as
-                // a variable.
-                if(!DNUM)
-                {
-                    LONG ioe = IoErr();
-                    set_numvar(contxt, "@ioerr", ioe);
-                }
-            }
+            infos    = get_opt(C_ARG(2), OPT_INFOS),
             #endif
-        }
-        else
+            confirm  = get_opt(C_ARG(2), OPT_CONFIRM),
+            safe     = get_opt(C_ARG(2), OPT_SAFE);
+
+    D_NUM = 0;
+
+    // If we need confirmation and the user skips or aborts, return. On abort,
+    // the HALT will be set by h_confirm.
+    if(confirm && !h_confirm(C_ARG(2), str(help), str(prompt)))
+    {
+        R_CUR;
+    }
+
+    // Is this a safe operation or are we not running in pretend mode?
+    if(safe || !get_numvar(contxt, "@pretend"))
+    {
+        // The name of the directory.
+        char *dir = str(C_ARG(1));
+
+        // Create the directory.
+        D_NUM = h_makedir(contxt, dir, 0 /* FIXME */);
+
+        #if defined(AMIGA) && !defined(LG_TEST)
+        // Are we supposed to create an icon as well?
+        if(infos && D_NUM)
         {
-            // A non safe operation in pretend
-            // mode always succeeds.
-            DNUM = 1;
+            // Get the default drawer icon from the OS.
+            struct DiskObject *obj = (struct DiskObject *)
+                GetDefDiskObject(WBDRAWER);
+
+            // Assume failure.
+            D_NUM = 0;
+
+            // If we have a default icon, let our newly created directory have
+            // it.
+            if(obj)
+            {
+                // Create new .info.
+                if(PutDiskObject(dir, obj))
+                {
+                    // Done.
+                    D_NUM = 1;
+                }
+
+                // Free def. icon.
+                FreeDiskObject(obj);
+            }
+
+            // If any of the above failed, ioerr will be set. Export that value
+            // as a variable.
+            if(!D_NUM)
+            {
+                LONG ioe = IoErr();
+                set_numvar(contxt, "@ioerr", ioe);
+            }
         }
+        #endif
     }
     else
     {
-        // The parser is broken
-        PANIC(contxt);
+        // A non safe operation in pretend mode always succeeds.
+        D_NUM = 1;
     }
 
-    // Success, failure or
-    // broken parser.
-    RCUR;
+    // Success or failure.
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (protect <file> [<string of flags to change>] [<dec. mask>] <parameters>)
 //     get/set file protection flags
 //
@@ -3056,330 +2765,397 @@ entry_p m_makedir(entry_p contxt)
 // +--------------- |
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_protect(entry_p contxt)
 {
-    // A single argument is all we need.
-    if(c_sane(contxt, 1))
+    // One or more arguments.
+    C_SANE(1, C_ARG(2));
+
+    char *file = str(C_ARG(1));
+    D_NUM = 0;
+
+    if(C_ARG(2) && C_ARG(2) != end())
     {
-        char *file = str(CARG(1));
-        DNUM = 0;
-
-        if(CARG(2) && CARG(2) != end())
+        // Get with option.
+        if(C_ARG(2)->type == CONTXT)
         {
-            // Get with option.
-            if(CARG(2)->type == CONTXT)
-            {
-                entry_p override = get_opt(CARG(2), OPT_OVERRIDE);
+            entry_p override = get_opt(C_ARG(2), OPT_OVERRIDE);
 
-                if(override)
-                {
-                    // From user (script).
-                    DNUM = num(override);
-                }
-                else
-                {
-                    // From file.
-                    h_protect_get(contxt, file, &DNUM);
-                }
+            if(override)
+            {
+                // From user (script).
+                D_NUM = num(override);
             }
-            // Set value.
             else
             {
-                // Assume string operation.
-                const char *flg = str(CARG(2));
-                size_t len = strlen(flg);
+                // From file.
+                h_protect_get(contxt, file, &D_NUM);
+            }
+        }
+        // Set value.
+        else
+        {
+            // Assume string operation.
+            const char *flg = str(C_ARG(2));
+            size_t len = strlen(flg);
 
-                entry_p safe = get_opt(CARG(3), OPT_SAFE),
-                        override = get_opt(CARG(3), OPT_OVERRIDE);
+            entry_p safe = get_opt(C_ARG(3), OPT_SAFE),
+                    override = get_opt(C_ARG(3), OPT_OVERRIDE);
 
-                // If any numbers are present in the string,
-                // treat it as an absolute mask instead.
-                for(size_t i = 0; i < len; i++)
+            // If any numbers are present in the string, treat it as an absolute
+            // mask instead.
+            for(size_t i = 0; i < len; i++)
+            {
+                if(flg[i] < 58 && flg[i] > 47)
                 {
-                    if(flg[i] < 58 &&
-                       flg[i] > 47)
-                    {
-                        // We no longer have a string.
-                        len = 0;
-                        break;
-                    }
+                    // We no longer have a string.
+                    len = 0;
+                    break;
                 }
+            }
 
-                // Do we have a string?
-                if(len)
+            // Do we have a string?
+            if(len)
+            {
+                // Mode (+/-).
+                int mode = 0;
+
+                // Use a real file or override?
+                if(!override)
                 {
-                    // Mode (+/-).
-                    int mode = 0;
-
-                    // Use a real file or override?
-                    if(!override)
+                    // Get flags from file.
+                    if(!h_protect_get(contxt, file, &D_NUM))
                     {
-                        // Get flags from file.
-                        if(!h_protect_get(contxt, file, &DNUM))
-                        {
-                            // Helper will set proper error
-                            RNUM(-1);
-                        }
+                        // Helper will set proper error
+                        R_NUM(-1);
                     }
-                    else
-                    {
-                        // Get flags from user (script).
-                        DNUM = num(override);
-                    }
-
-                    // Invert 1-4.
-                    DNUM ^= 0x0f;
-
-                    // For all flags.
-                    for(size_t i = 0; i < len; i++)
-                    {
-                        // Mask.
-                        int bit = 0;
-
-                        // Which protection bit?
-                        switch(flg[i])
-                        {
-                            case '+': mode = 1; break;
-                            case '-': mode = 2; break;
-                            case 'h': bit = 1 << 7; break;
-                            case 's': bit = 1 << 6; break;
-                            case 'p': bit = 1 << 5; break;
-                            case 'a': bit = 1 << 4; break;
-                            case 'r': bit = 1 << 3; break;
-                            case 'w': bit = 1 << 2; break;
-                            case 'e': bit = 1 << 1; break;
-                            case 'd': bit = 1 << 0; break;
-                            default: break;
-                        }
-
-                        // Adding or subtracting?
-                        switch(mode)
-                        {
-                            case 0: DNUM = bit; mode = 1; break;
-                            case 1: DNUM |= bit; break;
-                            case 2: DNUM &= ~bit; break;
-                            default: break;
-                        }
-                    }
-
-                    // Invert 1-4.
-                    DNUM ^= 0x0f;
                 }
                 else
                 {
-                    // Use an absolute mask.
-                    DNUM = num(CARG(2));
+                    // Get flags from user (script).
+                    D_NUM = num(override);
                 }
 
-                if(!override)
+                // Invert 1-4.
+                D_NUM ^= 0x0f;
+
+                // For all flags.
+                for(size_t i = 0; i < len; i++)
                 {
-                    // Is this a safe operation or are we not
-                    // running in pretend mode?
-                    if(safe || !get_numvar(contxt, "@pretend"))
+                    // Mask.
+                    int bit = 0;
+
+                    // Which protection bit?
+                    switch(flg[i])
                     {
-                        // Helper will set error on failure.
-                        DNUM = h_protect_set(contxt, file, DNUM);
+                        case '+': mode = 1; break;
+                        case '-': mode = 2; break;
+                        case 'h': bit = 1 << 7; break;
+                        case 's': bit = 1 << 6; break;
+                        case 'p': bit = 1 << 5; break;
+                        case 'a': bit = 1 << 4; break;
+                        case 'r': bit = 1 << 3; break;
+                        case 'w': bit = 1 << 2; break;
+                        case 'e': bit = 1 << 1; break;
+                        case 'd': bit = 1 << 0; break;
+                        default: break;
                     }
-                    else
+
+                    // Adding or subtracting?
+                    switch(mode)
                     {
-                        // A non safe operation in pretend
-                        // mode always succeeds.
-                        DNUM = 1;
+                        case 0: D_NUM = bit; mode = 1; break;
+                        case 1: D_NUM |= bit; break;
+                        case 2: D_NUM &= ~bit; break;
+                        default: break;
                     }
                 }
+
+                // Invert 1-4.
+                D_NUM ^= 0x0f;
             }
-        }
-        else
-        {
-            // Get without options.
-            h_protect_get(contxt, file, &DNUM);
+            else
+            {
+                // Use an absolute mask.
+                D_NUM = num(C_ARG(2));
+            }
+
+            if(!override)
+            {
+                // Is this a safe operation or are we not running in pretend
+                // mode?
+                if(safe || !get_numvar(contxt, "@pretend"))
+                {
+                    // Helper will set error on failure.
+                    D_NUM = h_protect_set(contxt, file, D_NUM);
+                }
+                else
+                {
+                    // A non safe operation in pretend mode always succeeds.
+                    D_NUM = 1;
+                }
+            }
         }
     }
     else
     {
-        // The parser is broken
-        PANIC(contxt);
+        // Get without options.
+        h_protect_get(contxt, file, &D_NUM);
     }
 
-    // Success, failure or
-    // broken parser.
-    RCUR;
+    // Success or failure.
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (startup (prompt..) (command..))
 //     add a command to the boot scripts (startup-sequence, user-startup)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_startup(entry_p contxt)
 {
-    // We need atleast two arguments
-    if(c_sane(contxt, 2))
+    // Two or more arguments / options.
+    C_SANE(2, C_ARG(2));
+
+    char *cmd = NULL;
+    const char *app = str(C_ARG(1));
+
+    entry_p command  = get_opt(C_ARG(2), OPT_COMMAND),
+            help     = get_opt(C_ARG(2), OPT_HELP),
+            prompt   = get_opt(C_ARG(2), OPT_PROMPT);
+
+    // Expect failure.
+    D_NUM = 0;
+
+    // We need a command.
+    if(!command)
     {
-        char *cmd = NULL;
-        const char *app = str(CARG(1));
+        ERR(ERR_MISSING_OPTION, "command");
+        R_CUR;
+    }
 
-        entry_p command  = get_opt(CARG(2), OPT_COMMAND),
-                help     = get_opt(CARG(2), OPT_HELP),
-                prompt   = get_opt(CARG(2), OPT_PROMPT);
+    // And somewhere to put the command.
+    if(!strlen(app))
+    {
+        ERR(ERR_INVALID_APP, app);
+        R_CUR;
+    }
 
-        // Expect failure.
-        DNUM = 0;
+    // If we need confirmation and the user skips or aborts, return. On abort,
+    // the HALT will be set by h_confirm. Confirmation is needed when user level
+    // is expert or when (confirm) is used.
+    if((get_opt(C_ARG(2), OPT_CONFIRM) ||
+        get_numvar(contxt, "@user-level") > 1) &&
+       !h_confirm(C_ARG(2), str(help), str(prompt)))
+    {
+        R_CUR;
+    }
 
-        // We need a command, a prompt and a help text.
-        if(!command || !prompt || !help)
+    // We're done if executing in pretend mode.
+    if(get_numvar(contxt, "@pretend"))
+    {
+        R_NUM(1);
+    }
+
+    // Gather and merge all (command) strings.
+    cmd = get_optstr(C_ARG(2), OPT_COMMAND);
+
+    if(cmd)
+    {
+        const char *fln = get_strvar(contxt, "@user-startup");
+        const size_t len = strlen(";BEGIN ") + strlen(app),
+                     ins = strlen(cmd) + 2;
+
+        char *pre = DBG_ALLOC(calloc(len + 1, 1)),
+             *pst = DBG_ALLOC(calloc(len + 1, 1)),
+             *buf = NULL;
+
+        if(pre && pst)
         {
-            char *opt = !command ? "command" : !prompt ?
-                                   "prompt" : "help";
-            ERR(ERR_MISSING_OPTION, opt);
-            RCUR;
-        }
+            // We don't need to write yet.
+            FILE *file = fopen(fln, "r");
 
-        // And somewhere to put the command.
-        if(!strlen(app))
-        {
-            ERR(ERR_INVALID_APP, app);
-            RCUR;
-        }
-
-        // If we need confirmation and the user skips
-        // or aborts, return. On abort, the HALT will
-        // be set by h_confirm. Confirmation is needed
-        // when user level is not novice or (confirm)
-        // is used.
-        if((get_opt(CARG(2), OPT_CONFIRM) ||
-           get_numvar(contxt, "@user-level") > 0) &&
-           !h_confirm(CARG(2), str(help), str(prompt)))
-        {
-            RCUR;
-        }
-
-        // We're done if executing in pretend mode.
-        if(get_numvar(contxt, "@pretend"))
-        {
-            RNUM(1);
-        }
-
-        // Gather and merge all (command) strings.
-        cmd = get_optstr(CARG(2), OPT_COMMAND);
-
-        if(cmd)
-        {
-            const char *fln = get_strvar(contxt, "@user-startup");
-            const size_t len = strlen(";BEGIN ") + strlen(app),
-                         ins = strlen(cmd) + 2;
-
-            char *pre = DBG_ALLOC(calloc(len + 1, 1)),
-                 *pst = DBG_ALLOC(calloc(len + 1, 1)),
-                 *buf = NULL;
-
-            if(pre && pst)
+            // If the file doesn't exist, try to create it.
+            if(!file && !h_exists(fln))
             {
-                // We don't need to write yet.
-                FILE *file = fopen(fln, "r");
+                file = fopen(fln, "w");
 
-                // If the file doesn't exist,
-                // try to create it.
-                if(!file && !h_exists(fln))
-                {
-                    file = fopen(fln, "w");
-
-                    // If successful, close and
-                    // reopen as read only.
-                    if(file)
-                    {
-                        fclose(file);
-                        file = fopen(fln, "r");
-                    }
-                }
-
+                // If successful, close and reopen as read only.
                 if(file)
                 {
-                    // Seek to the end so that we
-                    // can use ftell below to get
-                    // the size of the file.
-                    if(!fseek(file, 0L, SEEK_END))
+                    fclose(file);
+                    file = fopen(fln, "r");
+                }
+            }
+
+            if(file)
+            {
+                // Seek to the end so that we can use ftell below to get the
+                // size of the file.
+                if(!fseek(file, 0L, SEEK_END))
+                {
+                    // Worst case: empty file + 3 NL + terminating 0 + BEGIN
+                    // and END markers + command.
+                    size_t osz = (size_t) ftell(file),
+                           nsz = osz + 2 * len + ins;
+
+                    // Allocate enough memory so that we can keep the old file
+                    // + any changes that we need to do in memory at the same
+                    // time.
+                    buf = DBG_ALLOC(calloc(nsz, 1));
+
+                    if(buf)
                     {
-                        // Worst case: empty file + 3 NL +
-                        // terminating 0 + BEGIN and END
-                        // markers + command.
-                        size_t osz = (size_t) ftell(file),
-                               nsz = osz + 2 * len + ins;
-
-                        // Allocate enough memory so that
-                        // we can keep the old file + any
-                        // changes that we need to do in
-                        // memory at the same time.
-                        buf = DBG_ALLOC(calloc(nsz, 1));
-
-                        if(buf)
+                        // Read the whole file in one go.
+                        if(!fseek(file, 0L, SEEK_SET) &&
+                            fread(buf, 1, osz, file) == osz)
                         {
-                            // Read the whole file in one go.
-                            if(!fseek(file, 0L, SEEK_SET) &&
-                                fread(buf, 1, osz, file) == osz)
+                            // Prepare the header and footer.
+                            snprintf(pre, len + 1, ";BEGIN %s", app);
+                            snprintf(pst, len + 1, ";END %s", app);
+
+                            // Do we already have an entry in the current file?
+                            char *beg = strstr(buf, pre),
+                                 *fin = strstr(buf, pst);
+
+                            // Replace the current entry by inserting the new
+                            // one at the same location.
+                            if(beg && fin)
                             {
-                                // Prepare the header and footer.
-                                snprintf(pre, len + 1, ";BEGIN %s", app);
-                                snprintf(pst, len + 1, ";END %s", app);
+                                // Move the tail of the buffer to the right
+                                // place.
+                                memmove(beg + len + ins, fin, (buf + osz) - fin + 1);
 
-                                // Do we already have an entry in
-                                // the current file?
-                                char *beg = strstr(buf, pre),
-                                     *fin = strstr(buf, pst);
+                                // Insert the command string.
+                                memcpy(beg + len + 1, cmd, ins - 2);
 
-                                // Replace the current entry by inserting
-                                // the new one at the same location.
-                                if(beg && fin)
-                                {
-                                    // Move the tail of the buffer to the right place.
-                                    memmove(beg + len + ins, fin, (buf + osz) - fin + 1);
-
-                                    // Insert the command string.
-                                    memcpy(beg + len + 1, cmd, ins - 2);
-
-                                    // Add surrounding line feeds so that the
-                                    // command won't end up being a comment.
-                                    beg[len + ins - 1] = beg[len] = '\n';
-                                }
-                                // No existing entry. Append the new entry.
-                                else
-                                {
-                                    // Header.
-                                    memcpy(buf + osz, pre, len);
-
-                                    // Command.
-                                    memcpy(buf + osz + len + 1, cmd, ins - 2);
-
-                                    // Footer.
-                                    memcpy(buf + osz + len + ins, pst, len);
-
-                                    // Add surrounding line feeds so that the
-                                    // command won't end up being a comment.
-                                    buf[osz + len + ins - 1] = buf[osz + len] = '\n';
-
-                                    // Add a newline at the end.
-                                    buf[osz + len + ins + strlen(pst)] = '\n';
-                                }
+                                // Add surrounding line feeds so that the
+                                // command won't end up being a comment.
+                                beg[len + ins - 1] = beg[len] = '\n';
                             }
+                            // No existing entry. Append the new entry.
                             else
                             {
-                                // Read problem, error will be set
-                                // further down if buf == NULL.
-                                free(buf);
-                                buf = NULL;
+                                // Header.
+                                memcpy(buf + osz, pre, len);
+
+                                // Command.
+                                memcpy(buf + osz + len + 1, cmd, ins - 2);
+
+                                // Footer.
+                                memcpy(buf + osz + len + ins, pst, len);
+
+                                // Add surrounding line feeds so that the
+                                // command won't end up being a comment.
+                                buf[osz + len + ins - 1] = buf[osz + len] = '\n';
+
+                                // Add a newline at the end.
+                                buf[osz + len + ins + strlen(pst)] = '\n';
                             }
                         }
                         else
                         {
-                            // Out of memory
-                            PANIC(contxt);
+                            // Read problem, error will be set further down if
+                            // buf == NULL.
+                            free(buf);
+                            buf = NULL;
                         }
                     }
+                    else
+                    {
+                        // Out of memory
+                        PANIC(contxt);
+                    }
+                }
 
-                    // Reading done.
-                    fclose(file);
+                // Reading done.
+                fclose(file);
+            }
+        }
+        else
+        {
+            // Out of memory
+            PANIC(contxt);
+        }
+
+        // We have no longer any use for the header, footer or command string.
+        free(pre);
+        free(pst);
+        free(cmd);
+
+        // If we have a buffer everything wen't fine above. Go ahead and write
+        // buffer to file.
+        if(buf)
+        {
+            // Use a temporary file to make sure that we don't mess up the
+            // current file if disk space becomes a problem, the system crashes,
+            // the power is lost and so on and so forth.
+            size_t tln = strlen(fln) + sizeof(".XXXXXX\0");
+            char *tmp = DBG_ALLOC(calloc(tln, 1));
+
+            if(tmp)
+            {
+                // Create temporary file.
+                snprintf(tmp, tln, "%s.XXXXXX", fln);
+                FILE *file = fdopen(mkstemp(tmp), "w");
+
+                if(file)
+                {
+                    // Write everything to the temporary file at once.
+                    if(fputs(buf, file) != EOF)
+                    {
+                        // Close file and release buffer.
+                        fclose(file);
+                        free(buf);
+                        buf = NULL;
+
+                        // Open the target file just to make sure that we have
+                        // write permissions.
+                        file = fopen(fln, "a");
+
+                        if(file)
+                        {
+                            // Close it immediately, we're not going to write
+                            // directly to it.
+                            fclose(file);
+
+                            // Do a less un-atomic write to the real file by
+                            // renaming the temporary file.
+                            if(!rename(tmp, fln))
+                            {
+                                // We're done.
+                                free(tmp);
+                                tmp = NULL;
+                                D_NUM = 1;
+                            }
+                        }
+                        else
+                        {
+                            // We aren't allowed to write data to the target
+                            // file so we need to clean up. We don't want old
+                            // temp files laying around.
+                            if(remove(tmp))
+                            {
+                                // This is highly unlikely, but why not?
+                                ERR(ERR_WRITE_FILE, tmp);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Failure. Could not write to disk. The old file is
+                        // still intact.
+                        fclose(file);
+                    }
+                }
+
+                // If we haven't released tmp by now, we failed when attempting
+                // one of the write operations above.
+                if(tmp)
+                {
+                    ERR(ERR_WRITE_FILE, fln);
+                    free(tmp);
                 }
             }
             else
@@ -3388,818 +3164,566 @@ entry_p m_startup(entry_p contxt)
                 PANIC(contxt);
             }
 
-            // We have no longer any use for the
-            // header, footer or command string.
-            free(pre);
-            free(pst);
-            free(cmd);
-
-            // If we have a buffer everything wen't fine
-            // above. Go ahead and write buffer to file.
-            if(buf)
-            {
-                // Use a temporary file to make sure that we
-                // don't mess up the current file if disk space
-                // becomes a problem, the system crashes, the
-                // power is lost and so on and so forth.
-                size_t tln = strlen(fln) + sizeof(".XXXXXX\0");
-                char *tmp = DBG_ALLOC(calloc(tln, 1));
-
-                if(tmp)
-                {
-                    // Create temporary file.
-                    snprintf(tmp, tln, "%s.XXXXXX", fln);
-                    FILE *file = fdopen(mkstemp(tmp), "w");
-
-                    if(file)
-                    {
-                        // Write everything to the temporary
-                        // file at once.
-                        if(fputs(buf, file) != EOF)
-                        {
-                            // Close file and release buffer.
-                            fclose(file);
-                            free(buf);
-                            buf = NULL;
-
-                            // Open the target file just to
-                            // make sure that we have write
-                            // permissions.
-                            file = fopen(fln, "a");
-
-                            if(file)
-                            {
-                                // Close it immediately, we're not
-                                // going to write directly to it.
-                                fclose(file);
-
-                                // Do a less un-atomic write to
-                                // the real file by renaming the
-                                // temporary file.
-                                if(!rename(tmp, fln))
-                                {
-                                    // We're done.
-                                    free(tmp);
-                                    tmp = NULL;
-                                    DNUM = 1;
-                                }
-                            }
-                            else
-                            {
-                                // We aren't allowed to write data
-                                // to the target file so we need to
-                                // clean up. We don't want old temp
-                                // files laying around.
-                                if(remove(tmp))
-                                {
-                                    // This is highly unlikely, but why not?
-                                    ERR(ERR_WRITE_FILE, tmp);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // Failure. Could not write to disk.
-                            // The old file is still intact.
-                            fclose(file);
-                        }
-                    }
-
-                    // If we haven't released tmp by now, we failed
-                    // when attempting one of the write operations
-                    // above.
-                    if(tmp)
-                    {
-                        free(tmp);
-                        ERR(ERR_WRITE_FILE, fln);
-                    }
-                }
-                else
-                {
-                    // Out of memory
-                    PANIC(contxt);
-                }
-
-                // We no longer need the buffer holding
-                // the new file contents.
-                free(buf);
-            }
-            else
-            {
-                // No buffer == read problem, or OOM but then
-                // we already have a PANIC.
-                ERR(ERR_READ_FILE, fln);
-            }
+            // We no longer need the buffer holding the new file contents.
+            free(buf);
         }
         else
         {
-            // Broken parser.
-            PANIC(contxt);
+            // No buffer == read problem, or out of memory but then we already
+            // have a PANIC.
+            ERR(ERR_READ_FILE, fln);
         }
     }
     else
     {
-        // Broken parser.
+        // Out of memory.
         PANIC(contxt);
     }
 
-    // Success, failure or
-    // broken parser.
-    RCUR;
+    // Success, failure or out of memory.
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (textfile (prompt..) (help..) (dest..) (append) (include..) (confirm..) (safe))
 //      create text file from other text files and strings
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_textfile(entry_p contxt)
 {
-    // We need atleast one argument
-    if(c_sane(contxt, 1))
+    // One or more arguments / options.
+    C_SANE(1, contxt);
+
+    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+            help     = get_opt(contxt, OPT_HELP),
+            dest     = get_opt(contxt, OPT_DEST),
+            post     = get_opt(contxt, OPT_APPEND),
+            include  = get_opt(contxt, OPT_INCLUDE),
+            confirm  = get_opt(contxt, OPT_CONFIRM),
+            safe     = get_opt(contxt, OPT_SAFE);
+
+    D_NUM = 0;
+
+    if(dest)
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                dest     = get_opt(contxt, OPT_DEST),
-                post     = get_opt(contxt, OPT_APPEND),
-                include  = get_opt(contxt, OPT_INCLUDE),
-                confirm  = get_opt(contxt, OPT_CONFIRM),
-                safe     = get_opt(contxt, OPT_SAFE);
-
-        DNUM = 0;
-
-        if(dest)
+        // If we need confirmation and the user skips or aborts, return. On
+        // abort, the HALT will be set by h_confirm.
+        if(confirm && !h_confirm(contxt, str(help), str(prompt)))
         {
-            // Do we need confirmation?
-            if(confirm)
+            R_CUR;
+        }
+
+        // Is this a safe operation or are we not running in pretend mode?
+        if(safe || !get_numvar(contxt, "@pretend"))
+        {
+            // Overwrite existing file.
+            const char *name = str(dest);
+            FILE *file = fopen(name, "w");
+
+            if(file)
             {
-                // The default threshold is expert.
-                int level = get_numvar(contxt, "@user-level"),
-                    thres = 2;
+                // Assume success.
+                D_NUM = 1;
 
-                // If the (confirm ...) option contains
-                // something that can be translated into
-                // a new threshold value...
-                if(confirm->children &&
-                   confirm->children[0] &&
-                   confirm->children[0] != end())
+                // Append to empty file. This is strange but it's how the CBM
+                // installer works.
+                if(post)
                 {
-                    // ...then do so.
-                    thres = num(confirm);
-                }
+                    // Gather and merge all (append) strings.
+                    char *app = get_optstr(contxt, OPT_APPEND);
 
-                // If we are below the threshold value,
-                // don't care about getting confirmation
-                // from the user.
-                if(level < thres)
-                {
-                    confirm = NULL;
-                }
-
-                // Make sure that we have the prompt and
-                // help texts that we need if 'confirm'
-                // is set.
-                if(!prompt || !help)
-                {
-                    char *opt = prompt ? "help" : "prompt";
-                    ERR(ERR_MISSING_OPTION, opt);
-                    RCUR;
-                }
-            }
-
-
-            // If we need confirmation and the user skips
-            // or aborts, return. On abort, the HALT will
-            // be set by h_confirm.
-            if(confirm && !h_confirm(contxt,
-               str(help), str(prompt)))
-            {
-                RCUR;
-            }
-
-            // Is this a safe operation or are we not
-            // running in pretend mode?
-            if(safe || !get_numvar(contxt, "@pretend"))
-            {
-                // Overwrite existing file.
-                const char *name = str(dest);
-                FILE *file = fopen(name, "w");
-
-                if(file)
-                {
-                    // Assume success.
-                    DNUM = 1;
-
-                    // Append to empty file. This is strange
-                    // but it's how the CBM installer works.
-                    if(post)
+                    if(app)
                     {
-                        // Gather and merge all (append) strings.
-                        char *app = get_optstr(contxt, OPT_APPEND);
+                        // Log operation.
+                        h_log(contxt, tr(S_APND), app, name);
 
-                        if(app)
+                        if(fputs(app, file) == EOF)
                         {
-                            // Log operation.
-                            h_log(contxt, tr(S_APND), app, name);
+                            ERR(ERR_WRITE_FILE, name);
+                            D_NUM = 0;
+                        }
 
-                            if(fputs(app, file) == EOF)
+                        // Free concatenation.
+                        free(app);
+                    }
+                    else
+                    {
+                        // Out of memory.
+                        PANIC(contxt);
+                        D_NUM = 0;
+                    }
+                }
+
+                // Are we going to include a file at the end of the new file
+                // (append proper)?
+                if(include && D_NUM)
+                {
+                    // File to copy.
+                    const char *incl = str(include);
+                    FILE *finc = fopen(incl, "r");
+
+                    if(finc)
+                    {
+                        // Use the global buffer.
+                        char *buf = get_buf();
+                        size_t siz = buf_size(), cnt = fread(buf, 1, siz, finc);
+
+                        // Log operation.
+                        h_log(contxt, tr(S_INCL), incl, name);
+
+                        // Copy the whole file.
+                        while(cnt)
+                        {
+                            // Write to destination file.
+                            if(fwrite(buf, 1, cnt, file) != cnt)
                             {
                                 ERR(ERR_WRITE_FILE, name);
-                                DNUM = 0;
+                                D_NUM = 0;
+                                break;
                             }
 
-                            // Free concatenation.
-                            free(app);
+                            // Do we have more data?
+                            cnt = fread(buf, 1, siz, finc);
                         }
-                        else
-                        {
-                            // Out of memory.
-                            PANIC(contxt);
-                            DNUM = 0;
-                        }
-                    }
 
-                    // Are we going to include a file at the
-                    // end of the new file (append proper)?
-                    if(include && DNUM)
-                    {
-                        // File to copy.
-                        const char *incl = str(include);
-                        FILE *finc = fopen(incl, "r");
-
-                        if(finc)
-                        {
-                            // Use the global buffer.
-                            char *buf = get_buf();
-                            size_t siz = buf_size(),
-                                   cnt = fread(buf, 1, siz, finc);
-
-                            // Log operation.
-                            h_log(contxt, tr(S_INCL), incl, name);
-
-                            // Copy the whole file.
-                            while(cnt)
-                            {
-                                // Write to destination file.
-                                if(fwrite(buf, 1, cnt, file) != cnt)
-                                {
-                                    ERR(ERR_WRITE_FILE, name);
-                                    DNUM = 0;
-                                    break;
-                                }
-
-                                // Do we have more data?
-                                cnt = fread(buf, 1, siz, finc);
-                            }
-
-                            // We're done reading from
-                            // the include file.
-                            fclose(finc);
-                        }
-                    }
-
-                    // We're done writing to the newly
-                    // created file.
-                    fclose(file);
-
-                    // We must append and / or include,
-                    // or else this doesn't make sense.
-                    if(!post && !include)
-                    {
-                        ERR(ERR_NOTHING_TO_DO, contxt->name);
-                        DNUM = 0;
+                        // We're done reading from the include file.
+                        fclose(finc);
                     }
                 }
-                else
+
+                // We're done writing to the newly created file.
+                fclose(file);
+
+                // We must append and / or include, or else this doesn't make
+                // sense.
+                if(!post && !include)
                 {
-                    ERR(ERR_WRITE_FILE, name);
+                    ERR(ERR_NOTHING_TO_DO, contxt->name);
+                    D_NUM = 0;
                 }
             }
             else
             {
-                // A non safe operation in pretend
-                // mode always succeeds.
-                DNUM = 1;
+                ERR(ERR_WRITE_FILE, name);
             }
         }
         else
         {
-            ERR(ERR_MISSING_OPTION, "dest");
+            // A non safe operation in pretend mode always succeeds.
+            D_NUM = 1;
         }
     }
     else
     {
-        // The parser is broken
-        PANIC(contxt);
+        ERR(ERR_MISSING_OPTION, "dest");
     }
 
-    // Success, failure or
-    // broken parser.
-    RCUR;
+    // Success or failure.
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (tooltype (prompt..) (help..) (dest..) (settooltype..) (setstack..)
 //     (setdefaulttool..) (noposition) (confirm..) (safe))
 //
 //     modify an icon
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_tooltype(entry_p contxt)
 {
-    // No arguments needed.
-    if(c_sane(contxt, 0))
+    // Zero or more arguments / options.
+    C_SANE(0, contxt);
+
+    entry_p help            = get_opt(contxt, OPT_HELP),
+            prompt          = get_opt(contxt, OPT_PROMPT),
+            dest            = get_opt(contxt, OPT_DEST),
+            settooltype     = get_opt(contxt, OPT_SETTOOLTYPE),
+            setdefaulttool  = get_opt(contxt, OPT_SETDEFAULTTOOL),
+            setstack        = get_opt(contxt, OPT_SETSTACK),
+            noposition      = get_opt(contxt, OPT_NOPOSITION),
+            setposition     = get_opt(contxt, OPT_SETPOSITION),
+            confirm         = get_opt(contxt, OPT_CONFIRM),
+            safe            = get_opt(contxt, OPT_SAFE);
+
+    D_NUM = 0;
+
+    // We need something to work with.
+    if(dest)
     {
-        entry_p help            = get_opt(contxt, OPT_HELP),
-                prompt          = get_opt(contxt, OPT_PROMPT),
-                dest            = get_opt(contxt, OPT_DEST),
-                settooltype     = get_opt(contxt, OPT_SETTOOLTYPE),
-                setdefaulttool  = get_opt(contxt, OPT_SETDEFAULTTOOL),
-                setstack        = get_opt(contxt, OPT_SETSTACK),
-                noposition      = get_opt(contxt, OPT_NOPOSITION),
-                setposition     = get_opt(contxt, OPT_SETPOSITION),
-                confirm         = get_opt(contxt, OPT_CONFIRM),
-                safe            = get_opt(contxt, OPT_SAFE);
+        // Something is 'dest'.info
+        char *file = str(dest);
 
-        DNUM = 0;
-
-        // We need something to work with.
-        if(dest)
+        // The (noposition) and (setposition) options are mutually exclusive.
+        if(noposition && setposition)
         {
-            // Something is 'dest'.info
-            char *file = str(dest);
+            ERR(ERR_OPTION_MUTEX, "noposition/setposition");
+            R_NUM(0);
+        }
 
-            // Do we need confirmation?
-            if(confirm)
+        // A non safe operation in pretend mode always succeeds.
+        if(get_numvar(contxt, "@pretend") && !safe)
+        {
+            R_NUM(1);
+        }
+
+        // Get confirmation if necessary.
+        if(!confirm || h_confirm(contxt, str(help), str(prompt)))
+        {
+            #if defined(AMIGA) && !defined(LG_TEST)
+            // Get icon information.
+            struct DiskObject *obj = (struct DiskObject *)
+                GetDiskObject(file);
+
+            if(obj)
             {
-                // The default threshold is expert.
-                int level = get_numvar(contxt, "@user-level"),
-                    thres = 2;
+                // We need to save the current value of the tool type and
+                // default tool members in order to not trash mem when free:ing
+                // the diskobject.
+                char *odt = obj->do_DefaultTool;
+                char **tts = (char **) obj->do_ToolTypes;
 
-                // If the (confirm ...) option contains
-                // something that can be translated into
-                // a new threshold value...
-                if(confirm->children &&
-                   confirm->children[0] &&
-                   confirm->children[0] != end())
+                // If we're going to set tooltypes the option must have one or
+                // two children.
+                if(settooltype && c_sane(settooltype, 1))
                 {
-                    // ...then do so.
-                    thres = num(confirm);
-                }
+                    // The number of tooltypes.
+                    size_t n = 0;
 
-                // If we are below the threshold value,
-                // don't care about getting confirmation
-                // from the user.
-                if(level < thres)
-                {
-                    confirm = NULL;
-                }
+                    // Get tooltype and current value (if it exists).
+                    char *t = str(settooltype->children[0]),
+                         *o = FindToolType(obj->do_ToolTypes, t);
 
-                // Make sure that we have the prompt and
-                // help texts that we need if 'confirm'
-                // is set.
-                if(!prompt || !help)
-                {
-                    char *opt = prompt ? "help" : "prompt";
-                    ERR(ERR_MISSING_OPTION, opt);
-                    RCUR;
-                }
-            }
+                    // Get size of tooltype array.
+                    while(*(tts + n++));
 
-            // The (noposition) and (setposition)
-            // options are mutually exclusive.
-            if(noposition && setposition)
-            {
-                ERR(ERR_OPTION_MUTEX,
-                    "noposition/setposition");
-                RCUR;
-            }
-
-            // A non safe operation in pretend mode
-            // always succeeds.
-            if(get_numvar(contxt, "@pretend") && !safe)
-            {
-                RNUM(1);
-            }
-
-            // Get confirmation if necessary.
-            if(!confirm ||
-               h_confirm(contxt, str(help), str(prompt)))
-            {
-                #if defined(AMIGA) && !defined(LG_TEST)
-                // Get icon information.
-                struct DiskObject *obj = (struct DiskObject *)
-                    GetDiskObject(file);
-
-                if(obj)
-                {
-                    // We need to save the current value
-                    // of the tool type and default tool
-                    // members in order to not trash mem
-                    // when free:ing the diskobject.
-                    char *odt = obj->do_DefaultTool;
-                    char **tts = (char **) obj->do_ToolTypes;
-
-                    // If we're going to set tooltypes the option
-                    // must have one or two children.
-                    if(settooltype &&
-                       c_sane(settooltype, 1))
+                    // Set value or create tooltype?
+                    if(settooltype->children[1] &&
+                       settooltype->children[1] != end())
                     {
-                        // The number of tooltypes.
-                        size_t n = 0;
+                        // Resolve tooltype value.
+                        const char *v = str(settooltype->children[1]);
 
-                        // Get tooltype and current value (if it exists).
-                        char *t = str(settooltype->children[0]),
-                             *o = FindToolType(obj->do_ToolTypes, t);
-
-                        // Get size of tooltype array.
-                        while(*(tts + n++));
-
-                        // Set value or create tooltype?
-                        if(settooltype->children[1] &&
-                           settooltype->children[1] != end())
+                        // If it already exists, we will replace the old value
+                        // with the new one.
+                        if(o)
                         {
-                            // Resolve tooltype value.
-                            const char *v = str(settooltype->children[1]);
+                            // Allocate memory for a new temporary array.
+                            obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
 
-                            // If it already exists, we will replace the old
-                            // value with the new one.
-                            if(o)
+                            if(obj->do_ToolTypes)
                             {
-                                // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
+                                char **nts = (char **) obj->do_ToolTypes;
 
-                                if(obj->do_ToolTypes)
+                                // Copy the current set of tooltypes.
+                                memcpy(nts, tts, n  * sizeof(char **));
+
+                                // Iterate over the current set.
+                                while(*nts)
                                 {
-                                    char **nts = (char **) obj->do_ToolTypes;
-
-                                    // Copy the current set of tooltypes.
-                                    memcpy(nts, tts, n  * sizeof(char **));
-
-                                    // Iterate over the current set.
-                                    while(*nts)
+                                    // Is the found value is within the bounds
+                                    // of the current string?
+                                    if(o >= *nts &&
+                                       o <= (*nts + strlen(*nts)))
                                     {
-                                        // Is the found value is within the
-                                        // bounds of the current string?
-                                        if(o >= *nts &&
-                                           o <= (*nts + strlen(*nts)))
+                                        // Create either a new key -> value
+                                        // pair, or a naked key.
+                                        if(strlen(v))
                                         {
-                                            // Create either a new key -> value pair, or a
-                                            // naked key.
-                                            if(strlen(v))
-                                            {
-                                                // Tooltype with value.
-                                                snprintf(get_buf(), buf_size(), "%s=%s", t, v);
-                                            }
-                                            else
-                                            {
-                                                // Naked tooltype.
-                                                snprintf(get_buf(), buf_size(), "%s", t);
-                                            }
-
-                                            // Overwrite the old tooltype.
-                                            *nts = get_buf();
-                                            break;
+                                            // Tooltype with value.
+                                            snprintf(get_buf(), buf_size(), "%s=%s", t, v);
+                                        }
+                                        else
+                                        {
+                                            // Naked tooltype.
+                                            snprintf(get_buf(), buf_size(), "%s", t);
                                         }
 
-                                        // Next tooltype.
-                                        nts++;
+                                        // Overwrite the old tooltype.
+                                        *nts = get_buf();
+                                        break;
                                     }
-                                }
-                                else
-                                {
-                                    // Out of memory.
-                                    PANIC(contxt);
+
+                                    // Next tooltype.
+                                    nts++;
                                 }
                             }
-                            // It doesn't exist, append new tooltype.
                             else
                             {
-                                // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = DBG_ALLOC(calloc(n + 1, sizeof(char *)));
-
-                                if(obj->do_ToolTypes)
-                                {
-                                    char **nts = (char **) obj->do_ToolTypes;
-
-                                    // Copy the current set of tooltypes.
-                                    memcpy(nts, tts, n * sizeof(char **));
-
-                                    if(strlen(v))
-                                    {
-                                        // Tooltype with value.
-                                        snprintf(get_buf(), buf_size(), "%s=%s", t, v);
-                                    }
-                                    else
-                                    {
-                                        // Naked tooltype.
-                                        snprintf(get_buf(), buf_size(), "%s", t);
-                                    }
-
-                                    // Append tooltype.
-                                    *(nts + n - 1) = get_buf();
-                                }
-                                else
-                                {
-                                    // Out of memory.
-                                    PANIC(contxt);
-                                }
+                                // Out of memory.
+                                PANIC(contxt);
                             }
                         }
-                        // Delete tooltype.
+                        // It doesn't exist, append new tooltype.
                         else
                         {
-                            // Is there anything to delete?
-                            if(o && n > 1)
+                            // Allocate memory for a new temporary array.
+                            obj->do_ToolTypes = DBG_ALLOC(calloc(n + 1, sizeof(char *)));
+
+                            if(obj->do_ToolTypes)
                             {
-                                // Allocate memory for a new temporary array.
-                                obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
+                                char **nts = (char **) obj->do_ToolTypes;
 
-                                if(obj->do_ToolTypes)
+                                // Copy the current set of tooltypes.
+                                memcpy(nts, tts, n * sizeof(char **));
+
+                                if(strlen(v))
                                 {
-                                    char **nts = (char **) obj->do_ToolTypes,
-                                         **ots = tts;
-
-                                    // Delete tooltype by copying everything
-                                    // except the tooltype to the new array.
-                                    while(*ots)
-                                    {
-                                        if((o < *ots) ||
-                                           (o > (*ots + strlen(*ots))))
-                                        {
-                                            *nts = *ots;
-                                            nts++;
-                                        }
-
-                                        ots++;
-                                    }
+                                    // Tooltype with value.
+                                    snprintf(get_buf(), buf_size(), "%s=%s", t, v);
                                 }
                                 else
                                 {
-                                    // Out of memory.
-                                    PANIC(contxt);
+                                    // Naked tooltype.
+                                    snprintf(get_buf(), buf_size(), "%s", t);
                                 }
+
+                                // Append tooltype.
+                                *(nts + n - 1) = get_buf();
+                            }
+                            else
+                            {
+                                // Out of memory.
+                                PANIC(contxt);
                             }
                         }
                     }
-
-                    // Change the default tool of project?
-                    if(setdefaulttool)
-                    {
-                        // Set temporary string.
-                        obj->do_DefaultTool = (char *)
-                            str(setdefaulttool);
-                    }
-
-                    // Set tool stacksize?
-                    if(setstack)
-                    {
-                        // Is a minimum value a good idea?
-                        obj->do_StackSize = num(setstack);
-                    }
-
-                    // Reset icon position?
-                    if(noposition)
-                    {
-                        obj->do_CurrentX = NO_ICON_POSITION;
-                        obj->do_CurrentY = NO_ICON_POSITION;
-                    }
-
-                    // Set icon position?
-                    if(setposition &&
-                       c_sane(setposition, 2))
-                    {
-                        obj->do_CurrentX = num(setposition->children[0]);
-                        obj->do_CurrentY = num(setposition->children[1]);
-                    }
-
-                    // Save all changes to the .info file.
-                    if(PutDiskObject(file, obj))
-                    {
-                        // Done.
-                        DNUM = 1;
-                    }
+                    // Delete tooltype.
                     else
                     {
-                        // We failed for some unknown reason.
-                        ERR(ERR_WRITE_FILE, file);
+                        // Is there anything to delete?
+                        if(o && n > 1)
+                        {
+                            // Allocate memory for a new temporary array.
+                            obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
+
+                            if(obj->do_ToolTypes)
+                            {
+                                char **nts = (char **) obj->do_ToolTypes,
+                                     **ots = tts;
+
+                                // Delete tooltype by copying everything
+                                // except the tooltype to the new array.
+                                while(*ots)
+                                {
+                                    if((o < *ots) ||
+                                       (o > (*ots + strlen(*ots))))
+                                    {
+                                        *nts = *ots;
+                                        nts++;
+                                    }
+
+                                    ots++;
+                                }
+                            }
+                            else
+                            {
+                                // Out of memory.
+                                PANIC(contxt);
+                            }
+                        }
                     }
+                }
 
-                    // Restore DiskObject, otherwise memory
-                    // will be lost / trashed. Refer to the
-                    // icon.library documentation.
+                // Change the default tool of project?
+                if(setdefaulttool)
+                {
+                    // Set temporary string.
+                    obj->do_DefaultTool = (char *) str(setdefaulttool);
+                }
 
-                    // If we have a new tooltype array, free
-                    // it and reinstate the old one.
-                    if(tts != (char **) obj->do_ToolTypes)
-                    {
-                        free(obj->do_ToolTypes);
-                        obj->do_ToolTypes = (STRPTR *) tts;
-                    }
+                // Set tool stacksize?
+                if(setstack)
+                {
+                    // Is a minimum value a good idea?
+                    obj->do_StackSize = num(setstack);
+                }
 
-                    // No need to free the current string,
-                    // just overwrite what we have.
-                    obj->do_DefaultTool = odt;
+                // Reset icon position?
+                if(noposition)
+                {
+                    obj->do_CurrentX = NO_ICON_POSITION;
+                    obj->do_CurrentY = NO_ICON_POSITION;
+                }
 
-                    // Free the DiskObject after restoring it to
-                    // the state it was in before our changes.
-                    FreeDiskObject(obj);
+                // Set icon position?
+                if(setposition && c_sane(setposition, 2))
+                {
+                    obj->do_CurrentX = num(setposition->children[0]);
+                    obj->do_CurrentY = num(setposition->children[1]);
+                }
+
+                // Save all changes to the .info file.
+                if(PutDiskObject(file, obj))
+                {
+                    // Done.
+                    D_NUM = 1;
                 }
                 else
                 {
-                    // More information? IoErr() is nice.
-                    ERR(ERR_READ_FILE, file);
+                    // We failed for some unknown reason.
+                    ERR(ERR_WRITE_FILE, file);
                 }
-                #else
-                // On non-Amiga systems we always succeed.
-                DNUM = 1;
 
-                // For testing purposes only.
-                printf("%s%d%d%d",
-                        file,
-                        settooltype ? 1 : 0,
-                        setstack ? 1 : 0,
-                        setdefaulttool ? 1: 0);
-                #endif
+                // Restore DiskObject, otherwise memory will be lost / trashed.
+                // Refer to the icon.library documentation.
+
+                // If we have a new tooltype array, free it and reinstate the
+                // old one.
+                if(tts != (char **) obj->do_ToolTypes)
+                {
+                    free(obj->do_ToolTypes);
+                    obj->do_ToolTypes = (STRPTR *) tts;
+                }
+
+                // No need to free the current string, just overwrite what we
+                // have.
+                obj->do_DefaultTool = odt;
+
+                // Free the DiskObject after restoring it to the state it was in
+                // before our changes.
+                FreeDiskObject(obj);
             }
             else
             {
-                // The user did not confirm.
-                DNUM = 0;
+                // More information? IoErr() is nice.
+                ERR(ERR_READ_FILE, file);
             }
+            #else
+            // On non-Amiga systems we always succeed.
+            D_NUM = 1;
+
+            // For testing purposes only.
+            printf("%s%d%d%d",
+                    file,
+                    settooltype ? 1 : 0,
+                    setstack ? 1 : 0,
+                    setdefaulttool ? 1: 0);
+            #endif
         }
         else
         {
-            // We need an icon.
-            ERR(ERR_MISSING_OPTION, "dest");
+            // The user did not confirm.
+            D_NUM = 0;
         }
     }
     else
     {
-        // The parser is broken
-        PANIC(contxt);
+        // We need an icon.
+        ERR(ERR_MISSING_OPTION, "dest");
     }
 
-    // Success, failure or
-    // broken parser.
-    RCUR;
+    // Success or failure.
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (transcript <string1> <string2>)
 //     puts concatenated strings in log file
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_transcript(entry_p contxt)
 {
-    // We need atleast one argument, one or
-    // more strings to put into the log file.
-    if(c_sane(contxt, 1))
+    // One or more arguments.
+    C_SANE(1, NULL);
+
+    // Concatenate all children.
+    char *msg = get_chlstr(contxt, false);
+
+    // Assume failure.
+    D_NUM = 0;
+
+    // Did we manage to concatenate something?
+    if(msg)
     {
-        // Concatenate all children.
-        char *msg = get_chlstr(contxt, false);
-
-        // Assume failure.
-        DNUM = 0;
-
-        // Did we manage to concatenate something?
-        if(msg)
+        // If we could resolve all our children, write the result of the
+        // concatenation to the log file (unless logging is disabled).
+        if(!DID_ERR)
         {
-            // If we could resolve all our children,
-            // write the result of the concatenation
-            // to the log file (unless logging is
-            // disabled).
-            if(!DID_ERR)
-            {
-                DNUM = h_log(contxt, "%s\n", msg) ? 1 : 0;
-            }
-
-            // Free the temporary buffer and exit.
-            free(msg);
-            RCUR;
+            D_NUM = h_log(contxt, "%s\n", msg) ? 1 : 0;
         }
+
+        // Free the temporary buffer and exit.
+        free(msg);
+    }
+    else
+    {
+        // Out of memory.
+        PANIC(contxt);
     }
 
-    // OOM / broken parser.
-    PANIC(contxt);
-    RCUR;
+    // Success, failure or OOM.
+    R_CUR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // (rename <old> <new> (help..) (prompt..) (confirm..) (safe))
 //     rename files
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 entry_p m_rename(entry_p contxt)
 {
-    // We need atleast two arguments
-    if(c_sane(contxt, 2))
+    // Two or more arguments / options.
+    C_SANE(2, C_ARG(3));
+
+    entry_p help    = get_opt(C_ARG(3), OPT_HELP),
+            prompt  = get_opt(C_ARG(3), OPT_PROMPT),
+            confirm = get_opt(C_ARG(3), OPT_CONFIRM),
+            disk    = get_opt(C_ARG(3), OPT_DISK),
+            safe    = get_opt(C_ARG(3), OPT_SAFE);
+
+    // Old and new file name.
+    const char *old = str(C_ARG(1)), *new = str(C_ARG(2));
+
+    // If we need confirmation and the user skips or aborts, return. On abort,
+    // HALT will be set by h_confirm.
+    if(confirm && !h_confirm(C_ARG(3), str(help), str(prompt)))
     {
-        entry_p help    = get_opt(CARG(3), OPT_HELP),
-                prompt  = get_opt(CARG(3), OPT_PROMPT),
-                confirm = get_opt(CARG(3), OPT_CONFIRM),
-                disk    = get_opt(CARG(3), OPT_DISK),
-                safe    = get_opt(CARG(3), OPT_SAFE);
-
-        const char *old  = str(CARG(1)),
-                   *new  = str(CARG(2));
-
-        // Do we need confirmation?
-        if(confirm)
-        {
-            // The default threshold is expert.
-            int level = get_numvar(contxt, "@user-level");
-            int thres = 2;
-
-            // If the (confirm ...) option contains
-            // something that can be translated into
-            // a new threshold value...
-            if(confirm->children &&
-               confirm->children[0] &&
-               confirm->children[0] != end())
-            {
-                // ...then do so.
-                thres = num(confirm);
-            }
-
-            // If we are below the threshold value,
-            // don't care about getting confirmation
-            // from the user.
-            if(level < thres)
-            {
-                confirm = NULL;
-            }
-
-            // Make sure that we have the prompt and
-            // help texts that we need if 'confirm'
-            // is set.
-            if(!prompt || !help)
-            {
-                char *opt = prompt ? "help" : "prompt";
-                ERR(ERR_MISSING_OPTION, opt);
-                RNUM(0);
-            }
-        }
-
-        // If we need confirmation and the user skips
-        // or aborts, return. On abort, the HALT will
-        // be set by h_confirm.
-        if(confirm && !h_confirm(CARG(3),
-           str(help), str(prompt)))
-        {
-            RNUM(0);
-        }
-
-        // Is this a safe operation or are we not
-        // running in pretend mode?
-        if(safe || !get_numvar(contxt, "@pretend"))
-        {
-            // Are we going to rename a file/dir?
-            if(!disk)
-            {
-                // Rename if target doesn't exist.
-                if(!h_exists(new) && !rename(old, new))
-                {
-                    // Success.
-                    h_log(contxt, tr(S_FRND), old, new);
-                    RNUM(-1);
-                }
-
-                // Fail if target exists.
-                ERR(ERR_RENAME_FILE, old);
-                RNUM(0);
-            }
-
-            // No, we're going to relabel a volume.
-            #if defined(AMIGA) && !defined(LG_TEST)
-            // Rename volume.
-            if(!Relabel(old, new))
-            {
-                // Failure.
-                RNUM(0);
-            }
-            #endif
-
-            // Success.
-            h_log(contxt, tr(S_FRND), old, new);
-        }
-
-        // Non safe operation in pretend mode
-        // or normal successful operation.
-        RNUM(-1);
+        R_NUM(0);
     }
 
-    // The parser is broken
-    PANIC(contxt);
-    RCUR;
+    // Is this a safe operation or are we not running in pretend mode?
+    if(safe || !get_numvar(contxt, "@pretend"))
+    {
+        // Are we going to rename a file/dir?
+        if(!disk)
+        {
+            // Rename if target doesn't exist.
+            if(!h_exists(new) && !rename(old, new))
+            {
+                // Success.
+                h_log(contxt, tr(S_FRND), old, new);
+                R_NUM(-1);
+            }
+
+            // Fail if target exists.
+            ERR(ERR_RENAME_FILE, old);
+            R_NUM(0);
+        }
+
+        // No, we're going to relabel a volume.
+        #if defined(AMIGA) && !defined(LG_TEST)
+        // Rename volume.
+        if(!Relabel(old, new))
+        {
+            // Failure.
+            R_NUM(0);
+        }
+        #endif
+
+        // Success.
+        h_log(contxt, tr(S_FRND), old, new);
+    }
+
+    // Non safe operation in pretend mode or normal successful operation.
+    R_NUM(-1);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        h_log
 // Description: Write formatted message to log file.
 // Input:       entry_p contxt:     The execution context.
@@ -4208,9 +3732,10 @@ entry_p m_rename(entry_p contxt)
 // Return:      int:                Number of characters written to log file
 //                                  if logging is enabled. If logging is
 //                                  disabled, '1' will always be returned.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int h_log(entry_p contxt, const char *fmt, ...)
 {
+    // Sanity check.
     if(contxt && fmt)
     {
         // Only if logging is enabled...
@@ -4252,8 +3777,7 @@ int h_log(entry_p contxt, const char *fmt, ...)
             return cnt;
         }
 
-        // We suceeded doing
-        // nothing.
+        // We suceeded doing nothing.
         return 1;
     }
 

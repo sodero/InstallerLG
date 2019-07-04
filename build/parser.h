@@ -1,8 +1,9 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
+   Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -29,6 +30,9 @@
 
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
+
+/* Undocumented macros, especially those whose name start with YY_,
+   are private implementation details.  Do not rely on them.  */
 
 #ifndef YY_YY_PARSER_H_INCLUDED
 # define YY_YY_PARSER_H_INCLUDED
@@ -182,142 +186,6 @@ extern int yydebug;
     OVERRIDE = 392
   };
 #endif
-/* Tokens.  */
-#define SYM 258
-#define STR 259
-#define OOM 260
-#define INT 261
-#define HEX 262
-#define BIN 263
-#define AND 264
-#define BITAND 265
-#define BITNOT 266
-#define BITOR 267
-#define BITXOR 268
-#define NOT 269
-#define IN 270
-#define OR 271
-#define SHIFTLEFT 272
-#define SHIFTRIGHT 273
-#define XOR 274
-#define EQ 275
-#define GT 276
-#define GTE 277
-#define LT 278
-#define LTE 279
-#define NEQ 280
-#define IF 281
-#define SELECT 282
-#define UNTIL 283
-#define WHILE 284
-#define TRACE 285
-#define RETRACE 286
-#define EXECUTE 287
-#define REXX 288
-#define RUN 289
-#define ABORT 290
-#define EXIT 291
-#define ONERROR 292
-#define TRAP 293
-#define REBOOT 294
-#define COPYFILES 295
-#define COPYLIB 296
-#define DELETE 297
-#define EXISTS 298
-#define FILEONLY 299
-#define FOREACH 300
-#define MAKEASSIGN 301
-#define MAKEDIR 302
-#define PROTECT 303
-#define STARTUP 304
-#define TEXTFILE 305
-#define TOOLTYPE 306
-#define TRANSCRIPT 307
-#define RENAME 308
-#define COMPLETE 309
-#define DEBUG 310
-#define MESSAGE 311
-#define USER 312
-#define WELCOME 313
-#define WORKING 314
-#define CLOSEMEDIA 315
-#define EFFECT 316
-#define SETMEDIA 317
-#define SHOWMEDIA 318
-#define DATABASE 319
-#define EARLIER 320
-#define GETASSIGN 321
-#define GETDEVICE 322
-#define GETDISKSPACE 323
-#define GETENV 324
-#define GETSIZE 325
-#define GETSUM 326
-#define GETVERSION 327
-#define ICONINFO 328
-#define CUS 329
-#define DCL 330
-#define ASKBOOL 331
-#define ASKCHOICE 332
-#define ASKDIR 333
-#define ASKDISK 334
-#define ASKFILE 335
-#define ASKNUMBER 336
-#define ASKOPTIONS 337
-#define ASKSTRING 338
-#define CAT 339
-#define EXPANDPATH 340
-#define FMT 341
-#define PATHONLY 342
-#define PATMATCH 343
-#define STRLEN 344
-#define SUBSTR 345
-#define TACKON 346
-#define SET 347
-#define SYMBOLSET 348
-#define SYMBOLVAL 349
-#define OPENWBOBJECT 350
-#define SHOWWBOBJECT 351
-#define CLOSEWBOBJECT 352
-#define ALL 353
-#define APPEND 354
-#define ASSIGNS 355
-#define BACK 356
-#define CHOICES 357
-#define COMMAND 358
-#define COMPRESSION 359
-#define CONFIRM 360
-#define DEFAULT 361
-#define DELOPTS 362
-#define DEST 363
-#define DISK 364
-#define FILES 365
-#define FONTS 366
-#define GETDEFAULTTOOL 367
-#define GETPOSITION 368
-#define GETSTACK 369
-#define GETTOOLTYPE 370
-#define HELP 371
-#define INFOS 372
-#define INCLUDE 373
-#define NEWNAME 374
-#define NEWPATH 375
-#define NOGAUGE 376
-#define NOPOSITION 377
-#define NOREQ 378
-#define PATTERN 379
-#define PROMPT 380
-#define QUIET 381
-#define RANGE 382
-#define SAFE 383
-#define SETDEFAULTTOOL 384
-#define SETPOSITION 385
-#define SETSTACK 386
-#define SETTOOLTYPE 387
-#define SOURCE 388
-#define SWAPCOLORS 389
-#define OPTIONAL 390
-#define RESIDENT 391
-#define OVERRIDE 392
 
 /* Value type.  */
 
