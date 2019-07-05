@@ -41,7 +41,13 @@ int error(entry_p contxt, int line, err_t type, const char *info)
         return last;
     }
 
-    // Show 'real' errors to the user.
+    // Dump context if in PANIC.
+    if(type == ERR_PANIC)
+    {
+        dump(contxt);
+        return type;
+    }
+
     static const char *des[] =
     {
         /*0*/ NULL, /*1*/ "Halt", /*2*/ "Abort", /*3*/ "Reset", /*4*/ "Parse error",
@@ -61,17 +67,8 @@ int error(entry_p contxt, int line, err_t type, const char *info)
         /*35*/ "Invalid assign", /*36*/ "Options are mutually exclusive", /*37*/ "Invalid value"
     };
 
-    // Dump context if in PANIC.
-    if(type == ERR_PANIC)
-    {
-        dump(contxt);
-    }
-    // Don't show GUI if in PANIC.
-    else
-    {
-        // Error window / console output.
-        gui_error(line, des[type], info);
-    }
+    // Error window / console output.
+    gui_error(line, des[type], info);
 
     // Current state.
     return last;
