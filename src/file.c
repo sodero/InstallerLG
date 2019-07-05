@@ -548,6 +548,12 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     node->copy = DBG_ALLOC(strdup(dst));
                     node->type = 2;
 
+                    // Create .info node if necessary.
+                    if(infos)
+                    {
+                        node = h_suffix_append(node, "info");
+                    }
+
                     // Iterate over all entries in the source directory.
                     while(entry)
                     {
@@ -1411,7 +1417,7 @@ entry_p m_copyfiles(entry_p contxt)
                 for(; cur && grc == G_TRUE; cur = cur->next)
                 {
                     int32_t prm = 0;
-
+KPrintF("cur:%s\n", cur->name);
                     // Copy file / create dir / skip if zero:ed
                     switch(cur->type)
                     {
