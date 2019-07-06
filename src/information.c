@@ -55,41 +55,30 @@ entry_p m_debug(entry_p contxt)
     // Installer works.
     C_SANE(0, NULL);
 
-    // Invoked from shell or WB?
-    int cli = arg_argc(-1);
-
     // Is there anything to print?
     if(contxt->children)
     {
-        entry_p *cur = contxt->children;
-
         // For all children, print the string representation, to stdout if we're
         // running in a shell or to the log when invoked from WB.
-        while(*cur && *cur != end())
+        for(entry_p *cur = contxt->children; *cur && *cur != end(); cur++)
         {
-            char *val = NULL;
+            char *val = "<NIL>";
 
             // Test if variable is defined, if not print <NIL>.
             if((*cur)->type == SYMREF)
             {
                 // Save level of strictness.
-                entry_p res;
                 int mode = get_numvar(contxt, "@strict");
 
                 // Set non strict mode and search for symbol. By doing it this
                 // way we supress error messages, if any.
                 set_numvar(contxt, "@strict", 0);
-                res = find_symbol(*cur);
+                entry_p res = find_symbol(*cur);
 
-                // If symbol is missing, we will have a (false) DANGLE.
-                if(res->type == DANGLE && !tru(res))
+                // Save string representation of symbol if it exists.
+                if(res->type != DANGLE)
                 {
-                    // As prescribed.
-                    val = "<NIL>";
-                }
-                else
-                {
-                    // Symbol found. Resolve it.
+                    // Resolve string.
                     val = str(*cur);
                 }
 
@@ -102,7 +91,7 @@ entry_p m_debug(entry_p contxt)
                 val = str(*cur);
             }
 
-            if(cli)
+            if(arg_argc(-1))
             {
                 // Invoked from CLI.
                 printf("%s ", val);
@@ -114,12 +103,11 @@ entry_p m_debug(entry_p contxt)
                 KPrintF("%s ", val);
             }
             #endif
-            cur++;
         }
     }
 
     // Append final newline.
-    if(cli)
+    if(arg_argc(-1))
     {
         // Invoked from CLI.
         printf("\n");
@@ -250,7 +238,7 @@ entry_p m_welcome(entry_p contxt)
     // Arguments are optional.
     C_SANE(0, NULL);
 
-    // Installer settings.
+    // Current installer settings.
     int lvl = get_numvar(contxt, "@user-level"),
         prt = get_numvar(contxt, "@pretend"),
         lgf = get_numvar(contxt, "@log");
@@ -259,47 +247,41 @@ entry_p m_welcome(entry_p contxt)
     char *msg = get_chlstr(contxt, false);
 
     // Make sure that we're not out of memory.
-    if(msg)
+    if(!msg)
     {
-        // Return value.
-        int ret = 0;
-
-        // If we could resolve everything, show the result of the concatenation.
-        if(!DID_ERR)
-        {
-            // Show welcome dialog.
-            inp_t grc = gui_welcome(msg, &lvl, &lgf, &prt,
-                                    get_numvar(contxt, "@user-min"),
-                                    get_numvar(contxt, "@no-pretend"),
-                                    get_numvar(contxt, "@no-log"));
-
-            // True or false only.
-            ret = (grc == G_TRUE) ? 1 : 0;
-
-            // On 'Proceed', set level and mode.
-            if(grc == G_TRUE)
-            {
-                set_numvar(contxt, "@user-level", lvl);
-                set_numvar(contxt, "@pretend", prt);
-                set_numvar(contxt, "@log", lgf);
-            }
-            else
-            {
-                // Abort.
-                HALT;
-            }
-        }
-
-        // Free temporary buffer.
-        free(msg);
-
-        // Done or halt.
-        R_NUM(ret);
+        PANIC(contxt);
+        R_CUR;
     }
 
-    // Out of memory.
-    PANIC(contxt);
-    R_CUR;
+    // Assume abort.
+    inp_t grc = G_FALSE;
+
+    // If we could resolve everything, show the result.
+    if(!DID_ERR)
+    {
+        // Show welcome dialog.
+        grc = gui_welcome(msg, &lvl, &lgf, &prt,
+                          get_numvar(contxt, "@user-min"),
+                          get_numvar(contxt, "@no-pretend"),
+                          get_numvar(contxt, "@no-log"));
+
+        // User abort?
+        if(grc != G_TRUE)
+        {
+            HALT;
+        }
+
+        // Save new settings.
+        set_numvar(contxt, "@user-level", lvl);
+        set_numvar(contxt, "@pretend", prt);
+        set_numvar(contxt, "@log", lgf);
+    }
+
+    // Free temporary buffer.
+    free(msg);
+
+    // Proceed, halt or error.
+    R_NUM((grc == G_TRUE) ? 1 : 0);
 }
 
 //------------------------------------------------------------------------------
@@ -316,7 +298,7 @@ entry_p m_working(entry_p contxt)
     // Concatenate all children.
     char *msg = get_chlstr(contxt, false);
 
-    // Did we manage to concatenate something?
+    // Make sure that we're not out of memory.
     if(msg)
     {
         // Did we fail while resolving one or more of our children?
@@ -328,19 +310,19 @@ entry_p m_working(entry_p contxt)
         }
 
         // Standard prefix.
-        const char *pre = tr(S_WRKN);
-        size_t len = strlen(pre) + strlen(msg) + 1;
+        size_t len = strlen(tr(S_WRKN)) + strlen(msg) + 1;
 
         // Memory to hold prefix and children.
         char *con = DBG_ALLOC(calloc(len, 1));
 
+        // Did we manage to concatenate something?
         if(con)
         {
             // Concatenate and free buffer.
-            snprintf(con, len, "%s%s", pre, msg);
+            snprintf(con, len, "%s%s", tr(S_WRKN), msg);
             free(msg);
 
-            // Show the result and eturn immediately.
+            // Show the result.
             gui_working(con);
 
             // Free the final message buffer.

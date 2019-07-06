@@ -647,56 +647,59 @@ entry_p merge(entry_p dst, entry_p src)
 entry_p push(entry_p dst, entry_p src)
 {
     // Sanity check.
-    if(dst && src)
+    if(!dst || !src)
     {
-        // Assume we're dealing with a child.
-        entry_p **dst_p = &dst->children;
+        PANIC(NULL);
+        return dst;
+    }
 
-        // Symbols and user-defined are the same.
-        if((src->type == SYMBOL || src->type == CUSTOM) &&
-           (dst->type == CONTXT || dst->type == CUSTOM))
+    // Assume we're dealing with a child.
+    entry_p **dst_p = &dst->children;
+
+    // Symbols and user-defined are the same.
+    if((src->type == SYMBOL || src->type == CUSTOM) &&
+       (dst->type == CONTXT || dst->type == CUSTOM))
+    {
+        // We can't have multiple references.
+        for(size_t ndx = 0; dst->symbols[ndx] &&
+            dst->symbols[ndx] != end(); ndx++)
         {
-            // We can't have multiple references.
-            for(size_t ndx = 0; dst->symbols[ndx] &&
-                dst->symbols[ndx] != end(); ndx++)
+            // On duplicate references, just update the existing one,
+            // don't create a new one. Multiple references aren't OK,
+            // multiple referents are. This means that you can redefine
+            // procedures dynamically, e.g @onerror. This is of course
+            // also true for normal variables.
+            if(!strcasecmp(dst->symbols[ndx]->name, src->name))
             {
-                // On duplicate references, just update the existing one,
-                // don't create a new one. Multiple references aren't OK,
-                // multiple referents are. This means that you can redefine
-                // procedures dynamically, e.g @onerror. This is of course
-                // also true for normal variables.
-                if(!strcasecmp(dst->symbols[ndx]->name, src->name))
+                // Variables set without (set) own themselves (refer to
+                // init() and init_num()) and must be killed before the
+                // reference is updated or else we will leak memory.
+                if(dst->symbols[ndx]->parent == dst)
                 {
-                    // Variables set without (set) own themselves (refer to
-                    // init() and init_num()) and must be killed before the
-                    // reference is updated or else we will leak memory.
-                    if(dst->symbols[ndx]->parent == dst)
-                    {
-                        kill(dst->symbols[ndx]);
-                    }
-
-                    dst->symbols[ndx] = src;
-                    return dst;
+                    kill(dst->symbols[ndx]);
                 }
+
+                dst->symbols[ndx] = src;
+                return dst;
             }
-
-            dst_p = &dst->symbols;
         }
 
-        // Whether symbol or child, the procedure is the same, just append and
-        // reparent.
-        if(*dst_p && append(dst_p, src))
-        {
-            src->parent = dst;
-            return dst;
-        }
+        dst_p = &dst->symbols;
+    }
+
+    // Whether symbol or child, the procedure is the same, just append and
+    // reparent.
+    if(*dst_p && append(dst_p, src))
+    {
+        src->parent = dst;
+        return dst;
     }
 
     // All or nothing. Since we own 'src', we need to free it, or else we will
     // leak when out of memory.
     kill(src);
 
-    // Out of memory / bad input.
+    // Out of memory.
     PANIC(NULL);
     return dst;
 }

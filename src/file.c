@@ -548,6 +548,12 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     node->copy = DBG_ALLOC(strdup(dst));
                     node->type = 2;
 
+                    // Create .info node if necessary.
+                    if(infos)
+                    {
+                        node = h_suffix_append(node, "info");
+                    }
+
                     // Iterate over all entries in the source directory.
                     while(entry)
                     {
