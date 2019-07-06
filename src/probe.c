@@ -891,16 +891,14 @@ entry_p m_getversion(entry_p contxt)
         // revision information.
         R_NUM(ver);
     }
-    else
-    {
-        #if defined(AMIGA) && !defined(LG_TEST)
-        // No arguments, return version of Exec.
-        extern struct ExecBase *SysBase;
-        R_NUM((SysBase->LibNode.lib_Version << 16) | SysBase->SoftVer);
-        #else
-        R_NUM(0);
-        #endif
-    }
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // No arguments, return version of Exec.
+    extern struct ExecBase *SysBase;
+    R_NUM((SysBase->LibNode.lib_Version << 16) | SysBase->SoftVer);
+    #else
+    R_NUM(0);
+    #endif
 }
 
 //------------------------------------------------------------------------------
@@ -926,148 +924,150 @@ entry_p m_iconinfo(entry_p contxt)
                         get_opt(contxt, OPT_GETSTACK),
                         get_opt(contxt, OPT_GETPOSITION), end() };
 
-    // We need something to work with.
-    if(dst)
+    // We need an icon.
+    if(!dst)
     {
-        // Something is 'dst'.info
-        char *file = str(dst);
+        ERR(ERR_MISSING_OPTION, "dest");
+        R_NUM(0);
+    }
 
-        #if defined(AMIGA) && !defined(LG_TEST)
-        // Get icon information.
-        struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
-        #else
-        char *obj = file;
-        #endif
+    // Suffix isn't needed.
+    char *file = str(dst);
 
-        if(obj)
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Get icon information.
+    struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
+    #else
+    char *obj = file;
+    #endif
+
+    // Exit if we can't read from icon.
+    if(!obj)
+    {
+        ERR(ERR_READ_FILE, file);
+        R_NUM(0);
+    }
+
+    // Iterate over all options.
+    for(size_t i = 0; types[i] != end() && !DID_ERR; i++)
+    {
+        // Is the current option not set?
+        if(!types[i])
         {
-            // Iterate over all options or until we run into resource problems.
-            for(size_t i = 0; types[i] != end() && !DID_ERR; i++)
+            // Next option.
+            continue;
+        }
+
+        // Iterate over all its children.
+        for(size_t j = 0; types[i]->children[j] &&
+            types[i]->children[j] != end(); j++)
+        {
+            // Get variable name.
+            char *name = str(types[i]->children[j]);
+
+            // Skip empty variable names.
+            if(!(*name))
             {
-                // Is the current option not set?
-                if(!types[i])
-                {
-                    // Next option.
-                    continue;
-                }
+                continue;
+            }
 
-                // Iterate over all its children.
-                for(size_t j = 0; types[i]->children[j] &&
-                    types[i]->children[j] != end(); j++)
-                {
-                    // Get variable name and option type.
-                    int type = types[i]->id;
-                    char *name = str(types[i]->children[j]);
+            // Get option type.
+            int type = types[i]->id;
+            char *svl = NULL;
 
-                    // Variable names must be atleast one character long.
-                    if(*name)
+            #if defined(AMIGA) && !defined(LG_TEST)
+            // Is this a numerical value?
+            if(type == OPT_GETSTACK || type == OPT_GETPOSITION)
+            {
+                int v = (type == OPT_GETSTACK ?
+                         obj->do_StackSize : j == 0 ?
+                         obj->do_CurrentX : obj->do_CurrentY);
+
+                snprintf(get_buf(), buf_size(), "%d", v);
+                svl = get_buf();
+            }
+            else
+            if(type == OPT_GETDEFAULTTOOL && obj->do_DefaultTool)
+            {
+                svl = obj->do_DefaultTool;
+            }
+            else
+            if(type == OPT_GETTOOLTYPE && obj->do_ToolTypes)
+            {
+                svl = (char *) FindToolType(obj->do_ToolTypes, name);
+                name = str(types[i]->children[++j]);
+            }
+
+            // Always a valid value.
+            svl = svl ? svl : "";
+            #else
+            // Testing purposes only.
+            snprintf(get_buf(), buf_size(), "%d:%zu", type, j);
+            svl = get_buf();
+            #endif
+
+            // Always a valid (string).
+            entry_p val = new_string(DBG_ALLOC(strdup(svl)));
+
+            // Unless we're out of memory.
+            if(!val)
+            {
+                PANIC(contxt);
+                break;
+            }
+
+            // If a symbol with the same name as that of the option, replace
+            // the value of the old one with the new value.
+            if(contxt->symbols)
+            {
+                for(size_t k = 0; contxt->symbols[k] &&
+                    contxt->symbols[k] != end(); k++)
+                {
+                    if(!strcasecmp(contxt->symbols[k]->name, name))
                     {
-                        char *svl = NULL;
-                        entry_p val;
+                        kill(contxt->symbols[k]->resolved);
+                        contxt->symbols[k]->resolved = val;
+                        push(global(contxt), contxt->symbols[k]);
+                        val->parent = contxt->symbols[k];
 
-                        #if defined(AMIGA) && !defined(LG_TEST)
-                        // Is this a numerical value?
-                        if(type == OPT_GETSTACK || type == OPT_GETPOSITION)
-                        {
-                            int v = (type == OPT_GETSTACK ?
-                                     obj->do_StackSize : j == 0 ?
-                                     obj->do_CurrentX : obj->do_CurrentY);
-
-                            snprintf(get_buf(), buf_size(), "%d", v);
-                            svl = get_buf();
-                        }
-                        else
-                        if(type == OPT_GETDEFAULTTOOL && obj->do_DefaultTool)
-                        {
-                            svl = obj->do_DefaultTool;
-                        }
-                        else
-                        if(type == OPT_GETTOOLTYPE && obj->do_ToolTypes)
-                        {
-                            svl = (char *) FindToolType(obj->do_ToolTypes, name);
-                            name = str(types[i]->children[++j]);
-                        }
-
-                        // Always a valid value.
-                        svl = svl ? svl : "";
-                        #else
-                        // Testing purposes only.
-                        snprintf(get_buf(), buf_size(), "%d:%zu", type, j);
-                        svl = get_buf();
-                        #endif
-
-                        // Always a valid (string).
-                        val = new_string(DBG_ALLOC(strdup(svl)));
-
-                        if(val)
-                        {
-                            // If we already have a symbol of the same same as
-                            // in the option, replace the value of the old one
-                            // with the new value.
-                            if(contxt->symbols)
-                            {
-                                for(size_t k = 0; contxt->symbols[k] &&
-                                    contxt->symbols[k] != end(); k++)
-                                {
-                                    if(!strcasecmp(contxt->symbols[k]->name, name))
-                                    {
-                                        kill(contxt->symbols[k]->resolved);
-                                        contxt->symbols[k]->resolved = val;
-                                        push(global(contxt), contxt->symbols[k]);
-                                        val->parent = contxt->symbols[k];
-
-                                        // We no longer own 'val'.
-                                        val = NULL;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            // No, this is a new symbol. Create, append to this
-                            // function and push to the global context.
-                            if(val)
-                            {
-                                entry_p sym = new_symbol(DBG_ALLOC(strdup(name)));
-
-                                if(sym)
-                                {
-                                    // Adopt the value found above.
-                                    val->parent = sym;
-                                    sym->resolved = val;
-
-                                    if(append(&contxt->symbols, sym))
-                                    {
-                                        push(global(contxt), sym);
-                                        sym->parent = contxt;
-                                    }
-                                }
-                                else
-                                {
-                                    // Out of memory. Do not leak 'val'.
-                                    kill(val);
-                                }
-                            }
-                        }
+                        // We no longer own 'val'.
+                        val = NULL;
+                        break;
                     }
                 }
             }
 
-            #if defined(AMIGA) && !defined(LG_TEST)
-            FreeDiskObject(obj);
-            #endif
-        }
-        else
-        {
-            // More information? IoErr() is nice.
-            ERR(ERR_READ_FILE, file);
-            R_NUM(0);
-        }
+            // No, this is a new symbol. Create, append to this function and
+            // push to the global context.
+            if(val)
+            {
+                entry_p sym = new_symbol(DBG_ALLOC(strdup(name)));
 
-        // Success.
-        R_NUM(1);
+                if(sym)
+                {
+                    // Adopt the value found above.
+                    val->parent = sym;
+                    sym->resolved = val;
+
+                    if(append(&contxt->symbols, sym))
+                    {
+                        push(global(contxt), sym);
+                        sym->parent = contxt;
+                    }
+                }
+                else
+                {
+                    // Out of memory. Do not leak 'val'.
+                    kill(val);
+                }
+            }
+        }
     }
 
-    // We need a destination.
-    ERR(ERR_MISSING_OPTION, "dest");
-    R_NUM(0);
+    #if defined(AMIGA) && !defined(LG_TEST)
+    FreeDiskObject(obj);
+    #endif
+
+    // Success.
+    R_NUM(1);
 }
