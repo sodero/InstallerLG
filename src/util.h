@@ -46,9 +46,9 @@ entry_p native_exists(entry_p contxt, call_t f);
 #define D_NUM    contxt->resolved->id
 #define R_CUR    if(contxt) return contxt->resolved; return NULL
 #define R_NUM(X) contxt->resolved->id = X; return contxt->resolved
-#define R_STR(X) {char *r_str = X; if(r_str) {free(contxt->resolved->name);\
+#define R_STR(X) char *r_str = X; if(r_str) {free(contxt->resolved->name);\
                  contxt->resolved->name = r_str;} else { PANIC(contxt);\
-                 contxt->resolved->name[0] = '\0'; }; return contxt->resolved;}
+                 contxt->resolved->name[0] = '\0'; }; return contxt->resolved
 #define R_EST    if(contxt->resolved->name) {contxt->resolved->name[0] = '\0';}\
                  return contxt->resolved
 #define C_ARG(X) contxt->children[(X) - 1]

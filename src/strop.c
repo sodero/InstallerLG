@@ -141,39 +141,41 @@ entry_p m_fmt(entry_p contxt)
         // Scan the format string.
         for(; fmt[ndx]; ndx++)
         {
-            // A format specifier?
-            if(fmt[ndx] == '%')
+            // Skip non format specifiers.
+            if(fmt[ndx] != '%')
             {
-                // If escape translate into fprintf escape and skip.
-                if(ndx && fmt[ndx - 1] == '\\')
-                {
-                    fmt[ndx - 1] = '%';
-                    continue;
-                }
+                continue;
+            }
 
-                // If this is a specifier that we recognize, then allocate a
-                // new string with just this specifier, nothing else.
-                if(fmt[++ndx] == 's' || (fmt[ndx++] == 'l' && fmt[ndx] == 'd'))
-                {
-                    sct[cnt] = DBG_ALLOC(calloc(ndx - off + 2, 1));
+            // If escape translate into fprintf escape and skip.
+            if(ndx && fmt[ndx - 1] == '\\')
+            {
+                fmt[ndx - 1] = '%';
+                continue;
+            }
 
-                    if(sct[cnt])
-                    {
-                        memcpy(sct[cnt], fmt + off, ndx - off + 1);
-                        off = ndx + 1;
-                        cnt++;
-                    }
-                    else
-                    {
-                        // Out of memory
-                        PANIC(contxt);
-                    }
+            // If this is a specifier that we recognize, then allocate a
+            // new string with just this specifier, nothing else.
+            if(fmt[++ndx] == 's' || (fmt[ndx++] == 'l' && fmt[ndx] == 'd'))
+            {
+                sct[cnt] = DBG_ALLOC(calloc(ndx - off + 2, 1));
+
+                if(sct[cnt])
+                {
+                    memcpy(sct[cnt], fmt + off, ndx - off + 1);
+                    off = ndx + 1;
+                    cnt++;
                 }
                 else
                 {
-                    ERR(ERR_FMT_INVALID, contxt->name);
-                    break;
+                    // Out of memory
+                    PANIC(contxt);
                 }
+            }
+            else
+            {
+                ERR(ERR_FMT_INVALID, contxt->name);
+                break;
             }
         }
 
