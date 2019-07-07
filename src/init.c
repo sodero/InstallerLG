@@ -311,6 +311,7 @@ entry_p init(entry_p contxt)
         init_num(contxt, "@skip", 0);
         init_num(contxt, "@abort", 0);
         init_num(contxt, "@back", 0);
+        init_num(contxt, "@wild", 0);
         init_num(contxt, "@each-type", 0);
         init_num(contxt, "@debug", 0);
         init_num(contxt, "@strict",

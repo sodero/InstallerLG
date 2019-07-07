@@ -2314,6 +2314,8 @@ entry_p m_delete(entry_p contxt)
 
     #if defined(AMIGA) && !defined(LG_TEST)
     wild = ParsePattern(file, get_buf(), buf_size());
+    #else
+    wild = get_numvar(contxt, "@wild");
     #endif
 
     // Assume failure.
