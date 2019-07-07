@@ -15,3 +15,4 @@
 - file.c : h_choices LEAK CHECK
 - Check GUI list mgmt for leaks.
 - Retest iconinfo
+- In (copyfiles) make sure that .info:s aren't overwritten when using (infos).
