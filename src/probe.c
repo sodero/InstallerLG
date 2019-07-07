@@ -668,24 +668,29 @@ entry_p m_getsum(entry_p contxt)
 //------------------------------------------------------------------------------
 static int h_getversion_dev(const char *name)
 {
+    // Assume failure.
     int ver = -1;
-    (void) name;
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    /*
-    struct Device {
-        struct  Library dd_Library;
-    };
+    struct IORequest req;
 
-    struct IORequest {
-        struct  Message io_Message;
-        struct  Device  *io_Device;     device node pointer
-        struct  Unit    *io_Unit;	    unit (driver private)
-        UWORD   io_Command;	            device command
-        UBYTE   io_Flags;
-        BYTE    io_Error;		        error or warning num
-    };
-    */
+    // Assume that 'name' is a device that can be opened.
+    if(!OpenDevice(name, 0, &req, 0))
+    {
+        // Be paranoid.
+        if(req.io_Device)
+        {
+            // Get version and revision.
+            ver = req.io_Device->dd_Library.lib_Version << 16 |
+                  req.io_Device->dd_Library.lib_Revision;
+        }
+
+        // Device is no longer needed.
+        CloseDevice(&req);
+    }
+    #else
+    // Not used.
+    (void) name;
     #endif
 
     return ver;
@@ -699,35 +704,23 @@ static int h_getversion_dev(const char *name)
 //------------------------------------------------------------------------------
 static int h_getversion_lib(const char *name)
 {
+    // Assume failure.
     int ver = -1;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct Library *lib = OpenLibrary(name, 0);
 
-    /*
-    struct Library {
-        struct  Node lib_Node;
-        UBYTE   lib_Flags;
-        UBYTE   lib_pad;
-        UWORD   lib_NegSize;	    number of bytes before library
-        UWORD   lib_PosSize;	    number of bytes after library
-        UWORD   lib_Version;	    major
-        UWORD   lib_Revision;	    minor
-        APTR    lib_IdString;	    ASCII identification
-        ULONG   lib_Sum;		    the checksum itself
-        UWORD   lib_OpenCnt;	    number of current opens
-    };	Warning: size is not a longword multiple!
-    */
-
+    // Assume that 'name' is a library that can be opened.
     if(lib)
     {
-        // Library exists, get version and revision.
+        // Get version and revision.
         ver = (lib->lib_Version << 16) | lib->lib_Revision;
 
         // Library is no longer needed.
         CloseLibrary(lib);
     }
     #else
+    // Not used.
     (void) name;
     #endif
 
@@ -742,6 +735,7 @@ static int h_getversion_lib(const char *name)
 //------------------------------------------------------------------------------
 static int h_getversion_res(const char *name)
 {
+    // Assume failure.
     int ver = -1;
 
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -771,6 +765,7 @@ static int h_getversion_res(const char *name)
         }
     }
     #else
+    // Not used.
     (void) name;
     #endif
 
