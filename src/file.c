@@ -334,7 +334,7 @@ static pnode_p h_suffix_append(pnode_p node, char *suffix)
     pnode_p tail = node;
 
     // The suffixed result might not exist.
-    if(tail && !tail->next && type)
+    if(type && tail && !tail->next)
     {
         // It's not necessary to check the return value.
         tail->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
@@ -1164,18 +1164,77 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_makedir_create_icon
+// Description: Create directory icon.
+// Input:       entry_p contxt:     The execution context.
+//              char *dst:          The directory.
+// Return:      bool:               On success 'true', else 'false'.
+//------------------------------------------------------------------------------
+static bool h_makedir_create_icon(entry_p contxt, char *dst)
+{
+    // Sanity check.
+    if(!contxt || !dst)
+    {
+        PANIC(contxt);
+        return false;
+    }
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Get the default drawer icon from the OS.
+    struct DiskObject *obj = (struct DiskObject *) GetDefDiskObject(WBDRAWER);
+    #else
+    FILE *obj = fopen(h_suffix(dst, "info"), "w");
+    #endif
+
+    // Assume failure.
+    bool done = false;
+
+    // Save default icon if we have one.
+    if(obj)
+    {
+        #if defined(AMIGA) && !defined(LG_TEST)
+        // Create new .info.
+        done = PutDiskObject(dst, obj);
+        #else
+        done = fputs("icon", obj) != EOF;
+        #endif
+
+        #if defined(AMIGA) && !defined(LG_TEST)
+        // Free def. icon.
+        FreeDiskObject(obj);
+        #else
+        fclose(obj);
+        #endif
+    }
+
+    // Success or I/O error.
+    return done;
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_makedir
 // Description: Create directory / tree of directories.
 // Input:       entry_p contxt:     The execution context.
-//              const char *dst:    The directory.
+//              char *dst:          The directory.
 //              int mode:           FIXME.
 // Return:      int:                On success '1', else '0'.
 //------------------------------------------------------------------------------
-static int h_makedir(entry_p contxt, const char *dst, int mode)
+static int h_makedir(entry_p contxt, char *dst, int mode)
 {
     if(contxt && dst)
     {
         char *dir;
+
+        // Create icon if (infos) is set and there is no icon already.
+        if(get_opt(contxt, OPT_INFOS) && !h_exists(h_suffix(dst, "info")))
+        {
+            if(!h_makedir_create_icon(contxt, dst))
+            {
+                // Failed creating icon.
+                ERR(ERR_WRITE_DIR, dst);
+                return 0;
+            }
+        }
 
         // Return immediately if directory exists.
         if(h_exists(dst) == 2)
@@ -2682,74 +2741,25 @@ entry_p m_makedir(entry_p contxt)
 
     entry_p prompt   = get_opt(C_ARG(2), OPT_PROMPT),
             help     = get_opt(C_ARG(2), OPT_HELP),
-            #if defined(AMIGA) && !defined(LG_TEST)
-            infos    = get_opt(C_ARG(2), OPT_INFOS),
-            #endif
             confirm  = get_opt(C_ARG(2), OPT_CONFIRM),
             safe     = get_opt(C_ARG(2), OPT_SAFE);
-
-    D_NUM = 0;
 
     // If we need confirmation and the user skips or aborts, return. On abort,
     // the HALT will be set by h_confirm.
     if(confirm && !h_confirm(C_ARG(2), str(help), str(prompt)))
     {
-        R_CUR;
+        R_NUM(0);
     }
 
-    // Is this a safe operation or are we not running in pretend mode?
-    if(safe || !get_numvar(contxt, "@pretend"))
+    // Succeed immediately if this operation is unsafe and we're running in
+    // pretend mode.
+    if(!safe && get_numvar(contxt, "@pretend"))
     {
-        // The name of the directory.
-        char *dir = str(C_ARG(1));
-
-        // Create the directory.
-        D_NUM = h_makedir(contxt, dir, 0 /* FIXME */);
-
-        #if defined(AMIGA) && !defined(LG_TEST)
-        // Are we supposed to create an icon as well?
-        if(infos && D_NUM)
-        {
-            // Get the default drawer icon from the OS.
-            struct DiskObject *obj = (struct DiskObject *)
-                GetDefDiskObject(WBDRAWER);
-
-            // Assume failure.
-            D_NUM = 0;
-
-            // If we have a default icon, let our newly created directory have
-            // it.
-            if(obj)
-            {
-                // Create new .info.
-                if(PutDiskObject(dir, obj))
-                {
-                    // Done.
-                    D_NUM = 1;
-                }
-
-                // Free def. icon.
-                FreeDiskObject(obj);
-            }
-
-            // If any of the above failed, ioerr will be set. Export that value
-            // as a variable.
-            if(!D_NUM)
-            {
-                LONG ioe = IoErr();
-                set_numvar(contxt, "@ioerr", ioe);
-            }
-        }
-        #endif
-    }
-    else
-    {
-        // A non safe operation in pretend mode always succeeds.
-        D_NUM = 1;
+        R_NUM(1);
     }
 
-    // Success or failure.
-    R_CUR;
+    // Create directory.
+    R_NUM(h_makedir(C_ARG(2), str(C_ARG(1)), 0 /* FIXME */));
 }
 
 //------------------------------------------------------------------------------

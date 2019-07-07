@@ -662,16 +662,35 @@ entry_p m_getsum(entry_p contxt)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_dev
-// Description: Helper for m_getversion.
-// Input:       char *name: filename.
-// Return:      int: file version.
+// Description: Helper for m_getversion. Get device version.
+// Input:       char *name: Filename.
+// Return:      int:        File version.
 //------------------------------------------------------------------------------
 static int h_getversion_dev(const char *name)
 {
+    // Assume failure.
     int ver = -1;
-    (void) name;
 
     #if defined(AMIGA) && !defined(LG_TEST)
+    struct IORequest req;
+
+    // Assume that 'name' is a device that can be opened.
+    if(!OpenDevice(name, 0, &req, 0))
+    {
+        // Be paranoid.
+        if(req.io_Device)
+        {
+            // Get version and revision.
+            ver = req.io_Device->dd_Library.lib_Version << 16 |
+                  req.io_Device->dd_Library.lib_Revision;
+        }
+
+        // Device is no longer needed.
+        CloseDevice(&req);
+    }
+    #else
+    // Not used.
+    (void) name;
     #endif
 
     return ver;
@@ -679,16 +698,30 @@ static int h_getversion_dev(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_lib
-// Description: Helper for m_getversion.
-// Input:       char *name: filename.
-// Return:      int: file version.
+// Description: Helper for m_getversion. Get library version.
+// Input:       char *name: Library name.
+// Return:      int:        Library version.
 //------------------------------------------------------------------------------
 static int h_getversion_lib(const char *name)
 {
+    // Assume failure.
     int ver = -1;
-    (void) name;
 
     #if defined(AMIGA) && !defined(LG_TEST)
+    struct Library *lib = OpenLibrary(name, 0);
+
+    // Assume that 'name' is a library that can be opened.
+    if(lib)
+    {
+        // Get version and revision.
+        ver = (lib->lib_Version << 16) | lib->lib_Revision;
+
+        // Library is no longer needed.
+        CloseLibrary(lib);
+    }
+    #else
+    // Not used.
+    (void) name;
     #endif
 
     return ver;
@@ -696,12 +729,13 @@ static int h_getversion_lib(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_res
-// Description: Helper for m_getversion.
-// Input:       char *name: filename.
-// Return:      int: file version.
+// Description: Helper for m_getversion. Get resident version.
+// Input:       char *name: Resident name.
+// Return:      int:        Resident version.
 //------------------------------------------------------------------------------
 static int h_getversion_res(const char *name)
 {
+    // Assume failure.
     int ver = -1;
 
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -731,6 +765,7 @@ static int h_getversion_res(const char *name)
         }
     }
     #else
+    // Not used.
     (void) name;
     #endif
 
@@ -739,9 +774,9 @@ static int h_getversion_res(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_file
-// Description: Helper for m_getversion.
-// Input:       char *name: filename.
-// Return:      int: file version.
+// Description: Helper for m_getversion. Get file version.
+// Input:       char *name: Filename.
+// Return:      int:        File version.
 //------------------------------------------------------------------------------
 int h_getversion_file(const char *name)
 {
