@@ -991,7 +991,7 @@ static const flex_int16_t yy_chk[1505] =
 //
 // InstallerLG tokenizer
 //------------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -1006,7 +1006,7 @@ static const flex_int16_t yy_chk[1505] =
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* strduptr(const char *str) - Duplicate string and translate */
-/* escpate characters according to the Installer V42.6 guide  */
+/* escape characters according to the Installer V42.6 guide   */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 static char *strduptr(const char *str);
 #line 1012 "<stdout>"

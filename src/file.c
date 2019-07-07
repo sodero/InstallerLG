@@ -1183,7 +1183,7 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
     // Get the default drawer icon from the OS.
     struct DiskObject *obj = (struct DiskObject *) GetDefDiskObject(WBDRAWER);
     #else
-    FILE *obj = fopen(h_suffix(dst, "w"));
+    FILE *obj = fopen(h_suffix(dst, "info"), "w");
     #endif
 
     // Assume failure.
