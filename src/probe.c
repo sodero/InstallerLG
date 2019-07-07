@@ -662,9 +662,9 @@ entry_p m_getsum(entry_p contxt)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_dev
-// Description: Helper for m_getversion.
-// Input:       char *name: filename.
-// Return:      int: file version.
+// Description: Helper for m_getversion. Get device version.
+// Input:       char *name: Filename.
+// Return:      int:        File version.
 //------------------------------------------------------------------------------
 static int h_getversion_dev(const char *name)
 {
@@ -672,6 +672,20 @@ static int h_getversion_dev(const char *name)
     (void) name;
 
     #if defined(AMIGA) && !defined(LG_TEST)
+    /*
+    struct Device {
+        struct  Library dd_Library;
+    };
+
+    struct IORequest {
+        struct  Message io_Message;
+        struct  Device  *io_Device;     device node pointer
+        struct  Unit    *io_Unit;	    unit (driver private)
+        UWORD   io_Command;	            device command
+        UBYTE   io_Flags;
+        BYTE    io_Error;		        error or warning num
+    };
+    */
     #endif
 
     return ver;
@@ -679,16 +693,42 @@ static int h_getversion_dev(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_lib
-// Description: Helper for m_getversion.
-// Input:       char *name: filename.
-// Return:      int: file version.
+// Description: Helper for m_getversion. Get library version.
+// Input:       char *name: Library name.
+// Return:      int:        Library version.
 //------------------------------------------------------------------------------
 static int h_getversion_lib(const char *name)
 {
     int ver = -1;
-    (void) name;
 
     #if defined(AMIGA) && !defined(LG_TEST)
+    struct Library *lib = OpenLibrary(name, 0);
+
+    /*
+    struct Library {
+        struct  Node lib_Node;
+        UBYTE   lib_Flags;
+        UBYTE   lib_pad;
+        UWORD   lib_NegSize;	    number of bytes before library
+        UWORD   lib_PosSize;	    number of bytes after library
+        UWORD   lib_Version;	    major
+        UWORD   lib_Revision;	    minor
+        APTR    lib_IdString;	    ASCII identification
+        ULONG   lib_Sum;		    the checksum itself
+        UWORD   lib_OpenCnt;	    number of current opens
+    };	Warning: size is not a longword multiple!
+    */
+
+    if(lib)
+    {
+        // Library exists, get version and revision.
+        ver = (lib->lib_Version << 16) | lib->lib_Revision;
+
+        // Library is no longer needed.
+        CloseLibrary(lib);
+    }
+    #else
+    (void) name;
     #endif
 
     return ver;
@@ -696,9 +736,9 @@ static int h_getversion_lib(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_res
-// Description: Helper for m_getversion.
-// Input:       char *name: filename.
-// Return:      int: file version.
+// Description: Helper for m_getversion. Get resident version.
+// Input:       char *name: Resident name.
+// Return:      int:        Resident version.
 //------------------------------------------------------------------------------
 static int h_getversion_res(const char *name)
 {
@@ -739,9 +779,9 @@ static int h_getversion_res(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_file
-// Description: Helper for m_getversion.
-// Input:       char *name: filename.
-// Return:      int: file version.
+// Description: Helper for m_getversion. Get file version.
+// Input:       char *name: Filename.
+// Return:      int:        File version.
 //------------------------------------------------------------------------------
 int h_getversion_file(const char *name)
 {
