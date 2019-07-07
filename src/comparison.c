@@ -43,7 +43,7 @@ static int h_cmp(entry_p lhs, entry_p rhs)
         char *val = alfa->type == STRING ? alfa->name : beta->name;
 
         // Strings not equal to "0" are != 0.
-        if(!val[0] || val[0] != '0')
+        if(val[0] != '0')
         {
             // Not 0.
             return 1;
