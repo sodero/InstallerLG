@@ -1576,23 +1576,23 @@ static inline IPTR IGShowPicture(Class *cls, Object *obj,
             if(scr)
             {
                 // Screen / 2 (large) 4 (medium) 8 (small).
-                xs = scr->Width >> (msg->Action & G_SMALL ? 3 :
-                                    msg->Action & G_LARGE ? 1 : 2);
+                xs = scr->Width >> ((msg->Action & G_SMALL) ? 3 :
+                                    (msg->Action & G_LARGE) ? 1 : 2);
 
                 // Height of the window depends on the width.
-                ys = msg->Action & G_MORE ? scr->Height >>
-                         (msg->Action & G_LARGE ? 2 : 1) :
-                     msg->Action & G_LESS ? scr->Height >>
-                         (msg->Action & G_SMALL ? 2 : 3) :
-                     scr->Height >> (msg->Action & G_SMALL ? 3 :
-                                     msg->Action & G_LARGE ? 1 : 2);
+                ys = (msg->Action & G_MORE) ? scr->Height >>
+                         ((msg->Action & G_LARGE) ? 2 : 1) :
+                     (msg->Action & G_LESS) ? scr->Height >>
+                         ((msg->Action & G_SMALL) ? 2 : 3) :
+                     scr->Height >> ((msg->Action & G_SMALL) ? 3 :
+                                     (msg->Action & G_LARGE) ? 1 : 2);
             }
         }
 
         // Explicit horizontal placement?
         if(msg->Action & G_HORIZ)
         {
-            xp = msg->Action & G_LEFT ? 0 :
+            xp = (msg->Action & G_LEFT) ? 0 :
             #if !defined(__AROS__) && !defined(__VBCC__)
                 // This doesn't work on AROS.
                 MUIV_Window_LeftEdge_Right(0);
@@ -1604,7 +1604,7 @@ static inline IPTR IGShowPicture(Class *cls, Object *obj,
         // Explicit vertical placement?
         if(msg->Action & G_VERT)
         {
-            yp = msg->Action & G_UPPER ? 0 :
+            yp = (msg->Action & G_UPPER) ? 0 :
             #if !defined(__AROS__) && !defined(__VBCC__)
                 // This doesn't work on AROS.
                  MUIV_Window_TopEdge_Bottom(0);
@@ -2370,15 +2370,15 @@ static inline IPTR IGNew(Class *cls, Object *obj,
                          struct opSet *msg)
 {
     // Temp widgets.
-    Object *el, *ul, *fp, *cm, *pr, *st, *nm, *bp, *em, *rt, *tx, *ls, *lg, *tp,
-           *af, *ys, *no, *ya, *ab, *ao, *ar;
+    Object *el, *ul, *fp, *cm, *pr, *st, *nm, *bp, *em, *tx, *ls, *lg, *tp, *af,
+           *ys, *no, *ya, *ab, *ao, *ar;
 
     // Radio button strings.
     static const char *lev[4], *pre[3], *log[3];
 
     // Clear to enable check.
-    el = ul = fp = cm = pr = st = nm = bp = em = rt = tx = ls = lg = tp = af =
-    ys = no = ya = ab = ao = ar = NULL;
+    el = ul = fp = cm = pr = st = nm = bp = em = tx = ls = lg = tp = af = ys =
+    no = ya = ab = ao = ar = NULL;
 
     // User level.
     lev[0] = tr(S_ULNV); // Novice

@@ -2314,6 +2314,8 @@ entry_p m_delete(entry_p contxt)
 
     #if defined(AMIGA) && !defined(LG_TEST)
     wild = ParsePattern(file, get_buf(), buf_size());
+    #else
+    wild = get_numvar(contxt, "@wild");
     #endif
 
     // Assume failure.
@@ -2758,8 +2760,12 @@ entry_p m_makedir(entry_p contxt)
         R_NUM(1);
     }
 
+    // We need to pass a valid context to h_makedir. If we have a CONTXT with
+    // options, that's the one to pass, otherwise we should pass the default.
+    entry_p con = C_ARG(2) && C_ARG(2) != end() ? C_ARG(2) : contxt;
+
     // Create directory.
-    R_NUM(h_makedir(C_ARG(2), str(C_ARG(1)), 0 /* FIXME */));
+    R_NUM(h_makedir(con, str(C_ARG(1)), 0 /* FIXME */));
 }
 
 //------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 (set @yes 0) (set @pretend 0) (delete "_dl_" (optional askuser force)) ; "touch _dl_ && chmod a-w _dl_","1","test ! -f _dl_"
 (set @yes 0) (set @pretend "1") (delete "_dl_" (optional askuser force)) ; "touch _dl_ && chmod a-w _dl_","1","test ! -f _dl_"
+(set @yes 0 @wild -1) (set @pretend "1") (delete "_dl_" (optional askuser force)) ; "touch _dl_ && chmod a-w _dl_","Line 1: Buffer overflow '_dl_' 0","test -f _dl_ && rm -f _dl_"
 (set @yes 0) (set @pretend "a") (delete "_dl_" (optional askuser force)) ; "touch _dl_ && chmod a-w _dl_","1","test ! -f _dl_"
 (set @yes 0) (set @pretend 1) (delete "_dl_" (optional askuser force) (safe)) ; "touch _dl_ && chmod a-w _dl_","1","test ! -f _dl_"
 (set @yes 0) (set @pretend "1") (delete "_dl_" (optional askuser force) (safe)) ; "touch _dl_ && chmod a-w _dl_","1","test ! -f _dl_"
