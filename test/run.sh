@@ -59,7 +59,7 @@ evl()
             fi
         fi
     fi
-    if [ `which valgrind` ]; then
+    if [ `which _DISABLED_` ]; then
         if [ -n "$pre" ]; then
             eval "$pre" 2>&1
         fi
