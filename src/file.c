@@ -326,7 +326,7 @@ static char *h_suffix(char *name, char *suffix)
 //              char *suffix:   Suffix to append.
 // Return:      entry_p:        New tail.
 //------------------------------------------------------------------------------
-static pnode_p h_suffix_append(pnode_p node, char *suffix)
+static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
 {
     // Save the type of the suffixed result, it might not be the same as that of
     // the original node.
@@ -339,15 +339,21 @@ static pnode_p h_suffix_append(pnode_p node, char *suffix)
         // It's not necessary to check the return value.
         tail->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
-        // New list tail.
-        tail = tail->next;
-
-        // Fill out the details.
-        if(tail)
+        // Are we out of memory?
+        if(tail->next)
         {
+            // New list tail.
+            tail = tail->next;
+
+            // Fill out the details.
             tail->name = DBG_ALLOC(strdup(h_suffix(node->name, suffix)));
             tail->copy = DBG_ALLOC(strdup(h_suffix(node->copy, suffix)));
             tail->type = type;
+        }
+        else
+        {
+            // Out of memory.
+            PANIC(contxt);
         }
     }
 
@@ -425,17 +431,10 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
                     long type = node->type;
                     char *name = node->name, *copy = node->copy;
 
-                    // Create .info node if necessary.
-                    if(infos)
-                    {
-                        node = h_suffix_append(node, "info");
-                    }
-
-                    // Create .font node if necessary.
-                    if(fonts)
-                    {
-                        node = h_suffix_append(node, "font");
-                    }
+                    // Create .info and .font nodes if necessary. No need to
+                    // check node pointer. Bounce and PANIC in h_suffix_append.
+                    node = infos ? h_suffix_append(contxt, node, "info") : node;
+                    node = fonts ? h_suffix_append(contxt, node, "font") : node;
 
                     // Traverse (old, if info or font) directory if applicable.
                     if(type == 2
@@ -548,11 +547,9 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     node->copy = DBG_ALLOC(strdup(dst));
                     node->type = 2;
 
-                    // Create .info node if necessary.
-                    if(infos)
-                    {
-                        node = h_suffix_append(node, "info");
-                    }
+                    // Create .info node if necessary. No need to check node
+                    // pointer. Bounce and PANIC in h_suffix_append.
+                    node = infos ? h_suffix_append(contxt, node, "info") : node;
 
                     // Iterate over all entries in the source directory.
                     while(entry)
@@ -561,123 +558,122 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         n_src = h_tackon(contxt, src, entry->d_name),
                         n_dst = h_tackon(contxt, dst, entry->d_name);
 
-                        if(n_src && n_dst)
+                        // Are we out of memory?
+                        if(!n_src || !n_dst)
                         {
-                            if(pattern)
-                            {
-                                // Use a static buffer, Installer.guide
-                                // restricts pattern length to 64. It seems
-                                // like MatchPattern can use a lot of stack if
-                                // we use long patterns, so let's not remove
-                                // this limitation.
-                                static char pat[BUFSIZ];
-                                #if defined(AMIGA) && !defined(LG_TEST)
-                                LONG w = ParsePattern(str(pattern), pat,
-                                                      sizeof(pat));
+                            free(n_src);
+                            free(n_dst);
+                            break;
+                        }
 
-                                // Can we parse the pattern?
-                                if(w >= 0)
+                        if(pattern)
+                        {
+                            // Use a static buffer, Installer.guide
+                            // restricts pattern length to 64. It seems
+                            // like MatchPattern can use a lot of stack if
+                            // we use long patterns, so let's not remove
+                            // this limitation.
+                            static char pat[BUFSIZ];
+                            #if defined(AMIGA) && !defined(LG_TEST)
+                            LONG w = ParsePattern(str(pattern), pat,
+                                                  sizeof(pat));
+
+                            // Can we parse the pattern?
+                            if(w >= 0)
+                            {
+                                // Use pattern matching if we have one or
+                                // more wildcards, otherwise use plain
+                                // strcmp().
+                                if((w && MatchPattern(pat, entry->d_name))
+                                   || (w && !strcmp(pat, entry->d_name)))
                                 {
-                                    // Use pattern matching if we have one or
-                                    // more wildcards, otherwise use plain
-                                    // strcmp().
-                                    if((w && MatchPattern(pat, entry->d_name))
-                                       || (w && !strcmp(pat, entry->d_name)))
-                                    {
-                                        // Match, get proper type.
-                                        type = h_exists(n_src);
-                                    }
-                                    else
-                                    {
-                                        // Not a match, skip this.
-                                        type = 0;
-                                    }
+                                    // Match, get proper type.
+                                    type = h_exists(n_src);
                                 }
                                 else
                                 {
-                                    // We probably had a buffer overflow. No
-                                    // more pattern matching today.
-                                    ERR(ERR_OVERFLOW, str(pattern));
-                                    pattern = NULL;
+                                    // Not a match, skip this.
+                                    type = 0;
                                 }
-                                #else
-                                // Get rid of warning.
-                                *pat = '\0';
-                                type = h_exists(n_src);
-                                #endif
                             }
                             else
                             {
-                                // File or directory?
-                                type = h_exists(n_src);
+                                // We probably had a buffer overflow. No
+                                // more pattern matching today.
+                                ERR(ERR_OVERFLOW, str(pattern));
+                                pattern = NULL;
                             }
-
-                            // If we have a directory, recur.
-                            if(type == 2)
-                            {
-                                // Unless the (files) option is set.
-                                if(!files
-                                   #ifndef AMIGA
-                                   && strcmp(entry->d_name, ".")
-                                   && strcmp(entry->d_name, "..")
-                                   #endif
-                                  )
-                                {
-                                    // Get tree of subdirectory. Don't promote
-                                    // (choices), dirs will be assumed to be
-                                    // files and things will break.
-                                    node->next = h_filetree
-                                    (
-                                        contxt,
-                                        n_src,
-                                        n_dst,
-                                        files,
-                                        fonts,
-                                        NULL,
-                                        pattern,
-                                        NULL
-                                    );
-
-                                    // Fast forward to the end of the list.
-                                    while(node->next)
-                                    {
-                                        node = node->next;
-                                    }
-                                }
-
-                                // We don't need to store the names of
-                                // directories, release them.
-                                free(n_src);
-                                free(n_dst);
-                            }
-                            else
-                            {
-                                node->next = DBG_ALLOC(calloc(1,
-                                                       sizeof(struct pnode_t)));
-
-                                if(node->next)
-                                {
-                                    node->next->type = type;
-                                    node->next->name = n_src;
-                                    node->next->copy = n_dst;
-                                    node = node->next;
-                                }
-                                else
-                                {
-                                    // Out of memory.
-                                    PANIC(contxt);
-
-                                    // Free what we have and exit.
-                                    free(n_src);
-                                    free(n_dst);
-                                    break;
-                                }
-                            }
+                            #else
+                            // Get rid of warning.
+                            *pat = '\0';
+                            type = h_exists(n_src);
+                            #endif
                         }
                         else
                         {
-                            // Out of memory.
-                            break;
+                            // File or directory?
+                            type = h_exists(n_src);
+                        }
+
+                        // If we have a directory, recur.
+                        if(type == 2)
+                        {
+                            // Unless the (files) option is set.
+                            if(!files
+                               #ifndef AMIGA
+                               && strcmp(entry->d_name, ".")
+                               && strcmp(entry->d_name, "..")
+                               #endif
+                              )
+                            {
+                                // Get tree of subdirectory. Don't promote
+                                // (choices), dirs will be assumed to be
+                                // files and things will break.
+                                node->next = h_filetree
+                                (
+                                    contxt,
+                                    n_src,
+                                    n_dst,
+                                    files,
+                                    fonts,
+                                    NULL,
+                                    pattern,
+                                    NULL
+                                );
+
+                                // Fast forward to the end of the list.
+                                while(node->next)
+                                {
+                                    node = node->next;
+                                }
+                            }
+
+                            // We don't need to store the names of
+                            // directories, release them.
+                            free(n_src);
+                            free(n_dst);
+                        }
+                        else
+                        {
+                            node->next = DBG_ALLOC(calloc(1,
+                                                   sizeof(struct pnode_t)));
+                            if(node->next)
+                            {
+                                node->next->type = type;
+                                node->next->name = n_src;
+                                node->next->copy = n_dst;
+                                node = node->next;
+                            }
+                            else
+                            {
+                                // Out of memory.
+                                PANIC(contxt);
+
+                                // Free what we have and exit.
+                                free(n_src);
+                                free(n_dst);
+                                break;
+                            }
                         }
 
                         // Get next entry.
