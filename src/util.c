@@ -334,31 +334,33 @@ entry_p opt(entry_p contxt, opt_t type)
         entry_p entry = contxt->children[i];
 
         // Skip non options.
-        if(entry->type == OPTION)
+        if(entry->type != OPTION)
         {
-            // Option indentifier.
-            int option = entry->id;
+            continue;
+        }
 
-            // Fake option
-            if(option == OPT_OPTIONAL || option == OPT_DELOPTS)
-            {
-                // Cast to real options.
-                get_fake_opt(entry, cache);
-            }
-            else
-            // Dynamic options must be resolved.
-            if(option == OPT_DYNOPT)
-            {
-                // Replace with its resolved value.
-                entry_p res = resolve(entry);
-                cache[res->id] = res;
-            }
-            // We have a real option.
-            else
-            {
-                // Save it as it is.
-                cache[option] = entry;
-            }
+        // Option indentifier.
+        int option = entry->id;
+
+        // Fake option
+        if(option == OPT_OPTIONAL || option == OPT_DELOPTS)
+        {
+            // Cast to real options.
+            get_fake_opt(entry, cache);
+        }
+        else
+        // Dynamic options must be resolved.
+        if(option == OPT_DYNOPT)
+        {
+            // Replace with its resolved value.
+            entry_p res = resolve(entry);
+            cache[res->id] = res;
+        }
+        // We have a real option.
+        else
+        {
+            // Save it as it is.
+            cache[option] = entry;
         }
     }
 
