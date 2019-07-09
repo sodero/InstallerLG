@@ -442,74 +442,69 @@ entry_p m_strlen(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p m_substr(entry_p contxt)
 {
-    if(c_sane(contxt, 2))
+    // We need at least two arguments.
+    C_SANE(2, NULL);
+
+    char *arg = str(C_ARG(1));
+    int off = num(C_ARG(2)), len = (int) strlen(arg);
+
+    // Is there a limitation on the number of characters?
+    if(C_ARG(3) && C_ARG(3) != end())
     {
-        char *arg = str(C_ARG(1));
-        int off = num(C_ARG(2)),
-            len = (int) strlen(arg);
+        // Get the number of characters to copy.
+        int chr = num(C_ARG(3));
 
-        // Is the number characters limited?
-        if(C_ARG(3) && C_ARG(3) != end())
+        // Use the limitations used by the CBM installer.
+        if(off >= len || chr <= 0 || off < 0)
         {
-            // Get the number of characters to copy.
-            int chr = num(C_ARG(3));
-
-            // Use the limitations used by the CBM installer.
-            if(off < len && chr > 0 && off >= 0)
-            {
-                char *ret = DBG_ALLOC(calloc((size_t) len + 1, 1));
-
-                if(ret)
-                {
-                    // Cap all values and do the actual copy.
-                    len -= off;
-                    len = len < chr ? len : chr;
-                    memcpy(ret, arg + off, len);
-                    R_STR(ret);
-                }
-
-                // Out of memory.
-                PANIC(contxt);
-                R_EST;
-            }
-        }
-        else
-        // No, copy until the end of the string.
-        {
-            // Max cap.
-            if(off < len)
-            {
-                // Min cap.
-                if(off > 0)
-                {
-                    char *ret = DBG_ALLOC(calloc((size_t) len + 1, 1));
-
-                    if(ret)
-                    {
-                        // All values are already capped, just copy.
-                        memcpy(ret, arg + off, len - off);
-                        R_STR(ret);
-                    }
-
-                    // Out of memory.
-                    PANIC(contxt);
-                    R_EST;
-                }
-
-                // Return full string.
-                return C_ARG(1);
-            }
+            // Empty string fallback.
+            R_EST;
         }
 
-        // Fall through. Return empty string.
+        char *ret = DBG_ALLOC(calloc((size_t) len + 1, 1));
+
+        if(!ret)
+        {
+            // Out of memory.
+            PANIC(contxt);
+            R_EST;
+        }
+
+        // Cap all values.
+        len -= off;
+        len = len < chr ? len : chr;
+
+        // Copy, set and return.
+        memcpy(ret, arg + off, len);
+        R_STR(ret);
+    }
+
+    // Copy until the end of the string. Max cap.
+    if(off >= len)
+    {
+        // Empty string fallback.
         R_EST;
     }
 
-    // The parser isn't necessarily broken
-    // if we end up here. We could also be
-    // out of memory.
-    PANIC(contxt);
-    R_CUR;
+    // Min cap.
+    if(off > 0)
+    {
+        char *ret = DBG_ALLOC(calloc((size_t) len + 1, 1));
+
+        if(!ret)
+        {
+            // Out of memory.
+            PANIC(contxt);
+            R_EST;
+        }
+
+        // All values are already capped, just copy.
+        memcpy(ret, arg + off, len - off);
+        R_STR(ret);
+    }
+
+    // Return full string.
+    return C_ARG(1);
 }
 
 //------------------------------------------------------------------------------

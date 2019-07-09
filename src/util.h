@@ -58,6 +58,7 @@ entry_p native_exists(entry_p contxt, call_t f);
 #define C_SANE(N,O) if(!c_sane(contxt, N)) {PANIC(contxt); R_CUR;}\
                     {entry_p op_ = O; if(op_ && get_opt(O,OPT_INIT) && DID_ERR)\
                     {R_CUR;}}
+#define S_SANE(N) if(!s_sane(contxt, N)) {PANIC(contxt); R_CUR;}
 
 #ifdef __AROS__
 #define B_TO_CSTR(S) AROS_BSTR_ADDR(S)
