@@ -646,9 +646,11 @@ entry_p merge(entry_p dst, entry_p src)
 //------------------------------------------------------------------------------
 entry_p push(entry_p dst, entry_p src)
 {
-    // Sanity check.
+    // Sanity check. All or nothing. Since we own 'src', we need to free it, or
+    // else we will leak when out of memory.
     if(!dst || !src)
     {
+        kill(src);
         PANIC(NULL);
         return dst;
     }
