@@ -242,30 +242,17 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
         bool del = cur->parent->id == OPT_DELOPTS;
         char *opt = str(cur);
 
-        if(!strcmp(opt, "fail"))
-        {
-            cache[OPT_FAIL] = del ? NULL : cur;
-        }
-        else
-        if(!strcmp(opt, "force"))
-        {
-            cache[OPT_FORCE] = del ? NULL : cur;
-        }
-        else
-        if(!strcmp(opt, "nofail"))
-        {
-            cache[OPT_NOFAIL] = del ? NULL : cur;
-        }
-        else
-        if(!strcmp(opt, "askuser"))
-        {
-            cache[OPT_ASKUSER] = del ? NULL : cur;
-        }
-        else
-        if(!strcmp(opt, "oknodelete"))
-        {
-            cache[OPT_OKNODELETE] = del ? NULL : cur;
-        }
+        // Set or delete option.
+        cache[OPT_FAIL] = strcmp(opt, "fail") ?
+        cache[OPT_FAIL] : (del ? NULL : cur);
+        cache[OPT_FORCE] = strcmp(opt, "force") ?
+        cache[OPT_FORCE] : (del ? NULL : cur);
+        cache[OPT_NOFAIL] = strcmp(opt, "nofail") ?
+        cache[OPT_NOFAIL] : (del ? NULL : cur);
+        cache[OPT_ASKUSER] = strcmp(opt, "askuser") ?
+        cache[OPT_ASKUSER] : (del ? NULL : cur);
+        cache[OPT_OKNODELETE] = strcmp(opt, "oknodelete") ?
+        cache[OPT_OKNODELETE] : (del ? NULL : cur);
     }
 }
 
@@ -804,93 +791,89 @@ char *get_optstr(entry_p contxt, opt_t type)
 //------------------------------------------------------------------------------
 char *get_chlstr(entry_p contxt, bool pad)
 {
+    // We don't really need anything to concatenate but we expect a sane contxt.
+    if(!c_sane(contxt, 0))
+    {
+        return NULL;
+    }
+
     // Concatenation.
+    entry_p *child = contxt->children;
+    size_t cnt = 0;
+
+    // We might not have any children.
+    if(child)
+    {
+        // Count non context children.
+        while(child && *child && *child != end())
+        {
+            cnt += ((*child)->type != CONTXT) ? 1 : 0;
+            child++;
+        }
+    }
+
+    if(!cnt)
+    {
+        // No children to concatenate.
+        return DBG_ALLOC(strdup(""));
+    }
+
+    // Return value.
     char *ret = NULL;
 
-    // We don't really need anything to concatenate but we expect a sane contxt.
-    if(c_sane(contxt, 0))
-    {
-        size_t cnt = 0;
-        entry_p *child = contxt->children;
+    // Allocate memory to hold one string pointer per child.
+    char **stv = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
 
-        // We might not have any children.
-        if(child)
+    if(stv)
+    {
+        // Total length.
+        size_t len = 0;
+
+        // Save all string pointers so that we don't evaluate children twice
+        // and thereby set of side effects more than once.
+        while(cnt > 0)
         {
-            // Count non context children.
-            while(*child && *child != end())
+            entry_p cur = *(--child);
+
+            // Ignore contexts.
+            if(cur->type == CONTXT)
             {
-                cnt += ((*child)->type != CONTXT) ? 1 : 0;
-                child++;
+                continue;
             }
+
+            // Go backwards, evaluate and increase total string length as
+            // we go. Also, include padding if necessary.
+            stv[--cnt] = str(cur);
+            len += strlen(stv[cnt]) + (pad ? 1 : 0);
         }
 
-        if(cnt)
+        // Memory to hold the full concatenation.
+        ret = len ? DBG_ALLOC(calloc(len + 1, 1)) : NULL;
+
+        if(ret)
         {
-            // Allocate memory to hold one string pointer per child.
-            char **stv = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
-
-            if(stv)
+            // The concatenation, 'stv' is null terminated.
+            while(stv[cnt])
             {
-                // Total length.
-                size_t len = 0;
+                strncat(ret, stv[cnt], len + 1 - strlen(ret));
+                cnt++;
 
-                // Save all string pointers so that we don't
-                // evaluate children twice and thereby set of
-                // side effects more than once.
-                while(cnt > 0)
+                // Is padding applicable?
+                if(pad && stv[cnt])
                 {
-                    entry_p cur = *(--child);
-
-                    if(cur->type != CONTXT)
-                    {
-                        // Go backwards, evaluate and increase
-                        // total string length as we go. Also,
-                        // include padding if necessary.
-                        stv[--cnt] = str(cur);
-                        len += strlen(stv[cnt]);
-                        len += pad ? 1 : 0;
-                    }
+                    // Insert whitespace.
+                    strncat(ret, " ", len + 1 - strlen(ret));
                 }
-
-                // If the total length is non zero, we will
-                // concatenate all children.
-                if(len)
-                {
-                    // Memory to hold the full concatenation.
-                    ret = DBG_ALLOC(calloc(len + 1, 1));
-
-                    if(ret)
-                    {
-                        // The concatenation, 'stv' is null terminated.
-                        while(stv[cnt])
-                        {
-                            strncat(ret, stv[cnt], len + 1 - strlen(ret));
-                            cnt++;
-
-                            // Is padding applicable?
-                            if(pad && stv[cnt])
-                            {
-                                // Insert whitespace.
-                                strncat(ret, " ", len + 1 - strlen(ret));
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    // No data to concatenate.
-                    ret = DBG_ALLOC(strdup(""));
-                }
-
-                // Free references before returning.
-                free(stv);
             }
         }
         else
         {
-            // No children to concatenate.
+            // No data to concatenate.
             ret = DBG_ALLOC(strdup(""));
         }
+
+        // Free references before returning.
+        free(stv);
     }
 
     // We could be in any state here, success or panic.
@@ -989,26 +972,20 @@ static void dump_indent(entry_p entry, int indent)
         // Pretty print all children.
         if(entry->children)
         {
-            entry_p *child = entry->children;
-
-            while(*child && *child != end())
+            for(entry_p *chl = entry->children; *chl && *chl != end(); chl++)
             {
                 DBG("%sChl:\t", type);
-                dump_indent(*child, indent + 1);
-                child++;
+                dump_indent(*chl, indent + 1);
             }
         }
 
         // Pretty print all symbols.
         if(entry->symbols)
         {
-            entry_p *sym = entry->symbols;
-
-            while(*sym && *sym != end())
+            for(entry_p *sym = entry->symbols; *sym && *sym != end(); sym++)
             {
                 DBG("%sSym:\t", type);
                 dump_indent(*sym, indent + 1);
-                sym++;
             }
         }
     }
