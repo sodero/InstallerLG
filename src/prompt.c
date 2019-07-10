@@ -130,179 +130,157 @@ entry_p m_askbool(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p m_askchoice(entry_p contxt)
 {
-    if(contxt)
+    C_SANE(0, contxt);
+
+    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+            help     = get_opt(contxt, OPT_HELP),
+            back     = get_opt(contxt, OPT_BACK),
+            choices  = get_opt(contxt, OPT_CHOICES),
+            deflt    = get_opt(contxt, OPT_DEFAULT);
+
+    // We need something to choose from, a help text and a prompt text.
+    if(!prompt || !help || !choices)
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                back     = get_opt(contxt, OPT_BACK),
-                choices  = get_opt(contxt, OPT_CHOICES),
-                deflt    = get_opt(contxt, OPT_DEFAULT);
+        // Missing one or more.
+        ERR(ERR_MISSING_OPTION, prompt ? help ? "choices" : "help" :
+            "prompt");
+        R_CUR;
+    }
 
-        D_NUM = 0;
+    // The choice is represented by a bitmask of 32 bits, refer to
+    // Install.guide. Thus, we need room for 32 pointers + NULL.
+    const char *prt = str(prompt), *hlp = str(help);
+    int add[32], ndx = 0, off = 0;
+    static const char *chs[33];
 
-        // We need something to choose from, a help text and a prompt text.
-        if(!prompt || !help || !choices)
+    // Pick up a string representation of all the options.
+    for(entry_p *entry = choices->children; *entry && *entry != end() &&
+        off < 32; entry++)
+    {
+        // Resolve once.
+        char *opt = str(*entry);
+
+        // Save skip deltas. See (1).
+        add[ndx] = off - ndx;
+
+        // From the Installer.guide:
+        //
+        // 1. If you use an empty string as choice descriptor, the choice will
+        //    be invisible to the user, i.e. it will not be displayed on screen.
+        //    By using variables you can easily set up a programable number of
+        //    choices then while retaining the bit numbering.
+        if(*opt)
         {
-            // Missing one or more.
-            ERR(ERR_MISSING_OPTION, prompt ? help ?
-                "choices" : "help" : "prompt");
-            R_CUR;
-        }
+            // 2. Previous versions of Installer did not support proportional
+            //    fonts well and some people depended on the non proportional
+            //    layout of the display for table like choices. So Installer
+            //    will continue to render choices non proportional unless you
+            //    start one of the choices with a special escape sequence
+            //    `"<ESC>[2p"'. This escape sequence allows proportional
+            //    rendering. It is wise to specify this only in the first
+            //    choice of the list. Note this well.  (V42)
+            if(strlen(opt) > 3 && !memcmp("\x1B[2p", opt, 4))
+            {
+                // We rely on Zune / MUI for #2. Hide this control sequence if
+                // it exists.
+                opt += 4;
+            }
 
-        // Unless the parser is broken, we will have >= one child.
-        entry_p *entry = choices->children;
-
-        // The choice is represented by a bitmask of
-        // 32 bits, refer to Install.guide. Thus, we
-        // need room for 32 pointers + NULL.
-        static const char *chs[33];
-        static int add[32];
-
-        // Indices
-        int ndx = 0, off = 0;
-
-        // Pick up a string representation of all the options.
-        while(*entry && *entry != end() && off < 32)
-        {
-            // Resolve once.
-            char *opt = str(*entry);
-
-            // Save skip deltas. See (1).
-            add[ndx] = off - ndx;
-
-            // From the Installer.guide:
-            //
-            // 1. If you use an empty string as choice descriptor, the choice will
-            //    be invisible to the user, i.e. it will not be displayed on screen.
-            //    By using variables you can easily set up a programable number of
-            //    choices then while retaining the bit numbering.
+            // Make sure that the removal of the control sequence hasn't cleared
+            // the string.
             if(*opt)
             {
-                // 2. Previous versions of Installer did not support proportional fonts
-                //    well and some people depended on the non proportional layout of
-                //    the display for table like choices.  So Installer will continue to
-                //    render choices non proportional unless you start one of the
-                //    choices with a special escape sequence `"<ESC>[2p"'. This escape
-                //    sequence allows proportional rendering. It is wise to specify this
-                //    only in the first choice of the list. Note this well.  (V42)
-                if(strlen(opt) > 3 && !memcmp("\x1B[2p", opt, 4))
-                {
-                    // We rely on Zune / MUI for #2. Hide
-                    // this control sequence if it exists.
-                    opt += 4;
-                }
-
-                // Make sure that the removal of the control
-                // sequence hasn't cleared the string.
-                if(*opt)
-                {
-                    // Something to show.
-                    chs[ndx++] = opt;
-                }
-            }
-
-            // Invisible items are valid as default
-            // values, so we need to count these as
-            // well.
-            off++;
-
-            // Next option.
-            entry++;
-        }
-
-        // Exit if there's nothing to show.
-        if(!ndx)
-        {
-            // Use the default value if such exists.
-            R_NUM(deflt ? num(deflt) : 0);
-        }
-
-        // Terminate array.
-        chs[ndx] = NULL;
-
-        // Do we have default option?
-        if(deflt)
-        {
-            // Is there such a choice?
-            int def = num(deflt);
-
-            // Check for negative values as well.
-            if(def < 0 || def >= off)
-            {
-                // Nope, out of range.
-                ERR(ERR_NO_ITEM, str(deflt));
-                R_NUM(0);
-            }
-
-            // Use default value.
-            ndx = def;
-        }
-        else
-        {
-            // No default = 0
-            ndx = 0;
-        }
-
-        // Show requester unless we're executing in 'novice' mode.
-        if(get_numvar(contxt, "@user-level") > 0)
-        {
-            const char *prt = str(prompt), *hlp = str(help);
-
-            // Only show requester if we could resolve all options.
-            if(!DID_ERR)
-            {
-                // Skipper.
-                int del = 0;
-
-                // Cap / compute skipper.
-                if(ndx > 0 && ndx < 31 && ndx - add[ndx - 1] > 0 &&
-                   ndx + add[ndx - 1] < 31)
-                {
-                    del = add[ndx - 1];
-                }
-
-                // Prompt user. Subtract skipper from default.
-                inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back != false, &D_NUM);
-
-                // Add skipper. Don't trust the GUI.
-                D_NUM += ((D_NUM < 32 && D_NUM >= 0) ? add[D_NUM] : 0);
-
-                // Is the back option available?
-                if(back)
-                {
-                    // Fake input?
-                    if(get_numvar(contxt, "@back"))
-                    {
-                        grc = G_ABORT;
-                    }
-
-                    // On abort execute.
-                    if(grc == G_ABORT)
-                    {
-                        return resolve(back);
-                    }
-                }
-
-                // FIXME
-                if(grc == G_ABORT || grc == G_EXIT)
-                {
-                    HALT;
-                }
+                // Something to show.
+                chs[ndx++] = opt;
             }
         }
-        else
+
+        // Invisible items are valid as default values, so we need to count
+        // these as well.
+        off++;
+    }
+
+    // Exit if there's nothing to show.
+    if(!ndx)
+    {
+        // Use the default value if such exists.
+        R_NUM(deflt ? num(deflt) : 0);
+    }
+
+    // Do we have default option?
+    if(deflt)
+    {
+        // Is there such a choice?
+        int def = num(deflt);
+
+        // Check for negative values as well.
+        if(def < 0 || def >= off)
         {
-            D_NUM = ndx;
+            // Nope, out of range.
+            ERR(ERR_NO_ITEM, str(deflt));
+            R_NUM(0);
         }
+
+        // Use default value.
+        ndx = def;
     }
     else
     {
-        // The parser is broken
-        PANIC(contxt);
+        // No default = 0
+        ndx = 0;
     }
 
-    // Success, failure or broken parser.
-    R_CUR;
+    // Don't show requester if we're executing in 'novice' mode.
+    if(get_numvar(contxt, "@user-level") <= 0)
+    {
+        R_NUM(ndx);
+    }
+
+    // Only show requester if we could resolve all options.
+    if(DID_ERR)
+    {
+        R_NUM(0);
+    }
+
+    // Skipper and result.
+    int del = 0, res = 0;
+
+    // Cap / compute skipper.
+    if(ndx > 0 && ndx < 31 && ndx - add[ndx - 1] > 0 &&
+       ndx + add[ndx - 1] < 31)
+    {
+        del = add[ndx - 1];
+    }
+
+    // Prompt user. Subtract skipper from default.
+    inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back != false, &res);
+
+    // Add skipper. Don't trust the GUI.
+    res += ((D_NUM < 32 && D_NUM >= 0) ? add[D_NUM] : 0);
+
+    // Is the back option available?
+    if(back)
+    {
+        // Fake input?
+        if(get_numvar(contxt, "@back"))
+        {
+            grc = G_ABORT;
+        }
+
+        // On abort execute.
+        if(grc == G_ABORT)
+        {
+            return resolve(back);
+        }
+    }
+
+    // FIXME
+    if(grc == G_ABORT || grc == G_EXIT)
+    {
+        HALT;
+    }
+
+    R_NUM(res);
 }
 
 //------------------------------------------------------------------------------
