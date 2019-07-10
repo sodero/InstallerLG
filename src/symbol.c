@@ -224,6 +224,7 @@ entry_p m_symbolset(entry_p contxt)
             {
                 // Out of memory.
                 kill(res);
+                break;
             }
 
             res->parent = nsm;
