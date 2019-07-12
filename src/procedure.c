@@ -97,7 +97,7 @@ entry_p m_gosub(entry_p contxt)
         }
 
         // Recursion depth.
-        static int dep = 0;
+        static int dep;
 
         // Keep track of the recursion depth. Do not invoke if we're
         // beyond MAXDEP.
@@ -120,9 +120,6 @@ entry_p m_gosub(entry_p contxt)
     // format string exists.
     if(!get_numvar(contxt, "@strict"))
     {
-        // Output string.
-        entry_p res = NULL;
-
         // First invocation?
         if(!contxt->resolved)
         {
@@ -139,15 +136,8 @@ entry_p m_gosub(entry_p contxt)
             else
             {
                 // Panic already set.
-                res = end();
+                return end();
             }
-        }
-
-        // We should have no result yet.
-        if(res)
-        {
-            // Failure.
-            return res;
         }
 
         // Save the old name. We need to do this in order to resolve the
@@ -161,7 +151,7 @@ entry_p m_gosub(entry_p contxt)
         contxt->name = get_strvar(contxt, contxt->name);
 
         // Get the resolved value of the things we've stitched together.
-        res = resolve(contxt);
+        entry_p res = resolve(contxt);
 
         // Restore everything so that we can do this again, once again
         // resolving the format string.

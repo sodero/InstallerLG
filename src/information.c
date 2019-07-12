@@ -136,74 +136,41 @@ entry_p m_message(entry_p contxt)
     // One or more arguments.
     C_SANE(1, contxt);
 
-    // Get information needed to determine whether to show anything or not. And,
-    // to determine if there is any (back) code to execute.
-    entry_p all = get_opt(contxt, OPT_ALL),
-            back = get_opt(contxt, OPT_BACK);
-
-    int level = get_numvar(contxt, "@user-level");
-
-    D_NUM = 0;
-
-    if(!level && !all)
+    // In novice mode no message is to be shown unless (all) is set.
+    if(!get_opt(contxt, OPT_ALL) && !get_numvar(contxt, "@user-level"))
     {
-        // Silence.
-        R_CUR;
+        R_NUM(0);
     }
 
     // Concatenate all children.
     char *msg = get_chlstr(contxt, false);
 
-    // Did we manage to concatenate something?
-    if(msg)
+    // Make sure that we're not out of memory and that all children are
+    // resolvable.
+    if((!msg && PANIC(contxt)) || DID_ERR)
     {
-        // Did we fail while resolving children?
-        if(DID_ERR)
-        {
-            // Free the temporary buffer.
-            free(msg);
-        }
-        else
-        {
-            // Show the result of the concatenation.
-            inp_t grc = gui_message(msg, back != false);
-
-            // Free the temporary buffer.
-            free(msg);
-
-            // Is the back option available?
-            if(back)
-            {
-                // Fake input?
-                if(get_numvar(contxt, "@back"))
-                {
-                    grc = G_ABORT;
-                }
-
-                // On abort execute.
-                if(grc == G_ABORT)
-                {
-                    return resolve(back);
-                }
-            }
-
-            // FIXME
-            if(grc == G_ABORT || grc == G_EXIT)
-            {
-                HALT;
-            }
-
-            // Translate response.
-            D_NUM = (grc == G_TRUE) ? 1 : 0;
-        }
-
-        // Success or failure.
-        R_CUR;
+        free(msg);
+        R_NUM(0);
     }
 
-    // Out of memory.
-    PANIC(contxt);
-    R_CUR;
+    // Is the back option available?
+    entry_p back = get_opt(contxt, OPT_BACK);
+
+    // Show the result of the concatenation.
+    inp_t grc = gui_message(msg, back != false);
+
+    // Free the temporary buffer.
+    free(msg);
+
+    // If (back) exists, execute body on user / fake abort.
+    if(back && (grc == G_ABORT || get_numvar(contxt, "@back")))
+    {
+        return resolve(back);
+    }
+
+    // Translate response.
+    R_NUM(((grc == G_ABORT || grc == G_EXIT) && HALT) ? 0 :
+          ((grc == G_TRUE) ? 1 : 0));
 }
 
 //------------------------------------------------------------------------------
@@ -246,39 +213,33 @@ entry_p m_welcome(entry_p contxt)
     // Concatenate children, if any.
     char *msg = get_chlstr(contxt, false);
 
-    // Make sure that we're not out of memory.
-    if(!msg)
+    // Make sure that we're not out of memory and that all children are
+    // resolvable.
+    if((!msg && PANIC(contxt)) || DID_ERR)
     {
-        PANIC(contxt);
-        R_CUR;
+        free(msg);
+        R_NUM(0);
     }
 
-    // Assume abort.
-    inp_t grc = G_FALSE;
-
-    // If we could resolve everything, show the result.
-    if(!DID_ERR)
-    {
-        // Show welcome dialog.
-        grc = gui_welcome(msg, &lvl, &lgf, &prt,
-                          get_numvar(contxt, "@user-min"),
-                          get_numvar(contxt, "@no-pretend"),
-                          get_numvar(contxt, "@no-log"));
-
-        // User abort?
-        if(grc != G_TRUE)
-        {
-            HALT;
-        }
-
-        // Save new settings.
-        set_numvar(contxt, "@user-level", lvl);
-        set_numvar(contxt, "@pretend", prt);
-        set_numvar(contxt, "@log", lgf);
-    }
+    // Show welcome dialog.
+    inp_t grc = gui_welcome(msg, &lvl, &lgf, &prt,
+                            get_numvar(contxt, "@user-min"),
+                            get_numvar(contxt, "@no-pretend"),
+                            get_numvar(contxt, "@no-log"));
 
     // Free temporary buffer.
     free(msg);
+
+    // User abort?
+    if(grc != G_TRUE)
+    {
+        HALT;
+    }
+
+    // Save new settings.
+    set_numvar(contxt, "@user-level", lvl);
+    set_numvar(contxt, "@pretend", prt);
+    set_numvar(contxt, "@log", lgf);
 
     // Proceed, halt or error.
     R_NUM((grc == G_TRUE) ? 1 : 0);

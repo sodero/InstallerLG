@@ -34,8 +34,9 @@ int error(entry_p contxt, int line, err_t type, const char *info)
     }
 
     // Clear state or proper error?
-    last = type == ERR_RESET ? ERR_NONE : type;
+    last = (type == ERR_RESET) ? ERR_NONE : type;
 
+    // RESET, ABORT or HALT.
     if(type <= ERR_RESET)
     {
         return last;
@@ -67,9 +68,7 @@ int error(entry_p contxt, int line, err_t type, const char *info)
         /*35*/ "Invalid assign", /*36*/ "Options are mutually exclusive", /*37*/ "Invalid value"
     };
 
-    // Error window / console output.
+    // Show error in window / console.
     gui_error(line, des[type], info);
-
-    // Current state.
     return last;
 }

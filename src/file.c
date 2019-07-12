@@ -49,31 +49,37 @@ entry_p m_expandpath(entry_p contxt)
     // Short path.
     char *pth = str(C_ARG(1));
 
-    if(!DID_ERR)
+    // Make sure that the argument is resolvable.
+    if(DID_ERR)
     {
-        #if defined(AMIGA) && !defined(LG_TEST)
-        BPTR lock = (BPTR) Lock(pth, ACCESS_READ);
-
-        if(lock)
-        {
-            if(NameFromLock(lock, get_buf(), buf_size()))
-            {
-                UnLock(lock);
-                R_STR(strdup(get_buf()));
-            }
-            else
-            {
-                ERR(ERR_OVERFLOW, pth);
-                UnLock(lock);
-            }
-        }
-        #else
-        R_STR(strdup(pth));
-        #endif
+        // Return empty string on error.
+        R_EST;
     }
 
-    // Failure, return empty string.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Lock whatever resource the argument corresponds to.
+    BPTR lock = (BPTR) Lock(pth, ACCESS_READ);
+
+    if(lock)
+    {
+        // Get full name from lock.
+        if(NameFromLock(lock, get_buf(), buf_size()))
+        {
+            UnLock(lock);
+            R_STR(strdup(get_buf()));
+        }
+
+        // Buffer overflow.
+        ERR(ERR_OVERFLOW, pth);
+        UnLock(lock);
+    }
+
+    // Empty string fallback.
     R_EST;
+    #else
+    // Testing only.
+    R_STR(strdup(pth));
+    #endif
 }
 
 //------------------------------------------------------------------------------
@@ -160,92 +166,131 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_exists
-// Description: Get file / dir info.
-// Input:       entry_p contxt:     The execution context.
-//              const char *file:   Path to file / dir.
-// Return:      int:                Dir = '2', file = '1' else '0'.
+// File / dir type values according to the CBM installer documentation.
 //------------------------------------------------------------------------------
-int h_exists(const char *file)
+#define LG_EXISTS_NONE 0
+#define LG_EXISTS_FILE 1
+#define LG_EXISTS_DIR  2
+//------------------------------------------------------------------------------
+#if defined(AMIGA) && !defined(LG_TEST)
+//------------------------------------------------------------------------------
+// Name:        h_exists_amiga_type
+// Description: h_exists amiga implementation.
+// Input:       const char *name:   Path to file / dir.
+// Return:      int:                LG_EXISTS_NONE/LG_EXISTS_FILE/LG_EXISTS_DIR
+//------------------------------------------------------------------------------
+static int h_exists_amiga_type(const char *name)
 {
-    // NULL is a valid argument but this 'file' doesn't exist.
-    if(file)
+    // We must allocate dos objects with the dedicated function.
+    struct FileInfoBlock *fib = (struct FileInfoBlock *)
+           AllocDosObject(DOS_FIB, NULL);
+
+    // Make sure that we've succeeded.
+    if(!fib)
     {
-        // Empty string = current dir.
-        if(*file)
-        {
-            #if defined(AMIGA) && !defined(LG_TEST)
-            int r = 0;
-            struct FileInfoBlock *fib = (struct FileInfoBlock *)
-                   AllocDosObject(DOS_FIB, NULL);
-
-            if(fib)
-            {
-                BPTR lock = (BPTR) Lock(file, ACCESS_READ);
-
-                if(lock)
-                {
-                    if(Examine(lock, fib))
-                    {
-                        // ST_FILE         -3
-                        // ST_LINKFILE     -4
-                        if(fib->fib_DirEntryType < 0)
-                        {
-                            // A file.
-                            r = 1;
-                        }
-                        // ST_ROOT          1
-                        // ST_USERDIR       2
-                        // ST_SOFTLINK      3
-                        // ST_LINKDIR       4
-                        else if(fib->fib_DirEntryType > 0)
-                        {
-                            // A directory.
-                            r = 2;
-                        }
-                        // Return values according to the
-                        // CBM installer documentation.
-                    }
-
-                    UnLock(lock);
-                }
-
-                FreeDosObject(DOS_FIB, fib);
-            }
-
-            return r;
-            #else
-            // This implementation doesn't work on MorphOS. I have no clue why,
-            // it works on AROS. Let's use the implementation above on all Amiga
-            // like systems for now.
-            struct stat fst;
-            if(!stat(file, &fst))
-            {
-                // A file?
-                if(S_ISREG(fst.st_mode))
-                {
-                    // Value according to the CBM Installer documentation.
-                    return 1;
-                }
-
-                // A directory?
-                if(S_ISDIR(fst.st_mode))
-                {
-                    // Ibid.
-                    return 2;
-                }
-            }
-            #endif
-        }
-        else
-        {
-            // The current dir exists, and it's a dir, really.
-            return 2;
-        }
+        // Out of memory.
+        return LG_EXISTS_NONE;
     }
 
-    // Ibid.
-    return 0;
+    // Attempt to lock file or directory.
+    BPTR lock = (BPTR) Lock(file, ACCESS_READ);
+    int type = LG_EXISTS_NONE;
+
+    if(lock)
+    {
+        // Get information from lock.
+        if(Examine(lock, fib))
+        {
+            // ST_FILE         -3
+            // ST_LINKFILE     -4
+            if(fib->fib_DirEntryType < 0)
+            {
+                // It's a file.
+                type = LG_EXISTS_FILE;
+            }
+            // ST_ROOT          1
+            // ST_USERDIR       2
+            // ST_SOFTLINK      3
+            // ST_LINKDIR       4
+            else
+            if(fib->fib_DirEntryType > 0)
+            {
+                // It's a directory.
+                type = LG_EXISTS_DIR;
+            }
+        }
+
+        // Release lock to file or directory.
+        UnLock(lock);
+    }
+
+    // Free dos object with the dedicated function.
+    FreeDosObject(DOS_FIB, fib);
+    return type;
+}
+#else
+//------------------------------------------------------------------------------
+// Name:        h_exists_posix_type
+// Description: h_exists posix implementation.
+// Input:       const char *name:   Path to file / dir.
+// Return:      int:                LG_EXISTS_NONE/LG_EXISTS_FILE/LG_EXISTS_DIR
+//------------------------------------------------------------------------------
+static int h_exists_posix_type(const char *name)
+{
+    // This implementation doesn't work on MorphOS. I have no clue why, it works
+    // on AROS. Let's use the implementation above on all Amiga systems for now.
+    struct stat fst;
+
+    // Does the file / dir exist?
+    if(stat(name, &fst))
+    {
+        return LG_EXISTS_NONE;
+    }
+
+    // A file?
+    if(S_ISREG(fst.st_mode))
+    {
+        return LG_EXISTS_FILE;
+    }
+
+    // A directory?
+    if(S_ISDIR(fst.st_mode))
+    {
+        return LG_EXISTS_DIR;
+    }
+
+    // It's something else. Pretend that it doesn't exist.
+    return LG_EXISTS_NONE;
+}
+#endif
+
+//------------------------------------------------------------------------------
+// Name:        h_exists
+// Description: Get file / dir info. Return value according to the CBM Installer
+//              documentation.
+// Input:       entry_p contxt:     The execution context.
+//              const char *name:   Path to file / dir.
+// Return:      int:                LG_EXISTS_NONE/LG_EXISTS_FILE/LG_EXISTS_DIR
+//------------------------------------------------------------------------------
+int h_exists(const char *name)
+{
+    // NULL is a valid argument but this 'file' doesn't exist.
+    if(!name)
+    {
+        return LG_EXISTS_NONE;
+    }
+
+    // Empty string = current dir.
+    if(!(*name))
+    {
+        return LG_EXISTS_DIR;
+    }
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    return h_exists_amiga_type(name);
+    #else
+    return h_exists_posix_type(name);
+    #endif
 }
 
 //------------------------------------------------------------------------------
@@ -273,7 +318,7 @@ static const char *h_fileonly(entry_p contxt, const char *path)
             }
 
             // Return the new offset.
-            return (path + len);
+            return path + len;
         }
 
         // Only fail if we're in 'strict' mode.
@@ -328,36 +373,42 @@ static char *h_suffix(char *name, char *suffix)
 //------------------------------------------------------------------------------
 static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
 {
+    // Make sure that we have a node and that it's the tail of the list.
+    if(!node || node->next)
+    {
+        return node;
+    }
+
     // Save the type of the suffixed result, it might not be the same as that of
     // the original node.
     int type = h_exists(h_suffix(node->name, suffix));
-    pnode_p tail = node;
 
-    // The suffixed result might not exist.
-    if(type && tail && !tail->next)
+    // Make sure that the file / directory exists.
+    if(!type)
     {
-        // It's not necessary to check the return value.
-        tail->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-
-        // Are we out of memory?
-        if(tail->next)
-        {
-            // New list tail.
-            tail = tail->next;
-
-            // Fill out the details.
-            tail->name = DBG_ALLOC(strdup(h_suffix(node->name, suffix)));
-            tail->copy = DBG_ALLOC(strdup(h_suffix(node->copy, suffix)));
-            tail->type = type;
-        }
-        else
-        {
-            // Out of memory.
-            PANIC(contxt);
-        }
+        return node;
     }
 
-    // New tail or the input node.
+    // New list tail.
+    pnode_p tail = node;
+
+    // It's not necessary to check the return value.
+    tail->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+
+    // Are we out of memory?
+    if(!tail->next)
+    {
+        PANIC(contxt);
+    }
+
+    // New list tail.
+    tail = tail->next;
+
+    // Fill out the details and return the result.
+    tail->name = DBG_ALLOC(strdup(h_suffix(node->name, suffix)));
+    tail->copy = DBG_ALLOC(strdup(h_suffix(node->copy, suffix)));
+    tail->type = type;
+
     return tail;
 }
 
@@ -366,6 +417,7 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
 static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                           entry_p files, entry_p fonts, entry_p choices,
                           entry_p pattern, entry_p infos);
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Name:        h_choices
@@ -389,7 +441,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
     // Sanity check.
     if(contxt && choices && src && dst)
     {
-        // Unless the parser is broken, we will have >= one child.
+       // Unless the parser is broken, we will have >= one child.
         entry_p *chl = choices->children;
 
         // Create head node.
@@ -931,207 +983,188 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
                         bool bck, int mde)
 {
     // Sanity check.
-    if(contxt && src && dst)
+    if(!contxt || !src || !dst)
     {
-        // GUI return code.
-        inp_t grc = G_TRUE;
+        // Unknown error.
+        return G_ERR;
+    }
 
-        // Show GUI unless we're in silent mode.
-        if(!(mde & CF_SILENT))
+    // GUI return code.
+    inp_t grc = G_TRUE;
+
+    // Show GUI unless we're in silent mode.
+    if(!(mde & CF_SILENT))
+    {
+        grc = gui_copyfiles_setcur(src, mde & CF_NOGAUGE, bck);
+    }
+
+    // Prepare GUI unless we're in silent mode as used by copylib.
+    if(grc == G_TRUE)
+    {
+        static char buf[BUFSIZ];
+        FILE *file = fopen(src, "r");
+        size_t cnt = file ? fread(buf, 1, BUFSIZ, file) : 0;
+        int err =
+            #if defined(AMIGA) && !defined(LG_TEST)
+            IoErr();
+            #else
+            file ? ferror(file) : 0;
+            #endif
+
+        if(file && !err)
         {
-            grc = gui_copyfiles_setcur(src, mde & CF_NOGAUGE, bck);
-        }
-
-        // Prepare GUI unless we're in silent mode as used by copylib.
-        if(grc == G_TRUE)
-        {
-            static char buf[BUFSIZ];
-            FILE *file = fopen(src, "r");
-            size_t cnt = file ? fread(buf, 1, BUFSIZ, file) : 0;
-            int err =
-                #if defined(AMIGA) && !defined(LG_TEST)
-                IoErr();
-                #else
-                file ? ferror(file) : 0;
-                #endif
-
-            if(file && !err)
+            // Is there an existing destination file that is write
+            // protected?
+            if(!access(dst, F_OK) && access(dst, W_OK))
             {
-                // Is there an existing destination file that is write
-                // protected?
-                if(!access(dst, F_OK) && access(dst, W_OK))
+                // No need to ask if only (force).
+                if((mde & CF_FORCE) && !(mde & CF_ASKUSER))
                 {
-                    // No need to ask if only (force).
-                    if((mde & CF_FORCE) && !(mde & CF_ASKUSER))
+                    // Unprotect file.
+                    chmod(dst, S_IRWXU);
+                }
+                else
+                // Ask for confirmation if (askuser) unless we're running
+                // in novice mode and (force) at the same time.
+                if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
+                    get_numvar(contxt, "@user-level")))
+                {
+                    if(h_confirm(contxt, "", tr(S_OWRT), dst))
                     {
                         // Unprotect file.
                         chmod(dst, S_IRWXU);
                     }
                     else
-                    // Ask for confirmation if (askuser) unless we're running
-                    // in novice mode and (force) at the same time.
-                    if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
-                        get_numvar(contxt, "@user-level")))
                     {
-                        if(h_confirm(contxt, "", tr(S_OWRT), dst))
-                        {
-                            // Unprotect file.
-                            chmod(dst, S_IRWXU);
-                        }
-                        else
-                        {
-                            // Skip file or abort.
-                            fclose(file);
-                            return DID_HALT ? G_ABORT : G_TRUE;
-                        }
+                        // Skip file or abort.
+                        fclose(file);
+                        return DID_HALT ? G_ABORT : G_TRUE;
                     }
                 }
+            }
 
-                // Create / overwrite file.
-                FILE *dest = fopen(dst, "w");
+            // Create / overwrite file.
+            FILE *dest = fopen(dst, "w");
 
-                if(dest)
+            if(dest)
+            {
+                // Read and write until there is nothing more to read.
+                while(cnt)
                 {
-                    // Read and write until there is nothing more to read.
-                    while(cnt)
+                    if(fwrite(buf, 1, cnt, dest) == cnt)
                     {
-                        if(fwrite(buf, 1, cnt, dest) == cnt)
+                        // Update GUI unless we're in silent mode.
+                        if(!(mde & CF_SILENT))
                         {
-                            // Update GUI unless we're in silent mode.
-                            if(!(mde & CF_SILENT))
-                            {
-                                grc = gui_copyfiles_setcur(NULL, mde & CF_NOGAUGE, bck);
-                            }
+                            grc = gui_copyfiles_setcur(NULL, mde & CF_NOGAUGE, bck);
+                        }
 
-                            if(grc == G_TRUE)
-                            {
-                                cnt = fread(buf, 1, sizeof(buf), file);
-                            }
-                            else
-                            {
-                                break;
-                            }
+                        if(grc == G_TRUE)
+                        {
+                            cnt = fread(buf, 1, sizeof(buf), file);
                         }
                         else
                         {
-                            ERR(ERR_WRITE_FILE, dst);
-                            grc = G_FALSE;
                             break;
                         }
                     }
-
-                    // Close input and output files.
-                    fclose(file);
-                    fclose(dest);
-
-                    // The number of bytes read and not written should be zero.
-                    if(!cnt)
-                    {
-                        // Write to the log file (if logging is enabled).
-                        h_log(contxt, tr(S_CPYD), src, dst);
-
-                        // Are we going to copy the icon as well?
-                        if(mde & CF_INFOS)
-                        {
-                            // The source icon.
-                            static char icon[PATH_MAX];
-                            snprintf(icon, sizeof(icon), "%s.info", src);
-
-                            // Only if it exists, it's not an error if it's
-                            // missing.
-                            if(h_exists(icon) == 1)
-                            {
-                                static char copy[PATH_MAX];
-
-                                // The destination icon.
-                                snprintf(copy, sizeof(copy), "%s.info", dst);
-
-                                // Recur without info set.
-                                grc = h_copyfile(contxt, icon, copy, bck,
-                                                 mde & ~CF_INFOS);
-
-                                #if defined(AMIGA) && !defined(LG_TEST)
-                                // Reset icon position?
-                                if(grc == G_TRUE && mde & CF_NOPOSITION)
-                                {
-                                    struct DiskObject *obj = (struct DiskObject *)
-                                        GetDiskObject(dst);
-
-                                    if(obj)
-                                    {
-                                        // Reset icon position.
-                                        obj->do_CurrentX = NO_ICON_POSITION;
-                                        obj->do_CurrentY = NO_ICON_POSITION;
-
-                                        // Save the changes to the .info file.
-                                        if(!PutDiskObject(dst, obj))
-                                        {
-                                            // We failed for some unknown reason.
-                                            ERR(ERR_WRITE_FILE, copy);
-                                            grc = G_FALSE;
-                                        }
-
-                                        FreeDiskObject(obj);
-                                    }
-                                }
-                                #endif
-                            }
-                        }
-
-                        // Preserve file permissions. On error, code will be set
-                        // by h_protect_x().
-                        int32_t prm = 0;
-
-                        if(h_protect_get(contxt, src, &prm))
-                        {
-                            h_protect_set(contxt, dst, prm);
-                        }
-
-                        // Reset error codes if necessary.
-                        if(DID_ERR)
-                        {
-                            if(mde & CF_NOFAIL)
-                            {
-                                // Forget all errors.
-                                RESET;
-                            }
-                            else
-                            {
-                                // Fail for real.
-                                grc = G_ABORT;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    // The source handle is open.
-                    fclose(file);
-
-                    if((mde & CF_NOFAIL) || (mde & CF_OKNODELETE))
-                    {
-                        // Ignore failure.
-                        h_log(contxt, tr(S_NCPY), src, dst);
-                        grc = G_TRUE;
-                    }
                     else
                     {
-                        // Fail for real.
                         ERR(ERR_WRITE_FILE, dst);
                         grc = G_FALSE;
+                        break;
+                    }
+                }
+
+                // Close input and output files.
+                fclose(file);
+                fclose(dest);
+
+                // The number of bytes read and not written should be zero.
+                if(!cnt)
+                {
+                    // Write to the log file (if logging is enabled).
+                    h_log(contxt, tr(S_CPYD), src, dst);
+
+                    // Are we going to copy the icon as well?
+                    if(mde & CF_INFOS)
+                    {
+                        // The source icon.
+                        static char icon[PATH_MAX];
+                        snprintf(icon, sizeof(icon), "%s.info", src);
+
+                        // Only if it exists, it's not an error if it's
+                        // missing.
+                        if(h_exists(icon) == 1)
+                        {
+                            static char copy[PATH_MAX];
+
+                            // The destination icon.
+                            snprintf(copy, sizeof(copy), "%s.info", dst);
+
+                            // Recur without info set.
+                            grc = h_copyfile(contxt, icon, copy, bck,
+                                             mde & ~CF_INFOS);
+
+                            #if defined(AMIGA) && !defined(LG_TEST)
+                            // Reset icon position?
+                            if(grc == G_TRUE && mde & CF_NOPOSITION)
+                            {
+                                struct DiskObject *obj = (struct DiskObject *)
+                                    GetDiskObject(dst);
+
+                                if(obj)
+                                {
+                                    // Reset icon position.
+                                    obj->do_CurrentX = NO_ICON_POSITION;
+                                    obj->do_CurrentY = NO_ICON_POSITION;
+
+                                    // Save the changes to the .info file.
+                                    if(!PutDiskObject(dst, obj))
+                                    {
+                                        // We failed for some unknown reason.
+                                        ERR(ERR_WRITE_FILE, copy);
+                                        grc = G_FALSE;
+                                    }
+
+                                    FreeDiskObject(obj);
+                                }
+                            }
+                            #endif
+                        }
+                    }
+
+                    // Preserve file permissions. On error, code will be set
+                    // by h_protect_x().
+                    int32_t prm = 0;
+
+                    if(h_protect_get(contxt, src, &prm))
+                    {
+                        h_protect_set(contxt, dst, prm);
+                    }
+
+                    // Reset error codes if necessary.
+                    if(DID_ERR)
+                    {
+                        if(mde & CF_NOFAIL)
+                        {
+                            // Forget all errors.
+                            RESET;
+                        }
+                        else
+                        {
+                            // Fail for real.
+                            grc = G_ABORT;
+                        }
                     }
                 }
             }
             else
             {
-                // The source handle might be open.
-                if(file)
-                {
-                    // Not true on non Amiga systems.
-                    fclose(file);
-                }
+                // The source handle is open.
+                fclose(file);
 
-                if(mde & CF_NOFAIL)
+                if((mde & CF_NOFAIL) || (mde & CF_OKNODELETE))
                 {
                     // Ignore failure.
                     h_log(contxt, tr(S_NCPY), src, dst);
@@ -1140,23 +1173,42 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
                 else
                 {
                     // Fail for real.
-                    ERR(ERR_READ_FILE, src);
+                    ERR(ERR_WRITE_FILE, dst);
                     grc = G_FALSE;
                 }
             }
         }
         else
         {
-            h_log(contxt, tr(S_ACPY), src, dst);
-            HALT;
-        }
+            // The source handle might be open.
+            if(file)
+            {
+                // Not true on non Amiga systems.
+                fclose(file);
+            }
 
-        // Unknown status.
-        return grc;
+            if(mde & CF_NOFAIL)
+            {
+                // Ignore failure.
+                h_log(contxt, tr(S_NCPY), src, dst);
+                grc = G_TRUE;
+            }
+            else
+            {
+                // Fail for real.
+                ERR(ERR_READ_FILE, src);
+                grc = G_FALSE;
+            }
+        }
+    }
+    else
+    {
+        h_log(contxt, tr(S_ACPY), src, dst);
+        HALT;
     }
 
-    // Unknown error.
-    return G_ERR;
+    // Unknown status.
+    return grc;
 }
 
 //------------------------------------------------------------------------------
@@ -1182,26 +1234,26 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
     FILE *obj = fopen(h_suffix(dst, "info"), "w");
     #endif
 
-    // Assume failure.
-    bool done = false;
+    // Bail out if we can't open the default icon.
+    if(!obj)
+    {
+        return false;
+    }
 
     // Save default icon if we have one.
-    if(obj)
-    {
-        #if defined(AMIGA) && !defined(LG_TEST)
-        // Create new .info.
-        done = PutDiskObject(dst, obj);
-        #else
-        done = fputs("icon", obj) != EOF;
-        #endif
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Create new .info.
+    bool done = PutDiskObject(dst, obj);
+    #else
+    bool done = fputs("icon", obj) != EOF;
+    #endif
 
-        #if defined(AMIGA) && !defined(LG_TEST)
-        // Free def. icon.
-        FreeDiskObject(obj);
-        #else
-        fclose(obj);
-        #endif
-    }
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Free def. icon.
+    FreeDiskObject(obj);
+    #else
+    fclose(obj);
+    #endif
 
     // Success or I/O error.
     return done;
@@ -1217,107 +1269,102 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
 //------------------------------------------------------------------------------
 static int h_makedir(entry_p contxt, char *dst, int mode)
 {
-    if(contxt && dst)
+    // Sanity check.
+    if(!contxt || !dst)
     {
-        char *dir;
+        PANIC(contxt);
+        return 0;
+    }
 
-        // Create icon if (infos) is set and there is no icon already.
-        if(get_opt(contxt, OPT_INFOS) && !h_exists(h_suffix(dst, "info")))
+    // Create icon if (infos) is set and there is no icon already.
+    if(get_opt(contxt, OPT_INFOS) && !h_exists(h_suffix(dst, "info")) &&
+      !h_makedir_create_icon(contxt, dst))
+    {
+        // Failed creating icon.
+        ERR(ERR_WRITE_DIR, dst);
+        return 0;
+    }
+
+    // Return immediately if directory exists.
+    if(h_exists(dst) == 2)
+    {
+        h_log(contxt, tr(S_EDIR), dst);
+        return 1;
+    }
+
+    // Create working copy.
+    char *dir = DBG_ALLOC(strdup(dst));
+
+    // Make sure that we're not out of memory.
+    if(!dir)
+    {
+        PANIC(contxt);
+    }
+
+    int depth = 1, len = (int) strlen(dir);
+
+    // Get directory depth.
+    for(int i = 0; i < len; i++)
+    {
+        if(dir[i] == '/')
         {
-            if(!h_makedir_create_icon(contxt, dst))
-            {
-                // Failed creating icon.
-                ERR(ERR_WRITE_DIR, dst);
-                return 0;
-            }
-        }
-
-        // Return immediately if directory exists.
-        if(h_exists(dst) == 2)
-        {
-            // Nothing to do.
-            h_log(contxt, tr(S_EDIR), dst);
-            return 1;
-        }
-
-        // Create working copy.
-        dir = DBG_ALLOC(strdup(dst));
-
-        if(dir)
-        {
-            int depth = 1, len = (int) strlen(dir);
-
-            // Get directory depth.
-            for(int i = 0; i < len; i++)
-            {
-                if(dir[i] == '/')
-                {
-                    depth++;
-                }
-            }
-
-            // Maximum number of retries == depth.
-            while(depth--)
-            {
-                // Shrink scope until mkdir works.
-                for(int i = len; i >= 0; i--)
-                {
-                    // Is the current char a delimiter?
-                    if(dir[i] == '/' || dir[i] == '\0')
-                    {
-                        // Save delimiter.
-                        char del = dir[i];
-
-                        // Truncate string.
-                        dir[i] = '\0';
-
-                        // Attempt to create path.
-                        if(mkdir(dir, 0777) == 0)
-                        {
-                            // Is this the full path?
-                            if(i == len)
-                            {
-                                free(dir);
-                                h_log(contxt, tr(S_CRTD), dst);
-
-                                // Yes, we're done.
-                                return 1;
-                            }
-
-                            // Not the full path, reinstate delimiter and start
-                            // all over again with the full path.
-                            dir[i] = del;
-                            break;
-                        }
-                        else
-                        {
-                            // Reinstate delimiter and shrink scope.
-                            dir[i] = del;
-                        }
-                    }
-                }
-            }
-
-            // Free working copy.
-            free(dir);
-
-            if(mode)
-            {
-                // FIXME
-                return 1;
-            }
-
-            // For some unknown reason, we can't create the directory.
-            ERR(ERR_WRITE_DIR, dst);
-        }
-        else
-        {
-            // Out of memory.
-            PANIC(contxt);
+            depth++;
         }
     }
 
-    // Unknown error.
+    // Maximum number of retries == depth.
+    while(depth--)
+    {
+        // Shrink scope until mkdir works.
+        for(int i = len; i >= 0; i--)
+        {
+            // Is the current char a delimiter?
+            if(dir[i] == '/' || dir[i] == '\0')
+            {
+                // Save delimiter.
+                char del = dir[i];
+
+                // Truncate string.
+                dir[i] = '\0';
+
+                // Attempt to create path.
+                if(mkdir(dir, 0777) == 0)
+                {
+                    // Is this the full path?
+                    if(i == len)
+                    {
+                        free(dir);
+                        h_log(contxt, tr(S_CRTD), dst);
+
+                        // Yes, we're done.
+                        return 1;
+                    }
+
+                    // Not the full path, reinstate delimiter and start
+                    // all over again with the full path.
+                    dir[i] = del;
+                    break;
+                }
+                else
+                {
+                    // Reinstate delimiter and shrink scope.
+                    dir[i] = del;
+                }
+            }
+        }
+    }
+
+    // Free working copy.
+    free(dir);
+
+    if(mode)
+    {
+        // FIXME
+        return 1;
+    }
+
+    // For some unknown reason, we can't create the directory.
+    ERR(ERR_WRITE_DIR, dst);
     return 0;
 }
 
@@ -1563,7 +1610,7 @@ entry_p m_copyfiles(entry_p contxt)
     }
     else
     {
-        char *opt = !source ? "source" : "dest";
+        char *opt = source ? "dest" : "source";
         ERR(ERR_MISSING_OPTION, opt);
     }
 
@@ -1663,18 +1710,17 @@ entry_p m_copylib(entry_p contxt)
             if(!type)
             {
                 // Directory doesn't exist, create it. One level deep only.
-                if(!mkdir(dst, 0777))
-                {
-                    // Log the success.
-                    h_log(contxt, tr(S_CRTD), dst);
-                }
-                else
+                if(mkdir(dst, 0777))
                 {
                     // Permission problems or the dir is more than 1 level
                     // deeper than the existing path.
                     ERR(ERR_WRITE_DIR, dst);
                     R_CUR;
                 }
+
+                // Log the success.
+                h_log(contxt, tr(S_CRTD), dst);
+
             }
 
             // Are we renaming the file?
@@ -2021,11 +2067,8 @@ static int h_delete_file(entry_p contxt, const char *file)
 
                 if(h_exists(info) == 1)
                 {
-                    // Set permissions so that delete can succeed.
-                    chmod(info, S_IRWXU);
-
-                    // Delete the info file.
-                    if(!remove(info))
+                    // Set write permission and delete file.
+                    if(!chmod(info, S_IRWXU) && !remove(info))
                     {
                         // The info file has been deleted.
                         h_log(contxt, tr(S_DLTD), info);
@@ -3755,51 +3798,50 @@ entry_p m_rename(entry_p contxt)
 int h_log(entry_p contxt, const char *fmt, ...)
 {
     // Sanity check.
-    if(contxt && fmt)
+    if(!contxt || !fmt)
     {
-        // Only if logging is enabled...
-        if(get_numvar(contxt, "@log"))
-        {
-            // Use the log file set in init(..) or by the user.
-            const char *log = get_strvar(contxt, "@log-file");
+        PANIC(contxt);
+        return 0;
+    }
 
-            // Don't care about existing files, just append.
-            FILE *file = fopen(log, "a");
-            int cnt = -1;
-
-            if(file)
-            {
-                // Line number and function name as prefix.
-                cnt = fprintf(file, "[%d:%s] ", contxt->id, contxt->name);
-
-                // Append formatted string.
-                if(cnt > 0)
-                {
-                    // Use whatever format and arguments we get
-                    va_list arg;
-
-                    va_start(arg, fmt);
-                    cnt = vfprintf(file, fmt, arg);
-                    va_end(arg);
-                }
-
-                fclose(file);
-            }
-
-            // Could we open the file AND write all data to it?
-            if(cnt < 0)
-            {
-                ERR(ERR_WRITE_FILE, log);
-                cnt = 0;
-            }
-
-            return cnt;
-        }
-
-        // We suceeded doing nothing.
+    // Is logging disabled?
+    if(!get_numvar(contxt, "@log"))
+    {
         return 1;
     }
 
-    // We failed.
-    return 0;
+    // Use the log file set in init(..) or by the user.
+    const char *log = get_strvar(contxt, "@log-file");
+
+    // Don't care about existing files, just append.
+    FILE *file = fopen(log, "a");
+    int cnt = -1;
+
+    if(file)
+    {
+        // Line number and function name as prefix.
+        cnt = fprintf(file, "[%d:%s] ", contxt->id, contxt->name);
+
+        // Append formatted string.
+        if(cnt > 0)
+        {
+            // Use whatever format and arguments we get
+            va_list arg;
+
+            va_start(arg, fmt);
+            cnt = vfprintf(file, fmt, arg);
+            va_end(arg);
+        }
+
+        fclose(file);
+    }
+
+    // Could we open the file AND write all data to it?
+    if(cnt < 0)
+    {
+        ERR(ERR_WRITE_FILE, log);
+        cnt = 0;
+    }
+
+    return cnt;
 }

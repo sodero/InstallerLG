@@ -1014,8 +1014,7 @@ entry_p m_iconinfo(entry_p contxt)
             // Is this a numerical value?
             if(type == OPT_GETSTACK || type == OPT_GETPOSITION)
             {
-                int v = (type == OPT_GETSTACK ?
-                         obj->do_StackSize : j == 0 ?
+                int v = (type == OPT_GETSTACK ? obj->do_StackSize : j == 0 ?
                          obj->do_CurrentX : obj->do_CurrentY);
 
                 snprintf(get_buf(), buf_size(), "%d", v);
@@ -1072,29 +1071,32 @@ entry_p m_iconinfo(entry_p contxt)
                 }
             }
 
-            // No, this is a new symbol. Create, append to this function and
-            // push to the global context.
-            if(val)
+            // Continue with the next symbol if this one exists.
+            if(!val)
             {
-                entry_p sym = new_symbol(DBG_ALLOC(strdup(name)));
+                continue;
+            }
 
-                if(sym)
-                {
-                    // Adopt the value found above.
-                    val->parent = sym;
-                    sym->resolved = val;
+            // This is a new symbol. Create, append to this function and push to
+            // the global context.
+            entry_p sym = new_symbol(DBG_ALLOC(strdup(name)));
 
-                    if(append(&contxt->symbols, sym))
-                    {
-                        push(global(contxt), sym);
-                        sym->parent = contxt;
-                    }
-                }
-                else
-                {
-                    // Out of memory. Do not leak 'val'.
-                    kill(val);
-                }
+            if(!sym)
+            {
+                // Out of memory. Do not leak 'val'.
+                kill(val);
+                continue;
+            }
+
+            // Adopt the value found above.
+            val->parent = sym;
+            sym->resolved = val;
+
+            // PANIC set by append on out of memory.
+            if(append(&contxt->symbols, sym))
+            {
+                push(global(contxt), sym);
+                sym->parent = contxt;
             }
         }
     }
