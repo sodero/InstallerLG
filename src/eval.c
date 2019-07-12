@@ -78,14 +78,14 @@ entry_p find_symbol(entry_p entry)
             }
         }
 
-        // Nothing found in the current context. Climb one scope higher and
-        // try again.
+        // Nothing found in the current context. Climb one scope higher and try
+        // again.
         con = local(con->parent);
     }
     while(con);
 
-    // Only fail if we're in 'strict' mode. Never recur when looking for
-    // @strict, it might not be there if we're OOM. If we do so, we will run out
+    // Only fail if we're in strict mode. Never recur when looking for @strict,
+    // it might not be there if we're out of memory. If we do, we will run out
     // of stack as well.
     if(strcasecmp(entry->name, "@strict") &&
        get_numvar(global(entry), "@strict"))
@@ -108,61 +108,61 @@ entry_p find_symbol(entry_p entry)
 entry_p resolve(entry_p entry)
 {
     // Is there anything to resolve?
-    if(entry)
+    if(!entry)
     {
-        switch(entry->type)
-        {
-            // Symbols are resolved from birth.
-            case SYMBOL:
-                return entry->resolved;
-
-            // A symbolic reference is resolved by resolving the symbol it
-            // refers to.
-            case SYMREF:
-                return resolve(find_symbol(entry));
-
-            // A context is resolved by executing all functions in it.
-            case CONTXT:
-                return invoke(entry);
-
-            // Functions are resolved by executing them.
-            case CUSREF:
-            case NATIVE:
-                return entry->call(entry);
-
-            // Special options.
-            case OPTION:
-                // Dynamic options are treated like functions.
-                if(entry->id == OPT_DYNOPT)
-                {
-                    return entry->call(entry);
-                }
-                else
-                // Back options are treated like contexts.
-                if(entry->id == OPT_BACK)
-                {
-                    return invoke(entry);
-                }
-                // Ordinary options.
-                return entry;
-
-            // We already have a primitive.
-            case NUMBER:
-            case STRING:
-            case DANGLE:
-                return entry;
-
-            // We should never end up here.
-            case CUSTOM:
-                break;
-        }
+        // Bad input.
+        PANIC(entry);
+        return end();
     }
 
-    // Bad input.
-    PANIC(entry);
+    switch(entry->type)
+    {
+        // Symbols are resolved from birth.
+        case SYMBOL:
+            return entry->resolved;
 
-    // Failure.
-    return end();
+        // Symbolic references are resolved by resolving the symbol it refers to.
+        case SYMREF:
+            return resolve(find_symbol(entry));
+
+        // A context is resolved by executing all functions in it.
+        case CONTXT:
+            return invoke(entry);
+
+        // Functions are resolved by executing them.
+        case CUSREF:
+        case NATIVE:
+            return entry->call(entry);
+
+        // Special options.
+        case OPTION:
+            // Dynamic options are treated like functions.
+            if(entry->id == OPT_DYNOPT)
+            {
+                return entry->call(entry);
+            }
+            else
+            // Back options are treated like contexts.
+            if(entry->id == OPT_BACK)
+            {
+                return invoke(entry);
+            }
+            // Ordinary options.
+            return entry;
+
+        // We already have a primitive.
+        case NUMBER:
+        case STRING:
+        case DANGLE:
+            return entry;
+
+        case CUSTOM:
+            break;
+    }
+
+    // We should never end up here.
+    PANIC(entry);
+    return entry;
 }
 
 //------------------------------------------------------------------------------
@@ -309,109 +309,110 @@ int tru(entry_p entry)
 char *str(entry_p entry)
 {
     // Is there anything to resolve?
-    if(entry)
+    if(!entry)
     {
-        switch(entry->type)
-        {
-            // Special treatment of options with a single string argument. Let
-            // other options fall through.
-            case OPTION:
-                switch(entry->id)
-                {
-                    case OPT_APPEND:
-                    case OPT_CONFIRM:
-                    case OPT_DEFAULT:
-                    case OPT_DEST:
-                    case OPT_DISK:
-                    case OPT_INCLUDE:
-                    case OPT_NEWNAME:
-                    case OPT_PATTERN:
-                    case OPT_SETDEFAULTTOOL:
-                    case OPT_SETSTACK:
-                    case OPT_SOURCE:
-                    case OPT_OVERRIDE:
-                    case OPT_GETDEFAULTTOOL:
-                    case OPT_GETSTACK:
-                    case OPT_GETTOOLTYPE:
-                        // All the options above have a single
-                        // child.
-                        return str
-                        (
-                            entry->children ?
-                            entry->children[0] : NULL
-                        );
+        // Bad input.
+        PANIC(entry);
+        return "";
+    }
 
-                    case OPT_HELP:
-                    case OPT_PROMPT:
-                        // (help) and (prompt) may have multiple children that
-                        // must be concatenated.
-                        free(entry->name);
-                        entry->name = get_chlstr(entry, false);
+    switch(entry->type)
+    {
+        // Special treatment of options with a single string argument. Let
+        // other options fall through.
+        case OPTION:
+            switch(entry->id)
+            {
+                case OPT_APPEND:
+                case OPT_CONFIRM:
+                case OPT_DEFAULT:
+                case OPT_DEST:
+                case OPT_DISK:
+                case OPT_INCLUDE:
+                case OPT_NEWNAME:
+                case OPT_PATTERN:
+                case OPT_SETDEFAULTTOOL:
+                case OPT_SETSTACK:
+                case OPT_SOURCE:
+                case OPT_OVERRIDE:
+                case OPT_GETDEFAULTTOOL:
+                case OPT_GETSTACK:
+                case OPT_GETTOOLTYPE:
+                    // All the options above have a single child.
+                    return str
+                    (
+                        entry->children ?
+                        entry->children[0] : NULL
+                    );
 
-                        // On OOM, fall through.
-                        if(entry->name)
-                        {
-                            return entry->name;
-                        }
+                case OPT_HELP:
+                case OPT_PROMPT:
+                    // (help) and (prompt) may have multiple children that
+                    // must be concatenated.
+                    free(entry->name);
+                    entry->name = get_chlstr(entry, false);
 
-                        // OOM.
-                        PANIC(entry);
-                        break;
+                    // On OOM, fall through.
+                    if(entry->name)
+                    {
+                        return entry->name;
+                    }
 
-                    default:
-                        break;
-                }
-                /* FALLTHRU */
+                    // OOM.
+                    PANIC(entry);
+                    break;
 
-            // Dangling entries and options are considered empty strings with
-            // the exceptions above.
-            case DANGLE:
-                return "";
+                default:
+                    break;
+            }
+            /* FALLTHRU */
 
-            // Strings and function names can be returned directly.
-            case CUSTOM:
-            case STRING:
+        // Dangling entries and options are considered empty strings with
+        // the exceptions above.
+        case DANGLE:
+            return "";
+
+        // Strings and function names can be returned directly.
+        case CUSTOM:
+        case STRING:
+            return entry->name;
+
+        // Recur.
+        case SYMBOL:
+            return str(entry->resolved);
+
+        // Recur.
+        case SYMREF:
+            return str(find_symbol(entry));
+
+        // Recur.
+        case CUSREF:
+        case NATIVE:
+            return str(entry->call(entry));
+
+        // Conversion. Please note the use of NUMLEN.
+        case NUMBER:
+            // Have we converted this number to a string before?
+            if(!entry->name)
+            {
+                entry->name = DBG_ALLOC(malloc(NUMLEN));
+            }
+
+            // On out of memory, fall through and PANIC below.
+            if(entry->name)
+            {
+                snprintf(entry->name, NUMLEN, "%d", entry->id);
                 return entry->name;
+            }
+            break;
 
-            // Recur.
-            case SYMBOL:
-                return str(entry->resolved);
-
-            // Recur.
-            case SYMREF:
-                return str(find_symbol(entry));
-
-            // Recur.
-            case CUSREF:
-            case NATIVE:
-                return str(entry->call(entry));
-
-            // Conversion. Please note the use of NUMLEN.
-            case NUMBER:
-                // Have we converted this number to a string before?
-                if(!entry->name)
-                {
-                    entry->name = DBG_ALLOC(malloc(NUMLEN));
-                }
-
-                // On out of memory, fall through and PANIC below.
-                if(entry->name)
-                {
-                    snprintf(entry->name, NUMLEN, "%d", entry->id);
-                    return entry->name;
-                }
-                break;
-
-            // We should never end up here.
-            case CONTXT:
-                break;
-        }
+        // We should never end up here.
+        case CONTXT:
+            break;
     }
 
     // Bad input.
     PANIC(entry);
-
-    // Failure.
     return "";
 }
 

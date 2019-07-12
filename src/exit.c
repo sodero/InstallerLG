@@ -36,27 +36,26 @@ entry_p m_abort(entry_p contxt)
     // Concatenate all children.
     char *msg = get_chlstr(contxt, false);
 
-    // Did we manage to concatenate something?
-    if(msg)
+    // Make sure that we're not out of memory and that all children are
+    // resolvable.
+    if((!msg && PANIC(contxt)) || DID_ERR)
     {
-        // If we could resolve all our children, show the result of the
-        // concatenation unless we have an empty string.
-        if(*msg && !DID_ERR)
-        {
-            gui_abort(msg);
-        }
-
-        // Free the temporary buffer.
         free(msg);
-
-        // Set abort. Will make invoke() halt.
-        error(contxt, -3, ERR_ABORT, __func__);
         R_NUM(0);
     }
 
-    // Out of memory.
-    PANIC(contxt);
-    R_CUR;
+    // Show the result of the concatenation unless it's empty.
+    if(*msg)
+    {
+        gui_abort(msg);
+    }
+
+    // Free temporary buffer.
+    free(msg);
+
+    // Set ABORT and return. This will make invoke() halt.
+    error(contxt, -3, ERR_ABORT, __func__);
+    R_NUM(1);
 }
 
 //------------------------------------------------------------------------------
@@ -73,64 +72,51 @@ entry_p m_abort(entry_p contxt)
 entry_p m_exit(entry_p contxt)
 {
     // All we need is a context.
-    if(contxt)
+    C_SANE(0, NULL);
+
+    // If we have any children, display them.
+    if(contxt->children)
     {
-        // If we have any children, display them.
-        if(contxt->children)
+        // Concatenate all children.
+        char *msg = get_chlstr(contxt, false);
+
+        // Make sure that we're not out of memory and that all children are
+        // resolvable.
+        if((!msg && PANIC(contxt)) || DID_ERR)
         {
-            // Concatenate all children.
-            char *msg = get_chlstr(contxt, false);
-
-            if(!msg)
-            {
-                // Out of memory
-                PANIC(contxt);
-                R_CUR;
-            }
-
-            // If we could resolve all our children, show the result of the
-            // concatenation unless we have an empty string.
-            if(*msg && !DID_ERR)
-            {
-                gui_finish(msg);
-            }
-
-            // Free the temporary buffer.
             free(msg);
+            R_NUM(0);
         }
 
-        // Show final message unless 'quiet' is set.
-        if(!get_opt(contxt, OPT_QUIET) && !DID_ERR)
-        {
-            // Get name and location of application.
-            const char *app = get_strvar(contxt, "@app-name"),
-                       *dst = get_strvar(contxt, "@default-dest");
-
-            // Only display the 'the app can be found here' message if we know
-            // the name and location of the application.
-            if(*app && *dst)
-            {
-                snprintf(get_buf(), buf_size(), tr(S_CBFI), tr(S_ICPL),
-                         app, dst);
-
-                // Display the full message.
-                gui_finish(get_buf());
-            }
-            else
-            {
-                // Display the bare minimum.
-                gui_finish(tr(S_ICPL));
-            }
-        }
-
-        // Make invoke() halt.
-        HALT;
-        R_NUM(0);
+        // Show the result and free buffer.
+        gui_finish(msg);
+        free(msg);
     }
 
-    // The parser is broken
-    PANIC(contxt);
-    R_CUR;
+    // Show final message unless 'quiet' is set.
+    if(!get_opt(contxt, OPT_QUIET))
+    {
+        // Get name and location of application.
+        const char *app = get_strvar(contxt, "@app-name"),
+                   *dst = get_strvar(contxt, "@default-dest");
+
+        // Only display the 'the app can be found here' message if we know
+        // the name and location of the application.
+        if(*app && *dst)
+        {
+            // Display the full message.
+            snprintf(get_buf(), buf_size(), tr(S_CBFI), tr(S_ICPL), app, dst);
+            gui_finish(get_buf());
+        }
+        else
+        {
+            // Display the bare minimum.
+            gui_finish(tr(S_ICPL));
+        }
+    }
+
+    // Make invoke() halt.
+    R_NUM(HALT);
 }
 
 //------------------------------------------------------------------------------
