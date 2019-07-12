@@ -5,6 +5,8 @@
 (tooltype (dest "dest") (confirm)) ; "","Line 1: Missing option 'prompt' 0",""
 (tooltype (dest "dest") (help "help")) ; "","dest0001",""
 (tooltype (dest "dest") (noposition)) ; "","dest0001",""
+(set @pretend 1) (tooltype (dest "dest") (safe)) ; "","dest0001",""
+(set @pretend 1) (tooltype (dest "dest")) ; "","1",""
 (tooltype (dest "dest") (setdefaulttool "tool" err)) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
 (tooltype (dest "dest") (setdefaulttool "tool")) ; "","dest0011",""
 (tooltype (dest "dest") (setposition a b err)) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
