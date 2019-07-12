@@ -300,35 +300,33 @@ int h_exists(const char *name)
 //------------------------------------------------------------------------------
 static const char *h_fileonly(entry_p contxt, const char *path)
 {
-    if(path)
+    // Sanity check. Always return a valid string.
+    if(!path)
     {
-        size_t len = strlen(path);
-
-        // Do we have a string that doesn't look like a directory / volume?
-        if(len-- && path[len] != '/' && path[len] != ':' )
-        {
-            // Go backwards until we find a delimiter or the beginning of the
-            // string.
-            while(len && path[len - 1] != '/' && path[len - 1] != ':' )
-            {
-                len--;
-            }
-
-            // Return the new offset.
-            return path + len;
-        }
-
-        // Only fail if we're in 'strict' mode.
-        if(get_numvar(contxt, "@strict"))
-        {
-            // Empty string or dir / vol.
-            ERR(ERR_NOT_A_FILE, path);
-        }
-    }
-    else
-    {
-        // Bad input.
         PANIC(contxt);
+        return "";
+    }
+
+    size_t len = strlen(path);
+
+    // Do we have a string that doesn't look like a directory / volume?
+    if(len-- && path[len] != '/' && path[len] != ':' )
+    {
+        // Back off until we find a delimiter or the beginning of the string.
+        while(len && path[len - 1] != '/' && path[len - 1] != ':' )
+        {
+            len--;
+        }
+
+        // Return the new offset.
+        return path + len;
+    }
+
+    // Only fail if we're in 'strict' mode.
+    if(get_numvar(contxt, "@strict"))
+    {
+        // Empty string or dir / vol.
+        ERR(ERR_NOT_A_FILE, path);
     }
 
     // Always return a valid string.
@@ -436,108 +434,111 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
                          entry_p infos, const char *src, const char *dst)
 {
     // Sanity check.
-    if(contxt && choices && src && dst)
+    if(!contxt || !choices || !choices->children || !src || !dst)
     {
-       // Unless the parser is broken, we will have >= one child.
-        entry_p *chl = choices->children;
-
-        // Create head node.
-        pnode_p node = DBG_ALLOC(calloc(1, sizeof(struct pnode_t))),
-                head = node;
-
-        if(node)
-        {
-            // We already know the type of the first element; it's a directory.
-            node->name = DBG_ALLOC(strdup(src));
-            node->copy = DBG_ALLOC(strdup(dst));
-            node->type = 2;
-
-            // Not necessary to check the return value.
-            node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-            node = node->next;
-
-            // Iterate over all files / dirs.
-            while(node)
-            {
-                // Resolve current file.
-                char *f_nam = str(*chl);
-
-                // Build source <-> dest pair.
-                node->name = h_tackon(contxt, src, f_nam);
-                node->copy = h_tackon(contxt, dst, h_fileonly(contxt, f_nam));
-                node->type = h_exists(node->name);
-
-                // Next file.
-                chl++;
-
-                // Make sure that the file / dir exists. But only in strict
-                // mode, otherwise just go on, missing files will be skipped
-                // during file copy anyway.
-                if(node->type || !get_numvar(contxt, "@strict"))
-                {
-                    // Save current name and type in case we need to append
-                    // icon or font.
-                    long type = node->type;
-                    char *name = node->name, *copy = node->copy;
-
-                    // Create .info and .font nodes if necessary. No need to
-                    // check node pointer. Bounce and PANIC in h_suffix_append.
-                    node = infos ? h_suffix_append(contxt, node, "info") : node;
-                    node = fonts ? h_suffix_append(contxt, node, "font") : node;
-
-                    // Traverse (old, if info or font) directory if applicable.
-                    if(type == 2
-                       #ifndef AMIGA
-                       && strcmp(f_nam, ".") && strcmp(f_nam, "..")
-                       #endif
-                       )
-                    {
-                        // Get tree of subdirectory. Don't promote (choices).
-                        node->next = h_filetree
-                        (
-                            contxt,
-                            name,
-                            copy,
-                            NULL,
-                            NULL,
-                            NULL,
-                            NULL,
-                            NULL
-                        );
-
-                        // Fast forward to the end of the list.
-                        while(node->next)
-                        {
-                            node = node->next;
-                        }
-                    }
-
-                    // If there are more files, allocate memory for the next
-                    // node.
-                    if(*chl && *chl != end())
-                    {
-                        // Not necessary to check the return value.
-                        node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-                    }
-                }
-                else
-                {
-                    // File or directory doesn't exist.
-                    ERR(ERR_NO_SUCH_FILE_OR_DIR, node->name);
-                }
-
-                // Next element.
-                node = node ? node->next : node;
-            }
-
-            // List complete.
-            return head;
-        }
+        PANIC(contxt);
+        return NULL;
     }
 
-    // Unknown error / out of memory.
-    PANIC(contxt);
-    return NULL;
+    // Unless the parser is broken, we will have >= one child.
+    entry_p *chl = choices->children;
+
+    // Create head node.
+    pnode_p node = DBG_ALLOC(calloc(1, sizeof(struct pnode_t))),
+            head = node;
+
+    // Make sure that we're not out of memory.
+    if(!node)
+    {
+        PANIC(contxt);
+        return NULL;
+    }
+
+    // We already know the type of the first element; it's a directory.
+    node->name = DBG_ALLOC(strdup(src));
+    node->copy = DBG_ALLOC(strdup(dst));
+    node->type = 2;
+
+    // Not necessary to check the return value.
+    node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+    node = node->next;
+
+    // Iterate over all files / dirs.
+    while(node)
+    {
+        // Resolve current file.
+        char *f_nam = str(*chl);
+
+        // Build source <-> dest pair.
+        node->name = h_tackon(contxt, src, f_nam);
+        node->copy = h_tackon(contxt, dst, h_fileonly(contxt, f_nam));
+        node->type = h_exists(node->name);
+
+        // Next file.
+        chl++;
+
+        // Make sure that the file / dir exists. But only in strict
+        // mode, otherwise just go on, missing files will be skipped
+        // during file copy anyway.
+        if(node->type || !get_numvar(contxt, "@strict"))
+        {
+            // Save current name and type in case we need to append
+            // icon or font.
+            long type = node->type;
+            char *name = node->name, *copy = node->copy;
+
+            // Create .info and .font nodes if necessary. No need to
+            // check node pointer. Bounce and PANIC in h_suffix_append.
+            node = infos ? h_suffix_append(contxt, node, "info") : node;
+            node = fonts ? h_suffix_append(contxt, node, "font") : node;
+
+            // Traverse (old, if info or font) directory if applicable.
+            if(type == 2
+               #ifndef AMIGA
+               && strcmp(f_nam, ".") && strcmp(f_nam, "..")
+               #endif
+               )
+            {
+                // Get tree of subdirectory. Don't promote (choices).
+                node->next = h_filetree
+                (
+                    contxt,
+                    name,
+                    copy,
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL
+                );
+
+                // Fast forward to the end of the list.
+                while(node->next)
+                {
+                    node = node->next;
+                }
+            }
+
+            // If there are more files, allocate memory for the next
+            // node.
+            if(*chl && *chl != end())
+            {
+                // Not necessary to check the return value.
+                node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
+            }
+        }
+        else
+        {
+            // File or directory doesn't exist.
+            ERR(ERR_NO_SUCH_FILE_OR_DIR, node->name);
+        }
+
+        // Next element.
+        node = node ? node->next : node;
+    }
+
+    // List complete.
+    return head;
 }
 
 //------------------------------------------------------------------------------
@@ -927,35 +928,31 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
 static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 {
     // Sanity check.
-    if(contxt && file)
+    if(!contxt || !file)
     {
-        // On non Amiga systems, or in test mode, this is a stub.
-        #if defined(AMIGA) && !defined(LG_TEST)
-        size_t len = strlen(file);
-
-        // Filter out volumes.
-        if(len && file[len - 1] != ':')
-        {
-            if(!SetProtection(file, mask))
-            {
-                // Only fail if we're in 'strict' mode.
-                if(get_numvar(contxt, "@strict"))
-                {
-                    ERR(ERR_SET_PERM, file);
-                    return 0;
-                }
-            }
-        }
-        #endif
-
-        // If logging is enabled, write to log.
-        h_log(contxt, tr(S_PTCT), file, mask);
-        return 1;
+        PANIC(contxt);
+        return 0;
     }
 
-    // Bad input.
-    PANIC(contxt);
-    return 0;
+    // On non Amiga systems, or in test mode, this is a stub.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    size_t len = strlen(file);
+
+    // Filter out volumes.
+    if(len && file[len - 1] != ':')
+    {
+        // Only fail if we're running in 'strict' mode.
+        if(!SetProtection(file, mask) && get_numvar(contxt, "@strict"))
+        {
+            ERR(ERR_SET_PERM, file);
+            return 0;
+        }
+    }
+    #endif
+
+    // If logging is enabled, write to log.
+    h_log(contxt, tr(S_PTCT), file, mask);
+    return 1;
 }
 
 #define CF_INFOS        (1 << 0)
@@ -978,13 +975,11 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 //              bool bck:           Enable back mode.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copyfile(entry_p contxt, char *src, char *dst,
-                        bool bck, int mde)
+static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
 {
     // Sanity check.
     if(!contxt || !src || !dst)
     {
-        // Unknown error.
         return G_ERR;
     }
 
@@ -2005,91 +2000,84 @@ entry_p m_copylib(entry_p contxt)
 //------------------------------------------------------------------------------
 static int h_delete_file(entry_p contxt, const char *file)
 {
-    if(file)
+    // Sanity check.
+    if(!file)
     {
-        entry_p infos    = get_opt(C_ARG(2), OPT_INFOS),
-                force    = get_opt(C_ARG(2), OPT_FORCE),
-                askuser  = get_opt(C_ARG(2), OPT_ASKUSER);
+        PANIC(contxt);
+        return 0;
+    }
 
-        // If (force) is used, give permissions so that delete can succeed.
-        if(force)
-        {
-            // No need to bother with the return value since errors will be
-            // caught below.
-            chmod(file, S_IRWXU);
-        }
-        else
-        {
-            if(access(file, W_OK))
-            {
-                // Do we need to ask for confirmation?
-                if(askuser)
-                {
-                    // Ask for confirmation if we're not running in novice mode.
-                    if(get_numvar(contxt, "@user-level") &&
-                       h_confirm(contxt, "", tr(S_DWRT), file))
-                    {
-                        // Give permissions so that delete can succeed. No need
-                        // to bother with the return value since errors will be
-                        // caught below.
-                        chmod(file, S_IRWXU);
-                    }
-                    else
-                    {
-                        // Halt will be set by h_confirm. Skip will result in
-                        // nothing.
-                        return 0;
-                    }
-                }
-                else
-                {
-                    // Fail silently just like the original.
-                    return 0;
-                }
-            }
-        }
-
-        // If yes, this must succeed, otherwise we will abort with an error.
-        if(!remove(file))
-        {
-            // The file has been deleted.
-            h_log(contxt, tr(S_DLTD), file);
-
-            // Shall we delete the info file as well?
-            if(infos)
-            {
-                // Info = file + .info.
-                char *info = get_buf();
-                snprintf(info, buf_size(), "%s.info", file);
-
-                if(h_exists(info) == 1)
-                {
-                    // Set write permission and delete file.
-                    if(chmod(info, S_IRWXU) || remove(info))
-                    {
-                        ERR(ERR_DELETE_FILE, info);
-                        return 0;
-                    }
-
-                    // The info file has been deleted.
-                    h_log(contxt, tr(S_DLTD), info);
-                }
-            }
-
-            // All done.
-            return 1;
-        }
-
-        // Could not delete file.
-        ERR(ERR_DELETE_FILE, file);
+    // If (force) is used, give permissions so that delete can succeed.
+    if(get_opt(C_ARG(2), OPT_FORCE))
+    {
+        // No need to bother with the return value since errors will be
+        // caught below.
+        chmod(file, S_IRWXU);
     }
     else
     {
-        // Unknown error.
-        PANIC(contxt);
+        if(access(file, W_OK))
+        {
+            // Do we need to ask for confirmation?
+            if(get_opt(C_ARG(2), OPT_ASKUSER))
+            {
+                // Ask for confirmation if we're not running in novice mode.
+                if(get_numvar(contxt, "@user-level") &&
+                   h_confirm(contxt, "", tr(S_DWRT), file))
+                {
+                    // Give permissions so that delete can succeed. No need
+                    // to bother with the return value since errors will be
+                    // caught below.
+                    chmod(file, S_IRWXU);
+                }
+                else
+                {
+                    // Halt will be set by h_confirm. Skip will result in
+                    // nothing.
+                    return 0;
+                }
+            }
+            else
+            {
+                // Fail silently just like the original.
+                return 0;
+            }
+        }
     }
 
-    // Failure.
+    // If yes, this must succeed, otherwise we will abort with an error.
+    if(!remove(file))
+    {
+        // The file has been deleted.
+        h_log(contxt, tr(S_DLTD), file);
+
+        // Shall we delete the info file as well?
+        if(get_opt(C_ARG(2), OPT_INFOS))
+        {
+            // Info = file + .info.
+            char *info = get_buf();
+            snprintf(info, buf_size(), "%s.info", file);
+
+            if(h_exists(info) == 1)
+            {
+                // Set write permission and delete file.
+                if(chmod(info, S_IRWXU) || remove(info))
+                {
+                    ERR(ERR_DELETE_FILE, info);
+                    return 0;
+                }
+
+                // The info file has been deleted.
+                h_log(contxt, tr(S_DLTD), info);
+            }
+        }
+
+        // All done.
+        return 1;
+    }
+
+    // Could not delete file.
+    ERR(ERR_DELETE_FILE, file);
     return 0;
 }
 
@@ -2448,21 +2436,18 @@ entry_p m_exists(entry_p contxt)
         #endif
 
         // Get type (file / dir / 0)
-        D_NUM = h_exists(str(C_ARG(1)));
+        int res = h_exists(str(C_ARG(1)));
 
         #if defined(AMIGA) && !defined(LG_TEST)
         // Restore auto request.
         p->pr_WindowPtr = w;
         #endif
-    }
-    else
-    {
-        // Get type (file / dir / 0)
-        D_NUM = h_exists(str(C_ARG(1)));
+
+        R_NUM(res);
     }
 
-    // Success.
-    R_CUR;
+    // Get type (file / dir / 0)
+    R_NUM(h_exists(str(C_ARG(1))));
 }
 
 //------------------------------------------------------------------------------
@@ -2779,8 +2764,7 @@ entry_p m_makedir(entry_p contxt)
 
     entry_p prompt   = get_opt(C_ARG(2), OPT_PROMPT),
             help     = get_opt(C_ARG(2), OPT_HELP),
-            confirm  = get_opt(C_ARG(2), OPT_CONFIRM),
-            safe     = get_opt(C_ARG(2), OPT_SAFE);
+            confirm  = get_opt(C_ARG(2), OPT_CONFIRM);
 
     // If we need confirmation and the user skips or aborts, return. On abort,
     // the HALT will be set by h_confirm.
@@ -2791,7 +2775,7 @@ entry_p m_makedir(entry_p contxt)
 
     // Succeed immediately if this operation is unsafe and we're running in
     // pretend mode.
-    if(!safe && get_numvar(contxt, "@pretend"))
+    if(!get_opt(C_ARG(2), OPT_SAFE) && get_numvar(contxt, "@pretend"))
     {
         R_NUM(1);
     }
@@ -3691,30 +3675,21 @@ entry_p m_transcript(entry_p contxt)
     // Concatenate all children.
     char *msg = get_chlstr(contxt, false);
 
-    // Assume failure.
-    D_NUM = 0;
-
-    // Did we manage to concatenate something?
-    if(msg)
+    // Make sure that we're not out of memory and that all children are valid.
+    if((!msg && PANIC(contxt)) || DID_ERR)
     {
-        // If we could resolve all our children, write the result of the
-        // concatenation to the log file (unless logging is disabled).
-        if(!DID_ERR)
-        {
-            D_NUM = h_log(contxt, "%s\n", msg) ? 1 : 0;
-        }
-
-        // Free the temporary buffer and exit.
         free(msg);
-    }
-    else
-    {
-        // Out of memory.
-        PANIC(contxt);
+        R_NUM(0);
     }
 
-    // Success, failure or OOM.
-    R_CUR;
+    // Write result to the log file.
+    int res = h_log(contxt, "%s\n", msg) ? 1 : 0;
+
+    // Free the temporary buffer and exit.
+    free(msg);
+
+    // Return status of h_log.
+    R_NUM(res);
 }
 
 //------------------------------------------------------------------------------
