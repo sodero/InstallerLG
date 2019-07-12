@@ -1,19 +1,13 @@
 - Retest (exists)
+- Retest (protect) get o sont.
 - Retest tooltypes / cli args
+- Retest (confirm)
 - Make sure that @language is OK.
 - Improve (back) and (retrace) test coverage.
-- Retest (confirm)
-
-- >= V44
--- (closemedia <media>)
--- (effect <position> <effect> <color 1> <color 2>)
--- (setmedia <media> <action> [parameter])
--- (showmedia <medianame> <filename> <position> <size> <borderflag> ...)
-
-- Some kind of uninstaller, see http://aminet.net/package/util/wb/Uninstaller
-- (copylib) - compare with OS3.9 - Show filename or assume it's included in prompt text?
-
 - file.c : h_choices LEAK CHECK
 - Check GUI list mgmt for leaks.
 - Retest iconinfo
 - In (copyfiles) make sure that .info:s aren't overwritten when using (infos).
+- Some kind of uninstaller, see http://aminet.net/package/util/wb/Uninstaller
+- (copylib) - compare with OS3.9 - Show filename or assume it's included in prompt text?
+

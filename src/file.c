@@ -181,11 +181,9 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 //------------------------------------------------------------------------------
 static int h_exists_amiga_type(const char *name)
 {
-    // We must allocate dos objects with the dedicated function.
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
-    // Make sure that we've succeeded.
     if(!fib)
     {
         // Out of memory.
@@ -224,7 +222,6 @@ static int h_exists_amiga_type(const char *name)
         UnLock(lock);
     }
 
-    // Free dos object with the dedicated function.
     FreeDosObject(DOS_FIB, fib);
     return type;
 }
@@ -853,67 +850,69 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 //------------------------------------------------------------------------------
 static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
 {
-    if(contxt && mask && file)
+    // Sanity check.
+    if(!contxt || !mask || !file)
     {
-        // On non Amiga systems, or in test mode, this is a stub.
-        #if defined(AMIGA) && !defined(LG_TEST)
-        struct FileInfoBlock *fib = (struct FileInfoBlock *)
-               AllocDosObject(DOS_FIB, NULL);
-
-        if(fib)
-        {
-            // Attempt to lock file / dir.
-            BOOL done = FALSE;
-            BPTR lock = (BPTR) Lock(file, ACCESS_READ);
-
-            // Did we obtain a lock?
-            if(lock)
-            {
-                // Fill up FIB and get bits.
-                if(Examine(lock, fib))
-                {
-                    *mask = fib->fib_Protection;
-                    done = TRUE;
-                }
-
-                UnLock(lock);
-            }
-
-            // Free FIB memory.
-            FreeDosObject(DOS_FIB, fib);
-
-            // Did everything above succeed?
-            if(!done)
-            {
-                // Only fail if we're in 'strict' mode.
-                if(get_numvar(contxt, "@strict"))
-                {
-                    // No, fail and set impossible mask.
-                    ERR(ERR_GET_PERM, file);
-                    *mask = -1;
-                }
-                else
-                {
-                    // Fallback to RWED.
-                    *mask = 0;
-                }
-            }
-
-            // If enabled, write to log file.
-            h_log(contxt, tr(S_GMSK), file, *mask);
-
-            // MASK or -1.
-            return done;
-        }
-        #else
-        // Always succeed on non Amiga systems.
-        return 1;
-        #endif
+        PANIC(contxt);
+        return 0;
     }
 
-    // Out of memory.
-    PANIC(contxt);
-    return 0;
+    // On non Amiga systems, or in test mode, this is a stub.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    struct FileInfoBlock *fib = (struct FileInfoBlock *)
+           AllocDosObject(DOS_FIB, NULL);
+
+    if(!fib)
+    {
+        // Out of memory.
+        PANIC(contxt);
+        return 0;
+    }
+
+    // Attempt to lock file / dir.
+    bool done = false;
+    BPTR lock = (BPTR) Lock(file, ACCESS_READ);
+
+    // Did we obtain a lock?
+    if(lock)
+    {
+        // Fill up FIB and get bits.
+        if(Examine(lock, fib))
+        {
+            *mask = fib->fib_Protection;
+            done = true;
+        }
+
+        UnLock(lock);
+    }
+
+    // Free FIB memory.
+    FreeDosObject(DOS_FIB, fib);
+
+    // Did everything above succeed?
+    if(!done)
+    {
+        // Only fail if we're in 'strict' mode.
+        if(get_numvar(contxt, "@strict"))
+        {
+            // Set invalid mask.
+            ERR(ERR_GET_PERM, file);
+            *mask = -1;
+        }
+        else
+        {
+            // Fallback to RWED.
+            *mask = 0;
+        }
+    }
+
+    // If enabled, write to log file.
+    h_log(contxt, tr(S_GMSK), file, *mask);
+    return done ? 1 : 0;
+    #else
+    // Always succeed on non Amiga systems.
+    return 1;
+    #endif
 }
 
 //------------------------------------------------------------------------------
@@ -1295,9 +1294,9 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
     // Create working copy.
     char *dir = DBG_ALLOC(strdup(dst));
 
-    // Make sure that we're not out of memory.
     if(!dir)
     {
+        // Out of memory.
         PANIC(contxt);
     }
 
@@ -1318,38 +1317,36 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
         // Shrink scope until mkdir works.
         for(int i = len; i >= 0; i--)
         {
-            // Is the current char a delimiter?
-            if(dir[i] == '/' || dir[i] == '\0')
+            // Skip non-delimiters.
+            if(dir[i] != '/' && dir[i] != '\0')
             {
-                // Save delimiter.
-                char del = dir[i];
+                continue;
+            }
 
-                // Truncate string.
-                dir[i] = '\0';
+            // Save delimiter and truncate.
+            char del = dir[i];
+            dir[i] = '\0';
 
-                // Attempt to create path.
-                if(mkdir(dir, 0777) == 0)
+            // Attempt to create truncated path.
+            if(mkdir(dir, 0777) == 0)
+            {
+                // We're done if this is the full path.
+                if(i == len)
                 {
-                    // Is this the full path?
-                    if(i == len)
-                    {
-                        free(dir);
-                        h_log(contxt, tr(S_CRTD), dst);
-
-                        // Yes, we're done.
-                        return 1;
-                    }
-
-                    // Not the full path, reinstate delimiter and start
-                    // all over again with the full path.
-                    dir[i] = del;
-                    break;
+                    free(dir);
+                    h_log(contxt, tr(S_CRTD), dst);
+                    return 1;
                 }
-                else
-                {
-                    // Reinstate delimiter and shrink scope.
-                    dir[i] = del;
-                }
+
+                // Not the full path, reinstate delimiter and start all over
+                // again with the full path.
+                dir[i] = del;
+                break;
+            }
+            else
+            {
+                // Reinstate delimiter and shrink scope.
+                dir[i] = del;
             }
         }
     }
@@ -2068,16 +2065,14 @@ static int h_delete_file(entry_p contxt, const char *file)
                 if(h_exists(info) == 1)
                 {
                     // Set write permission and delete file.
-                    if(!chmod(info, S_IRWXU) && !remove(info))
-                    {
-                        // The info file has been deleted.
-                        h_log(contxt, tr(S_DLTD), info);
-                    }
-                    else
+                    if(chmod(info, S_IRWXU) || remove(info))
                     {
                         ERR(ERR_DELETE_FILE, info);
                         return 0;
                     }
+
+                    // The info file has been deleted.
+                    h_log(contxt, tr(S_DLTD), info);
                 }
             }
 
@@ -2707,66 +2702,68 @@ entry_p m_makeassign(entry_p contxt)
     // One or more arguments and option.
     C_SANE(1, contxt);
 
-    entry_p safe = get_opt(contxt, OPT_SAFE);
-
-    // Is this a safe operation or are we not running in pretend mode?
-    if(safe || !get_numvar(contxt, "@pretend"))
+    // Succeed immediately if non-safe in pretend mode.
+    if(!get_opt(contxt, OPT_SAFE) && get_numvar(contxt, "@pretend"))
     {
-        // The name of the assign.
-        char *asn = str(C_ARG(1));
+        R_NUM(1);
+    }
 
-        // Assume failure..
-        D_NUM = 0;
+    // The name of the assign.
+    char *asn = str(C_ARG(1));
+    int res = 0;
 
-        // Are we going to create an assign?
-        if(C_ARG(2) && C_ARG(2) != end() &&
-           C_ARG(2)->type != OPTION)
+    // Are we going to create an assign?
+    if(C_ARG(2) && C_ARG(2) != end() && C_ARG(2)->type != OPTION)
+    {
+        // The destination.
+        char *dst = str(C_ARG(2));
+
+        #if defined(AMIGA) && !defined(LG_TEST)
+        BPTR lock = (BPTR) Lock(dst, ACCESS_READ);
+        if(lock)
         {
-            // The destination.
-            char *dst = str(C_ARG(2));
-
-            #if defined(AMIGA) && !defined(LG_TEST)
-            BPTR lock = (BPTR) Lock(dst, ACCESS_READ);
-            if(lock)
+            // Create the assign. After this, the lock will be owned by the OS,
+            // do not unlock or use.
+            //res = AssignLock(asn, lock) ? 1 : 0;
+            if(AssignLock(asn, lock))
             {
-                // Create the assign. After this, the lock will be owned by the
-                // system, do not unlock or use.
-                D_NUM = AssignLock(asn, lock) ? 1 : 0;
+                res = 1;
             }
-            #else
-            D_NUM = 1;
-            #endif
-
-            // Log the outcome.
-            h_log(contxt, D_NUM ? tr(S_ACRT) : tr(S_ACRE), asn, dst);
+            // On failure, the OS doesn't take ownership of the lock. We must
+            // unlock it.
+            else
+            {
+                UnLock(lock);
+            }
         }
-        else
-        {
-            #if defined(AMIGA) && !defined(LG_TEST)
-            // Remove assign.
-            D_NUM = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? 1 : 0;
-            #else
-            D_NUM = 2;
-            #endif
+        #else
+        res = 1;
+        #endif
 
-            // Log the outcome.
-            h_log(contxt, D_NUM ? tr(S_ADEL) : tr(S_ADLE), asn);
-        }
-
-        if(!D_NUM)
-        {
-            // Could not create / rm assign / get lock.
-            ERR(ERR_ASSIGN, str(C_ARG(1)));
-        }
+        // Log the outcome.
+        h_log(contxt, res ? tr(S_ACRT) : tr(S_ACRE), asn, dst);
     }
     else
     {
-        // Pretend.
-        D_NUM = 1;
+        #if defined(AMIGA) && !defined(LG_TEST)
+        // Remove assign.
+        res = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? 1 : 0;
+        #else
+        res = 2;
+        #endif
+
+        // Log the outcome.
+        h_log(contxt, res ? tr(S_ADEL) : tr(S_ADLE), asn);
+    }
+
+    if(!res)
+    {
+        // Could not create / rm assign / get lock.
+        ERR(ERR_ASSIGN, str(C_ARG(1)));
     }
 
     // Failure or success.
-    R_CUR;
+    R_NUM(res);
 }
 
 //------------------------------------------------------------------------------
@@ -3407,8 +3404,13 @@ entry_p m_tooltype(entry_p contxt)
             setstack        = get_opt(contxt, OPT_SETSTACK),
             noposition      = get_opt(contxt, OPT_NOPOSITION),
             setposition     = get_opt(contxt, OPT_SETPOSITION),
-            confirm         = get_opt(contxt, OPT_CONFIRM),
-            safe            = get_opt(contxt, OPT_SAFE);
+            confirm         = get_opt(contxt, OPT_CONFIRM);
+
+    // Succeed immediately if non-safe in pretend mode.
+    if(!get_opt(contxt, OPT_SAFE) && get_numvar(contxt, "@pretend"))
+    {
+        R_NUM(1);
+    }
 
     D_NUM = 0;
 
@@ -3423,12 +3425,6 @@ entry_p m_tooltype(entry_p contxt)
         {
             ERR(ERR_OPTION_MUTEX, "noposition/setposition");
             R_NUM(0);
-        }
-
-        // A non safe operation in pretend mode always succeeds.
-        if(get_numvar(contxt, "@pretend") && !safe)
-        {
-            R_NUM(1);
         }
 
         // Get confirmation if necessary.
