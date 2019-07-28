@@ -191,7 +191,7 @@ static int h_exists_amiga_type(const char *name)
     }
 
     // Attempt to lock file or directory.
-    BPTR lock = (BPTR) Lock(file, ACCESS_READ);
+    BPTR lock = (BPTR) Lock(name, ACCESS_READ);
     int type = LG_EXISTS_NONE;
 
     if(lock)
