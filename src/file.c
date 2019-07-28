@@ -50,9 +50,8 @@ entry_p m_expandpath(entry_p contxt)
     char *pth = str(C_ARG(1));
 
     // Make sure that the argument is resolvable.
-    if(DID_ERR)
+    if((!pth && PANIC(contxt)) || DID_ERR)
     {
-        // Return empty string on error.
         R_EST;
     }
 
@@ -94,75 +93,40 @@ entry_p m_expandpath(entry_p contxt)
 //------------------------------------------------------------------------------
 bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 {
-    if(contxt)
+    // Sanity check;
+    if(!contxt)
     {
-        // By setting @yes, @skip or @abort user behaviour can be simulated.
-        int yes = get_numvar(contxt, "@yes"),
-            skip = get_numvar(contxt, "@skip"),
-            abort = get_numvar(contxt, "@abort");
-
-        inp_t grc;
-        va_list ap;
-
-        // Format messsage string.
-        va_start(ap, msg);
-        vsnprintf(get_buf(), buf_size(), msg, ap);
-        va_end(ap);
-
-        // If we have any overrides, translate them to the corresponding gui
-        // return value.
-        if(abort)
-        {
-            grc = G_ABORT;
-        }
-        else
-        if(skip)
-        {
-            grc = G_FALSE;
-        }
-        else
-        if(yes)
-        {
-            grc = G_TRUE;
-        }
-        // No overrides, get confirmation.
-        else
-        {
-            entry_p back = get_opt(contxt, OPT_BACK);
-
-            grc = gui_confirm(get_buf(), hlp, back != false);
-
-            // Is the back option available?
-            if(back)
-            {
-                // Fake input?
-                if(get_numvar(contxt, "@back"))
-                {
-                    grc = G_ABORT;
-                }
-
-                // On abort execute.
-                if(grc == G_ABORT)
-                {
-                    grc = resolve(back) ?
-                          G_TRUE : G_ERR;
-                }
-            }
-        }
-
-        // FIXME
-        if(grc == G_ABORT || grc == G_EXIT)
-        {
-            HALT;
-        }
-
-        // FIXME
-        return grc == G_TRUE;
+        PANIC(contxt);
+        return false;
     }
 
-    // Broken parser.
-    PANIC(contxt);
-    return false;
+    // By setting @yes, @skip or @abort user behaviour can be simulated.
+    inp_t grc = get_numvar(contxt, "@abort") ? G_ABORT :
+                get_numvar(contxt, "@skip") ? G_FALSE :
+                get_numvar(contxt, "@yes") ? G_TRUE : G_EXIT;
+
+    va_list ap;
+
+    // Format messsage string.
+    va_start(ap, msg);
+    vsnprintf(get_buf(), buf_size(), msg, ap);
+    va_end(ap);
+
+    // Get confirmation unless @yes, @skip or @abort are set.
+    if(grc == G_EXIT)
+    {
+        entry_p back = get_opt(contxt, OPT_BACK);
+        grc = gui_confirm(get_buf(), hlp, back != false);
+
+        // If (back) exists, execute body on user / fake abort.
+        if(back && (grc == G_ABORT || get_numvar(contxt, "@back")))
+        {
+            grc = resolve(back) ? G_TRUE : G_ERR;
+        }
+    }
+
+    // Translate response.
+    return (grc == G_TRUE) || ((grc == G_ABORT || grc == G_EXIT) && HALT);
 }
 
 //------------------------------------------------------------------------------
@@ -336,11 +300,11 @@ static const char *h_fileonly(entry_p contxt, const char *path)
 //------------------------------------------------------------------------------
 // Name:        h_suffix
 // Description: Append file / directory suffix.
-// Input:       char *name:     Name of file or directory.
-//              char *suffix:   Suffix to append.
-// Return:      char *:         File or directory with suffix.
+// Input:       const char *name:     Name of file or directory.
+//              const char *suffix:   Suffix to append.
+// Return:      char *:               File or directory with suffix.
 //------------------------------------------------------------------------------
-static char *h_suffix(char *name, char *suffix)
+static char *h_suffix(const char *name, const char *suffix)
 {
     // Use global buffer.
     char *buf = get_buf();
@@ -2046,39 +2010,41 @@ static int h_delete_file(entry_p contxt, const char *file)
     }
 
     // If yes, this must succeed, otherwise we will abort with an error.
-    if(!remove(file))
+    if(remove(file))
     {
-        // The file has been deleted.
-        h_log(contxt, tr(S_DLTD), file);
+        // Could not delete file.
+        ERR(ERR_DELETE_FILE, file);
+        return 0;
+    }
 
-        // Shall we delete the info file as well?
-        if(get_opt(C_ARG(2), OPT_INFOS))
-        {
-            // Info = file + .info.
-            char *info = get_buf();
-            snprintf(info, buf_size(), "%s.info", file);
+    // The file has been deleted.
+    h_log(contxt, tr(S_DLTD), file);
 
-            if(h_exists(info) == 1)
-            {
-                // Set write permission and delete file.
-                if(chmod(info, S_IRWXU) || remove(info))
-                {
-                    ERR(ERR_DELETE_FILE, info);
-                    return 0;
-                }
-
-                // The info file has been deleted.
-                h_log(contxt, tr(S_DLTD), info);
-            }
-        }
-
-        // All done.
+    // Shall we delete the info file as well?
+    if(!get_opt(C_ARG(2), OPT_INFOS))
+    {
+        // No, we're done.
         return 1;
     }
 
-    // Could not delete file.
-    ERR(ERR_DELETE_FILE, file);
-    return 0;
+    // Do we have a corresponding .info file?
+    char *info = h_suffix(file, "info");
+
+    if(h_exists(h_suffix(file, "info")) == 1)
+    {
+        // Set write permission and delete file.
+        if(chmod(info, S_IRWXU) || remove(info))
+        {
+            ERR(ERR_DELETE_FILE, info);
+            return 0;
+        }
+
+        // The info file has been deleted.
+        h_log(contxt, tr(S_DLTD), info);
+    }
+
+    // All done.
+    return 1;
 }
 
 //------------------------------------------------------------------------------
@@ -2091,152 +2057,155 @@ static int h_delete_file(entry_p contxt, const char *file)
 static int h_delete_dir(entry_p contxt, const char *name)
 {
     // Sanity check.
-    if(name)
+    if(!name)
     {
-        entry_p infos    = get_opt(C_ARG(2), OPT_INFOS),
-                force    = get_opt(C_ARG(2), OPT_FORCE),
-                askuser  = get_opt(C_ARG(2), OPT_ASKUSER),
-                all      = get_opt(C_ARG(2), OPT_ALL);
+        PANIC(contxt);
+        return 0; 
+    }
 
-        if(!force && access(name, W_OK))
+    // Sanity check.
+/*    if(name)
+    { */
+    entry_p infos    = get_opt(C_ARG(2), OPT_INFOS),
+            force    = get_opt(C_ARG(2), OPT_FORCE),
+            askuser  = get_opt(C_ARG(2), OPT_ASKUSER),
+            all      = get_opt(C_ARG(2), OPT_ALL);
+
+    if(!force && access(name, W_OK))
+    {
+        // Do we need to ask for confirmation?
+        if(askuser)
         {
-            // Do we need to ask for confirmation?
-            if(askuser)
+            // Ask for confirmation if we're not running in novice mode.
+            if(!get_numvar(contxt, "@user-level") ||
+               !h_confirm(C_ARG(2), "", tr(S_DWRD), name))
             {
-                // Ask for confirmation if we're not running in novice mode.
-                if(!get_numvar(contxt, "@user-level") ||
-                   !h_confirm(C_ARG(2), "", tr(S_DWRD), name))
-                {
-                    // Halt will be set by h_confirm. Skip
-                    // will result in nothing.
-                    return 0;
-                }
-            }
-            else
-            {
-                // Exit silently.
+                // Halt will be set by h_confirm. Skip
+                // will result in nothing.
                 return 0;
             }
         }
-
-        // Give permissions so that delete can succeed. No need to bother with
-        // the return value since errors will be caught below.
-        chmod(name, S_IRWXU);
-
-        if(rmdir(name))
+        else
         {
-            if(all)
+            // Exit silently.
+            return 0;
+        }
+    }
+
+    // Give permissions so that delete can succeed. No need to bother with
+    // the return value since errors will be caught below.
+    chmod(name, S_IRWXU);
+
+    if(rmdir(name))
+    {
+        if(all)
+        {
+            DIR *dir = opendir(name);
+
+            // Permission to read?
+            if(dir)
             {
-                DIR *dir = opendir(name);
+                struct dirent *entry = readdir(dir);
 
-                // Permission to read?
-                if(dir)
+                // Find all files in the directory.
+                while(entry)
                 {
-                    struct dirent *entry = readdir(dir);
+                    // Create full path.
+                    char *path = h_tackon(contxt, name, entry->d_name);
 
-                    // Find all files in the directory.
-                    while(entry)
+                    // Is it a file?
+                    if(path && h_exists(path) == 1)
+                    {
+                        // Delete it.
+                        h_delete_file(contxt, path);
+                    }
+
+                    // Free full path.
+                    free(path);
+
+                    // Get next entry.
+                    entry = readdir(dir);
+                }
+
+                // Restart from the beginning.
+                rewinddir(dir);
+                entry = readdir(dir);
+
+                // Find all subdirectories in the directory.
+                while(entry)
+                {
+                    #ifndef AMIGA
+                    // Filter out the magic on non-Amigas.
+                    if(strcmp(entry->d_name, ".") &&
+                       strcmp(entry->d_name, ".."))
+                    #endif
                     {
                         // Create full path.
                         char *path = h_tackon(contxt, name, entry->d_name);
 
-                        // Is it a file?
-                        if(path && h_exists(path) == 1)
+                        // Is it a directory?
+                        if(path && h_exists(path) == 2)
                         {
-                            // Delete it.
-                            h_delete_file(contxt, path);
+                            // Recur into subdirectory.
+                            h_delete_dir(contxt, path);
                         }
 
                         // Free full path.
                         free(path);
-
-                        // Get next entry.
-                        entry = readdir(dir);
                     }
 
-                    // Restart from the beginning.
-                    rewinddir(dir);
+                    // Get next entry.
                     entry = readdir(dir);
-
-                    // Find all subdirectories in the directory.
-                    while(entry)
-                    {
-                        #ifndef AMIGA
-                        // Filter out the magic on non-Amigas.
-                        if(strcmp(entry->d_name, ".") &&
-                           strcmp(entry->d_name, ".."))
-                        #endif
-                        {
-                            // Create full path.
-                            char *path = h_tackon(contxt, name, entry->d_name);
-
-                            // Is it a directory?
-                            if(path && h_exists(path) == 2)
-                            {
-                                // Recur into subdirectory.
-                                h_delete_dir(contxt, path);
-                            }
-
-                            // Free full path.
-                            free(path);
-                        }
-
-                        // Get next entry.
-                        entry = readdir(dir);
-                    }
-
-                    // Close the (by now, hopefully) empty dir.
-                    closedir(dir);
                 }
 
-                if(rmdir(name))
-                {
-                    // Fail silently.
-                    return 0;
-                }
+                // Close the (by now, hopefully) empty dir.
+                closedir(dir);
             }
-            else
+
+            if(rmdir(name))
             {
                 // Fail silently.
                 return 0;
             }
         }
-
-        // Shall we delete the info file as well?
-        if(infos)
+        else
         {
-            // Info = file + .info.
-            char *info = get_buf();
-            snprintf(info, buf_size(), "%s.info", name);
-
-            if(h_exists(info) == 1)
-            {
-                // Set permissions so that delete can succeed.
-                chmod(info, S_IRWXU);
-
-                // Delete the info file.
-                if(!remove(info))
-                {
-                    // The info file has been deleted.
-                    h_log(contxt, tr(S_DLTD), info);
-                }
-                else
-                {
-                    // Fail silently.
-                    return 0;
-                }
-            }
+            // Fail silently.
+            return 0;
         }
+    }
 
-        // Done.
+    // Shall we delete the info file as well?
+    if(!infos )
+    {
+        // No, we're done..
         return 1;
     }
 
-    // Bad input.
-    PANIC(contxt);
+    // Info = file + .info.
+    char *info = get_buf();
+    snprintf(info, buf_size(), "%s.info", name);
 
-    // Fail silently.
-    return 0;
+    if(h_exists(info) == 1)
+    {
+        // Set permissions so that delete can succeed.
+        chmod(info, S_IRWXU);
+
+        // Delete the info file.
+        if(!remove(info))
+        {
+            // The info file has been deleted.
+            h_log(contxt, tr(S_DLTD), info);
+        }
+        else
+        {
+            // Fail silently.
+            return 0;
+        }
+    }
+
+    // We're done.
+    return 1;
 }
 
 //------------------------------------------------------------------------------
@@ -2248,73 +2217,74 @@ static int h_delete_dir(entry_p contxt, const char *name)
 //------------------------------------------------------------------------------
 static int h_delete_pattern(entry_p contxt, const char *pat)
 {
-    if(contxt && pat)
+    // Sanity check.
+    if(!contxt || !pat)
     {
-        // Pattern matching is only done on Amiga systems in non test mode.
-        #if defined(AMIGA) && !defined(LG_TEST)
-        struct AnchorPath *ap =
-            DBG_ALLOC(calloc(1, sizeof(struct AnchorPath) + PATH_MAX));
-
-        if(ap)
-        {
-            int err;
-            ap->ap_Strlen = PATH_MAX;
-
-            // For all matches, invoke the appropriate function for deletion.
-            for(err = MatchFirst(pat, ap); !err; err = MatchNext(ap))
-            {
-                // ST_FILE         -3
-                // ST_LINKFILE     -4
-                if(ap->ap_Info.fib_DirEntryType < 0)
-                {
-                    if(!h_delete_file(contxt, ap->ap_Buf))
-                    {
-                        // Break out on trouble / user abort.
-                        break;
-                    }
-                }
-                else
-                // ST_ROOT          1
-                // ST_USERDIR       2
-                // ST_SOFTLINK      3
-                // ST_LINKDIR       4
-                if(ap->ap_Info.fib_DirEntryType > 0)
-                {
-                    if(!h_delete_dir(contxt, ap->ap_Buf))
-                    {
-                        // Break out on trouble / user abort.
-                        break;
-                    }
-                }
-            }
-
-            // Free all resources.
-            MatchEnd(ap);
-            free(ap);
-
-            // Is there nothing left?
-            if(!err || err == ERROR_NO_MORE_ENTRIES)
-            {
-                // Done.
-                return 1;
-            }
-            else
-            {
-                // Please note that 'breaks' will take us here, so will
-                // MatchFirst / MatchNext() problems.
-                ERR(ERR_DELETE_FILE, pat);
-                return 0;
-            }
-        }
-        #else
-        // On non Amiga systems this is a stub.
-        return 1;
-        #endif
+        PANIC(contxt);
+        return 0;
     }
 
-    // Bad input.
-    PANIC(contxt);
+    // Pattern matching is only done on Amiga systems in non test mode.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    struct AnchorPath *apt =
+        DBG_ALLOC(calloc(1, sizeof(struct AnchorPath) + PATH_MAX));
+
+    if(!apt)
+    {
+        PANIC(contxt);
+        return 0;
+    }
+
+    apt->ap_Strlen = PATH_MAX;
+    int err;
+
+    // For all matches, invoke the appropriate function for deletion.
+    for(err = MatchFirst(pat, apt); !err; err = MatchNext(apt))
+    {
+        // ST_FILE         -3
+        // ST_LINKFILE     -4
+        if(apt->ap_Info.fib_DirEntryType < 0)
+        {
+            if(!h_delete_file(contxt, apt->ap_Buf))
+            {
+                // Break out on trouble / user abort.
+                break;
+            }
+        }
+        else
+        // ST_ROOT          1
+        // ST_USERDIR       2
+        // ST_SOFTLINK      3
+        // ST_LINKDIR       4
+        if(apt->ap_Info.fib_DirEntryType > 0)
+        {
+            if(!h_delete_dir(contxt, apt->ap_Buf))
+            {
+                // Break out on trouble / user abort.
+                break;
+            }
+        }
+    }
+
+    // Free all resources.
+    MatchEnd(apt);
+    free(apt);
+
+    // Is there nothing left?
+    if(!err || err == ERROR_NO_MORE_ENTRIES)
+    {
+        // Done.
+        return 1;
+    }
+
+    // Please note that 'breaks' will take us here, so will
+    // MatchFirst / MatchNext() problems.
+    ERR(ERR_DELETE_FILE, pat);
     return 0;
+    #else
+    // On non Amiga systems this is a stub.
+    return 1;
+    #endif
 }
 
 //------------------------------------------------------------------------------
@@ -2340,75 +2310,57 @@ entry_p m_delete(entry_p contxt)
     wild = get_numvar(contxt, "@wild");
     #endif
 
-    // Assume failure.
-    D_NUM = 0;
-
     // Can we parse the input string?
-    if(wild >= 0)
+    if(wild < 0)
     {
-        entry_p help     = get_opt(C_ARG(2), OPT_HELP),
-                prompt   = get_opt(C_ARG(2), OPT_PROMPT),
-                confirm  = get_opt(C_ARG(2), OPT_CONFIRM),
-                safe     = get_opt(C_ARG(2), OPT_SAFE);
-
-        // If we need confirmation and the user skips or aborts, return. On
-        // abort, the HALT will be set by h_confirm.
-        if(confirm && !h_confirm(C_ARG(2), str(help), str(prompt)))
-        {
-            R_CUR;
-        }
-
-        // Is this a safe operation or are we not running in pretend mode?
-        if(safe || !get_numvar(contxt, "@pretend"))
-        {
-            // Did the input string contain any wildcards?
-            if(wild)
-            {
-                // Delete everything matching the wildcard pattern.
-                D_NUM = h_delete_pattern(contxt, file);
-            }
-            else
-            // No wildcards, delete directory, file or something that doesn't
-            // exist.
-            {
-                switch(h_exists(file))
-                {
-                    // Doesn't exist.
-                    case 0:
-                        h_log(contxt, tr(S_NSFL), file);
-                        break;
-
-                    // A file.
-                    case 1:
-                        D_NUM = h_delete_file(contxt, file);
-                        break;
-
-                    // A directory.
-                    case 2:
-                        D_NUM = h_delete_dir(contxt, file);
-                        break;
-
-                    // Invalid type.
-                    default:
-                        PANIC(contxt);
-                        break;
-                }
-            }
-        }
-        else
-        {
-            // A non safe operation in pretend mode always succeeds.
-            D_NUM = 1;
-        }
-    }
-    else
-    {
-        // We probably had a buffer overflow.
+        // Buffer overflow.
         ERR(ERR_OVERFLOW, file);
+        R_NUM(0);
     }
 
-    // Success or failure.
-    R_CUR;
+    entry_p help     = get_opt(C_ARG(2), OPT_HELP),
+            prompt   = get_opt(C_ARG(2), OPT_PROMPT),
+            confirm  = get_opt(C_ARG(2), OPT_CONFIRM);
+
+    // If we need confirmation and the user skips or aborts, return. On
+    // abort, the HALT will be set by h_confirm.
+    if(confirm && !h_confirm(C_ARG(2), str(help), str(prompt)))
+    {
+        R_NUM(0);
+    }
+
+    // Succeed immediately if non-safe in pretend mode.
+    if(!get_opt(C_ARG(2), OPT_SAFE) && get_numvar(contxt, "@pretend"))
+    {
+        R_NUM(1);
+    }
+
+    // Did the input string contain any wildcards?
+    if(wild)
+    {
+        // Delete everything matching the wildcard pattern.
+        R_NUM(h_delete_pattern(contxt, file));
+    }
+
+    switch(h_exists(file))
+    {
+        // Doesn't exist.
+        case 0:
+            h_log(contxt, tr(S_NSFL), file);
+            R_NUM(0);
+
+        // A file.
+        case 1:
+            R_NUM(h_delete_file(contxt, file));
+
+        // A directory.
+        case 2:
+            R_NUM(h_delete_dir(contxt, file));
+
+        // Invalid type.
+        default:
+            R_NUM(PANIC(contxt));
+    }
 }
 
 //------------------------------------------------------------------------------
