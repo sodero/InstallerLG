@@ -1,7 +1,10 @@
+- Test coverage, (copyfiles) (info) do not overwrite existing .info
 - Retest (exists)
+- Retest delete pattern
 - Retest (protect) get o sont.
 - Retest tooltypes / cli args
 - Retest (confirm)
+- Retest (back)
 - Make sure that @language is OK.
 - Improve (back) and (retrace) test coverage.
 - file.c : h_choices LEAK CHECK
