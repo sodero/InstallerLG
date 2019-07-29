@@ -358,6 +358,7 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
     if(!tail->next)
     {
         PANIC(contxt);
+        return tail;
     }
 
     // New list tail.
@@ -1257,6 +1258,7 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
     {
         // Out of memory.
         PANIC(contxt);
+        return 0;
     }
 
     int depth = 1, len = (int) strlen(dir);
