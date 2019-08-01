@@ -531,8 +531,7 @@ entry_p m_askdisk(entry_p contxt)
         PANIC(contxt);
     }
 
-    // Success, failure or
-    // broken parser.
+    // Success, failure or broken parser.
     R_CUR;
 }
 

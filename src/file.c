@@ -467,14 +467,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
                 // Get tree of subdirectory. Don't promote (choices).
                 node->next = h_filetree
                 (
-                    contxt,
-                    name,
-                    copy,
-                    NULL,
-                    NULL,
-                    NULL,
-                    NULL,
-                    NULL
+                    contxt, name, copy, NULL, NULL, NULL, NULL, NULL
                 );
 
                 // Fast forward to the end of the list.
