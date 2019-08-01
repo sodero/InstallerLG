@@ -196,30 +196,20 @@ entry_p m_trap(entry_p contxt)
 entry_p m_reboot(entry_p contxt)
 {
     // All we need is a context.
-    if(contxt)
+    C_SANE(0, NULL);
+
+    // Don't reboot in pretend mode.
+    if(get_numvar(contxt, "@pretend"))
     {
-        // Don't reboot in pretend mode.
-        if(get_numvar(contxt, "@pretend"))
-        {
-            D_NUM = 0;
-        }
-        else
-        {
-            // In test mode, don't reboot.
-            #if defined(AMIGA) && !defined(LG_TEST)
-            // Hard reset.
-            ColdReboot();
-            #else
-            D_NUM = 1;
-            #endif
-        }
-    }
-    else
-    {
-        // Broken parser.
-        PANIC(contxt);
+        R_NUM(0);
     }
 
-    // No reboot.
-    R_CUR;
+    // Don't reboot in test mode.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Hard reset.
+    ColdReboot();
+    #endif
+
+    // Always succeed in test mode.
+    R_NUM(1);
 }

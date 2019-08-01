@@ -518,14 +518,13 @@ entry_p m_tackon(entry_p contxt)
     // Two arguments.
     C_SANE(2, NULL);
 
-    // All work's done by the helper.
+    // All work is done by the helper.
     char *ret = h_tackon(contxt, str(C_ARG(1)), str(C_ARG(2)));
 
     // Did we fail?
     if(!ret)
     {
-        // Return empty string. Error codes, PANIC:s and
-        // so on are set by h_tackon().
+        // Return empty string. Error codes are set by h_tackon().
         R_EST;
     }
 
@@ -541,9 +540,7 @@ entry_p m_tackon(entry_p contxt)
 //              const char *suf:    The file.
 // Return:      const char *:       The dir/file concatenation.
 //------------------------------------------------------------------------------
-char *h_tackon(entry_p contxt,
-               const char *pre,
-               const char *suf)
+char *h_tackon(entry_p contxt, const char *pre, const char *suf)
 {
     // We need a path and a file.
     if(pre && suf)
