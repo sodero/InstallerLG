@@ -149,6 +149,53 @@ entry_p m_trace(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_retrace
+// Description: Backtrack to the next trace point.
+// Input:       entry_p contxt: The start context.
+// Return:      entry_p *:      Pointer to a trace point, if it exists, NULL
+//                              otherwise.
+//------------------------------------------------------------------------------
+static entry_p *h_retrace(entry_p contxt)
+{
+    // Stop at the root. User procedures are considered roots. It's not possible
+    // to escape a function scope with (retrace).
+    if(!contxt || contxt->type == CUSTOM || !contxt->parent)
+    {
+        return NULL;
+    }
+
+    // We must be a child of our parent.
+    entry_p *chl = contxt->parent->children;
+
+    if(!chl)
+    {
+        PANIC(contxt);
+        return NULL;
+    }
+
+    size_t pos = 0;
+
+    // Locate ourselves among the children.
+    while(chl[pos] != contxt)
+    {
+        pos++;
+    }
+
+    // Find trace point before current contxt.
+    while(pos--)
+    {
+        // Use pointer to identify (trace).
+        if(chl[pos]->call == m_trace)
+        {
+            return(chl + pos);
+        }
+    }
+
+    // No trace point found. Climb up the tree.
+    return h_retrace(contxt->parent);
+}
+
+//------------------------------------------------------------------------------
 // (retrace)
 //     backtrace to the next to last backtrace position
 //
@@ -159,91 +206,33 @@ entry_p m_retrace(entry_p contxt)
     // No arguments.
     C_SANE(0, NULL);
 
-    // Starting point.
-    entry_p con = contxt;
+    // Backtrack to first trace point.
+    entry_p *top = h_retrace(contxt);
 
-    // Find context or user procedure.
-    while(con->parent && con->parent->type != CONTXT &&
-          con->parent->type != CUSTOM)
+    // Backtrack to second trace point.
+    top = top ? h_retrace(*top) : NULL;
+
+    // Resolve if we have two trace points.
+    if(top)
     {
-        // Climb one generation.
-        con = con->parent;
-    }
-
-    // We should always have a CONTXT or CUSTOM parent.
-    if(!con->parent || !con->parent->children)
-    {
-        // Nowhere to go.
-        PANIC(con);
-        R_CUR;
-    }
-
-    // Iterator and sentinel.
-    entry_p *chl = con->parent->children;
-    entry_p top = *chl;
-
-    // Locate ourselves.
-    while(*chl != con)
-    {
-        chl++;
-    }
-
-    // Locate the first trace point, unless we're first in line.
-    if(*chl != top)
-    {
-        // Find first trace point.
-        while(*(--chl) != top)
-        {
-            if((*chl)->call == m_trace)
-            {
-                // Found it.
-                break;
-            }
-        }
-
-        // Look for the second trace point, unless we're at the top by now.
-        if(*chl != top)
-        {
-            // Find the second point.
-            while(*(--chl) != top)
-            {
-                if((*chl)->call == m_trace)
-                {
-                    // Found it.
-                    break;
-                }
-            }
-        }
-    }
-
-    // Backtrack if we found two trace points.
-    if((*chl)->call == m_trace)
-    {
-        // Expect failure.
-        entry_p ret = end();
-        entry_p *org = chl;
-
         // Stack frame counter.
         static int dep = 0;
 
         // Keep track of the recursion depth.
         if(++dep > MAXDEP)
         {
-            // We risk running out of stack.
-            ERR(ERR_MAX_DEPTH, con->name);
+            ERR(ERR_MAX_DEPTH, contxt->name);
             R_CUR;
         }
 
-        // As long as no one fails, resolve all children and save the return
-        // value of the last one.
-        for(; !DID_ERR; chl = org)
+        // Expect failure.
+        entry_p ret = end();
+
+        // Resolve children and save return values.
+        while(*top && *top != end() && !DID_ERR)
         {
-            while(*chl && *chl != end() && !DID_ERR)
-            {
-                // Resolve and proceed.
-                ret = resolve(*chl);
-                chl++;
-            }
+            ret = resolve(*top);
+            top++;
         }
 
         // Leaving stack frame.
