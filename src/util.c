@@ -32,32 +32,35 @@
 void ror(entry_p *entry)
 {
     // Something to rotate?
-    if(entry)
+    if(!entry)
     {
-        int lst = 0;
+        // Nope.
+        return;
+    }
 
-        // Let 'lst' be the index of the last entry.
-        while(entry[lst] && entry[lst] != end())
+    int lst = 0;
+
+    // Let 'lst' be the index of the last entry.
+    while(entry[lst] && entry[lst] != end())
+    {
+        lst++;
+    }
+
+    // Nothing to do if we have < 2 entries.
+    if(--lst > 0)
+    {
+        // Save the last entry.
+        entry_p last = entry[lst];
+
+        // Shift the rest to the right.
+        while(lst)
         {
-            lst++;
+            entry[lst] = entry[lst - 1];
+            lst--;
         }
 
-        // Nothing to do if we have < 2 entries.
-        if(--lst > 0)
-        {
-            // Save the last entry.
-            entry_p last = entry[lst];
-
-            // Shift the rest to the right.
-            while(lst)
-            {
-                entry[lst] = entry[lst - 1];
-                lst--;
-            }
-
-            // Put the saved entry first.
-            entry[0] = last;
-        }
+        // Put the saved entry first.
+        entry[0] = last;
     }
 }
 
@@ -464,27 +467,26 @@ void set_numvar(entry_p contxt, char *var, int val)
     static entry_t ref = { .type = SYMREF };
 
     // We need a name and a context.
-    if(contxt && var)
+    if(!contxt || !var)
     {
-        // Name and reparent.
-        ref.parent = contxt;
-        ref.name = var;
-
-        // Find whatever 'var' is.
-        entry_p sym = find_symbol(&ref);
-
-        // This should be a symbol. And it
-        // should be a resolved numerical one.
-        if(sym && sym->type == SYMBOL && sym->resolved &&
-           sym->resolved->type == NUMBER)
-        {
-            // Success.
-            sym->resolved->id = val;
-            return;
-        }
+        PANIC(contxt);
+        return;
     }
 
-    // Failure.
+    // Name and reparent.
+    ref.parent = contxt;
+    ref.name = var;
+
+    // Find whatever 'var' is.
+    entry_p sym = find_symbol(&ref);
+
+    // This should be a symbol and it should be a resolved numerical one.
+    if(sym && sym->type == SYMBOL && sym->resolved &&
+       sym->resolved->type == NUMBER)
+    {
+        // Success.
+        sym->resolved->id = val;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -502,17 +504,16 @@ int get_numvar(entry_p contxt, char *var)
     // We need a name and a context.
     if(!contxt || !var)
     {
-        // This shouldn't happen.
         PANIC(contxt);
         return 0;
     }
 
-    // Dummy reference used to find the variable.
+    // Dummy reference used for searching.
     static entry_t ref = { .type = SYMREF };
 
     // Name and reparent dummy.
-    ref.name = var;
     ref.parent = contxt;
+    ref.name = var;
 
     // Find whatever 'var' is.
     entry_p sym = find_symbol(&ref);
@@ -544,7 +545,6 @@ char *get_strvar(entry_p contxt, char *var)
     // We need a name and a context.
     if(!contxt || !var)
     {
-        // This shouldn't happen.
         PANIC(contxt);
         return "";
     }
@@ -772,27 +772,30 @@ char *get_chlstr(entry_p contxt, bool pad)
 void set_strvar(entry_p contxt, char *var, char *val)
 {
     // We need a name and a context.
-    if(contxt && var)
+    if(!contxt || !var)
     {
-        // Dummy reference used to find the variable.
-        static entry_t ref = { .type = SYMREF };
+        PANIC(contxt);
+        return;
+    }
 
-        // Name and reparent dummy.
-        ref.parent = contxt;
-        ref.name = var;
+    // Dummy reference used for searching.
+    static entry_t ref = { .type = SYMREF };
 
-        // Find whatever 'v' is.
-        entry_p sym = find_symbol(&ref);
+    // Name and reparent dummy.
+    ref.parent = contxt;
+    ref.name = var;
 
-        // This should be a symbol. And it
-        // should be a resolved string.
-        if(sym && sym->type == SYMBOL && sym->resolved &&
-           sym->resolved->type == STRING)
-        {
-            // Taking ownership of 'val'.
-            free(sym->resolved->name);
-            sym->resolved->name = val;
-        }
+    // Find whatever 'v' is.
+    entry_p sym = find_symbol(&ref);
+
+    // This should be a symbol. And it
+    // should be a resolved string.
+    if(sym && sym->type == SYMBOL && sym->resolved &&
+       sym->resolved->type == STRING)
+    {
+        // Taking ownership of 'val'.
+        free(sym->resolved->name);
+        sym->resolved->name = val;
     }
 }
 
