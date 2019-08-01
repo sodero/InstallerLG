@@ -5,6 +5,7 @@
 - Retest tooltypes / cli args
 - Retest (confirm)
 - Retest (back)
+- Make expert file choices opt out instead of opt in.
 - Make sure that @language is OK.
 - Improve (back) and (retrace) test coverage.
 - file.c : h_choices LEAK CHECK

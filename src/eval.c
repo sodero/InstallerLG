@@ -454,8 +454,6 @@ entry_p invoke(entry_p entry)
 
     // Bad input.
     PANIC(entry);
-
-    // Failure.
     return ret;
 }
 

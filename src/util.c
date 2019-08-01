@@ -167,72 +167,9 @@ entry_p native(entry_p entry)
     return parent(entry, NATIVE);
 }
 
-//.OS.TEST
-/*
-static entry_p get_opt_string(entry_p contxt, opt_t type)
-{
-    // Iterate over all strings.
-    for(entry_p *child = contxt->children;
-       *child && *child != end(); child++)
-    {
-        if((type == OPT_FAIL && !strcmp(str(*child), "fail")) ||
-           (type == OPT_FORCE && !strcmp(str(*child), "force")) ||
-           (type == OPT_NOFAIL && !strcmp(str(*child), "nofail")) ||
-           (type == OPT_ASKUSER && !strcmp(str(*child), "askuser")) ||
-           (type == OPT_OKNODELETE && !strcmp(str(*child), "oknodelete")))
-        {
-            // Option found.
-            return *child;
-        }
-    }
-
-    // Not found.
-    return NULL;
-}
-*/
-
-//.OS.TEST
-/*
-static entry_p opt_verify_confirm(entry_p contxt, entry_p confirm)
-{
-    entry_p prompt = get_opt(contxt, OPT_PROMPT),
-            help   = get_opt(contxt, OPT_HELP);
-
-    // Make sure that we a prompt and help string.
-    if(!prompt || !help)
-    {
-        char * msg = prompt ? "help" : "prompt";
-        ERR_C(native(contxt), ERR_MISSING_OPTION, msg);
-    }
-
-    // The default threshold is expert.
-    int level = get_numvar(contxt, "@user-level"),
-        thres = 2;
-
-    // If the (confirm ...) option contains
-    // something that can be translated into
-    // a new threshold value...
-    if(confirm->children &&
-       confirm->children[0] &&
-       confirm->children[0] != end())
-    {
-        // ...then do so.
-        thres = num(confirm);
-    }
-
-    // If we are below the threshold value, or
-    // user input has been short-circuited by
-    // @yes, skip confirmation.
-    if(level < thres || get_numvar(contxt, "@yes"))
-    {
-        return NULL;
-    }
-
-    // Confirmation needed.
-    return confirm;
-}
-*/
-
+//------------------------------------------------------------------------------
+// FIXME
+//------------------------------------------------------------------------------
 static void get_fake_opt(entry_p fake, entry_p *cache)
 {
     // Translate strings to options.
@@ -256,6 +193,9 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
     }
 }
 
+//------------------------------------------------------------------------------
+// FIXME
+//------------------------------------------------------------------------------
 static void prune_opt(entry_p contxt, entry_p *cache)
 {
     if(cache[OPT_CONFIRM])
@@ -293,6 +233,9 @@ static void prune_opt(entry_p contxt, entry_p *cache)
     }
 }
 
+//------------------------------------------------------------------------------
+// FIXME
+//------------------------------------------------------------------------------
 entry_p opt(entry_p contxt, opt_t type)
 {
     static entry_p cache[OPT_LAST], last;
@@ -384,71 +327,6 @@ entry_p opt(entry_p contxt, opt_t type)
 entry_p get_opt(entry_p contxt, opt_t type)
 {
     return opt(contxt, type);
-/*
-    // We need a context without any previous errors.
-    if(!contxt || !contxt->children || contxt == end())
-    {
-        // Nowhere.
-        return NULL;
-    }
-
-    // An (optional) string.
-    if(contxt->type == OPTION)
-    {
-        return get_opt_string(contxt, type);
-    }
-    // Real option.
-    else
-    {
-        // Iterate over all options.
-        for(entry_p *child = contxt->children;
-           *child && *child != end(); child++)
-        {
-            entry_p entry = *child;
-
-            // Skip non options.
-            if(entry->type != OPTION)
-            {
-                // Next.
-                continue;
-            }
-
-            // Dynamic options need to
-            // be resolved before eval.
-            if(entry->id == OPT_DYNOPT)
-            {
-                // Replace dummy with
-                // its resolved value.
-                entry = resolve(entry);
-            }
-
-            // Did we find it?
-            if(entry->id == (int32_t) type)
-            {
-                if(type == OPT_CONFIRM)
-                {
-                    // Is confirmation really needed?
-                    return opt_verify_confirm(contxt, entry);
-                }
-
-                // Option found.
-                return entry;
-            }
-        }
-    }
-
-    // If in non strict mode, allow the absense
-    // of (prompt) and (help).
-    if((type == OPT_PROMPT || type == OPT_HELP)
-        && !get_numvar(contxt, "@strict"))
-    {
-        // Will be resolved as "".
-        return end();
-    }
-
-    // Nothing found.
-    return NULL;
-*/
 }
 
 //------------------------------------------------------------------------------

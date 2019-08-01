@@ -48,35 +48,24 @@ int arg_init(int argc, char **argv)
     {
         // Use the builtin parser.
         rda = (struct RDArgs *)
+
+        ReadArgs
+        (
+            "SCRIPT/A,"
+            "APPNAME/K,"
+            "MINUSER/K,"
+            "DEFUSER/K,"
+            "LANGUAGE/K,"
+            "LOGFILE/K,"
+            "NOLOG/S,"
+            "NOPRETEND/S",
         #ifdef __VBCC__
-        ReadArgs
-        (
-            "SCRIPT/A,"
-            "APPNAME/K,"
-            "MINUSER/K,"
-            "DEFUSER/K,"
-            "LANGUAGE/K,"
-            "LOGFILE/K,"
-            "NOLOG/S,"
-            "NOPRETEND/S",
             (LONG *) args,
-            NULL
-        );
         #else
-        ReadArgs
-        (
-            "SCRIPT/A,"
-            "APPNAME/K,"
-            "MINUSER/K,"
-            "DEFUSER/K,"
-            "LANGUAGE/K,"
-            "LOGFILE/K,"
-            "NOLOG/S,"
-            "NOPRETEND/S",
             (IPTR *) args,
+        #endif
             NULL
         );
-        #endif
     }
     else
     // Invoked from Workbench. Examine 'tooltypes'.

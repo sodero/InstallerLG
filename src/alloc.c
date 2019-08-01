@@ -58,10 +58,9 @@ entry_p new_contxt(void)
     }
 
     // Out of memory.
-    PANIC(NULL);
     free(entry);
 
-    // Failure.
+    PANIC(NULL);
     return NULL;
 }
 
@@ -88,8 +87,6 @@ entry_p new_number(int num)
 
     // Out of memory.
     PANIC(NULL);
-
-    // Failure
     return NULL;
 }
 
@@ -125,8 +122,6 @@ entry_p new_string(char *name)
 
     // Out of memory / bad input.
     PANIC(NULL);
-
-    // Failure.
     return NULL;
 }
 
@@ -164,8 +159,6 @@ entry_p new_symbol(char *name)
 
     // Out of memory / bad input.
     PANIC(NULL);
-
-    // Failure.
     return NULL;
 }
 
@@ -244,8 +237,6 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
 
     // Out of memory / bad input.
     PANIC(NULL);
-
-    // Failure.
     return NULL;
 }
 
@@ -284,8 +275,6 @@ entry_p new_symref(char *name, int line)
 
     // Out of memory / bad input.
     PANIC(NULL);
-
-    // Failure.
     return NULL;
 }
 

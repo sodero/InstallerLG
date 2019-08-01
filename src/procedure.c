@@ -163,10 +163,8 @@ entry_p m_gosub(entry_p contxt)
         return res;
     }
 
-    // No match found.
-    ERR(ERR_UNDEF_FNC, contxt->name);
-
     // Undefined user procedure.
+    ERR(ERR_UNDEF_FNC, contxt->name);
     return end();
 }
 
