@@ -236,4 +236,5 @@
 - (getversion) device and library support.
 - (copyfiles) (info) combination fix (MicroDot II 1.4 and DockBot 1.0).
 - (startup) confirmation level fix.
+- (retrace) scope fix (Grunch).
 - ?
