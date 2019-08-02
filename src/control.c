@@ -222,7 +222,7 @@ entry_p m_retrace(entry_p contxt)
         if(++dep > MAXDEP)
         {
             ERR(ERR_MAX_DEPTH, contxt->name);
-            R_CUR;
+            R_NUM(0);
         }
 
         // Expect failure.
@@ -242,6 +242,6 @@ entry_p m_retrace(entry_p contxt)
         return ret;
     }
 
-    // Nowhere to go.
-    R_CUR;
+    // Exit if there's nowhere to go.
+    R_NUM(HALT);
 }

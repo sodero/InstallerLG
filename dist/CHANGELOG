@@ -222,7 +222,7 @@
 - Improved robustness.
 - Local variables handling / recursion fix.
 - File permission workaround / cheat.
-- (exists) support undocumented (quiet) == (noreq) (CubicIDE_HW80).
+- (exists) now supports undocumented (quiet) == (noreq) (CubicIDE_HW80).
 
 0.1.0-alpha.36:
 ===============

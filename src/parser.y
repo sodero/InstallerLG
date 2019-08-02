@@ -308,7 +308,7 @@ select:         '(' SELECT p xpbs ')'            { $$ = new_native(strdup("selec
 until:          '(' UNTIL p vps ')'              { $$ = new_native(strdup("until"), LINE, m_until, push(push(new_contxt(), $3), $4), NUMBER); };
 while:          '(' WHILE p vps ')'              { $$ = new_native(strdup("while"), LINE, m_while, push(push(new_contxt(), $3), $4), NUMBER); };
 trace:          '(' TRACE ')'                    { $$ = new_native(strdup("trace"), LINE, m_trace, NULL, NUMBER); };
-retrace:        '(' RETRACE ')'                  { $$ = new_native(strdup("retrace"), LINE, m_retrace, NULL, DANGLE); };
+retrace:        '(' RETRACE ')'                  { $$ = new_native(strdup("retrace"), LINE, m_retrace, NULL, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h --------------------------------------------------------------------------------------------------------------------------------------------------------*/
 execute:        '(' EXECUTE ps opts ')'          { $$ = new_native(strdup("execute"), LINE, m_execute, push($3, $4), NUMBER); } |
