@@ -32,13 +32,13 @@ static int h_cmp(entry_p lhs, entry_p rhs)
         return strcmp(alfa->name, beta->name);
     }
 
-    // Quirky treatment of comparisons between the constant 0 and strings.
-    // The CBM implementation is not very stringent when evaluating strings.
-    // Let's create the same mess here to be fully compatible.
-    if((alfa == lhs && !alfa->id && alfa->type == NUMBER &&
-        beta->type == STRING && beta->name) ||
-       (beta == rhs && !beta->id && beta->type == NUMBER &&
-        alfa->type == STRING && alfa->name))
+    // Quirky treatment of comparisons between the constant 0, non defined
+    // variables and strings. The CBM implementation is not very stringent when
+    // evaluating strings. Let's create the same mess here to be compatible.
+    if((alfa == lhs && !alfa->id && (alfa->type == NUMBER ||
+        alfa->type == DANGLE) && beta->type == STRING && beta->name) ||
+       (beta == rhs && !beta->id && (beta->type == NUMBER ||
+        beta->type == DANGLE) && alfa->type == STRING && alfa->name))
     {
         char *val = alfa->type == STRING ? alfa->name : beta->name;
 
