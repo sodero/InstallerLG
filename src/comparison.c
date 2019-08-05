@@ -24,34 +24,44 @@ static int h_cmp(entry_p lhs, entry_p rhs)
     // always get something to compare.
     entry_p alfa = resolve(lhs), beta = resolve(rhs);
 
-    // If both arguments are strings then use string comparison. Don't trust
-    // strings since we might be out of memory.
-    if(alfa->type == STRING && beta->type == STRING &&
-       alfa->name && beta->name)
+    // Numbers and dangles can be treated as equals.
+    if((alfa->type == NUMBER || alfa->type == DANGLE) &&
+       (beta->type == NUMBER || beta->type == DANGLE))
+    {
+        return alfa->id - beta->id;
+    }
+
+    // Use normal string comparison if both arguments are strings.
+    if(alfa->type == STRING && alfa->name && beta->type == STRING && beta->name)
     {
         return strcmp(alfa->name, beta->name);
     }
 
-    // Quirky treatment of comparisons between the constant 0 and strings.
-    // The CBM implementation is not very stringent when evaluating strings.
-    // Let's create the same mess here to be fully compatible.
-    if((alfa == lhs && !alfa->id && alfa->type == NUMBER &&
-        beta->type == STRING && beta->name) ||
-       (beta == rhs && !beta->id && beta->type == NUMBER &&
-        alfa->type == STRING && alfa->name))
+    // We have a string and a number / dangle. Is the first argument a string?
+    if(alfa->type == STRING && alfa->name)
     {
-        char *val = alfa->type == STRING ? alfa->name : beta->name;
-
-        // Strings not equal to "0" are != 0.
-        if(val[0] != '0')
+        // Empty strings are less than all numbers.
+        if(!(*alfa->name))
         {
-            // Not 0.
-            return 1;
+            // Alfa < Beta.
+            return -1;
+        }
+
+        // Do we have a number != 0 or a '0' string?
+        if(num(alfa) || (alfa->name[0] == '0' && !alfa->name[1]))
+        {
+            return num(alfa) - beta->id;
         }
     }
 
-    // Convert whatever we have to numerical values and subtract.
-    return num(alfa) - num(beta);
+    // Beta is a string. A nonzero number or a '0' string?
+    if(num(beta) || (beta->name && beta->name[0] == '0' && !beta->name[1]))
+    {
+        return alfa->id - num(beta);
+    }
+
+    // Alfa > Beta.
+    return 1;
 }
 
 //------------------------------------------------------------------------------
