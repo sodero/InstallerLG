@@ -246,8 +246,7 @@ entry_p m_askchoice(entry_p contxt)
     int del = 0, res = 0;
 
     // Cap / compute skipper.
-    if(ndx > 0 && ndx < 31 && ndx - add[ndx - 1] > 0 &&
-       ndx + add[ndx - 1] < 31)
+    if(ndx > 0 && ndx < 31 && ndx - add[ndx - 1] > 0 && ndx + add[ndx - 1] < 31)
     {
         del = add[ndx - 1];
     }

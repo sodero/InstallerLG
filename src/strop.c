@@ -31,92 +31,90 @@
 entry_p m_cat(entry_p contxt)
 {
     // We need atleast one string.
-    if(c_sane(contxt, 1))
+    C_SANE(1, NULL);
+
+    // Start with a string length of 64.
+    size_t cnt = 64;
+    char *buf = DBG_ALLOC(calloc(cnt + 1, 1));
+
+    if(!buf)
     {
-        // Start with a string length of 64.
-        size_t cnt = 64;
-        char *buf = DBG_ALLOC(calloc(cnt + 1, 1));
+        // Out of memory.
+        PANIC(contxt);
+        R_CUR;
+    }
 
-        if(buf)
+    size_t len = 0, cur = 0;
+
+    // Iterate over all arguments.
+    while(contxt->children[cur] && contxt->children[cur] != end())
+    {
+        // Resolve and get a string representation
+        // of the current argument.
+        const char *arg = str(contxt->children[cur++]);
+        size_t alen;
+
+        // If we couldn't resolve the current argument,
+        // return an empty string.
+        if(DID_ERR)
         {
-            size_t len = 0, cur = 0;
+            free(buf);
+            R_EST;
+        }
 
-            // Iterate over all arguments.
-            while(contxt->children[cur] && contxt->children[cur] != end())
+        // Get length of the current argument.
+        alen = strlen(arg);
+
+        // Is the current string empty?
+        if(!alen)
+        {
+            // Proceed with the next argument.
+            continue;
+        }
+
+        // Increase the total string length.
+        len += strlen(arg);
+
+        // If we're about to exceed the current buffer,
+        // allocate a new one big enough.
+        if(len > cnt)
+        {
+            char *tmp;
+
+            // Double up until we have enough.
+            while(cnt && cnt < len)
             {
-                // Resolve and get a string representation
-                // of the current argument.
-                const char *arg = str(contxt->children[cur++]);
-                size_t alen;
-
-                // If we couldn't resolve the current argument,
-                // return an empty string.
-                if(DID_ERR)
-                {
-                    free(buf);
-                    R_EST;
-                }
-
-                // Get length of the current argument.
-                alen = strlen(arg);
-
-                // Is the current string empty?
-                if(!alen)
-                {
-                    // Proceed with the next argument.
-                    continue;
-                }
-
-                // Increase the total string length.
-                len += strlen(arg);
-
-                // If we're about to exceed the current buffer,
-                // allocate a new one big enough.
-                if(len > cnt)
-                {
-                    char *tmp;
-
-                    // Double up until we have enough.
-                    while(cnt && cnt < len)
-                    {
-                        cnt = cnt << 1;
-                    }
-
-                    tmp = DBG_ALLOC(calloc(cnt + 1, 1));
-
-                    // Copy the contents to the new buffer
-                    // and free the old one.
-                    if(tmp && cnt)
-                    {
-                        memcpy(tmp, buf, len - alen + 1);
-                        free(buf);
-                        buf = tmp;
-                    }
-                    else
-                    {
-                        // Out of memory.
-                        PANIC(contxt);
-                        free(tmp);
-                        free(buf);
-                        R_EST;
-                    }
-                }
-
-                // By now we're ready to append.
-                strncat(buf, arg, cnt - strlen(buf));
+                cnt = cnt << 1;
             }
 
-            // Unless we're out of memory, buf will
-            // will contain the concatenation of all
-            // the children.
-            R_STR(buf);
+            tmp = DBG_ALLOC(calloc(cnt + 1, 1));
+
+            // Copy the contents to the new buffer
+            // and free the old one.
+            if(tmp && cnt)
+            {
+                memcpy(tmp, buf, len - alen + 1);
+                free(buf);
+                buf = tmp;
+            }
+            else
+            {
+                // Out of memory.
+                PANIC(contxt);
+                free(tmp);
+                free(buf);
+                R_EST;
+            }
         }
+
+        // By now we're ready to append.
+        strncat(buf, arg, cnt - strlen(buf));
     }
-    // The parser isn't necessarily broken
-    // if we end up here. We could alse be
-    // out of memory.
-    PANIC(contxt);
-    R_CUR;
+
+    // Unless we're out of memory, buf will
+    // will contain the concatenation of all
+    // the children.
+    R_STR(buf);
 }
 
 //------------------------------------------------------------------------------
@@ -543,88 +541,87 @@ entry_p m_tackon(entry_p contxt)
 char *h_tackon(entry_p contxt, const char *pre, const char *suf)
 {
     // We need a path and a file.
-    if(pre && suf)
+    if(!pre || !suf)
     {
-        size_t lep = strlen(pre), les = strlen(suf);
+        return NULL;
+    }
 
-        // No point doing this if both strings are empty.
-        if(lep || les)
+    size_t lep = strlen(pre), les = strlen(suf);
+
+    // No point doing this if both strings are empty.
+    if(!lep && !les)
+    {
+        return NULL;
+    }
+
+    // If the filename ends with a delimiter, it's not a valid filename.
+    // Only fail if we're running in 'strict' mode.
+    if(les && (suf[les - 1] == '/' || suf[les - 1] == ':')
+       && get_numvar(contxt, "@strict"))
+    {
+        ERR(ERR_NOT_A_FILE, suf);
+        return NULL;
+    }
+
+    // Ignore the path part if the file part is an absolute Amiga path.
+    if(strchr(suf, ':'))
+    {
+        // Empty path.
+        lep = 0;
+    }
+
+    char *ret = NULL;
+
+    // If the path is empty, the result equals the filename.
+    if(!lep)
+    {
+        ret = DBG_ALLOC(strdup(suf));
+
+        if(!ret)
         {
-            char *ret = NULL;
-
-            // If the filename ends with a delimiter,
-            // it's not a valid filename. Only fail if
-            // we're running in 'strict' mode.
-            if(les && (suf[les - 1] == '/' || suf[les - 1] == ':')
-               && get_numvar(contxt, "@strict"))
-            {
-                ERR(ERR_NOT_A_FILE, suf);
-                return NULL;
-            }
-
-            // Ignore the path part if the file part is
-            // an absolute Amiga style path.
-            if(strchr(suf, ':'))
-            {
-                // Empty path.
-                lep = 0;
-            }
-
-            // If the path is empty, the result equals
-            // the filename.
-            if(!lep)
-            {
-                ret = DBG_ALLOC(strdup(suf));
-
-                if(!ret)
-                {
-                    // Out of memory.
-                    PANIC(contxt);
-                }
-
-                return ret;
-            }
-
-            // If the filename is empty, the result equals the path.
-            if(!les)
-            {
-                ret = DBG_ALLOC(strdup(pre));
-
-                if(!ret)
-                {
-                    // Out of memory.
-                    PANIC(contxt);
-                }
-
-                return ret;
-            }
-
-            // Allocate memory to hold path, filename,
-            // delimiter and termination.
-            size_t let = lep + les + 2;
-            ret = DBG_ALLOC(calloc(let, 1));
-
-            if(ret)
-            {
-                // Copy the path.
-                memcpy(ret, pre, lep);
-
-                // Insert delimiter if none exist.
-                if(pre[lep - 1] != '/' && pre[lep - 1] != ':')
-                {
-                   strncat(ret, "/", let - strlen(ret));
-                }
-
-                // Concatenate the result.
-                strncat(ret, suf, let - strlen(ret));
-                return ret;
-            }
-
             // Out of memory.
             PANIC(contxt);
         }
+
+        return ret;
     }
 
-    // Failure.
-    return NULL;
+    // If the filename is empty, the result equals the path.
+    if(!les)
+    {
+        ret = DBG_ALLOC(strdup(pre));
+
+        if(!ret)
+        {
+            // Out of memory.
+            PANIC(contxt);
+        }
+
+        return ret;
+    }
+
+
+    // Allocate memory to hold path, filename, delimiter and termination.
+    size_t let = lep + les + 2;
+    ret = DBG_ALLOC(calloc(let, 1));
+
+    if(!ret)
+    {
+        // Out of memory.
+        PANIC(contxt);
+        return NULL;
+    }
+
+    // Copy the path.
+    memcpy(ret, pre, lep);
+
+    // Insert delimiter if none exist.
+    if(pre[lep - 1] != '/' && pre[lep - 1] != ':')
+    {
+       strncat(ret, "/", let - strlen(ret));
+    }
+
+    // Concatenate the result.
+    strncat(ret, suf, let - strlen(ret));
+    return ret;
 }
