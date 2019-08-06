@@ -132,16 +132,16 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 //------------------------------------------------------------------------------
 // File / dir type values according to the CBM installer documentation.
 //------------------------------------------------------------------------------
-#define LG_EXISTS_NONE 0
-#define LG_EXISTS_FILE 1
-#define LG_EXISTS_DIR  2
+#define LG_NONE 0
+#define LG_FILE 1
+#define LG_DIR  2
 //------------------------------------------------------------------------------
 #if defined(AMIGA) && !defined(LG_TEST)
 //------------------------------------------------------------------------------
 // Name:        h_exists_amiga_type
 // Description: h_exists amiga implementation.
 // Input:       const char *name:   Path to file / dir.
-// Return:      int:                LG_EXISTS_NONE/LG_EXISTS_FILE/LG_EXISTS_DIR
+// Return:      int:                LG_NONE/LG_FILE/LG_DIR
 //------------------------------------------------------------------------------
 static int h_exists_amiga_type(const char *name)
 {
@@ -151,12 +151,12 @@ static int h_exists_amiga_type(const char *name)
     if(!fib)
     {
         // Out of memory.
-        return LG_EXISTS_NONE;
+        return LG_NONE;
     }
 
     // Attempt to lock file or directory.
     BPTR lock = (BPTR) Lock(name, ACCESS_READ);
-    int type = LG_EXISTS_NONE;
+    int type = LG_NONE;
 
     if(lock)
     {
@@ -168,7 +168,7 @@ static int h_exists_amiga_type(const char *name)
             if(fib->fib_DirEntryType < 0)
             {
                 // It's a file.
-                type = LG_EXISTS_FILE;
+                type = LG_FILE;
             }
             // ST_ROOT          1
             // ST_USERDIR       2
@@ -178,7 +178,7 @@ static int h_exists_amiga_type(const char *name)
             if(fib->fib_DirEntryType > 0)
             {
                 // It's a directory.
-                type = LG_EXISTS_DIR;
+                type = LG_DIR;
             }
         }
 
@@ -194,7 +194,7 @@ static int h_exists_amiga_type(const char *name)
 // Name:        h_exists_posix_type
 // Description: h_exists posix implementation.
 // Input:       const char *name:   Path to file / dir.
-// Return:      int:                LG_EXISTS_NONE/LG_EXISTS_FILE/LG_EXISTS_DIR
+// Return:      int:                LG_NONE/LG_FILE/LG_DIR
 //------------------------------------------------------------------------------
 static int h_exists_posix_type(const char *name)
 {
@@ -205,23 +205,23 @@ static int h_exists_posix_type(const char *name)
     // Does the file / dir exist?
     if(stat(name, &fst))
     {
-        return LG_EXISTS_NONE;
+        return LG_NONE;
     }
 
     // A file?
     if(S_ISREG(fst.st_mode))
     {
-        return LG_EXISTS_FILE;
+        return LG_FILE;
     }
 
     // A directory?
     if(S_ISDIR(fst.st_mode))
     {
-        return LG_EXISTS_DIR;
+        return LG_DIR;
     }
 
     // It's something else. Pretend that it doesn't exist.
-    return LG_EXISTS_NONE;
+    return LG_NONE;
 }
 #endif
 
@@ -231,20 +231,20 @@ static int h_exists_posix_type(const char *name)
 //              documentation.
 // Input:       entry_p contxt:     The execution context.
 //              const char *name:   Path to file / dir.
-// Return:      int:                LG_EXISTS_NONE/LG_EXISTS_FILE/LG_EXISTS_DIR
+// Return:      int:                LG_NONE/LG_FILE/LG_DIR
 //------------------------------------------------------------------------------
 int h_exists(const char *name)
 {
     // NULL is a valid argument but this 'file' doesn't exist.
     if(!name)
     {
-        return LG_EXISTS_NONE;
+        return LG_NONE;
     }
 
     // Empty string = current dir.
     if(!(*name))
     {
-        return LG_EXISTS_DIR;
+        return LG_DIR;
     }
 
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -458,7 +458,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
             node = fonts ? h_suffix_append(contxt, node, "font") : node;
 
             // Traverse (old, if info or font) directory if applicable.
-            if(type == 2
+            if(type == LG_DIR
                #ifndef AMIGA
                && strcmp(f_nam, ".") && strcmp(f_nam, "..")
                #endif
@@ -535,7 +535,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
         int type = h_exists(src);
 
         // Is source a directory?
-        if(type == 2)
+        if(type == LG_DIR)
         {
             DIR *dir = opendir(src);
 
@@ -624,7 +624,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         }
 
                         // If we have a directory, recur.
-                        if(type == 2)
+                        if(type == LG_DIR)
                         {
                             // Unless the (files) option is set.
                             if(!files
@@ -702,7 +702,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
         }
 
         // Is source a file?
-        if(type == 1)
+        if(type == LG_FILE)
         {
             pnode_p file = DBG_ALLOC(calloc(1, sizeof(struct pnode_t))),
                     head = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
@@ -742,7 +742,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         // Font = file + .font.
                         snprintf(get_buf(), buf_size(), "%s.font", n_src);
 
-                        if(h_exists(get_buf()) == 1)
+                        if(h_exists(get_buf()) == LG_FILE)
                         {
                             pnode_p font = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
@@ -951,195 +951,177 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
     }
 
     // Prepare GUI unless we're in silent mode as used by copylib.
-    if(grc == G_TRUE)
+    if(grc != G_TRUE)
     {
-        static char buf[BUFSIZ];
-        FILE *file = fopen(src, "r");
-        size_t cnt = file ? fread(buf, 1, BUFSIZ, file) : 0;
-        int err =
-            #if defined(AMIGA) && !defined(LG_TEST)
-            IoErr();
-            #else
-            file ? ferror(file) : 0;
-            #endif
+        HALT;
+        h_log(contxt, tr(S_ACPY), src, dst);
+        return grc;
+    }
 
-        if(file && !err)
+    static char buf[BUFSIZ];
+    FILE *file = fopen(src, "r");
+    size_t cnt = file ? fread(buf, 1, BUFSIZ, file) : 0;
+    int err =
+        #if defined(AMIGA) && !defined(LG_TEST)
+        IoErr();
+        #else
+        file ? ferror(file) : 0;
+        #endif
+
+    if(file && !err)
+    {
+        // Is there an existing destination file that is write
+        // protected?
+        if(!access(dst, F_OK) && access(dst, W_OK))
         {
-            // Is there an existing destination file that is write
-            // protected?
-            if(!access(dst, F_OK) && access(dst, W_OK))
+            // No need to ask if only (force).
+            if((mde & CF_FORCE) && !(mde & CF_ASKUSER))
             {
-                // No need to ask if only (force).
-                if((mde & CF_FORCE) && !(mde & CF_ASKUSER))
+                // Unprotect file.
+                chmod(dst, S_IRWXU);
+            }
+            else
+            // Ask for confirmation if (askuser) unless we're running
+            // in novice mode and (force) at the same time.
+            if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
+                get_numvar(contxt, "@user-level")))
+            {
+                if(h_confirm(contxt, "", tr(S_OWRT), dst))
                 {
                     // Unprotect file.
                     chmod(dst, S_IRWXU);
                 }
                 else
-                // Ask for confirmation if (askuser) unless we're running
-                // in novice mode and (force) at the same time.
-                if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
-                    get_numvar(contxt, "@user-level")))
                 {
-                    if(h_confirm(contxt, "", tr(S_OWRT), dst))
-                    {
-                        // Unprotect file.
-                        chmod(dst, S_IRWXU);
-                    }
-                    else
-                    {
-                        // Skip file or abort.
-                        fclose(file);
-                        return DID_HALT ? G_ABORT : G_TRUE;
-                    }
+                    // Skip file or abort.
+                    fclose(file);
+                    return DID_HALT ? G_ABORT : G_TRUE;
                 }
             }
+        }
 
-            // Create / overwrite file.
-            FILE *dest = fopen(dst, "w");
+        // Create / overwrite file.
+        FILE *dest = fopen(dst, "w");
 
-            if(dest)
+        if(dest)
+        {
+            // Read and write until there is nothing more to read.
+            while(cnt)
             {
-                // Read and write until there is nothing more to read.
-                while(cnt)
+                if(fwrite(buf, 1, cnt, dest) == cnt)
                 {
-                    if(fwrite(buf, 1, cnt, dest) == cnt)
+                    // Update GUI unless we're in silent mode.
+                    if(!(mde & CF_SILENT))
                     {
-                        // Update GUI unless we're in silent mode.
-                        if(!(mde & CF_SILENT))
-                        {
-                            grc = gui_copyfiles_setcur(NULL, mde & CF_NOGAUGE, bck);
-                        }
+                        grc = gui_copyfiles_setcur(NULL, mde & CF_NOGAUGE, bck);
+                    }
 
-                        if(grc == G_TRUE)
-                        {
-                            cnt = fread(buf, 1, sizeof(buf), file);
-                        }
-                        else
-                        {
-                            break;
-                        }
+                    if(grc == G_TRUE)
+                    {
+                        cnt = fread(buf, 1, sizeof(buf), file);
                     }
                     else
                     {
-                        ERR(ERR_WRITE_FILE, dst);
-                        grc = G_FALSE;
                         break;
                     }
                 }
-
-                // Close input and output files.
-                fclose(file);
-                fclose(dest);
-
-                // The number of bytes read and not written should be zero.
-                if(!cnt)
-                {
-                    // Write to the log file (if logging is enabled).
-                    h_log(contxt, tr(S_CPYD), src, dst);
-
-                    // Are we going to copy the icon as well?
-                    if(mde & CF_INFOS)
-                    {
-                        // The source icon.
-                        static char icon[PATH_MAX];
-                        snprintf(icon, sizeof(icon), "%s.info", src);
-
-                        // Only if it exists, it's not an error if it's
-                        // missing.
-                        if(h_exists(icon) == 1)
-                        {
-                            static char copy[PATH_MAX];
-
-                            // The destination icon.
-                            snprintf(copy, sizeof(copy), "%s.info", dst);
-
-                            // Recur without info set.
-                            grc = h_copyfile(contxt, icon, copy, bck,
-                                             mde & ~CF_INFOS);
-
-                            #if defined(AMIGA) && !defined(LG_TEST)
-                            // Reset icon position?
-                            if(grc == G_TRUE && mde & CF_NOPOSITION)
-                            {
-                                struct DiskObject *obj = (struct DiskObject *)
-                                    GetDiskObject(dst);
-
-                                if(obj)
-                                {
-                                    // Reset icon position.
-                                    obj->do_CurrentX = NO_ICON_POSITION;
-                                    obj->do_CurrentY = NO_ICON_POSITION;
-
-                                    // Save the changes to the .info file.
-                                    if(!PutDiskObject(dst, obj))
-                                    {
-                                        // We failed for some unknown reason.
-                                        ERR(ERR_WRITE_FILE, copy);
-                                        grc = G_FALSE;
-                                    }
-
-                                    FreeDiskObject(obj);
-                                }
-                            }
-                            #endif
-                        }
-                    }
-
-                    // Preserve file permissions. On error, code will be set
-                    // by h_protect_x().
-                    int32_t prm = 0;
-
-                    if(h_protect_get(contxt, src, &prm))
-                    {
-                        h_protect_set(contxt, dst, prm);
-                    }
-
-                    // Reset error codes if necessary.
-                    if(DID_ERR)
-                    {
-                        if(mde & CF_NOFAIL)
-                        {
-                            // Forget all errors.
-                            RESET;
-                        }
-                        else
-                        {
-                            // Fail for real.
-                            grc = G_ABORT;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // The source handle is open.
-                fclose(file);
-
-                if((mde & CF_NOFAIL) || (mde & CF_OKNODELETE))
-                {
-                    // Ignore failure.
-                    h_log(contxt, tr(S_NCPY), src, dst);
-                    grc = G_TRUE;
-                }
                 else
                 {
-                    // Fail for real.
                     ERR(ERR_WRITE_FILE, dst);
                     grc = G_FALSE;
+                    break;
+                }
+            }
+
+            // Close input and output files.
+            fclose(file);
+            fclose(dest);
+
+            // The number of bytes read and not written should be zero.
+            if(!cnt)
+            {
+                // Write to the log file (if logging is enabled).
+                h_log(contxt, tr(S_CPYD), src, dst);
+
+                // Are we going to copy the icon as well?
+                if(mde & CF_INFOS)
+                {
+                    // The source icon.
+                    static char icon[PATH_MAX];
+                    snprintf(icon, sizeof(icon), "%s.info", src);
+
+                    // Only if it exists, it's not an error if it's
+                    // missing.
+                    if(h_exists(icon) == LG_FILE)
+                    {
+                        static char copy[PATH_MAX];
+
+                        // The destination icon.
+                        snprintf(copy, sizeof(copy), "%s.info", dst);
+
+                        // Recur without info set.
+                        grc = h_copyfile(contxt, icon, copy, bck,
+                                         mde & ~CF_INFOS);
+
+                        #if defined(AMIGA) && !defined(LG_TEST)
+                        // Reset icon position?
+                        if(grc == G_TRUE && mde & CF_NOPOSITION)
+                        {
+                            struct DiskObject *obj = (struct DiskObject *)
+                                GetDiskObject(dst);
+
+                            if(obj)
+                            {
+                                // Reset icon position.
+                                obj->do_CurrentX = NO_ICON_POSITION;
+                                obj->do_CurrentY = NO_ICON_POSITION;
+
+                                // Save the changes to the .info file.
+                                if(!PutDiskObject(dst, obj))
+                                {
+                                    // We failed for some unknown reason.
+                                    ERR(ERR_WRITE_FILE, copy);
+                                    grc = G_FALSE;
+                                }
+
+                                FreeDiskObject(obj);
+                            }
+                        }
+                        #endif
+                    }
+                }
+
+                // Preserve file permissions. On error, code will be set
+                // by h_protect_x().
+                int32_t prm = 0;
+
+                if(h_protect_get(contxt, src, &prm))
+                {
+                    h_protect_set(contxt, dst, prm);
+                }
+
+                // Reset error codes if necessary.
+                if(DID_ERR)
+                {
+                    if(mde & CF_NOFAIL)
+                    {
+                        // Forget all errors.
+                        RESET;
+                    }
+                    else
+                    {
+                        // Fail for real.
+                        grc = G_ABORT;
+                    }
                 }
             }
         }
         else
         {
-            // The source handle might be open.
-            if(file)
-            {
-                // Not true on non Amiga systems.
-                fclose(file);
-            }
+            // The source handle is open.
+            fclose(file);
 
-            if(mde & CF_NOFAIL)
+            if((mde & CF_NOFAIL) || (mde & CF_OKNODELETE))
             {
                 // Ignore failure.
                 h_log(contxt, tr(S_NCPY), src, dst);
@@ -1148,15 +1130,32 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
             else
             {
                 // Fail for real.
-                ERR(ERR_READ_FILE, src);
+                ERR(ERR_WRITE_FILE, dst);
                 grc = G_FALSE;
             }
         }
     }
     else
     {
-        h_log(contxt, tr(S_ACPY), src, dst);
-        HALT;
+        // The source handle might be open.
+        if(file)
+        {
+            // Not true on non Amiga systems.
+            fclose(file);
+        }
+
+        if(mde & CF_NOFAIL)
+        {
+            // Ignore failure.
+            h_log(contxt, tr(S_NCPY), src, dst);
+            grc = G_TRUE;
+        }
+        else
+        {
+            // Fail for real.
+            ERR(ERR_READ_FILE, src);
+            grc = G_FALSE;
+        }
     }
 
     // Unknown status.
@@ -1238,7 +1237,7 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
     }
 
     // Return immediately if directory exists.
-    if(h_exists(dst) == 2)
+    if(h_exists(dst) == LG_DIR)
     {
         h_log(contxt, tr(S_EDIR), dst);
         return 1;
@@ -1358,21 +1357,19 @@ entry_p m_copyfiles(entry_p contxt)
     D_NUM = 0;
 
     // The (pattern) (choices) and (all) options are mutually exclusive.
-    if((pattern && (choices || all)) ||
-       (choices && (pattern || all)) ||
+    if((pattern && (choices || all)) || (choices && (pattern || all)) ||
        (all && (choices || pattern)))
     {
         ERR(ERR_OPTION_MUTEX, "pattern/choices/all");
-        R_CUR;
+        R_NUM(0);
     }
 
     // The (fail) (nofail) and (oknodelete) options are mutually exclusive.
-    if((fail && (nofail || oknodelete)) ||
-       (nofail && (fail || oknodelete)) ||
+    if((fail && (nofail || oknodelete)) || (nofail && (fail || oknodelete)) ||
        (oknodelete && (nofail || fail)))
     {
         ERR(ERR_OPTION_MUTEX, "fail/nofail/oknodelete");
-        R_CUR;
+        R_NUM(0);
     }
 
     // We need a source and a destination dir.
@@ -1386,7 +1383,7 @@ entry_p m_copyfiles(entry_p contxt)
 
         // If the source is a directory, (all), (choices) or (pattern) must be
         // used.
-        if(h_exists(src) == 2 && !all && !choices && !pattern)
+        if(h_exists(src) == LG_DIR && !all && !choices && !pattern)
         {
             ERR(ERR_MISSING_OPTION, "all/choices/pattern");
             R_CUR;
@@ -1399,7 +1396,7 @@ entry_p m_copyfiles(entry_p contxt)
         }
 
         // Does the destination already exist?
-        if(h_exists(dst) == 2)
+        if(h_exists(dst) == LG_DIR)
         {
             // Don't trust h_exists, this string might be empty.
             size_t dln = strlen(dst);
@@ -1434,8 +1431,8 @@ entry_p m_copyfiles(entry_p contxt)
             pnode_p cur = tree;
 
             // Replace file name if single file and the 'newname' option is set
-            if(newname && cur->next && cur->type == 2 &&
-               cur->next->type == 1 && !cur->next->next)
+            if(newname && cur->next && cur->type == LG_DIR &&
+               cur->next->type == LG_FILE && !cur->next->next)
             {
                 free(cur->next->copy);
                 cur->next->copy = h_tackon(contxt, dst, str(newname));
@@ -1603,12 +1600,11 @@ entry_p m_copylib(entry_p contxt)
     D_NUM = 0;
 
     // The (fail) (nofail) and (oknodelete) options are mutually exclusive.
-    if((fail && (nofail || oknodelete)) ||
-       (nofail && (fail || oknodelete)) ||
+    if((fail && (nofail || oknodelete)) || (nofail && (fail || oknodelete)) ||
        (oknodelete && (nofail || fail)))
     {
         ERR(ERR_OPTION_MUTEX, "fail/nofail/oknodelete");
-        R_CUR;
+        R_NUM(0);
     }
 
     // We always need a prompt and help since trying to overwrite new files
@@ -1616,252 +1612,287 @@ entry_p m_copylib(entry_p contxt)
     // Installer doesn't behave this way, but the Installer guide says so, and
     // it makes sense, so let's do it this way until we know for sure that this
     // will break existing scripts.
-    if(source && dest && prompt && help)
+    if(!source || !dest || !prompt || !help)
     {
-        char *src = str(source),
-             *dst = str(dest);
+        ERR(ERR_MISSING_OPTION, source ? dest ? prompt ? "help" : "prompt" :
+                                                         "dest" : "source");
+        R_NUM(0);
+    }
 
-        // Does the source file exist?
-        if(h_exists(src) == 1)
+    char *src = str(source), *dst = str(dest);
+
+    // Does the source file exist?
+    if(h_exists(src) == LG_FILE)
+    {
+        // User level.
+        int level = get_numvar(contxt, "@user-level"),
+
+        // Source file version.
+        new = h_getversion_file(src),
+
+        // Destination type.
+        type = h_exists(dst);
+
+        // Destination file.
+        char *name = NULL;
+
+        // A non safe operation in pretend mode always succeeds.
+        if(get_numvar(contxt, "@pretend") && !safe)
         {
-            // User level.
-            int level = get_numvar(contxt, "@user-level"),
+            R_NUM(1);
+        }
 
-            // Source file version.
-            new = h_getversion_file(src),
+        // Only fail if we're in 'strict' mode.
+        if(new < 0 && get_numvar(contxt, "@strict"))
+        {
+            // Could not find version string.
+            ERR(ERR_NO_VERSION, src);
+            R_CUR;
+        }
 
-            // Destination type.
-            type = h_exists(dst);
+        // Only fail if we're in 'strict' mode.
+        if(type == LG_FILE && get_numvar(contxt, "@strict"))
+        {
+            // Destination is a file, not a dir.
+            ERR(ERR_NOT_A_DIR, dst);
+            R_CUR;
+        }
 
-            // Destination file.
-            char *name = NULL;
-
-            // A non safe operation in pretend mode always succeeds.
-            if(get_numvar(contxt, "@pretend") && !safe)
+        if(!type)
+        {
+            // Directory doesn't exist, create it. One level deep only.
+            if(mkdir(dst, 0777))
             {
-                R_NUM(1);
+                // Permission problems or the dir is more than 1 level deeper
+                // than the existing path.
+                ERR(ERR_WRITE_DIR, dst);
+                R_NUM(0);
             }
 
-            // Only fail if we're in 'strict' mode.
-            if(new < 0 && get_numvar(contxt, "@strict"))
-            {
-                // Could not find version string.
-                ERR(ERR_NO_VERSION, src);
-                R_CUR;
-            }
+            // Log the success.
+            h_log(contxt, tr(S_CRTD), dst);
 
-            // Only fail if we're in 'strict' mode.
-            if(type == 1 && get_numvar(contxt, "@strict"))
-            {
-                // Destination is a file, not a dir.
-                ERR(ERR_NOT_A_DIR, dst);
-                R_CUR;
-            }
+        }
 
-            if(!type)
+        // Are we renaming the file?
+        if(newname)
+        {
+            // Yes, append the new name to the path.
+            name = h_tackon(contxt, dst, str(newname));
+        }
+        else
+        {
+            // No, append the file part of the (possibly) full source path
+            // to the destination path.
+            name = h_tackon(contxt, dst, h_fileonly(contxt, src));
+        }
+
+        // If we're not out of memory and destination dir and / or
+        // destination file is non empty, name will be <> 0.
+        if(name)
+        {
+            // Set copy mode.
+            int mode = CF_SILENT | (infos ? CF_INFOS : 0) |
+                       (noposition ? CF_NOPOSITION : 0) |
+                       (nogauge ? CF_NOGAUGE : 0) |
+                       (nofail ? CF_NOFAIL : 0) |
+                       (oknodelete ? CF_OKNODELETE : 0) |
+                       (force ? CF_FORCE : 0) |
+                       (askuser ? CF_ASKUSER : 0);
+
+            // Get 'name' type info.
+            type = h_exists(name);
+
+            // Currently there is no way to abort a file copy, but we need
+            // to handle the GUI return values anyway.
+            inp_t grc = G_FALSE;
+
+            // Are we overwriting a file?
+            if(type == LG_NONE)
             {
-                // Directory doesn't exist, create it. One level deep only.
-                if(mkdir(dst, 0777))
+                // No such file, copy source to the destination directory.
+                // If needed get confirmation.
+                if(confirm)
                 {
-                    // Permission problems or the dir is more than 1 level
-                    // deeper than the existing path.
-                    ERR(ERR_WRITE_DIR, dst);
-                    R_CUR;
+                    // Is the version of the source file unknown?
+                    if(new < 0)
+                    {
+                        if(h_confirm(
+                            contxt,
+                            "",
+                            "%s\n\n%s: %s\n%s\n\n%s: %s",
+                            str(prompt),
+                            tr(S_VINS),
+                            tr(S_VUNK),
+                            tr(S_NINS),
+                            tr(S_DDRW),
+                            dst))
+                        {
+                            grc = h_copyfile(contxt, src, name, back != false, mode);
+                        }
+                    }
+                    // The version of the source file is known.
+                    else
+                    {
+                        if(h_confirm(
+                            contxt,
+                            "",
+                            "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
+                            str(prompt),
+                            tr(S_VINS),
+                            new >> 16,
+                            new & 0xffff,
+                            tr(S_NINS),
+                            tr(S_DDRW),
+                            dst))
+                        {
+                            grc = h_copyfile(contxt, src, name, back != false, mode);
+                        }
+                    }
                 }
-
-                // Log the success.
-                h_log(contxt, tr(S_CRTD), dst);
-
-            }
-
-            // Are we renaming the file?
-            if(newname)
-            {
-                // Yes, append the new name to the path.
-                name = h_tackon(contxt, dst, str(newname));
+                else
+                {
+                    // No confirmation needed.
+                    grc = h_copyfile(contxt, src, name, back != false, mode);
+                }
             }
             else
+            // It's a file.
+            if(type == LG_FILE)
             {
-                // No, append the file part of the (possibly) full source path
-                // to the destination path.
-                name = h_tackon(contxt, dst, h_fileonly(contxt, src));
-            }
+                // Get version of existing file.
+                int old = h_getversion_file(name);
 
-            // If we're not out of memory and destination dir and / or
-            // destination file is non empty, name will be <> 0.
-            if(name)
-            {
-                // Set copy mode.
-                int mode = CF_SILENT | (infos ? CF_INFOS : 0) |
-                           (noposition ? CF_NOPOSITION : 0) |
-                           (nogauge ? CF_NOGAUGE : 0) |
-                           (nofail ? CF_NOFAIL : 0) |
-                           (oknodelete ? CF_OKNODELETE : 0) |
-                           (force ? CF_FORCE : 0) |
-                           (askuser ? CF_ASKUSER : 0);
-
-                // Get 'name' type info.
-                type = h_exists(name);
-
-                // Currently there is no way to abort a file copy, but we need
-                // to handle the GUI return values anyway.
-                inp_t grc = G_FALSE;
-
-                // Are we overwriting a file?
-                if(!type)
+                // Is the version of the existing file unknown?
+                if(old < 0)
                 {
-                    // No such file, copy source to the destination directory.
-                    // If needed get confirmation.
-                    if(confirm)
+                    // Only fail if we're in 'strict' mode.
+                    if(get_numvar(contxt, "@strict"))
+                    {
+                        // Could not find version string.
+                        ERR(ERR_NO_VERSION, name);
+                        new = old;
+                    }
+                    else
                     {
                         // Is the version of the source file unknown?
                         if(new < 0)
                         {
+                            // Both target and source file have an unknown
+                            // version.
                             if(h_confirm(
                                 contxt,
                                 "",
-                                "%s\n\n%s: %s\n%s\n\n%s: %s",
+                                "%s\n\n%s: %s\n%s: %s\n\n%s: %s",
                                 str(prompt),
                                 tr(S_VINS),
                                 tr(S_VUNK),
-                                tr(S_NINS),
+                                tr(S_VCUR),
+                                tr(S_VUNK),
                                 tr(S_DDRW),
                                 dst))
                             {
-                                grc = h_copyfile(contxt, src, name, back != false, mode);
+                                new = old + 1;
+                            }
+                            else
+                            {
+                                new = old;
                             }
                         }
-                        // The version of the source file is known.
                         else
                         {
+                            // The version of the source file is known, the
+                            // target version is unknown.
                             if(h_confirm(
                                 contxt,
                                 "",
-                                "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
+                                "%s\n\n%s: %d.%d\n%s: %s\n\n%s: %s",
                                 str(prompt),
                                 tr(S_VINS),
                                 new >> 16,
                                 new & 0xffff,
-                                tr(S_NINS),
+                                tr(S_VCUR),
+                                tr(S_VUNK),
                                 tr(S_DDRW),
                                 dst))
                             {
-                                grc = h_copyfile(contxt, src, name, back != false, mode);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // No confirmation needed.
-                        grc = h_copyfile(contxt, src, name, back != false, mode);
-                    }
-                }
-                else
-                // It's a file.
-                if(type == 1)
-                {
-                    // Get version of existing file.
-                    int old = h_getversion_file(name);
-
-                    // Is the version of the existing file unknown?
-                    if(old < 0)
-                    {
-                        // Only fail if we're in 'strict' mode.
-                        if(get_numvar(contxt, "@strict"))
-                        {
-                            // Could not find version string.
-                            ERR(ERR_NO_VERSION, name);
-                            new = old;
-                        }
-                        else
-                        {
-                            // Is the version of the source file unknown?
-                            if(new < 0)
-                            {
-                                // Both target and source file have an unknown
-                                // version.
-                                if(h_confirm(
-                                    contxt,
-                                    "",
-                                    "%s\n\n%s: %s\n%s: %s\n\n%s: %s",
-                                    str(prompt),
-                                    tr(S_VINS),
-                                    tr(S_VUNK),
-                                    tr(S_VCUR),
-                                    tr(S_VUNK),
-                                    tr(S_DDRW),
-                                    dst))
-                                {
-                                    new = old + 1;
-                                }
-                                else
-                                {
-                                    new = old;
-                                }
+                                new = old + 1;
                             }
                             else
                             {
-                                // The version of the source file is known, the
-                                // target version is unknown.
-                                if(h_confirm(
-                                    contxt,
-                                    "",
-                                    "%s\n\n%s: %d.%d\n%s: %s\n\n%s: %s",
-                                    str(prompt),
-                                    tr(S_VINS),
-                                    new >> 16,
-                                    new & 0xffff,
-                                    tr(S_VCUR),
-                                    tr(S_VUNK),
-                                    tr(S_DDRW),
-                                    dst))
-                                {
-                                    new = old + 1;
-                                }
-                                else
-                                {
-                                    new = old;
-                                }
-                            }
-
-                            if(new > old)
-                            {
-                                confirm = NULL;
+                                new = old;
                             }
                         }
+
+                        if(new > old)
+                        {
+                            confirm = NULL;
+                        }
                     }
-                    // The target file version is known.
-                    else
+                }
+                // The target file version is known.
+                else
+                {
+                    // Is the version of the source file unknown?
+                    if(new < 0 && h_confirm(
+                        contxt,
+                        "",
+                        "%s\n\n%s: %s\n%s: %d.%d\n\n%s: %s",
+                        str(prompt),
+                        tr(S_VINS),
+                        tr(S_VUNK),
+                        tr(S_VCUR),
+                        old >> 16,
+                        old & 0xffff,
+                        tr(S_DDRW),
+                        dst))
                     {
-                        // Is the version of the source file unknown?
-                        if(new < 0 && h_confirm(
+                        new = old + 1;
+                        confirm = NULL;
+                    }
+                }
+
+                // Did we find a version not equal to that of the current
+                // file?
+                if(new != old)
+                {
+                    // If we ask for confirmation and get it, copy the file
+                    // no matter what version it (and the existing
+                    // destination file) has.
+                    if(confirm)
+                    {
+                        if(h_confirm(
                             contxt,
                             "",
-                            "%s\n\n%s: %s\n%s: %d.%d\n\n%s: %s",
+                            "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
                             str(prompt),
                             tr(S_VINS),
-                            tr(S_VUNK),
+                            new >> 16,
+                            new & 0xffff,
                             tr(S_VCUR),
                             old >> 16,
                             old & 0xffff,
                             tr(S_DDRW),
                             dst))
                         {
-                            new = old + 1;
-                            confirm = NULL;
+                            grc = h_copyfile(contxt, src, name, back != false, mode);
                         }
                     }
-
-                    // Did we find a version not equal to that of the current
-                    // file?
-                    if(new != old)
+                    else
                     {
-                        // If we ask for confirmation and get it, copy the file
-                        // no matter what version it (and the existing
-                        // destination file) has.
-                        if(confirm)
+                        // If the file to be copied has a higher version
+                        // number than the existing one, overwrite.
+                        if(new > old)
                         {
-                            if(h_confirm(
+                            grc = h_copyfile(contxt, src, name, back != false, mode);
+                        }
+                        else
+                        {
+                            // If the file to be copied has a lower version
+                            // number than the existing one, and we're in
+                            // expert mode, ask the user to confirm. If we
+                            // get a confirmation, overwrite.
+                            if(level == LG_DIR && h_confirm(
                                 contxt,
                                 "",
                                 "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
@@ -1878,72 +1909,35 @@ entry_p m_copylib(entry_p contxt)
                                 grc = h_copyfile(contxt, src, name, back != false, mode);
                             }
                         }
-                        else
-                        {
-                            // If the file to be copied has a higher version
-                            // number than the existing one, overwrite.
-                            if(new > old)
-                            {
-                                grc = h_copyfile(contxt, src, name, back != false, mode);
-                            }
-                            else
-                            {
-                                // If the file to be copied has a lower version
-                                // number than the existing one, and we're in
-                                // expert mode, ask the user to confirm. If we
-                                // get a confirmation, overwrite.
-                                if(level == 2 && h_confirm(
-                                    contxt,
-                                    "",
-                                    "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
-                                    str(prompt),
-                                    tr(S_VINS),
-                                    new >> 16,
-                                    new & 0xffff,
-                                    tr(S_VCUR),
-                                    old >> 16,
-                                    old & 0xffff,
-                                    tr(S_DDRW),
-                                    dst))
-                                {
-                                    grc = h_copyfile(contxt, src, name, back != false, mode);
-                                }
-                            }
-                        }
                     }
                 }
-                // It's a dir.
-                else
-                {
-                    // Only fail if we're in 'strict' mode.
-                    if(get_numvar(contxt, "@strict"))
-                    {
-                        // Dest file exists, but is a directory.
-                        ERR(ERR_NOT_A_FILE, name);
-                    }
-                }
-
-                // Free memory allocated by h_tackon.
-                free(name);
-
-                // Translate return code.
-                D_NUM = (grc == G_TRUE) ? 1 : 0;
             }
-        }
-        else
-        {
-            // Only fail if we're in 'strict' mode.
-            if(get_numvar(contxt, "@strict"))
+            // It's a dir.
+            else
             {
-                // No file, doesn't exist or is dir.
-                ERR(ERR_NOT_A_FILE, src);
+                // Only fail if we're in 'strict' mode.
+                if(get_numvar(contxt, "@strict"))
+                {
+                    // Dest file exists, but is a directory.
+                    ERR(ERR_NOT_A_FILE, name);
+                }
             }
+
+            // Free memory allocated by h_tackon.
+            free(name);
+
+            // Translate return code.
+            D_NUM = (grc == G_TRUE) ? 1 : 0;
         }
     }
     else
     {
-        ERR(ERR_MISSING_OPTION, !source ? "source" : !dest ? "dest" : !prompt ?
-            "prompt" :"help");
+        // Only fail if we're in 'strict' mode.
+        if(get_numvar(contxt, "@strict"))
+        {
+            // No file, it doesn't exist or it's a directory.
+            ERR(ERR_NOT_A_FILE, src);
+        }
     }
 
     // Success or failure.
@@ -2025,7 +2019,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     // Do we have a corresponding .info file?
     char *info = h_suffix(file, "info");
 
-    if(h_exists(h_suffix(file, "info")) == 1)
+    if(h_exists(h_suffix(file, "info")) == LG_FILE)
     {
         // Set write permission and delete file.
         if(chmod(info, S_IRWXU) || remove(info))
@@ -2055,12 +2049,9 @@ static int h_delete_dir(entry_p contxt, const char *name)
     if(!name)
     {
         PANIC(contxt);
-        return 0; 
+        return 0;
     }
 
-    // Sanity check.
-/*    if(name)
-    { */
     entry_p infos    = get_opt(C_ARG(2), OPT_INFOS),
             force    = get_opt(C_ARG(2), OPT_FORCE),
             askuser  = get_opt(C_ARG(2), OPT_ASKUSER),
@@ -2109,7 +2100,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
                     char *path = h_tackon(contxt, name, entry->d_name);
 
                     // Is it a file?
-                    if(path && h_exists(path) == 1)
+                    if(path && h_exists(path) == LG_FILE)
                     {
                         // Delete it.
                         h_delete_file(contxt, path);
@@ -2139,7 +2130,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
                         char *path = h_tackon(contxt, name, entry->d_name);
 
                         // Is it a directory?
-                        if(path && h_exists(path) == 2)
+                        if(path && h_exists(path) == LG_DIR)
                         {
                             // Recur into subdirectory.
                             h_delete_dir(contxt, path);
@@ -2170,10 +2161,10 @@ static int h_delete_dir(entry_p contxt, const char *name)
         }
     }
 
-    // Shall we delete the info file as well?
-    if(!infos )
+    // Delete the icon as well?
+    if(!infos)
     {
-        // No, we're done..
+        // No, we're done.
         return 1;
     }
 
@@ -2181,26 +2172,25 @@ static int h_delete_dir(entry_p contxt, const char *name)
     char *info = get_buf();
     snprintf(info, buf_size(), "%s.info", name);
 
-    if(h_exists(info) == 1)
+    // We're done if there's no icon.
+    if(h_exists(info) != 1)
     {
-        // Set permissions so that delete can succeed.
-        chmod(info, S_IRWXU);
-
-        // Delete the info file.
-        if(!remove(info))
-        {
-            // The info file has been deleted.
-            h_log(contxt, tr(S_DLTD), info);
-        }
-        else
-        {
-            // Fail silently.
-            return 0;
-        }
+        return 1;
     }
 
-    // We're done.
-    return 1;
+    // Set permissions so that delete can succeed.
+    chmod(info, S_IRWXU);
+
+    // Delete the info file.
+    if(!remove(info))
+    {
+        // The info file has been deleted.
+        h_log(contxt, tr(S_DLTD), info);
+        return 1;
+    }
+
+    // Fail silently.
+    return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -2811,7 +2801,13 @@ entry_p m_protect(entry_p contxt)
                 int mode = 0;
 
                 // Use a real file or override?
-                if(!override)
+
+                if(override)
+                {
+                    // Get flags from user (script).
+                    D_NUM = num(override);
+                }
+                else
                 {
                     // Get flags from file.
                     if(!h_protect_get(contxt, file, &D_NUM))
@@ -2819,11 +2815,6 @@ entry_p m_protect(entry_p contxt)
                         // Helper will set proper error
                         R_NUM(-1);
                     }
-                }
-                else
-                {
-                    // Get flags from user (script).
-                    D_NUM = num(override);
                 }
 
                 // Invert 1-4.
@@ -3093,7 +3084,13 @@ entry_p m_startup(entry_p contxt)
                 if(file)
                 {
                     // Write everything to the temporary file at once.
-                    if(fputs(buf, file) != EOF)
+                    if(fputs(buf, file) == EOF)
+                    {
+                        // Failure. Could not write to disk. The old file is
+                        // still intact.
+                        fclose(file);
+                    }
+                    else
                     {
                         // Close file and release buffer.
                         fclose(file);
@@ -3131,12 +3128,6 @@ entry_p m_startup(entry_p contxt)
                                 ERR(ERR_WRITE_FILE, tmp);
                             }
                         }
-                    }
-                    else
-                    {
-                        // Failure. Could not write to disk. The old file is
-                        // still intact.
-                        fclose(file);
                     }
                 }
 
@@ -3196,118 +3187,111 @@ entry_p m_textfile(entry_p contxt)
 
     D_NUM = 0;
 
-    if(dest)
+    if(!dest)
     {
-        // If we need confirmation and the user skips or aborts, return. On
-        // abort, the HALT will be set by h_confirm.
-        if(confirm && !h_confirm(contxt, str(help), str(prompt)))
+        ERR(ERR_MISSING_OPTION, "dest");
+        R_NUM(0);
+    }
+
+    // If we need confirmation and the user skips or aborts, return. On
+    // abort, the HALT will be set by h_confirm.
+    if(confirm && !h_confirm(contxt, str(help), str(prompt)))
+    {
+        R_NUM(0);
+    }
+
+    // Is this a safe operation or are we not running in pretend mode?
+    if(!safe && get_numvar(contxt, "@pretend"))
+    {
+        // A non safe operation in pretend mode always succeeds.
+        R_NUM(1);
+    }
+
+    // Overwrite existing file.
+    const char *name = str(dest);
+    FILE *file = fopen(name, "w");
+
+    if(!file)
+    {
+        ERR(ERR_WRITE_FILE, name);
+        R_NUM(0);
+    }
+
+    // Assume success.
+    D_NUM = 1;
+
+    // Append to empty file. Strange but it's how the CBM installer works.
+    if(post)
+    {
+        // Gather and merge all (append) strings.
+        char *app = get_optstr(contxt, OPT_APPEND);
+
+        if(app)
         {
-            R_CUR;
-        }
+            // Log operation.
+            h_log(contxt, tr(S_APND), app, name);
 
-        // Is this a safe operation or are we not running in pretend mode?
-        if(safe || !get_numvar(contxt, "@pretend"))
-        {
-            // Overwrite existing file.
-            const char *name = str(dest);
-            FILE *file = fopen(name, "w");
-
-            if(file)
-            {
-                // Assume success.
-                D_NUM = 1;
-
-                // Append to empty file. This is strange but it's how the CBM
-                // installer works.
-                if(post)
-                {
-                    // Gather and merge all (append) strings.
-                    char *app = get_optstr(contxt, OPT_APPEND);
-
-                    if(app)
-                    {
-                        // Log operation.
-                        h_log(contxt, tr(S_APND), app, name);
-
-                        if(fputs(app, file) == EOF)
-                        {
-                            ERR(ERR_WRITE_FILE, name);
-                            D_NUM = 0;
-                        }
-
-                        // Free concatenation.
-                        free(app);
-                    }
-                    else
-                    {
-                        // Out of memory.
-                        PANIC(contxt);
-                        D_NUM = 0;
-                    }
-                }
-
-                // Are we going to include a file at the end of the new file
-                // (append proper)?
-                if(include && D_NUM)
-                {
-                    // File to copy.
-                    const char *incl = str(include);
-                    FILE *finc = fopen(incl, "r");
-
-                    if(finc)
-                    {
-                        // Use the global buffer.
-                        char *buf = get_buf();
-                        size_t siz = buf_size(), cnt = fread(buf, 1, siz, finc);
-
-                        // Log operation.
-                        h_log(contxt, tr(S_INCL), incl, name);
-
-                        // Copy the whole file.
-                        while(cnt)
-                        {
-                            // Write to destination file.
-                            if(fwrite(buf, 1, cnt, file) != cnt)
-                            {
-                                ERR(ERR_WRITE_FILE, name);
-                                D_NUM = 0;
-                                break;
-                            }
-
-                            // Do we have more data?
-                            cnt = fread(buf, 1, siz, finc);
-                        }
-
-                        // We're done reading from the include file.
-                        fclose(finc);
-                    }
-                }
-
-                // We're done writing to the newly created file.
-                fclose(file);
-
-                // We must append and / or include, or else this doesn't make
-                // sense.
-                if(!post && !include)
-                {
-                    ERR(ERR_NOTHING_TO_DO, contxt->name);
-                    D_NUM = 0;
-                }
-            }
-            else
+            if(fputs(app, file) == EOF)
             {
                 ERR(ERR_WRITE_FILE, name);
+                D_NUM = 0;
             }
+
+            // Free concatenation.
+            free(app);
         }
         else
         {
-            // A non safe operation in pretend mode always succeeds.
-            D_NUM = 1;
+            // Out of memory.
+            PANIC(contxt);
+            D_NUM = 0;
         }
     }
-    else
+
+    // Include a file at the end of the new file (append proper)?
+    if(include && D_NUM)
     {
-        ERR(ERR_MISSING_OPTION, "dest");
+        // File to copy.
+        const char *incl = str(include);
+        FILE *finc = fopen(incl, "r");
+
+        if(finc)
+        {
+            // Use the global buffer.
+            char *buf = get_buf();
+            size_t siz = buf_size(), cnt = fread(buf, 1, siz, finc);
+
+            // Log operation.
+            h_log(contxt, tr(S_INCL), incl, name);
+
+            // Copy the whole file.
+            while(cnt)
+            {
+                // Write to destination file.
+                if(fwrite(buf, 1, cnt, file) != cnt)
+                {
+                    ERR(ERR_WRITE_FILE, name);
+                    D_NUM = 0;
+                    break;
+                }
+
+                // Do we have more data?
+                cnt = fread(buf, 1, siz, finc);
+            }
+
+            // We're done reading from the include file.
+            fclose(finc);
+        }
+    }
+
+    // We're done writing to the newly created file.
+    fclose(file);
+
+    // We must append and / or include, or else this doesn't make sense.
+    if(!post && !include)
+    {
+        ERR(ERR_NOTHING_TO_DO, contxt->name);
+        R_NUM(0);
     }
 
     // Success or failure.

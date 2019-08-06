@@ -187,7 +187,7 @@ static entry_p *h_retrace(entry_p contxt)
         // Use pointer to identify (trace).
         if(chl[pos]->call == m_trace)
         {
-            return(chl + pos);
+            return chl + pos;
         }
     }
 
