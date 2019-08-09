@@ -50,7 +50,7 @@ entry_p m_expandpath(entry_p contxt)
     char *pth = str(C_ARG(1));
 
     // Make sure that the argument is resolvable.
-    if((!pth && PANIC(contxt)) || DID_ERR)
+    if(DID_ERR)
     {
         R_EST;
     }
@@ -409,8 +409,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
     entry_p *chl = choices->children;
 
     // Create head node.
-    pnode_p node = DBG_ALLOC(calloc(1, sizeof(struct pnode_t))),
-            head = node;
+    pnode_p node = DBG_ALLOC(calloc(1, sizeof(struct pnode_t))), head = node;
 
     // Make sure that we're not out of memory.
     if(!node)
@@ -3655,39 +3654,39 @@ entry_p m_rename(entry_p contxt)
     }
 
     // Is this a safe operation or are we not running in pretend mode?
-    if(safe || !get_numvar(contxt, "@pretend"))
+    if(!safe && get_numvar(contxt, "@pretend"))
     {
-        // Are we going to rename a file/dir?
-        if(!disk)
-        {
-            // Rename if target doesn't exist.
-            if(!h_exists(new) && !rename(old, new))
-            {
-                // Success.
-                h_log(contxt, tr(S_FRND), old, new);
-                R_NUM(-1);
-            }
-
-            // Fail if target exists.
-            ERR(ERR_RENAME_FILE, old);
-            R_NUM(0);
-        }
-
-        // No, we're going to relabel a volume.
-        #if defined(AMIGA) && !defined(LG_TEST)
-        // Rename volume.
-        if(!Relabel(old, new))
-        {
-            // Failure.
-            R_NUM(0);
-        }
-        #endif
-
-        // Success.
-        h_log(contxt, tr(S_FRND), old, new);
+        R_NUM(-1);
     }
 
-    // Non safe operation in pretend mode or normal successful operation.
+    // Are we going to rename a file/dir?
+    if(!disk)
+    {
+        // Rename if target doesn't exist.
+        if(h_exists(new) == LG_NONE && !rename(old, new))
+        {
+            // Success.
+            h_log(contxt, tr(S_FRND), old, new);
+            R_NUM(-1);
+        }
+
+        // Fail if target exists.
+        ERR(ERR_RENAME_FILE, old);
+        R_NUM(0);
+    }
+
+    // No, we're going to relabel a volume.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Rename volume.
+    if(!Relabel(old, new))
+    {
+        // Failure.
+        R_NUM(0);
+    }
+    #endif
+
+    // Success.
+    h_log(contxt, tr(S_FRND), old, new);
     R_NUM(-1);
 }
 
