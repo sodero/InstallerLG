@@ -702,138 +702,130 @@ entry_p m_asknumber(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p m_askoptions(entry_p contxt)
 {
-    if(contxt)
+    // Zero or more arguments.
+    C_SANE(0, contxt);
+
+    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
+            help     = get_opt(contxt, OPT_HELP),
+            back     = get_opt(contxt, OPT_BACK),
+            choices  = get_opt(contxt, OPT_CHOICES),
+            deflt    = get_opt(contxt, OPT_DEFAULT);
+
+    D_NUM = -1;
+
+    // We need everything but a default value.
+    if(!prompt || !help || !choices)
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                back     = get_opt(contxt, OPT_BACK),
-                choices  = get_opt(contxt, OPT_CHOICES),
-                deflt    = get_opt(contxt, OPT_DEFAULT);
+        ERR(ERR_MISSING_OPTION, prompt ? help ? "choices" : "help" : "prompt");
+        R_NUM(-1);
+    }
 
-        D_NUM = -1;
+    // Unless the parser is broken, we will have >= one child.
+    entry_p *chl = choices->children;
 
-        // We need everything but a default value.
-        if(!prompt || !help || !choices)
+    // Options are represented by bitmask of 32
+    // bits, refer to Install.guide. Thus, we
+    // need room for 32 pointers + NULL.
+    static const char *chs[33];
+
+    // Choice index.
+    int ndx = 0;
+
+    // Pick up a string representation of all the options.
+    while(*chl && *chl != end() && ndx < 32)
+    {
+        char *cur = str(*chl);
+
+        // From the Installer.guide:
+        //
+        // Previous versions of Installer did not support proportional fonts
+        // well and some people depended on the non proportional layout of
+        // the display for table like choices.  So Installer will continue to
+        // render choices non proportional unless you start one of the
+        // choices with a special escape sequence `"<ESC>[2p"'. This escape
+        // sequence allows proportional rendering. It is wise to specify this
+        // only in the first choice of the list. Note this well.  (V42)
+        if(strlen(cur) > 3 && !memcmp("\x1B[2p", cur, 4))
         {
-            ERR(ERR_MISSING_OPTION, prompt ? help ? "choices" : "help" : "prompt");
-            R_NUM(-1);
+            // We rely on Zune / MUI for #2. Hide
+            // this control sequence if it exists.
+            cur += 4;
         }
 
-        // Unless the parser is broken, we will have >= one child.
-        entry_p *chl = choices->children;
+        // Save choice.
+        chs[ndx++] = cur;
 
-        // Options are represented by bitmask of 32
-        // bits, refer to Install.guide. Thus, we
-        // need room for 32 pointers + NULL.
-        static const char *chs[33];
+        // Next option.
+        chl++;
+    }
 
-        // Choice index.
-        int ndx = 0;
+    // Exit if there's nothing to show.
+    if(!ndx)
+    {
+        // Use the default value if such exists.
+        R_NUM(deflt ? num(deflt) : -1);
+    }
 
-        // Pick up a string representation of all the options.
-        while(*chl && *chl != end() && ndx < 32)
+    // Terminate array.
+    chs[ndx] = NULL;
+
+    // Do we have default option?
+    if(deflt)
+    {
+        // Is there such a choice?
+        int def = num(deflt);
+
+        if(def >= (1L << ndx))
         {
-            char *cur = str(*chl);
-
-            // From the Installer.guide:
-            //
-            // Previous versions of Installer did not support proportional fonts
-            // well and some people depended on the non proportional layout of
-            // the display for table like choices.  So Installer will continue to
-            // render choices non proportional unless you start one of the
-            // choices with a special escape sequence `"<ESC>[2p"'. This escape
-            // sequence allows proportional rendering. It is wise to specify this
-            // only in the first choice of the list. Note this well.  (V42)
-            if(strlen(cur) > 3 && !memcmp("\x1B[2p", cur, 4))
-            {
-                // We rely on Zune / MUI for #2. Hide
-                // this control sequence if it exists.
-                cur += 4;
-            }
-
-            // Save choice.
-            chs[ndx++] = cur;
-
-            // Next option.
-            chl++;
+            // Nope, out of range.
+            ERR(ERR_NO_ITEM, str(deflt));
+            R_NUM(0);
         }
 
-        // Exit if there's nothing to show.
-        if(!ndx)
-        {
-            // Use the default value if such exists.
-            R_NUM(deflt ? num(deflt) : -1);
-        }
-
-        // Terminate array.
-        chs[ndx] = NULL;
-
-        // Do we have default option?
-        if(deflt)
-        {
-            // Is there such a choice?
-            int def = num(deflt);
-
-            if(def >= (1L << ndx))
-            {
-                // Nope, out of range.
-                ERR(ERR_NO_ITEM, str(deflt));
-                R_NUM(0);
-            }
-
-            // Yes, use the default value given.
-            ndx = def;
-        }
-        else
-        {
-            // No default = -1
-            ndx = -1;
-        }
-
-        // Show requester unless we're executing in 'novice' mode.
-        if(get_numvar(contxt, "@user-level") > 0)
-        {
-            const char *prt = str(prompt),
-                       *hlp = str(help);
-
-            // Only show requester if we could resolve all options.
-            if(!DID_ERR)
-            {
-                // Prompt user.
-                inp_t grc = gui_options(prt, hlp, chs, ndx, back != false, &D_NUM);
-
-                // Is the back option available?
-                if(back)
-                {
-                    // Fake input?
-                    if(get_numvar(contxt, "@back"))
-                    {
-                        grc = G_ABORT;
-                    }
-
-                    // On abort execute.
-                    if(grc == G_ABORT)
-                    {
-                        return resolve(back);
-                    }
-                }
-
-                // FIXME
-                if(grc == G_ABORT || grc == G_EXIT)
-                {
-                    HALT;
-                }
-            }
-        }
-        else
-        {
-            D_NUM = ndx;
-        }
+        // Yes, use the default value given.
+        ndx = def;
     }
     else
     {
-        // The parser is broken
-        PANIC(contxt);
+        // No default = -1
+        ndx = -1;
+    }
+
+    // Return default value if we're executing in 'novice' mode.
+    if(get_numvar(contxt, "@user-level") <= 0)
+    {
+        R_NUM(ndx);
+    }
+
+    const char *prt = str(prompt), *hlp = str(help);
+
+    // Only show requester if we could resolve all options.
+    if(!DID_ERR)
+    {
+        // Prompt user.
+        inp_t grc = gui_options(prt, hlp, chs, ndx, back != false, &D_NUM);
+
+        // Is the back option available?
+        if(back)
+        {
+            // Fake input?
+            if(get_numvar(contxt, "@back"))
+            {
+                grc = G_ABORT;
+            }
+
+            // On abort execute.
+            if(grc == G_ABORT)
+            {
+                return resolve(back);
+            }
+        }
+
+        // FIXME
+        if(grc == G_ABORT || grc == G_EXIT)
+        {
+            HALT;
+        }
     }
 
     // Success, failure or broken parser.
