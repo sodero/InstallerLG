@@ -113,12 +113,12 @@ entry_p m_effect(entry_p contxt)
         }
 
         // Always.
-        R_NUM(1);
+        R_NUM(LG_TRUE);
     }
 
     // Missing effect type.
     ERR(ERR_VAL_INVALID, est);
-    R_NUM(0);
+    R_NUM(LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -173,7 +173,7 @@ entry_p m_setmedia(entry_p contxt)
 
     // Invalid action.
     ERR(ERR_VAL_INVALID, act);
-    R_NUM(0);
+    R_NUM(LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ entry_p m_showmedia(entry_p contxt)
     if(gui_showmedia(&mid, str(C_ARG(2)), msk) != G_TRUE)
     {
         // Could not open file.
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Symbol destination.
@@ -240,7 +240,7 @@ entry_p m_showmedia(entry_p contxt)
             {
                 // Success.
                 (*sym)->resolved->id = mid;
-                R_NUM(1);
+                R_NUM(LG_TRUE);
             }
 
             // Next symbol.
@@ -270,7 +270,7 @@ entry_p m_showmedia(entry_p contxt)
                     nsm->parent = contxt;
 
                     // Success.
-                    R_NUM(1);
+                    R_NUM(LG_TRUE);
                 }
 
                 // Out of memory.

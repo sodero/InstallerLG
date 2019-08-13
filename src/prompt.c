@@ -51,7 +51,7 @@ entry_p m_askbool(entry_p contxt)
     {
         // Missing one or more.
         ERR(ERR_MISSING_OPTION, prompt ? "help" : "prompt");
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Do we have a choice option?
@@ -73,7 +73,7 @@ entry_p m_askbool(entry_p contxt)
     }
 
     // Show requester unless we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") > 0)
+    if(get_numvar(contxt, "@user-level") != LG_NOVICE)
     {
         const char *prt = str(prompt),
                    *hlp = str(help);
@@ -219,7 +219,7 @@ entry_p m_askchoice(entry_p contxt)
         {
             // Nope, out of range.
             ERR(ERR_NO_ITEM, str(deflt));
-            R_NUM(0);
+            R_NUM(LG_FALSE);
         }
 
         // Use default value.
@@ -232,7 +232,7 @@ entry_p m_askchoice(entry_p contxt)
     }
 
     // Don't show requester if we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") <= 0)
+    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
     {
         R_NUM(ndx);
     }
@@ -240,7 +240,7 @@ entry_p m_askchoice(entry_p contxt)
     // Only show requester if we could resolve all options.
     if(DID_ERR)
     {
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Skipper and result.
@@ -313,7 +313,7 @@ entry_p m_askdir(entry_p contxt)
     }
 
     // Return default value if we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") <= 0)
+    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
     {
         R_STR(DBG_ALLOC(strdup(str(deflt))));
     }
@@ -551,7 +551,7 @@ entry_p m_askfile(entry_p contxt)
     }
 
     // Return default value if we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") <= 0)
+    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
     {
         R_STR(DBG_ALLOC(strdup(str(deflt))));
     }
@@ -622,7 +622,7 @@ entry_p m_asknumber(entry_p contxt)
     if(!prompt || !help || !deflt)
     {
         ERR(ERR_MISSING_OPTION, prompt ? help ? "default" : "help" : "prompt");
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     int min = 0, max = 100;
@@ -650,7 +650,7 @@ entry_p m_asknumber(entry_p contxt)
     }
 
     // Show requester unless we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") > 0)
+    if(get_numvar(contxt, "@user-level") != LG_NOVICE)
     {
         int def = num(deflt);
         const char *prt = str(prompt), *hlp = str(help);
@@ -779,7 +779,7 @@ entry_p m_askoptions(entry_p contxt)
         {
             // Nope, out of range.
             ERR(ERR_NO_ITEM, str(deflt));
-            R_NUM(0);
+            R_NUM(LG_FALSE);
         }
 
         // Yes, use the default value given.
@@ -792,7 +792,7 @@ entry_p m_askoptions(entry_p contxt)
     }
 
     // Return default value if we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") <= 0)
+    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
     {
         R_NUM(ndx);
     }
@@ -856,7 +856,7 @@ entry_p m_askstring(entry_p contxt)
     }
 
     // Return default value if we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") <= 0)
+    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
     {
         R_STR(DBG_ALLOC(strdup(str(deflt))));
     }

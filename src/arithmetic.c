@@ -55,7 +55,7 @@ entry_p m_div(entry_p contxt)
     {
         // Division by zero.
         ERR(ERR_DIV_BY_ZERO, contxt->name);
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Return quotient.

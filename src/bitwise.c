@@ -32,12 +32,12 @@ entry_p m_and(entry_p contxt)
     {
         if(!num(*cur))
         {
-            R_NUM(0);
+            R_NUM(LG_FALSE);
         }
     }
 
     // All children are true.
-    R_NUM(1);
+    R_NUM(LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -159,13 +159,12 @@ entry_p m_or(entry_p contxt)
     {
         if(num(*cur))
         {
-            // True.
-            R_NUM(1);
+            R_NUM(LG_TRUE);
         }
     }
 
     // All children were false.
-    R_NUM(0);
+    R_NUM(LG_FALSE);
 }
 
 //------------------------------------------------------------------------------

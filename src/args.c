@@ -35,9 +35,9 @@ static char *args[ARG_NUMBER_OF];
 //              allocate resources that must be free:d by calling arg_done().
 // Input:       int argc:       From main(), the number of arguments.
 //              char **argv:    From main(), the array of arguments.
-// Return:      '1' on success, '0' otherwise.
+// Return:      'true' on success, 'false' otherwise.
 //------------------------------------------------------------------------------
-int arg_init(int argc, char **argv)
+bool arg_init(int argc, char **argv)
 {
     // Save argc, used later to determine whether we are invoked from CLI or WB.
     arg_argc(argc);
@@ -167,18 +167,15 @@ int arg_init(int argc, char **argv)
     }
 
     // Change working dir if started from a 'project'.
-    if(args[ARG_WORKDIR])
+    if(args[ARG_WORKDIR] && chdir(args[ARG_WORKDIR]))
     {
-        if(chdir(args[ARG_WORKDIR]))
-        {
-            // Fail.
-            return 0;
-        }
+        // Could not change directory.
+        return false;
     }
 
     // By now we should have either a disk object, or an rda, otherwise we have
     // failed.
-    return (rda || dob) ? 1 : 0;
+    return rda || dob;
     #else
     // On non-AMIGA systems, or in test mode, only the script name is supported.
     if(argc >= 2)
@@ -192,7 +189,7 @@ int arg_init(int argc, char **argv)
     }
 
     // Something is really wrong if we don't have the executable name.
-    return *args ? 1 : 0;
+    return *args;
     #endif
 }
 
@@ -259,4 +256,3 @@ void arg_done(void)
     }
     #endif
 }
-

@@ -247,7 +247,7 @@ entry_p m_earlier(entry_p contxt)
     {
         // Could not read from file / dir.
         ERR(ERR_READ, str(C_ARG(1)));
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Get information about the second file.
@@ -255,7 +255,7 @@ entry_p m_earlier(entry_p contxt)
     {
         // Could not read from file / dir.
         ERR(ERR_READ, str(C_ARG(2)));
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Is the first older than the second one?
@@ -617,7 +617,7 @@ entry_p m_getsize(entry_p contxt)
 
     // Could not read from file.
     ERR(ERR_READ_FILE, str(C_ARG(1)));
-    R_NUM(0);
+    R_NUM(LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -657,7 +657,7 @@ entry_p m_getsum(entry_p contxt)
 
     // Could not read from file.
     ERR(ERR_READ_FILE, name);
-    R_NUM(0);
+    R_NUM(LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -932,7 +932,7 @@ entry_p m_getversion(entry_p contxt)
     extern struct ExecBase *SysBase;
     R_NUM((SysBase->LibNode.lib_Version << 16) | SysBase->SoftVer);
     #else
-    R_NUM(0);
+    R_NUM(LG_FALSE);
     #endif
 }
 
@@ -963,7 +963,7 @@ entry_p m_iconinfo(entry_p contxt)
     if(!dst)
     {
         ERR(ERR_MISSING_OPTION, "dest");
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Suffix isn't needed.
@@ -980,7 +980,7 @@ entry_p m_iconinfo(entry_p contxt)
     if(!obj)
     {
         ERR(ERR_READ_FILE, file);
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Iterate over all options.
@@ -1106,5 +1106,5 @@ entry_p m_iconinfo(entry_p contxt)
     #endif
 
     // Success.
-    R_NUM(1);
+    R_NUM(LG_TRUE);
 }

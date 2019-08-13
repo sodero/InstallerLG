@@ -188,20 +188,17 @@ static int opt_to_int(entry_p entry)
     // Special treatment of (confirm).
     if(strcasecmp(opt, "novice") == 0)
     {
-        // Refer to Installer.guide.
-        return 0;
+        return LG_NOVICE;
     }
     else
     if(strcasecmp(opt, "average") == 0)
     {
-        // Refer to Installer.guide.
-        return 1;
+        return LG_AVERAGE;
     }
     else
     if(strcasecmp(opt, "expert") == 0)
     {
-        // Refer to Installer.guide.
-        return 2;
+        return LG_EXPERT;
     }
 
     // Fall through.
@@ -272,31 +269,29 @@ int num(entry_p entry)
 //              necessary, converting it. Non empty strings and non zero
 //              numerical values are considered true, everythings else false.
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
-// Return:      int:            The truth value of the input.
+// Return:      bool:           The truth value of the input.
 //------------------------------------------------------------------------------
-int tru(entry_p entry)
+bool tru(entry_p entry)
 {
     // Anything to resolve?
-    if(entry)
+    if(!entry)
     {
-        // Attempt to resolve it.
-        entry_p val = resolve(entry);
-
-        // Only numerals and strings can be true.
-        if(((val->type == STRING && *(val->name)) ||
-            (val->type == NUMBER && val->id)) && !DID_ERR)
-        {
-            return 1;
-        }
-    }
-    else
-    {
-        // Bad input.
         PANIC(entry);
+        return false;
     }
 
-    // False.
-    return 0;
+    // Attempt to resolve it.
+    entry_p val = resolve(entry);
+
+    // Only numerals and strings can be true.
+    if(((val->type == STRING && *(val->name)) ||
+        (val->type == NUMBER && val->id)) && !DID_ERR)
+    {
+        return true;
+    }
+
+    // Something else.
+    return false;
 }
 
 //------------------------------------------------------------------------------
@@ -390,18 +385,18 @@ char *str(entry_p entry)
         case NATIVE:
             return str(entry->call(entry));
 
-        // Conversion. Please note the use of NUMLEN.
+        // Conversion. Please note the use of LG_NUMLEN.
         case NUMBER:
             // Have we converted this number to a string before?
             if(!entry->name)
             {
-                entry->name = DBG_ALLOC(malloc(NUMLEN));
+                entry->name = DBG_ALLOC(malloc(LG_NUMLEN));
             }
 
             // On out of memory, fall through and PANIC below.
             if(entry->name)
             {
-                snprintf(entry->name, NUMLEN, "%d", entry->id);
+                snprintf(entry->name, LG_NUMLEN, "%d", entry->id);
                 return entry->name;
             }
             break;

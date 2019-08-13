@@ -121,7 +121,7 @@ entry_p m_debug(entry_p contxt)
     #endif
 
     // Always.
-    R_NUM(1);
+    R_NUM(LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -137,9 +137,10 @@ entry_p m_message(entry_p contxt)
     C_SANE(1, contxt);
 
     // In novice mode no message is to be shown unless (all) is set.
-    if(!get_opt(contxt, OPT_ALL) && !get_numvar(contxt, "@user-level"))
+    if(!get_opt(contxt, OPT_ALL) &&
+        get_numvar(contxt, "@user-level") == LG_NOVICE)
     {
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Concatenate all children.
@@ -150,7 +151,7 @@ entry_p m_message(entry_p contxt)
     if((!msg && PANIC(contxt)) || DID_ERR)
     {
         free(msg);
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Is the back option available?
@@ -218,7 +219,7 @@ entry_p m_welcome(entry_p contxt)
     if((!msg && PANIC(contxt)) || DID_ERR)
     {
         free(msg);
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Show welcome dialog.
@@ -267,7 +268,7 @@ entry_p m_working(entry_p contxt)
         {
             // We own msg.
             free(msg);
-            R_NUM(0);
+            R_NUM(LG_FALSE);
         }
 
         // Standard prefix.
@@ -290,7 +291,7 @@ entry_p m_working(entry_p contxt)
             free(con);
 
             // Success.
-            R_NUM(1);
+            R_NUM(LG_TRUE);
         }
 
         // Free the children buffer.

@@ -13,11 +13,31 @@
 #include <stdint.h>
 
 //------------------------------------------------------------------------------
+// File / dir type values according to the CBM installer documentation.
+//------------------------------------------------------------------------------
+#define LG_NONE     0
+#define LG_FILE     1
+#define LG_DIR      2
+
+//------------------------------------------------------------------------------
+// User levels according to the CBM installer documentation.
+//------------------------------------------------------------------------------
+#define LG_NOVICE   0
+#define LG_AVERAGE  1
+#define LG_EXPERT   2
+
+//------------------------------------------------------------------------------
+// Default return values.
+//------------------------------------------------------------------------------
+#define LG_TRUE     1
+#define LG_FALSE    0
+
+//------------------------------------------------------------------------------
 // Misc constants.
 //------------------------------------------------------------------------------
-#define VECLEN 4        // Default array size
-#define NUMLEN 16       // Max string length of numerical values
-#define MAXDEP 32       // Max recursion depth
+#define LG_VECLEN   4        // Default array size
+#define LG_NUMLEN   16       // Max string length of numerical values
+#define LG_MAXDEP   32       // Max recursion depth
 
 //------------------------------------------------------------------------------
 // Data types.
