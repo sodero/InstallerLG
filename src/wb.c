@@ -38,7 +38,7 @@ entry_p m_openwbobject(entry_p contxt)
     // A non safe operation in pretend mode always succeeds.
     if(get_numvar(contxt, "@pretend") && !safe)
     {
-        R_NUM(1);
+        R_NUM(LG_TRUE);
     }
 
     if(!confirm || h_confirm(C_ARG(2), str(help), str(prompt)))
@@ -52,7 +52,7 @@ entry_p m_openwbobject(entry_p contxt)
     }
 
     // User abort.
-    R_NUM(0);
+    R_NUM(LG_FALSE);
 }
 
 //------------------------------------------------------------------------------

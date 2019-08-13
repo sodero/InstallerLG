@@ -130,12 +130,6 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 }
 
 //------------------------------------------------------------------------------
-// File / dir type values according to the CBM installer documentation.
-//------------------------------------------------------------------------------
-#define LG_NONE 0
-#define LG_FILE 1
-#define LG_DIR  2
-//------------------------------------------------------------------------------
 #if defined(AMIGA) && !defined(LG_TEST)
 //------------------------------------------------------------------------------
 // Name:        h_exists_amiga_type
@@ -306,19 +300,15 @@ static const char *h_fileonly(entry_p contxt, const char *path)
 //------------------------------------------------------------------------------
 static char *h_suffix(const char *name, const char *suffix)
 {
-    // Use global buffer.
-    char *buf = get_buf();
-    size_t len = buf_size();
-
     // Don't trust the input.
     if(name && suffix)
     {
         // Append suffix.
-        snprintf(buf, len, "%s.%s", name, suffix);
+        snprintf(get_buf(), buf_size(), "%s.%s", name, suffix);
     }
 
     // Success or failure.
-    return buf;
+    return get_buf();
 }
 
 //------------------------------------------------------------------------------
@@ -421,7 +411,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
     // We already know the type of the first element; it's a directory.
     node->name = DBG_ALLOC(strdup(src));
     node->copy = DBG_ALLOC(strdup(dst));
-    node->type = 2;
+    node->type = LG_DIR;
 
     // Not necessary to check the return value.
     node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
@@ -441,53 +431,49 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
         // Next file.
         chl++;
 
-        // Make sure that the file / dir exists. But only in strict
-        // mode, otherwise just go on, missing files will be skipped
-        // during file copy anyway.
-        if(node->type || !get_numvar(contxt, "@strict"))
-        {
-            // Save current name and type in case we need to append
-            // icon or font.
-            long type = node->type;
-            char *name = node->name, *copy = node->copy;
-
-            // Create .info and .font nodes if necessary. No need to
-            // check node pointer. Bounce and PANIC in h_suffix_append.
-            node = infos ? h_suffix_append(contxt, node, "info") : node;
-            node = fonts ? h_suffix_append(contxt, node, "font") : node;
-
-            // Traverse (old, if info or font) directory if applicable.
-            if(type == LG_DIR
-               #ifndef AMIGA
-               && strcmp(f_nam, ".") && strcmp(f_nam, "..")
-               #endif
-               )
-            {
-                // Get tree of subdirectory. Don't promote (choices).
-                node->next = h_filetree
-                (
-                    contxt, name, copy, NULL, NULL, NULL, NULL, NULL
-                );
-
-                // Fast forward to the end of the list.
-                while(node->next)
-                {
-                    node = node->next;
-                }
-            }
-
-            // If there are more files, allocate memory for the next
-            // node.
-            if(*chl && *chl != end())
-            {
-                // Not necessary to check the return value.
-                node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
-            }
-        }
-        else
+        // Make sure that the file / dir exists. But only in strict mode,
+        // otherwise just go on, missing files will be skipped during file
+        // copy anyway.
+        if(node->type == LG_NONE && get_numvar(contxt, "@strict"))
         {
             // File or directory doesn't exist.
             ERR(ERR_NO_SUCH_FILE_OR_DIR, node->name);
+            return head;
+        }
+
+        long type = node->type;
+        char *name = node->name, *copy = node->copy;
+
+        // Create .info and .font nodes if necessary. No need to check node
+        // pointer. Bounce and PANIC in h_suffix_append.
+        node = infos ? h_suffix_append(contxt, node, "info") : node;
+        node = fonts ? h_suffix_append(contxt, node, "font") : node;
+
+        // Traverse (old, if info or font) directory if applicable.
+        if(type == LG_DIR
+           #ifndef AMIGA
+           && strcmp(f_nam, ".") && strcmp(f_nam, "..")
+           #endif
+           )
+        {
+            // Get tree of subdirectory. Don't promote (choices).
+            node->next = h_filetree
+            (
+                contxt, name, copy, NULL, NULL, NULL, NULL, NULL
+            );
+
+            // Fast forward to the end of the list.
+            while(node->next)
+            {
+                node = node->next;
+            }
+        }
+
+        // If there are more files, allocate memory for the next node.
+        if(*chl && *chl != end())
+        {
+            // Not necessary to check the return value.
+            node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
         }
 
         // Next element.
@@ -789,7 +775,6 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
         ERR(ERR_NO_SUCH_FILE_OR_DIR, src);
         return NULL;
     }
-   /* } */
 
     // Out of memory.
     PANIC(contxt);
@@ -816,7 +801,7 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
     if(!contxt || !mask || !file)
     {
         PANIC(contxt);
-        return 0;
+        return LG_FALSE;
     }
 
     // On non Amiga systems, or in test mode, this is a stub.
@@ -828,7 +813,7 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
     {
         // Out of memory.
         PANIC(contxt);
-        return 0;
+        return LG_FALSE;
     }
 
     // Attempt to lock file / dir.
@@ -873,7 +858,7 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
     return done ? 1 : 0;
     #else
     // Always succeed on non Amiga systems.
-    return 1;
+    return LG_TRUE;
     #endif
 }
 
@@ -892,7 +877,7 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
     if(!contxt || !file)
     {
         PANIC(contxt);
-        return 0;
+        return LG_FALSE;
     }
 
     // On non Amiga systems, or in test mode, this is a stub.
@@ -906,14 +891,14 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
         if(!SetProtection(file, mask) && get_numvar(contxt, "@strict"))
         {
             ERR(ERR_SET_PERM, file);
-            return 0;
+            return LG_FALSE;
         }
     }
     #endif
 
     // If logging is enabled, write to log.
     h_log(contxt, tr(S_PTCT), file, mask);
-    return 1;
+    return LG_TRUE;
 }
 
 #define CF_INFOS        (1 << 0)
@@ -987,7 +972,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
             // Ask for confirmation if (askuser) unless we're running
             // in novice mode and (force) at the same time.
             if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
-                get_numvar(contxt, "@user-level")))
+                get_numvar(contxt, "@user-level") != LG_NOVICE))
             {
                 if(h_confirm(contxt, "", tr(S_OWRT), dst))
                 {
@@ -1227,7 +1212,7 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
     if(!contxt || !dst)
     {
         PANIC(contxt);
-        return 0;
+        return LG_FALSE;
     }
 
     // Create icon if (infos) is set and there is no icon already.
@@ -1236,14 +1221,14 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
     {
         // Failed creating icon.
         ERR(ERR_WRITE_DIR, dst);
-        return 0;
+        return LG_FALSE;
     }
 
     // Return immediately if directory exists.
     if(h_exists(dst) == LG_DIR)
     {
         h_log(contxt, tr(S_EDIR), dst);
-        return 1;
+        return LG_TRUE;
     }
 
     // Create working copy.
@@ -1253,7 +1238,7 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
     {
         // Out of memory.
         PANIC(contxt);
-        return 0;
+        return LG_FALSE;
     }
 
     int depth = 1, len = (int) strlen(dir);
@@ -1291,7 +1276,7 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
                 {
                     free(dir);
                     h_log(contxt, tr(S_CRTD), dst);
-                    return 1;
+                    return LG_TRUE;
                 }
 
                 // Not the full path, reinstate delimiter and start all over
@@ -1313,12 +1298,12 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
     if(mode)
     {
         // FIXME
-        return 1;
+        return LG_TRUE;
     }
 
     // For some unknown reason, we can't create the directory.
     ERR(ERR_WRITE_DIR, dst);
-    return 0;
+    return LG_FALSE;
 }
 
 //------------------------------------------------------------------------------
@@ -1364,7 +1349,7 @@ entry_p m_copyfiles(entry_p contxt)
        (all && (choices || pattern)))
     {
         ERR(ERR_OPTION_MUTEX, "pattern/choices/all");
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // The (fail) (nofail) and (oknodelete) options are mutually exclusive.
@@ -1372,7 +1357,7 @@ entry_p m_copyfiles(entry_p contxt)
        (oknodelete && (nofail || fail)))
     {
         ERR(ERR_OPTION_MUTEX, "fail/nofail/oknodelete");
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // We need a source and a destination dir.
@@ -1395,7 +1380,7 @@ entry_p m_copyfiles(entry_p contxt)
         // A non safe operation in pretend mode always succeeds.
         if(get_numvar(contxt, "@pretend") && !safe)
         {
-            R_NUM(1);
+            R_NUM(LG_TRUE);
         }
 
         // Does the destination already exist?
@@ -1607,7 +1592,7 @@ entry_p m_copylib(entry_p contxt)
        (oknodelete && (nofail || fail)))
     {
         ERR(ERR_OPTION_MUTEX, "fail/nofail/oknodelete");
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // We always need a prompt and help since trying to overwrite new files
@@ -1619,7 +1604,7 @@ entry_p m_copylib(entry_p contxt)
     {
         ERR(ERR_MISSING_OPTION, source ? dest ? prompt ? "help" : "prompt" :
                                                          "dest" : "source");
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     char *src = str(source), *dst = str(dest);
@@ -1642,7 +1627,7 @@ entry_p m_copylib(entry_p contxt)
         // A non safe operation in pretend mode always succeeds.
         if(get_numvar(contxt, "@pretend") && !safe)
         {
-            R_NUM(1);
+            R_NUM(LG_TRUE);
         }
 
         // Only fail if we're in 'strict' mode.
@@ -1669,7 +1654,7 @@ entry_p m_copylib(entry_p contxt)
                 // Permission problems or the dir is more than 1 level deeper
                 // than the existing path.
                 ERR(ERR_WRITE_DIR, dst);
-                R_NUM(0);
+                R_NUM(LG_FALSE);
             }
 
             // Log the success.
@@ -1895,7 +1880,7 @@ entry_p m_copylib(entry_p contxt)
                             // number than the existing one, and we're in
                             // expert mode, ask the user to confirm. If we
                             // get a confirmation, overwrite.
-                            if(level == LG_DIR && h_confirm(
+                            if(level == LG_EXPERT && h_confirm(
                                 contxt,
                                 "",
                                 "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
@@ -1960,7 +1945,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     if(!file)
     {
         PANIC(contxt);
-        return 0;
+        return LG_FALSE;
     }
 
     // If (force) is used, give permissions so that delete can succeed.
@@ -1978,7 +1963,7 @@ static int h_delete_file(entry_p contxt, const char *file)
             if(get_opt(C_ARG(2), OPT_ASKUSER))
             {
                 // Ask for confirmation if we're not running in novice mode.
-                if(get_numvar(contxt, "@user-level") &&
+                if(get_numvar(contxt, "@user-level") != LG_NOVICE &&
                    h_confirm(contxt, "", tr(S_DWRT), file))
                 {
                     // Give permissions so that delete can succeed. No need
@@ -1990,13 +1975,13 @@ static int h_delete_file(entry_p contxt, const char *file)
                 {
                     // Halt will be set by h_confirm. Skip will result in
                     // nothing.
-                    return 0;
+                    return LG_FALSE;
                 }
             }
             else
             {
                 // Fail silently just like the original.
-                return 0;
+                return LG_FALSE;
             }
         }
     }
@@ -2006,7 +1991,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     {
         // Could not delete file.
         ERR(ERR_DELETE_FILE, file);
-        return 0;
+        return LG_FALSE;
     }
 
     // The file has been deleted.
@@ -2016,7 +2001,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     if(!get_opt(C_ARG(2), OPT_INFOS))
     {
         // No, we're done.
-        return 1;
+        return LG_TRUE;
     }
 
     // Do we have a corresponding .info file?
@@ -2028,7 +2013,7 @@ static int h_delete_file(entry_p contxt, const char *file)
         if(chmod(info, S_IRWXU) || remove(info))
         {
             ERR(ERR_DELETE_FILE, info);
-            return 0;
+            return LG_FALSE;
         }
 
         // The info file has been deleted.
@@ -2036,7 +2021,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     }
 
     // All done.
-    return 1;
+    return LG_TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -2052,7 +2037,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
     if(!name)
     {
         PANIC(contxt);
-        return 0;
+        return LG_FALSE;
     }
 
     entry_p infos    = get_opt(C_ARG(2), OPT_INFOS),
@@ -2066,18 +2051,18 @@ static int h_delete_dir(entry_p contxt, const char *name)
         if(askuser)
         {
             // Ask for confirmation if we're not running in novice mode.
-            if(!get_numvar(contxt, "@user-level") ||
+            if(get_numvar(contxt, "@user-level") == LG_NOVICE ||
                !h_confirm(C_ARG(2), "", tr(S_DWRD), name))
             {
                 // Halt will be set by h_confirm. Skip
                 // will result in nothing.
-                return 0;
+                return LG_FALSE;
             }
         }
         else
         {
             // Exit silently.
-            return 0;
+            return LG_FALSE;
         }
     }
 
@@ -2154,13 +2139,13 @@ static int h_delete_dir(entry_p contxt, const char *name)
             if(rmdir(name))
             {
                 // Fail silently.
-                return 0;
+                return LG_FALSE;
             }
         }
         else
         {
             // Fail silently.
-            return 0;
+            return LG_FALSE;
         }
     }
 
@@ -2168,7 +2153,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
     if(!infos)
     {
         // No, we're done.
-        return 1;
+        return LG_TRUE;
     }
 
     // Info = file + .info.
@@ -2178,7 +2163,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
     // We're done if there's no icon.
     if(h_exists(info) != 1)
     {
-        return 1;
+        return LG_TRUE;
     }
 
     // Set permissions so that delete can succeed.
@@ -2189,11 +2174,11 @@ static int h_delete_dir(entry_p contxt, const char *name)
     {
         // The info file has been deleted.
         h_log(contxt, tr(S_DLTD), info);
-        return 1;
+        return LG_TRUE;
     }
 
     // Fail silently.
-    return 0;
+    return LG_FALSE;
 }
 
 //------------------------------------------------------------------------------
@@ -2209,7 +2194,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
     if(!contxt || !pat)
     {
         PANIC(contxt);
-        return 0;
+        return LG_FALSE;
     }
 
     // Pattern matching is only done on Amiga systems in non test mode.
@@ -2220,7 +2205,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
     if(!apt)
     {
         PANIC(contxt);
-        return 0;
+        return LG_FALSE;
     }
 
     apt->ap_Strlen = PATH_MAX;
@@ -2262,16 +2247,16 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
     if(!err || err == ERROR_NO_MORE_ENTRIES)
     {
         // Done.
-        return 1;
+        return LG_TRUE;
     }
 
     // Please note that 'breaks' will take us here, so will
     // MatchFirst / MatchNext() problems.
     ERR(ERR_DELETE_FILE, pat);
-    return 0;
+    return LG_FALSE;
     #else
     // On non Amiga systems this is a stub.
-    return 1;
+    return LG_TRUE;
     #endif
 }
 
@@ -2303,7 +2288,7 @@ entry_p m_delete(entry_p contxt)
     {
         // Buffer overflow.
         ERR(ERR_OVERFLOW, file);
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     entry_p help     = get_opt(C_ARG(2), OPT_HELP),
@@ -2314,13 +2299,13 @@ entry_p m_delete(entry_p contxt)
     // abort, the HALT will be set by h_confirm.
     if(confirm && !h_confirm(C_ARG(2), str(help), str(prompt)))
     {
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Succeed immediately if non-safe in pretend mode.
     if(!get_opt(C_ARG(2), OPT_SAFE) && get_numvar(contxt, "@pretend"))
     {
-        R_NUM(1);
+        R_NUM(LG_TRUE);
     }
 
     // Did the input string contain any wildcards?
@@ -2335,7 +2320,7 @@ entry_p m_delete(entry_p contxt)
         // Doesn't exist.
         case 0:
             h_log(contxt, tr(S_NSFL), file);
-            R_NUM(0);
+            R_NUM(LG_FALSE);
 
         // A file.
         case 1:
@@ -2630,7 +2615,7 @@ entry_p m_makeassign(entry_p contxt)
     // Succeed immediately if non-safe in pretend mode.
     if(!get_opt(contxt, OPT_SAFE) && get_numvar(contxt, "@pretend"))
     {
-        R_NUM(1);
+        R_NUM(LG_TRUE);
     }
 
     // The name of the assign.
@@ -2710,14 +2695,14 @@ entry_p m_makedir(entry_p contxt)
     // the HALT will be set by h_confirm.
     if(confirm && !h_confirm(C_ARG(2), str(help), str(prompt)))
     {
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Succeed immediately if this operation is unsafe and we're running in
     // pretend mode.
     if(!get_opt(C_ARG(2), OPT_SAFE) && get_numvar(contxt, "@pretend"))
     {
-        R_NUM(1);
+        R_NUM(LG_TRUE);
     }
 
     // We need to pass a valid context to h_makedir. If we have a CONTXT with
@@ -2930,7 +2915,7 @@ entry_p m_startup(entry_p contxt)
     // the HALT will be set by h_confirm. Confirmation is needed when user level
     // is expert or when (confirm) is used.
     if((get_opt(C_ARG(2), OPT_CONFIRM) ||
-        get_numvar(contxt, "@user-level") > 1) &&
+        get_numvar(contxt, "@user-level") == LG_EXPERT) &&
        !h_confirm(C_ARG(2), str(help), str(prompt)))
     {
         R_CUR;
@@ -2939,7 +2924,7 @@ entry_p m_startup(entry_p contxt)
     // We're done if executing in pretend mode.
     if(get_numvar(contxt, "@pretend"))
     {
-        R_NUM(1);
+        R_NUM(LG_TRUE);
     }
 
     // Gather and merge all (command) strings.
@@ -3193,21 +3178,21 @@ entry_p m_textfile(entry_p contxt)
     if(!dest)
     {
         ERR(ERR_MISSING_OPTION, "dest");
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // If we need confirmation and the user skips or aborts, return. On
     // abort, the HALT will be set by h_confirm.
     if(confirm && !h_confirm(contxt, str(help), str(prompt)))
     {
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Is this a safe operation or are we not running in pretend mode?
     if(!safe && get_numvar(contxt, "@pretend"))
     {
         // A non safe operation in pretend mode always succeeds.
-        R_NUM(1);
+        R_NUM(LG_TRUE);
     }
 
     // Overwrite existing file.
@@ -3217,7 +3202,7 @@ entry_p m_textfile(entry_p contxt)
     if(!file)
     {
         ERR(ERR_WRITE_FILE, name);
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Assume success.
@@ -3294,7 +3279,7 @@ entry_p m_textfile(entry_p contxt)
     if(!post && !include)
     {
         ERR(ERR_NOTHING_TO_DO, contxt->name);
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Success or failure.
@@ -3327,7 +3312,7 @@ entry_p m_tooltype(entry_p contxt)
     // Succeed immediately if non-safe in pretend mode.
     if(!get_opt(contxt, OPT_SAFE) && get_numvar(contxt, "@pretend"))
     {
-        R_NUM(1);
+        R_NUM(LG_TRUE);
     }
 
     D_NUM = 0;
@@ -3342,7 +3327,7 @@ entry_p m_tooltype(entry_p contxt)
         if(noposition && setposition)
         {
             ERR(ERR_OPTION_MUTEX, "noposition/setposition");
-            R_NUM(0);
+            R_NUM(LG_FALSE);
         }
 
         // Get confirmation if necessary.
@@ -3613,7 +3598,7 @@ entry_p m_transcript(entry_p contxt)
     if((!msg && PANIC(contxt)) || DID_ERR)
     {
         free(msg);
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Write result to the log file.
@@ -3650,7 +3635,7 @@ entry_p m_rename(entry_p contxt)
     // HALT will be set by h_confirm.
     if(confirm && !h_confirm(C_ARG(3), str(help), str(prompt)))
     {
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Is this a safe operation or are we not running in pretend mode?
@@ -3672,7 +3657,7 @@ entry_p m_rename(entry_p contxt)
 
         // Fail if target exists.
         ERR(ERR_RENAME_FILE, old);
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // No, we're going to relabel a volume.
@@ -3681,7 +3666,7 @@ entry_p m_rename(entry_p contxt)
     if(!Relabel(old, new))
     {
         // Failure.
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
     #endif
 
@@ -3706,13 +3691,13 @@ int h_log(entry_p contxt, const char *fmt, ...)
     if(!contxt || !fmt)
     {
         PANIC(contxt);
-        return 0;
+        return LG_FALSE;
     }
 
     // Is logging disabled?
     if(!get_numvar(contxt, "@log"))
     {
-        return 1;
+        return LG_TRUE;
     }
 
     // Use the log file set in init(..) or by the user.

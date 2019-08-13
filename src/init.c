@@ -122,35 +122,35 @@ static void init_tooltypes(entry_p contxt)
     init_str(contxt, "@log-file", a_log ? a_log : "install_log_file");
 
     // Default and minimum user level.
-    int l_def = 1, l_min = 0;
+    int l_def = LG_AVERAGE, l_min = LG_NOVICE;
 
     // Minimum user level setting?
     if(a_min)
     {
-        // NOVICE (0) is implicit.
+        // LG_NOVICE is implicit.
         if(strcasecmp("AVERAGE", a_min) == 0)
         {
-            l_min = 1;
+            l_min = LG_AVERAGE;
         }
         else
         if(strcasecmp("EXPERT", a_min) == 0)
         {
-            l_min = 2;
+            l_min = LG_EXPERT;
         }
     }
 
     // Default user level setting?
     if(a_def)
     {
-        // AVERAGE (1) is implicit.
+        // LG_AVERAGE is implicit.
         if(strcasecmp("NOVICE", a_def) == 0)
         {
-            l_def = 0;
+            l_def = LG_NOVICE;
         }
         else
         if(strcasecmp("EXPERT", a_def) == 0)
         {
-            l_def = 2;
+            l_def = LG_EXPERT;
         }
     }
 

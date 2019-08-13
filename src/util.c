@@ -211,7 +211,7 @@ static void prune_opt(entry_p contxt, entry_p *cache)
         }
 
         // The default threshold is expert.
-        int level = get_numvar(contxt, "@user-level"), thres = 2;
+        int level = get_numvar(contxt, "@user-level"), thres = LG_EXPERT;
 
         // If the (cache[OPT_CONFIRM] ...) option contains something that can be
         // translated into a new threshold value...
@@ -340,9 +340,9 @@ entry_p get_opt(entry_p contxt, opt_t type)
 // Input:       entry_p contxt:  The context.
 //              type_t:          NATIVE or SYMBOL.
 //              size_t num:      The number of children / symbols needed.
-// Return:      int:             1 if context is valid, 0 otherwise.
+// Return:      bool:            'true' if context is valid, 'false' otherwise.
 //------------------------------------------------------------------------------
-static int x_sane(entry_p contxt, type_t type, size_t num)
+static bool x_sane(entry_p contxt, type_t type, size_t num)
 {
     // We need a context.
     if(contxt)
@@ -359,7 +359,7 @@ static int x_sane(entry_p contxt, type_t type, size_t num)
             if(contxt->type == NATIVE && !contxt->resolved)
             {
                 dump(contxt);
-                return 0;
+                return false;
             }
         }
 
@@ -368,7 +368,7 @@ static int x_sane(entry_p contxt, type_t type, size_t num)
         if(num && !vec)
         {
             dump(contxt);
-            return 0;
+            return false;
         }
 
         // Expect at least num children.
@@ -378,21 +378,21 @@ static int x_sane(entry_p contxt, type_t type, size_t num)
             if(!vec[i])
             {
                 dump(contxt);
-                return 0;
+                return false;
             }
 
             // It should not be a sentinel.
             if(vec[i] == end())
             {
                 dump(contxt);
-                return 0;
+                return false;
             }
 
             // Make sure that it belongs to us.
             if(vec[i]->parent != contxt)
             {
                 dump(contxt);
-                return 0;
+                return false;
             }
 
             // All but CONTXT / NUMBER are named.
@@ -400,24 +400,24 @@ static int x_sane(entry_p contxt, type_t type, size_t num)
                 vec[i]->type != NUMBER)
             {
                 dump(vec[i]);
-                return 0;
+                return false;
             }
 
             // A CONTXT must have room for children.
             if(vec[i]->type == CONTXT && !vec[i]->children)
             {
                 dump(vec[i]);
-                return 0;
+                return false;
             }
         }
 
         // We're OK;
-        return 1;
+        return true;
     }
 
     // Badly broken.
     dump(contxt);
-    return 0;
+    return false;
 }
 
 //------------------------------------------------------------------------------
@@ -428,9 +428,9 @@ static int x_sane(entry_p contxt, type_t type, size_t num)
 //              or an out of memory problem.
 // Input:       entry_p contxt:  The context.
 //              size_t num:      The number of children necessary.
-// Return:      int:             1 if context is valid, 0 otherwise.
+// Return:      bool:            'true' if context is valid, 'false' otherwise.
 //------------------------------------------------------------------------------
-int c_sane(entry_p contxt, size_t num)
+bool c_sane(entry_p contxt, size_t num)
 {
     return x_sane(contxt, NATIVE, num);
 }
@@ -443,9 +443,9 @@ int c_sane(entry_p contxt, size_t num)
 //              or an out of memory problem.
 // Input:       entry_p contxt:  The context.
 //              size_t num:      The number of symbols necessary.
-// Return:      int:             1 if context is valid, 0 otherwise.
+// Return:      bool:            'true' if context is valid, 'false' otherwise.
 //------------------------------------------------------------------------------
-int s_sane(entry_p contxt, size_t num)
+bool s_sane(entry_p contxt, size_t num)
 {
     return x_sane(contxt, SYMBOL, num);
 }

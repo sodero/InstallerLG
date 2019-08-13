@@ -100,8 +100,8 @@ entry_p m_gosub(entry_p contxt)
         static int dep;
 
         // Keep track of the recursion depth. Do not invoke if we're
-        // beyond MAXDEP.
-        if(dep++ < MAXDEP)
+        // beyond LG_MAXDEP.
+        if(dep++ < LG_MAXDEP)
         {
             // Return value.
             entry_p ret = invoke(*cus);

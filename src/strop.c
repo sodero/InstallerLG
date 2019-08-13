@@ -217,7 +217,7 @@ entry_p m_fmt(entry_p contxt)
                     if(sct[cnt][oln - 1] == 'd')
                     {
                         int val = num(*arg);
-                        size_t nln = oln + NUMLEN;
+                        size_t nln = oln + LG_NUMLEN;
                         char *new = DBG_ALLOC(calloc(nln + 1, 1));
 
                         // Replace the current format string with
@@ -409,11 +409,11 @@ entry_p m_patmatch(entry_p contxt)
     {
         // We probably had a buffer overflow.
         ERR(ERR_OVERFLOW, pat);
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
     #else
     // Testing.
-    R_NUM(0);
+    R_NUM(LG_FALSE);
     #endif
 }
 

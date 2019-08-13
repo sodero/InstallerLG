@@ -33,9 +33,9 @@ entry_p new_contxt(void)
         entry_p *symbols, *children;
 
         // Memory for children and symbols, this will be grown if necessary.
-        // Start with VECLEN.
-        symbols = DBG_ALLOC(calloc(VECLEN + 1, sizeof(entry_p)));
-        children = DBG_ALLOC(calloc(VECLEN + 1, sizeof(entry_p)));
+        // Start with LG_VECLEN.
+        symbols = DBG_ALLOC(calloc(LG_VECLEN + 1, sizeof(entry_p)));
+        children = DBG_ALLOC(calloc(LG_VECLEN + 1, sizeof(entry_p)));
 
         if(symbols && children)
         {
@@ -45,8 +45,8 @@ entry_p new_contxt(void)
             entry->children = children;
 
             // Set sentinel values.
-            entry->symbols[VECLEN] = end();
-            entry->children[VECLEN] = end();
+            entry->symbols[LG_VECLEN] = end();
+            entry->children[LG_VECLEN] = end();
 
             // Success.
             return entry;

@@ -41,7 +41,7 @@ entry_p m_abort(entry_p contxt)
     if((!msg && PANIC(contxt)) || DID_ERR)
     {
         free(msg);
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Show the result of the concatenation unless it's empty.
@@ -55,7 +55,7 @@ entry_p m_abort(entry_p contxt)
 
     // Set ABORT and return. This will make invoke() halt.
     error(contxt, -3, ERR_ABORT, __func__);
-    R_NUM(1);
+    R_NUM(LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ entry_p m_exit(entry_p contxt)
         if((!msg && PANIC(contxt)) || DID_ERR)
         {
             free(msg);
-            R_NUM(0);
+            R_NUM(LG_FALSE);
         }
 
         // Show the result and free buffer.
@@ -184,7 +184,7 @@ entry_p m_trap(entry_p contxt)
     C_SANE(2, NULL);
 
     // Dummy.
-    R_NUM(1);
+    R_NUM(LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -201,7 +201,7 @@ entry_p m_reboot(entry_p contxt)
     // Don't reboot in pretend mode.
     if(get_numvar(contxt, "@pretend"))
     {
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // Don't reboot in test mode.
@@ -211,5 +211,5 @@ entry_p m_reboot(entry_p contxt)
     #endif
 
     // Always succeed in test mode.
-    R_NUM(1);
+    R_NUM(LG_TRUE);
 }

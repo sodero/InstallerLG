@@ -75,8 +75,8 @@ entry_p m_eq(entry_p contxt)
     // Two arguments.
     C_SANE(2, NULL);
 
-    // Turn the result of h_cmp into 1 or 0.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) ? 0 : 1);
+    // Translate the result of h_cmp.
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) ? LG_FALSE : LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -90,8 +90,8 @@ entry_p m_gt(entry_p contxt)
     // Two arguments.
     C_SANE(2, NULL);
 
-    // Turn the result of h_cmp into 0 or 1.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) > 0 ? 1 : 0);
+    // Translate the result of h_cmp.
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) > 0 ? LG_TRUE : LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -105,8 +105,8 @@ entry_p m_gte(entry_p contxt)
     // Two arguments.
     C_SANE(2, NULL);
 
-    // Turn the result of h_cmp into 0 or 1.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) >= 0 ? 1 : 0);
+    // Translate the result of h_cmp.
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) >= 0 ? LG_TRUE : LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -120,8 +120,8 @@ entry_p m_lt(entry_p contxt)
     // Two arguments.
     C_SANE(2, NULL);
 
-    // Turn the result of h_cmp into 0 or 1.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) < 0 ? 1 : 0);
+    // Translate the result of h_cmp.
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) < 0 ? LG_TRUE : LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -135,8 +135,8 @@ entry_p m_lte(entry_p contxt)
     // Two arguments.
     C_SANE(2, NULL);
 
-    // Turn the result of h_cmp into 0 or 1.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) <= 0 ? 1 : 0);
+    // Translate the result of h_cmp.
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) <= 0 ? LG_TRUE : LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -150,6 +150,6 @@ entry_p m_neq(entry_p contxt)
     // Two arguments.
     C_SANE(2, NULL);
 
-    // Turn the result of h_cmp into 0 or 1.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) ? 1 : 0);
+    // Translate the result of h_cmp.
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) ? LG_TRUE : LG_FALSE);
 }

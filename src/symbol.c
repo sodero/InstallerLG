@@ -281,7 +281,7 @@ entry_p m_symbolval(entry_p contxt)
         }
 
         // Symbol not found.
-        R_NUM(0);
+        R_NUM(LG_FALSE);
     }
 
     // The parser is broken

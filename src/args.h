@@ -15,6 +15,8 @@
 #include <dos/dos.h>
 #endif
 
+#include <stdbool.h>
+
 enum
 {
     ARG_SCRIPT = 0,
@@ -29,7 +31,7 @@ enum
     ARG_NUMBER_OF
 };
 
-int arg_init(int argc, char **argv);
+bool arg_init(int argc, char **argv);
 char *arg_get(int ndx);
 int arg_argc(int argc);
 void arg_done(void);

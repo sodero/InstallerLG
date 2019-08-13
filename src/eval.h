@@ -11,9 +11,10 @@
 #define EVAL_H_
 
 #include "types.h"
+#include <stdbool.h>
 
 int num(entry_p entry);
-int tru(entry_p entry);
+bool tru(entry_p entry);
 void run(entry_p entry);
 char *str(entry_p entry);
 entry_p invoke(entry_p entry);

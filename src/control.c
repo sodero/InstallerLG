@@ -43,7 +43,7 @@ entry_p m_if(entry_p contxt)
     }
 
     // Nothing to resolve.
-    R_NUM(0);
+    R_NUM(LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ entry_p m_select(entry_p contxt)
 
     // No such item, n + 1 > the number of items.
     ERR(ERR_NO_ITEM, str(C_ARG(1)));
-    R_NUM(0);
+    R_NUM(LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ entry_p m_trace(entry_p contxt)
     C_SANE(0, NULL);
 
     // We're not doing anything except occupying space.
-    R_NUM(1);
+    R_NUM(LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -219,10 +219,10 @@ entry_p m_retrace(entry_p contxt)
         static int dep = 0;
 
         // Keep track of the recursion depth.
-        if(++dep > MAXDEP)
+        if(++dep > LG_MAXDEP)
         {
             ERR(ERR_MAX_DEPTH, contxt->name);
-            R_NUM(0);
+            R_NUM(LG_FALSE);
         }
 
         // Expect failure.
