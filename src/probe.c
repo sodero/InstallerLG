@@ -893,7 +893,7 @@ entry_p m_getversion(entry_p contxt)
         int ver = -1;
 
         // Get resident module version.
-        if(get_opt(contxt, OPT_RESIDENT))
+        if(opt(contxt, OPT_RESIDENT))
         {
             ver = h_getversion_res(name);
         }
@@ -953,11 +953,11 @@ entry_p m_iconinfo(entry_p contxt)
     // One or more arguments.
     C_SANE(1, contxt);
 
-    entry_p dst     =   get_opt(contxt, OPT_DEST);
-    entry_p types[] = { get_opt(contxt, OPT_GETTOOLTYPE),
-                        get_opt(contxt, OPT_GETDEFAULTTOOL),
-                        get_opt(contxt, OPT_GETSTACK),
-                        get_opt(contxt, OPT_GETPOSITION), end() };
+    entry_p dst     =   opt(contxt, OPT_DEST);
+    entry_p types[] = { opt(contxt, OPT_GETTOOLTYPE),
+                        opt(contxt, OPT_GETDEFAULTTOOL),
+                        opt(contxt, OPT_GETSTACK),
+                        opt(contxt, OPT_GETPOSITION), end() };
 
     // We need an icon.
     if(!dst)

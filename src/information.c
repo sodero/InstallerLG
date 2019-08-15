@@ -137,7 +137,7 @@ entry_p m_message(entry_p contxt)
     C_SANE(1, contxt);
 
     // In novice mode no message is to be shown unless (all) is set.
-    if(!get_opt(contxt, OPT_ALL) &&
+    if(!opt(contxt, OPT_ALL) &&
         get_numvar(contxt, "@user-level") == LG_NOVICE)
     {
         R_NUM(LG_FALSE);
@@ -155,7 +155,7 @@ entry_p m_message(entry_p contxt)
     }
 
     // Is the back option available?
-    entry_p back = get_opt(contxt, OPT_BACK);
+    entry_p back = opt(contxt, OPT_BACK);
 
     // Show the result of the concatenation.
     inp_t grc = gui_message(msg, back != false);

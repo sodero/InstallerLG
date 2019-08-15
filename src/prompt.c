@@ -37,11 +37,11 @@ entry_p m_askbool(entry_p contxt)
     C_SANE(0, contxt);
 
     const char *yes = tr(S_AYES), *nay = tr(S_NONO);
-    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-            help     = get_opt(contxt, OPT_HELP),
-            back     = get_opt(contxt, OPT_BACK),
-            deflt    = get_opt(contxt, OPT_DEFAULT),
-            choices  = get_opt(contxt, OPT_CHOICES);
+    entry_p prompt   = opt(contxt, OPT_PROMPT),
+            help     = opt(contxt, OPT_HELP),
+            back     = opt(contxt, OPT_BACK),
+            deflt    = opt(contxt, OPT_DEFAULT),
+            choices  = opt(contxt, OPT_CHOICES);
 
     // Default = 'no'.
     int ans = 0;
@@ -133,19 +133,18 @@ entry_p m_askchoice(entry_p contxt)
 {
     C_SANE(0, contxt);
 
-    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-            help     = get_opt(contxt, OPT_HELP),
-            back     = get_opt(contxt, OPT_BACK),
-            choices  = get_opt(contxt, OPT_CHOICES),
-            deflt    = get_opt(contxt, OPT_DEFAULT);
+    entry_p prompt   = opt(contxt, OPT_PROMPT),
+            help     = opt(contxt, OPT_HELP),
+            back     = opt(contxt, OPT_BACK),
+            choices  = opt(contxt, OPT_CHOICES),
+            deflt    = opt(contxt, OPT_DEFAULT);
 
     // We need something to choose from, a help text and a prompt text.
     if(!prompt || !help || !choices)
     {
         // Missing one or more.
-        ERR(ERR_MISSING_OPTION, prompt ? help ? "choices" : "help" :
-            "prompt");
-        R_CUR;
+        ERR(ERR_MISSING_OPTION, prompt ? help ? "choices" : "help" : "prompt");
+        R_NUM(LG_FALSE);
     }
 
     // The choice is represented by a bitmask of 32 bits, refer to
@@ -297,13 +296,13 @@ entry_p m_askdir(entry_p contxt)
     // Zero or more arguments.
     C_SANE(0, contxt);
 
-    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-            help     = get_opt(contxt, OPT_HELP),
-            back     = get_opt(contxt, OPT_BACK),
-            deflt    = get_opt(contxt, OPT_DEFAULT),
-            newpath  = get_opt(contxt, OPT_NEWPATH),
-            disk     = get_opt(contxt, OPT_DISK),
-            assigns  = get_opt(contxt, OPT_ASSIGNS);
+    entry_p prompt   = opt(contxt, OPT_PROMPT),
+            help     = opt(contxt, OPT_HELP),
+            back     = opt(contxt, OPT_BACK),
+            deflt    = opt(contxt, OPT_DEFAULT),
+            newpath  = opt(contxt, OPT_NEWPATH),
+            disk     = opt(contxt, OPT_DISK),
+            assigns  = opt(contxt, OPT_ASSIGNS);
 
     // Are all mandatory options (?) present?
     if(!prompt || !help || !deflt)
@@ -370,11 +369,11 @@ entry_p m_askdisk(entry_p contxt)
 {
     if(contxt)
     {
-        entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-                help     = get_opt(contxt, OPT_HELP),
-                back     = get_opt(contxt, OPT_BACK),
-                dest     = get_opt(contxt, OPT_DEST),
-                newname  = get_opt(contxt, OPT_NEWNAME);
+        entry_p prompt   = opt(contxt, OPT_PROMPT),
+                help     = opt(contxt, OPT_HELP),
+                back     = opt(contxt, OPT_BACK),
+                dest     = opt(contxt, OPT_DEST),
+                newname  = opt(contxt, OPT_NEWNAME);
 
         D_NUM = 0;
 
@@ -536,12 +535,12 @@ entry_p m_askfile(entry_p contxt)
     // Zero or more arguments.
     C_SANE(0, contxt);
 
-    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-            help     = get_opt(contxt, OPT_HELP),
-            back     = get_opt(contxt, OPT_BACK),
-            newpath  = get_opt(contxt, OPT_NEWPATH),
-            disk     = get_opt(contxt, OPT_DISK),
-            deflt    = get_opt(contxt, OPT_DEFAULT);
+    entry_p prompt   = opt(contxt, OPT_PROMPT),
+            help     = opt(contxt, OPT_HELP),
+            back     = opt(contxt, OPT_BACK),
+            newpath  = opt(contxt, OPT_NEWPATH),
+            disk     = opt(contxt, OPT_DISK),
+            deflt    = opt(contxt, OPT_DEFAULT);
 
     // Are all mandatory options (?) present?
     if(!prompt || !help || !deflt)
@@ -610,11 +609,11 @@ entry_p m_asknumber(entry_p contxt)
     // Zero or more arguments.
     C_SANE(0, contxt);
 
-    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-            help     = get_opt(contxt, OPT_HELP),
-            back     = get_opt(contxt, OPT_BACK),
-            range    = get_opt(contxt, OPT_RANGE),
-            deflt    = get_opt(contxt, OPT_DEFAULT);
+    entry_p prompt   = opt(contxt, OPT_PROMPT),
+            help     = opt(contxt, OPT_HELP),
+            back     = opt(contxt, OPT_BACK),
+            range    = opt(contxt, OPT_RANGE),
+            deflt    = opt(contxt, OPT_DEFAULT);
 
     D_NUM = 0;
 
@@ -649,45 +648,45 @@ entry_p m_asknumber(entry_p contxt)
         }
     }
 
-    // Show requester unless we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") != LG_NOVICE)
+    // Show requester only if we're not executing in 'novice' mode.
+    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
     {
-        int def = num(deflt);
-        const char *prt = str(prompt), *hlp = str(help);
+        // Use default value.
+        R_NUM(num(deflt));
+    }
 
-        // Only show requester if we could resolve all options.
-        if(!DID_ERR)
+    int def = num(deflt);
+    const char *prt = str(prompt), *hlp = str(help);
+
+    // Only show requester if we could resolve all options.
+    if(DID_ERR)
+    {
+        R_NUM(LG_FALSE);
+    }
+
+    // Prompt user.
+    inp_t grc = gui_number(prt, hlp, min, max, def, back != false, &D_NUM);
+
+    // Is the back option available?
+    if(back)
+    {
+        // Fake input?
+        if(get_numvar(contxt, "@back"))
         {
-            // Prompt user.
-            inp_t grc = gui_number(prt, hlp, min, max, def, back != false, &D_NUM);
+            grc = G_ABORT;
+        }
 
-            // Is the back option available?
-            if(back)
-            {
-                // Fake input?
-                if(get_numvar(contxt, "@back"))
-                {
-                    grc = G_ABORT;
-                }
-
-                // On abort execute.
-                if(grc == G_ABORT)
-                {
-                    return resolve(back);
-                }
-            }
-
-            // FIXME
-            if(grc == G_ABORT || grc == G_EXIT)
-            {
-                HALT;
-            }
+        // On abort execute.
+        if(grc == G_ABORT)
+        {
+            return resolve(back);
         }
     }
-    else
+
+    // FIXME
+    if(grc == G_ABORT || grc == G_EXIT)
     {
-        // Use the default value.
-        D_NUM = num(deflt);
+        HALT;
     }
 
     // Success, failure or broken parser.
@@ -705,11 +704,11 @@ entry_p m_askoptions(entry_p contxt)
     // Zero or more arguments.
     C_SANE(0, contxt);
 
-    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-            help     = get_opt(contxt, OPT_HELP),
-            back     = get_opt(contxt, OPT_BACK),
-            choices  = get_opt(contxt, OPT_CHOICES),
-            deflt    = get_opt(contxt, OPT_DEFAULT);
+    entry_p prompt   = opt(contxt, OPT_PROMPT),
+            help     = opt(contxt, OPT_HELP),
+            back     = opt(contxt, OPT_BACK),
+            choices  = opt(contxt, OPT_CHOICES),
+            deflt    = opt(contxt, OPT_DEFAULT);
 
     D_NUM = -1;
 
@@ -843,10 +842,10 @@ entry_p m_askstring(entry_p contxt)
     // Zero or more arguments.
     C_SANE(0, contxt);
 
-    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-            help     = get_opt(contxt, OPT_HELP),
-            back     = get_opt(contxt, OPT_BACK),
-            deflt    = get_opt(contxt, OPT_DEFAULT);
+    entry_p prompt   = opt(contxt, OPT_PROMPT),
+            help     = opt(contxt, OPT_HELP),
+            back     = opt(contxt, OPT_BACK),
+            deflt    = opt(contxt, OPT_DEFAULT);
 
     // Are all mandatory options (?) present?
     if(!prompt || !help || !deflt)

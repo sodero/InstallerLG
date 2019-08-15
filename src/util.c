@@ -237,7 +237,11 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 }
 
 //------------------------------------------------------------------------------
-// FIXME
+// Name:        opt
+// Description: Find option of a given type in a context.
+// Input:       entry_p contxt:  The context to search in.
+//              opt_t type:      The type of option to search for.
+// Return:      entry_p:         An OPTION entry if found, NULL otherwise.
 //------------------------------------------------------------------------------
 entry_p opt(entry_p contxt, opt_t type)
 {
@@ -318,18 +322,6 @@ entry_p opt(entry_p contxt, opt_t type)
 
     // Use the (full) cache.
     return cache[type];
-}
-
-//------------------------------------------------------------------------------
-// Name:        get_opt
-// Description: Find option of a given type in a context.
-// Input:       entry_p contxt:  The context to search in.
-//              opt_t type:      The type of option to search for.
-// Return:      entry_p:         An OPTION entry if found, NULL otherwise.
-//------------------------------------------------------------------------------
-entry_p get_opt(entry_p contxt, opt_t type)
-{
-    return opt(contxt, type);
 }
 
 //------------------------------------------------------------------------------

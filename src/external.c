@@ -34,11 +34,11 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
     // One or more arguments.
     C_SANE(1, C_ARG(2));
 
-    entry_p prompt   = get_opt(C_ARG(2), OPT_PROMPT),
-            help     = get_opt(C_ARG(2), OPT_HELP),
-            confirm  = get_opt(C_ARG(2), OPT_CONFIRM),
-            safe     = get_opt(C_ARG(2), OPT_SAFE),
-            back     = get_opt(C_ARG(2), OPT_BACK);
+    entry_p prompt   = opt(C_ARG(2), OPT_PROMPT),
+            help     = opt(C_ARG(2), OPT_HELP),
+            confirm  = opt(C_ARG(2), OPT_CONFIRM),
+            safe     = opt(C_ARG(2), OPT_SAFE),
+            back     = opt(C_ARG(2), OPT_BACK);
 
     D_NUM = 0;
 

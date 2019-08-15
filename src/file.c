@@ -115,7 +115,7 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
     // Get confirmation unless @yes, @skip or @abort are set.
     if(grc == G_EXIT)
     {
-        entry_p back = get_opt(contxt, OPT_BACK);
+        entry_p back = opt(contxt, OPT_BACK);
         grc = gui_confirm(get_buf(), hlp, back != false);
 
         // If (back) exists, execute body on user / fake abort.
@@ -1216,7 +1216,7 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
     }
 
     // Create icon if (infos) is set and there is no icon already.
-    if(get_opt(contxt, OPT_INFOS) && !h_exists(h_suffix(dst, "info")) &&
+    if(opt(contxt, OPT_INFOS) && !h_exists(h_suffix(dst, "info")) &&
       !h_makedir_create_icon(contxt, dst))
     {
         // Failed creating icon.
@@ -1321,26 +1321,26 @@ entry_p m_copyfiles(entry_p contxt)
     // One or more arguments / options.
     C_SANE(1, contxt);
 
-    entry_p prompt     = get_opt(contxt, OPT_PROMPT),
-            help       = get_opt(contxt, OPT_HELP),
-            source     = get_opt(contxt, OPT_SOURCE),
-            dest       = get_opt(contxt, OPT_DEST),
-            newname    = get_opt(contxt, OPT_NEWNAME),
-            choices    = get_opt(contxt, OPT_CHOICES),
-            all        = get_opt(contxt, OPT_ALL),
-            pattern    = get_opt(contxt, OPT_PATTERN),
-            infos      = get_opt(contxt, OPT_INFOS),
-            confirm    = get_opt(contxt, OPT_CONFIRM),
-            safe       = get_opt(contxt, OPT_SAFE),
-            nogauge    = get_opt(contxt, OPT_NOGAUGE),
-            fonts      = get_opt(contxt, OPT_FONTS),
-            back       = get_opt(contxt, OPT_BACK),
-            fail       = get_opt(contxt, OPT_FAIL),
-            nofail     = get_opt(contxt, OPT_NOFAIL),
-            oknodelete = get_opt(contxt, OPT_OKNODELETE),
-            force      = get_opt(contxt, OPT_FORCE),
-            askuser    = get_opt(contxt, OPT_ASKUSER),
-            files      = get_opt(contxt, OPT_FILES);
+    entry_p prompt     = opt(contxt, OPT_PROMPT),
+            help       = opt(contxt, OPT_HELP),
+            source     = opt(contxt, OPT_SOURCE),
+            dest       = opt(contxt, OPT_DEST),
+            newname    = opt(contxt, OPT_NEWNAME),
+            choices    = opt(contxt, OPT_CHOICES),
+            all        = opt(contxt, OPT_ALL),
+            pattern    = opt(contxt, OPT_PATTERN),
+            infos      = opt(contxt, OPT_INFOS),
+            confirm    = opt(contxt, OPT_CONFIRM),
+            safe       = opt(contxt, OPT_SAFE),
+            nogauge    = opt(contxt, OPT_NOGAUGE),
+            fonts      = opt(contxt, OPT_FONTS),
+            back       = opt(contxt, OPT_BACK),
+            fail       = opt(contxt, OPT_FAIL),
+            nofail     = opt(contxt, OPT_NOFAIL),
+            oknodelete = opt(contxt, OPT_OKNODELETE),
+            force      = opt(contxt, OPT_FORCE),
+            askuser    = opt(contxt, OPT_ASKUSER),
+            files      = opt(contxt, OPT_FILES);
 
     D_NUM = 0;
 
@@ -1568,22 +1568,22 @@ entry_p m_copylib(entry_p contxt)
     // One or more arguments / options.
     C_SANE(1, contxt);
 
-    entry_p prompt     = get_opt(contxt, OPT_PROMPT),
-            help       = get_opt(contxt, OPT_HELP),
-            source     = get_opt(contxt, OPT_SOURCE),
-            dest       = get_opt(contxt, OPT_DEST),
-            newname    = get_opt(contxt, OPT_NEWNAME),
-            infos      = get_opt(contxt, OPT_INFOS),
-            confirm    = get_opt(contxt, OPT_CONFIRM),
-            safe       = get_opt(contxt, OPT_SAFE),
-            nogauge    = get_opt(contxt, OPT_NOGAUGE),
-            noposition = get_opt(contxt, OPT_NOPOSITION),
-            back       = get_opt(contxt, OPT_BACK),
-            fail       = get_opt(contxt, OPT_FAIL),
-            nofail     = get_opt(contxt, OPT_NOFAIL),
-            oknodelete = get_opt(contxt, OPT_OKNODELETE),
-            force      = get_opt(contxt, OPT_FORCE),
-            askuser    = get_opt(contxt, OPT_ASKUSER);
+    entry_p prompt     = opt(contxt, OPT_PROMPT),
+            help       = opt(contxt, OPT_HELP),
+            source     = opt(contxt, OPT_SOURCE),
+            dest       = opt(contxt, OPT_DEST),
+            newname    = opt(contxt, OPT_NEWNAME),
+            infos      = opt(contxt, OPT_INFOS),
+            confirm    = opt(contxt, OPT_CONFIRM),
+            safe       = opt(contxt, OPT_SAFE),
+            nogauge    = opt(contxt, OPT_NOGAUGE),
+            noposition = opt(contxt, OPT_NOPOSITION),
+            back       = opt(contxt, OPT_BACK),
+            fail       = opt(contxt, OPT_FAIL),
+            nofail     = opt(contxt, OPT_NOFAIL),
+            oknodelete = opt(contxt, OPT_OKNODELETE),
+            force      = opt(contxt, OPT_FORCE),
+            askuser    = opt(contxt, OPT_ASKUSER);
 
     D_NUM = 0;
 
@@ -1949,7 +1949,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     }
 
     // If (force) is used, give permissions so that delete can succeed.
-    if(get_opt(C_ARG(2), OPT_FORCE))
+    if(opt(C_ARG(2), OPT_FORCE))
     {
         // No need to bother with the return value since errors will be
         // caught below.
@@ -1960,7 +1960,7 @@ static int h_delete_file(entry_p contxt, const char *file)
         if(access(file, W_OK))
         {
             // Do we need to ask for confirmation?
-            if(get_opt(C_ARG(2), OPT_ASKUSER))
+            if(opt(C_ARG(2), OPT_ASKUSER))
             {
                 // Ask for confirmation if we're not running in novice mode.
                 if(get_numvar(contxt, "@user-level") != LG_NOVICE &&
@@ -1998,7 +1998,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     h_log(contxt, tr(S_DLTD), file);
 
     // Shall we delete the info file as well?
-    if(!get_opt(C_ARG(2), OPT_INFOS))
+    if(!opt(C_ARG(2), OPT_INFOS))
     {
         // No, we're done.
         return LG_TRUE;
@@ -2040,10 +2040,10 @@ static int h_delete_dir(entry_p contxt, const char *name)
         return LG_FALSE;
     }
 
-    entry_p infos    = get_opt(C_ARG(2), OPT_INFOS),
-            force    = get_opt(C_ARG(2), OPT_FORCE),
-            askuser  = get_opt(C_ARG(2), OPT_ASKUSER),
-            all      = get_opt(C_ARG(2), OPT_ALL);
+    entry_p infos    = opt(C_ARG(2), OPT_INFOS),
+            force    = opt(C_ARG(2), OPT_FORCE),
+            askuser  = opt(C_ARG(2), OPT_ASKUSER),
+            all      = opt(C_ARG(2), OPT_ALL);
 
     if(!force && access(name, W_OK))
     {
@@ -2291,9 +2291,9 @@ entry_p m_delete(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    entry_p help     = get_opt(C_ARG(2), OPT_HELP),
-            prompt   = get_opt(C_ARG(2), OPT_PROMPT),
-            confirm  = get_opt(C_ARG(2), OPT_CONFIRM);
+    entry_p help     = opt(C_ARG(2), OPT_HELP),
+            prompt   = opt(C_ARG(2), OPT_PROMPT),
+            confirm  = opt(C_ARG(2), OPT_CONFIRM);
 
     // If we need confirmation and the user skips or aborts, return. On
     // abort, the HALT will be set by h_confirm.
@@ -2303,7 +2303,7 @@ entry_p m_delete(entry_p contxt)
     }
 
     // Succeed immediately if non-safe in pretend mode.
-    if(!get_opt(C_ARG(2), OPT_SAFE) && get_numvar(contxt, "@pretend"))
+    if(!opt(C_ARG(2), OPT_SAFE) && get_numvar(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -2348,7 +2348,7 @@ entry_p m_exists(entry_p contxt)
     C_SANE(1, contxt);
 
     // Supress volume requester?
-    if(get_opt(contxt, OPT_NOREQ) || get_opt(contxt, OPT_QUIET))
+    if(opt(contxt, OPT_NOREQ) || opt(contxt, OPT_QUIET))
     {
         #if defined(AMIGA) && !defined(LG_TEST)
         struct Process *p = (struct Process *) FindTask(NULL);
@@ -2613,7 +2613,7 @@ entry_p m_makeassign(entry_p contxt)
     C_SANE(1, contxt);
 
     // Succeed immediately if non-safe in pretend mode.
-    if(!get_opt(contxt, OPT_SAFE) && get_numvar(contxt, "@pretend"))
+    if(!opt(contxt, OPT_SAFE) && get_numvar(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -2687,9 +2687,9 @@ entry_p m_makedir(entry_p contxt)
     // One argument and options.
     C_SANE(1, C_ARG(2));
 
-    entry_p prompt   = get_opt(C_ARG(2), OPT_PROMPT),
-            help     = get_opt(C_ARG(2), OPT_HELP),
-            confirm  = get_opt(C_ARG(2), OPT_CONFIRM);
+    entry_p prompt   = opt(C_ARG(2), OPT_PROMPT),
+            help     = opt(C_ARG(2), OPT_HELP),
+            confirm  = opt(C_ARG(2), OPT_CONFIRM);
 
     // If we need confirmation and the user skips or aborts, return. On abort,
     // the HALT will be set by h_confirm.
@@ -2700,7 +2700,7 @@ entry_p m_makedir(entry_p contxt)
 
     // Succeed immediately if this operation is unsafe and we're running in
     // pretend mode.
-    if(!get_opt(C_ARG(2), OPT_SAFE) && get_numvar(contxt, "@pretend"))
+    if(!opt(C_ARG(2), OPT_SAFE) && get_numvar(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -2747,7 +2747,7 @@ entry_p m_protect(entry_p contxt)
         // Get with option.
         if(C_ARG(2)->type == CONTXT)
         {
-            entry_p override = get_opt(C_ARG(2), OPT_OVERRIDE);
+            entry_p override = opt(C_ARG(2), OPT_OVERRIDE);
 
             if(override)
             {
@@ -2767,8 +2767,8 @@ entry_p m_protect(entry_p contxt)
             const char *flg = str(C_ARG(2));
             size_t len = strlen(flg);
 
-            entry_p safe = get_opt(C_ARG(3), OPT_SAFE),
-                    override = get_opt(C_ARG(3), OPT_OVERRIDE);
+            entry_p safe = opt(C_ARG(3), OPT_SAFE),
+                    override = opt(C_ARG(3), OPT_OVERRIDE);
 
             // If any numbers are present in the string, treat it as an absolute
             // mask instead.
@@ -2890,9 +2890,9 @@ entry_p m_startup(entry_p contxt)
     char *cmd = NULL;
     const char *app = str(C_ARG(1));
 
-    entry_p command  = get_opt(C_ARG(2), OPT_COMMAND),
-            help     = get_opt(C_ARG(2), OPT_HELP),
-            prompt   = get_opt(C_ARG(2), OPT_PROMPT);
+    entry_p command  = opt(C_ARG(2), OPT_COMMAND),
+            help     = opt(C_ARG(2), OPT_HELP),
+            prompt   = opt(C_ARG(2), OPT_PROMPT);
 
     // Expect failure.
     D_NUM = 0;
@@ -2914,7 +2914,7 @@ entry_p m_startup(entry_p contxt)
     // If we need confirmation and the user skips or aborts, return. On abort,
     // the HALT will be set by h_confirm. Confirmation is needed when user level
     // is expert or when (confirm) is used.
-    if((get_opt(C_ARG(2), OPT_CONFIRM) ||
+    if((opt(C_ARG(2), OPT_CONFIRM) ||
         get_numvar(contxt, "@user-level") == LG_EXPERT) &&
        !h_confirm(C_ARG(2), str(help), str(prompt)))
     {
@@ -3165,13 +3165,13 @@ entry_p m_textfile(entry_p contxt)
     // One or more arguments / options.
     C_SANE(1, contxt);
 
-    entry_p prompt   = get_opt(contxt, OPT_PROMPT),
-            help     = get_opt(contxt, OPT_HELP),
-            dest     = get_opt(contxt, OPT_DEST),
-            post     = get_opt(contxt, OPT_APPEND),
-            include  = get_opt(contxt, OPT_INCLUDE),
-            confirm  = get_opt(contxt, OPT_CONFIRM),
-            safe     = get_opt(contxt, OPT_SAFE);
+    entry_p prompt   = opt(contxt, OPT_PROMPT),
+            help     = opt(contxt, OPT_HELP),
+            dest     = opt(contxt, OPT_DEST),
+            post     = opt(contxt, OPT_APPEND),
+            include  = opt(contxt, OPT_INCLUDE),
+            confirm  = opt(contxt, OPT_CONFIRM),
+            safe     = opt(contxt, OPT_SAFE);
 
     D_NUM = 0;
 
@@ -3299,18 +3299,18 @@ entry_p m_tooltype(entry_p contxt)
     // Zero or more arguments / options.
     C_SANE(0, contxt);
 
-    entry_p help            = get_opt(contxt, OPT_HELP),
-            prompt          = get_opt(contxt, OPT_PROMPT),
-            dest            = get_opt(contxt, OPT_DEST),
-            settooltype     = get_opt(contxt, OPT_SETTOOLTYPE),
-            setdefaulttool  = get_opt(contxt, OPT_SETDEFAULTTOOL),
-            setstack        = get_opt(contxt, OPT_SETSTACK),
-            noposition      = get_opt(contxt, OPT_NOPOSITION),
-            setposition     = get_opt(contxt, OPT_SETPOSITION),
-            confirm         = get_opt(contxt, OPT_CONFIRM);
+    entry_p help            = opt(contxt, OPT_HELP),
+            prompt          = opt(contxt, OPT_PROMPT),
+            dest            = opt(contxt, OPT_DEST),
+            settooltype     = opt(contxt, OPT_SETTOOLTYPE),
+            setdefaulttool  = opt(contxt, OPT_SETDEFAULTTOOL),
+            setstack        = opt(contxt, OPT_SETSTACK),
+            noposition      = opt(contxt, OPT_NOPOSITION),
+            setposition     = opt(contxt, OPT_SETPOSITION),
+            confirm         = opt(contxt, OPT_CONFIRM);
 
     // Succeed immediately if non-safe in pretend mode.
-    if(!get_opt(contxt, OPT_SAFE) && get_numvar(contxt, "@pretend"))
+    if(!opt(contxt, OPT_SAFE) && get_numvar(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -3602,13 +3602,13 @@ entry_p m_transcript(entry_p contxt)
     }
 
     // Write result to the log file.
-    int res = h_log(contxt, "%s\n", msg) ? 1 : 0;
+    h_log(contxt, "%s\n", msg);
 
     // Free the temporary buffer and exit.
     free(msg);
 
-    // Return status of h_log.
-    R_NUM(res);
+    // h_log might fail silently.
+    R_NUM(DID_ERR ? LG_FALSE : LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -3622,11 +3622,9 @@ entry_p m_rename(entry_p contxt)
     // Two or more arguments / options.
     C_SANE(2, C_ARG(3));
 
-    entry_p help    = get_opt(C_ARG(3), OPT_HELP),
-            prompt  = get_opt(C_ARG(3), OPT_PROMPT),
-            confirm = get_opt(C_ARG(3), OPT_CONFIRM),
-            disk    = get_opt(C_ARG(3), OPT_DISK),
-            safe    = get_opt(C_ARG(3), OPT_SAFE);
+    entry_p help    = opt(C_ARG(3), OPT_HELP),
+            prompt  = opt(C_ARG(3), OPT_PROMPT),
+            confirm = opt(C_ARG(3), OPT_CONFIRM);
 
     // Old and new file name.
     const char *old = str(C_ARG(1)), *new = str(C_ARG(2));
@@ -3639,13 +3637,13 @@ entry_p m_rename(entry_p contxt)
     }
 
     // Is this a safe operation or are we not running in pretend mode?
-    if(!safe && get_numvar(contxt, "@pretend"))
+    if(!opt(C_ARG(3), OPT_SAFE) && get_numvar(contxt, "@pretend"))
     {
         R_NUM(-1);
     }
 
     // Are we going to rename a file/dir?
-    if(!disk)
+    if(!opt(C_ARG(3), OPT_DISK))
     {
         // Rename if target doesn't exist.
         if(h_exists(new) == LG_NONE && !rename(old, new))
@@ -3681,23 +3679,21 @@ entry_p m_rename(entry_p contxt)
 // Input:       entry_p contxt:     The execution context.
 //              const char *fmt:    Message format string.
 //              ...:                Format string varargs.
-// Return:      int:                Number of characters written to log file
-//                                  if logging is enabled. If logging is
-//                                  disabled, '1' will always be returned.
+// Return:      -
 //------------------------------------------------------------------------------
-int h_log(entry_p contxt, const char *fmt, ...)
+void h_log(entry_p contxt, const char *fmt, ...)
 {
     // Sanity check.
     if(!contxt || !fmt)
     {
         PANIC(contxt);
-        return LG_FALSE;
+        return;
     }
 
     // Is logging disabled?
     if(!get_numvar(contxt, "@log"))
     {
-        return LG_TRUE;
+        return;
     }
 
     // Use the log file set in init(..) or by the user.
@@ -3730,8 +3726,5 @@ int h_log(entry_p contxt, const char *fmt, ...)
     if(cnt < 0)
     {
         ERR(ERR_WRITE_FILE, log);
-        cnt = 0;
     }
-
-    return cnt;
 }

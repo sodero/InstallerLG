@@ -30,10 +30,10 @@ entry_p m_openwbobject(entry_p contxt)
     // We need a single argument.
     C_SANE(1, C_ARG(2));
 
-    entry_p prompt     = get_opt(C_ARG(2), OPT_PROMPT),
-            help       = get_opt(C_ARG(2), OPT_HELP),
-            confirm    = get_opt(C_ARG(2), OPT_CONFIRM),
-            safe       = get_opt(C_ARG(2), OPT_SAFE);
+    entry_p prompt     = opt(C_ARG(2), OPT_PROMPT),
+            help       = opt(C_ARG(2), OPT_HELP),
+            confirm    = opt(C_ARG(2), OPT_CONFIRM),
+            safe       = opt(C_ARG(2), OPT_SAFE);
 
     // A non safe operation in pretend mode always succeeds.
     if(get_numvar(contxt, "@pretend") && !safe)
