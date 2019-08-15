@@ -94,7 +94,7 @@ entry_p m_exit(entry_p contxt)
     }
 
     // Show final message unless 'quiet' is set.
-    if(!get_opt(contxt, OPT_QUIET))
+    if(!opt(contxt, OPT_QUIET))
     {
         // Get name and location of application.
         const char *app = get_strvar(contxt, "@app-name"),

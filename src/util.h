@@ -23,12 +23,11 @@ entry_p local(entry_p e);
 entry_p global(entry_p e);
 entry_p custom(entry_p e);
 entry_p native(entry_p e);
+entry_p opt(entry_p c, opt_t t);
 bool c_sane(entry_p c, size_t n);
 bool s_sane(entry_p c, size_t n);
 void dump(entry_p entry);
 int get_numvar(entry_p c, char *v);
-entry_p opt(entry_p c, opt_t t);
-entry_p get_opt(entry_p c, opt_t t);
 char *get_strvar(entry_p c, char *v);
 char *get_optstr(entry_p c, opt_t t);
 char *get_chlstr(entry_p c, bool p);
@@ -56,7 +55,7 @@ entry_p native_exists(entry_p contxt, call_t f);
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, __func__, M)
 #define HERE printf("%s:%s:%d\n", __FILE__, __func__, __LINE__)
 #define C_SANE(N,O) if(!c_sane(contxt, N)) {PANIC(contxt); R_CUR;}\
-                    {entry_p op_ = O; if(op_ && get_opt(O,OPT_INIT) && DID_ERR)\
+                    {entry_p op_ = O; if(op_ && opt(O,OPT_INIT) && DID_ERR)\
                     {R_CUR;}}
 #define S_SANE(N) if(!s_sane(contxt, N)) {PANIC(contxt); R_CUR;}
 

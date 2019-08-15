@@ -25,6 +25,7 @@
 (set @pretend 1) (rename "_rn_" "_rm_") ; "touch _rn_ && touch _rm_","-1","test -e _rm_ && test -e _rn_ && rm -Rf _rm_ _rn_"
 (set @pretend 1) (rename "_rn_" "_rm_") ; "rm -Rf _rm_ && touch _rn_","-1","test -f _rn_ && test ! -f _rm_ && rm -Rf _rn_"
 (set @pretend 1) (rename "_rn_" "_rm_" (safe)) ; "rm -Rf _rm_ && touch _rn_","-1","test ! -f _rn_ && test -f _rm_ && rm -Rf _rn_"
+(set @pretend 1) (rename "_rn_" "_rm_") ; "rm -Rf _rm_ && touch _rn_","-1","test -f _rn_ && test ! -f _rm_ && rm -Rf _rn_"
 (user 2) (rename "_rn_" "_rm_" (confirm) (prompt "p") (help "h")) ; "rm -Rf _rm_ && touch _rn_","ph0 -1","rm -Rf _rm_ _rn_"
 (rename "_rn_" "_rm_" (confirm) (prompt "p") (help "h")) ; "rm -Rf _rm_ && touch _rn_","-1","rm -Rf _rm_ _rn_"
 (set @yes 1) (rename "_rn_" "_rm_" (confirm) (prompt "p") (help "h")) ; "rm -Rf _rm_ && touch _rn_","-1","rm -Rf _rm_ _rn_"
