@@ -129,7 +129,6 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
     return (grc == G_TRUE) || ((grc == G_ABORT || grc == G_EXIT) && HALT);
 }
 
-//------------------------------------------------------------------------------
 #if defined(AMIGA) && !defined(LG_TEST)
 //------------------------------------------------------------------------------
 // Name:        h_exists_amiga_type
@@ -280,10 +279,9 @@ static const char *h_fileonly(entry_p contxt, const char *path)
         return path + len;
     }
 
-    // Only fail if we're in 'strict' mode.
+    // Empty string or dir / vol. Only fail if we're in 'strict' mode.
     if(get_numvar(contxt, "@strict"))
     {
-        // Empty string or dir / vol.
         ERR(ERR_NOT_A_FILE, path);
     }
 
@@ -300,10 +298,9 @@ static const char *h_fileonly(entry_p contxt, const char *path)
 //------------------------------------------------------------------------------
 static char *h_suffix(const char *name, const char *suffix)
 {
-    // Don't trust the input.
+    // Append suffix. Don't trust the input.
     if(name && suffix)
     {
-        // Append suffix.
         snprintf(get_buf(), buf_size(), "%s.%s", name, suffix);
     }
 
@@ -593,7 +590,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         else
                         {
                             // Not a match, skip this.
-                            type = 0;
+                            type = LG_NONE;
                         }
                     }
                     else
@@ -704,7 +701,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                 // The destination of the head element will be a directory
                 // even though the source is a file. We need somewhere to
                 // put the file.
-                head->type = 2;
+                head->type = LG_DIR;
                 head->next = file;
                 head->name = n_src;
                 head->copy = n_dst;
@@ -716,7 +713,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                 if(n_src && n_dst)
                 {
                     // The second element in the list will be the file.
-                    file->type = 1;
+                    file->type = LG_FILE;
                     file->name = n_src;
                     file->copy = n_dst;
 
@@ -742,7 +739,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                             // Add the font to the list.
                             if(font->name && font->copy)
                             {
-                                font->type = 1;
+                                font->type = LG_FILE;
                                 file->next = font;
 
                                 // The list is complete.
@@ -954,179 +951,11 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
         file ? ferror(file) : 0;
         #endif
 
-    if(file && !err)
-    {
-        // Is there an existing destination file that is write
-        // protected?
-        if(!access(dst, F_OK) && access(dst, W_OK))
-        {
-            // No need to ask if only (force).
-            if((mde & CF_FORCE) && !(mde & CF_ASKUSER))
-            {
-                // Unprotect file.
-                chmod(dst, S_IRWXU);
-            }
-            else
-            // Ask for confirmation if (askuser) unless we're running
-            // in novice mode and (force) at the same time.
-            if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
-                get_numvar(contxt, "@user-level") != LG_NOVICE))
-            {
-                if(h_confirm(contxt, "", tr(S_OWRT), dst))
-                {
-                    // Unprotect file.
-                    chmod(dst, S_IRWXU);
-                }
-                else
-                {
-                    // Skip file or abort.
-                    fclose(file);
-                    return DID_HALT ? G_ABORT : G_TRUE;
-                }
-            }
-        }
-
-        // Create / overwrite file.
-        FILE *dest = fopen(dst, "w");
-
-        if(dest)
-        {
-            // Read and write until there is nothing more to read.
-            while(cnt)
-            {
-                if(fwrite(buf, 1, cnt, dest) == cnt)
-                {
-                    // Update GUI unless we're in silent mode.
-                    if(!(mde & CF_SILENT))
-                    {
-                        grc = gui_copyfiles_setcur(NULL, mde & CF_NOGAUGE, bck);
-                    }
-
-                    if(grc == G_TRUE)
-                    {
-                        cnt = fread(buf, 1, sizeof(buf), file);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    ERR(ERR_WRITE_FILE, dst);
-                    grc = G_FALSE;
-                    break;
-                }
-            }
-
-            // Close input and output files.
-            fclose(file);
-            fclose(dest);
-
-            // The number of bytes read and not written should be zero.
-            if(!cnt)
-            {
-                // Write to the log file (if logging is enabled).
-                h_log(contxt, tr(S_CPYD), src, dst);
-
-                // Are we going to copy the icon as well?
-                if(mde & CF_INFOS)
-                {
-                    // The source icon.
-                    static char icon[PATH_MAX];
-                    snprintf(icon, sizeof(icon), "%s.info", src);
-
-                    // Only if it exists, it's not an error if it's
-                    // missing.
-                    if(h_exists(icon) == LG_FILE)
-                    {
-                        static char copy[PATH_MAX];
-
-                        // The destination icon.
-                        snprintf(copy, sizeof(copy), "%s.info", dst);
-
-                        // Recur without info set.
-                        grc = h_copyfile(contxt, icon, copy, bck,
-                                         mde & ~CF_INFOS);
-
-                        #if defined(AMIGA) && !defined(LG_TEST)
-                        // Reset icon position?
-                        if(grc == G_TRUE && mde & CF_NOPOSITION)
-                        {
-                            struct DiskObject *obj = (struct DiskObject *)
-                                GetDiskObject(dst);
-
-                            if(obj)
-                            {
-                                // Reset icon position.
-                                obj->do_CurrentX = NO_ICON_POSITION;
-                                obj->do_CurrentY = NO_ICON_POSITION;
-
-                                // Save the changes to the .info file.
-                                if(!PutDiskObject(dst, obj))
-                                {
-                                    // We failed for some unknown reason.
-                                    ERR(ERR_WRITE_FILE, copy);
-                                    grc = G_FALSE;
-                                }
-
-                                FreeDiskObject(obj);
-                            }
-                        }
-                        #endif
-                    }
-                }
-
-                // Preserve file permissions. On error, code will be set
-                // by h_protect_x().
-                int32_t prm = 0;
-
-                if(h_protect_get(contxt, src, &prm))
-                {
-                    h_protect_set(contxt, dst, prm);
-                }
-
-                // Reset error codes if necessary.
-                if(DID_ERR)
-                {
-                    if(mde & CF_NOFAIL)
-                    {
-                        // Forget all errors.
-                        RESET;
-                    }
-                    else
-                    {
-                        // Fail for real.
-                        grc = G_ABORT;
-                    }
-                }
-            }
-        }
-        else
-        {
-            // The source handle is open.
-            fclose(file);
-
-            if((mde & CF_NOFAIL) || (mde & CF_OKNODELETE))
-            {
-                // Ignore failure.
-                h_log(contxt, tr(S_NCPY), src, dst);
-                grc = G_TRUE;
-            }
-            else
-            {
-                // Fail for real.
-                ERR(ERR_WRITE_FILE, dst);
-                grc = G_FALSE;
-            }
-        }
-    }
-    else
+    if(!file || err)
     {
         // The source handle might be open.
         if(file)
         {
-            // Not true on non Amiga systems.
             fclose(file);
         }
 
@@ -1134,13 +963,171 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
         {
             // Ignore failure.
             h_log(contxt, tr(S_NCPY), src, dst);
-            grc = G_TRUE;
+            return G_TRUE;
+        }
+
+        // Fail for real.
+        ERR(ERR_READ_FILE, src);
+        return G_FALSE;
+    }
+
+    // Is there an existing destination file that is write protected?
+    if(!access(dst, F_OK) && access(dst, W_OK))
+    {
+        // No need to ask if only (force).
+        if((mde & CF_FORCE) && !(mde & CF_ASKUSER))
+        {
+            // Unprotect file.
+            chmod(dst, S_IRWXU);
+        }
+        else
+        // Ask for confirmation if (askuser) unless we're running
+        // in novice mode and (force) at the same time.
+        if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
+            get_numvar(contxt, "@user-level") != LG_NOVICE))
+        {
+            if(h_confirm(contxt, "", tr(S_OWRT), dst))
+            {
+                // Unprotect file.
+                chmod(dst, S_IRWXU);
+            }
+            else
+            {
+                // Skip file or abort.
+                fclose(file);
+                return DID_HALT ? G_ABORT : G_TRUE;
+            }
+        }
+    }
+
+    // Create / overwrite file.
+    FILE *dest = fopen(dst, "w");
+
+    if(!dest)
+    {
+        // The source handle is open.
+        fclose(file);
+
+        if((mde & CF_NOFAIL) || (mde & CF_OKNODELETE))
+        {
+            // Ignore failure.
+            h_log(contxt, tr(S_NCPY), src, dst);
+            return G_TRUE;
+        }
+
+        // Fail for real.
+        ERR(ERR_WRITE_FILE, dst);
+        return G_FALSE;
+    }
+
+    // Read and write until there is nothing more to read.
+    while(cnt)
+    {
+        if(fwrite(buf, 1, cnt, dest) == cnt)
+        {
+            // Update GUI unless we're in silent mode.
+            if(!(mde & CF_SILENT))
+            {
+                grc = gui_copyfiles_setcur(NULL, mde & CF_NOGAUGE, bck);
+            }
+
+            if(grc == G_TRUE)
+            {
+                cnt = fread(buf, 1, sizeof(buf), file);
+            }
+            else
+            {
+                break;
+            }
         }
         else
         {
-            // Fail for real.
-            ERR(ERR_READ_FILE, src);
+            ERR(ERR_WRITE_FILE, dst);
             grc = G_FALSE;
+            break;
+        }
+    }
+
+    // Close input and output files.
+    fclose(file);
+    fclose(dest);
+
+    // The number of bytes read and not written should be zero.
+    if(!cnt)
+    {
+        // Write to the log file (if logging is enabled).
+        h_log(contxt, tr(S_CPYD), src, dst);
+
+        // Are we going to copy the icon as well?
+        if(mde & CF_INFOS)
+        {
+            // The source icon.
+            static char icon[PATH_MAX];
+            snprintf(icon, sizeof(icon), "%s.info", src);
+
+            // Only if it exists, it's not an error if it's
+            // missing.
+            if(h_exists(icon) == LG_FILE)
+            {
+                static char copy[PATH_MAX];
+
+                // The destination icon.
+                snprintf(copy, sizeof(copy), "%s.info", dst);
+
+                // Recur without info set.
+                grc = h_copyfile(contxt, icon, copy, bck,
+                                 mde & ~CF_INFOS);
+
+                #if defined(AMIGA) && !defined(LG_TEST)
+                // Reset icon position?
+                if(grc == G_TRUE && mde & CF_NOPOSITION)
+                {
+                    struct DiskObject *obj = (struct DiskObject *)
+                        GetDiskObject(dst);
+
+                    if(obj)
+                    {
+                        // Reset icon position.
+                        obj->do_CurrentX = NO_ICON_POSITION;
+                        obj->do_CurrentY = NO_ICON_POSITION;
+
+                        // Save the changes to the .info file.
+                        if(!PutDiskObject(dst, obj))
+                        {
+                            // We failed for some unknown reason.
+                            ERR(ERR_WRITE_FILE, copy);
+                            grc = G_FALSE;
+                        }
+
+                        FreeDiskObject(obj);
+                    }
+                }
+                #endif
+            }
+        }
+
+        // Preserve file permissions. On error, code will be set
+        // by h_protect_x().
+        int32_t prm = 0;
+
+        if(h_protect_get(contxt, src, &prm))
+        {
+            h_protect_set(contxt, dst, prm);
+        }
+
+        // Reset error codes if necessary.
+        if(DID_ERR)
+        {
+            if(mde & CF_NOFAIL)
+            {
+                // Forget all errors.
+                RESET;
+            }
+            else
+            {
+                // Fail for real.
+                grc = G_ABORT;
+            }
         }
     }
 
@@ -2029,8 +2016,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
             if(get_numvar(contxt, "@user-level") == LG_NOVICE ||
                !h_confirm(C_ARG(2), "", tr(S_DWRD), name))
             {
-                // Halt will be set by h_confirm. Skip
-                // will result in nothing.
+                // Halt will be set by h_confirm. Skip will result in nothing.
                 return LG_FALSE;
             }
         }
@@ -2136,7 +2122,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
     snprintf(info, buf_size(), "%s.info", name);
 
     // We're done if there's no icon.
-    if(h_exists(info) != 1)
+    if(h_exists(info) != LG_FILE)
     {
         return LG_TRUE;
     }
@@ -2225,8 +2211,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
         return LG_TRUE;
     }
 
-    // Please note that 'breaks' will take us here, so will
-    // MatchFirst / MatchNext() problems.
+    // Breaks will take us here, so will MatchFirst / MatchNext() problems.
     ERR(ERR_DELETE_FILE, pat);
     return LG_FALSE;
     #else
@@ -2383,7 +2368,7 @@ entry_p m_foreach(entry_p contxt)
     const char *dname = str(C_ARG(1));
     DIR *dir = opendir(dname);
     pnode_p top = NULL;
-    int err = 1;
+    bool err = true;
 
     // Permission to read?
     if(dir)
@@ -2414,7 +2399,7 @@ entry_p m_foreach(entry_p contxt)
             #endif
 
             // The dir might be empty but that's not an error.
-            err = 0;
+            err = false;
 
             // Iterate over all entries in dir.
             while(ent && cur && !err)
@@ -2430,7 +2415,7 @@ entry_p m_foreach(entry_p contxt)
                     #if defined(AMIGA) && !defined(LG_TEST)
                     // The dir is not empty, we should be able to go all the way
                     // here. Assume failure.
-                    err = 1;
+                    err = true;
 
                     // Lock and get the information we need from the current
                     // entry
@@ -2447,7 +2432,7 @@ entry_p m_foreach(entry_p contxt)
 
                             // We're probably good. PANIC:s will be caught
                             // further down.
-                            err = 0;
+                            err = false;
                         }
 
                         UnLock(lock);
@@ -2497,7 +2482,7 @@ entry_p m_foreach(entry_p contxt)
             {
                 // Out of memory.
                 PANIC(contxt);
-                err = 1;
+                err = true;
             }
 
             // Go back where we started.
@@ -2519,7 +2504,7 @@ entry_p m_foreach(entry_p contxt)
     // we have in argument 3.
     while(top)
     {
-        int skip = err;
+        bool skip = err;
         pnode_p old = top;
 
         // 'Export' name and type info if we have a name.
@@ -2536,7 +2521,7 @@ entry_p m_foreach(entry_p contxt)
                 {
                     // If we have any wildcards, try to match.
                     case 1:
-                        skip = MatchPattern(buf, top->name) ? 0 : 1;
+                        skip = MatchPattern(buf, top->name);
                         break;
 
                     // If no wildcards, do a simple string comparsion.
@@ -2547,7 +2532,7 @@ entry_p m_foreach(entry_p contxt)
                     // We probably had a buffer overflow.
                     default:
                         ERR(ERR_OVERFLOW, pt);
-                        err = 1;
+                        err = true;
                 }
             }
             #endif
@@ -2569,7 +2554,7 @@ entry_p m_foreach(entry_p contxt)
     }
 
     // Success or failure.
-    R_NUM(err ? 0 : 1);
+    R_NUM(err ? LG_FALSE : LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
