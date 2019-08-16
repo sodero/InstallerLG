@@ -819,7 +819,9 @@ entry_p m_askoptions(entry_p contxt)
                 return resolve(back);
             }
         }
-
+//
+// See file.c 116++
+//
         // FIXME
         if(grc == G_ABORT || grc == G_EXIT)
         {

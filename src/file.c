@@ -129,7 +129,6 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
     return (grc == G_TRUE) || ((grc == G_ABORT || grc == G_EXIT) && HALT);
 }
 
-//------------------------------------------------------------------------------
 #if defined(AMIGA) && !defined(LG_TEST)
 //------------------------------------------------------------------------------
 // Name:        h_exists_amiga_type
@@ -280,10 +279,9 @@ static const char *h_fileonly(entry_p contxt, const char *path)
         return path + len;
     }
 
-    // Only fail if we're in 'strict' mode.
+    // Empty string or dir / vol. Only fail if we're in 'strict' mode.
     if(get_numvar(contxt, "@strict"))
     {
-        // Empty string or dir / vol.
         ERR(ERR_NOT_A_FILE, path);
     }
 
@@ -300,10 +298,9 @@ static const char *h_fileonly(entry_p contxt, const char *path)
 //------------------------------------------------------------------------------
 static char *h_suffix(const char *name, const char *suffix)
 {
-    // Don't trust the input.
+    // Append suffix. Don't trust the input.
     if(name && suffix)
     {
-        // Append suffix.
         snprintf(get_buf(), buf_size(), "%s.%s", name, suffix);
     }
 
@@ -593,7 +590,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         else
                         {
                             // Not a match, skip this.
-                            type = 0;
+                            type = LG_NONE;
                         }
                     }
                     else
@@ -704,7 +701,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                 // The destination of the head element will be a directory
                 // even though the source is a file. We need somewhere to
                 // put the file.
-                head->type = 2;
+                head->type = LG_DIR;
                 head->next = file;
                 head->name = n_src;
                 head->copy = n_dst;
@@ -716,7 +713,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                 if(n_src && n_dst)
                 {
                     // The second element in the list will be the file.
-                    file->type = 1;
+                    file->type = LG_FILE;
                     file->name = n_src;
                     file->copy = n_dst;
 
@@ -742,7 +739,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                             // Add the font to the list.
                             if(font->name && font->copy)
                             {
-                                font->type = 1;
+                                font->type = LG_FILE;
                                 file->next = font;
 
                                 // The list is complete.
@@ -954,179 +951,11 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
         file ? ferror(file) : 0;
         #endif
 
-    if(file && !err)
-    {
-        // Is there an existing destination file that is write
-        // protected?
-        if(!access(dst, F_OK) && access(dst, W_OK))
-        {
-            // No need to ask if only (force).
-            if((mde & CF_FORCE) && !(mde & CF_ASKUSER))
-            {
-                // Unprotect file.
-                chmod(dst, S_IRWXU);
-            }
-            else
-            // Ask for confirmation if (askuser) unless we're running
-            // in novice mode and (force) at the same time.
-            if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
-                get_numvar(contxt, "@user-level") != LG_NOVICE))
-            {
-                if(h_confirm(contxt, "", tr(S_OWRT), dst))
-                {
-                    // Unprotect file.
-                    chmod(dst, S_IRWXU);
-                }
-                else
-                {
-                    // Skip file or abort.
-                    fclose(file);
-                    return DID_HALT ? G_ABORT : G_TRUE;
-                }
-            }
-        }
-
-        // Create / overwrite file.
-        FILE *dest = fopen(dst, "w");
-
-        if(dest)
-        {
-            // Read and write until there is nothing more to read.
-            while(cnt)
-            {
-                if(fwrite(buf, 1, cnt, dest) == cnt)
-                {
-                    // Update GUI unless we're in silent mode.
-                    if(!(mde & CF_SILENT))
-                    {
-                        grc = gui_copyfiles_setcur(NULL, mde & CF_NOGAUGE, bck);
-                    }
-
-                    if(grc == G_TRUE)
-                    {
-                        cnt = fread(buf, 1, sizeof(buf), file);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    ERR(ERR_WRITE_FILE, dst);
-                    grc = G_FALSE;
-                    break;
-                }
-            }
-
-            // Close input and output files.
-            fclose(file);
-            fclose(dest);
-
-            // The number of bytes read and not written should be zero.
-            if(!cnt)
-            {
-                // Write to the log file (if logging is enabled).
-                h_log(contxt, tr(S_CPYD), src, dst);
-
-                // Are we going to copy the icon as well?
-                if(mde & CF_INFOS)
-                {
-                    // The source icon.
-                    static char icon[PATH_MAX];
-                    snprintf(icon, sizeof(icon), "%s.info", src);
-
-                    // Only if it exists, it's not an error if it's
-                    // missing.
-                    if(h_exists(icon) == LG_FILE)
-                    {
-                        static char copy[PATH_MAX];
-
-                        // The destination icon.
-                        snprintf(copy, sizeof(copy), "%s.info", dst);
-
-                        // Recur without info set.
-                        grc = h_copyfile(contxt, icon, copy, bck,
-                                         mde & ~CF_INFOS);
-
-                        #if defined(AMIGA) && !defined(LG_TEST)
-                        // Reset icon position?
-                        if(grc == G_TRUE && mde & CF_NOPOSITION)
-                        {
-                            struct DiskObject *obj = (struct DiskObject *)
-                                GetDiskObject(dst);
-
-                            if(obj)
-                            {
-                                // Reset icon position.
-                                obj->do_CurrentX = NO_ICON_POSITION;
-                                obj->do_CurrentY = NO_ICON_POSITION;
-
-                                // Save the changes to the .info file.
-                                if(!PutDiskObject(dst, obj))
-                                {
-                                    // We failed for some unknown reason.
-                                    ERR(ERR_WRITE_FILE, copy);
-                                    grc = G_FALSE;
-                                }
-
-                                FreeDiskObject(obj);
-                            }
-                        }
-                        #endif
-                    }
-                }
-
-                // Preserve file permissions. On error, code will be set
-                // by h_protect_x().
-                int32_t prm = 0;
-
-                if(h_protect_get(contxt, src, &prm))
-                {
-                    h_protect_set(contxt, dst, prm);
-                }
-
-                // Reset error codes if necessary.
-                if(DID_ERR)
-                {
-                    if(mde & CF_NOFAIL)
-                    {
-                        // Forget all errors.
-                        RESET;
-                    }
-                    else
-                    {
-                        // Fail for real.
-                        grc = G_ABORT;
-                    }
-                }
-            }
-        }
-        else
-        {
-            // The source handle is open.
-            fclose(file);
-
-            if((mde & CF_NOFAIL) || (mde & CF_OKNODELETE))
-            {
-                // Ignore failure.
-                h_log(contxt, tr(S_NCPY), src, dst);
-                grc = G_TRUE;
-            }
-            else
-            {
-                // Fail for real.
-                ERR(ERR_WRITE_FILE, dst);
-                grc = G_FALSE;
-            }
-        }
-    }
-    else
+    if(!file || err)
     {
         // The source handle might be open.
         if(file)
         {
-            // Not true on non Amiga systems.
             fclose(file);
         }
 
@@ -1134,13 +963,171 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
         {
             // Ignore failure.
             h_log(contxt, tr(S_NCPY), src, dst);
-            grc = G_TRUE;
+            return G_TRUE;
+        }
+
+        // Fail for real.
+        ERR(ERR_READ_FILE, src);
+        return G_FALSE;
+    }
+
+    // Is there an existing destination file that is write protected?
+    if(!access(dst, F_OK) && access(dst, W_OK))
+    {
+        // No need to ask if only (force).
+        if((mde & CF_FORCE) && !(mde & CF_ASKUSER))
+        {
+            // Unprotect file.
+            chmod(dst, S_IRWXU);
+        }
+        else
+        // Ask for confirmation if (askuser) unless we're running
+        // in novice mode and (force) at the same time.
+        if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
+            get_numvar(contxt, "@user-level") != LG_NOVICE))
+        {
+            if(h_confirm(contxt, "", tr(S_OWRT), dst))
+            {
+                // Unprotect file.
+                chmod(dst, S_IRWXU);
+            }
+            else
+            {
+                // Skip file or abort.
+                fclose(file);
+                return DID_HALT ? G_ABORT : G_TRUE;
+            }
+        }
+    }
+
+    // Create / overwrite file.
+    FILE *dest = fopen(dst, "w");
+
+    if(!dest)
+    {
+        // The source handle is open.
+        fclose(file);
+
+        if((mde & CF_NOFAIL) || (mde & CF_OKNODELETE))
+        {
+            // Ignore failure.
+            h_log(contxt, tr(S_NCPY), src, dst);
+            return G_TRUE;
+        }
+
+        // Fail for real.
+        ERR(ERR_WRITE_FILE, dst);
+        return G_FALSE;
+    }
+
+    // Read and write until there is nothing more to read.
+    while(cnt)
+    {
+        if(fwrite(buf, 1, cnt, dest) == cnt)
+        {
+            // Update GUI unless we're in silent mode.
+            if(!(mde & CF_SILENT))
+            {
+                grc = gui_copyfiles_setcur(NULL, mde & CF_NOGAUGE, bck);
+            }
+
+            if(grc == G_TRUE)
+            {
+                cnt = fread(buf, 1, sizeof(buf), file);
+            }
+            else
+            {
+                break;
+            }
         }
         else
         {
-            // Fail for real.
-            ERR(ERR_READ_FILE, src);
+            ERR(ERR_WRITE_FILE, dst);
             grc = G_FALSE;
+            break;
+        }
+    }
+
+    // Close input and output files.
+    fclose(file);
+    fclose(dest);
+
+    // The number of bytes read and not written should be zero.
+    if(!cnt)
+    {
+        // Write to the log file (if logging is enabled).
+        h_log(contxt, tr(S_CPYD), src, dst);
+
+        // Are we going to copy the icon as well?
+        if(mde & CF_INFOS)
+        {
+            // The source icon.
+            static char icon[PATH_MAX];
+            snprintf(icon, sizeof(icon), "%s.info", src);
+
+            // Only if it exists, it's not an error if it's
+            // missing.
+            if(h_exists(icon) == LG_FILE)
+            {
+                static char copy[PATH_MAX];
+
+                // The destination icon.
+                snprintf(copy, sizeof(copy), "%s.info", dst);
+
+                // Recur without info set.
+                grc = h_copyfile(contxt, icon, copy, bck,
+                                 mde & ~CF_INFOS);
+
+                #if defined(AMIGA) && !defined(LG_TEST)
+                // Reset icon position?
+                if(grc == G_TRUE && mde & CF_NOPOSITION)
+                {
+                    struct DiskObject *obj = (struct DiskObject *)
+                        GetDiskObject(dst);
+
+                    if(obj)
+                    {
+                        // Reset icon position.
+                        obj->do_CurrentX = NO_ICON_POSITION;
+                        obj->do_CurrentY = NO_ICON_POSITION;
+
+                        // Save the changes to the .info file.
+                        if(!PutDiskObject(dst, obj))
+                        {
+                            // We failed for some unknown reason.
+                            ERR(ERR_WRITE_FILE, copy);
+                            grc = G_FALSE;
+                        }
+
+                        FreeDiskObject(obj);
+                    }
+                }
+                #endif
+            }
+        }
+
+        // Preserve file permissions. On error, code will be set
+        // by h_protect_x().
+        int32_t prm = 0;
+
+        if(h_protect_get(contxt, src, &prm))
+        {
+            h_protect_set(contxt, dst, prm);
+        }
+
+        // Reset error codes if necessary.
+        if(DID_ERR)
+        {
+            if(mde & CF_NOFAIL)
+            {
+                // Forget all errors.
+                RESET;
+            }
+            else
+            {
+                // Fail for real.
+                grc = G_ABORT;
+            }
         }
     }
 
@@ -1340,7 +1327,7 @@ entry_p m_copyfiles(entry_p contxt)
             askuser    = opt(contxt, OPT_ASKUSER),
             files      = opt(contxt, OPT_FILES);
 
-    D_NUM = 0;
+    D_NUM = LG_FALSE;
 
     // The (pattern) (choices) and (all) options are mutually exclusive.
     if((pattern && (choices || all)) || (choices && (pattern || all)) ||
@@ -2029,8 +2016,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
             if(get_numvar(contxt, "@user-level") == LG_NOVICE ||
                !h_confirm(C_ARG(2), "", tr(S_DWRD), name))
             {
-                // Halt will be set by h_confirm. Skip
-                // will result in nothing.
+                // Halt will be set by h_confirm. Skip will result in nothing.
                 return LG_FALSE;
             }
         }
@@ -2136,7 +2122,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
     snprintf(info, buf_size(), "%s.info", name);
 
     // We're done if there's no icon.
-    if(h_exists(info) != 1)
+    if(h_exists(info) != LG_FILE)
     {
         return LG_TRUE;
     }
@@ -2225,8 +2211,7 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
         return LG_TRUE;
     }
 
-    // Please note that 'breaks' will take us here, so will
-    // MatchFirst / MatchNext() problems.
+    // Breaks will take us here, so will MatchFirst / MatchNext() problems.
     ERR(ERR_DELETE_FILE, pat);
     return LG_FALSE;
     #else
@@ -2383,7 +2368,7 @@ entry_p m_foreach(entry_p contxt)
     const char *dname = str(C_ARG(1));
     DIR *dir = opendir(dname);
     pnode_p top = NULL;
-    int err = 1;
+    bool err = true;
 
     // Permission to read?
     if(dir)
@@ -2414,7 +2399,7 @@ entry_p m_foreach(entry_p contxt)
             #endif
 
             // The dir might be empty but that's not an error.
-            err = 0;
+            err = false;
 
             // Iterate over all entries in dir.
             while(ent && cur && !err)
@@ -2430,7 +2415,7 @@ entry_p m_foreach(entry_p contxt)
                     #if defined(AMIGA) && !defined(LG_TEST)
                     // The dir is not empty, we should be able to go all the way
                     // here. Assume failure.
-                    err = 1;
+                    err = true;
 
                     // Lock and get the information we need from the current
                     // entry
@@ -2447,7 +2432,7 @@ entry_p m_foreach(entry_p contxt)
 
                             // We're probably good. PANIC:s will be caught
                             // further down.
-                            err = 0;
+                            err = false;
                         }
 
                         UnLock(lock);
@@ -2497,7 +2482,7 @@ entry_p m_foreach(entry_p contxt)
             {
                 // Out of memory.
                 PANIC(contxt);
-                err = 1;
+                err = true;
             }
 
             // Go back where we started.
@@ -2519,7 +2504,7 @@ entry_p m_foreach(entry_p contxt)
     // we have in argument 3.
     while(top)
     {
-        int skip = err;
+        bool skip = err;
         pnode_p old = top;
 
         // 'Export' name and type info if we have a name.
@@ -2536,7 +2521,7 @@ entry_p m_foreach(entry_p contxt)
                 {
                     // If we have any wildcards, try to match.
                     case 1:
-                        skip = MatchPattern(buf, top->name) ? 0 : 1;
+                        skip = MatchPattern(buf, top->name);
                         break;
 
                     // If no wildcards, do a simple string comparsion.
@@ -2547,7 +2532,7 @@ entry_p m_foreach(entry_p contxt)
                     // We probably had a buffer overflow.
                     default:
                         ERR(ERR_OVERFLOW, pt);
-                        err = 1;
+                        err = true;
                 }
             }
             #endif
@@ -2569,7 +2554,7 @@ entry_p m_foreach(entry_p contxt)
     }
 
     // Success or failure.
-    R_NUM(err ? 0 : 1);
+    R_NUM(err ? LG_FALSE : LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -2591,7 +2576,7 @@ entry_p m_makeassign(entry_p contxt)
 
     // The name of the assign.
     char *asn = str(C_ARG(1));
-    int res = 0;
+    int res = LG_FALSE;
 
     // Are we going to create an assign?
     if(C_ARG(2) && C_ARG(2) != end() && C_ARG(2)->type != OPTION)
@@ -2608,7 +2593,7 @@ entry_p m_makeassign(entry_p contxt)
             //res = AssignLock(asn, lock) ? 1 : 0;
             if(AssignLock(asn, lock))
             {
-                res = 1;
+                res = LG_TRUE;
             }
             // On failure, the OS doesn't take ownership of the lock. We must
             // unlock it.
@@ -2618,7 +2603,7 @@ entry_p m_makeassign(entry_p contxt)
             }
         }
         #else
-        res = 1;
+        res = LG_TRUE;
         #endif
 
         // Log the outcome.
@@ -2628,9 +2613,9 @@ entry_p m_makeassign(entry_p contxt)
     {
         #if defined(AMIGA) && !defined(LG_TEST)
         // Remove assign.
-        res = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? 1 : 0;
+        res = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? LG_TRUE : LG_FALSE;
         #else
-        res = 2;
+        res = LG_TEST;
         #endif
 
         // Log the outcome.
@@ -2711,7 +2696,7 @@ entry_p m_protect(entry_p contxt)
     C_SANE(1, C_ARG(2));
 
     char *file = str(C_ARG(1));
-    D_NUM = 0;
+    D_NUM = LG_FALSE;
 
     if(C_ARG(2) && C_ARG(2) != end())
     {
@@ -2832,7 +2817,7 @@ entry_p m_protect(entry_p contxt)
                 else
                 {
                     // A non safe operation in pretend mode always succeeds.
-                    D_NUM = 1;
+                    D_NUM = LG_TRUE;
                 }
             }
         }
@@ -2866,20 +2851,13 @@ entry_p m_startup(entry_p contxt)
             prompt   = opt(C_ARG(2), OPT_PROMPT);
 
     // Expect failure.
-    D_NUM = 0;
+    D_NUM = LG_FALSE;
 
-    // We need a command.
-    if(!command)
+    // We need a command and somewhere to put it.
+    if((!*app && ERR(ERR_INVALID_APP, app)) ||
+       (!command && ERR(ERR_MISSING_OPTION, "command")))
     {
-        ERR(ERR_MISSING_OPTION, "command");
-        R_CUR;
-    }
-
-    // And somewhere to put the command.
-    if(!strlen(app))
-    {
-        ERR(ERR_INVALID_APP, app);
-        R_CUR;
+        R_NUM(LG_FALSE);
     }
 
     // If we need confirmation and the user skips or aborts, return. On abort,
@@ -2887,9 +2865,9 @@ entry_p m_startup(entry_p contxt)
     // is expert or when (confirm) is used.
     if((opt(C_ARG(2), OPT_CONFIRM) ||
         get_numvar(contxt, "@user-level") == LG_EXPERT) &&
-       !h_confirm(C_ARG(2), str(help), str(prompt)))
+        !h_confirm(C_ARG(2), str(help), str(prompt)))
     {
-        R_CUR;
+        R_NUM(LG_FALSE);
     }
 
     // We're done if executing in pretend mode.
@@ -3073,7 +3051,7 @@ entry_p m_startup(entry_p contxt)
                                 // We're done.
                                 free(tmp);
                                 tmp = NULL;
-                                D_NUM = 1;
+                                D_NUM = LG_TRUE;
                             }
                         }
                         else
@@ -3144,7 +3122,7 @@ entry_p m_textfile(entry_p contxt)
             confirm  = opt(contxt, OPT_CONFIRM),
             safe     = opt(contxt, OPT_SAFE);
 
-    D_NUM = 0;
+    D_NUM = LG_FALSE;
 
     if(!dest)
     {
@@ -3177,7 +3155,7 @@ entry_p m_textfile(entry_p contxt)
     }
 
     // Assume success.
-    D_NUM = 1;
+    D_NUM = LG_TRUE;
 
     // Append to empty file. Strange but it's how the CBM installer works.
     if(post)
@@ -3193,7 +3171,7 @@ entry_p m_textfile(entry_p contxt)
             if(fputs(app, file) == EOF)
             {
                 ERR(ERR_WRITE_FILE, name);
-                D_NUM = 0;
+                D_NUM = LG_FALSE;
             }
 
             // Free concatenation.
@@ -3203,7 +3181,7 @@ entry_p m_textfile(entry_p contxt)
         {
             // Out of memory.
             PANIC(contxt);
-            D_NUM = 0;
+            D_NUM = LG_FALSE;
         }
     }
 
@@ -3230,7 +3208,7 @@ entry_p m_textfile(entry_p contxt)
                 if(fwrite(buf, 1, cnt, file) != cnt)
                 {
                     ERR(ERR_WRITE_FILE, name);
-                    D_NUM = 0;
+                    D_NUM = LG_FALSE;
                     break;
                 }
 
@@ -3286,265 +3264,261 @@ entry_p m_tooltype(entry_p contxt)
         R_NUM(LG_TRUE);
     }
 
-    D_NUM = 0;
+    D_NUM = LG_FALSE;
 
     // We need something to work with.
-    if(dest)
-    {
-        // Something is 'dest'.info
-        char *file = str(dest);
-
-        // The (noposition) and (setposition) options are mutually exclusive.
-        if(noposition && setposition)
-        {
-            ERR(ERR_OPTION_MUTEX, "noposition/setposition");
-            R_NUM(LG_FALSE);
-        }
-
-        // Get confirmation if necessary.
-        if(!confirm || h_confirm(contxt, str(help), str(prompt)))
-        {
-            #if defined(AMIGA) && !defined(LG_TEST)
-            // Get icon information.
-            struct DiskObject *obj = (struct DiskObject *)
-                GetDiskObject(file);
-
-            if(obj)
-            {
-                // We need to save the current value of the tool type and
-                // default tool members in order to not trash mem when free:ing
-                // the diskobject.
-                char *odt = obj->do_DefaultTool;
-                char **tts = (char **) obj->do_ToolTypes;
-
-                // If we're going to set tooltypes the option must have one or
-                // two children.
-                if(settooltype && c_sane(settooltype, 1))
-                {
-                    // The number of tooltypes.
-                    size_t n = 0;
-
-                    // Get tooltype and current value (if it exists).
-                    char *t = str(settooltype->children[0]),
-                         *o = FindToolType(obj->do_ToolTypes, t);
-
-                    // Get size of tooltype array.
-                    while(*(tts + n++));
-
-                    // Set value or create tooltype?
-                    if(settooltype->children[1] &&
-                       settooltype->children[1] != end())
-                    {
-                        // Resolve tooltype value.
-                        const char *v = str(settooltype->children[1]);
-
-                        // If it already exists, we will replace the old value
-                        // with the new one.
-                        if(o)
-                        {
-                            // Allocate memory for a new temporary array.
-                            obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
-
-                            if(obj->do_ToolTypes)
-                            {
-                                char **nts = (char **) obj->do_ToolTypes;
-
-                                // Copy the current set of tooltypes.
-                                memcpy(nts, tts, n  * sizeof(char **));
-
-                                // Iterate over the current set.
-                                while(*nts)
-                                {
-                                    // Is the found value is within the bounds
-                                    // of the current string?
-                                    if(o >= *nts &&
-                                       o <= (*nts + strlen(*nts)))
-                                    {
-                                        // Create either a new key -> value
-                                        // pair, or a naked key.
-                                        if(strlen(v))
-                                        {
-                                            // Tooltype with value.
-                                            snprintf(get_buf(), buf_size(), "%s=%s", t, v);
-                                        }
-                                        else
-                                        {
-                                            // Naked tooltype.
-                                            snprintf(get_buf(), buf_size(), "%s", t);
-                                        }
-
-                                        // Overwrite the old tooltype.
-                                        *nts = get_buf();
-                                        break;
-                                    }
-
-                                    // Next tooltype.
-                                    nts++;
-                                }
-                            }
-                            else
-                            {
-                                // Out of memory.
-                                PANIC(contxt);
-                            }
-                        }
-                        // It doesn't exist, append new tooltype.
-                        else
-                        {
-                            // Allocate memory for a new temporary array.
-                            obj->do_ToolTypes = DBG_ALLOC(calloc(n + 1, sizeof(char *)));
-
-                            if(obj->do_ToolTypes)
-                            {
-                                char **nts = (char **) obj->do_ToolTypes;
-
-                                // Copy the current set of tooltypes.
-                                memcpy(nts, tts, n * sizeof(char **));
-
-                                if(strlen(v))
-                                {
-                                    // Tooltype with value.
-                                    snprintf(get_buf(), buf_size(), "%s=%s", t, v);
-                                }
-                                else
-                                {
-                                    // Naked tooltype.
-                                    snprintf(get_buf(), buf_size(), "%s", t);
-                                }
-
-                                // Append tooltype.
-                                *(nts + n - 1) = get_buf();
-                            }
-                            else
-                            {
-                                // Out of memory.
-                                PANIC(contxt);
-                            }
-                        }
-                    }
-                    // Delete tooltype.
-                    else
-                    {
-                        // Is there anything to delete?
-                        if(o && n > 1)
-                        {
-                            // Allocate memory for a new temporary array.
-                            obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
-
-                            if(obj->do_ToolTypes)
-                            {
-                                char **nts = (char **) obj->do_ToolTypes,
-                                     **ots = tts;
-
-                                // Delete tooltype by copying everything
-                                // except the tooltype to the new array.
-                                while(*ots)
-                                {
-                                    if((o < *ots) ||
-                                       (o > (*ots + strlen(*ots))))
-                                    {
-                                        *nts = *ots;
-                                        nts++;
-                                    }
-
-                                    ots++;
-                                }
-                            }
-                            else
-                            {
-                                // Out of memory.
-                                PANIC(contxt);
-                            }
-                        }
-                    }
-                }
-
-                // Change the default tool of project?
-                if(setdefaulttool)
-                {
-                    // Set temporary string.
-                    obj->do_DefaultTool = (char *) str(setdefaulttool);
-                }
-
-                // Set tool stacksize?
-                if(setstack)
-                {
-                    // Is a minimum value a good idea?
-                    obj->do_StackSize = num(setstack);
-                }
-
-                // Reset icon position?
-                if(noposition)
-                {
-                    obj->do_CurrentX = NO_ICON_POSITION;
-                    obj->do_CurrentY = NO_ICON_POSITION;
-                }
-
-                // Set icon position?
-                if(setposition && c_sane(setposition, 2))
-                {
-                    obj->do_CurrentX = num(setposition->children[0]);
-                    obj->do_CurrentY = num(setposition->children[1]);
-                }
-
-                // Save all changes to the .info file.
-                if(PutDiskObject(file, obj))
-                {
-                    // Done.
-                    D_NUM = 1;
-                }
-                else
-                {
-                    // We failed for some unknown reason.
-                    ERR(ERR_WRITE_FILE, file);
-                }
-
-                // Restore DiskObject, otherwise memory will be lost / trashed.
-                // Refer to the icon.library documentation.
-
-                // If we have a new tooltype array, free it and reinstate the
-                // old one.
-                if(tts != (char **) obj->do_ToolTypes)
-                {
-                    free(obj->do_ToolTypes);
-                    obj->do_ToolTypes = (STRPTR *) tts;
-                }
-
-                // No need to free the current string, just overwrite what we
-                // have.
-                obj->do_DefaultTool = odt;
-
-                // Free the DiskObject after restoring it to the state it was in
-                // before our changes.
-                FreeDiskObject(obj);
-            }
-            else
-            {
-                // More information? IoErr() is nice.
-                ERR(ERR_READ_FILE, file);
-            }
-            #else
-            // On non-Amiga systems we always succeed.
-            D_NUM = 1;
-
-            // For testing purposes only.
-            printf("%s%d%d%d",
-                    file,
-                    settooltype ? 1 : 0,
-                    setstack ? 1 : 0,
-                    setdefaulttool ? 1: 0);
-            #endif
-        }
-        else
-        {
-            // The user did not confirm.
-            D_NUM = 0;
-        }
-    }
-    else
+    if(!dest)
     {
         // We need an icon.
         ERR(ERR_MISSING_OPTION, "dest");
+        R_NUM(LG_FALSE);
+    }
+
+    // Something is 'dest'.info
+    char *file = str(dest);
+
+    // The (noposition) and (setposition) options are mutually exclusive.
+    if(noposition && setposition)
+    {
+        ERR(ERR_OPTION_MUTEX, "noposition/setposition");
+        R_NUM(LG_FALSE);
+    }
+
+    // Get confirmation if necessary.
+    if(!confirm || h_confirm(contxt, str(help), str(prompt)))
+    {
+        #if defined(AMIGA) && !defined(LG_TEST)
+        // Get icon information.
+        struct DiskObject *obj = (struct DiskObject *)
+            GetDiskObject(file);
+
+        if(obj)
+        {
+            // We need to save the current value of the tool type and
+            // default tool members in order to not trash mem when free:ing
+            // the diskobject.
+            char *odt = obj->do_DefaultTool;
+            char **tts = (char **) obj->do_ToolTypes;
+
+            // If we're going to set tooltypes the option must have one or
+            // two children.
+            if(settooltype && c_sane(settooltype, 1))
+            {
+                // The number of tooltypes.
+                size_t n = 0;
+
+                // Get tooltype and current value (if it exists).
+                char *t = str(settooltype->children[0]),
+                     *o = FindToolType(obj->do_ToolTypes, t);
+
+                // Get size of tooltype array.
+                while(*(tts + n++));
+
+                // Set value or create tooltype?
+                if(settooltype->children[1] &&
+                   settooltype->children[1] != end())
+                {
+                    // Resolve tooltype value.
+                    const char *v = str(settooltype->children[1]);
+
+                    // If it already exists, we will replace the old value
+                    // with the new one.
+                    if(o)
+                    {
+                        // Allocate memory for a new temporary array.
+                        obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
+
+                        if(obj->do_ToolTypes)
+                        {
+                            char **nts = (char **) obj->do_ToolTypes;
+
+                            // Copy the current set of tooltypes.
+                            memcpy(nts, tts, n  * sizeof(char **));
+
+                            // Iterate over the current set.
+                            while(*nts)
+                            {
+                                // Is the found value is within the bounds
+                                // of the current string?
+                                if(o >= *nts &&
+                                   o <= (*nts + strlen(*nts)))
+                                {
+                                    // Create either a new key -> value
+                                    // pair, or a naked key.
+                                    if(strlen(v))
+                                    {
+                                        // Tooltype with value.
+                                        snprintf(get_buf(), buf_size(), "%s=%s", t, v);
+                                    }
+                                    else
+                                    {
+                                        // Naked tooltype.
+                                        snprintf(get_buf(), buf_size(), "%s", t);
+                                    }
+
+                                    // Overwrite the old tooltype.
+                                    *nts = get_buf();
+                                    break;
+                                }
+
+                                // Next tooltype.
+                                nts++;
+                            }
+                        }
+                        else
+                        {
+                            // Out of memory.
+                            PANIC(contxt);
+                        }
+                    }
+                    // It doesn't exist, append new tooltype.
+                    else
+                    {
+                        // Allocate memory for a new temporary array.
+                        obj->do_ToolTypes = DBG_ALLOC(calloc(n + 1, sizeof(char *)));
+
+                        if(obj->do_ToolTypes)
+                        {
+                            char **nts = (char **) obj->do_ToolTypes;
+
+                            // Copy the current set of tooltypes.
+                            memcpy(nts, tts, n * sizeof(char **));
+
+                            if(strlen(v))
+                            {
+                                // Tooltype with value.
+                                snprintf(get_buf(), buf_size(), "%s=%s", t, v);
+                            }
+                            else
+                            {
+                                // Naked tooltype.
+                                snprintf(get_buf(), buf_size(), "%s", t);
+                            }
+
+                            // Append tooltype.
+                            *(nts + n - 1) = get_buf();
+                        }
+                        else
+                        {
+                            // Out of memory.
+                            PANIC(contxt);
+                        }
+                    }
+                }
+                // Delete tooltype.
+                else
+                {
+                    // Is there anything to delete?
+                    if(o && n > 1)
+                    {
+                        // Allocate memory for a new temporary array.
+                        obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
+
+                        if(obj->do_ToolTypes)
+                        {
+                            char **nts = (char **) obj->do_ToolTypes,
+                                 **ots = tts;
+
+                            // Delete tooltype by copying everything
+                            // except the tooltype to the new array.
+                            while(*ots)
+                            {
+                                if((o < *ots) ||
+                                   (o > (*ots + strlen(*ots))))
+                                {
+                                    *nts = *ots;
+                                    nts++;
+                                }
+
+                                ots++;
+                            }
+                        }
+                        else
+                        {
+                            // Out of memory.
+                            PANIC(contxt);
+                        }
+                    }
+                }
+            }
+
+            // Change the default tool of project?
+            if(setdefaulttool)
+            {
+                // Set temporary string.
+                obj->do_DefaultTool = (char *) str(setdefaulttool);
+            }
+
+            // Set tool stacksize?
+            if(setstack)
+            {
+                // Is a minimum value a good idea?
+                obj->do_StackSize = num(setstack);
+            }
+
+            // Reset icon position?
+            if(noposition)
+            {
+                obj->do_CurrentX = NO_ICON_POSITION;
+                obj->do_CurrentY = NO_ICON_POSITION;
+            }
+
+            // Set icon position?
+            if(setposition && c_sane(setposition, 2))
+            {
+                obj->do_CurrentX = num(setposition->children[0]);
+                obj->do_CurrentY = num(setposition->children[1]);
+            }
+
+            // Save all changes to the .info file.
+            if(PutDiskObject(file, obj))
+            {
+                // Done.
+                D_NUM = LG_TRUE;
+            }
+            else
+            {
+                // We failed for some unknown reason.
+                ERR(ERR_WRITE_FILE, file);
+            }
+
+            // Restore DiskObject, otherwise memory will be lost / trashed.
+            // Refer to the icon.library documentation.
+
+            // If we have a new tooltype array, free it and reinstate the
+            // old one.
+            if(tts != (char **) obj->do_ToolTypes)
+            {
+                free(obj->do_ToolTypes);
+                obj->do_ToolTypes = (STRPTR *) tts;
+            }
+
+            // No need to free the current string, just overwrite what we
+            // have.
+            obj->do_DefaultTool = odt;
+
+            // Free the DiskObject after restoring it to the state it was in
+            // before our changes.
+            FreeDiskObject(obj);
+        }
+        else
+        {
+            // More information? IoErr() is nice.
+            ERR(ERR_READ_FILE, file);
+        }
+        #else
+        // On non-Amiga systems we always succeed.
+        D_NUM = LG_TRUE;
+
+        // For testing purposes only.
+        printf("%s%d%d%d", file, settooltype ? 1 : 0, setstack ? 1 : 0,
+                setdefaulttool ? 1: 0);
+        #endif
+    }
+    else
+    {
+        // The user did not confirm.
+        D_NUM = LG_FALSE;
     }
 
     // Success or failure.
@@ -3639,7 +3613,7 @@ entry_p m_rename(entry_p contxt)
     }
     #endif
 
-    // Success.
+    // Successfully relabeled volume.
     h_log(contxt, tr(S_FRND), old, new);
     R_NUM(-1);
 }
