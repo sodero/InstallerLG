@@ -1327,7 +1327,7 @@ entry_p m_copyfiles(entry_p contxt)
             askuser    = opt(contxt, OPT_ASKUSER),
             files      = opt(contxt, OPT_FILES);
 
-    D_NUM = 0;
+    D_NUM = LG_FALSE;
 
     // The (pattern) (choices) and (all) options are mutually exclusive.
     if((pattern && (choices || all)) || (choices && (pattern || all)) ||
@@ -2576,7 +2576,7 @@ entry_p m_makeassign(entry_p contxt)
 
     // The name of the assign.
     char *asn = str(C_ARG(1));
-    int res = 0;
+    int res = LG_FALSE;
 
     // Are we going to create an assign?
     if(C_ARG(2) && C_ARG(2) != end() && C_ARG(2)->type != OPTION)
@@ -2593,7 +2593,7 @@ entry_p m_makeassign(entry_p contxt)
             //res = AssignLock(asn, lock) ? 1 : 0;
             if(AssignLock(asn, lock))
             {
-                res = 1;
+                res = LG_TRUE;
             }
             // On failure, the OS doesn't take ownership of the lock. We must
             // unlock it.
@@ -2603,7 +2603,7 @@ entry_p m_makeassign(entry_p contxt)
             }
         }
         #else
-        res = 1;
+        res = LG_TRUE;
         #endif
 
         // Log the outcome.
@@ -2613,9 +2613,9 @@ entry_p m_makeassign(entry_p contxt)
     {
         #if defined(AMIGA) && !defined(LG_TEST)
         // Remove assign.
-        res = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? 1 : 0;
+        res = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? LG_TRUE : LG_FALSE;
         #else
-        res = 2;
+        res = LG_TEST;
         #endif
 
         // Log the outcome.
@@ -2696,7 +2696,7 @@ entry_p m_protect(entry_p contxt)
     C_SANE(1, C_ARG(2));
 
     char *file = str(C_ARG(1));
-    D_NUM = 0;
+    D_NUM = LG_FALSE;
 
     if(C_ARG(2) && C_ARG(2) != end())
     {
@@ -2817,7 +2817,7 @@ entry_p m_protect(entry_p contxt)
                 else
                 {
                     // A non safe operation in pretend mode always succeeds.
-                    D_NUM = 1;
+                    D_NUM = LG_TRUE;
                 }
             }
         }
@@ -2851,20 +2851,13 @@ entry_p m_startup(entry_p contxt)
             prompt   = opt(C_ARG(2), OPT_PROMPT);
 
     // Expect failure.
-    D_NUM = 0;
+    D_NUM = LG_FALSE;
 
-    // We need a command.
-    if(!command)
+    // We need a command and somewhere to put it.
+    if((!*app && ERR(ERR_INVALID_APP, app)) ||
+       (!command && ERR(ERR_MISSING_OPTION, "command")))
     {
-        ERR(ERR_MISSING_OPTION, "command");
-        R_CUR;
-    }
-
-    // And somewhere to put the command.
-    if(!strlen(app))
-    {
-        ERR(ERR_INVALID_APP, app);
-        R_CUR;
+        R_NUM(LG_FALSE);
     }
 
     // If we need confirmation and the user skips or aborts, return. On abort,
@@ -2872,9 +2865,9 @@ entry_p m_startup(entry_p contxt)
     // is expert or when (confirm) is used.
     if((opt(C_ARG(2), OPT_CONFIRM) ||
         get_numvar(contxt, "@user-level") == LG_EXPERT) &&
-       !h_confirm(C_ARG(2), str(help), str(prompt)))
+        !h_confirm(C_ARG(2), str(help), str(prompt)))
     {
-        R_CUR;
+        R_NUM(LG_FALSE);
     }
 
     // We're done if executing in pretend mode.
@@ -3058,7 +3051,7 @@ entry_p m_startup(entry_p contxt)
                                 // We're done.
                                 free(tmp);
                                 tmp = NULL;
-                                D_NUM = 1;
+                                D_NUM = LG_TRUE;
                             }
                         }
                         else
@@ -3129,7 +3122,7 @@ entry_p m_textfile(entry_p contxt)
             confirm  = opt(contxt, OPT_CONFIRM),
             safe     = opt(contxt, OPT_SAFE);
 
-    D_NUM = 0;
+    D_NUM = LG_FALSE;
 
     if(!dest)
     {
@@ -3162,7 +3155,7 @@ entry_p m_textfile(entry_p contxt)
     }
 
     // Assume success.
-    D_NUM = 1;
+    D_NUM = LG_TRUE;
 
     // Append to empty file. Strange but it's how the CBM installer works.
     if(post)
@@ -3178,7 +3171,7 @@ entry_p m_textfile(entry_p contxt)
             if(fputs(app, file) == EOF)
             {
                 ERR(ERR_WRITE_FILE, name);
-                D_NUM = 0;
+                D_NUM = LG_FALSE;
             }
 
             // Free concatenation.
@@ -3188,7 +3181,7 @@ entry_p m_textfile(entry_p contxt)
         {
             // Out of memory.
             PANIC(contxt);
-            D_NUM = 0;
+            D_NUM = LG_FALSE;
         }
     }
 
@@ -3215,7 +3208,7 @@ entry_p m_textfile(entry_p contxt)
                 if(fwrite(buf, 1, cnt, file) != cnt)
                 {
                     ERR(ERR_WRITE_FILE, name);
-                    D_NUM = 0;
+                    D_NUM = LG_FALSE;
                     break;
                 }
 
@@ -3271,265 +3264,261 @@ entry_p m_tooltype(entry_p contxt)
         R_NUM(LG_TRUE);
     }
 
-    D_NUM = 0;
+    D_NUM = LG_FALSE;
 
     // We need something to work with.
-    if(dest)
-    {
-        // Something is 'dest'.info
-        char *file = str(dest);
-
-        // The (noposition) and (setposition) options are mutually exclusive.
-        if(noposition && setposition)
-        {
-            ERR(ERR_OPTION_MUTEX, "noposition/setposition");
-            R_NUM(LG_FALSE);
-        }
-
-        // Get confirmation if necessary.
-        if(!confirm || h_confirm(contxt, str(help), str(prompt)))
-        {
-            #if defined(AMIGA) && !defined(LG_TEST)
-            // Get icon information.
-            struct DiskObject *obj = (struct DiskObject *)
-                GetDiskObject(file);
-
-            if(obj)
-            {
-                // We need to save the current value of the tool type and
-                // default tool members in order to not trash mem when free:ing
-                // the diskobject.
-                char *odt = obj->do_DefaultTool;
-                char **tts = (char **) obj->do_ToolTypes;
-
-                // If we're going to set tooltypes the option must have one or
-                // two children.
-                if(settooltype && c_sane(settooltype, 1))
-                {
-                    // The number of tooltypes.
-                    size_t n = 0;
-
-                    // Get tooltype and current value (if it exists).
-                    char *t = str(settooltype->children[0]),
-                         *o = FindToolType(obj->do_ToolTypes, t);
-
-                    // Get size of tooltype array.
-                    while(*(tts + n++));
-
-                    // Set value or create tooltype?
-                    if(settooltype->children[1] &&
-                       settooltype->children[1] != end())
-                    {
-                        // Resolve tooltype value.
-                        const char *v = str(settooltype->children[1]);
-
-                        // If it already exists, we will replace the old value
-                        // with the new one.
-                        if(o)
-                        {
-                            // Allocate memory for a new temporary array.
-                            obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
-
-                            if(obj->do_ToolTypes)
-                            {
-                                char **nts = (char **) obj->do_ToolTypes;
-
-                                // Copy the current set of tooltypes.
-                                memcpy(nts, tts, n  * sizeof(char **));
-
-                                // Iterate over the current set.
-                                while(*nts)
-                                {
-                                    // Is the found value is within the bounds
-                                    // of the current string?
-                                    if(o >= *nts &&
-                                       o <= (*nts + strlen(*nts)))
-                                    {
-                                        // Create either a new key -> value
-                                        // pair, or a naked key.
-                                        if(strlen(v))
-                                        {
-                                            // Tooltype with value.
-                                            snprintf(get_buf(), buf_size(), "%s=%s", t, v);
-                                        }
-                                        else
-                                        {
-                                            // Naked tooltype.
-                                            snprintf(get_buf(), buf_size(), "%s", t);
-                                        }
-
-                                        // Overwrite the old tooltype.
-                                        *nts = get_buf();
-                                        break;
-                                    }
-
-                                    // Next tooltype.
-                                    nts++;
-                                }
-                            }
-                            else
-                            {
-                                // Out of memory.
-                                PANIC(contxt);
-                            }
-                        }
-                        // It doesn't exist, append new tooltype.
-                        else
-                        {
-                            // Allocate memory for a new temporary array.
-                            obj->do_ToolTypes = DBG_ALLOC(calloc(n + 1, sizeof(char *)));
-
-                            if(obj->do_ToolTypes)
-                            {
-                                char **nts = (char **) obj->do_ToolTypes;
-
-                                // Copy the current set of tooltypes.
-                                memcpy(nts, tts, n * sizeof(char **));
-
-                                if(strlen(v))
-                                {
-                                    // Tooltype with value.
-                                    snprintf(get_buf(), buf_size(), "%s=%s", t, v);
-                                }
-                                else
-                                {
-                                    // Naked tooltype.
-                                    snprintf(get_buf(), buf_size(), "%s", t);
-                                }
-
-                                // Append tooltype.
-                                *(nts + n - 1) = get_buf();
-                            }
-                            else
-                            {
-                                // Out of memory.
-                                PANIC(contxt);
-                            }
-                        }
-                    }
-                    // Delete tooltype.
-                    else
-                    {
-                        // Is there anything to delete?
-                        if(o && n > 1)
-                        {
-                            // Allocate memory for a new temporary array.
-                            obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
-
-                            if(obj->do_ToolTypes)
-                            {
-                                char **nts = (char **) obj->do_ToolTypes,
-                                     **ots = tts;
-
-                                // Delete tooltype by copying everything
-                                // except the tooltype to the new array.
-                                while(*ots)
-                                {
-                                    if((o < *ots) ||
-                                       (o > (*ots + strlen(*ots))))
-                                    {
-                                        *nts = *ots;
-                                        nts++;
-                                    }
-
-                                    ots++;
-                                }
-                            }
-                            else
-                            {
-                                // Out of memory.
-                                PANIC(contxt);
-                            }
-                        }
-                    }
-                }
-
-                // Change the default tool of project?
-                if(setdefaulttool)
-                {
-                    // Set temporary string.
-                    obj->do_DefaultTool = (char *) str(setdefaulttool);
-                }
-
-                // Set tool stacksize?
-                if(setstack)
-                {
-                    // Is a minimum value a good idea?
-                    obj->do_StackSize = num(setstack);
-                }
-
-                // Reset icon position?
-                if(noposition)
-                {
-                    obj->do_CurrentX = NO_ICON_POSITION;
-                    obj->do_CurrentY = NO_ICON_POSITION;
-                }
-
-                // Set icon position?
-                if(setposition && c_sane(setposition, 2))
-                {
-                    obj->do_CurrentX = num(setposition->children[0]);
-                    obj->do_CurrentY = num(setposition->children[1]);
-                }
-
-                // Save all changes to the .info file.
-                if(PutDiskObject(file, obj))
-                {
-                    // Done.
-                    D_NUM = 1;
-                }
-                else
-                {
-                    // We failed for some unknown reason.
-                    ERR(ERR_WRITE_FILE, file);
-                }
-
-                // Restore DiskObject, otherwise memory will be lost / trashed.
-                // Refer to the icon.library documentation.
-
-                // If we have a new tooltype array, free it and reinstate the
-                // old one.
-                if(tts != (char **) obj->do_ToolTypes)
-                {
-                    free(obj->do_ToolTypes);
-                    obj->do_ToolTypes = (STRPTR *) tts;
-                }
-
-                // No need to free the current string, just overwrite what we
-                // have.
-                obj->do_DefaultTool = odt;
-
-                // Free the DiskObject after restoring it to the state it was in
-                // before our changes.
-                FreeDiskObject(obj);
-            }
-            else
-            {
-                // More information? IoErr() is nice.
-                ERR(ERR_READ_FILE, file);
-            }
-            #else
-            // On non-Amiga systems we always succeed.
-            D_NUM = 1;
-
-            // For testing purposes only.
-            printf("%s%d%d%d",
-                    file,
-                    settooltype ? 1 : 0,
-                    setstack ? 1 : 0,
-                    setdefaulttool ? 1: 0);
-            #endif
-        }
-        else
-        {
-            // The user did not confirm.
-            D_NUM = 0;
-        }
-    }
-    else
+    if(!dest)
     {
         // We need an icon.
         ERR(ERR_MISSING_OPTION, "dest");
+        R_NUM(LG_FALSE);
+    }
+
+    // Something is 'dest'.info
+    char *file = str(dest);
+
+    // The (noposition) and (setposition) options are mutually exclusive.
+    if(noposition && setposition)
+    {
+        ERR(ERR_OPTION_MUTEX, "noposition/setposition");
+        R_NUM(LG_FALSE);
+    }
+
+    // Get confirmation if necessary.
+    if(!confirm || h_confirm(contxt, str(help), str(prompt)))
+    {
+        #if defined(AMIGA) && !defined(LG_TEST)
+        // Get icon information.
+        struct DiskObject *obj = (struct DiskObject *)
+            GetDiskObject(file);
+
+        if(obj)
+        {
+            // We need to save the current value of the tool type and
+            // default tool members in order to not trash mem when free:ing
+            // the diskobject.
+            char *odt = obj->do_DefaultTool;
+            char **tts = (char **) obj->do_ToolTypes;
+
+            // If we're going to set tooltypes the option must have one or
+            // two children.
+            if(settooltype && c_sane(settooltype, 1))
+            {
+                // The number of tooltypes.
+                size_t n = 0;
+
+                // Get tooltype and current value (if it exists).
+                char *t = str(settooltype->children[0]),
+                     *o = FindToolType(obj->do_ToolTypes, t);
+
+                // Get size of tooltype array.
+                while(*(tts + n++));
+
+                // Set value or create tooltype?
+                if(settooltype->children[1] &&
+                   settooltype->children[1] != end())
+                {
+                    // Resolve tooltype value.
+                    const char *v = str(settooltype->children[1]);
+
+                    // If it already exists, we will replace the old value
+                    // with the new one.
+                    if(o)
+                    {
+                        // Allocate memory for a new temporary array.
+                        obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
+
+                        if(obj->do_ToolTypes)
+                        {
+                            char **nts = (char **) obj->do_ToolTypes;
+
+                            // Copy the current set of tooltypes.
+                            memcpy(nts, tts, n  * sizeof(char **));
+
+                            // Iterate over the current set.
+                            while(*nts)
+                            {
+                                // Is the found value is within the bounds
+                                // of the current string?
+                                if(o >= *nts &&
+                                   o <= (*nts + strlen(*nts)))
+                                {
+                                    // Create either a new key -> value
+                                    // pair, or a naked key.
+                                    if(strlen(v))
+                                    {
+                                        // Tooltype with value.
+                                        snprintf(get_buf(), buf_size(), "%s=%s", t, v);
+                                    }
+                                    else
+                                    {
+                                        // Naked tooltype.
+                                        snprintf(get_buf(), buf_size(), "%s", t);
+                                    }
+
+                                    // Overwrite the old tooltype.
+                                    *nts = get_buf();
+                                    break;
+                                }
+
+                                // Next tooltype.
+                                nts++;
+                            }
+                        }
+                        else
+                        {
+                            // Out of memory.
+                            PANIC(contxt);
+                        }
+                    }
+                    // It doesn't exist, append new tooltype.
+                    else
+                    {
+                        // Allocate memory for a new temporary array.
+                        obj->do_ToolTypes = DBG_ALLOC(calloc(n + 1, sizeof(char *)));
+
+                        if(obj->do_ToolTypes)
+                        {
+                            char **nts = (char **) obj->do_ToolTypes;
+
+                            // Copy the current set of tooltypes.
+                            memcpy(nts, tts, n * sizeof(char **));
+
+                            if(strlen(v))
+                            {
+                                // Tooltype with value.
+                                snprintf(get_buf(), buf_size(), "%s=%s", t, v);
+                            }
+                            else
+                            {
+                                // Naked tooltype.
+                                snprintf(get_buf(), buf_size(), "%s", t);
+                            }
+
+                            // Append tooltype.
+                            *(nts + n - 1) = get_buf();
+                        }
+                        else
+                        {
+                            // Out of memory.
+                            PANIC(contxt);
+                        }
+                    }
+                }
+                // Delete tooltype.
+                else
+                {
+                    // Is there anything to delete?
+                    if(o && n > 1)
+                    {
+                        // Allocate memory for a new temporary array.
+                        obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
+
+                        if(obj->do_ToolTypes)
+                        {
+                            char **nts = (char **) obj->do_ToolTypes,
+                                 **ots = tts;
+
+                            // Delete tooltype by copying everything
+                            // except the tooltype to the new array.
+                            while(*ots)
+                            {
+                                if((o < *ots) ||
+                                   (o > (*ots + strlen(*ots))))
+                                {
+                                    *nts = *ots;
+                                    nts++;
+                                }
+
+                                ots++;
+                            }
+                        }
+                        else
+                        {
+                            // Out of memory.
+                            PANIC(contxt);
+                        }
+                    }
+                }
+            }
+
+            // Change the default tool of project?
+            if(setdefaulttool)
+            {
+                // Set temporary string.
+                obj->do_DefaultTool = (char *) str(setdefaulttool);
+            }
+
+            // Set tool stacksize?
+            if(setstack)
+            {
+                // Is a minimum value a good idea?
+                obj->do_StackSize = num(setstack);
+            }
+
+            // Reset icon position?
+            if(noposition)
+            {
+                obj->do_CurrentX = NO_ICON_POSITION;
+                obj->do_CurrentY = NO_ICON_POSITION;
+            }
+
+            // Set icon position?
+            if(setposition && c_sane(setposition, 2))
+            {
+                obj->do_CurrentX = num(setposition->children[0]);
+                obj->do_CurrentY = num(setposition->children[1]);
+            }
+
+            // Save all changes to the .info file.
+            if(PutDiskObject(file, obj))
+            {
+                // Done.
+                D_NUM = LG_TRUE;
+            }
+            else
+            {
+                // We failed for some unknown reason.
+                ERR(ERR_WRITE_FILE, file);
+            }
+
+            // Restore DiskObject, otherwise memory will be lost / trashed.
+            // Refer to the icon.library documentation.
+
+            // If we have a new tooltype array, free it and reinstate the
+            // old one.
+            if(tts != (char **) obj->do_ToolTypes)
+            {
+                free(obj->do_ToolTypes);
+                obj->do_ToolTypes = (STRPTR *) tts;
+            }
+
+            // No need to free the current string, just overwrite what we
+            // have.
+            obj->do_DefaultTool = odt;
+
+            // Free the DiskObject after restoring it to the state it was in
+            // before our changes.
+            FreeDiskObject(obj);
+        }
+        else
+        {
+            // More information? IoErr() is nice.
+            ERR(ERR_READ_FILE, file);
+        }
+        #else
+        // On non-Amiga systems we always succeed.
+        D_NUM = LG_TRUE;
+
+        // For testing purposes only.
+        printf("%s%d%d%d", file, settooltype ? 1 : 0, setstack ? 1 : 0,
+                setdefaulttool ? 1: 0);
+        #endif
+    }
+    else
+    {
+        // The user did not confirm.
+        D_NUM = LG_FALSE;
     }
 
     // Success or failure.
@@ -3624,7 +3613,7 @@ entry_p m_rename(entry_p contxt)
     }
     #endif
 
-    // Success.
+    // Successfully relabeled volume.
     h_log(contxt, tr(S_FRND), old, new);
     R_NUM(-1);
 }

@@ -942,11 +942,11 @@ entry_p m_getversion(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //
-// Despite what the Installer.guide says, 'help', 'prompt', 'confirm'
-// and 'safe' are dead options in OS 3.9. We choose to ignore the guide
-// and mimic the behaviour of the implementation in 3.9. Also, the 3.9
-// implementation deletes tooltypes when (gettooltype) is used. This is
-// assumed to be a bug and therefore not mimiced.
+// Despite what the Installer.guide says, 'help', 'prompt', 'confirm' and 'safe'
+// are dead options in OS 3.9. We choose to ignore the guide and mimic the
+// behaviour of the implementation in 3.9. Also, the 3.9 implementation deletes
+// tooltypes when (gettooltype) is used. This is assumed to be a bug and
+// therefore not mimiced.
 //------------------------------------------------------------------------------
 entry_p m_iconinfo(entry_p contxt)
 {
