@@ -180,18 +180,18 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
     {
         entry_p cur = fake->children[i];
         bool del = cur->parent->id == OPT_DELOPTS;
-        char *opt = str(cur);
+        char *fop = str(cur);
 
         // Set or delete option.
-        cache[OPT_FAIL] = strcmp(opt, "fail") ?
+        cache[OPT_FAIL] = strcmp(fop, "fail") ?
         cache[OPT_FAIL] : (del ? NULL : cur);
-        cache[OPT_FORCE] = strcmp(opt, "force") ?
+        cache[OPT_FORCE] = strcmp(fop, "force") ?
         cache[OPT_FORCE] : (del ? NULL : cur);
-        cache[OPT_NOFAIL] = strcmp(opt, "nofail") ?
+        cache[OPT_NOFAIL] = strcmp(fop, "nofail") ?
         cache[OPT_NOFAIL] : (del ? NULL : cur);
-        cache[OPT_ASKUSER] = strcmp(opt, "askuser") ?
+        cache[OPT_ASKUSER] = strcmp(fop, "askuser") ?
         cache[OPT_ASKUSER] : (del ? NULL : cur);
-        cache[OPT_OKNODELETE] = strcmp(opt, "oknodelete") ?
+        cache[OPT_OKNODELETE] = strcmp(fop, "oknodelete") ?
         cache[OPT_OKNODELETE] : (del ? NULL : cur);
     }
 }
@@ -201,6 +201,13 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
 //------------------------------------------------------------------------------
 static void prune_opt(entry_p contxt, entry_p *cache)
 {
+    // Sanity check.
+    if(!cache)
+    {
+        PANIC(contxt);
+        return;
+    }
+
     if(cache[OPT_CONFIRM])
     {
         // Make sure that we a prompt and help string.

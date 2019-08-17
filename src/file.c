@@ -1346,190 +1346,162 @@ entry_p m_copyfiles(entry_p contxt)
     }
 
     // We need a source and a destination dir.
-    if(source && dest)
+    if(!source || !dest)
     {
-        // Tree of source / destination tuples.
-        pnode_p tree;
+        ERR(ERR_MISSING_OPTION, source ? "dest" : "source");
+        R_NUM(LG_FALSE);
+    }
 
-        const char *src = str(source),
-                   *dst = str(dest);
+    const char *src = str(source), *dst = str(dest);
 
-        // If the source is a directory, (all), (choices) or (pattern) must be
-        // used.
-        if(h_exists(src) == LG_DIR && !all && !choices && !pattern)
+    // If source is a directory (all)/(choices)/(pattern) are needed.
+    if(h_exists(src) == LG_DIR && !all && !choices && !pattern)
+    {
+        ERR(ERR_MISSING_OPTION, "all/choices/pattern");
+        R_NUM(LG_FALSE);
+    }
+
+    // A non safe operation in pretend mode always succeeds.
+    if(get_numvar(contxt, "@pretend") && !safe)
+    {
+        R_NUM(LG_TRUE);
+    }
+
+    // Does the destination already exist?
+    if(h_exists(dst) == LG_DIR)
+    {
+        // Don't trust h_exists, this string might be empty.
+        size_t dln = strlen(dst);
+
+        // If it's not a volume, set permissions to allow overwriting.
+        if(dln && dst[dln - 1] != ':')
         {
-            ERR(ERR_MISSING_OPTION, "all/choices/pattern");
-            R_CUR;
-        }
-
-        // A non safe operation in pretend mode always succeeds.
-        if(get_numvar(contxt, "@pretend") && !safe)
-        {
-            R_NUM(LG_TRUE);
-        }
-
-        // Does the destination already exist?
-        if(h_exists(dst) == LG_DIR)
-        {
-            // Don't trust h_exists, this string might be empty.
-            size_t dln = strlen(dst);
-
-            // If it's not a volume, set permission so that overwriting can
-            // succeed.
-            if(dln && dst[dln - 1] != ':')
-            {
-                chmod(dst, S_IRWXU);
-            }
-        }
-
-        // Traverse the source directory and create the corresponding
-        // destination strings.
-        tree = h_filetree
-        (
-            contxt,
-            src,
-            dst,
-            files,
-            fonts,
-            choices,
-            pattern,
-            infos
-        );
-
-        // Unless we ran out of memory when traversing the source directory, we
-        // now have a list of source -> destination tuples.
-        if(tree)
-        {
-            inp_t grc = G_TRUE;
-            pnode_p cur = tree;
-
-            // Replace file name if single file and the 'newname' option is set
-            if(newname && cur->next && cur->type == LG_DIR &&
-               cur->next->type == LG_FILE && !cur->next->next)
-            {
-                free(cur->next->copy);
-                cur->next->copy = h_tackon(contxt, dst, str(newname));
-            }
-
-            // Initialize GUI, set up file lists, events, and so on.
-            if(cur)
-            {
-                grc = gui_copyfiles_start
-                (
-                    prompt ? str(prompt) : NULL,
-                    confirm ? str(help) : NULL,
-                    cur,
-                    confirm != false,
-                    back != false
-                );
-            }
-
-            // Start copy unless skip / abort / back.
-            if(grc == G_TRUE)
-            {
-                // Set file copy mode.
-                int mode = (infos ? CF_INFOS : 0) |
-                           (fonts ? CF_FONTS : 0) |
-                           (nogauge ? CF_NOGAUGE : 0) |
-                           (nofail ? CF_NOFAIL : 0) |
-                           (oknodelete ? CF_OKNODELETE : 0) |
-                           (force ? CF_FORCE : 0) |
-                           (askuser ? CF_ASKUSER : 0);
-
-                // For all files / dirs in list, copy / create.
-                for(; cur && grc == G_TRUE; cur = cur->next)
-                {
-                    int32_t prm = 0;
-
-                    // Copy file / create dir / skip if non existing.
-                    switch(cur->type)
-                    {
-                        case LG_NONE:
-                            continue;
-
-                        case LG_FILE:
-                            grc = h_copyfile(contxt, cur->name, cur->copy,
-                                             back != false, mode);
-                            break;
-
-                        case LG_DIR:
-                            // Make dir and make sure the protection bits of the
-                            // new one matches the old.
-                            if(!h_makedir(contxt, cur->copy, mode) ||
-                               !h_protect_get(contxt, cur->name, &prm) ||
-                               !h_protect_set(contxt, cur->copy, prm))
-                            {
-                                grc = G_FALSE;
-                            }
-                            break;
-
-                        // Invalid type.
-                        default:
-                            PANIC(contxt);
-                            break;
-                    }
-                }
-
-                // GUI teardown.
-                gui_copyfiles_end();
-
-                // Translate return code.
-                D_NUM = (grc == G_TRUE) ? 1 : 0;
-            }
-
-            // Back return value.
-            entry_p ret = NULL;
-
-            // FIXME
-            if(grc != G_TRUE)
-            {
-                // Is the back option available?
-                if(back)
-                {
-                    // Fake input?
-                    if(get_numvar(contxt, "@back"))
-                    {
-                        grc = G_ABORT;
-                    }
-
-                    // On abort execute.
-                    if(grc == G_ABORT)
-                    {
-                        ret = resolve(back);
-                    }
-                }
-
-                // FIXME
-                if(grc == G_ABORT || grc == G_EXIT)
-                {
-                    HALT;
-                }
-            }
-
-            cur = tree;
-
-            // Free list of files / dirs.
-            while(cur)
-            {
-                tree = cur;
-                free(cur->name);
-                free(cur->copy);
-                cur = cur->next;
-                free(tree);
-            }
-
-            // If we've executed any 'back' code, return its return value
-            // instead of our own.
-            if(ret)
-            {
-                return ret;
-            }
+            chmod(dst, S_IRWXU);
         }
     }
-    else
+
+    // Traverse source directory and create destination strings.
+    pnode_p tree = h_filetree(contxt, src, dst, files, fonts, choices,
+                              pattern, infos);
+
+    if(!tree)
     {
-        char *opt = source ? "dest" : "source";
-        ERR(ERR_MISSING_OPTION, opt);
+        // Either we could not read from source directory or we're out of
+        // memory. Error or PANIC is set by h_filetree.
+        R_NUM(LG_FALSE);
+    }
+
+    // Start from the top of the list.
+    pnode_p cur = tree;
+
+    // Replace file name if single file and the 'newname' option is set
+    if(newname && cur->next && cur->type == LG_DIR &&
+       cur->next->type == LG_FILE && !cur->next->next)
+    {
+        free(cur->next->copy);
+        cur->next->copy = h_tackon(contxt, dst, str(newname));
+    }
+
+    // Initialize GUI, set up file lists, events, and so on.
+    inp_t grc = gui_copyfiles_start(prompt ? str(prompt) : NULL,
+                                    confirm ? str(help) : NULL, cur,
+                                    confirm != false, back != false);
+
+    // Start copy unless skip / abort / back.
+    if(grc == G_TRUE)
+    {
+        // Set file copy mode.
+        int mode = (infos ? CF_INFOS : 0) | (fonts ? CF_FONTS : 0) |
+                   (nogauge ? CF_NOGAUGE : 0) | (nofail ? CF_NOFAIL : 0) |
+                   (oknodelete ? CF_OKNODELETE : 0) | (force ? CF_FORCE : 0) |
+                   (askuser ? CF_ASKUSER : 0);
+
+        // For all files / dirs in list, copy / create.
+        for(; cur && grc == G_TRUE; cur = cur->next)
+        {
+            int32_t prm = 0;
+
+            // Copy file / create dir / skip if non existing.
+            switch(cur->type)
+            {
+                case LG_NONE:
+                    continue;
+
+                case LG_FILE:
+                    grc = h_copyfile(contxt, cur->name, cur->copy,
+                                     back != false, mode);
+                    break;
+
+                case LG_DIR:
+                    // Make dir and replicate source protection bits.
+                    if(!h_makedir(contxt, cur->copy, mode) ||
+                       !h_protect_get(contxt, cur->name, &prm) ||
+                       !h_protect_set(contxt, cur->copy, prm))
+                    {
+                        // Could not create directory.
+                        grc = G_FALSE;
+                    }
+                    break;
+
+                // Invalid type.
+                default:
+                    PANIC(contxt);
+                    break;
+            }
+        }
+
+        // GUI teardown.
+        gui_copyfiles_end();
+
+        // Translate return code.
+        D_NUM = (grc == G_TRUE) ? LG_TRUE : LG_FALSE;
+    }
+
+    // Back return value.
+    entry_p ret = NULL;
+
+    // FIXME
+    if(grc != G_TRUE)
+    {
+        // Is the back option available?
+        if(back)
+        {
+            // Fake input?
+            if(get_numvar(contxt, "@back"))
+            {
+                grc = G_ABORT;
+            }
+
+            // On abort execute.
+            if(grc == G_ABORT)
+            {
+                ret = resolve(back);
+            }
+        }
+
+        // FIXME
+        if(grc == G_ABORT || grc == G_EXIT)
+        {
+            HALT;
+        }
+    }
+
+    cur = tree;
+
+    // Free list of files / dirs.
+    while(cur)
+    {
+        tree = cur;
+        free(cur->name);
+        free(cur->copy);
+        cur = cur->next;
+        free(tree);
+    }
+
+    // If we've executed any 'back' code, return its return value.
+    if(ret)
+    {
+        return ret;
     }
 
     // We don't know if we're successsful, at this point, return what we have.
@@ -1656,18 +1628,15 @@ entry_p m_copylib(entry_p contxt)
 
     // Set copy mode.
     int mode = CF_SILENT | (infos ? CF_INFOS : 0) |
-               (noposition ? CF_NOPOSITION : 0) |
-               (nogauge ? CF_NOGAUGE : 0) |
-               (nofail ? CF_NOFAIL : 0) |
-               (oknodelete ? CF_OKNODELETE : 0) |
-               (force ? CF_FORCE : 0) |
-               (askuser ? CF_ASKUSER : 0);
+               (noposition ? CF_NOPOSITION : 0) | (nogauge ? CF_NOGAUGE : 0) |
+               (nofail ? CF_NOFAIL : 0) | (oknodelete ? CF_OKNODELETE : 0) |
+               (force ? CF_FORCE : 0) | (askuser ? CF_ASKUSER : 0);
 
     // Get 'name' type info.
     type = h_exists(name);
 
-    // Currently there is no way to abort a file copy, but we need
-    // to handle the GUI return values anyway.
+    // There is no way to abort a file copy, but we need to handle the GUI
+    // return values anyway.
     inp_t grc = G_FALSE;
 
     // Are we overwriting a file?
@@ -1680,15 +1649,8 @@ entry_p m_copylib(entry_p contxt)
             // Is the version of the source file unknown?
             if(new < 0)
             {
-                if(h_confirm(
-                    contxt,
-                    "",
-                    "%s\n\n%s: %s\n%s\n\n%s: %s",
-                    str(prompt),
-                    tr(S_VINS),
-                    tr(S_VUNK),
-                    tr(S_NINS),
-                    tr(S_DDRW),
+                if(h_confirm(contxt, "", "%s\n\n%s: %s\n%s\n\n%s: %s",
+                    str(prompt), tr(S_VINS), tr(S_VUNK), tr(S_NINS), tr(S_DDRW),
                     dst))
                 {
                     grc = h_copyfile(contxt, src, name, back != false, mode);
@@ -1697,17 +1659,9 @@ entry_p m_copylib(entry_p contxt)
             // The version of the source file is known.
             else
             {
-                if(h_confirm(
-                    contxt,
-                    "",
-                    "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
-                    str(prompt),
-                    tr(S_VINS),
-                    new >> 16,
-                    new & 0xffff,
-                    tr(S_NINS),
-                    tr(S_DDRW),
-                    dst))
+                if(h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
+                    str(prompt), tr(S_VINS), new >> 16, new & 0xffff,
+                    tr(S_NINS), tr(S_DDRW), dst))
                 {
                     grc = h_copyfile(contxt, src, name, back != false, mode);
                 }
@@ -1741,19 +1695,10 @@ entry_p m_copylib(entry_p contxt)
                 // Is the version of the source file unknown?
                 if(new < 0)
                 {
-                    // Both target and source file have an unknown
-                    // version.
-                    if(h_confirm(
-                        contxt,
-                        "",
-                        "%s\n\n%s: %s\n%s: %s\n\n%s: %s",
-                        str(prompt),
-                        tr(S_VINS),
-                        tr(S_VUNK),
-                        tr(S_VCUR),
-                        tr(S_VUNK),
-                        tr(S_DDRW),
-                        dst))
+                    // Both target and source file have an unknown version.
+                    if(h_confirm(contxt, "", "%s\n\n%s: %s\n%s: %s\n\n%s: %s",
+                        str(prompt), tr(S_VINS), tr(S_VUNK), tr(S_VCUR),
+                        tr(S_VUNK), tr(S_DDRW), dst))
                     {
                         new = old + 1;
                     }
@@ -1764,20 +1709,12 @@ entry_p m_copylib(entry_p contxt)
                 }
                 else
                 {
-                    // The version of the source file is known, the
-                    // target version is unknown.
-                    if(h_confirm(
-                        contxt,
-                        "",
+                    // The source file is version is known, thh target version
+                    // is unknown.
+                    if(h_confirm(contxt, "",
                         "%s\n\n%s: %d.%d\n%s: %s\n\n%s: %s",
-                        str(prompt),
-                        tr(S_VINS),
-                        new >> 16,
-                        new & 0xffff,
-                        tr(S_VCUR),
-                        tr(S_VUNK),
-                        tr(S_DDRW),
-                        dst))
+                        str(prompt), tr(S_VINS), new >> 16, new & 0xffff,
+                        tr(S_VCUR), tr(S_VUNK), tr(S_DDRW), dst))
                     {
                         new = old + 1;
                     }
@@ -1797,78 +1734,48 @@ entry_p m_copylib(entry_p contxt)
         else
         {
             // Is the version of the source file unknown?
-            if(new < 0 && h_confirm(
-                contxt,
-                "",
-                "%s\n\n%s: %s\n%s: %d.%d\n\n%s: %s",
-                str(prompt),
-                tr(S_VINS),
-                tr(S_VUNK),
-                tr(S_VCUR),
-                old >> 16,
-                old & 0xffff,
-                tr(S_DDRW),
-                dst))
+            if(new < 0 && h_confirm(contxt, "",
+               "%s\n\n%s: %s\n%s: %d.%d\n\n%s: %s", str(prompt), tr(S_VINS),
+               tr(S_VUNK), tr(S_VCUR), old >> 16, old & 0xffff, tr(S_DDRW),
+               dst))
             {
                 new = old + 1;
                 confirm = NULL;
             }
         }
 
-        // Did we find a version not equal to that of the current
-        // file?
+        // Did we find a version not equal to that of the current file?
         if(new != old)
         {
-            // If we ask for confirmation and get it, copy the file
-            // no matter what version it (and the existing
-            // destination file) has.
+            // If we ask for confirmation and get it, copy the file no matter
+            // what version it (and the existing destination file) has.
             if(confirm)
             {
-                if(h_confirm(
-                    contxt,
-                    "",
-                    "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
-                    str(prompt),
-                    tr(S_VINS),
-                    new >> 16,
-                    new & 0xffff,
-                    tr(S_VCUR),
-                    old >> 16,
-                    old & 0xffff,
-                    tr(S_DDRW),
-                    dst))
+                if(h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
+                   str(prompt), tr(S_VINS), new >> 16, new & 0xffff, tr(S_VCUR),
+                   old >> 16, old & 0xffff, tr(S_DDRW), dst))
                 {
                     grc = h_copyfile(contxt, src, name, back != false, mode);
                 }
             }
             else
             {
-                // If the file to be copied has a higher version
-                // number than the existing one, overwrite.
+                // If the file to be copied has a higher version number than the
+                // existing one, overwrite.
                 if(new > old)
                 {
                     grc = h_copyfile(contxt, src, name, back != false, mode);
                 }
                 else
                 {
-                    // If the file to be copied has a lower version
-                    // number than the existing one, and we're in
-                    // expert mode, ask the user to confirm. If we
-                    // get a confirmation, overwrite.
+                    // If the file to be copied has a lower version number than
+                    // the existing one, and we're in expert mode, ask the user
+                    // to confirm. If we get a confirmation, overwrite.
                     if(get_numvar(contxt, "@user-level") == LG_EXPERT &&
-                       h_confirm(
-                            contxt,
-                            "",
-                            "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
-                            str(prompt),
-                            tr(S_VINS),
-                            new >> 16,
-                            new & 0xffff,
-                            tr(S_VCUR),
-                            old >> 16,
-                            old & 0xffff,
-                            tr(S_DDRW),
-                            dst))
+                       h_confirm(contxt, "",
+                       "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s", str(prompt),
+                       tr(S_VINS), new >> 16, new & 0xffff, tr(S_VCUR),
+                       old >> 16, old & 0xffff, tr(S_DDRW), dst))
                     {
                         grc = h_copyfile(contxt, src, name, back != false, mode);
                     }
@@ -1879,10 +1786,9 @@ entry_p m_copylib(entry_p contxt)
     // It's a dir.
     else
     {
-        // Only fail if we're in 'strict' mode.
+        // Dest file exists, but is a directory. Fail in strict mode.
         if(strict)
         {
-            // Dest file exists, but is a directory.
             ERR(ERR_NOT_A_FILE, name);
         }
     }
