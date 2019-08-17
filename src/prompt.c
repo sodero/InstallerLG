@@ -158,7 +158,7 @@ entry_p m_askchoice(entry_p contxt)
         off < 32; entry++)
     {
         // Resolve once.
-        char *opt = str(*entry);
+        char *opn = str(*entry);
 
         // Save skip deltas. See (1).
         add[ndx] = off - ndx;
@@ -169,7 +169,7 @@ entry_p m_askchoice(entry_p contxt)
         //    be invisible to the user, i.e. it will not be displayed on screen.
         //    By using variables you can easily set up a programable number of
         //    choices then while retaining the bit numbering.
-        if(*opt)
+        if(*opn)
         {
             // 2. Previous versions of Installer did not support proportional
             //    fonts well and some people depended on the non proportional
@@ -179,19 +179,19 @@ entry_p m_askchoice(entry_p contxt)
             //    `"<ESC>[2p"'. This escape sequence allows proportional
             //    rendering. It is wise to specify this only in the first
             //    choice of the list. Note this well.  (V42)
-            if(strlen(opt) > 3 && !memcmp("\x1B[2p", opt, 4))
+            if(strlen(opn) > 3 && !memcmp("\x1B[2p", opn, 4))
             {
                 // We rely on Zune / MUI for #2. Hide this control sequence if
                 // it exists.
-                opt += 4;
+                opn += 4;
             }
 
             // Make sure that the removal of the control sequence hasn't cleared
             // the string.
-            if(*opt)
+            if(*opn)
             {
                 // Something to show.
-                chs[ndx++] = opt;
+                chs[ndx++] = opn;
             }
         }
 

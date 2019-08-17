@@ -62,54 +62,54 @@ typedef enum
 //------------------------------------------------------------------------------
 typedef enum
 {
-    OPT_ALL,
-    OPT_APPEND,
-    OPT_ASSIGNS,
-    OPT_BACK,
-    OPT_CHOICES,
-    OPT_COMMAND,
-    OPT_COMPRESSION,
-    OPT_CONFIRM,
-    OPT_DEFAULT,
-    OPT_DELOPTS,
-    OPT_DEST,
-    OPT_DISK,
-    OPT_FILES,
-    OPT_FONTS,
-    OPT_GETDEFAULTTOOL,
-    OPT_GETPOSITION,
-    OPT_GETSTACK,
-    OPT_GETTOOLTYPE,
-    OPT_HELP,
-    OPT_INFOS,
-    OPT_INCLUDE,
-    OPT_NEWNAME,
-    OPT_NEWPATH,
-    OPT_NOGAUGE,
-    OPT_NOPOSITION,
-    OPT_NOREQ,
-    OPT_PATTERN,
-    OPT_PROMPT,
-    OPT_QUIET,
-    OPT_RANGE,
-    OPT_SAFE,
-    OPT_SETDEFAULTTOOL,
-    OPT_SETPOSITION,
-    OPT_SETSTACK,
-    OPT_SETTOOLTYPE,
-    OPT_SOURCE,
-    OPT_SWAPCOLORS,
-    OPT_OPTIONAL,
-    OPT_RESIDENT,
-    OPT_OVERRIDE,
-    OPT_ASKUSER,
-    OPT_FAIL,
-    OPT_FORCE,
-    OPT_NOFAIL,
-    OPT_OKNODELETE,
-    OPT_DYNOPT,
-    OPT_INIT,
-    OPT_LAST,
+    OPT_ALL,                // 0
+    OPT_APPEND,             // 1
+    OPT_ASSIGNS,            // 2
+    OPT_BACK,               // 3
+    OPT_CHOICES,            // 4
+    OPT_COMMAND,            // 5
+    OPT_COMPRESSION,        // 6
+    OPT_CONFIRM,            // 7
+    OPT_DEFAULT,            // 8
+    OPT_DELOPTS,            // 9
+    OPT_DEST,               // 10
+    OPT_DISK,               // 11
+    OPT_FILES,              // 12
+    OPT_FONTS,              // 13
+    OPT_GETDEFAULTTOOL,     // 14
+    OPT_GETPOSITION,        // 15
+    OPT_GETSTACK,           // 16
+    OPT_GETTOOLTYPE,        // 17
+    OPT_HELP,               // 18
+    OPT_INFOS,              // 19
+    OPT_INCLUDE,            // 20
+    OPT_NEWNAME,            // 21
+    OPT_NEWPATH,            // 22
+    OPT_NOGAUGE,            // 23
+    OPT_NOPOSITION,         // 24
+    OPT_NOREQ,              // 25
+    OPT_PATTERN,            // 26
+    OPT_PROMPT,             // 27
+    OPT_QUIET,              // 28
+    OPT_RANGE,              // 29
+    OPT_SAFE,               // 30
+    OPT_SETDEFAULTTOOL,     // 31
+    OPT_SETPOSITION,        // 32
+    OPT_SETSTACK,           // 33
+    OPT_SETTOOLTYPE,        // 34
+    OPT_SOURCE,             // 35
+    OPT_SWAPCOLORS,         // 36
+    OPT_OPTIONAL,           // 37
+    OPT_RESIDENT,           // 38
+    OPT_OVERRIDE,           // 39
+    OPT_ASKUSER,            // 40
+    OPT_FAIL,               // 41
+    OPT_FORCE,              // 42
+    OPT_NOFAIL,             // 43
+    OPT_OKNODELETE,         // 44
+    OPT_DYNOPT,             // 45
+    OPT_INIT,               // 46
+    OPT_LAST,               // 47
 } opt_t;
 
 //------------------------------------------------------------------------------
