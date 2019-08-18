@@ -252,7 +252,7 @@ int h_exists(const char *name)
 // Description: Get file part from full path.
 // Input:       entry_p contxt:     The execution context.
 //              const char *path:   Path to file.
-// Return:      const char *:       On success, file part of path, otherwise
+// Return:      const char *:       On success, file part of path, otherwise an
 //                                  empty string.
 //------------------------------------------------------------------------------
 static const char *h_fileonly(entry_p contxt, const char *path)
@@ -2749,7 +2749,6 @@ entry_p m_startup(entry_p contxt)
     // Two or more arguments / options.
     C_SANE(2, C_ARG(2));
 
-    char *cmd = NULL;
     const char *app = str(C_ARG(1));
 
     entry_p command  = opt(C_ARG(2), OPT_COMMAND),
@@ -2783,118 +2782,208 @@ entry_p m_startup(entry_p contxt)
     }
 
     // Gather and merge all (command) strings.
-    cmd = get_optstr(C_ARG(2), OPT_COMMAND);
+    char *cmd = get_optstr(C_ARG(2), OPT_COMMAND);
 
-    if(cmd)
+    if(!cmd)
     {
-        const char *fln = get_strvar(contxt, "@user-startup");
-        const size_t len = strlen(";BEGIN ") + strlen(app),
-                     ins = strlen(cmd) + 2;
+        // Out of memory.
+        PANIC(contxt);
+        R_NUM(LG_FALSE);
+    }
 
-        char *pre = DBG_ALLOC(calloc(len + 1, 1)),
-             *pst = DBG_ALLOC(calloc(len + 1, 1)),
-             *buf = NULL;
+    const char *fln = get_strvar(contxt, "@user-startup");
+    const size_t len = strlen(";BEGIN ") + strlen(app),
+                 ins = strlen(cmd) + 2;
 
-        if(pre && pst)
+    char *pre = DBG_ALLOC(calloc(len + 1, 1)),
+         *pst = DBG_ALLOC(calloc(len + 1, 1)),
+         *buf = NULL;
+
+    if(pre && pst)
+    {
+        // We don't need to write yet.
+        FILE *file = fopen(fln, "r");
+
+        // If the file doesn't exist, try to create it.
+        if(!file && !h_exists(fln))
         {
-            // We don't need to write yet.
-            FILE *file = fopen(fln, "r");
+            file = fopen(fln, "w");
 
-            // If the file doesn't exist, try to create it.
-            if(!file && !h_exists(fln))
-            {
-                file = fopen(fln, "w");
-
-                // If successful, close and reopen as read only.
-                if(file)
-                {
-                    fclose(file);
-                    file = fopen(fln, "r");
-                }
-            }
-
+            // If successful, close and reopen as read only.
             if(file)
             {
-                // Seek to the end so that we can use ftell below to get the
-                // size of the file.
-                if(!fseek(file, 0L, SEEK_END))
+                fclose(file);
+                file = fopen(fln, "r");
+            }
+        }
+
+        if(file)
+        {
+            // Seek to the end so that we can use ftell below to get the
+            // size of the file.
+            if(!fseek(file, 0L, SEEK_END))
+            {
+                // Worst case: empty file + 3 NL + terminating 0 + BEGIN
+                // and END markers + command.
+                size_t osz = (size_t) ftell(file),
+                       nsz = osz + 2 * len + ins;
+
+                // Allocate enough memory so that we can keep the old file
+                // + any changes that we need to do in memory at the same
+                // time.
+                buf = DBG_ALLOC(calloc(nsz, 1));
+
+                if(buf)
                 {
-                    // Worst case: empty file + 3 NL + terminating 0 + BEGIN
-                    // and END markers + command.
-                    size_t osz = (size_t) ftell(file),
-                           nsz = osz + 2 * len + ins;
-
-                    // Allocate enough memory so that we can keep the old file
-                    // + any changes that we need to do in memory at the same
-                    // time.
-                    buf = DBG_ALLOC(calloc(nsz, 1));
-
-                    if(buf)
+                    // Read the whole file in one go.
+                    if(!fseek(file, 0L, SEEK_SET) &&
+                        fread(buf, 1, osz, file) == osz)
                     {
-                        // Read the whole file in one go.
-                        if(!fseek(file, 0L, SEEK_SET) &&
-                            fread(buf, 1, osz, file) == osz)
+                        // Prepare the header and footer.
+                        snprintf(pre, len + 1, ";BEGIN %s", app);
+                        snprintf(pst, len + 1, ";END %s", app);
+
+                        // Do we already have an entry in the current file?
+                        char *beg = strstr(buf, pre),
+                             *fin = strstr(buf, pst);
+
+                        // Replace the current entry by inserting the new
+                        // one at the same location.
+                        if(beg && fin)
                         {
-                            // Prepare the header and footer.
-                            snprintf(pre, len + 1, ";BEGIN %s", app);
-                            snprintf(pst, len + 1, ";END %s", app);
+                            // Move the tail of the buffer to the right
+                            // place.
+                            memmove(beg + len + ins, fin, (buf + osz) - fin + 1);
 
-                            // Do we already have an entry in the current file?
-                            char *beg = strstr(buf, pre),
-                                 *fin = strstr(buf, pst);
+                            // Insert the command string.
+                            memcpy(beg + len + 1, cmd, ins - 2);
 
-                            // Replace the current entry by inserting the new
-                            // one at the same location.
-                            if(beg && fin)
-                            {
-                                // Move the tail of the buffer to the right
-                                // place.
-                                memmove(beg + len + ins, fin, (buf + osz) - fin + 1);
-
-                                // Insert the command string.
-                                memcpy(beg + len + 1, cmd, ins - 2);
-
-                                // Add surrounding line feeds so that the
-                                // command won't end up being a comment.
-                                beg[len + ins - 1] = beg[len] = '\n';
-                            }
-                            // No existing entry. Append the new entry.
-                            else
-                            {
-                                // Header.
-                                memcpy(buf + osz, pre, len);
-
-                                // Command.
-                                memcpy(buf + osz + len + 1, cmd, ins - 2);
-
-                                // Footer.
-                                memcpy(buf + osz + len + ins, pst, len);
-
-                                // Add surrounding line feeds so that the
-                                // command won't end up being a comment.
-                                buf[osz + len + ins - 1] = buf[osz + len] = '\n';
-
-                                // Add a newline at the end.
-                                buf[osz + len + ins + strlen(pst)] = '\n';
-                            }
+                            // Add surrounding line feeds so that the
+                            // command won't end up being a comment.
+                            beg[len + ins - 1] = beg[len] = '\n';
                         }
+                        // No existing entry. Append the new entry.
                         else
                         {
-                            // Read problem, error will be set further down if
-                            // buf == NULL.
-                            free(buf);
-                            buf = NULL;
+                            // Header.
+                            memcpy(buf + osz, pre, len);
+
+                            // Command.
+                            memcpy(buf + osz + len + 1, cmd, ins - 2);
+
+                            // Footer.
+                            memcpy(buf + osz + len + ins, pst, len);
+
+                            // Add surrounding line feeds so that the
+                            // command won't end up being a comment.
+                            buf[osz + len + ins - 1] = buf[osz + len] = '\n';
+
+                            // Add a newline at the end.
+                            buf[osz + len + ins + strlen(pst)] = '\n';
                         }
                     }
                     else
                     {
-                        // Out of memory
-                        PANIC(contxt);
+                        // Read problem, error will be set further down if
+                        // buf == NULL.
+                        free(buf);
+                        buf = NULL;
                     }
                 }
+                else
+                {
+                    // Out of memory
+                    PANIC(contxt);
+                }
+            }
 
-                // Reading done.
-                fclose(file);
+            // Reading done.
+            fclose(file);
+        }
+    }
+    else
+    {
+        // Out of memory
+        PANIC(contxt);
+    }
+
+    // We have no longer any use for the header, footer or command string.
+    free(pre);
+    free(pst);
+    free(cmd);
+
+    // If we have a buffer everything wen't fine above. Go ahead and write
+    // buffer to file.
+    if(buf)
+    {
+        // Use a temporary file to make sure that we don't mess up the
+        // current file if disk space becomes a problem, the system crashes,
+        // the power is lost and so on and so forth.
+        size_t tln = strlen(fln) + sizeof(".XXXXXX\0");
+        char *tmp = DBG_ALLOC(calloc(tln, 1));
+
+        if(tmp)
+        {
+            // Create temporary file.
+            snprintf(tmp, tln, "%s.XXXXXX", fln);
+            FILE *file = fdopen(mkstemp(tmp), "w");
+
+            if(file)
+            {
+                // Write everything to the temporary file at once.
+                if(fputs(buf, file) == EOF)
+                {
+                    // Failure. Could not write to disk. The old file is
+                    // still intact.
+                    fclose(file);
+                }
+                else
+                {
+                    // Close file and release buffer.
+                    fclose(file);
+                    free(buf);
+                    buf = NULL;
+
+                    // Open the target file just to make sure that we have
+                    // write permissions.
+                    file = fopen(fln, "a");
+
+                    if(file)
+                    {
+                        // Close it immediately, we're not going to write
+                        // directly to it.
+                        fclose(file);
+
+                        // Do a less un-atomic write to the real file by
+                        // renaming the temporary file.
+                        if(!rename(tmp, fln))
+                        {
+                            // We're done.
+                            free(tmp);
+                            tmp = NULL;
+                            D_NUM = LG_TRUE;
+                        }
+                    }
+                    else
+                    {
+                        // We aren't allowed to write data to the target
+                        // file so we need to clean up. We don't want old
+                        // temp files laying around.
+                        if(remove(tmp))
+                        {
+                            // This is highly unlikely, but why not?
+                            ERR(ERR_WRITE_FILE, tmp);
+                        }
+                    }
+                }
+            }
+
+            // If we haven't released tmp by now, we failed when attempting
+            // one of the write operations above.
+            if(tmp)
+            {
+                ERR(ERR_WRITE_FILE, fln);
+                free(tmp);
             }
         }
         else
@@ -2903,105 +2992,14 @@ entry_p m_startup(entry_p contxt)
             PANIC(contxt);
         }
 
-        // We have no longer any use for the header, footer or command string.
-        free(pre);
-        free(pst);
-        free(cmd);
-
-        // If we have a buffer everything wen't fine above. Go ahead and write
-        // buffer to file.
-        if(buf)
-        {
-            // Use a temporary file to make sure that we don't mess up the
-            // current file if disk space becomes a problem, the system crashes,
-            // the power is lost and so on and so forth.
-            size_t tln = strlen(fln) + sizeof(".XXXXXX\0");
-            char *tmp = DBG_ALLOC(calloc(tln, 1));
-
-            if(tmp)
-            {
-                // Create temporary file.
-                snprintf(tmp, tln, "%s.XXXXXX", fln);
-                FILE *file = fdopen(mkstemp(tmp), "w");
-
-                if(file)
-                {
-                    // Write everything to the temporary file at once.
-                    if(fputs(buf, file) == EOF)
-                    {
-                        // Failure. Could not write to disk. The old file is
-                        // still intact.
-                        fclose(file);
-                    }
-                    else
-                    {
-                        // Close file and release buffer.
-                        fclose(file);
-                        free(buf);
-                        buf = NULL;
-
-                        // Open the target file just to make sure that we have
-                        // write permissions.
-                        file = fopen(fln, "a");
-
-                        if(file)
-                        {
-                            // Close it immediately, we're not going to write
-                            // directly to it.
-                            fclose(file);
-
-                            // Do a less un-atomic write to the real file by
-                            // renaming the temporary file.
-                            if(!rename(tmp, fln))
-                            {
-                                // We're done.
-                                free(tmp);
-                                tmp = NULL;
-                                D_NUM = LG_TRUE;
-                            }
-                        }
-                        else
-                        {
-                            // We aren't allowed to write data to the target
-                            // file so we need to clean up. We don't want old
-                            // temp files laying around.
-                            if(remove(tmp))
-                            {
-                                // This is highly unlikely, but why not?
-                                ERR(ERR_WRITE_FILE, tmp);
-                            }
-                        }
-                    }
-                }
-
-                // If we haven't released tmp by now, we failed when attempting
-                // one of the write operations above.
-                if(tmp)
-                {
-                    ERR(ERR_WRITE_FILE, fln);
-                    free(tmp);
-                }
-            }
-            else
-            {
-                // Out of memory
-                PANIC(contxt);
-            }
-
-            // We no longer need the buffer holding the new file contents.
-            free(buf);
-        }
-        else
-        {
-            // No buffer == read problem, or out of memory but then we already
-            // have a PANIC.
-            ERR(ERR_READ_FILE, fln);
-        }
+        // We no longer need the buffer holding the new file contents.
+        free(buf);
     }
     else
     {
-        // Out of memory.
-        PANIC(contxt);
+        // No buffer == read problem, or out of memory but then we already
+        // have a PANIC.
+        ERR(ERR_READ_FILE, fln);
     }
 
     // Success, failure or out of memory.
@@ -3548,10 +3546,7 @@ void h_log(entry_p contxt, const char *fmt, ...)
     }
 
     // Use the log file set in init(..) or by the user.
-    const char *log = get_strvar(contxt, "@log-file");
-
-    // Don't care about existing files, just append.
-    FILE *file = fopen(log, "a");
+    FILE *file = fopen(get_strvar(contxt, "@log-file"), "a");
     int cnt = -1;
 
     if(file)
@@ -3570,12 +3565,13 @@ void h_log(entry_p contxt, const char *fmt, ...)
             va_end(arg);
         }
 
+        // Done.
         fclose(file);
     }
 
     // Could we open the file AND write all data to it?
     if(cnt < 0)
     {
-        ERR(ERR_WRITE_FILE, log);
+        ERR(ERR_WRITE_FILE, get_strvar(contxt, "@log-file"));
     }
 }
