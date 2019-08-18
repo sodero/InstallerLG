@@ -2521,7 +2521,7 @@ entry_p m_makeassign(entry_p contxt)
         // Remove assign.
         res = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? LG_TRUE : LG_FALSE;
         #else
-        res = LG_TEST;
+        res = LG_FAKE;
         #endif
 
         // Log the outcome.
