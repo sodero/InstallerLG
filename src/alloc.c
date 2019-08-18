@@ -39,7 +39,6 @@ entry_p new_contxt(void)
 
         if(symbols && children)
         {
-            // Type + above.
             entry->type = CONTXT;
             entry->symbols = symbols;
             entry->children = children;
@@ -47,8 +46,6 @@ entry_p new_contxt(void)
             // Set sentinel values.
             entry->symbols[LG_VECLEN] = end();
             entry->children[LG_VECLEN] = end();
-
-            // Success.
             return entry;
         }
 
@@ -80,8 +77,6 @@ entry_p new_number(int num)
         // The value of a NUMBER equals its ID.
         entry->type = NUMBER;
         entry->id = num;
-
-        // Success.
         return entry;
     }
 
@@ -110,14 +105,12 @@ entry_p new_string(char *name)
             // The value of a string equals its name.
             entry->type = STRING;
             entry->name = name;
-
-            // Success.
             return entry;
         }
     }
 
-    // All or nothing. Since we own 'name', we need to free it here, or
-    // else it will leak when out of memory.
+    // All or nothing. Since we own 'name', we need to free it here, or else it
+    // will leak when out of memory.
     free(name);
 
     // Out of memory / bad input.
@@ -147,14 +140,12 @@ entry_p new_symbol(char *name)
             entry->resolved = end();
             entry->type = SYMBOL;
             entry->name = name;
-
-            // Success.
             return entry;
         }
     }
 
-    // All or nothing. Since we own 'name', we need to free it here, or
-    // else it will leak when out of memory.
+    // All or nothing. Since we own 'name', we need to free it here, or else it
+    // will leak when out of memory.
     free(name);
 
     // Out of memory / bad input.
@@ -197,8 +188,7 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
                 sym->symbols = NULL;
                 kill(sym);
 
-                // Reparent all symbols. The return value will be dangeling
-                // for now.
+                // Reparent all symbols. Initially the return value will dangle.
                 for(entry_p *cur = entry->symbols; *cur && *cur != end(); cur++)
                 {
                     (*cur)->parent = entry;
@@ -209,7 +199,6 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
             // We're finished if we dont't have any children to adopt.
             if(!chl || !chl->children)
             {
-                // Success.
                 return entry;
             }
 
@@ -224,7 +213,6 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
                 (*cur)->parent = entry;
             }
 
-            // Success.
             return entry;
         }
     }
@@ -263,8 +251,6 @@ entry_p new_symref(char *name, int line)
             entry->type = SYMREF;
             entry->name = name;
             entry->id = line;
-
-            // Success.
             return entry;
         }
     }
@@ -288,38 +274,33 @@ entry_p new_symref(char *name, int line)
 //------------------------------------------------------------------------------
 static void move_contxt(entry_p dst, entry_p src)
 {
-    // Sanity check.
-    if(dst && src)
+    if(!dst || !src)
     {
-        // Iter.
-        entry_p *sym = dst->symbols = src->symbols,
-                *chl = dst->children = src->children;
-
-        // Reparent children.
-        while(*chl && *chl != end())
-        {
-            (*chl)->parent = dst;
-            chl++;
-        }
-
-        // Reparent symbols.
-        while(*sym && *sym != end())
-        {
-            (*sym)->parent = dst;
-            sym++;
-        }
-
-        // Free the source.
-        src->children = NULL;
-        src->symbols = NULL;
-        kill(src);
-
-        // Success.
-        return;
+        // Invalid input.
+        PANIC(NULL);
     }
 
-    // Invalid input.
-    PANIC(NULL);
+    entry_p *sym = dst->symbols = src->symbols,
+            *chl = dst->children = src->children;
+
+    // Reparent children.
+    while(*chl && *chl != end())
+    {
+        (*chl)->parent = dst;
+        chl++;
+    }
+
+    // Reparent symbols.
+    while(*sym && *sym != end())
+    {
+        (*sym)->parent = dst;
+        sym++;
+    }
+
+    // Free the source.
+    src->children = NULL;
+    src->symbols = NULL;
+    kill(src);
 }
 
 //------------------------------------------------------------------------------
@@ -400,36 +381,38 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
 {
     // Although not strictly necessary, we required a name of the option. For
     // debugging purposes.
-    if(name)
+    if(!name)
     {
-        // We rely on everything being set to '0'
-        entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
+        PANIC(NULL);
+        return NULL;
+    }
 
-        if(entry)
+    // We rely on everything being set to '0'
+    entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
+
+    if(entry)
+    {
+        // Let the type be our ID.
+        entry->id = (int) type;
+        entry->type = OPTION;
+        entry->name = name;
+
+        // Adopt contents of CONTXT, if there is any.
+        if(chl && chl->type == CONTXT)
         {
-            // Let the type be our ID.
-            entry->id = (int) type;
-            entry->type = OPTION;
-            entry->name = name;
-
-            // Adopt contents of CONTXT, if there is any.
-            if(chl && chl->type == CONTXT)
-            {
-                // This is for options that contain more info than just 1 / 0,
-                // e.g delopts and command.
-                move_contxt(entry, chl);
-            }
-
-            // Dynamic options must be resolved.
-            if(type == OPT_DYNOPT)
-            {
-                // Set callback. Only (if) is allowed.
-                entry->call = m_if;
-            }
-
-            // Success.
-            return entry;
+            // This is for options that contain more info than just 1 / 0, E.g
+            // (delopts) and (command).
+            move_contxt(entry, chl);
         }
+
+        // Dynamic options must be resolved.
+        if(type == OPT_DYNOPT)
+        {
+            // Set callback. Only (if) is allowed.
+            entry->call = m_if;
+        }
+
+        return entry;
     }
 
     // All or nothing. Since we own 'name' and 'chl' we need to free them, or
@@ -437,7 +420,7 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
     free(name);
     kill(chl);
 
-    // Out of memory / bad input.
+    // Out of memory.
     PANIC(NULL);
     return NULL;
 }
@@ -476,7 +459,6 @@ entry_p new_cusref(char *name, int line, entry_p arg)
                 move_contxt(entry, arg);
             }
 
-            // Success.
             return entry;
         }
     }

@@ -166,6 +166,7 @@ entry_p m_onerror(entry_p contxt)
     }
 
     // @onerror not found. Init is broken.
+    PANIC(contxt);
     R_CUR;
 }
 
