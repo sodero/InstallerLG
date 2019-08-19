@@ -80,17 +80,19 @@ entry_p m_exit(entry_p contxt)
         // Concatenate all children.
         char *msg = get_chlstr(contxt, false);
 
-        // Make sure that we're not out of memory and that all children are
-        // resolvable.
         if((!msg && PANIC(contxt)) || DID_ERR)
         {
+            // Non resolvable children or out of memory.
             free(msg);
             R_NUM(LG_FALSE);
         }
 
-        // Show the result and free buffer.
-        gui_finish(msg);
-        free(msg);
+        // Show non-empty message and free buffer.
+        if(*msg)
+        {
+            gui_finish(msg);
+            free(msg);
+        }
     }
 
     // Show final message unless 'quiet' is set.
