@@ -87,12 +87,14 @@ entry_p m_exit(entry_p contxt)
             R_NUM(LG_FALSE);
         }
 
-        // Show non-empty message and free buffer.
+        // Show the result of the concatenation unless it's empty.
         if(*msg)
         {
             gui_finish(msg);
-            free(msg);
         }
+
+        // Free temporary buffer.
+        free(msg);
     }
 
     // Show final message unless 'quiet' is set.
