@@ -44,6 +44,7 @@
 
 #ifndef __GNUC__
 #define __attribute__(a)
+typedef LONG IPTR;
 #endif
 
 #ifdef AMIGA
@@ -64,7 +65,14 @@
   { TRAP_LIB, 0, (void (*) (void)) C ## Dispatch }; \
   struct C ## Data
 #else
+# ifndef __VBCC__
 # define DoSuperNew(C,O,...) DoSuperNewTags(C,O,NULL,__VA_ARGS__)
+#else
+APTR STDARGS DoSuperNew(struct IClass *cl, APTR obj, ULONG tag1, ...)
+{
+	return (IPTR) DoSuperMethod(cl, obj, OM_NEW, &tag1, NULL);
+}
+# endif
 # define DISPATCH_HEAD
 # define DISPATCH_ARGS Class *cls, Object *obj, Msg msg
 # define DISPATCH_GATE(C) C ## Dispatch
@@ -2425,13 +2433,13 @@ static inline IPTR IGNew(Class *cls, Object *obj,
     // The GUI is, as far as possible, a static construct. We're not
     // constructing things on the fly, instead we use paging to let
     // widgets become visible / disappear.
-#ifndef __VBCC__
     obj = (Object *) DoSuperNew
     (
         cls, obj,
         MUIA_Window_Title, tr(S_INST),
         MUIA_Window_AppWindow, TRUE,
         scr ? MUIA_Window_Screen : TAG_IGNORE, scr,
+#ifndef __VBCC__
         MUIA_Window_RootObject, MUI_NewObject(
             MUIC_Group,
             MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
@@ -2704,9 +2712,9 @@ static inline IPTR IGNew(Class *cls, Object *obj,
                     TAG_END),
                 TAG_END),
             TAG_END),
+#endif
         TAG_END
     );
-#endif
 
     // Initialize the rest if the parent is OK.
     if(obj)

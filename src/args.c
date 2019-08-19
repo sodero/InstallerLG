@@ -27,6 +27,10 @@ static struct RDArgs *rda;
 static struct DiskObject *dob;
 #endif
 
+#ifdef __VBCC__
+typedef LONG IPTR;
+#endif
+
 static char *args[ARG_NUMBER_OF];
 
 //------------------------------------------------------------------------------
@@ -59,11 +63,7 @@ bool arg_init(int argc, char **argv)
             "LOGFILE/K,"
             "NOLOG/S,"
             "NOPRETEND/S",
-        #ifdef __VBCC__
-            (LONG *) args,
-        #else
             (IPTR *) args,
-        #endif
             NULL
         );
     }
