@@ -3369,6 +3369,8 @@ inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst,
     // Testing purposes.
     if(lst)
     {
+        // Start copy.
+        puts("sc");
         if(cnf)
         {
             printf("%s%s%d\n", msg ? msg : "", hlp ? hlp : "", bck);
@@ -3393,10 +3395,7 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
     #if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesSetCur, cur, nga, bck);
     #else
-    (void) cur;
-    (void) nga;
-    (void) bck;
-
+    printf("%s%d%d\n", cur ? cur : "x", nga, bck);
     return G_TRUE;
     #endif
 }
@@ -3411,6 +3410,9 @@ void gui_copyfiles_end(void)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CopyFilesEnd);
+    #else
+    // End copy.
+    puts("ec");
     #endif
 }
 

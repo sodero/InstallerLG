@@ -565,9 +565,9 @@ char *h_tackon(entry_p contxt, const char *pre, const char *suf)
 
     // If the path is empty, the result equals the filename. If the filename is
     // empty, the result equals the path.
-    char *ret = lep ? les ? NULL : DBG_ALLOC(strdup(pre)) 
+    char *ret = lep ? les ? NULL : DBG_ALLOC(strdup(pre))
                                  : DBG_ALLOC(strdup(suf));
-        
+
     // Are we done already?
     if(ret)
     {

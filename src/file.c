@@ -1053,81 +1053,84 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
     fclose(dest);
 
     // The number of bytes read and not written should be zero.
-    if(!cnt)
+    if(cnt)
     {
-        // Write to the log file (if logging is enabled).
-        h_log(contxt, tr(S_CPYD), src, dst);
+        // Error or user abort.
+        return grc;
+    }
 
-        // Are we going to copy the icon as well?
-        if(mde & CF_INFOS)
+    // Write to the log file (if logging is enabled).
+    h_log(contxt, tr(S_CPYD), src, dst);
+
+    // Are we going to copy the icon as well?
+    if(mde & CF_INFOS)
+    {
+        // The source icon.
+        static char icon[PATH_MAX];
+        snprintf(icon, sizeof(icon), "%s.info", src);
+
+        // Only if it exists, it's not an error if it's
+        // missing.
+        if(h_exists(icon) == LG_FILE)
         {
-            // The source icon.
-            static char icon[PATH_MAX];
-            snprintf(icon, sizeof(icon), "%s.info", src);
+            static char copy[PATH_MAX];
 
-            // Only if it exists, it's not an error if it's
-            // missing.
-            if(h_exists(icon) == LG_FILE)
+            // The destination icon.
+            snprintf(copy, sizeof(copy), "%s.info", dst);
+
+            // Recur without info set.
+            grc = h_copyfile(contxt, icon, copy, bck,
+                             mde & ~CF_INFOS);
+
+            #if defined(AMIGA) && !defined(LG_TEST)
+            // Reset icon position?
+            if(grc == G_TRUE && mde & CF_NOPOSITION)
             {
-                static char copy[PATH_MAX];
+                struct DiskObject *obj = (struct DiskObject *)
+                    GetDiskObject(dst);
 
-                // The destination icon.
-                snprintf(copy, sizeof(copy), "%s.info", dst);
-
-                // Recur without info set.
-                grc = h_copyfile(contxt, icon, copy, bck,
-                                 mde & ~CF_INFOS);
-
-                #if defined(AMIGA) && !defined(LG_TEST)
-                // Reset icon position?
-                if(grc == G_TRUE && mde & CF_NOPOSITION)
+                if(obj)
                 {
-                    struct DiskObject *obj = (struct DiskObject *)
-                        GetDiskObject(dst);
+                    // Reset icon position.
+                    obj->do_CurrentX = NO_ICON_POSITION;
+                    obj->do_CurrentY = NO_ICON_POSITION;
 
-                    if(obj)
+                    // Save the changes to the .info file.
+                    if(!PutDiskObject(dst, obj))
                     {
-                        // Reset icon position.
-                        obj->do_CurrentX = NO_ICON_POSITION;
-                        obj->do_CurrentY = NO_ICON_POSITION;
-
-                        // Save the changes to the .info file.
-                        if(!PutDiskObject(dst, obj))
-                        {
-                            // We failed for some unknown reason.
-                            ERR(ERR_WRITE_FILE, copy);
-                            grc = G_FALSE;
-                        }
-
-                        FreeDiskObject(obj);
+                        // We failed for some unknown reason.
+                        ERR(ERR_WRITE_FILE, copy);
+                        grc = G_FALSE;
                     }
+
+                    FreeDiskObject(obj);
                 }
-                #endif
             }
+            #endif
         }
+    }
 
-        // Preserve file permissions. On error, code will be set
-        // by h_protect_x().
-        int32_t prm = 0;
+    // Preserve file permissions. On error, code will be set
+    // by h_protect_x().
+    int32_t prm = 0;
 
-        if(h_protect_get(contxt, src, &prm))
+    if(h_protect_get(contxt, src, &prm))
+    {
+        h_protect_set(contxt, dst, prm);
+    }
+
+    // Reset error codes if necessary.
+    if(DID_ERR)
+    {
+        if(mde & CF_NOFAIL)
         {
-            h_protect_set(contxt, dst, prm);
+            // Forget all errors.
+            RESET;
         }
-
-        // Reset error codes if necessary.
-        if(DID_ERR)
+        else
         {
-            if(mde & CF_NOFAIL)
-            {
-                // Forget all errors.
-                RESET;
-            }
-            else
-            {
-                // Fail for real.
-                grc = G_ABORT;
-            }
+            // Fail for real.
+            grc = G_ABORT;
         }
     }
 
@@ -1450,12 +1453,12 @@ entry_p m_copyfiles(entry_p contxt)
             }
         }
 
-        // GUI teardown.
-        gui_copyfiles_end();
-
         // Translate return code.
         D_NUM = (grc == G_TRUE) ? LG_TRUE : LG_FALSE;
     }
+
+    // GUI teardown.
+    gui_copyfiles_end();
 
     // Back return value.
     entry_p ret = NULL;
@@ -2819,18 +2822,17 @@ entry_p m_startup(entry_p contxt)
 
         if(file)
         {
-            // Seek to the end so that we can use ftell below to get the
-            // size of the file.
+            // Seek to the end so that we can use ftell below to get the size of
+            // the file.
             if(!fseek(file, 0L, SEEK_END))
             {
-                // Worst case: empty file + 3 NL + terminating 0 + BEGIN
-                // and END markers + command.
+                // Worst case: empty file + 3 NL + terminating 0 + BEGIN and END
+                // markers + command.
                 size_t osz = (size_t) ftell(file),
                        nsz = osz + 2 * len + ins;
 
-                // Allocate enough memory so that we can keep the old file
-                // + any changes that we need to do in memory at the same
-                // time.
+                // Allocate enough memory so that we can keep the old file + any
+                // changes that we need to do in memory at the same time.
                 buf = DBG_ALLOC(calloc(nsz, 1));
 
                 if(buf)
@@ -2844,8 +2846,7 @@ entry_p m_startup(entry_p contxt)
                         snprintf(pst, len + 1, ";END %s", app);
 
                         // Do we already have an entry in the current file?
-                        char *beg = strstr(buf, pre),
-                             *fin = strstr(buf, pst);
+                        char *beg = strstr(buf, pre), *fin = strstr(buf, pst);
 
                         // Replace the current entry by inserting the new
                         // one at the same location.
@@ -2858,8 +2859,8 @@ entry_p m_startup(entry_p contxt)
                             // Insert the command string.
                             memcpy(beg + len + 1, cmd, ins - 2);
 
-                            // Add surrounding line feeds so that the
-                            // command won't end up being a comment.
+                            // Add surrounding line feeds so that the command
+                            // won't end up being a comment.
                             beg[len + ins - 1] = beg[len] = '\n';
                         }
                         // No existing entry. Append the new entry.
@@ -2874,8 +2875,8 @@ entry_p m_startup(entry_p contxt)
                             // Footer.
                             memcpy(buf + osz + len + ins, pst, len);
 
-                            // Add surrounding line feeds so that the
-                            // command won't end up being a comment.
+                            // Add surrounding line feeds so that the command
+                            // won't end up being a comment.
                             buf[osz + len + ins - 1] = buf[osz + len] = '\n';
 
                             // Add a newline at the end.
@@ -2971,7 +2972,6 @@ entry_p m_startup(entry_p contxt)
                         // temp files laying around.
                         if(remove(tmp))
                         {
-                            // This is highly unlikely, but why not?
                             ERR(ERR_WRITE_FILE, tmp);
                         }
                     }
