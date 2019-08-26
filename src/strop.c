@@ -565,18 +565,22 @@ char *h_tackon(entry_p contxt, const char *pre, const char *suf)
 
     // If the path is empty, the result equals the filename. If the filename is
     // empty, the result equals the path.
-    char *ret = lep ? les ? NULL : DBG_ALLOC(strdup(pre))
-                                 : DBG_ALLOC(strdup(suf));
-
-    // Are we done already?
-    if(ret)
+    if(!lep || !les)
     {
+        char *ret = DBG_ALLOC(strdup(lep ? pre : suf));
+
+        if(!ret)
+        {
+            // Out of memory.
+            PANIC(contxt);
+        }
+
         return ret;
     }
 
     // Allocate memory to hold path, filename, delimiter and termination.
     size_t let = lep + les + 2;
-    ret = DBG_ALLOC(calloc(let, 1));
+    char *ret = DBG_ALLOC(calloc(let, 1));
 
     if(!ret)
     {
