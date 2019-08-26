@@ -3395,7 +3395,9 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
     #if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesSetCur, cur, nga, bck);
     #else
-    printf("%s%d%d\n", cur ? cur : "x", nga, bck);
+    (void) cur;
+    (void) nga;
+    (void) bck;
     return G_TRUE;
     #endif
 }
