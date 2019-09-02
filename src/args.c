@@ -9,6 +9,7 @@
 
 #include "args.h"
 #include "resource.h"
+#include "util.h"
 
 #ifdef AMIGA
 #include <proto/dos.h>
@@ -19,6 +20,7 @@
 
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 // Argument / tooltype support.
@@ -33,6 +35,74 @@ typedef LONG IPTR;
 
 static char *args[ARG_NUMBER_OF];
 
+static bool arg_post(void)
+{
+    if(!args[ARG_SCRIPT])
+    {
+        // Bad input.
+        return false;
+    }
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    BPTR lock = (BPTR) Lock(args[ARG_SCRIPT], ACCESS_READ);
+
+    if(!lock || !NameFromLock(lock, get_buf(), buf_size()))
+    {
+        // Read error or buffer to small.
+        UnLock(lock);
+        return false;
+    }
+
+    UnLock(lock);
+    #else
+    snprintf(get_buf(), buf_size(), "./%s", args[ARG_SCRIPT]);
+    #endif
+
+    args[ARG_SCRIPT] = DBG_ALLOC(strdup(get_buf()));
+
+    for(size_t arg = ARG_APPNAME; arg < ARG_NUMBER_OF; arg++)
+    {
+        if(!args[arg])
+        {
+            continue;
+        }
+
+        args[arg] =  DBG_ALLOC(strdup(args[arg]));
+    }
+
+    return true;
+}
+
+static bool arg_cli(int argc, char **argv)
+{
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Use the builtin commandline parser.
+    struct RDArgs *rda = (struct RDArgs *) ReadArgs("SCRIPT/A,APPNAME/K,"
+                                                    "MINUSER/K,DEFUSER/K,"
+                                                    "LANGUAGE/K,LOGFILE/K,"
+                                                    "NOLOG/S,NOPRETEND/S",
+                                                    (IPTR *) args, NULL);
+    // Post process parser output.
+    bool ret = arg_post();
+
+    // We no longer need this struct, a deep copy is done in arg_post().
+    FreeArgs(rda)
+    return ret;
+    #else
+    // On non-AMIGA systems, or in test mode, only the script name is supported.
+    if(argc < 2)
+    {
+        // Missing argument(s)
+        fputs(tr(S_RQMS), stderr);
+        return false;
+    }
+
+    // On non Amigas this is the only argument we can handle.
+    args[ARG_SCRIPT] = argv[1];
+    return arg_post();
+    #endif
+}
+
 //------------------------------------------------------------------------------
 // Name:        arg_init
 // Description: Initialization. Must be invoked before arg_get(). This will
@@ -45,6 +115,11 @@ bool arg_init(int argc, char **argv)
 {
     // Save argc, used later to determine whether we are invoked from CLI or WB.
     arg_argc(argc);
+
+    if(argc)
+    {
+        return arg_cli(argc, argv);
+    }
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // Invoked from the command line.
@@ -255,4 +330,10 @@ void arg_done(void)
         rda = NULL;
     }
     #endif
+
+    for(size_t arg = ARG_SCRIPT; arg < ARG_NUMBER_OF; arg++)
+    {
+//      if(args[arg]) printf("freeing:%p\n", args[arg]);
+        free(args[arg]);
+    }
 }
