@@ -23,12 +23,6 @@
 #include <string.h>
 #include <unistd.h>
 
-// Argument / tooltype support.
-#ifdef AMIGA
-static struct RDArgs *rda;
-static struct DiskObject *dob;
-#endif
-
 #ifdef __VBCC__
 typedef LONG IPTR;
 #endif
@@ -103,6 +97,57 @@ static bool arg_cli(int argc, char **argv)
     #endif
 }
 
+static bool arg_wb(int argc, char **argv)
+{
+    #if defined(AMIGA) && !defined(LG_TEST)
+    struct WBStartup *wb = (struct WBStartup *) argv;
+
+    // We must be invoked using a tool or a project.
+    if(!wb || (wb->sm_NumArgs != 1 && wb->sm_NumArgs != 2))
+    {
+        return false;
+    }
+
+    struct WBArg *arg;
+
+    // Are we being invoked using a 'tool'?
+    if(wb->sm_NumArgs == 1)
+    {
+        arg = wb->sm_ArgList;
+    }
+    // We're being invoked using a 'project'.
+    else
+    {
+        arg = wb->sm_ArgList + 1;
+    }
+
+    if(!arg)
+    {
+        // Unkown error.
+        return false;
+    }
+
+    // Change directory if applicable.
+    if(arg->wa_Lock)
+    {
+        CurrentDir(arg->wa_Lock);
+    }
+
+    // Read information from icon.
+    struct DiskObject *dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
+
+    if(!dob)
+    {
+        // Could not read from icon.
+        return false;
+    }
+
+
+    #else
+    // We should never end up here.
+    return false;
+    #endif
+}
 //------------------------------------------------------------------------------
 // Name:        arg_init
 // Description: Initialization. Must be invoked before arg_get(). This will
@@ -120,10 +165,14 @@ bool arg_init(int argc, char **argv)
     {
         return arg_cli(argc, argv);
     }
+    else
+    {
+        return arg_wb(argc, argv);
+    }
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // Invoked from the command line.
-    if(argc)
+    /*if(argc)
     {
         // Use the builtin parser.
         rda = (struct RDArgs *)
@@ -142,102 +191,100 @@ bool arg_init(int argc, char **argv)
             NULL
         );
     }
-    else
+    else*/
     // Invoked from Workbench. Examine 'tooltypes'.
+    struct WBArg *arg = NULL;
+    struct WBStartup *wb = (struct WBStartup *) argv;
+
+    // Invoked using a 'tool'?
+    if(wb->sm_NumArgs == 1)
     {
-        struct WBArg *arg = NULL;
-        struct WBStartup *wb = (struct WBStartup *) argv;
+        arg = wb->sm_ArgList;
+    }
+    // Invoked using a 'project'?
+    else if(wb->sm_NumArgs == 2)
+    {
+        // We're after the 'next' argument, where the information about the
+        // script is to be found.
+        arg = wb->sm_ArgList + 1;
 
-        // Invoked using a 'tool'?
-        if(wb->sm_NumArgs == 1)
+        // Sanity check.
+        if(arg->wa_Name && arg->wa_Lock)
         {
-            arg = wb->sm_ArgList;
+            // Change directory to that of the script.
+            static char wd[PATH_MAX];
+            BPTR owd = (BPTR) CurrentDir(arg->wa_Lock);
+
+            // Get the name of the script and the directory.
+            if(NameFromLock(arg->wa_Lock, wd, sizeof(wd)))
+            {
+                args[ARG_SCRIPT] = arg->wa_Name;
+                args[ARG_WORKDIR] = wd;
+            }
+
+            // Go back.
+            CurrentDir(owd);
         }
-        // Invoked using a 'project'?
-        else if(wb->sm_NumArgs == 2)
+    }
+
+    // Do we have something we can handle?
+    if(arg)
+    {
+        BPTR owd = (BPTR) -1;
+
+        // Change current directory if necessary.
+        if(arg->wa_Lock)
         {
-            // We're after the 'next' argument, where the information about the
-            // script is to be found.
-            arg = wb->sm_ArgList + 1;
+            // Save the old directory.
+            owd = (BPTR) CurrentDir(arg->wa_Lock);
+        }
 
-            // Sanity check.
-            if(arg->wa_Name && arg->wa_Lock)
+        // Read information from icon.
+        dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
+
+        if(dob)
+        {
+            char **tt = (char **) dob->do_ToolTypes;
+
+            if(tt)
             {
-                // Change directory to that of the script.
-                static char wd[PATH_MAX];
-                BPTR owd = (BPTR) CurrentDir(arg->wa_Lock);
-
-                // Get the name of the script and the directory.
-                if(NameFromLock(arg->wa_Lock, wd, sizeof(wd)))
+                // We already have the name of the script if the invocation
+                // was done using a 'project'
+                if(!args[ARG_SCRIPT])
                 {
-                    args[ARG_SCRIPT] = arg->wa_Name;
-                    args[ARG_WORKDIR] = wd;
+                    args[ARG_SCRIPT] = (char *)
+                        FindToolType ((STRPTR *) tt, "SCRIPT");
                 }
 
-                // Go back.
-                CurrentDir(owd);
+                // The rest of the 'tooltypes' are handled the same way for
+                // 'projects' and 'tools'.
+                args[ARG_APPNAME] = (char *)
+                    FindToolType((STRPTR *) tt, "APPNAME");
+                args[ARG_MINUSER] = (char *)
+                    FindToolType((STRPTR *) tt, "MINUSER");
+                args[ARG_DEFUSER] = (char *)
+                    FindToolType((STRPTR *) tt, "DEFUSER");
+                args[ARG_LANGUAGE] = (char *)
+                    FindToolType((STRPTR *) tt, "LANGUAGE");
+                args[ARG_LOGFILE] = (char *)
+                    FindToolType((STRPTR *) tt, "LOGFILE");
+                args[ARG_NOLOG] = (char *)
+                    FindToolType((STRPTR *) tt, "NOLOG");
+                args[ARG_NOPRETEND] = (char *)
+                    FindToolType((STRPTR *) tt, "NOPRETEND");
+            }
+            else
+            {
+                // Unknown problem, free disk object and bail out.
+                FreeDiskObject(dob);
+                dob = NULL;
             }
         }
 
-        // Do we have something we can handle?
-        if(arg)
+        // If we did change directory before, change back to the old one.
+        if(owd != (BPTR) -1)
         {
-            BPTR owd = (BPTR) -1;
-
-            // Change current directory if necessary.
-            if(arg->wa_Lock)
-            {
-                // Save the old directory.
-                owd = (BPTR) CurrentDir(arg->wa_Lock);
-            }
-
-            // Read information from icon.
-            dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
-
-            if(dob)
-            {
-                char **tt = (char **) dob->do_ToolTypes;
-
-                if(tt)
-                {
-                    // We already have the name of the script if the invocation
-                    // was done using a 'project'
-                    if(!args[ARG_SCRIPT])
-                    {
-                        args[ARG_SCRIPT] = (char *)
-                            FindToolType ((STRPTR *) tt, "SCRIPT");
-                    }
-
-                    // The rest of the 'tooltypes' are handled the same way for
-                    // 'projects' and 'tools'.
-                    args[ARG_APPNAME] = (char *)
-                        FindToolType((STRPTR *) tt, "APPNAME");
-                    args[ARG_MINUSER] = (char *)
-                        FindToolType((STRPTR *) tt, "MINUSER");
-                    args[ARG_DEFUSER] = (char *)
-                        FindToolType((STRPTR *) tt, "DEFUSER");
-                    args[ARG_LANGUAGE] = (char *)
-                        FindToolType((STRPTR *) tt, "LANGUAGE");
-                    args[ARG_LOGFILE] = (char *)
-                        FindToolType((STRPTR *) tt, "LOGFILE");
-                    args[ARG_NOLOG] = (char *)
-                        FindToolType((STRPTR *) tt, "NOLOG");
-                    args[ARG_NOPRETEND] = (char *)
-                        FindToolType((STRPTR *) tt, "NOPRETEND");
-                }
-                else
-                {
-                    // Unknown problem, free disk object and bail out.
-                    FreeDiskObject(dob);
-                    dob = NULL;
-                }
-            }
-
-            // If we did change directory before, change back to the old one.
-            if(owd != (BPTR) -1)
-            {
-                CurrentDir(owd);
-            }
+            CurrentDir(owd);
         }
     }
 
