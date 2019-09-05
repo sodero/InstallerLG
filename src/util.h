@@ -15,6 +15,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef AMIGA
+#include <clib/debug_protos.h>
+#endif
+
 //------------------------------------------------------------------------------
 // Utility functions.
 //------------------------------------------------------------------------------
@@ -53,7 +57,13 @@ entry_p native_exists(entry_p contxt, call_t f);
 #define C_ARG(X) contxt->children[(X) - 1]
 #define C_SYM(X) contxt->symbols[(X) - 1]
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, __func__, M)
-#define HERE printf("%s:%s:%d\n", __FILE__, __func__, __LINE__)
+#ifdef AMIGA
+#define DBG_PRINT KPrintF
+#else
+#define DBG_PRINT printf
+#endif
+#define HERE DBG_PRINT("%s:%s:%d\n", __FILE__, __func__, __LINE__)
+#define THIS(X) DBG_PRINT("%p <- %s:%s:%d\n", X, __FILE__, __func__, __LINE__)
 #define C_SANE(N,O) if(!c_sane(contxt, N)) {PANIC(contxt); R_CUR;}\
                     {entry_p op_ = O; if(op_ && opt(O,OPT_INIT) && DID_ERR)\
                     {R_CUR;}}
