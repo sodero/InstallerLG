@@ -9,6 +9,7 @@
 
 #include "args.h"
 #include "resource.h"
+#include "util.h"
 
 #ifdef AMIGA
 #include <proto/dos.h>
@@ -19,19 +20,184 @@
 
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
-
-// Argument / tooltype support.
-#ifdef AMIGA
-static struct RDArgs *rda;
-static struct DiskObject *dob;
-#endif
 
 #ifdef __VBCC__
 typedef LONG IPTR;
 #endif
 
 static char *args[ARG_NUMBER_OF];
+
+//------------------------------------------------------------------------------
+// Name:        arg_post
+// Description: Postprocess arguments from WB and CLI.
+// Input:       -
+// Return:      'true' on success, 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool arg_post(void)
+{
+    // We need a script name.
+    if(!args[ARG_SCRIPT])
+    {
+        return false;
+    }
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    BPTR lock = (BPTR) Lock(args[ARG_SCRIPT], ACCESS_READ);
+
+    // Use script name if we fail to get the absolute path.
+    if(!lock || !NameFromLock(lock, get_buf(), buf_size()))
+    {
+        strncpy(get_buf(), args[ARG_SCRIPT], buf_size());
+    }
+
+    // Lock might be invalid. The script might not exist.
+    UnLock(lock);
+    #else
+    // Prepend redundant path in test mode.
+    snprintf(get_buf(), buf_size(), "./%s", args[ARG_SCRIPT]);
+    #endif
+
+    // Create a copy of the (hopefully) absolute path.
+    args[ARG_SCRIPT] = DBG_ALLOC(strdup(get_buf()));
+
+    // Copy string arguments. Stop at LOGFILE since that is the last string.
+    for(size_t arg = ARG_APPNAME; arg < ARG_NOLOG; arg++)
+    {
+        args[arg] = args[arg] ? DBG_ALLOC(strdup(args[arg])) : NULL;
+    }
+
+    // All done.
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// Name:        arg_cli
+// Description: Get CLI arguments.
+// Input:       int argc:       From main(), the number of arguments.
+//              char **argv:    From main(), the array of arguments.
+// Return:      'true' on success, 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool arg_cli(int argc, char **argv)
+{
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Not used on Amiga.
+    (void) argc;
+    (void) argv;
+
+    // Use the builtin commandline parser.
+    struct RDArgs *rda = (struct RDArgs *) ReadArgs(tr(S_ARGS), (IPTR *) args,
+                                                    NULL);
+    if(!rda)
+    {
+        // Invalid or missing arguments.
+        fputs(tr(S_ARGS), stderr);
+        return false;
+    };
+
+    // Postprocess parser output.
+    bool ret = arg_post();
+
+    // ReadArgs struct not needed, a deep copy is done in arg_post().
+    FreeArgs(rda);
+
+    // Return the result of arg_post().
+    return ret;
+    #else
+    // On non-AMIGA systems, or in test mode, only the script name is supported.
+    if(argc < 2)
+    {
+        // Missing argument(s)
+        fputs(tr(S_RQMS), stderr);
+        return false;
+    }
+
+    // This is the only argument we can handle on non-Amigas.
+    args[ARG_SCRIPT] = argv[1];
+
+    // Copy and return.
+    return arg_post();
+    #endif
+}
+
+//------------------------------------------------------------------------------
+// Name:        arg_wb
+// Description: Get WB tooltype information.
+// Input:       int argc:       From main(), the number of arguments.
+//              char **argv:    From main(), the array of arguments.
+// Return:      'true' on success, 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool arg_wb(char **argv)
+{
+    #if defined(AMIGA) && !defined(LG_TEST)
+    struct WBStartup *wb = (struct WBStartup *) argv;
+
+    // We must be invoked using a tool or a project.
+    if(!wb || (wb->sm_NumArgs != 1 && wb->sm_NumArgs != 2))
+    {
+        return false;
+    }
+
+    // Are we being invoked using a 'tool' or a 'project'?
+    struct WBArg *arg = wb->sm_ArgList + wb->sm_NumArgs - 1;
+
+    if(!arg)
+    {
+        // Unkown error.
+        return false;
+    }
+
+    // Change directory if applicable.
+    if(arg->wa_Lock)
+    {
+        CurrentDir(arg->wa_Lock);
+    }
+
+    // We have the script name if this is a 'project'.
+    args[ARG_SCRIPT] = arg->wa_Name;
+
+    // Read information from icon.
+    struct DiskObject *dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
+
+    // Get info from icon if we can, otherwise continue.
+    if(dob && dob->do_ToolTypes)
+    {
+        char **tts = (char **) dob->do_ToolTypes;
+
+        // We need to find the script path if we're invoked as a tool.
+        if(wb->sm_NumArgs == 1)
+        {
+            args[ARG_SCRIPT] = (char *) FindToolType ((STRPTR *) tts,
+                                                      (STRPTR) tr(S_SCRI));
+        }
+
+        // The rest of the 'tooltypes' are the same for 'projects' and 'tools'.
+        args[ARG_APPNAME] = (char *) FindToolType((STRPTR *) tts, "APPNAME");
+        args[ARG_MINUSER] = (char *) FindToolType((STRPTR *) tts, "MINUSER");
+        args[ARG_DEFUSER] = (char *) FindToolType((STRPTR *) tts, "DEFUSER");
+        args[ARG_LANGUAGE] = (char *) FindToolType((STRPTR *) tts, "LANGUAGE");
+        args[ARG_LOGFILE] = (char *) FindToolType((STRPTR *) tts, "LOGFILE");
+        args[ARG_NOLOG] = (char *) FindToolType((STRPTR *) tts, "NOLOG");
+        args[ARG_NOPRETEND] = (char *) FindToolType((STRPTR *) tts, "NOPRETEND");
+    }
+
+    // Postprocess WB info.
+    bool ret = arg_post();
+
+    // Disk object not needed, a deep copy is done in arg_post().
+    if(dob)
+    {
+        FreeDiskObject(dob);
+    }
+
+    // Return the result of arg_post().
+    return ret;
+    #else
+    // We should never end up here.
+    return false;
+    #endif
+}
 
 //------------------------------------------------------------------------------
 // Name:        arg_init
@@ -46,151 +212,14 @@ bool arg_init(int argc, char **argv)
     // Save argc, used later to determine whether we are invoked from CLI or WB.
     arg_argc(argc);
 
-    #if defined(AMIGA) && !defined(LG_TEST)
-    // Invoked from the command line.
     if(argc)
     {
-        // Use the builtin parser.
-        rda = (struct RDArgs *)
-
-        ReadArgs
-        (
-            "SCRIPT/A,"
-            "APPNAME/K,"
-            "MINUSER/K,"
-            "DEFUSER/K,"
-            "LANGUAGE/K,"
-            "LOGFILE/K,"
-            "NOLOG/S,"
-            "NOPRETEND/S",
-            (IPTR *) args,
-            NULL
-        );
-    }
-    else
-    // Invoked from Workbench. Examine 'tooltypes'.
-    {
-        struct WBArg *arg = NULL;
-        struct WBStartup *wb = (struct WBStartup *) argv;
-
-        // Invoked using a 'tool'?
-        if(wb->sm_NumArgs == 1)
-        {
-            arg = wb->sm_ArgList;
-        }
-        // Invoked using a 'project'?
-        else if(wb->sm_NumArgs == 2)
-        {
-            // We're after the 'next' argument, where the information about the
-            // script is to be found.
-            arg = wb->sm_ArgList + 1;
-
-            // Sanity check.
-            if(arg->wa_Name && arg->wa_Lock)
-            {
-                // Change directory to that of the script.
-                static char wd[PATH_MAX];
-                BPTR owd = (BPTR) CurrentDir(arg->wa_Lock);
-
-                // Get the name of the script and the directory.
-                if(NameFromLock(arg->wa_Lock, wd, sizeof(wd)))
-                {
-                    args[ARG_SCRIPT] = arg->wa_Name;
-                    args[ARG_WORKDIR] = wd;
-                }
-
-                // Go back.
-                CurrentDir(owd);
-            }
-        }
-
-        // Do we have something we can handle?
-        if(arg)
-        {
-            BPTR owd = (BPTR) -1;
-
-            // Change current directory if necessary.
-            if(arg->wa_Lock)
-            {
-                // Save the old directory.
-                owd = (BPTR) CurrentDir(arg->wa_Lock);
-            }
-
-            // Read information from icon.
-            dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
-
-            if(dob)
-            {
-                char **tt = (char **) dob->do_ToolTypes;
-
-                if(tt)
-                {
-                    // We already have the name of the script if the invocation
-                    // was done using a 'project'
-                    if(!args[ARG_SCRIPT])
-                    {
-                        args[ARG_SCRIPT] = (char *)
-                            FindToolType ((STRPTR *) tt, "SCRIPT");
-                    }
-
-                    // The rest of the 'tooltypes' are handled the same way for
-                    // 'projects' and 'tools'.
-                    args[ARG_APPNAME] = (char *)
-                        FindToolType((STRPTR *) tt, "APPNAME");
-                    args[ARG_MINUSER] = (char *)
-                        FindToolType((STRPTR *) tt, "MINUSER");
-                    args[ARG_DEFUSER] = (char *)
-                        FindToolType((STRPTR *) tt, "DEFUSER");
-                    args[ARG_LANGUAGE] = (char *)
-                        FindToolType((STRPTR *) tt, "LANGUAGE");
-                    args[ARG_LOGFILE] = (char *)
-                        FindToolType((STRPTR *) tt, "LOGFILE");
-                    args[ARG_NOLOG] = (char *)
-                        FindToolType((STRPTR *) tt, "NOLOG");
-                    args[ARG_NOPRETEND] = (char *)
-                        FindToolType((STRPTR *) tt, "NOPRETEND");
-                }
-                else
-                {
-                    // Unknown problem, free disk object and bail out.
-                    FreeDiskObject(dob);
-                    dob = NULL;
-                }
-            }
-
-            // If we did change directory before, change back to the old one.
-            if(owd != (BPTR) -1)
-            {
-                CurrentDir(owd);
-            }
-        }
+        // Invoked from the commandline.
+        return arg_cli(argc, argv);
     }
 
-    // Change working dir if started from a 'project'.
-    if(args[ARG_WORKDIR] && chdir(args[ARG_WORKDIR]))
-    {
-        // Could not change directory.
-        return false;
-    }
-
-    // By now we should have either a disk object, or an rda, otherwise we have
-    // failed.
-    return rda || dob;
-    #else
-    // On non-AMIGA systems, or in test mode, only the script name is supported.
-    if(argc >= 2)
-    {
-        args[ARG_SCRIPT] = argv[1];
-    }
-    else
-    {
-        // Missing argument(s)
-        fputs(tr(S_RQMS), stderr);
-    }
-
-    // Something is really wrong if we don't have the executable name.
-    return *args;
-    #endif
+    // Invoked from WB. This should never happen on non Amigas.
+    return arg_wb(argv);
 }
 
 //------------------------------------------------------------------------------
@@ -237,22 +266,10 @@ int arg_argc(int argc)
 //------------------------------------------------------------------------------
 void arg_done(void)
 {
-    // Free what we have allocated. Make sure that we don't do this twice by
-    // setting all pointers to NULL.
-
-    #if defined(AMIGA) && !defined(LG_TEST)
-    // From Workbench.
-    if(dob)
+    // Free what we have allocated. Note that we stop at LOGFILE since that is
+    // the last string. NOLOG and NOPRETEND are integers.
+    for(size_t arg = ARG_SCRIPT; arg < ARG_NOLOG; arg++)
     {
-        FreeDiskObject(dob);
-        dob = NULL;
+        free(args[arg]);
     }
-
-    // From Shell.
-    if(rda)
-    {
-        FreeArgs(rda);
-        rda = NULL;
-    }
-    #endif
 }

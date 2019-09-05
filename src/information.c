@@ -18,10 +18,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef AMIGA
-#include <clib/debug_protos.h>
-#endif
-
 //------------------------------------------------------------------------------
 // (complete <num>)
 //     display percentage through install in titlebar
