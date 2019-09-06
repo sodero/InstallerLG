@@ -20,9 +20,7 @@
 #define YYDEBUG 1
 %}
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* We need the parser to be reentrant, not */
-/* because we want to, but because it will */
-/* will leak memory otherwise.             */
+/* We need the parser to be reentrant, not because we want to, but because it will leak memory otherwise. */
 %define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
@@ -74,13 +72,11 @@
        /*                */ showwbobject closewbobject trace retrace closemedia effect setmedia showmedia
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- destruction --------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* Use the destructor of the start symbol to set of  */
-/* the execution of the program.                     */
+/* Use the destructor of the start symbol to set of the execution of the program. */
 %destructor { run($$);  }   start
 /* Primitive strings are freed like you would expect */
 %destructor { free($$); }   SYM STR
-/* Complex types are freed using the kill() function */
-/* found in alloc.c                                  */
+/* Complex types are freed using the kill() function found in alloc.c */
 %destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np sps par cv cvv add sub div mul
                             gt gte eq set cus dcl fmt if while until and or xor not bitand bitor bitxor bitnot
                             shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice
@@ -502,4 +498,3 @@ override:       '(' OVERRIDE p ')'               { $$ = new_option(strdup("overr
 dynopt:         '(' IF p opt opt ')'             { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(push(new_contxt(), $3), $4), $5)); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %%
-
