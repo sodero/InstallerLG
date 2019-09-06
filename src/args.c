@@ -195,6 +195,7 @@ static bool arg_wb(char **argv)
     return ret;
     #else
     // We should never end up here.
+    (void) argv;
     return false;
     #endif
 }
