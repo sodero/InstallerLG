@@ -30,14 +30,11 @@
 entry_p find_symbol(entry_p entry)
 {
     // Local variables have priority. This currently implies function arguments
-    // only. We could enable local (set), but this might break old scripts, so
-    // let's not do it.
+    // only. We could enable local (set), but this might break old scripts.
     entry_p con = local(entry);
 
-    // Something is really broken if we're missing a context.
     if(!con)
     {
-        // Bad input.
         PANIC(entry);
         return end();
     }
@@ -45,52 +42,41 @@ entry_p find_symbol(entry_p entry)
     // Traverse tree until we reach the top.
     do
     {
-        // Current level.
-        entry_p *tmp;
-
         // Iterate over all symbols in the current context.
-        for(tmp = con->symbols; tmp && *tmp && *tmp != end(); tmp++)
+        for(entry_p *tmp = con->symbols; tmp && *tmp && *tmp != end(); tmp++)
         {
             // Return value.
             entry_p ret = *tmp;
 
-            // The current entry might be a CUSTOM. Ignore everything but
-            // SYMBOLS.
+            // Entry might be a CUSTOM. Ignore everything SYMBOLS.
             if(ret->type != SYMBOL || strcasecmp(ret->name, entry->name))
             {
-                // Next entry;
                 continue;
             }
-            else
-            {
-                // Rearrange symbols to make the next lookup faster. Don't do
-                // this unless we're at the root and not in a user defined
-                // procedure. This would break all positional symbols
-                // (procedure arguments).
-                if(!ret->parent->parent && ret->parent->type != CUSTOM)
-                {
-                    *tmp = *(con->symbols);
-                    *(con->symbols) = ret;
-                }
 
-                // Symbol found.
-                return ret;
+            // Rearrange symbols to make the next lookup faster. Don't do this
+            // unless we're at the root and not in a user defined procedure.
+            // This would break all positional symbols (procedure arguments).
+            if(!ret->parent->parent && ret->parent->type != CUSTOM)
+            {
+                *tmp = *(con->symbols);
+                *(con->symbols) = ret;
             }
+
+            // Symbol found.
+            return ret;
         }
 
-        // Nothing found in the current context. Climb one scope higher and try
-        // again.
+        // Nothing found in the current context. Climb one scope higher.
         con = local(con->parent);
     }
     while(con);
 
-    // Only fail if we're in strict mode. Never recur when looking for @strict,
-    // it might not be there if we're out of memory. If we do, we will run out
-    // of stack as well.
-    if(strcasecmp(entry->name, "@strict") &&
-       get_numvar(global(entry), "@strict"))
+    // Fail if in strict mode. Never recur when looking for @strict, it might
+    // not be there on OOM and then we'll run out of stack as well.
+    if(strcasecmp(entry->name, "@strict") && get_num(global(entry), "@strict"))
     {
-        // We found nothing.
+        // Undefined symbol.
         ERR_C(entry, ERR_UNDEF_VAR, entry->name);
     }
 

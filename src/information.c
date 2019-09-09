@@ -64,11 +64,11 @@ entry_p m_debug(entry_p contxt)
             if((*cur)->type == SYMREF)
             {
                 // Save level of strictness.
-                int mode = get_numvar(contxt, "@strict");
+                int mode = get_num(contxt, "@strict");
 
                 // Set non strict mode and search for symbol. By doing it this
                 // way we supress error messages, if any.
-                set_numvar(contxt, "@strict", 0);
+                set_num(contxt, "@strict", 0);
                 entry_p res = find_symbol(*cur);
 
                 // Save string representation of symbol if it exists.
@@ -79,7 +79,7 @@ entry_p m_debug(entry_p contxt)
                 }
 
                 // Restore level of strictness.
-                set_numvar(contxt, "@strict", mode);
+                set_num(contxt, "@strict", mode);
             }
             else
             {
@@ -133,8 +133,7 @@ entry_p m_message(entry_p contxt)
     C_SANE(1, contxt);
 
     // In novice mode no message is to be shown unless (all) is set.
-    if(!opt(contxt, OPT_ALL) &&
-        get_numvar(contxt, "@user-level") == LG_NOVICE)
+    if(!opt(contxt, OPT_ALL) && get_num(contxt, "@user-level") == LG_NOVICE)
     {
         R_NUM(LG_FALSE);
     }
@@ -160,7 +159,7 @@ entry_p m_message(entry_p contxt)
     free(msg);
 
     // If (back) exists, execute body on user / fake abort.
-    if(back && (grc == G_ABORT || get_numvar(contxt, "@back")))
+    if(back && (grc == G_ABORT || get_num(contxt, "@back")))
     {
         return resolve(back);
     }
@@ -182,10 +181,10 @@ entry_p m_user(entry_p contxt)
     C_SANE(1, NULL);
 
     // Save old value.
-    int old = get_numvar(contxt, "@user-level");
+    int old = get_num(contxt, "@user-level");
 
     // Set new value of @user-level.
-    set_numvar(contxt, "@user-level", num(C_ARG(1)));
+    set_num(contxt, "@user-level", num(C_ARG(1)));
 
     // Return the old.
     R_NUM(old);
@@ -203,9 +202,8 @@ entry_p m_welcome(entry_p contxt)
     C_SANE(0, NULL);
 
     // Current installer settings.
-    int lvl = get_numvar(contxt, "@user-level"),
-        prt = get_numvar(contxt, "@pretend"),
-        lgf = get_numvar(contxt, "@log");
+    int lvl = get_num(contxt, "@user-level"), prt = get_num(contxt, "@pretend"),
+        lgf = get_num(contxt, "@log");
 
     // Concatenate children, if any.
     char *msg = get_chlstr(contxt, false);
@@ -219,10 +217,9 @@ entry_p m_welcome(entry_p contxt)
     }
 
     // Show welcome dialog.
-    inp_t grc = gui_welcome(msg, &lvl, &lgf, &prt,
-                            get_numvar(contxt, "@user-min"),
-                            get_numvar(contxt, "@no-pretend"),
-                            get_numvar(contxt, "@no-log"));
+    inp_t grc = gui_welcome(msg, &lvl, &lgf, &prt, get_num(contxt, "@user-min"),
+                            get_num(contxt, "@no-pretend"),
+                            get_num(contxt, "@no-log"));
 
     // Free temporary buffer.
     free(msg);
@@ -234,9 +231,9 @@ entry_p m_welcome(entry_p contxt)
     }
 
     // Save new settings.
-    set_numvar(contxt, "@user-level", lvl);
-    set_numvar(contxt, "@pretend", prt);
-    set_numvar(contxt, "@log", lgf);
+    set_num(contxt, "@user-level", lvl);
+    set_num(contxt, "@pretend", prt);
+    set_num(contxt, "@log", lgf);
 
     // Proceed, halt or error.
     R_NUM((grc == G_TRUE) ? 1 : 0);

@@ -118,7 +118,7 @@ entry_p m_gosub(entry_p contxt)
     // (f1 arg1 arg2 ...) into a format string expression ("%s%ld.." ...) if
     // the function is not defined and a symbol that can be resolved into a
     // format string exists.
-    if(!get_numvar(contxt, "@strict"))
+    if(!get_num(contxt, "@strict"))
     {
         // First invocation?
         if(!contxt->resolved)
@@ -148,7 +148,7 @@ entry_p m_gosub(entry_p contxt)
         // function.
         contxt->call = m_fmt;
         contxt->type = NATIVE;
-        contxt->name = get_strvar(contxt, contxt->name);
+        contxt->name = get_str(contxt, contxt->name);
 
         // Get the resolved value of the things we've stitched together.
         entry_p res = resolve(contxt);

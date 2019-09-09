@@ -308,7 +308,7 @@ entry_p m_fmt(entry_p contxt)
     // Fail if the number of arguments and the number
     // of specifiers don't match, and we're in strict
     // mode.
-    if(arg && *arg && *arg != end() && get_numvar(contxt, "@strict"))
+    if(arg && *arg && *arg != end() && get_num(contxt, "@strict"))
     {
         ERR(ERR_FMT_UNUSED, contxt->name);
     }
@@ -551,7 +551,7 @@ char *h_tackon(entry_p contxt, const char *pre, const char *suf)
     // If the filename ends with a delimiter, it's not a valid filename.
     // Only fail if we're running in 'strict' mode.
     if(les && (suf[les - 1] == '/' || suf[les - 1] == ':')
-       && get_numvar(contxt, "@strict"))
+       && get_num(contxt, "@strict"))
     {
         ERR(ERR_NOT_A_FILE, suf);
         return NULL;

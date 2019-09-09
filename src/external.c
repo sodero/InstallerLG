@@ -51,7 +51,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         if(back)
         {
             // Fake input?
-            if(get_numvar(contxt, "@back"))
+            if(get_num(contxt, "@back"))
             {
                 grc = G_ABORT;
             }
@@ -77,7 +77,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
     }
 
     // Is this call safe to run or are we not in pretend mode?
-    if(safe || !get_numvar(contxt, "@pretend"))
+    if(safe || !get_num(contxt, "@pretend"))
     {
         // Command / script. Merge all and insert space between arguments.
         char *cmd = get_chlstr(contxt, true);
@@ -192,7 +192,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         }
 
         // OK == 0. Only fail in 'strict' mode.
-        if(D_NUM && get_numvar(contxt, "@strict"))
+        if(D_NUM && get_num(contxt, "@strict"))
         {
             ERR(ERR_EXEC, cmd);
         }
@@ -216,7 +216,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 //------------------------------------------------------------------------------
 entry_p m_execute(entry_p contxt)
 {
-    return h_run(contxt, "execute", get_strvar(contxt, "@execute-dir"));
+    return h_run(contxt, "execute", get_str(contxt, "@execute-dir"));
 }
 
 //------------------------------------------------------------------------------
@@ -238,5 +238,5 @@ entry_p m_rexx(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p m_run(entry_p contxt)
 {
-    return h_run(contxt, NULL, get_strvar(contxt, "@execute-dir"));
+    return h_run(contxt, NULL, get_str(contxt, "@execute-dir"));
 }

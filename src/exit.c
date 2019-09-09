@@ -101,8 +101,8 @@ entry_p m_exit(entry_p contxt)
     if(!opt(contxt, OPT_QUIET))
     {
         // Get name and location of application.
-        const char *app = get_strvar(contxt, "@app-name"),
-                   *dst = get_strvar(contxt, "@default-dest");
+        const char *app = get_str(contxt, "@app-name"),
+                   *dst = get_str(contxt, "@default-dest");
 
         // Only display the 'the app can be found here' message if we know
         // the name and location of the application.
@@ -204,7 +204,7 @@ entry_p m_reboot(entry_p contxt)
     C_SANE(0, NULL);
 
     // Don't reboot in pretend mode.
-    if(get_numvar(contxt, "@pretend"))
+    if(get_num(contxt, "@pretend"))
     {
         R_NUM(LG_FALSE);
     }

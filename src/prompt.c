@@ -73,7 +73,7 @@ entry_p m_askbool(entry_p contxt)
     }
 
     // Show requester unless we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") != LG_NOVICE)
+    if(get_num(contxt, "@user-level") != LG_NOVICE)
     {
         const char *prt = str(prompt),
                    *hlp = str(help);
@@ -91,7 +91,7 @@ entry_p m_askbool(entry_p contxt)
             if(back)
             {
                 // Fake input?
-                if(get_numvar(contxt, "@back"))
+                if(get_num(contxt, "@back"))
                 {
                     grc = G_ABORT;
                 }
@@ -231,7 +231,7 @@ entry_p m_askchoice(entry_p contxt)
     }
 
     // Don't show requester if we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
+    if(get_num(contxt, "@user-level") == LG_NOVICE)
     {
         R_NUM(ndx);
     }
@@ -261,7 +261,7 @@ entry_p m_askchoice(entry_p contxt)
     if(back)
     {
         // Fake input?
-        if(get_numvar(contxt, "@back"))
+        if(get_num(contxt, "@back"))
         {
             grc = G_ABORT;
         }
@@ -312,7 +312,7 @@ entry_p m_askdir(entry_p contxt)
     }
 
     // Return default value if we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
+    if(get_num(contxt, "@user-level") == LG_NOVICE)
     {
         R_STR(DBG_ALLOC(strdup(str(deflt))));
     }
@@ -333,7 +333,7 @@ entry_p m_askdir(entry_p contxt)
     if(back)
     {
         // Fake input?
-        if(get_numvar(contxt, "@back"))
+        if(get_num(contxt, "@back"))
         {
             grc = G_ABORT;
         }
@@ -423,7 +423,7 @@ entry_p m_askdisk(entry_p contxt)
                                 if(back)
                                 {
                                     // Fake input?
-                                    if(get_numvar(contxt, "@back"))
+                                    if(get_num(contxt, "@back"))
                                     {
                                         grc = G_ABORT;
                                     }
@@ -550,7 +550,7 @@ entry_p m_askfile(entry_p contxt)
     }
 
     // Return default value if we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
+    if(get_num(contxt, "@user-level") == LG_NOVICE)
     {
         R_STR(DBG_ALLOC(strdup(str(deflt))));
     }
@@ -571,7 +571,7 @@ entry_p m_askfile(entry_p contxt)
     if(back)
     {
         // Fake input?
-        if(get_numvar(contxt, "@back"))
+        if(get_num(contxt, "@back"))
         {
             grc = G_ABORT;
         }
@@ -649,7 +649,7 @@ entry_p m_asknumber(entry_p contxt)
     }
 
     // Show requester only if we're not executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
+    if(get_num(contxt, "@user-level") == LG_NOVICE)
     {
         // Use default value.
         R_NUM(num(deflt));
@@ -671,7 +671,7 @@ entry_p m_asknumber(entry_p contxt)
     if(back)
     {
         // Fake input?
-        if(get_numvar(contxt, "@back"))
+        if(get_num(contxt, "@back"))
         {
             grc = G_ABORT;
         }
@@ -791,7 +791,7 @@ entry_p m_askoptions(entry_p contxt)
     }
 
     // Return default value if we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
+    if(get_num(contxt, "@user-level") == LG_NOVICE)
     {
         R_NUM(ndx);
     }
@@ -808,7 +808,7 @@ entry_p m_askoptions(entry_p contxt)
         if(back)
         {
             // Fake input?
-            if(get_numvar(contxt, "@back"))
+            if(get_num(contxt, "@back"))
             {
                 grc = G_ABORT;
             }
@@ -857,7 +857,7 @@ entry_p m_askstring(entry_p contxt)
     }
 
     // Return default value if we're executing in 'novice' mode.
-    if(get_numvar(contxt, "@user-level") == LG_NOVICE)
+    if(get_num(contxt, "@user-level") == LG_NOVICE)
     {
         R_STR(DBG_ALLOC(strdup(str(deflt))));
     }
@@ -878,7 +878,7 @@ entry_p m_askstring(entry_p contxt)
     if(back)
     {
         // Fake input?
-        if(get_numvar(contxt, "@back"))
+        if(get_num(contxt, "@back"))
         {
             grc = G_ABORT;
         }
