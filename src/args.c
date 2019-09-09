@@ -124,8 +124,7 @@ static bool arg_cli(int argc, char **argv)
 //------------------------------------------------------------------------------
 // Name:        arg_wb
 // Description: Get WB tooltype information.
-// Input:       int argc:       From main(), the number of arguments.
-//              char **argv:    From main(), the array of arguments.
+// Input:       char **argv:    From main(), the array of arguments.
 // Return:      'true' on success, 'false' otherwise.
 //------------------------------------------------------------------------------
 static bool arg_wb(char **argv)

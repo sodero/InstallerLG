@@ -24,39 +24,30 @@
 //------------------------------------------------------------------------------
 entry_p new_contxt(void)
 {
+    // Memory for LG_VECLEN children and symbols, it will be grown if necessary.
+    entry_p *children = DBG_ALLOC(calloc(LG_VECLEN + 1, sizeof(entry_p))),
+            *symbols = DBG_ALLOC(calloc(LG_VECLEN + 1, sizeof(entry_p)));
+
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
 
-    if(entry)
+    if(entry && symbols && children)
     {
-        // A context contains variables (symbols) and functions (children).
-        entry_p *symbols, *children;
+        entry->children = children;
+        entry->symbols = symbols;
+        entry->type = CONTXT;
 
-        // Memory for children and symbols, this will be grown if necessary.
-        // Start with LG_VECLEN.
-        symbols = DBG_ALLOC(calloc(LG_VECLEN + 1, sizeof(entry_p)));
-        children = DBG_ALLOC(calloc(LG_VECLEN + 1, sizeof(entry_p)));
-
-        if(symbols && children)
-        {
-            entry->type = CONTXT;
-            entry->symbols = symbols;
-            entry->children = children;
-
-            // Set sentinel values.
-            entry->symbols[LG_VECLEN] = end();
-            entry->children[LG_VECLEN] = end();
-            return entry;
-        }
-
-        // Out of memory.
-        free(symbols);
-        free(children);
+        // Set sentinel values.
+        entry->children[LG_VECLEN] = end();
+        entry->symbols[LG_VECLEN] = end();
+        return entry;
     }
 
-    // Out of memory.
     free(entry);
+    free(symbols);
+    free(children);
 
+    // Out of memory.
     PANIC(NULL);
     return NULL;
 }
@@ -95,23 +86,20 @@ entry_p new_number(int num)
 //------------------------------------------------------------------------------
 entry_p new_string(char *name)
 {
-    if(name)
-    {
-        // We rely on everything being set to '0'
-        entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
+    // We rely on everything being set to '0'
+    entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
 
-        if(entry)
-        {
-            // The value of a string equals its name.
-            entry->type = STRING;
-            entry->name = name;
-            return entry;
-        }
+    if(name && entry)
+    {
+        // The value of a string equals its name.
+        entry->type = STRING;
+        entry->name = name;
+        return entry;
     }
 
-    // All or nothing. Since we own 'name', we need to free it here, or else it
-    // will leak when out of memory.
+    // We need to free 'name' also, since we own it.
     free(name);
+    free(entry);
 
     // Out of memory / bad input.
     PANIC(NULL);
@@ -128,25 +116,21 @@ entry_p new_string(char *name)
 //------------------------------------------------------------------------------
 entry_p new_symbol(char *name)
 {
-    // All symbols have a name.
-    if(name)
-    {
-        // We rely on everything being set to '0'
-        entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
+    // We rely on everything being set to '0'
+    entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
 
-        if(entry)
-        {
-            // The value of the symbol will dangle until the first (set).
-            entry->resolved = end();
-            entry->type = SYMBOL;
-            entry->name = name;
-            return entry;
-        }
+    if(name && entry)
+    {
+        // The value of the symbol will dangle until the first (set).
+        entry->resolved = end();
+        entry->type = SYMBOL;
+        entry->name = name;
+        return entry;
     }
 
-    // All or nothing. Since we own 'name', we need to free it here, or else it
-    // will leak when out of memory.
+    // We need to free 'name' also, since we own it.
     free(name);
+    free(entry);
 
     // Out of memory / bad input.
     PANIC(NULL);
@@ -166,62 +150,56 @@ entry_p new_symbol(char *name)
 //------------------------------------------------------------------------------
 entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
 {
-    // Functions must have a name, but they can have an empty body.
-    if(name)
+    // We rely on everything being set to '0'
+    entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
+
+    if(name && entry)
     {
-        // We rely on everything being set to '0'
-        entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
+        entry->type = CUSTOM;
+        entry->name = name;
+        entry->id = line;
 
-        if(entry)
+        // Move symbols if we have any, adopt and clear the 'resolved' status.
+        if(sym && sym->symbols)
         {
-            // Top level.
-            entry->id = line;
-            entry->name = name;
-            entry->type = CUSTOM;
+            // Transfer and kill the input.
+            entry->symbols = sym->symbols;
+            sym->symbols = NULL;
+            kill(sym);
 
-            // If we have symbols, move them to our new CUSTOM, adopt them and
-            // clear the 'resolved' status.
-            if(sym && sym->symbols)
+            // Reparent all symbols. Let the return value dangle.
+            for(entry_p *cur = entry->symbols; *cur && *cur != end(); cur++)
             {
-                // Transfer and kill the input.
-                entry->symbols = sym->symbols;
-                sym->symbols = NULL;
-                kill(sym);
-
-                // Reparent all symbols. Initially the return value will dangle.
-                for(entry_p *cur = entry->symbols; *cur && *cur != end(); cur++)
-                {
-                    (*cur)->parent = entry;
-                    (*cur)->resolved = end();
-                }
-            }
-
-            // We're finished if we dont't have any children to adopt.
-            if(!chl || !chl->children)
-            {
-                return entry;
-            }
-
-            // Transfer children and free the input.
-            entry->children = chl->children;
-            chl->children = NULL;
-            kill(chl);
-
-            // Reparent all children.
-            for(entry_p *cur = entry->children; *cur && *cur != end(); cur++)
-            {
+                (*cur)->resolved = end();
                 (*cur)->parent = entry;
             }
+        }
 
+        // We're finished if we dont't have any children to adopt.
+        if(!chl || !chl->children)
+        {
             return entry;
         }
+
+        // Transfer children and free the input.
+        entry->children = chl->children;
+        chl->children = NULL;
+        kill(chl);
+
+        // Reparent all children.
+        for(entry_p *cur = entry->children; *cur && *cur != end(); cur++)
+        {
+            (*cur)->parent = entry;
+        }
+
+        return entry;
     }
 
-    // All or nothing. Since we own 'name', 'chl' and 'sym', we need to free
-    // them or else they will leak when out of memory.
-    free(name);
+    // All or nothing, we own 'name', 'chl' and 'sym'.
     kill(chl);
     kill(sym);
+    free(name);
+    free(entry);
 
     // Out of memory / bad input.
     PANIC(NULL);
@@ -239,24 +217,20 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
 //------------------------------------------------------------------------------
 entry_p new_symref(char *name, int line)
 {
-    // All references must have a name and a line number. Line numberx are used
-    // in error messages when refering to non existing symbols in strict mode.
-    if(name && (line > 0))
-    {
-        // We rely on everything being set to '0'
-        entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
+    // We rely on everything being set to '0'
+    entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
 
-        if(entry)
-        {
-            entry->type = SYMREF;
-            entry->name = name;
-            entry->id = line;
-            return entry;
-        }
+    // All references must have a name and a line number. Line numbers are used
+    // in error messages when refering to non existing symbols in strict mode.
+    if(entry && name && (line > 0))
+    {
+        entry->type = SYMREF;
+        entry->name = name;
+        entry->id = line;
+        return entry;
     }
 
-    // All or nothing. Since we own 'name', we need to free it here, or else
-    // it will leak when out of memory.
+    // We need to free 'name', since we own it.
     free(name);
 
     // Out of memory / bad input.
@@ -274,10 +248,11 @@ entry_p new_symref(char *name, int line)
 //------------------------------------------------------------------------------
 static void move_contxt(entry_p dst, entry_p src)
 {
+    // Sanity check.
     if(!dst || !src)
     {
-        // Invalid input.
         PANIC(NULL);
+        return;
     }
 
     entry_p *sym = dst->symbols = src->symbols,
@@ -319,44 +294,39 @@ static void move_contxt(entry_p dst, entry_p src)
 //------------------------------------------------------------------------------
 entry_p new_native(char *name, int line, call_t call, entry_p chl, type_t type)
 {
+    // We rely on everything being set to '0'
+    entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
+
     // We require a name and a line number.
-    if(call && name && (line > 0))
+    if(entry && call && name && (line > 0))
     {
-        // We rely on everything being set to '0'
-        entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
+        // Allocate default return value.
+        entry->resolved = type == NUMBER ? new_number(0) : type == STRING ?
+                          new_string(DBG_ALLOC(strdup(""))) : end();
 
-        if(entry)
+        // Make sure that we have a valid default return value.
+        if(entry->resolved)
         {
-            // Allocate default return value.
-            entry->resolved = type == NUMBER ? new_number(0) : type == STRING ?
-                              new_string(DBG_ALLOC(strdup(""))) : end();
+            // ID and name are for debug only.
+            entry->type = NATIVE;
+            entry->name = name;
+            entry->call = call;
+            entry->id = line;
 
-            // Do we have a valid default return type?
-            if(entry->resolved)
+            // Adopt children and symbols if any.
+            if(chl && chl->type == CONTXT)
             {
-                // ID and name are for debug only.
-                entry->id = line;
-                entry->call = call;
-                entry->type = NATIVE;
-                entry->name = name;
-
-                // Adopt children and symbols if any.
-                if(chl && chl->type == CONTXT)
-                {
-                    move_contxt(entry, chl);
-                }
-
-                // Set parent of return value.
-                entry->resolved->parent = entry;
-                return entry;
+                move_contxt(entry, chl);
             }
 
-            // Out of memory.
-            free(entry);
+            // Set parent of return value.
+            entry->resolved->parent = entry;
+            return entry;
         }
     }
 
-    // We own 'name' and 'chl'.
+    // We need to free 'name' and 'chl' also, since we own them.
+    free(entry);
     free(name);
     kill(chl);
 
@@ -379,23 +349,22 @@ entry_p new_native(char *name, int line, call_t call, entry_p chl, type_t type)
 //------------------------------------------------------------------------------
 entry_p new_option(char *name, opt_t type, entry_p chl)
 {
-    // Although not strictly necessary, we required a name of the option. For
-    // debugging purposes.
-    if(!name)
-    {
-        PANIC(NULL);
-        return NULL;
-    }
-
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
 
-    if(entry)
+    // We required a name of the option for debugging purposes.
+    if(name && entry)
     {
         // Let the type be our ID.
         entry->id = (int) type;
         entry->type = OPTION;
         entry->name = name;
+
+        // Dynamic options need a return value.
+        entry->resolved = new_number(LG_FALSE);
+
+        // Set parent of return value.
+        entry->resolved->parent = entry;
 
         // Adopt contents of CONTXT, if there is any.
         if(chl && chl->type == CONTXT)
@@ -415,12 +384,12 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
         return entry;
     }
 
-    // All or nothing. Since we own 'name' and 'chl' we need to free them, or
-    // else we will leak when out of memory.
-    free(name);
+    // We need to free 'name' and 'chl' also, since we own them.
     kill(chl);
+    free(name);
+    free(entry);
 
-    // Out of memory.
+    // Bad input or out of memory.
     PANIC(NULL);
     return NULL;
 }
@@ -438,33 +407,29 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
 //------------------------------------------------------------------------------
 entry_p new_cusref(char *name, int line, entry_p arg)
 {
-    // A line number is required. It's used in error messages when invoking an
-    // undefined procedure in strict mode.
-    if(name && (line > 0))
+    // We rely on everything being set to '0'
+    entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
+
+    // A line number is required to produce meaningful error messages.
+    if(entry && name && (line > 0))
     {
-        // We rely on everything being set to '0'
-        entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
+        // The m_gosub function is used as trampoline.
+        entry->id = line;
+        entry->name = name;
+        entry->type = CUSREF;
+        entry->call = m_gosub;
 
-        if(entry)
+        // Adopt function arguments if any.
+        if(arg && arg->type == CONTXT)
         {
-            // The m_gosub is used as a trampoline.
-            entry->id = line;
-            entry->name = name;
-            entry->call = m_gosub;
-            entry->type = CUSREF;
-
-            // Adopt function arguments if any.
-            if(arg && arg->type == CONTXT)
-            {
-                move_contxt(entry, arg);
-            }
-
-            return entry;
+            move_contxt(entry, arg);
         }
+
+        return entry;
     }
 
-    // All or nothing. Since we own 'name' and 'arg' we need to free them, or
-    // else we will leak when out of memory.
+    // We need to free 'name' and 'arg' also, since we own them.
+    free(entry);
     free(name);
     kill(arg);
 
@@ -482,52 +447,52 @@ entry_p new_cusref(char *name, int line, entry_p arg)
 //------------------------------------------------------------------------------
 entry_p append(entry_p **dest, entry_p entry)
 {
-    // Sanity check.
-    if(entry && dest && *dest)
+    if(!entry || !dest || !*dest)
     {
-        size_t num = 0;
-
-        // Find the first 'free' slot, if there is one.
-        while((*dest)[num] && (*dest)[num] != end())
-        {
-            num++;
-        }
-
-        // No free slot available. More memory needed.
-        if((*dest)[num])
-        {
-            // Everything must be set to '0'. Make the array twice as big.
-            entry_p *new = DBG_ALLOC(calloc((num << 1) + 1, sizeof(entry_p)));
-
-            // Move everything to the new array.
-            if(new)
-            {
-                new[num << 1] = end();
-                memcpy(new, *dest, num * sizeof(entry_p));
-                free(*dest);
-                *dest = new;
-            }
-            else
-            {
-                // Out of memory. This is a very rude way of not leaking memory
-                // when out of memory. Simply overwrite previous elements after
-                // killing them of.
-                kill((*dest)[0]);
-                (*dest)[0] = entry;
-
-                PANIC(entry);
-                return entry;
-            }
-        }
-
-        // Success.
-        (*dest)[num] = entry;
-        return entry;
+        // Bad input.
+        PANIC(NULL);
+        return NULL;
     }
 
-    // Bad input.
-    PANIC(NULL);
-    return NULL;
+    // Start from the beginning.
+    size_t num = 0;
+
+    // Find the first free slot if there is one.
+    while((*dest)[num] && (*dest)[num] != end())
+    {
+        num++;
+    }
+
+    // No free slot available. More memory needed.
+    if((*dest)[num])
+    {
+        // Everything must be set to '0'. Make the array twice as big.
+        entry_p *new = DBG_ALLOC(calloc((num << 1) + 1, sizeof(entry_p)));
+
+        // Move everything to the new array.
+        if(new)
+        {
+            new[num << 1] = end();
+            memcpy(new, *dest, num * sizeof(entry_p));
+            free(*dest);
+            *dest = new;
+        }
+        else
+        {
+            // Out of memory. This is a very rude way of not leaking memory
+            // when out of memory. Simply overwrite previous elements after
+            // killing them of.
+            kill((*dest)[0]);
+            (*dest)[0] = entry;
+
+            PANIC(entry);
+            return entry;
+        }
+    }
+
+    // Let entry be the new tail.
+    (*dest)[num] = entry;
+    return entry;
 }
 
 //------------------------------------------------------------------------------
@@ -543,20 +508,8 @@ entry_p merge(entry_p dst, entry_p src)
     // Sanity check.
     if(dst && dst->children && src && src->children)
     {
-        // Number of children.
-        size_t num = 0;
-
-        // Count the number of source children.
-        for(size_t i = 0; src->children[i] && src->children[i] != end(); i++)
-        {
-            num++;
-        }
-
-        // Add the number of current children.
-        for(size_t i = 0; dst->children[i] && dst->children[i] != end(); i++)
-        {
-            num++;
-        }
+        // Total number of children.
+        size_t num = num_children(src->children) + num_children(dst->children);
 
         // We rely on everything being set to '0'. Make the new array big enough
         // to hold both source and (current) destination.
@@ -617,8 +570,7 @@ entry_p merge(entry_p dst, entry_p src)
 //------------------------------------------------------------------------------
 entry_p push(entry_p dst, entry_p src)
 {
-    // Sanity check. All or nothing. Since we own 'src', we need to free it, or
-    // else we will leak when out of memory.
+    // Sanity check. All or nothing. Since we own 'src', we need to free it.
     if(!dst || !src)
     {
         kill(src);
@@ -637,16 +589,15 @@ entry_p push(entry_p dst, entry_p src)
         for(size_t ndx = 0; dst->symbols[ndx] &&
             dst->symbols[ndx] != end(); ndx++)
         {
-            // On duplicate references, just update the existing one,
-            // don't create a new one. Multiple references aren't OK,
-            // multiple referents are. This means that you can redefine
-            // procedures dynamically, e.g @onerror. This is of course
-            // also true for normal variables.
+            // On duplicate references, update the existing one, don't create a
+            // new one. Multiple references aren't OK, multiple referents are.
+            // This means that you can redefine procedures dynamically, e.g
+            // @onerror. This is of course also true for normal variables.
             if(!strcasecmp(dst->symbols[ndx]->name, src->name))
             {
-                // Variables set without (set) own themselves (refer to
-                // init() and init_num()) and must be killed before the
-                // reference is updated or else we will leak memory.
+                // Variables set without (set) own themselves (refer to init()
+                // and init_num()) and must be killed before the reference is
+                // updated or else we will leak memory.
                 if(dst->symbols[ndx]->parent == dst)
                 {
                     kill(dst->symbols[ndx]);
@@ -660,16 +611,14 @@ entry_p push(entry_p dst, entry_p src)
         dst_p = &dst->symbols;
     }
 
-    // Whether symbol or child, the procedure is the same, just append and
-    // reparent.
+    // Whether symbol or child, append and reparent.
     if(*dst_p && append(dst_p, src))
     {
         src->parent = dst;
         return dst;
     }
 
-    // All or nothing. Since we own 'src', we need to free it, or else we will
-    // leak when out of memory.
+    // All or nothing. Since we own 'src', we need to free it.
     kill(src);
 
     // Out of memory.
@@ -678,79 +627,57 @@ entry_p push(entry_p dst, entry_p src)
 }
 
 //------------------------------------------------------------------------------
+// Name:        kill_children
+// Description: Kill all children that are owned by a given entry.
+// Input:       entry_p *chl:   A vector with children.
+//              entry_p par:    The parent / owner entry.
+// Return:      -
+//------------------------------------------------------------------------------
+static void kill_children(entry_p *chl, entry_p par)
+{
+    // Kill all children that we own.
+    for(entry_p *cur = chl; cur && *cur && *cur != end(); cur++)
+    {
+        if((*cur)->parent == par)
+        {
+            kill(*cur);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
 // Name:        kill
 // Description: Free the memory occupied by 'entry' and all its children.
-// Input:       entry_p:    The entry_p to be free:d.
+// Input:       entry_p entry:  The entry_p to be free:d.
 // Return:      -
 //------------------------------------------------------------------------------
 void kill(entry_p entry)
 {
-    // DANGLE entries are static, no need to free them.
-    if(entry && entry->type != DANGLE)
+    // DANGLE entries are static.
+    if(!entry || entry->type == DANGLE)
     {
-        // All entries might have a name. Set to NULL to make pretty_print:ing
-        // possible.
-        free(entry->name);
-        entry->name = NULL;
-
-        // Free symbols, if any.
-        if(entry->symbols)
-        {
-            // Iter.
-            entry_p *chl = entry->symbols;
-
-            while(*chl && *chl != end())
-            {
-                // Free only the ones we own. References can be anywhere.
-                if((*chl)->parent == entry)
-                {
-                    // Recur to free symbol.
-                    kill(*chl);
-                }
-
-                // Next symbol.
-                chl++;
-            }
-
-            // Free the array itself.
-            free(entry->symbols);
-            entry->symbols = NULL;
-        }
-
-        // Free children, if any.
-        if(entry->children)
-        {
-            // Iter.
-            entry_p *chl = entry->children;
-
-            while(*chl && *chl != end())
-            {
-                // Free only the ones we own. References can be anywhere.
-                if((*chl)->parent == entry)
-                {
-                    // Recur to free child.
-                    kill(*chl);
-                }
-
-                // Next child.
-                chl++;
-            }
-
-            // Free the array itself.
-            free(entry->children);
-            entry->children = NULL;
-        }
-
-        // If we have any resolved entries that we own, free them.
-        if(entry->resolved && entry->resolved->parent == entry)
-        {
-            kill(entry->resolved);
-            entry->resolved = NULL;
-        }
-
-        // Nothing but this entry left.
-        free(entry);
+        return;
     }
+
+    // Free symbols and children, if any.
+    kill_children(entry->children, entry);
+    kill_children(entry->symbols, entry);
+
+    // Free symbols and children arrays.
+    free(entry->children);
+    free(entry->symbols);
+
+    // If we have any resolved entries that we own, free them.
+    if(entry->resolved && entry->resolved->parent == entry)
+    {
+        kill(entry->resolved);
+    }
+
+    // All entries might have a name.
+    free(entry->name);
+
+    // Nothing but this entry left.
+    free(entry);
 }
 
 //------------------------------------------------------------------------------

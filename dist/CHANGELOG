@@ -240,4 +240,5 @@
 
 0.1.0-alpha.38:
 ===============
-- ?
+- Dynamic options single branch fix (rc-ftpd).
+- @icon now contains absolute path also when started from CLI.
