@@ -36,7 +36,7 @@ entry_p m_openwbobject(entry_p contxt)
             safe       = opt(C_ARG(2), OPT_SAFE);
 
     // A non safe operation in pretend mode always succeeds.
-    if(get_numvar(contxt, "@pretend") && !safe)
+    if(get_num(contxt, "@pretend") && !safe)
     {
         R_NUM(LG_TRUE);
     }

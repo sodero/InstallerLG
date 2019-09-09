@@ -138,6 +138,36 @@ entry_p new_symbol(char *name)
 }
 
 //------------------------------------------------------------------------------
+// Name:        reparent_and_set
+// Description: Reparent entries and set resolved value.
+// Input:       entry_p *chl:   A vector with entries to reparent.
+//              entry_p par:    Parent entry.
+//              entry_p res:    Resolved value. If NULL no value will be set.
+// Return:      -
+//------------------------------------------------------------------------------
+static void reparent_and_set(entry_p *chl, entry_p par, entry_p res)
+{
+    if(!chl || !par)
+    {
+        // Nothing to do.
+        return;
+    }
+
+    // Reparent all given entries.
+    for(entry_p *cur = chl; *cur && *cur != end(); cur++)
+    {
+        if(res)
+        {
+            // Set resolved value.
+            (*cur)->resolved = res;
+        }
+
+        // Reparent current entry.
+        (*cur)->parent = par;
+    }
+}
+
+//------------------------------------------------------------------------------
 // Name:        new_custom
 // Description: Allocate CUSTOM, a user defined procedure / function.
 // Input:       char *name:   The name of the function. This string won't be
@@ -168,11 +198,7 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
             kill(sym);
 
             // Reparent all symbols. Let the return value dangle.
-            for(entry_p *cur = entry->symbols; *cur && *cur != end(); cur++)
-            {
-                (*cur)->resolved = end();
-                (*cur)->parent = entry;
-            }
+            reparent_and_set(entry->symbols, entry, end());
         }
 
         // We're finished if we dont't have any children to adopt.
@@ -186,11 +212,8 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
         chl->children = NULL;
         kill(chl);
 
-        // Reparent all children.
-        for(entry_p *cur = entry->children; *cur && *cur != end(); cur++)
-        {
-            (*cur)->parent = entry;
-        }
+        // Reparent all children. Don't touch the resolved value.
+        reparent_and_set(entry->children, entry, NULL);
 
         return entry;
     }
@@ -511,13 +534,12 @@ entry_p merge(entry_p dst, entry_p src)
         // Total number of children.
         size_t num = num_children(src->children) + num_children(dst->children);
 
-        // We rely on everything being set to '0'. Make the new array big enough
-        // to hold both source and (current) destination.
+        // Make the new array big enough to hold both source and destination.
         entry_p *new = DBG_ALLOC(calloc(num + 1, sizeof(entry_p)));
 
         if(new)
         {
-            // Start all over again.
+            // Start all over.
             num = 0;
 
             // Copy current destination children.
@@ -551,11 +573,8 @@ entry_p merge(entry_p dst, entry_p src)
         PANIC(NULL);
     }
 
-    // No matter how things went above, we own 'src' and need to free it, else
-    // we will leak on success and if out of memory.
+    // We own 'src' and need to free it.
     kill(src);
-
-    // Return destination.
     return dst;
 }
 
@@ -581,33 +600,29 @@ entry_p push(entry_p dst, entry_p src)
     // Assume we're dealing with a child.
     entry_p **dst_p = &dst->children;
 
-    // Symbols and user-defined are the same.
+    // Symbols and user-defined procedures are equals.
     if((src->type == SYMBOL || src->type == CUSTOM) &&
        (dst->type == CONTXT || dst->type == CUSTOM))
     {
         // We can't have multiple references.
-        for(size_t ndx = 0; dst->symbols[ndx] &&
-            dst->symbols[ndx] != end(); ndx++)
+        for(size_t i = 0; dst->symbols[i] && dst->symbols[i] != end(); i++)
         {
-            // On duplicate references, update the existing one, don't create a
-            // new one. Multiple references aren't OK, multiple referents are.
-            // This means that you can redefine procedures dynamically, e.g
-            // @onerror. This is of course also true for normal variables.
-            if(!strcasecmp(dst->symbols[ndx]->name, src->name))
+            // If duplicate reference, update the existing one.
+            if(!strcasecmp(dst->symbols[i]->name, src->name))
             {
                 // Variables set without (set) own themselves (refer to init()
-                // and init_num()) and must be killed before the reference is
-                // updated or else we will leak memory.
-                if(dst->symbols[ndx]->parent == dst)
+                // and init_num()) and must be killed before an update.
+                if(dst->symbols[i]->parent == dst)
                 {
-                    kill(dst->symbols[ndx]);
+                    kill(dst->symbols[i]);
                 }
 
-                dst->symbols[ndx] = src;
+                dst->symbols[i] = src;
                 return dst;
             }
         }
 
+        // We're dealing with a symbols.
         dst_p = &dst->symbols;
     }
 
@@ -618,25 +633,29 @@ entry_p push(entry_p dst, entry_p src)
         return dst;
     }
 
-    // All or nothing. Since we own 'src', we need to free it.
+    // Out of memory. Since we own 'src', we need to free it.
     kill(src);
-
-    // Out of memory.
     PANIC(NULL);
     return dst;
 }
 /*
 //------------------------------------------------------------------------------
-// Name:        kill_children
-// Description: Kill all children that are owned by a given entry.
-// Input:       entry_p *chl:   A vector with children.
-//              entry_p par:    The parent / owner entry.
+// Name:        kill_all
+// Description: Kill all entries owned by a given parent.
+// Input:       entry_p *chl:   Vector with entries.
+//              entry_p par:    Parent entry.
 // Return:      -
 //------------------------------------------------------------------------------
-static void kill_children(entry_p *chl, entry_p par)
+static void kill_all(entry_p *chl, entry_p par)
 {
-    // Kill all children that we own.
-    for(entry_p *cur = chl; cur && *cur && *cur != end(); cur++)
+    if(!chl)
+    {
+        // Nothing to do.
+        return;
+    }
+
+    // Free the entries we own. References can be anywhere.
+    for(entry_p *cur = chl; *cur && *cur != end(); cur++)
     {
         if((*cur)->parent == par)
         {
@@ -655,31 +674,29 @@ static void kill_children(entry_p *chl, entry_p par)
 /*
 void kill(entry_p entry)
 {
-    // DANGLE entries are static.
-    if(!entry || entry->type == DANGLE)
+    // DANGLE entries are static, no need to free them.
+    if(entry && entry->type != DANGLE)
     {
-        return;
+        // All entries might have a name.
+        free(entry->name);
+
+        // Free symbols, if any.
+        kill_all(entry->symbols, entry);
+        free(entry->symbols);
+
+        // Free children, if any.
+        kill_all(entry->children, entry);
+        free(entry->children);
+
+        // If we own any resolved entries, free them.
+        if(entry->resolved && entry->resolved->parent == entry)
+        {
+            kill(entry->resolved);
+        }
+
+        // Nothing but this entry left.
+        free(entry);
     }
-
-    // Free symbols and children, if any.
-    kill_children(entry->children, entry);
-    kill_children(entry->symbols, entry);
-
-    // Free symbols and children arrays.
-    free(entry->children);
-    free(entry->symbols);
-
-    // If we have any resolved entries that we own, free them.
-    if(entry->resolved && entry->resolved->parent == entry)
-    {
-        kill(entry->resolved);
-    }
-
-    // All entries might have a name.
-    free(entry->name);
-
-    // Nothing but this entry left.
-    free(entry);
 }
 */
 void kill(entry_p entry)

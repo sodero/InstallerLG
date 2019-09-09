@@ -218,7 +218,7 @@ static void prune_opt(entry_p contxt, entry_p *cache)
         }
 
         // The default threshold is expert.
-        int level = get_numvar(contxt, "@user-level"), thres = LG_EXPERT;
+        int level = get_num(contxt, "@user-level"), thres = LG_EXPERT;
 
         // If the (cache[OPT_CONFIRM] ...) option contains something that can be
         // translated into a new threshold value...
@@ -231,7 +231,7 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 
         // If we are below the threshold value, or user input has been
         // short-circuited by @yes, skip cache[OPT_CONFIRM]ation.
-        if(level < thres || get_numvar(contxt, "@yes"))
+        if(level < thres || get_num(contxt, "@yes"))
         {
             cache[OPT_CONFIRM] = NULL;
         }
@@ -309,7 +309,7 @@ entry_p opt(entry_p contxt, opt_t type)
     }
 
     // If in non strict mode, allow the absense of (prompt) and (help).
-    if(!get_numvar(contxt, "@strict"))
+    if(!get_num(contxt, "@strict"))
     {
         if(!cache[OPT_HELP])
         {
@@ -450,7 +450,7 @@ bool s_sane(entry_p contxt, size_t num)
 }
 
 //------------------------------------------------------------------------------
-// Name:        set_numvar
+// Name:        set_num
 // Description: Give an existing numerical variable a new value. Please note
 //              that the variable must exist and that the current resolved
 //              value must be a NUMBER, if not, this function will silently
@@ -460,7 +460,7 @@ bool s_sane(entry_p contxt, size_t num)
 //              int val:         The new value of the variable.
 // Return:      -
 //------------------------------------------------------------------------------
-void set_numvar(entry_p contxt, char *var, int val)
+void set_num(entry_p contxt, char *var, int val)
 {
     // Dummy reference used for searching.
     static entry_t ref = { .type = SYMREF };
@@ -489,7 +489,7 @@ void set_numvar(entry_p contxt, char *var, int val)
 }
 
 //------------------------------------------------------------------------------
-// Name:        get_numvar
+// Name:        get_num
 // Description: Get the value of an existing numerical variable. Please note
 //              that the variable must exist and that the current resolved value
 //              must be a NUMBER.
@@ -498,7 +498,7 @@ void set_numvar(entry_p contxt, char *var, int val)
 // Return:      int:             The value of the variable or zero if the
 //                               variable can't be found.
 //------------------------------------------------------------------------------
-int get_numvar(entry_p contxt, char *var)
+int get_num(entry_p contxt, char *var)
 {
     // We need a name and a context.
     if(!contxt || !var)
@@ -530,7 +530,7 @@ int get_numvar(entry_p contxt, char *var)
 }
 
 //------------------------------------------------------------------------------
-// Name:        get_strvar
+// Name:        get_str
 // Description: Get the value of an existing string variable. Please note
 //              that the variable must exist and that the current resolved
 //              value must be a STRING.
@@ -539,7 +539,7 @@ int get_numvar(entry_p contxt, char *var)
 // Return:      char *:          The value of the variable or an empty string
 //                               if the variable can't be found.
 //------------------------------------------------------------------------------
-char *get_strvar(entry_p contxt, char *var)
+char *get_str(entry_p contxt, char *var)
 {
     // We need a name and a context.
     if(!contxt || !var)
@@ -758,7 +758,7 @@ char *get_chlstr(entry_p contxt, bool pad)
 }
 
 //------------------------------------------------------------------------------
-// Name:        set_strvar
+// Name:        set_str
 // Description: Give an existing string variable a new value. Please note
 //              that the variable must exist and that the current resolved
 //              value must be a STRING, if not, this function will silently
@@ -768,7 +768,7 @@ char *get_chlstr(entry_p contxt, bool pad)
 //              char *val:       The new value of the variable.
 // Return:      -
 //------------------------------------------------------------------------------
-void set_strvar(entry_p contxt, char *var, char *val)
+void set_str(entry_p contxt, char *var, char *val)
 {
     // We need a name and a context.
     if(!contxt || !var)

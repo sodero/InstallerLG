@@ -101,9 +101,9 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
     }
 
     // By setting @yes, @skip or @abort user behaviour can be simulated.
-    inp_t grc = get_numvar(contxt, "@abort") ? G_ABORT :
-                get_numvar(contxt, "@skip") ? G_FALSE :
-                get_numvar(contxt, "@yes") ? G_TRUE : G_EXIT;
+    inp_t grc = get_num(contxt, "@abort") ? G_ABORT :
+                get_num(contxt, "@skip") ? G_FALSE :
+                get_num(contxt, "@yes") ? G_TRUE : G_EXIT;
 
     va_list ap;
 
@@ -119,7 +119,7 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
         grc = gui_confirm(get_buf(), hlp, back != false);
 
         // If (back) exists, execute body on user / fake abort.
-        if(back && (grc == G_ABORT || get_numvar(contxt, "@back")))
+        if(back && (grc == G_ABORT || get_num(contxt, "@back")))
         {
             grc = resolve(back) ? G_TRUE : G_ERR;
         }
@@ -280,7 +280,7 @@ static const char *h_fileonly(entry_p contxt, const char *path)
     }
 
     // Empty string or dir / vol. Only fail if we're in 'strict' mode.
-    if(get_numvar(contxt, "@strict"))
+    if(get_num(contxt, "@strict"))
     {
         ERR(ERR_NOT_A_FILE, path);
     }
@@ -429,7 +429,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
         // Make sure that the file / dir exists. But only in strict mode,
         // otherwise just go on, missing files will be skipped during file
         // copy anyway.
-        if(node->type == LG_NONE && get_numvar(contxt, "@strict"))
+        if(node->type == LG_NONE && get_num(contxt, "@strict"))
         {
             // File or directory doesn't exist.
             ERR(ERR_NO_SUCH_FILE_OR_DIR, node->name);
@@ -835,7 +835,7 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
     if(!done)
     {
         // Only fail if we're in 'strict' mode.
-        if(get_numvar(contxt, "@strict"))
+        if(get_num(contxt, "@strict"))
         {
             // Set invalid mask.
             ERR(ERR_GET_PERM, file);
@@ -883,7 +883,7 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
     if(len && file[len - 1] != ':')
     {
         // Only fail if we're running in 'strict' mode.
-        if(!SetProtection(file, mask) && get_numvar(contxt, "@strict"))
+        if(!SetProtection(file, mask) && get_num(contxt, "@strict"))
         {
             ERR(ERR_SET_PERM, file);
             return LG_FALSE;
@@ -984,7 +984,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
         // Ask for confirmation if (askuser) unless we're running
         // in novice mode and (force) at the same time.
         if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
-            get_numvar(contxt, "@user-level") != LG_NOVICE))
+            get_num(contxt, "@user-level") != LG_NOVICE))
         {
             if(h_confirm(contxt, "", tr(S_OWRT), dst))
             {
@@ -1365,7 +1365,7 @@ entry_p m_copyfiles(entry_p contxt)
     }
 
     // A non safe operation in pretend mode always succeeds.
-    if(get_numvar(contxt, "@pretend") && !safe)
+    if(get_num(contxt, "@pretend") && !safe)
     {
         R_NUM(LG_TRUE);
     }
@@ -1470,7 +1470,7 @@ entry_p m_copyfiles(entry_p contxt)
         if(back)
         {
             // Fake input?
-            if(get_numvar(contxt, "@back"))
+            if(get_num(contxt, "@back"))
             {
                 grc = G_ABORT;
             }
@@ -1563,7 +1563,7 @@ entry_p m_copylib(entry_p contxt)
     }
 
     char *src = str(source), *dst = str(dest);
-    bool strict = get_numvar(contxt, "@strict");
+    bool strict = get_num(contxt, "@strict");
 
     // Does the source file exist?
     if(h_exists(src) != LG_FILE)
@@ -1582,7 +1582,7 @@ entry_p m_copylib(entry_p contxt)
     int new = h_getversion_file(src), type = h_exists(dst);
 
     // A non safe operation in pretend mode always succeeds.
-    if(!safe && get_numvar(contxt, "@pretend"))
+    if(!safe && get_num(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -1774,7 +1774,7 @@ entry_p m_copylib(entry_p contxt)
                     // If the file to be copied has a lower version number than
                     // the existing one, and we're in expert mode, ask the user
                     // to confirm. If we get a confirmation, overwrite.
-                    if(get_numvar(contxt, "@user-level") == LG_EXPERT &&
+                    if(get_num(contxt, "@user-level") == LG_EXPERT &&
                        h_confirm(contxt, "",
                        "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s", str(prompt),
                        tr(S_VINS), new >> 16, new & 0xffff, tr(S_VCUR),
@@ -1834,7 +1834,7 @@ static int h_delete_file(entry_p contxt, const char *file)
             if(opt(C_ARG(2), OPT_ASKUSER))
             {
                 // Ask for confirmation if we're not running in novice mode.
-                if(get_numvar(contxt, "@user-level") != LG_NOVICE &&
+                if(get_num(contxt, "@user-level") != LG_NOVICE &&
                    h_confirm(contxt, "", tr(S_DWRT), file))
                 {
                     // Give permissions so that delete can succeed. No need
@@ -1922,7 +1922,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
         if(askuser)
         {
             // Ask for confirmation if we're not running in novice mode.
-            if(get_numvar(contxt, "@user-level") == LG_NOVICE ||
+            if(get_num(contxt, "@user-level") == LG_NOVICE ||
                !h_confirm(C_ARG(2), "", tr(S_DWRD), name))
             {
                 // Halt will be set by h_confirm. Skip will result in nothing.
@@ -2149,7 +2149,7 @@ entry_p m_delete(entry_p contxt)
     #if defined(AMIGA) && !defined(LG_TEST)
     wild = ParsePattern(file, get_buf(), buf_size());
     #else
-    wild = get_numvar(contxt, "@wild");
+    wild = get_num(contxt, "@wild");
     #endif
 
     // Can we parse the input string?
@@ -2172,7 +2172,7 @@ entry_p m_delete(entry_p contxt)
     }
 
     // Succeed immediately if non-safe in pretend mode.
-    if(!opt(C_ARG(2), OPT_SAFE) && get_numvar(contxt, "@pretend"))
+    if(!opt(C_ARG(2), OPT_SAFE) && get_num(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -2447,8 +2447,8 @@ entry_p m_foreach(entry_p contxt)
             #endif
 
             // We always export, for memory management reasons.
-            set_numvar(contxt, "@each-type", (int) top->type);
-            set_strvar(contxt, "@each-name", top->name);
+            set_num(contxt, "@each-type", (int) top->type);
+            set_str(contxt, "@each-name", top->name);
 
             if(!skip)
             {
@@ -2478,7 +2478,7 @@ entry_p m_makeassign(entry_p contxt)
     C_SANE(1, contxt);
 
     // Succeed immediately if non-safe in pretend mode.
-    if(!opt(contxt, OPT_SAFE) && get_numvar(contxt, "@pretend"))
+    if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -2565,7 +2565,7 @@ entry_p m_makedir(entry_p contxt)
 
     // Succeed immediately if this operation is unsafe and we're running in
     // pretend mode.
-    if(!opt(C_ARG(2), OPT_SAFE) && get_numvar(contxt, "@pretend"))
+    if(!opt(C_ARG(2), OPT_SAFE) && get_num(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -2718,7 +2718,7 @@ entry_p m_protect(entry_p contxt)
             {
                 // Is this a safe operation or are we not running in pretend
                 // mode?
-                if(safe || !get_numvar(contxt, "@pretend"))
+                if(safe || !get_num(contxt, "@pretend"))
                 {
                     // Helper will set error on failure.
                     D_NUM = h_protect_set(contxt, file, D_NUM);
@@ -2772,14 +2772,14 @@ entry_p m_startup(entry_p contxt)
     // the HALT will be set by h_confirm. Confirmation is needed when user level
     // is expert or when (confirm) is used.
     if((opt(C_ARG(2), OPT_CONFIRM) ||
-        get_numvar(contxt, "@user-level") == LG_EXPERT) &&
+        get_num(contxt, "@user-level") == LG_EXPERT) &&
         !h_confirm(C_ARG(2), str(help), str(prompt)))
     {
         R_NUM(LG_FALSE);
     }
 
     // We're done if executing in pretend mode.
-    if(get_numvar(contxt, "@pretend"))
+    if(get_num(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -2794,7 +2794,7 @@ entry_p m_startup(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    const char *fln = get_strvar(contxt, "@user-startup");
+    const char *fln = get_str(contxt, "@user-startup");
     const size_t len = strlen(";BEGIN ") + strlen(app),
                  ins = strlen(cmd) + 2;
 
@@ -3042,7 +3042,7 @@ entry_p m_textfile(entry_p contxt)
     }
 
     // Is this a safe operation or are we not running in pretend mode?
-    if(!safe && get_numvar(contxt, "@pretend"))
+    if(!safe && get_num(contxt, "@pretend"))
     {
         // A non safe operation in pretend mode always succeeds.
         R_NUM(LG_TRUE);
@@ -3163,7 +3163,7 @@ entry_p m_tooltype(entry_p contxt)
             confirm         = opt(contxt, OPT_CONFIRM);
 
     // Succeed immediately if non-safe in pretend mode.
-    if(!opt(contxt, OPT_SAFE) && get_numvar(contxt, "@pretend"))
+    if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -3486,7 +3486,7 @@ entry_p m_rename(entry_p contxt)
     }
 
     // Is this a safe operation or are we not running in pretend mode?
-    if(!opt(C_ARG(3), OPT_SAFE) && get_numvar(contxt, "@pretend"))
+    if(!opt(C_ARG(3), OPT_SAFE) && get_num(contxt, "@pretend"))
     {
         R_NUM(-1);
     }
@@ -3540,13 +3540,13 @@ void h_log(entry_p contxt, const char *fmt, ...)
     }
 
     // Is logging disabled?
-    if(!get_numvar(contxt, "@log"))
+    if(!get_num(contxt, "@log"))
     {
         return;
     }
 
     // Use the log file set in init(..) or by the user.
-    FILE *file = fopen(get_strvar(contxt, "@log-file"), "a");
+    FILE *file = fopen(get_str(contxt, "@log-file"), "a");
     int cnt = -1;
 
     if(file)
@@ -3572,6 +3572,6 @@ void h_log(entry_p contxt, const char *fmt, ...)
     // Could we open the file AND write all data to it?
     if(cnt < 0)
     {
-        ERR(ERR_WRITE_FILE, get_strvar(contxt, "@log-file"));
+        ERR(ERR_WRITE_FILE, get_str(contxt, "@log-file"));
     }
 }

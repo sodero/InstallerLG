@@ -41,8 +41,7 @@ char *strcasestr(const char *, const char *);
 static void init_num(entry_p contxt, char *sym, int num)
 {
     // Create SYMBOL VALUE tuple.
-    entry_p var = new_symbol(DBG_ALLOC(strdup(sym))),
-            val = new_number(num);
+    entry_p var = new_symbol(DBG_ALLOC(strdup(sym))), val = new_number(num);
 
     // Unless we're out of memory, init tuple.
     if(var && val)
@@ -53,13 +52,12 @@ static void init_num(entry_p contxt, char *sym, int num)
 
         // Insert result in CONTXT.
         append(&contxt->symbols, var);
+        return;
     }
-    else
-    {
-        // Don't leak on OOM.
-        kill(var);
-        kill(val);
-    }
+
+    // Don't leak on OOM.
+    kill(var);
+    kill(val);
 }
 
 //------------------------------------------------------------------------------
@@ -87,13 +85,12 @@ static void init_str(entry_p contxt, char *sym, char *str)
 
         // Insert result in CONTXT.
         append(&contxt->symbols, var);
+        return;
     }
-    else
-    {
-        // Don't leak on OOM.
-        kill(var);
-        kill(val);
-    }
+
+    // Don't leak on OOM.
+    kill(var);
+    kill(val);
 }
 
 //------------------------------------------------------------------------------
