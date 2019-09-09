@@ -625,7 +625,7 @@ entry_p push(entry_p dst, entry_p src)
     PANIC(NULL);
     return dst;
 }
-
+/*
 //------------------------------------------------------------------------------
 // Name:        kill_children
 // Description: Kill all children that are owned by a given entry.
@@ -644,6 +644,7 @@ static void kill_children(entry_p *chl, entry_p par)
         }
     }
 }
+*/
 
 //------------------------------------------------------------------------------
 // Name:        kill
@@ -651,6 +652,7 @@ static void kill_children(entry_p *chl, entry_p par)
 // Input:       entry_p entry:  The entry_p to be free:d.
 // Return:      -
 //------------------------------------------------------------------------------
+/*
 void kill(entry_p entry)
 {
     // DANGLE entries are static.
@@ -679,6 +681,76 @@ void kill(entry_p entry)
     // Nothing but this entry left.
     free(entry);
 }
+*/
+void kill(entry_p entry)
+{
+    // DANGLE entries are static, no need to free them.
+    if(entry && entry->type != DANGLE)
+    {
+        // All entries might have a name. Set to NULL to make pretty_print:ing
+        // possible.
+        free(entry->name);
+        entry->name = NULL;
+
+        // Free symbols, if any.
+        if(entry->symbols)
+        {
+            // Iter.
+            entry_p *chl = entry->symbols;
+
+            while(*chl && *chl != end())
+            {
+                // Free only the ones we own. References can be anywhere.
+                if((*chl)->parent == entry)
+                {
+                    // Recur to free symbol.
+                    kill(*chl);
+                }
+
+                // Next symbol.
+                chl++;
+            }
+
+            // Free the array itself.
+            free(entry->symbols);
+            entry->symbols = NULL;
+        }
+
+        // Free children, if any.
+        if(entry->children)
+        {
+            // Iter.
+            entry_p *chl = entry->children;
+
+            while(*chl && *chl != end())
+            {
+                // Free only the ones we own. References can be anywhere.
+                if((*chl)->parent == entry)
+                {
+                    // Recur to free child.
+                    kill(*chl);
+                }
+
+                // Next child.
+                chl++;
+            }
+
+            // Free the array itself.
+            free(entry->children);
+            entry->children = NULL;
+        }
+
+        // If we have any resolved entries that we own, free them.
+        if(entry->resolved && entry->resolved->parent == entry)
+        {
+            kill(entry->resolved);
+            entry->resolved = NULL;
+        }
+
+        // Nothing but this entry left.
+        free(entry);
+    }
+}
 
 //------------------------------------------------------------------------------
 // Name:        end
@@ -693,4 +765,3 @@ entry_p end(void)
 
     return &entry;
 }
-
