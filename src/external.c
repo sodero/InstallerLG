@@ -153,7 +153,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                     LONG ioe = IoErr();
 
                     // Expose IoErr to script.
-                    set_numvar(contxt, "@ioerr", ioe);
+                    set_num(contxt, "@ioerr", ioe);
                 }
 
                 // We probably don't need to close NIL: but it doesn't hurt.
