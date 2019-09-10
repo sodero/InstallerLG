@@ -244,6 +244,45 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 }
 
 //------------------------------------------------------------------------------
+// FIXME
+//------------------------------------------------------------------------------
+static void opt_fill_cache(entry_p contxt, entry_p *cache)
+{
+    // Iterate over all options to fill up the cache.
+    for(size_t i = 0; contxt->children[i] &&
+        contxt->children[i] != end() && i < OPT_LAST; i++)
+    {
+        entry_p entry = contxt->children[i];
+
+        // Skip non options.
+        if(entry->type != OPTION)
+        {
+            continue;
+        }
+
+        // Fake option.
+        if(entry->id == OPT_OPTIONAL || entry->id == OPT_DELOPTS)
+        {
+            // Cast to real option.
+            get_fake_opt(entry, cache);
+        }
+        // Dynamic options must be resolved.
+        else if(entry->id == OPT_DYNOPT)
+        {
+            // Replace with its resolved value.
+            entry_p res = resolve(entry);
+            cache[res->id] = res;
+        }
+        // A real option.
+        else
+        {
+            // Save it as is.
+            cache[entry->id] = entry;
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
 // Name:        opt
 // Description: Find option of a given type in a context.
 // Input:       entry_p contxt:  The context to search in.
@@ -271,42 +310,8 @@ entry_p opt(entry_p contxt, opt_t type)
     cache[OPT_INIT] = end();
     last = contxt;
 
-    // Iterate over all options to fill up the cache.
-    for(size_t i = 0; contxt->children[i] &&
-        contxt->children[i] != end() && i < OPT_LAST; i++)
-    {
-        entry_p entry = contxt->children[i];
-
-        // Skip non options.
-        if(entry->type != OPTION)
-        {
-            continue;
-        }
-
-        // Option indentifier.
-        int option = entry->id;
-
-        // Fake option
-        if(option == OPT_OPTIONAL || option == OPT_DELOPTS)
-        {
-            // Cast to real options.
-            get_fake_opt(entry, cache);
-        }
-        else
-        // Dynamic options must be resolved.
-        if(option == OPT_DYNOPT)
-        {
-            // Replace with its resolved value.
-            entry_p res = resolve(entry);
-            cache[res->id] = res;
-        }
-        // We have a real option.
-        else
-        {
-            // Save it as it is.
-            cache[option] = entry;
-        }
-    }
+    // Populate cache.
+    opt_fill_cache(contxt, cache);
 
     // If in non strict mode, allow the absense of (prompt) and (help).
     if(!get_num(contxt, "@strict"))
@@ -343,80 +348,78 @@ entry_p opt(entry_p contxt, opt_t type)
 //------------------------------------------------------------------------------
 static bool x_sane(entry_p contxt, type_t type, size_t num)
 {
-    // We need a context.
-    if(contxt)
+    if(!contxt)
     {
-        // Assume verification of symbols.
-        entry_p *vec = contxt->symbols;
+        // No context.
+        dump(contxt);
+        return false;
+    }
 
-        // Are we going to verify children?
-        if(type == NATIVE)
+    // Assume verification of symbols.
+    entry_p *vec = contxt->symbols;
+
+    // Are we going to verify children?
+    if(type == NATIVE)
+    {
+        vec = contxt->children;
+
+        // All NATIVE have a default return value.
+        if(contxt->type == NATIVE && !contxt->resolved)
         {
-            vec = contxt->children;
-
-            // All NATIVE have a default return value.
-            if(contxt->type == NATIVE && !contxt->resolved)
-            {
-                dump(contxt);
-                return false;
-            }
+            dump(contxt);
+            return false;
         }
+    }
 
-        // We should have an array here if we're expecting more than 0 children
-        // or symbols.
-        if(num && !vec)
+    // Array needed if we're expecting more than 0 children or symbols.
+    if(num && !vec)
+    {
+        dump(contxt);
+        return false;
+    }
+
+    // Expect at least num children.
+    for(size_t i = 0; i < num; i++)
+    {
+        // Make sure we have something.
+        if(!vec[i])
         {
             dump(contxt);
             return false;
         }
 
-        // Expect at least num children.
-        for(size_t i = 0; i < num; i++)
+        // It should not be a sentinel.
+        if(vec[i] == end())
         {
-            // Make sure we have something.
-            if(!vec[i])
-            {
-                dump(contxt);
-                return false;
-            }
-
-            // It should not be a sentinel.
-            if(vec[i] == end())
-            {
-                dump(contxt);
-                return false;
-            }
-
-            // Make sure that it belongs to us.
-            if(vec[i]->parent != contxt)
-            {
-                dump(contxt);
-                return false;
-            }
-
-            // All but CONTXT / NUMBER are named.
-            if(!vec[i]->name && vec[i]->type != CONTXT &&
-                vec[i]->type != NUMBER)
-            {
-                dump(vec[i]);
-                return false;
-            }
-
-            // A CONTXT must have room for children.
-            if(vec[i]->type == CONTXT && !vec[i]->children)
-            {
-                dump(vec[i]);
-                return false;
-            }
+            dump(contxt);
+            return false;
         }
 
-        // We're OK;
-        return true;
+        // Make sure that it belongs to us.
+        if(vec[i]->parent != contxt)
+        {
+            dump(contxt);
+            return false;
+        }
+
+        // All but CONTXT / NUMBER are named.
+        if(!vec[i]->name && vec[i]->type != CONTXT &&
+            vec[i]->type != NUMBER)
+        {
+            dump(vec[i]);
+            return false;
+        }
+
+        // A CONTXT must have room for children.
+        if(vec[i]->type == CONTXT && !vec[i]->children)
+        {
+            dump(vec[i]);
+            return false;
+        }
     }
 
-    // Badly broken.
-    dump(contxt);
-    return false;
+    // We're OK;
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -572,8 +575,7 @@ char *get_str(entry_p contxt, char *var)
 
 //------------------------------------------------------------------------------
 // Name:        get_optstr
-// Description: Concatenate all the strings in all the options of a given
-//              type in contxt.
+// Description: Concatenate all the strings in all the options of a given type.
 // Input:       entry_p contxt:    The context.
 //              opt_t type:        The option type.
 // Return:      char *:            A concatenation of all the strings found.
@@ -606,7 +608,7 @@ char *get_optstr(entry_p contxt, opt_t type)
     // References to strings of options of the right type.
     char **val = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
 
-    if(!val)
+    if(!val && PANIC(contxt))
     {
         // Out of memory.
         return NULL;
@@ -815,63 +817,62 @@ static void dump_indent(entry_p entry, int indent)
     type = type < ind ? ind : type;
 
     // NULL is a valid value.
-    if(entry)
-    {
-        // Data type descriptions.
-        char *tps[] = { "NUMBER", "STRING", "SYMBOL", "SYMREF", "NATIVE",
-                        "OPTION", "CUSTOM", "CUSREF", "CONTXT", "DANGLE" };
-
-        // All entries have a type, a parent and an ID.
-        DBG("%s\n", tps[entry->type]);
-        DBG("%sThis:%p\n", type, (void *) entry);
-        DBG("%sParent:%p\n", type, (void *) entry->parent);
-        DBG("%sId:\t%d\n", type, entry->id);
-
-        // Most, but not all, have a name.
-        if(entry->name)
-        {
-            DBG("%sName:\t%s\n", type, entry->name);
-        }
-
-         // Natives and cusrefs have callbacks.
-        if(entry->call)
-        {
-            DBG("%sCall:\t%p\n", type, (void *) entry->call);
-        }
-
-        // Functions / symbols can be 'resolved'.
-        if(entry->resolved)
-        {
-            DBG("%sRes:\t", type);
-
-            // Pretty print the 'resolved' entry, last / default return value
-            // and values refered to by symbols.
-            dump_indent(entry->resolved, indent + 1);
-        }
-
-        // Pretty print all children.
-        if(entry->children)
-        {
-            for(entry_p *chl = entry->children; *chl && *chl != end(); chl++)
-            {
-                DBG("%sChl:\t", type);
-                dump_indent(*chl, indent + 1);
-            }
-        }
-
-        // Pretty print all symbols.
-        if(entry->symbols)
-        {
-            for(entry_p *sym = entry->symbols; *sym && *sym != end(); sym++)
-            {
-                DBG("%sSym:\t", type);
-                dump_indent(*sym, indent + 1);
-            }
-        }
-    }
-    else
+    if(!entry)
     {
         DBG("NULL\n\n");
+        return;
+    }
+
+    // Data type descriptions.
+    char *tps[] = { "NUMBER", "STRING", "SYMBOL", "SYMREF", "NATIVE",
+                    "OPTION", "CUSTOM", "CUSREF", "CONTXT", "DANGLE" };
+
+    // All entries have a type, a parent and an ID.
+    DBG("%s\n", tps[entry->type]);
+    DBG("%sThis:%p\n", type, (void *) entry);
+    DBG("%sParent:%p\n", type, (void *) entry->parent);
+    DBG("%sId:\t%d\n", type, entry->id);
+
+    // Most, but not all, have a name.
+    if(entry->name)
+    {
+        DBG("%sName:\t%s\n", type, entry->name);
+    }
+
+     // Natives and cusrefs have callbacks.
+    if(entry->call)
+    {
+        DBG("%sCall:\t%p\n", type, (void *) entry->call);
+    }
+
+    // Functions / symbols can be 'resolved'.
+    if(entry->resolved)
+    {
+        DBG("%sRes:\t", type);
+
+        // Pretty print the 'resolved' entry, last / default return value
+        // and values refered to by symbols.
+        dump_indent(entry->resolved, indent + 1);
+    }
+
+    // Pretty print all children.
+    if(entry->children)
+    {
+        for(entry_p *chl = entry->children; *chl && *chl != end(); chl++)
+        {
+            DBG("%sChl:\t", type);
+            dump_indent(*chl, indent + 1);
+        }
+    }
+
+    // Pretty print all symbols.
+    if(entry->symbols)
+    {
+        for(entry_p *sym = entry->symbols; *sym && *sym != end(); sym++)
+        {
+            DBG("%sSym:\t", type);
+            dump_indent(*sym, indent + 1);
+        }
     }
 }
 
