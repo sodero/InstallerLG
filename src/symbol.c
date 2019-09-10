@@ -68,10 +68,9 @@ entry_p m_set(entry_p contxt)
         // Create a copy of the contents of the rhs.
         entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
 
-        if(!res)
+        if(!res && PANIC(contxt))
         {
             // Out of memory.
-            PANIC(contxt);
             break;
         }
 
@@ -83,10 +82,9 @@ entry_p m_set(entry_p contxt)
         {
             res->name = DBG_ALLOC(strdup(res->name));
 
-            if(!res->name)
+            if(!res->name && PANIC(contxt))
             {
                 // Out of memory.
-                PANIC(contxt);
                 free(res);
                 break;
             }
@@ -156,10 +154,9 @@ entry_p m_symbolset(entry_p contxt)
             // Create a copy of the evaluated rhs.
             entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
 
-            if(!res)
+            if(!res && PANIC(contxt))
             {
                 // Out of memory.
-                PANIC(contxt);
                 R_CUR;
             }
 
@@ -171,10 +168,9 @@ entry_p m_symbolset(entry_p contxt)
             {
                 res->name = DBG_ALLOC(strdup(res->name));
 
-                if(!res->name)
+                if(!res->name && PANIC(contxt))
                 {
                     // Out of memory.
-                    PANIC(contxt);
                     free(res);
                     break;
                 }
@@ -220,7 +216,7 @@ entry_p m_symbolset(entry_p contxt)
             // This is a new symbol.
             entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs)));
 
-            if(!nsm)
+            if(!nsm && PANIC(contxt))
             {
                 // Out of memory.
                 kill(res);

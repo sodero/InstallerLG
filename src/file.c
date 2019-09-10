@@ -654,23 +654,19 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                 {
                     node->next = DBG_ALLOC(calloc(1,
                                            sizeof(struct pnode_t)));
-                    if(node->next)
-                    {
-                        node->next->type = type;
-                        node->next->name = n_src;
-                        node->next->copy = n_dst;
-                        node = node->next;
-                    }
-                    else
+
+                    if(!node->next && PANIC(contxt))
                     {
                         // Out of memory.
-                        PANIC(contxt);
-
-                        // Free what we have and exit.
                         free(n_src);
                         free(n_dst);
                         break;
                     }
+
+                    node->next->type = type;
+                    node->next->name = n_src;
+                    node->next->copy = n_dst;
+                    node = node->next;
                 }
 
                 // Get next entry.
@@ -804,10 +800,9 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
-    if(!fib)
+    if(!fib && PANIC(contxt))
     {
         // Out of memory.
-        PANIC(contxt);
         return LG_FALSE;
     }
 
@@ -1222,10 +1217,9 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
     // Create working copy.
     char *dir = DBG_ALLOC(strdup(dst));
 
-    if(!dir)
+    if(!dir && PANIC(contxt))
     {
         // Out of memory.
-        PANIC(contxt);
         return LG_FALSE;
     }
 
@@ -1622,10 +1616,9 @@ entry_p m_copylib(entry_p contxt)
     char *name = newname ? h_tackon(contxt, dst, str(newname)) :
                            h_tackon(contxt, dst, h_fileonly(contxt, src));
 
-    if(!name)
+    if(!name && PANIC(contxt))
     {
         // Out of memory.
-        PANIC(contxt);
         R_NUM(LG_FALSE);
     }
 
@@ -2387,10 +2380,9 @@ entry_p m_foreach(entry_p contxt)
             }
             #endif
 
-            if(!cur)
+            if(!cur && PANIC(contxt))
             {
                 // Out of memory.
-                PANIC(contxt);
                 err = true;
             }
 
@@ -2787,10 +2779,9 @@ entry_p m_startup(entry_p contxt)
     // Gather and merge all (command) strings.
     char *cmd = get_optstr(C_ARG(2), OPT_COMMAND);
 
-    if(!cmd)
+    if(!cmd && PANIC(contxt))
     {
         // Out of memory.
-        PANIC(contxt);
         R_NUM(LG_FALSE);
     }
 

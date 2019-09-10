@@ -82,10 +82,9 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         // Command / script. Merge all and insert space between arguments.
         char *cmd = get_chlstr(contxt, true);
 
-        if(!cmd)
+        if(!cmd && PANIC(contxt))
         {
             // Out of memory.
-            PANIC(contxt);
             R_CUR;
         }
 
@@ -98,22 +97,17 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             size_t len = strlen(cmd) + strlen(pre) + 2;
             char *tmp = DBG_ALLOC(malloc(len));
 
-            if(tmp)
-            {
-                // Prepend prefix to command string.
-                snprintf(tmp, len, "%s %s", pre, cmd);
-                free(cmd);
-                cmd = tmp;
-            }
-            else
+            if(!tmp && PANIC(contxt))
             {
                 // Out of memory
-                PANIC(contxt);
                 free(cmd);
-
-                // Failure.
                 R_CUR;
             }
+
+            // Prepend prefix to command string.
+            snprintf(tmp, len, "%s %s", pre, cmd);
+            free(cmd);
+            cmd = tmp;
         }
 
         // If we have a valid destination dir, change to that directory. We're

@@ -253,45 +253,42 @@ entry_p m_working(entry_p contxt)
     // Concatenate all children.
     char *msg = get_chlstr(contxt, false);
 
-    // Make sure that we're not out of memory.
-    if(msg)
+    if(!msg && PANIC(contxt))
     {
-        // Did we fail while resolving one or more of our children?
-        if(DID_ERR)
-        {
-            // We own msg.
-            free(msg);
-            R_NUM(LG_FALSE);
-        }
-
-        // Standard prefix.
-        size_t len = strlen(tr(S_WRKN)) + strlen(msg) + 1;
-
-        // Memory to hold prefix and children.
-        char *con = DBG_ALLOC(calloc(len, 1));
-
-        // Did we manage to concatenate something?
-        if(con)
-        {
-            // Concatenate and free buffer.
-            snprintf(con, len, "%s%s", tr(S_WRKN), msg);
-            free(msg);
-
-            // Show the result.
-            gui_working(con);
-
-            // Free the final message buffer.
-            free(con);
-
-            // Success.
-            R_NUM(LG_TRUE);
-        }
-
-        // Free the children buffer.
-        free(msg);
+        // Out of memory.
+        R_CUR;
     }
 
-    // Out of memory.
-    PANIC(contxt);
-    R_CUR;
+    // Did we fail while resolving one or more of our children?
+    if(DID_ERR)
+    {
+        // We own msg.
+        free(msg);
+        R_NUM(LG_FALSE);
+    }
+
+    // Standard prefix.
+    size_t len = strlen(tr(S_WRKN)) + strlen(msg) + 1;
+
+    // Memory to hold prefix and children.
+    char *con = DBG_ALLOC(calloc(len, 1));
+
+    if(!con && PANIC(contxt))
+    {
+        free(msg);
+        R_CUR;
+    }
+
+    // Concatenate and free buffer.
+    snprintf(con, len, "%s%s", tr(S_WRKN), msg);
+    free(msg);
+
+    // Show the result.
+    gui_working(con);
+
+    // Free the final message buffer.
+    free(con);
+
+    // Success.
+    R_NUM(LG_TRUE);
 }

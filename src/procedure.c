@@ -66,31 +66,25 @@ entry_p m_gosub(entry_p contxt)
             //
             // (message (P_ADDMUL 1 2 3)) ; shows 9
             // (message (P_ADDMUL 4 5))   ; shows 27
-
             while(*arg && *arg != end() && *ina && *ina != end())
             {
                 entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
 
-                // Do a deep copy and free the resources from the last
-                // invocation, if any.
-                if(res)
-                {
-                    memmove(res, resolve(*ina), sizeof(entry_t));
-                    res->name = res->name ? DBG_ALLOC(strdup(res->name)) : NULL;
-                    res->parent = *arg;
-                    kill((*arg)->resolved);
-                    (*arg)->resolved = res;
-                }
-                else
+                if(!res && PANIC(contxt))
                 {
                     // Out of memory
-                    PANIC(contxt);
                     return end();
                 }
 
-                // Continue until we have no more arguments from the
-                // caller or that the procedure doesn't take any more
-                // arguments.
+                // Copy and free the resources from the last invocation, if any.
+                memmove(res, resolve(*ina), sizeof(entry_t));
+                res->name = res->name ? DBG_ALLOC(strdup(res->name)) : NULL;
+                res->parent = *arg;
+                kill((*arg)->resolved);
+                (*arg)->resolved = res;
+
+                // Continue until we have no more arguments from the caller or
+                // that the procedure doesn't take any more arguments.
                 arg++;
                 ina++;
             }
@@ -127,17 +121,14 @@ entry_p m_gosub(entry_p contxt)
             // mimicing a NATIVE returning a STRING.
             contxt->resolved = new_string(DBG_ALLOC(strdup("")));
 
-            // Out of memory?
-            if(contxt->resolved)
-            {
-                // Reparent the dummy.
-                contxt->resolved->parent = contxt;
-            }
-            else
+            if(!contxt->resolved)
             {
                 // Panic already set.
                 return end();
             }
+
+            // Reparent the dummy.
+            contxt->resolved->parent = contxt;
         }
 
         // Save the old name. We need to do this in order to resolve the
