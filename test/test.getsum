@@ -3,6 +3,7 @@
 (getsum "_ne_") ; "rm -f _ne_","Line 1: Could not read from file '_ne_' 0",""
 (getsum "_gs_") ; "touch _gs_","1","rm -f _gs_"
 (getsum "_gs_") ; "echo '0' > _gs_","7077947","rm -f _gs_"
+(getsum "_gs_") ; "echo '0' > _gs_ && chmod a-r _gs_","Line 1: Could not read from file '_gs_' 0","rm -f _gs_"
 (getsum "_gs_") ; "echo '00' > _gs_","16580715","rm -f _gs_"
 (getsum "_gs_") ; "echo '000' > _gs_","29229211","rm -f _gs_"
 (getsum "_gs_") ; "echo 'a' > _gs_","13500524","rm -f _gs_"

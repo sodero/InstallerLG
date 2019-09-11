@@ -1,18 +1,18 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // resource.h:
 //
 // Encapsulation of resources that we might want to localize later on.
-//----------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+//------------------------------------------------------------------------------
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #ifndef RESOURCE_H_
 #define RESOURCE_H_
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // String mapping
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 typedef enum
 {
     // Out of range.
@@ -86,6 +86,15 @@ typedef enum
     S_VUNK, /* "Unknown version" */
     S_DDRW, /* "Destination drawer" */
     S_NINS, /* "There is no currently installed version" */
+    S_ARGS, /* "SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,NOLOG/S,NOPRETEND/S" */
+    S_SCRI, /* "SCRIPT" */
+    S_APPN, /* "APPNAME" */
+    S_MUSR, /* "MINUSER" */
+    S_DUSR, /* "DEFUSER" */
+    S_LANG, /* "LANGUAGE" */
+    S_LGFL, /* "LOGFILE" */
+    S_NLOG, /* "NOLOG" */
+    S_NOPR, /* "NOPRETEND" */
 
     // Out of range.
     S_GONE,

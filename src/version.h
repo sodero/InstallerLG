@@ -1,18 +1,18 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // version.h:
 //
 // InstallerLG version information
-//----------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+//------------------------------------------------------------------------------
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #ifndef VERSION_H_
 #define VERSION_H_
 
 #define MAJOR 44
 #define MINOR 10
-#define BUILD 37
+#define BUILD 38
 #define PHASE "ALPHA"
 
 #define STY(X) #X

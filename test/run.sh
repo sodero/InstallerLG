@@ -1,13 +1,13 @@
 run()
 {
     export _INSTALLER_LG_=yes
-    instfile=`mktemp ./Installer.tmp.XXXXXX`
+    instfile=`mktemp Installer.tmp.XXXXXX`
     echo $1 > $instfile
     if [ `which valgrind` ]; then
-        l=`mktemp ./leak.tmp.XXXXXX`
+        l=`mktemp leak.tmp.XXXXXX`
         o=`valgrind --track-fds=yes --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 $prg $instfile 2>$l`
         if [ $? -ne 0 ]; then
-            s=`mktemp ./leak.tmp.XXXXXX`
+            s=`mktemp leak.tmp.XXXXXX`
             cat $l | sed -r 's/==[0-9]+/;==/g' >> $s
             cat $instfile >> $s
             return 2
@@ -25,7 +25,7 @@ run()
     if [ "$o" = "$2" ]; then
         return 1
     else
-        l=`mktemp ./err.tmp.XXXXXX`
+        l=`mktemp err.tmp.XXXXXX`
         echo "; In line $3" > $l
         echo $1 >> $l
         echo "; Actual result [$o]" >> $l
@@ -63,8 +63,8 @@ evl()
         if [ -n "$pre" ]; then
             eval "$pre" 2>&1
         fi
-        instfile=`mktemp ./Installer.tmp.XXXXXX`
-        massfile=`mktemp ./massif.out.XXXXXX`
+        instfile=`mktemp Installer.tmp.XXXXXX`
+        massfile=`mktemp massif.out.XXXXXX`
         echo "$1 ; [$pre ; $pst]" > $instfile
         valgrind --tool=massif --massif-out-file=$massfile --stacks=yes $prg $instfile > /dev/null 2>&1
         snip=$(echo $1 | tr -d '.' | tr '/' '_' | tr -d '"' | tr -d '\n')

@@ -1,12 +1,12 @@
 %{
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // lexer.l:
 //
-// InstallerNG tokenizer
-//----------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+// InstallerLG tokenizer
+//------------------------------------------------------------------------------
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "args.h"
 #include "error.h"
@@ -19,14 +19,12 @@
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* strduptr(const char *str) - Duplicate string and translate */
-/* escpate characters according to the Installer V42.6 guide  */
+/* escape characters according to the Installer V42.6 guide   */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 static char *strduptr(const char *str);
 %}
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
-    /* We need the parser to be reentrant, not */
-    /* because we want to, but because it will */
-    /* will leak memory otherwise.             */
+    /* We need the parser to be reentrant, not because we want to, but because it will will leak memory otherwise. */
     /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 %option noyywrap reentrant bison-bridge caseless
 
@@ -230,9 +228,7 @@ int yyerror(yyscan_t scanner, const char *err)
     int line = yyget_lineno(scanner);
     const char *info = yyget_text(scanner);
 
-    // Print to stderr if we're executing
-    // from shell, show dialogue if we're
-    // executing from WB.
+    // Print to stderr if we're executing from shell, show dialogue if we're executing from WB.
     if(arg_argc(-1))
     {
         // All details to stderr.
@@ -240,14 +236,11 @@ int yyerror(yyscan_t scanner, const char *err)
     }
     else
     {
-        // A slightly less detailed
-        // graphical error report.
+        // A slightly less detailed graphical error report.
         error(NULL, line, ERR_PARSE, err);
     }
 
-    // Return a bogus value, not the
-    // number of bytes printed, like
-    // the default yyerror function.
+    // Return a bogus value, not the number of bytes printed, like the default yyerror function.
     return line;
 }
 
@@ -259,18 +252,15 @@ int main(int argc, char **argv)
     // Assume failure.
     int r = -1;
 
-    // Initialize the argument handling. Transparent
-    // handling of Workbench and CLI arguments.
+    // Initialize the argument handling. Transparent handling of Workbench and CLI arguments.
     if(arg_init(argc, argv))
     {
         yyscan_t lexer;
 
-        // Allocate and initialize whatever the lexer
-        // needs. Reentrant, see comment at the top.
+        // Allocate and initialize whatever the lexer needs. Reentrant, see comment at the top.
         if(yylex_init(&lexer) == 0)
         {
-            // Get the name of the script from CLI
-            // or tooltypes / wb.
+            // Get the name of the script from CLI or tooltypes / wb.
             char *n = arg_get(ARG_SCRIPT);
             FILE *f = fopen(n, "r");
 
@@ -294,8 +284,7 @@ int main(int argc, char **argv)
                 fprintf(stderr, tr(S_CNOF), n);
             }
 
-            // Free all resources allocated by
-            // the lexer.
+            // Free all resources allocated by the lexer.
             yylex_destroy(lexer);
         }
         else
@@ -304,16 +293,12 @@ int main(int argc, char **argv)
             fprintf(stderr, "%s\n", tr(S_UNER));
         }
 
-        // Free all resources allocated by
-        // the argument handling routines.
+        // Free all resources allocated by the argument handling routines.
         arg_done();
     }
 
 #ifdef AMIGA
-    // Translate value of r to the appropriate
-    // Amiga DOS return value. Syntax error is
-    // an ERROR and file not found / readable
-    // a FAIL.
+    // Translate value of r to the appropriate Amiga DOS return value. Syntax error is an ERROR and file not found / readable a FAIL.
     return (!r ? r :
            (r == 1 ? RETURN_ERROR : RETURN_FAIL));
 #else
@@ -329,7 +314,7 @@ int main(int argc, char **argv)
 static char *strduptr(const char *str)
 {
     /* Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-     -------------------------------------------------------
+     ---------------------------------------------------------
     `\n' newline character
     `\r' return character
     `\t' tab character
@@ -348,9 +333,7 @@ static char *strduptr(const char *str)
     static char chr[] = "nrthvbf\"'\\\0";
     static char raw[] = "\n\r\t\t\v\b\f\"'\\\0";
 
-    // Please note 'len -1', we strip the " from the string
-    // at this point, str index starts at 1 and we skip the
-    // last character.
+    // Please note 'len -1', we strip the " from the string at this point, str index starts at 1 and we skip the last character.
     char *out = calloc(len - 1, 1);
 
     if(out)
@@ -362,14 +345,12 @@ static char *strduptr(const char *str)
             char cr = str[i];
 
             // Are we dealing with a control character?
-            if(str[i] == '\\' &&
-               i + 1 < len - 1)
+            if(str[i] == '\\' && i + 1 < len - 1)
             {
                 // Are we within the limits of the string?
                 if(i + 3 < len - 1)
                 {
-                    // Is this a hex number that needs to be
-                    // translated into a character?
+                    // Is this a hex number that needs to be translated into a character?
                     if(str[i + 1] == 'x' && (
                       ((str[i + 2] >= 48 && str[i + 2] <= 57) ||
                        (str[i + 2] >= 65 && str[i + 2] <= 70) ||
@@ -379,12 +360,7 @@ static char *strduptr(const char *str)
                        (str[i + 3] >= 97 && str[i + 3] <= 102))))
                     {
                         // Temporary string for conversion
-                        char h[] =
-                        {
-                            str[i + 2],
-                            str[i + 3],
-                            '\0'
-                        };
+                        char h[] = { str[i + 2], str[i + 3], '\0' };
 
                         // Three digits, \ooo.
                         i += 3;
@@ -395,20 +371,13 @@ static char *strduptr(const char *str)
                         // Continue with the rest of the string.
                         continue;
                     }
-                    // Is this a oct number that needs to be
-                    // translated into a character?
+                    // Is this a oct number that needs to be translated into a character?
                     if(str[i + 1] >= 48 && str[i + 1] <= 55 &&
                        str[i + 2] >= 48 && str[i + 2] <= 55 &&
                        str[i + 3] >= 48 && str[i + 3] <= 55)
                     {
                         // Temporary string for conversion
-                        char h[] =
-                        {
-                            str[i + 1],
-                            str[i + 2],
-                            str[i + 3],
-                            '\0'
-                        };
+                        char h[] = { str[i + 1], str[i + 2], str[i + 3], '\0' };
 
                         // Two digits + 'x', \xXX.
                         i += 3;
@@ -422,12 +391,9 @@ static char *strduptr(const char *str)
                 }
 
                 // Standard escape sequence.
-                for(int j = 0;
-                    chr[j]; j++)
+                for(int j = 0; chr[j]; j++)
                 {
-                    // A direct mapping between the current
-                    // character and the value representing
-                    // the full escape sequence.
+                    // A direct mapping between the current character and the value representing the full escape sequence.
                     if(str[i + 1] == chr[j])
                     {
                         i++;
@@ -437,18 +403,11 @@ static char *strduptr(const char *str)
                 }
             }
 
-            // Copy input to ouput. The 'cr' might have
-            // been translated, maybe it's just a copy.
+            // Copy input to ouput. The 'cr' might have been translated, maybe it's just a copy.
             out[io++] = cr;
         }
     }
 
-    // Unless we're out of memory,
-    // out will be a copy of str.
-    // If we're out of memory this
-    // will be trapped by the OOM
-    // token and the parser will
-    // abort.
+    // Unless we're out of memory, out will be a copy of str. If we're out of memory this will be trapped by the OOM token and the parser will abort.
     return out;
 }
-

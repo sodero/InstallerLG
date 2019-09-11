@@ -1,12 +1,12 @@
 %{
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // parser.y:
 //
 // InstallerLG parser
-//----------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+//------------------------------------------------------------------------------
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "all.h"
 #include "alloc.h"
@@ -20,9 +20,7 @@
 #define YYDEBUG 1
 %}
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* We need the parser to be reentrant, not */
-/* because we want to, but because it will */
-/* will leak memory otherwise.             */
+/* We need the parser to be reentrant, not because we want to, but because it will leak memory otherwise. */
 %define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
@@ -74,13 +72,11 @@
        /*                */ showwbobject closewbobject trace retrace closemedia effect setmedia showmedia
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- destruction --------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* Use the destructor of the start symbol to set of  */
-/* the execution of the program.                     */
+/* Use the destructor of the start symbol to set of the execution of the program. */
 %destructor { run($$);  }   start
 /* Primitive strings are freed like you would expect */
 %destructor { free($$); }   SYM STR
-/* Complex types are freed using the kill() function */
-/* found in alloc.c                                  */
+/* Complex types are freed using the kill() function found in alloc.c */
 %destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np sps par cv cvv add sub div mul
                             gt gte eq set cus dcl fmt if while until and or xor not bitand bitor bitxor bitnot
                             shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice
@@ -308,7 +304,7 @@ select:         '(' SELECT p xpbs ')'            { $$ = new_native(strdup("selec
 until:          '(' UNTIL p vps ')'              { $$ = new_native(strdup("until"), LINE, m_until, push(push(new_contxt(), $3), $4), NUMBER); };
 while:          '(' WHILE p vps ')'              { $$ = new_native(strdup("while"), LINE, m_while, push(push(new_contxt(), $3), $4), NUMBER); };
 trace:          '(' TRACE ')'                    { $$ = new_native(strdup("trace"), LINE, m_trace, NULL, NUMBER); };
-retrace:        '(' RETRACE ')'                  { $$ = new_native(strdup("retrace"), LINE, m_retrace, NULL, DANGLE); };
+retrace:        '(' RETRACE ')'                  { $$ = new_native(strdup("retrace"), LINE, m_retrace, NULL, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h --------------------------------------------------------------------------------------------------------------------------------------------------------*/
 execute:        '(' EXECUTE ps opts ')'          { $$ = new_native(strdup("execute"), LINE, m_execute, push($3, $4), NUMBER); } |
@@ -459,7 +455,7 @@ closewbobject:  '(' CLOSEWBOBJECT p ')'          { $$ = new_native(strdup("close
 all:            '(' ALL ')'                      { $$ = new_option(strdup("all"), OPT_ALL, NULL); };
 append:         '(' APPEND ps ')'                { $$ = new_option(strdup("append"), OPT_APPEND, $3); };
 assigns:        '(' ASSIGNS ')'                  { $$ = new_option(strdup("assigns"), OPT_ASSIGNS, NULL); };
-back:           '(' BACK vps ')'                { $$ = new_option(strdup("back"), OPT_BACK, $3); };
+back:           '(' BACK vps ')'                 { $$ = new_option(strdup("back"), OPT_BACK, $3); };
 choices:        '(' CHOICES ps ')'               { $$ = new_option(strdup("choices"), OPT_CHOICES, $3); };
 command:        '(' COMMAND ps ')'               { $$ = new_option(strdup("command"), OPT_COMMAND, $3); };
 compression:    '(' COMPRESSION ')'              { $$ = new_option(strdup("compression"), OPT_COMPRESSION, NULL); };
@@ -499,7 +495,7 @@ swapcolors:     '(' SWAPCOLORS ')'               { $$ = new_option(strdup("swapc
 optional:       '(' OPTIONAL ps ')'              { $$ = new_option(strdup("optional"), OPT_OPTIONAL, $3); };
 resident:       '(' RESIDENT ')'                 { $$ = new_option(strdup("resident"), OPT_RESIDENT, NULL); };
 override:       '(' OVERRIDE p ')'               { $$ = new_option(strdup("override"), OPT_OVERRIDE, push(new_contxt(), $3)); };
-dynopt:         '(' IF p opt opt ')'             { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(push(new_contxt(), $3), $4), $5)); };
+dynopt:         '(' IF p opt opt ')'             { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(push(new_contxt(), $3), $4), $5)); } |
+                '(' IF p opt ')'                 { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(new_contxt(), $3), $4)); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %%
-

@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // resource.c:
 //
 // Encapsulation of resources that we might want to localize later on.
-//----------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+//------------------------------------------------------------------------------
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "error.h"
 #include "resource.h"
@@ -22,12 +22,12 @@ struct LocaleInfo
 
 static struct LocaleInfo loc;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        tr
 // Description: Get string from string ID.
 // Input:       A res_t string ID.
 // Return:      The string corresponding to the string ID.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const char *tr(res_t res)
 {
     // Fail nicely if we're out of range.
@@ -36,85 +36,42 @@ const char *tr(res_t res)
     // res_t -> string mappings.
     static const char *str[] =
     {
-        // Out of range.
         "NONE",
+        /*1*/ "Copying file(s)", /*2*/ "Overwrite existing directory '%s'?",
+        /*3*/ "Abort copy '%s' to '%s'.\n", /*4*/ "Could not copy '%s' to '%s'.\n",
+        /*5*/ "Delete write protected file '%s'?", /*6*/ "Delete write protected directory '%s'?",
+        /*7*/ "Overwrite write protected file '%s'?", /*8*/ "Delete file '%s'?",
+        /*9*/ "Deleted '%s'.\n", /*10*/ "No such file '%s'.\n", /*11*/ "Renamed '%s' to '%s'.\n",
+        /*12*/ "Copied '%s' to '%s'.\n", /*13*/ "Directory '%s' exists already.\n",
+        /*14*/ "Created '%s'.\n", /*15*/ "Get mask '%s' %d\n", /*16*/ "Protect '%s' %d\n",
+        /*17*/ "Installer", /*18*/ "Set Installation Mode", /*19*/ "Destination drawer",
+        /*20*/ "Copying file", /*21*/ "Files to install", /*22*/ "Installation mode and logging",
+        /*23*/ "Progress", /*24*/ "Proceed", /*25*/ "Retry", /*26*/ "Abort", /*27*/ "Yes",
+        /*28*/ "No", /*29*/ "Ok", /*30*/ "Next", /*31*/ "Skip", /*32*/ "Back",
+        /*33*/ "Unknown error", /*34*/ "Setup failed", /*35*/ "Failed creating MUI custom class",
+        /*36*/ "Failed creating MUI application", /*37*/ "Initialization failed", /*38*/ "Error",
+        /*39*/ "Success", /*40*/ "Line %d: %s '%s'\n", /*41*/ "Novice User - All Actions Automatic",
+        /*42*/ "Intermediate User - Limited Manual Control",
+        /*43*/ "Expert User - Must Confirm all actions", /*44*/ "Install for real",
+        /*45*/ "Dry run only", /*46*/ "No logging", /*47*/ "Log to file", /*48*/ "Log to printer",
+        /*49*/ "installer: required argument missing\n", /*50*/ "%s\n\n%s can be found in %s",
+        /*51*/ "Installation complete", /*52*/ "Executed '%s'.\n",
+        /*53*/ "Error: Could not open file '%s'\n", /*54*/ "Line %d: %s '%s'\n",
+        /*55*/ "Working on installation...\n\n", /*56*/ "Select directory", /*57*/ "Select file",
+        /*58*/ "Assign '%s' to '%s'\n", /*59*/ "Remove assign '%s'\n",
+        /*60*/ "Could not assign '%s' to '%s'\n", /*61*/ "Could not remove assign '%s'\n",
+        /*62*/ "Append '%s' to '%s'\n", /*63*/ "Include '%s' in '%s'\n",
+        /*64*/ "Version to install", /*65*/ "Version currently installed", /*66*/ "Unknown version",
+        /*67*/ "Destination drawer", /*68*/ "There is no currently installed version",
+        /*69*/ "SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,NOLOG/S,NOPRETEND/S\n",
+        /*70*/ "SCRIPT", /*71*/ "APPNAME", /*72*/ "MINUSER", /*73*/ "DEFUSER", /*74*/ "LANGUAGE",
+        /*75*/ "LOGFILE", /*76*/ "NOLOG", /*77*/ "NOPRETEND",
 
-        "Copying file(s)",
-        "Overwrite existing directory '%s'?",
-        "Abort copy '%s' to '%s'.\n",
-        "Could not copy '%s' to '%s'.\n",
-        "Delete write protected file '%s'?",
-        "Delete write protected directory '%s'?",
-        "Overwrite write protected file '%s'?",
-        "Delete file '%s'?",
-        "Deleted '%s'.\n",
-        "No such file '%s'.\n",
-        "Renamed '%s' to '%s'.\n",
-        "Copied '%s' to '%s'.\n",
-        "Directory '%s' exists already.\n",
-        "Created '%s'.\n",
-        "Get mask '%s' %d\n",
-        "Protect '%s' %d\n",
-        "Installer",
-        "Set Installation Mode",
-        "Destination drawer",
-        "Copying file",
-        "Files to install",
-        "Installation mode and logging",
-        "Progress",
-        "Proceed",
-        "Retry",
-        "Abort",
-        "Yes",
-        "No",
-        "Ok",
-        "Next",
-        "Skip",
-        "Back",
-        "Unknown error",
-        "Setup failed",
-        "Failed creating MUI custom class",
-        "Failed creating MUI application",
-        "Initialization failed",
-        "Error",
-        "Success",
-        "Line %d: %s '%s'\n",
-        "Novice User - All Actions Automatic",
-        "Intermediate User - Limited Manual Control",
-        "Expert User - Must Confirm all actions",
-        "Install for real",
-        "Dry run only",
-        "No logging",
-        "Log to file",
-        "Log to printer",
-        "installer: required argument missing\n",
-        "%s\n\n%s can be found in %s",
-        "Installation complete",
-        "Executed '%s'.\n",
-        "Error: Could not open file '%s'\n",
-        "Line %d: %s '%s'\n",
-        "Working on installation...\n\n",
-        "Select directory",
-        "Select file",
-        "Assign '%s' to '%s'\n",
-        "Remove assign '%s'\n",
-        "Could not assign '%s' to '%s'\n",
-        "Could not remove assign '%s'\n",
-        "Append '%s' to '%s'\n",
-        "Include '%s' in '%s'\n",
-        "Version to install",
-        "Version currently installed",
-        "Unknown version",
-        "Destination drawer",
-        "There is no currently installed version",
-
-        // Out of range.
-        "GONE"
+        /*S_GONE*/ "OUT OF RANGE"
     };
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    if(loc.li_LocaleBase &&
-       loc.li_Catalog && cur > S_NONE)
+    if(loc.li_LocaleBase && loc.li_Catalog && cur > S_NONE)
     {
         return GetCatalogStr(loc.li_Catalog, cur - 1, str[cur]);
     }
@@ -124,12 +81,12 @@ const char *tr(res_t res)
     return str[cur];
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        locale_init
 // Description: Initialize and open the catalog.
 // Input:       -
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void locale_init(void)
 {
     if(!loc.li_LocaleBase)
@@ -143,12 +100,12 @@ void locale_init(void)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        locale_exit
 // Description: Close catalog and free locale resources.
 // Input:       -
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void locale_exit(void)
 {
     if(loc.li_LocaleBase)

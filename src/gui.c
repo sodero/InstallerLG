@@ -1,12 +1,12 @@
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // gui.c:
 //
 // MUI based GUI. On non Amiga systems this is, except for some stdout prints
 // to aid testing, a stub.
-//----------------------------------------------------------------------------
-// Copyright (C) 2018, Ola Söder. All rights reserved.
+//------------------------------------------------------------------------------
+// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "gui.h"
 #include "version.h"
@@ -44,12 +44,13 @@
 
 #ifndef __GNUC__
 #define __attribute__(a)
+typedef LONG IPTR;
 #endif
 
 #ifdef AMIGA
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // MUI macros
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #ifdef __MORPHOS__
 # define DISPATCH_GATE(C) &C ## Gate
 # define DISPATCH_ARGS void
@@ -64,7 +65,14 @@
   { TRAP_LIB, 0, (void (*) (void)) C ## Dispatch }; \
   struct C ## Data
 #else
+# ifndef __VBCC__
 # define DoSuperNew(C,O,...) DoSuperNewTags(C,O,NULL,__VA_ARGS__)
+#else
+APTR STDARGS DoSuperNew(struct IClass *cl, APTR obj, ULONG tag1, ...)
+{
+	return (IPTR) DoSuperMethod(cl, obj, OM_NEW, &tag1, NULL);
+}
+# endif
 # define DISPATCH_HEAD
 # define DISPATCH_ARGS Class *cls, Object *obj, Msg msg
 # define DISPATCH_GATE(C) C ## Dispatch
@@ -77,20 +85,20 @@
 #define TAGBASE_LG (TAG_USER | 27<<16)
 #define CAST(P,T) ((T) ((uintptr_t) P))
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Debug and logging macros
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #define GPUT(E,S) KPrintF((CONST_STRPTR)"%s:\t%s\t(%s)\n",E,S,__func__)
 #define GERR(S) GPUT("ERR",S)
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Installer window
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 Object *Win;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Class members
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 CLASS_DEF(IG)
 {
     // Timer.
@@ -101,19 +109,17 @@ CLASS_DEF(IG)
     struct Window *Win;
 
     // Widgets.
-    Object *ExpertLevel, *UserLevel, *Progress,
-           *Complete, *Pretend, *Bottom, *String,
-           *Number, *Empty, *Text, *List, *Log,
-           *Top, *Ask, *Yes, *No, *AbortYes, *Abort,
-           *AbortOnly, *AbortRun;
+    Object *ExpertLevel, *UserLevel, *Progress, *Complete, *Pretend, *Bottom,
+           *String, *Number, *Empty, *Text, *List, *Log, *Top, *Ask, *Yes, *No,
+           *AbortYes, *Abort, *AbortOnly, *AbortRun;
 
     // String buffer.
     char Buf[1 << 10];
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Public methods
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #define MUIM_IG_Init             (TAGBASE_LG + 101)
 #define MUIM_IG_Welcome          (TAGBASE_LG + 102)
 #define MUIM_IG_CopyFilesStart   (TAGBASE_LG + 104)
@@ -142,28 +148,28 @@ CLASS_DEF(IG)
 #define MUIM_IG_ShowPicture      (TAGBASE_LG + 127)
 #define MUIM_IG_GetCustomScreen  (TAGBASE_LG + 128)
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Attributes
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #define MUIA_IG_UseCustomScreen  (TAGBASE_LG + 201)
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Media ID
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #define MUIA_IG_MediaBase        (TAGBASE_LG + 301)
 #define MUIA_IG_MediaMax         (TAGBASE_LG + 399)
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Init parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Init
 {
     ULONG MethodID;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Welcome parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Welcome
 {
     ULONG MethodID;
@@ -176,9 +182,9 @@ struct MUIP_IG_Welcome
     ULONG NoLog;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - CopyFilesStart parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_CopyFilesStart
 {
     ULONG MethodID;
@@ -189,9 +195,9 @@ struct MUIP_IG_CopyFilesStart
     ULONG Back;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - CopyFilesSetCur parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_CopyFilesSetCur
 {
     ULONG MethodID;
@@ -200,36 +206,36 @@ struct MUIP_IG_CopyFilesSetCur
     ULONG Back;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Exit parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Exit
 {
     ULONG MethodID;
     ULONG Message;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Complete parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Complete
 {
     ULONG MethodID;
     ULONG Progress;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - CopyFilesAdd parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_CopyFilesAdd
 {
     ULONG MethodID;
     ULONG File;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Run parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Confirm
 {
     ULONG MethodID;
@@ -238,9 +244,9 @@ struct MUIP_IG_Confirm
     ULONG Back;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Message parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Message
 {
     ULONG MethodID;
@@ -248,27 +254,27 @@ struct MUIP_IG_Message
     ULONG Back;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Finish parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Finish
 {
     ULONG MethodID;
     ULONG Message;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Working parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Working
 {
     ULONG MethodID;
     ULONG Message;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Effect parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Effect
 {
     ULONG MethodID;
@@ -277,18 +283,18 @@ struct MUIP_IG_Effect
     ULONG ColorEnd;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - CloseMedia parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_CloseMedia
 {
     ULONG MethodID;
     ULONG MediaID;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - SetMedia parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_SetMedia
 {
     ULONG MethodID;
@@ -297,9 +303,9 @@ struct MUIP_IG_SetMedia
     ULONG Parameter;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - ShowMedia parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_ShowMedia
 {
     ULONG MethodID;
@@ -308,9 +314,9 @@ struct MUIP_IG_ShowMedia
     ULONG Action;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - ShowPicture parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_ShowPicture
 {
     ULONG MethodID;
@@ -319,18 +325,18 @@ struct MUIP_IG_ShowPicture
     ULONG Action;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Abort parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Abort
 {
     ULONG MethodID;
     ULONG Message;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Radio parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Radio
 {
     ULONG MethodID;
@@ -342,9 +348,9 @@ struct MUIP_IG_Radio
     ULONG Select;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Bool parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Bool
 {
     ULONG MethodID;
@@ -355,9 +361,9 @@ struct MUIP_IG_Bool
     ULONG Back;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - String parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_String
 {
     ULONG MethodID;
@@ -368,9 +374,9 @@ struct MUIP_IG_String
     ULONG String;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - Number parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_Number
 {
     ULONG MethodID;
@@ -383,9 +389,9 @@ struct MUIP_IG_Number
     ULONG Number;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - CheckBoxes parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_CheckBoxes
 {
     ULONG MethodID;
@@ -397,9 +403,9 @@ struct MUIP_IG_CheckBoxes
     ULONG Bitmap;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - AskFile parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_AskFile
 {
     ULONG MethodID;
@@ -414,9 +420,9 @@ struct MUIP_IG_AskFile
     ULONG File;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - PageSet parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_PageSet
 {
     ULONG MethodID;
@@ -426,17 +432,17 @@ struct MUIP_IG_PageSet
     ULONG Bottom;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - GetCustomScreen parameters
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct MUIP_IG_GetCustomScreen
 {
     ULONG MethodID;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IG - private values
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #define MUIV_IG_FirstButton      (TAGBASE_LG + 200)
 #define MUIV_IG_Proceed          (TAGBASE_LG + 200)
 #define MUIV_IG_Abort            (TAGBASE_LG + 201)
@@ -452,28 +458,28 @@ struct MUIP_IG_GetCustomScreen
 #define MUIV_IG_LastButton       (TAGBASE_LG + 211)
 
 // Pages
-#define P_WELCOME                          0
-#define P_COPYFILES                        1
-#define P_FILEDEST                         2
-#define P_PRETEND_LOG                      3
-#define P_MESSAGE                          4
-#define P_STRING                           5
-#define P_NUMBER                           6
-#define P_ASKFILE                          7
+#define P_WELCOME                0
+#define P_COPYFILES              1
+#define P_FILEDEST               2
+#define P_PRETEND_LOG            3
+#define P_MESSAGE                4
+#define P_STRING                 5
+#define P_NUMBER                 6
+#define P_ASKFILE                7
 
 // Buttons
-#define B_PROCEED_ABORT                    0
-#define B_YES_NO_ABORT                     1
-#define B_ABORT                            2
-#define B_PROCEED_SKIP_ABORT               3
-#define B_OK                               4
-#define B_NONE                             5
+#define B_PROCEED_ABORT          0
+#define B_YES_NO_ABORT           1
+#define B_ABORT                  2
+#define B_PROCEED_SKIP_ABORT     3
+#define B_OK                     4
+#define B_NONE                   5
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGTrans - [PRIVATE] -
 // Input:    ULONG signal:  -
 // Return:   Gui ret val.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static inline ULONG IGTrans(ULONG signal)
 {
     switch(signal)
@@ -502,19 +508,17 @@ static inline ULONG IGTrans(ULONG signal)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGWait - [PRIVATE] Wait for notification(s)
 // Input:             ULONG notif:  Start notification value
 //                    ULONG range:  Number of values to check for
 // Return:            Notifcation val. / zero on return id quit
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static inline ULONG IGWait(Object *obj, ULONG notif, ULONG range)
 {
-    ULONG sig = 0,
-          ret = 0, n;
+    ULONG sig = 0, ret = 0, n;
 
-    // Set cycle chain for all buttons
-    // within the notification range.
+    // Set cycle chain for all buttons within the notification range.
     for(n = 0; n < range; n++)
     {
         // Filter out ticks.
@@ -553,15 +557,13 @@ static inline ULONG IGWait(Object *obj, ULONG notif, ULONG range)
     // Enter the message loop.
     while(ret != (ULONG) MUIV_Application_ReturnID_Quit)
     {
-        // Iterate over all signals that we're
-        // waiting for.
+        // Iterate over all signals that we're waiting for.
         for(n = 0; n < range; n++)
         {
             // Did we get what we're waiting for?
             if(ret == notif + n)
             {
-                // Remove buttons within the range
-                // from the cycle chain.
+                // Remove buttons within the range from the cycle chain.
                 for(n = 0; n < range; n++)
                 {
                     // Filter out ticks.
@@ -607,11 +609,11 @@ static inline ULONG IGWait(Object *obj, ULONG notif, ULONG range)
     return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGInit - Initialize all the things
 // Input:   -
 // Return:  On success TRUE, FALSE otherwise.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static inline IPTR IGInit(Class *cls, Object *obj)
 {
     static ULONG i = MUIV_IG_FirstButton;
@@ -671,16 +673,15 @@ static inline IPTR IGInit(Class *cls, Object *obj)
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGPageSet - [PRIVATE] Set page / buttons and display text
 // Input:                int top:   Top page
 //                       int btm:   Button page
 //                       ULONG msg: Top text message
 // Return:               TRUE on success, FALSE otherwise
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
-static inline IPTR IGPageSet(Class *cls,
-                             Object *obj,
+static inline IPTR IGPageSet(Class *cls, Object *obj,
                              struct MUIP_IG_PageSet *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
@@ -700,8 +701,7 @@ static inline IPTR IGPageSet(Class *cls,
     size_t cnt = strlen(src), len = 50;
 
     // Cap the size of the message.
-    cnt = cnt < (sizeof(my->Buf) - 1) ?
-          cnt : (sizeof(my->Buf) - 1);
+    cnt = cnt < (sizeof(my->Buf) - 1) ? cnt : (sizeof(my->Buf) - 1);
 
     // Copy for wrapping.
     memcpy(my->Buf, src, cnt);
@@ -709,8 +709,7 @@ static inline IPTR IGPageSet(Class *cls,
     // Do we need to word wrap?
     if(cnt > len)
     {
-        // Start from the first point
-        // where we need to wrap.
+        // Start from the first point where we need to wrap.
         size_t cur = len;
 
         // As long we have characters.
@@ -719,17 +718,14 @@ static inline IPTR IGPageSet(Class *cls,
             // Last wrapping point.
             size_t ref = cur - len;
 
-            // Go backwards from where we are
-            // to a point where we can wrap.
+            // Go backwards from where we are to a point where we can wrap.
             while(cur > ref && my->Buf[cur] > 33)
             {
                 cur--;
             }
 
-            // If we ended up where we started
-            // we failed. Wrap in the middle of
-            // the word in that case. This will
-            // only happen with words >= len.
+            // If we ended up where we started we failed. Wrap in the middle of
+            // the word in that case. This will only happen with words >= len.
             if(cur == ref)
             {
                 // Restore the previous point.
@@ -737,10 +733,8 @@ static inline IPTR IGPageSet(Class *cls,
             }
             else
             {
-                // If we found a wrapping point
-                // we must make sure that no NL
-                // exists before this point but
-                // after the previous point.
+                // If we found a wrapping point we must make sure that no NL
+                // exists before this point but after the previous point.
                 while(++ref < cur)
                 {
                     if(my->Buf[ref] == '\n')
@@ -770,10 +764,9 @@ static inline IPTR IGPageSet(Class *cls,
     return TRUE;
 }
 
-//----------------------------------------------------------------------------
-// IGWelcome - Show welcome message. The Level, Log, and Pretend
-//             parameters are int pointers that act as both input
-//             and output.
+//------------------------------------------------------------------------------
+// IGWelcome - Show welcome message. The Level, Log, and Pretend parameters are
+//             int pointers that act as both input and output.
 // Input:      Message - the welcome message text
 //             Level - User level
 //             Log - Log to file
@@ -782,9 +775,8 @@ static inline IPTR IGPageSet(Class *cls,
 //             NoPretend - Disable pretend mode
 //             NoLog - Disable logging
 // Return:     G_TRUE / G_ABORT / G_EXIT / G_ERR.
-//----------------------------------------------------------------------------
-static inline IPTR IGWelcome(Class *cls,
-                             Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGWelcome(Class *cls, Object *obj,
                              struct MUIP_IG_Welcome *msg)
 {
     // Show welcome page.
@@ -793,16 +785,15 @@ static inline IPTR IGWelcome(Class *cls,
     {
         struct IGData *my = INST_DATA(cls, obj);
 
-        // If the minimum user level is set to 'expert',
-        // disable radio buttons to indicate that there
-        // is no choice to be made.
+        // If the minimum user level is set to 'expert', disable radio buttons
+        // to indicate that there is no choice to be made.
         if(msg->MinLevel == 2)
         {
             set(my->UserLevel, MUIA_Disabled, TRUE);
         }
 
-        // If the minimum user level is set to 'average',
-        // show 'average' and 'expert' only.
+        // If the minimum user level is set to 'average', show 'average' and
+        // 'expert' only.
         else if(msg->MinLevel == 1)
         {
             // Hide the full one.
@@ -821,10 +812,9 @@ static inline IPTR IGWelcome(Class *cls,
 
         if(rc == G_TRUE)
         {
-            // Get the selected user level value. If we have
-            // a minimum user level of 'average' we're using
-            // a different set of radio buttons. Fetch from
-            // the right object and adjust the return value.
+            // Get the selected user level value. If we have a minimum user
+            // level of 'average' we're using a different set of radio buttons.
+            // Fetch from the right object and adjust the return value.
             if(msg->MinLevel == 1)
             {
                 // Minimum user level 'average'.
@@ -837,9 +827,8 @@ static inline IPTR IGWelcome(Class *cls,
                 get(my->UserLevel, MUIA_Radio_Active, CAST(msg->Level, int *));
             }
 
-            // Disable the pretend choice if the NOPRETEND
-            // tooltype is used. The default behaviour is
-            // to install for real, not to pretend.
+            // Disable the pretend choice if the NOPRETEND tooltype is used. The
+            // default behaviour is to install for real, not to pretend.
             SetAttrs
             (
                 my->Pretend,
@@ -849,9 +838,8 @@ static inline IPTR IGWelcome(Class *cls,
                 TAG_END
             );
 
-            // Disable the 'log to file' choice if the NOLOG
-            // tooltype is used. The default behaviour is to
-            // not write to a log file.
+            // Disable the 'log to file' choice if the NOLOG tooltype is used.
+            // The default behaviour is to not write to a log file.
             SetAttrs
             (
                 my->Log,
@@ -861,8 +849,7 @@ static inline IPTR IGWelcome(Class *cls,
                 TAG_END
             );
 
-            // Don't show logging and pretend mode settings
-            // to 'Novice' users.
+            // Don't show logging and pretend mode settings to 'Novice' users.
             if(*CAST(msg->Level, int *))
             {
                 // Show pretend / log page.
@@ -899,7 +886,7 @@ static inline IPTR IGWelcome(Class *cls,
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGAskFile - Show file / directory requester
 // Input:      Message - The prompt
 //             Help - Help text
@@ -911,7 +898,7 @@ static inline IPTR IGWelcome(Class *cls,
 //             Back - Use 'Back' instead of 'Abort'.
 //             File - File / dir return value.
 // Return:     G_TRUE / G_ABORT / G_EXIT / G_ERR.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static inline IPTR IGAskFile(Class *cls,
                              Object *obj,
                              struct MUIP_IG_AskFile *msg)
@@ -935,8 +922,7 @@ static inline IPTR IGAskFile(Class *cls,
             TAG_END
         );
 
-        // Open the requester after adding it
-        // to the current group.
+        // Open the requester after adding it to the current group.
         if(pop)
         {
             struct IGData *my = INST_DATA(cls, obj);
@@ -970,14 +956,13 @@ static inline IPTR IGAskFile(Class *cls,
 
                     if(*CAST(msg->File, char **))
                     {
-                        // We need to create a copy of the filename
-                        // string since we're about to free the pop
-                        // up requester.
+                        // We need to create a copy of the filename string since
+                        // we're about to free the pop up requester.
                         int n = snprintf(my->Buf, sizeof(my->Buf), "%s",
                                          *CAST(msg->File, char **));
 
-                        // Make sure that we succeded in creating a
-                        // copy of the filename.
+                        // Make sure that we succeded in creating a copy of the
+                        // filename.
                         if(n >= 0 && ((size_t) n < sizeof(my->Buf)))
                         {
                             *CAST(msg->File, char **) = my->Buf;
@@ -1025,27 +1010,24 @@ static inline IPTR IGAskFile(Class *cls,
     return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGCopyFilesStart - Show file copy requester
 // Input:             Message - The prompt
 //                    List - File / dir list
 //                    Confirm - User confirmation
 // Return:            G_TRUE / G_ABORT / G_EXIT / G_ERR.
-//----------------------------------------------------------------------------
-static inline IPTR IGCopyFilesStart(Class *cls,
-                                    Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGCopyFilesStart(Class *cls, Object *obj,
                                     struct MUIP_IG_CopyFilesStart *msg)
 {
 
     struct IGData *my = INST_DATA(cls, obj);
 
     int n = 0;
-    pnode_p cur = CAST(msg->List, pnode_p),
-            lst = cur;
+    pnode_p cur = CAST(msg->List, pnode_p), lst = cur;
 
-    // For all files and directories to be copied; count
-    // the files, and if confirmation is needed, add them
-    // to the selection / deselection list.
+    // For all files and directories to be copied; count the files, and if
+    // confirmation is needed, add them to the selection / deselection list.
     while(cur)
     {
         // Is this a file?
@@ -1097,8 +1079,8 @@ static inline IPTR IGCopyFilesStart(Class *cls,
             {
                 LONG id = MUIV_List_NextSelected_Start;
 
-                // For all files in the selection / deselection
-                // list, tag the ones that we're going to copy.
+                // For all files in the selection / deselection list, tag the
+                // ones that we're going to copy.
                 for(;;)
                 {
                     // Get the first element in the list.
@@ -1113,15 +1095,12 @@ static inline IPTR IGCopyFilesStart(Class *cls,
 
                         if(ent)
                         {
-                            // Find the corresponding file node
-                            // in 'our' list.
-                            for(cur = lst; cur;
-                                cur = cur->next)
+                            // Find the corresponding file node in 'our' list.
+                            for(cur = lst; cur; cur = cur->next)
                             {
-                                // If we find it, and it's a file,
-                                // give it a 'copy' tag.
-                                if(cur->type == 1 &&
-                                   !strcmp(ent, cur->name))
+                                // If we find it, and it's a file, give it a
+                                // 'copy' tag.
+                                if(cur->type == 1 && !strcmp(ent, cur->name))
                                 {
                                     cur->type = -1;
                                     break;
@@ -1131,32 +1110,29 @@ static inline IPTR IGCopyFilesStart(Class *cls,
                     }
                     else
                     {
-                        // We're done with all files in the
-                        // selection / deselection list.
+                        // We're done with all files in the selection /
+                        // deselection list.
                         break;
                     }
                 }
 
-                // Iterate over nodes in 'our' list and tag
-                // everything that we're NOT going to copy.
-                for(cur = lst; cur;
-                    cur = cur->next)
+                // Iterate over nodes in 'our' list and tag everything that
+                // we're NOT going to copy.
+                for(cur = lst; cur; cur = cur->next)
                 {
-                    // Is this a file that's not going to be
-                    // copied?
+                    // Is this a file that's not going to be copied?
                     if(cur->type == 1)
                     {
-                        // Give it an 'ignore' tag and decrease
-                        // the number of files to be copied.
-                        n--;
+                        // Give it an 'ignore' tag and decrease the number of
+                        // files to be copied.
                         cur->type = 0;
+                        n--;
                     }
                     // Is this a file that's going to be copied?
                     else if(cur->type == -1)
                     {
-                        // Restore the file type so that the
-                        // rest of the world understands that
-                        // this is a file.
+                        // Restore the file type so that the rest of the world
+                        // understands that this is a file.
                         cur->type = 1;
                     }
                 }
@@ -1170,16 +1146,15 @@ static inline IPTR IGCopyFilesStart(Class *cls,
     }
 
     // Show file copy page.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
-                NULL, P_COPYFILES, B_ABORT))
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_COPYFILES, B_ABORT))
     {
-        // Install a timer to create a time slice
-        // where the user has a chance to abort.
+        // Install a timer to create a time slice where the user has a chance to
+        // abort.
         DoMethod(_app(obj), MUIM_Application_AddInputHandler, &my->Ticker);
 
         // Configure gauge so that one tick == one file.
-        SetAttrs(my->Progress, MUIA_Gauge_Max, n,
-                 MUIA_Gauge_Current, 0, TAG_END);
+        SetAttrs(my->Progress, MUIA_Gauge_Max, n, MUIA_Gauge_Current, 0,
+                 TAG_END);
 
         // Always true.
         return (IPTR) G_TRUE;
@@ -1192,15 +1167,14 @@ static inline IPTR IGCopyFilesStart(Class *cls,
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGCopyFilesSetCur - Show current file
 // Input:              File - filename
 //                     NoGauge - Hide file gauge
 //                     Back - Use 'Back' instead of 'Abort'.
 // Return:             G_TRUE / G_ABORT / G_EXIT / G_ERR.
-//----------------------------------------------------------------------------
-static inline IPTR IGCopyFilesSetCur(Class *cls,
-                                     Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGCopyFilesSetCur(Class *cls, Object *obj,
                                      struct MUIP_IG_CopyFilesSetCur *msg)
 {
     if(msg->File)
@@ -1222,9 +1196,8 @@ static inline IPTR IGCopyFilesSetCur(Class *cls,
                 back ? tr(S_BACK) : tr(S_ABRT));
         }
 
-        // Get the number of characters that
-        // can be shown given the width of the
-        // gauge and the contents of the string.
+        // Get the number of characters that can be shown given the width of
+        // the gauge and the contents of the string.
         ULONG max = TextFit
         (
             _rp(my->Progress),
@@ -1233,12 +1206,10 @@ static inline IPTR IGCopyFilesSetCur(Class *cls,
             _mheight(my->Progress)
         );
 
-        // Do we need to truncate the file
-        // string to not wreck the gauge?
+        // Do we need to truncate the file string to not wreck the gauge?
         if(len > max)
         {
-            // The gauge might have room for more
-            // than the temporary my->Buffer.
+            // The gauge might have room for more than the temporary my->Buffer.
             len = max < sizeof(my->Buf) ? max : sizeof(my->Buf);
 
             // Truncate and switch.
@@ -1254,8 +1225,7 @@ static inline IPTR IGCopyFilesSetCur(Class *cls,
             // Get current progress.
             get(my->Progress, MUIA_Gauge_Current, &cur);
 
-            // Add another file on top of the current
-            // progress (one file = one tick).
+            // Add another file on top (one file = one tick).
             SetAttrs(my->Progress, MUIA_Gauge_InfoText, file,
                      MUIA_Gauge_Current, ++cur, TAG_END);
         }
@@ -1270,8 +1240,7 @@ static inline IPTR IGCopyFilesSetCur(Class *cls,
         // Inv. count.
         static int n;
 
-        // Give the user a chance to abort every
-        // 64:th block.
+        // Give the user a chance to abort every 64:th block.
         if(++n >> 6)
         {
             // Wait for tick / abort / exit.
@@ -1295,25 +1264,19 @@ static inline IPTR IGCopyFilesSetCur(Class *cls,
     return (IPTR) G_TRUE;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGCopyFilesEnd - End of file copy
 // Input:           -
 // Return:          G_TRUE
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static inline IPTR IGCopyFilesEnd(Class *cls, Object *obj)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
-    // Uninstall timer created to establish a time
-    // slice where the user has a chance to abort
-    // file copy operations. Things will continue
-    // to work even if we don't, but by doing it
-    // this way we make less noise.
-    DoMethod
-    (
-        _app (obj),
-        MUIM_Application_RemInputHandler, &my->Ticker
-    );
+    // Uninstall timer created to establish a time slice where the user has a
+    // chance to abort file copy operations. Things will continue to work even
+    // if we don't, but by doing it this way we make less noise.
+    DoMethod(_app (obj), MUIM_Application_RemInputHandler, &my->Ticker);
 
     // Leave the file list the way we found it (empty).
     DoMethod(my->List, MUIM_List_Clear);
@@ -1322,14 +1285,13 @@ static inline IPTR IGCopyFilesEnd(Class *cls, Object *obj)
     return (IPTR) G_TRUE;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGCopyFilesAdd - Add files to (expert) file (de)selector
 // Input:           File - Name of file (or dir)
 // Return:          TRUE
-//----------------------------------------------------------------------------
-static inline IPTR IGCopyFilesAdd(Class *cls,
-                           Object *obj,
-                           struct MUIP_IG_CopyFilesAdd *msg)
+//------------------------------------------------------------------------------
+static inline IPTR IGCopyFilesAdd(Class *cls, Object *obj,
+                                  struct MUIP_IG_CopyFilesAdd *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -1349,14 +1311,12 @@ static inline IPTR IGCopyFilesAdd(Class *cls,
 }
 
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGExit - Say goodbye and close GUI
 // Input    Message - The prompt
 // Return:  TRUE
-//----------------------------------------------------------------------------
-static inline IPTR IGExit(Class *cls,
-                          Object *obj,
-                          struct MUIP_IG_Exit *msg)
+//------------------------------------------------------------------------------
+static inline IPTR IGExit(Class *cls, Object *obj, struct MUIP_IG_Exit *msg)
 {
     // Silence.
     (void) cls;
@@ -1367,44 +1327,37 @@ static inline IPTR IGExit(Class *cls,
     return G_TRUE;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGWorking - Show busy message
 // Input:      Message - The message
 // Return:     G_TRUE / G_ERR.
-//----------------------------------------------------------------------------
-static inline IPTR IGWorking(Class *cls,
-                             Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGWorking(Class *cls, Object *obj,
                              struct MUIP_IG_Working *msg)
 {
     // Silence.
     (void) cls;
 
     // Set correct page and button combination.
-    if(DoMethod(obj, MUIM_IG_PageSet,
-       msg->Message, NULL, P_MESSAGE, B_NONE))
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE, B_NONE))
     {
-        // We don't do anything. The
-        // message is already shown.
+        // We don't do anything. The message is already shown.
         return G_TRUE;
     }
-    else
-    {
-        // Unknown error.
-        GERR(tr(S_UNER));
-        return G_ERR;
-    }
+
+    // Unknown error.
+    GERR(tr(S_UNER));
+    return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGEffect -  Show gradient backdrop.
 // Input:      Effect - Type and position
 //             ColorStart - First color in gradient.
 //             ColorEnd - Last color in gradient.
 // Return:     G_TRUE / G_FALSE / G_ERR.
-//----------------------------------------------------------------------------
-static inline IPTR IGEffect(Class *cls,
-                            Object *obj,
-                            struct MUIP_IG_Effect *msg)
+//------------------------------------------------------------------------------
+static inline IPTR IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -1419,8 +1372,8 @@ static inline IPTR IGEffect(Class *cls,
     if(my->Scr && my->Win)
     {
         // Allocate pen for the gradient.
-        LONG pn = ObtainPen(my->Scr->ViewPort.ColorMap, -1,
-                  0, 0, 0, PEN_EXCLUSIVE | PEN_NO_SETCOLOR);
+        LONG pn = ObtainPen(my->Scr->ViewPort.ColorMap, -1, 0, 0, 0,
+                            PEN_EXCLUSIVE | PEN_NO_SETCOLOR);
 
         // Valid pen?
         if(pn != -1)
@@ -1433,8 +1386,7 @@ static inline IPTR IGEffect(Class *cls,
                 g2 = (msg->ColorEnd >> 8) & 0xff,
                 b2 = msg->ColorEnd & 0xff,
 
-                // Minimum chunk = 1 << ct pixels,
-                // to save time when drawing.
+                // Minimum chunk = 1 << ct pixels, to save time when drawing.
                 ct = 2, s = my->Win->Height >> ct;
 
             // RGB deltas per chunk.
@@ -1459,9 +1411,7 @@ static inline IPTR IGEffect(Class *cls,
                 int i = 0;
 
                 // Initial RGB values.
-                float r = r1,
-                      g = g1,
-                      b = b1;
+                float r = r1, g = g1, b = b1;
 
                 // Compute gradient.
                 while(i < s * 3)
@@ -1486,21 +1436,18 @@ static inline IPTR IGEffect(Class *cls,
                 // Draw effect if it's enabled.
                 if(msg->Effect & G_EFFECT)
                 {
-                    // Start from the bottom, one
-                    // delta at a time.
+                    // Start from the bottom, one delta at a time.
                     int d = 1 << ct,
                         v = my->Win->Height;
 
-                    // For all colors in gradient,
-                    // draw rectangle with delta
+                    // For all colors in gradient, draw rectangle with delta
                     // height.
                     while(i >= 0)
                     {
                         // Go backwards in vector.
                         i -= 3;
 
-                        // Use the same pen again
-                        // and again.
+                        // Use the same pen again and again.
                         SetRGB32
                         (
                             &my->Scr->ViewPort, pn,
@@ -1538,13 +1485,12 @@ static inline IPTR IGEffect(Class *cls,
     return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGCloseMedia -  FIXME
 // Input:          FIXME
 // Return:         G_TRUE / G_FALSE
-//----------------------------------------------------------------------------
-static inline IPTR IGCloseMedia(Class *cls,
-                                Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGCloseMedia(Class *cls, Object *obj,
                                 struct MUIP_IG_CloseMedia *msg)
 {
     // Silence.
@@ -1557,10 +1503,7 @@ static inline IPTR IGCloseMedia(Class *cls,
     if(mid <= MUIA_IG_MediaMax)
     {
         // Is the ID in use?
-        Object *win = (Object *) DoMethod
-        (
-            _app(obj), MUIM_FindUData, mid
-        );
+        Object *win = (Object *) DoMethod(_app(obj), MUIM_FindUData, mid);
 
         // If it's in use, close the window.
         if(win)
@@ -1574,13 +1517,12 @@ static inline IPTR IGCloseMedia(Class *cls,
     return G_FALSE;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGSetMedia -  FIXME
 // Input:        FIXME
 // Return:       G_TRUE / G_FALSE / G_ERR.
-//----------------------------------------------------------------------------
-static inline IPTR IGSetMedia(Class *cls,
-                              Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGSetMedia(Class *cls, Object *obj,
                               struct MUIP_IG_SetMedia *msg)
 {
     // Silence.
@@ -1598,25 +1540,24 @@ static inline IPTR IGSetMedia(Class *cls,
     return G_FALSE;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGGetCustomScreen - Get custom screen.
 // Input:            -
-// Return:             struct Screen * if open, NULL otherwise.
-//----------------------------------------------------------------------------
+// Return:           struct Screen * if open, NULL otherwise.
+//------------------------------------------------------------------------------
 static inline IPTR IGGetCustomScreen(Class *cls, Object *obj)
 {
     struct IGData *my = INST_DATA(cls, obj);
     return (IPTR) my->Scr;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGShowPicture -  FIXME
 // Input:           Picture - Image file.
 //                  Action - FIXME
 // Return:          FIXME
-//----------------------------------------------------------------------------
-static inline IPTR IGShowPicture(Class *cls,
-                                 Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGShowPicture(Class *cls, Object *obj,
                                  struct MUIP_IG_ShowPicture *msg)
 {
     // Silence.
@@ -1627,10 +1568,9 @@ static inline IPTR IGShowPicture(Class *cls,
     // We need something to show.
     if(msg->Picture)
     {
-        // Default behaviour is to put the window
-        // in the center and leave the size as is.
-        ULONG xs = 0, ys = 0,
-              yp = MUIV_Window_TopEdge_Centered,
+        // Default behaviour is to put the window in the center and leave the
+        // size as is.
+        ULONG xs = 0, ys = 0, yp = MUIV_Window_TopEdge_Centered,
               xp = MUIV_Window_LeftEdge_Centered;
 
         // Set size explicitly?
@@ -1644,23 +1584,23 @@ static inline IPTR IGShowPicture(Class *cls,
             if(scr)
             {
                 // Screen / 2 (large) 4 (medium) 8 (small).
-                xs = scr->Width >> (msg->Action & G_SMALL ? 3 :
-                                    msg->Action & G_LARGE ? 1 : 2);
+                xs = scr->Width >> ((msg->Action & G_SMALL) ? 3 :
+                                    (msg->Action & G_LARGE) ? 1 : 2);
 
                 // Height of the window depends on the width.
-                ys = msg->Action & G_MORE ? scr->Height >>
-                         (msg->Action & G_LARGE ? 2 : 1) :
-                     msg->Action & G_LESS ? scr->Height >>
-                         (msg->Action & G_SMALL ? 2 : 3) :
-                     scr->Height >> (msg->Action & G_SMALL ? 3 :
-                                     msg->Action & G_LARGE ? 1 : 2);
+                ys = (msg->Action & G_MORE) ? scr->Height >>
+                         ((msg->Action & G_LARGE) ? 2 : 1) :
+                     (msg->Action & G_LESS) ? scr->Height >>
+                         ((msg->Action & G_SMALL) ? 2 : 3) :
+                     scr->Height >> ((msg->Action & G_SMALL) ? 3 :
+                                     (msg->Action & G_LARGE) ? 1 : 2);
             }
         }
 
         // Explicit horizontal placement?
         if(msg->Action & G_HORIZ)
         {
-            xp = msg->Action & G_LEFT ? 0 :
+            xp = (msg->Action & G_LEFT) ? 0 :
             #if !defined(__AROS__) && !defined(__VBCC__)
                 // This doesn't work on AROS.
                 MUIV_Window_LeftEdge_Right(0);
@@ -1672,7 +1612,7 @@ static inline IPTR IGShowPicture(Class *cls,
         // Explicit vertical placement?
         if(msg->Action & G_VERT)
         {
-            yp = msg->Action & G_UPPER ? 0 :
+            yp = (msg->Action & G_UPPER) ? 0 :
             #if !defined(__AROS__) && !defined(__VBCC__)
                 // This doesn't work on AROS.
                  MUIV_Window_TopEdge_Bottom(0);
@@ -1684,9 +1624,8 @@ static inline IPTR IGShowPicture(Class *cls,
         // Proper window unless borderless is set.
         if(msg->Action & G_BORDER)
         {
-            // Take size and placement into account. Make
-            // sure that this window is not activated and
-            // that it's not possible to close it.
+            // Take size and placement into account. Make sure that this
+            // window is not activated and that it's not possible to close it.
             win = (Object *) MUI_NewObject
             (
                 MUIC_Window,
@@ -1712,8 +1651,8 @@ static inline IPTR IGShowPicture(Class *cls,
         }
         else
         {
-            // Take placement into account, ignore size. Create
-            // no gadgets whatsoever, and it should be inactive.
+            // Take placement into account, ignore size. Create no gadgets
+            // whatsoever, and it should be inactive.
             win = (Object *) MUI_NewObject
             (
                 MUIC_Window,
@@ -1735,9 +1674,8 @@ static inline IPTR IGShowPicture(Class *cls,
         }
     }
 
-    // On success, let the application manage the new
-    // window. Make sure that the installer window is
-    // in front of it.
+    // On success, let the application manage the new window. Make sure that
+    // the installer window is in front of it.
     if(win)
     {
         DoMethod(_app(obj), OM_ADDMEMBER, win);
@@ -1751,15 +1689,14 @@ static inline IPTR IGShowPicture(Class *cls,
 
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGShowMedia -  FIXME
 // Input:         MediaID - Output FIXME
 //                Media - Media file.
 //                Action - FIXME
 // Return:        G_TRUE / G_FALSE / G_ERR.
-//----------------------------------------------------------------------------
-static inline IPTR IGShowMedia(Class *cls,
-                               Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGShowMedia(Class *cls, Object *obj,
                                struct MUIP_IG_ShowMedia *msg)
 {
     // Silence.
@@ -1769,8 +1706,7 @@ static inline IPTR IGShowMedia(Class *cls,
     static int mid;
 
     // Test name and cap the number of open files.
-    if(mid + MUIA_IG_MediaBase <= MUIA_IG_MediaMax
-       && msg->Media)
+    if(mid + MUIA_IG_MediaBase <= MUIA_IG_MediaMax && msg->Media)
     {
         // And we need permission to read from the file.
         BPTR flk = Lock(CAST(msg->Media, STRPTR), ACCESS_READ);
@@ -1838,19 +1774,18 @@ static inline IPTR IGShowMedia(Class *cls,
     return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGMessage - Show message
 // Input:      Message - The prompt
 //             Back - Use 'Back' instead of 'Abort'.
 // Return:     G_TRUE / G_ABORT / G_EXIT / G_ERR.
-//----------------------------------------------------------------------------
-static inline IPTR IGMessage(Class *cls,
-                             Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGMessage(Class *cls, Object *obj,
                              struct MUIP_IG_Message *msg)
 {
     // Set correct page and button combination.
-    if(DoMethod(obj, MUIM_IG_PageSet,
-       msg->Message, NULL, P_MESSAGE, B_PROCEED_ABORT))
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE,
+                                                          B_PROCEED_ABORT))
     {
         struct IGData *my = INST_DATA(cls, obj);
 
@@ -1886,61 +1821,53 @@ static inline IPTR IGMessage(Class *cls,
     }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGFinish - Show final message
 // Input:     Message - The message
 // Return:    G_TRUE / G_ABORT / G_EXIT / G_ERR.
-//----------------------------------------------------------------------------
-static inline IPTR IGFinish(Class *cls,
-                            Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGFinish(Class *cls, Object *obj,
                             struct MUIP_IG_Finish *msg)
 {
     // Silence.
     (void) cls;
 
     // Set correct page and button combination.
-    if(DoMethod(obj, MUIM_IG_PageSet,
-       msg->Message, NULL, P_MESSAGE, B_OK))
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE, B_OK))
     {
         // No need to wait for anything specific.
         return IGTrans(IGWait(obj, MUIV_IG_Ok, 1));
     }
-    else
-    {
-        // Unknown error.
-        GERR(tr(S_UNER));
-        return G_ERR;
-    }
+
+    // Unknown error.
+    GERR(tr(S_UNER));
+    return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGAbort - Show message and abort
 // Input:    Message - The message to be shown
 // Return:   G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
-static inline IPTR IGAbort(Class *cls,
-                           Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGAbort(Class *cls, Object *obj,
                            struct MUIP_IG_Abort *msg)
 {
     // Silence.
     (void) cls;
 
     // Set correct page and button combination.
-    if(DoMethod(obj, MUIM_IG_PageSet,
-       msg->Message, NULL, P_MESSAGE, B_ABORT))
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE, B_ABORT))
     {
         // Wait for abort.
         return IGTrans(IGWait(obj, MUIV_IG_AbortOnly, 1));
     }
-    else
-    {
-        // Unknown error.
-        GERR(tr(S_UNER));
-        return G_ERR;
-    }
+
+    // Unknown error.
+    GERR(tr(S_UNER));
+    return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGRadio - Show radio buttons
 // Input:    Message - The prompt
 //           Help - Help text
@@ -1949,13 +1876,12 @@ static inline IPTR IGAbort(Class *cls,
 //           Back - Use 'Back' instead of 'Abort'.
 //           Select - Zero index representing the selected button
 // Return:   G_TRUE / G_ABORT / G_EXIT / G_ERR.
-//----------------------------------------------------------------------------
-static inline IPTR IGRadio(Class *cls,
-                           Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGRadio(Class *cls, Object *obj,
                            struct MUIP_IG_Radio *msg)
 {
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
-                msg->Help, P_MESSAGE, B_PROCEED_ABORT))
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
+                                                               B_PROCEED_ABORT))
     {
         char **nms = CAST(msg->Names, char **);
 
@@ -1964,21 +1890,18 @@ static inline IPTR IGRadio(Class *cls,
             struct IGData *my = INST_DATA(cls, obj);
             int def = msg->Default;
 
-            // Make sure that the default value is a
-            // valid choice.
+            // Make sure that the default value is a valid choice.
             while(def && *nms)
             {
                 def--;
                 nms++;
             }
 
-            // Don't fail if it isn't, use a fallback
-            // of 0 instead.
+            // Don't fail if it isn't, use a fallback of 0 instead.
             def = !def ? msg->Default : 0;
 
-            // Unlike most other pages, this one is
-            // partly generated on the fly, we have
-            // no choice.
+            // Unlike most other pages, this one is partly generated on the fly,
+            // we have no choice.
             Object *r = (Object *) MUI_NewObject
             (
                 MUIC_Radio,
@@ -2033,7 +1956,7 @@ static inline IPTR IGRadio(Class *cls,
 #endif
                         MUI_DisposeObject(r);
 
-                        // Unknown status. 
+                        // Unknown status.
                         return rc;
                     }
                 }
@@ -2049,7 +1972,7 @@ static inline IPTR IGRadio(Class *cls,
     return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGBool - Get boolean value from user
 // Input:   Message - The prompt
 //          Help - Help text
@@ -2057,13 +1980,13 @@ static inline IPTR IGRadio(Class *cls,
 //          No - False string value
 //          Back - Use 'Back' instead of 'Abort'.
 // Return:  G_TRUE / G_FALSE / G_ABORT / G_ERR
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static inline IPTR IGBool(Class *cls,
                           Object *obj,
                           struct MUIP_IG_Bool *msg)
 {
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
-       msg->Help, P_MESSAGE, B_YES_NO_ABORT))
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
+                                                               B_YES_NO_ABORT))
     {
         struct IGData *my = INST_DATA(cls, obj);
 
@@ -2093,15 +2016,13 @@ static inline IPTR IGBool(Class *cls,
 
         return rc;
     }
-    else
-    {
-        // Unknown error.
-        GERR(tr(S_UNER));
-        return G_ERR;
-    }
+
+    // Unknown error.
+    GERR(tr(S_UNER));
+    return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGString - Get string value from user.
 // Input:     Message - The prompt
 //            Help - Help text
@@ -2109,14 +2030,14 @@ static inline IPTR IGBool(Class *cls,
 //            Back - Use 'Back' instead of 'Abort'.
 //            String - String return value
 // Return:    G_TRUE / G_FALSE / G_ABORT / G_ERR
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static inline IPTR IGString(Class *cls,
                             Object *obj,
                             struct MUIP_IG_String *msg)
 {
     // Show string widget page.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
-                msg->Help, P_STRING, B_PROCEED_ABORT))
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_STRING,
+                                                               B_PROCEED_ABORT))
     {
         struct IGData *my = INST_DATA(cls, obj);
 
@@ -2150,15 +2071,13 @@ static inline IPTR IGString(Class *cls,
         // Return status.
         return rc;
     }
-    else
-    {
-        // Unknown error.
-        GERR(tr(S_UNER));
-        return G_ERR;
-    }
+
+    // Unknown error.
+    GERR(tr(S_UNER));
+    return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGNumber - Get numerical value from user
 // Input:     Message - The prompt
 //            Help - Help text
@@ -2168,14 +2087,13 @@ static inline IPTR IGString(Class *cls,
 //            Back - Use 'Back' instead of 'Abort'
 //            Number - Return value
 // Return:    G_TRUE / G_ABORT / G_EXIT / G_ERR
-//----------------------------------------------------------------------------
-static inline IPTR IGNumber(Class *cls,
-                            Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGNumber(Class *cls, Object *obj,
                             struct MUIP_IG_Number *msg)
 {
     // Show slider.
-    if(DoMethod(obj, MUIM_IG_PageSet,
-       msg->Message, msg->Help, P_NUMBER, B_PROCEED_ABORT))
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_NUMBER,
+                                                               B_PROCEED_ABORT))
     {
         struct IGData *my = INST_DATA(cls, obj);
 
@@ -2211,15 +2129,13 @@ static inline IPTR IGNumber(Class *cls,
         // Success or halt.
         return rc;
     }
-    else
-    {
-        // Unknown error.
-        GERR(tr(S_UNER));
-        return G_ERR;
-    }
+
+    // Unknown error.
+    GERR(tr(S_UNER));
+    return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGCheckBoxes - Show list of radiobuttons
 // Input:         Message - The prompt
 //                Help - Help text
@@ -2228,19 +2144,17 @@ static inline IPTR IGNumber(Class *cls,
 //                Back - Use 'Back' instead of 'Abort'
 //                Bitmap - A bitmask representing the selected button(s)
 // Return:        G_TRUE / G_ABORT / G_EXIT / G_ERR
-//----------------------------------------------------------------------------
-static inline IPTR IGCheckBoxes(Class *cls,
-                                Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGCheckBoxes(Class *cls, Object *obj,
                                 struct MUIP_IG_CheckBoxes *msg)
 {
-    if(DoMethod(obj, MUIM_IG_PageSet,
-       msg->Message, msg->Help, P_MESSAGE, B_PROCEED_ABORT))
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
+                                                               B_PROCEED_ABORT))
     {
         struct IGData *my = INST_DATA(cls, obj);
 
-        // Unlike most other pages, this one is
-        // partly generated on the fly, we have
-        // no choice.
+        // Unlike most other pages, this one is partly generated on the fly, we
+        // have no choice.
         if(DoMethod(my->Empty, MUIM_Group_InitChange))
         {
             size_t i = 0;
@@ -2284,8 +2198,7 @@ static inline IPTR IGCheckBoxes(Class *cls,
                     TAG_END
                 );
 
-                // On success, add it to the group and
-                // save the adress.
+                // On success, add it to the group and save the adress.
                 if(c)
                 {
                     DoMethod(my->Empty, OM_ADDMEMBER, c);
@@ -2294,8 +2207,7 @@ static inline IPTR IGCheckBoxes(Class *cls,
                 }
                 else
                 {
-                    // On error, free all the previous ones
-                    // and bail out.
+                    // On error, free all the previous ones and bail out.
                     GERR(tr(S_UNER));
 
                     while(i--)
@@ -2342,7 +2254,7 @@ static inline IPTR IGCheckBoxes(Class *cls,
                 // All cleared.
                 DoMethod(my->Empty, MUIM_Group_ExitChange);
 
-                // Unknown status. 
+                // Unknown status.
                 return rc;
             }
         }
@@ -2353,13 +2265,12 @@ static inline IPTR IGCheckBoxes(Class *cls,
     return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGComplete - Show progress
 // Input:       Progress - Installer progress in %
 // Return:      G_TRUE / G_FALSE.
-//----------------------------------------------------------------------------
-static inline IPTR IGComplete(Class *cls,
-                              Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGComplete(Class *cls, Object *obj,
                               struct MUIP_IG_Complete *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
@@ -2381,28 +2292,26 @@ static inline IPTR IGComplete(Class *cls,
     return rc;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGConfirm - Get user confirmation.
 // Input:      Message - The prompt
 //             Help - Help text
 //             Back - Use 'Back' instead of 'Abort'.
 // Return:     '1' = proceed, '0' = skip, '-1' = abort
-//----------------------------------------------------------------------------
-static inline IPTR IGConfirm(Class *cls,
-                      Object *obj,
-                      struct MUIP_IG_Confirm *msg)
+//------------------------------------------------------------------------------
+static inline IPTR IGConfirm(Class *cls, Object *obj,
+                             struct MUIP_IG_Confirm *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
     ULONG top = 0, btm = 0, str = 0;
 
-    // Save the current state of whatever we're
-    // showing before we ask for confirmation.
+    // Save the current state of whatever we're showing before we ask for
+    // confirmation.
     if(get(my->Top, MUIA_Group_ActivePage, &top) &&
        get(my->Bottom, MUIA_Group_ActivePage, &btm) &&
        get(my->Text, MUIA_Text_Contents, &str))
     {
-        // Allocate memory to hold a copy of the
-        // current message.
+        // Allocate memory to hold a copy of the current message.
         size_t osz = strlen(CAST(str, char *)) + 1;
         char *ost = calloc(osz, 1);
 
@@ -2412,8 +2321,8 @@ static inline IPTR IGConfirm(Class *cls,
             memcpy(ost, CAST(str, char *), osz);
 
             // Prompt for confirmation.
-            if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
-                        msg->Help, P_MESSAGE, B_PROCEED_SKIP_ABORT))
+            if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help,
+                        P_MESSAGE, B_PROCEED_SKIP_ABORT))
             {
                 // Return code.
                 inp_t rc;
@@ -2436,9 +2345,8 @@ static inline IPTR IGConfirm(Class *cls,
                     rc = IGTrans(IGWait(obj, MUIV_IG_ProceedRun, 3));
                 }
 
-                // Restore everything so that things
-                // look the way they did before the
-                // confirmation dialog was shown.
+                // Restore everything so that things look the way they did
+                // before the confirmation dialog was shown.
                 set(my->Top, MUIA_Group_ActivePage, top);
                 set(my->Bottom, MUIA_Group_ActivePage, btm);
                 set(my->Text, MUIA_Text_Contents, ost);
@@ -2450,8 +2358,8 @@ static inline IPTR IGConfirm(Class *cls,
                 return rc;
             }
 
-            // We never did show the new message so
-            // we can get rid of the old (current).
+            // We never did show the new message so we can get rid of the old
+            // (current).
             free(ost);
         }
     }
@@ -2461,31 +2369,24 @@ static inline IPTR IGConfirm(Class *cls,
     return G_ERR;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGNew - Overloading OM_NEW
 // Input:  See BOOPSI docs
 // Return: See BOOPSI docs
-//----------------------------------------------------------------------------
-static inline IPTR IGNew(Class *cls,
-                         Object *obj,
+//------------------------------------------------------------------------------
+static inline IPTR IGNew(Class *cls, Object *obj,
                          struct opSet *msg)
 {
     // Temp widgets.
-    Object *el, *ul, *fp, *cm, *pr, *st,
-           *nm, *bp, *em, *rt, *tx, *ls,
-           *lg, *tp, *af, *ys, *no, *ya,
-           *ab, *ao, *ar;
+    Object *el, *ul, *fp, *cm, *pr, *st, *nm, *bp, *em, *tx, *ls, *lg, *tp, *af,
+           *ys, *no, *ya, *ab, *ao, *ar;
 
     // Radio button strings.
-    static const char *lev[4],
-                      *pre[3],
-                      *log[3];
+    static const char *lev[4], *pre[3], *log[3];
 
     // Clear to enable check.
-    el = ul = fp = cm = pr = st =
-    nm = bp = em = rt = tx = ls =
-    lg = tp = af = ys = no = ya =
-    ab = ao = ar = NULL;
+    el = ul = fp = cm = pr = st = nm = bp = em = tx = ls = lg = tp = af = ys =
+    no = ya = ab = ao = ar = NULL;
 
     // User level.
     lev[0] = tr(S_ULNV); // Novice
@@ -2529,17 +2430,16 @@ static inline IPTR IGNew(Class *cls,
         }
     }
 
-    // The GUI is, as far as possible, a static
-    // construct. We're not constructing things
-    // on the fly, instead we use paging to let
+    // The GUI is, as far as possible, a static construct. We're not
+    // constructing things on the fly, instead we use paging to let
     // widgets become visible / disappear.
-#ifndef __VBCC__
     obj = (Object *) DoSuperNew
     (
         cls, obj,
         MUIA_Window_Title, tr(S_INST),
         MUIA_Window_AppWindow, TRUE,
         scr ? MUIA_Window_Screen : TAG_IGNORE, scr,
+#ifndef __VBCC__
         MUIA_Window_RootObject, MUI_NewObject(
             MUIC_Group,
             MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
@@ -2812,9 +2712,9 @@ static inline IPTR IGNew(Class *cls,
                     TAG_END),
                 TAG_END),
             TAG_END),
+#endif
         TAG_END
     );
-#endif
 
     // Initialize the rest if the parent is OK.
     if(obj)
@@ -2832,10 +2732,8 @@ static inline IPTR IGNew(Class *cls,
         my->Win = win;
 
         // Save widgets.
-        if(el && ul && fp && cm && pr &&
-           st && nm && bp && em && tx &&
-           ls && lg && tp && af && ys &&
-           no && ab && ao && ar)
+        if(el && ul && fp && cm && pr && st && nm && bp && em &&
+           tx && ls && lg && tp && af && ys && no && ab && ao && ar)
         {
             my->ExpertLevel = el;
             my->AbortOnly = ao;
@@ -2862,6 +2760,7 @@ static inline IPTR IGNew(Class *cls,
         {
             // Forgot something.
             MUI_DisposeObject(obj);
+            GERR(tr(S_UNER));
             obj = NULL;
         }
     }
@@ -2870,14 +2769,12 @@ static inline IPTR IGNew(Class *cls,
     return (IPTR) obj;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGSetup - Overloading MUIM_Setup
 // Input:    See MUI docs
 // Return:   See MUI docs
-//----------------------------------------------------------------------------
-static inline IPTR IGSetup(Class *cls,
-                           Object *obj,
-                           struct MUI_RenderInfo *msg)
+//------------------------------------------------------------------------------
+static inline IPTR IGSetup(Class *cls, Object *obj, struct MUI_RenderInfo *msg)
 {
     // Let our parent set itself up first
     if(!DoSuperMethodA (cls, obj, (Msg) msg))
@@ -2885,18 +2782,16 @@ static inline IPTR IGSetup(Class *cls,
         GERR(tr(S_STFL));
         return FALSE;
     }
-    else
-    {
-        // Nothing to do.
-        return TRUE;
-    }
+
+    // Nothing to do.
+    return TRUE;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGDispose - Overloading OM_DISPOSE
 // Input:      See BOOPSI docs
 // Return:     See BOOPSI docs
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static inline IPTR IGDispose (Class *cls, Object *obj, Msg msg)
 {
 
@@ -2911,21 +2806,21 @@ static inline IPTR IGDispose (Class *cls, Object *obj, Msg msg)
     return DoSuperMethodA(cls, obj, msg);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGCleanup - Overloading MUIM_Cleanup
 // Input:      See MUI docs
 // Return:     See MUI docs
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static inline IPTR IGCleanup (Class *cls, Object *obj, Msg msg)
 {
     return (IPTR) DoSuperMethodA(cls, obj, (Msg) msg);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // IGDispatch - MUI custom class dispatcher
 // Input:       Pass through
 // Return:      Pass through
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 DISPATCH(IG)
 {
     DISPATCH_HEAD;
@@ -3046,7 +2941,7 @@ DISPATCH(IG)
 //
 //
 // The gui_* functions below serve as glue between the platform independent
-// parts of InstallerNG and the Amiga specific Zune / MUI parts. On non Amiga
+// parts of InstallerLG and the Amiga specific Zune / MUI parts. On non Amiga
 // systems, arguments are written to stdout to facilitate testing.
 //
 //
@@ -3059,12 +2954,12 @@ DISPATCH(IG)
 //############################################################################
 //############################################################################
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_init
 // Description: Initialize and show GUI.
 // Input:       bool scr: Use custom screen.
 // Return:      inp_t: G_TRUE / G_ERR.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inp_t gui_init(bool scr)
 {
     // Amiga style version string.
@@ -3131,12 +3026,12 @@ inp_t gui_init(bool scr)
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_exit
 // Description: Close GUI and free GUI resources.
 // Input:       -
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void gui_exit(void)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -3166,88 +3061,75 @@ void gui_exit(void)
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_message
 // Description: Show message.
 // Input:       const char *msg: Message shown to the user.
 //              bool bck: Enable back mode.
 // Return:      inp_t: G_TRUE / G_ABORT / G_EXIT / G_ERR.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inp_t gui_message(const char *msg, bool bck)
 {
     return
     #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod
-    (
-        Win, MUIM_IG_Message, msg, bck
-    );
+    (inp_t) DoMethod(Win, MUIM_IG_Message, msg, bck);
     #else
     // Testing purposes.
     printf("%s%d", msg, bck) >= 1 ? G_TRUE : G_ERR;
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_finish
 // Description: Show final message.
 // Input:       const char *msg: Message shown to the user.
 // Return:      inp_t: G_TRUE / G_ABORT / G_EXIT / G_ERR.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inp_t gui_finish(const char *msg)
 {
     return
     #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod
-    (
-        Win, MUIM_IG_Finish, msg
-    );
+    (inp_t) DoMethod(Win, MUIM_IG_Finish, msg);
     #else
     // Testing purposes.
     fputs(msg, stdout) >= 0 ? G_TRUE : G_ERR;
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_working
 // Description: Show busy message.
 // Input:       const char *msg:    Message shown to the user.
 // Return:      inp_t: G_TRUE / G_ERR.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inp_t gui_working(const char *msg)
 {
     return
     #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod
-    (
-        Win, MUIM_IG_Working, msg
-    );
+    (inp_t) DoMethod(Win, MUIM_IG_Working, msg);
     #else
     // Testing purposes.
     fputs(msg, stdout) >= 0 ? G_TRUE : G_ERR;
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_abort
 // Description: Show message and abort.
 // Input:       const char *msg: Message shown to the user.
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void gui_abort(const char *msg)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
-    DoMethod
-    (
-        Win, MUIM_IG_Abort,
-        msg
-    );
+    DoMethod(Win, MUIM_IG_Abort, msg);
     #else
     // Testing purposes.
     fputs(msg, stdout);
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_choice
 // Description: Get user selecton of a single string out of a list of strings.
 // Input:       const char *msg:    Message shown to the user.
@@ -3257,21 +3139,13 @@ void gui_abort(const char *msg)
 //              bool bck:           Enable back mode.
 //              int *ret:           The choice (0-index).
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
-inp_t gui_choice(const char *msg,
-                 const char *hlp,
-                 const char **nms,
-                 int def,
-                 bool bck,
-                 int *ret)
+//------------------------------------------------------------------------------
+inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def,
+                 bool bck, int *ret)
 {
     inp_t grc =
     #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod
-    (
-        Win, MUIM_IG_Radio, msg,
-        hlp, nms, def, bck, ret
-    );
+    (inp_t) DoMethod(Win, MUIM_IG_Radio, msg, hlp, nms, def, bck, ret);
     #else
     // Testing purposes.
     printf("%s%s%s%d%d\n", msg, hlp, *nms, def, bck) ? G_TRUE : G_ERR;
@@ -3280,7 +3154,7 @@ inp_t gui_choice(const char *msg,
     return grc;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_options
 // Description: Get user selection of any number / combination of strings
 //              from a list.
@@ -3291,21 +3165,13 @@ inp_t gui_choice(const char *msg,
 //              bool bck:           Enable back mode.
 //              int *ret:           A bitmap representing the selection.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
-inp_t gui_options(const char *msg,
-                  const char *hlp,
-                  const char **nms,
-                  int def,
-                  bool bck,
-                  int *ret)
+//------------------------------------------------------------------------------
+inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def,
+                  bool bck, int *ret)
 {
     inp_t grc =
     #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod
-    (
-        Win, MUIM_IG_CheckBoxes, msg,
-        hlp, nms, def, bck, ret
-    );
+    (inp_t) DoMethod(Win, MUIM_IG_CheckBoxes, msg, hlp, nms, def, bck, ret);
     #else
     // Testing purposes.
     printf("%s%s%s%d%d%d\n", msg, hlp, *nms, def, *ret, bck) ? G_TRUE : G_ERR;
@@ -3314,7 +3180,7 @@ inp_t gui_options(const char *msg,
     return grc;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_bool
 // Description: Get boolean value from user, e.g 'Yes' / 'No'.
 // Input:       const char *msg: Message shown to the user.
@@ -3323,27 +3189,20 @@ inp_t gui_options(const char *msg,
 //              const char *nay: False string.
 //              bool bck: Enable back mode.
 // Return:      inp_t: G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
-inp_t gui_bool(const char *msg,
-               const char *hlp,
-               const char *yes,
-               const char *nay,
-               bool bck)
+//------------------------------------------------------------------------------
+inp_t gui_bool(const char *msg, const char *hlp, const char *yes,
+               const char *nay, bool bck)
 {
     return
     #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod
-    (
-        Win, MUIM_IG_Bool,
-        msg, hlp, yes, nay, bck
-    );
+    (inp_t) DoMethod(Win, MUIM_IG_Bool, msg, hlp, yes, nay, bck);
     #else
     // Testing purposes.
     printf("%s%s%s%s%d\n", msg, hlp, yes, nay, bck) ? G_TRUE : G_ERR;
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_string
 // Description: Get string value from user.
 // Input:       const char *msg:    Message shown to the user.
@@ -3352,7 +3211,7 @@ inp_t gui_bool(const char *msg,
 //              bool  bck:          Enable back mode.
 //              const char **ret:   String value from user.
 // Return:      inp_t: G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inp_t gui_string(const char *msg,
                  const char *hlp,
                  const char *def,
@@ -3361,11 +3220,7 @@ inp_t gui_string(const char *msg,
 {
     inp_t grc =
     #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod
-    (
-        Win, MUIM_IG_String,
-        msg, hlp, def, bck, ret
-    );
+    (inp_t) DoMethod(Win, MUIM_IG_String, msg, hlp, def, bck, ret);
     #else
     // Testing purposes.
     printf("%s%s%s%d\n", msg, hlp, def, bck) ? G_TRUE : G_ERR;
@@ -3374,7 +3229,7 @@ inp_t gui_string(const char *msg,
     return grc;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_number
 // Description: Get numerical value from user.
 // Input:       const char *msg:    Message shown to the user.
@@ -3385,7 +3240,7 @@ inp_t gui_string(const char *msg,
 //              bool bck:           Enable back mode.
 //              int *ret:           Return value.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inp_t gui_number(const char *msg,
                  const char *hlp,
                  int min,
@@ -3396,11 +3251,7 @@ inp_t gui_number(const char *msg,
 {
     inp_t grc =
     #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod
-    (
-        Win, MUIM_IG_Number, msg,
-        hlp, min, max, def, bck, ret
-    );
+    (inp_t) DoMethod(Win, MUIM_IG_Number, msg, hlp, min, max, def, bck, ret);
     #else
     // Testing purposes.
     printf("%s%s%d%d%d\n", msg, hlp, min, max, bck) ? G_TRUE : G_ERR;
@@ -3409,7 +3260,7 @@ inp_t gui_number(const char *msg,
     return grc;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_welcome
 // Description: Show welcome message and prompt for user level / installer
 //              mode. Note that the 'lvl', 'lgf', and 'prt' parameters act
@@ -3422,34 +3273,21 @@ inp_t gui_number(const char *msg,
 //              bool npr:           Disable pretend mode.
 //              bool nlg:           Disable logging.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
-inp_t gui_welcome(const char *msg,
-                  int *lvl,
-                  int *lgf,
-                  int *prt,
-                  int min,
-                  bool npr,
-                  bool nlg)
+//------------------------------------------------------------------------------
+inp_t gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min,
+                  bool npr, bool nlg)
 {
     return
     #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod
-    (
-        Win, MUIM_IG_Welcome, msg,
-        lvl, lgf, prt, min, npr, nlg
-    );
+    (inp_t) DoMethod(Win, MUIM_IG_Welcome, msg, lvl, lgf, prt, min, npr, nlg);
     #else
     // Testing purposes.
-    printf
-    (
-        "%s%d%d%d%d%d%d\n",
-        msg, *lvl, *lgf, *prt,
-        min, npr, nlg
-    ) ? G_TRUE : G_ERR;
+    printf("%s%d%d%d%d%d%d\n", msg, *lvl, *lgf, *prt, min, npr, nlg ) ? G_TRUE :
+                                                                        G_ERR;
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_askdir
 // Description: Get directory name from user.
 // Input:       const char *msg:    Message shown to the user.
@@ -3461,23 +3299,13 @@ inp_t gui_welcome(const char *msg,
 //              bool  bck:          Enable back mode.
 //              const char **ret:   File / dir string value.
 // Return:      inp_t: G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
-inp_t gui_askdir(const char *msg,
-                 const char *hlp,
-                 bool pth,
-                 bool dsk,
-                 bool asn,
-                 const char *def,
-                 bool bck,
-                 const char **ret)
+//------------------------------------------------------------------------------
+inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
+                 const char *def, bool bck, const char **ret)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
-    return (inp_t) DoMethod
-    (
-        Win, MUIM_IG_AskFile,
-        msg, hlp, pth, dsk, asn,
-        def, TRUE, bck, ret
-    );
+    return (inp_t) DoMethod(Win, MUIM_IG_AskFile, msg, hlp, pth, dsk, asn, def,
+                            TRUE, bck, ret);
     #else
     // Testing purposes.
     if(msg && hlp && def && ret)
@@ -3490,7 +3318,7 @@ inp_t gui_askdir(const char *msg,
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_askfile
 // Description: Get filename from user.
 // Input:       const char *msg:    Message shown to the user.
@@ -3501,22 +3329,13 @@ inp_t gui_askdir(const char *msg,
 //              bool  bck:          Enable back mode.
 //              const char **ret:   File / dir string value.
 // Return:      inp_t: G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
-inp_t gui_askfile(const char *msg,
-                  const char *hlp,
-                  bool pth,
-                  bool dsk,
-                  const char *def,
-                  bool bck,
-                  const char **ret)
+//------------------------------------------------------------------------------
+inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
+                  const char *def, bool bck, const char **ret)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
-    return (inp_t) DoMethod
-    (
-        Win, MUIM_IG_AskFile,
-        msg, hlp, pth, dsk, FALSE,
-        def, FALSE, bck, ret
-    );
+    return (inp_t) DoMethod(Win, MUIM_IG_AskFile, msg, hlp, pth, dsk, FALSE,
+                            def, FALSE, bck, ret);
     #else
     // Testing purposes.
     if(msg && hlp && def && ret)
@@ -3529,7 +3348,7 @@ inp_t gui_askfile(const char *msg,
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_copyfiles_start
 // Description: Show file copy confirmation requester with a populated file
 //              list.
@@ -3539,23 +3358,22 @@ inp_t gui_askfile(const char *msg,
 //              bool cnf:           Confirmation.
 //              bool bck:           Enable back mode.
 // Return:      inp_t: G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
-inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, bool cnf, bool bck)
+//------------------------------------------------------------------------------
+inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst,
+                          bool cnf, bool bck)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
-    return (inp_t) DoMethod
-    (
-        Win, MUIM_IG_CopyFilesStart,
-        msg, hlp, lst, cnf, bck
-    );
+    return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesStart, msg, hlp, lst, cnf,
+                            bck);
     #else
     // Testing purposes.
     if(lst)
     {
+        // Start copy.
+        puts("sc");
         if(cnf)
         {
-            printf("%s%s%d\n", msg ? msg : "", 
-                               hlp ? hlp : "", bck);
+            printf("%s%s%d\n", msg ? msg : "", hlp ? hlp : "", bck);
             return G_FALSE;
         }
         return G_TRUE;
@@ -3564,50 +3382,48 @@ inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, bool cn
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_copyfiles_setcur
 // Description: Update progress gauge and show current filename.
 // Input:       const char *cur: Filename.
 //              bool nga: Hide gauge.
 //              bool bck: Enable back mode.
 // Return:      inp_t: G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
-    return (inp_t) DoMethod
-    (
-        Win, MUIM_IG_CopyFilesSetCur,
-        cur, nga, bck
-    );
+    return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesSetCur, cur, nga, bck);
     #else
     (void) cur;
     (void) nga;
     (void) bck;
-
     return G_TRUE;
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_copyfiles_end
 // Description: End file copy. Must be invoked after gui_copyfiles_start().
 // Input:       -
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void gui_copyfiles_end(void)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CopyFilesEnd);
+    #else
+    // End copy.
+    puts("ec");
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_complete
 // Description: Show progress gauge.
 // Input:       int com: Progress in percent.
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void gui_complete(int com)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -3618,14 +3434,14 @@ void gui_complete(int com)
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_confirm
 // Description: Get user confirmation.
 // Input:       const char *msg:    Message shown to the user.
 //              const char *hlp:    Help text.
 //              bool bck:           Enable back mode.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 {
     return
@@ -3637,46 +3453,40 @@ inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_error
 // Description: Show error message.
 // Input:       int line: Line number.
 //              const char *type: Error description.
 //              const char *info: Extra info, e.g. filename.
 // Return:      -
-//----------------------------------------------------------------------------
-void gui_error(int line,
-               const char *type,
-               const char *info)
+//------------------------------------------------------------------------------
+void gui_error(int line, const char *type, const char *info)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     static char err[BUFSIZ];
-    static struct EasyStruct es =
-    {
-        .es_TextFormat = (UBYTE *) &err,
-        .es_StructSize = sizeof(struct EasyStruct),
-    };
+    static struct EasyStruct es = { .es_TextFormat = (UBYTE *) &err,
+                                    .es_StructSize = sizeof(struct EasyStruct)};
 
     es.es_Title = (UBYTE *) tr(S_ERRS);
     es.es_GadgetFormat = (UBYTE *) tr(S_OKEY);
     snprintf(err, sizeof(err), tr(S_LERR), line, type, info);
 
-    // We don't have any way of knowing
-    // whether this really works out...
+    // We don't have any way of knowing whether this really works out...
     EasyRequest(NULL, &es, NULL);
     #else
     fprintf(stderr, tr(S_LERR), line, type, info);
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_effect
 // Description: Show custom screen gradient.
 // Input:       int eff:            Type and position.
 //              int cl1:            Color 1.
 //              int cl2:            Color 2.
 // Return:      -
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void gui_effect(int eff, int cl1, int cl2)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -3687,12 +3497,12 @@ void gui_effect(int eff, int cl1, int cl2)
     #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_closemedia
 // Description: FIXME
 // Input:       int mid:    Media ID.
 // Return:      FIXME
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inp_t gui_closemedia(int mid)
 {
     // Testing purposes.
@@ -3704,14 +3514,14 @@ inp_t gui_closemedia(int mid)
     return G_TRUE;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_setmedia
 // Description: FIXME
 // Input:       int mid:            Media ID
 //              int act:            Action
 //              const char* par:    Parameter
 // Return:      FIXME
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inp_t gui_setmedia(int mid, int act, const char *par)
 {
     // Testing purposes.
@@ -3723,12 +3533,12 @@ inp_t gui_setmedia(int mid, int act, const char *par)
     return G_TRUE;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Name:        gui_showmedia
 // Description: FIXME
 // Input:       FIXME
 // Return:      FIXME
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inp_t gui_showmedia(int *mid, const char* mda, int act)
 {
     // Testing purposes.
