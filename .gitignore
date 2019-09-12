@@ -10,3 +10,5 @@ build/massif.out.*
 build/leak.tmp.*
 build/err.tmp.*
 build/Catalogs/
+/cmake-build-debug/
+.idea/
