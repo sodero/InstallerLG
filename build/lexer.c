@@ -3371,8 +3371,8 @@ int main(int argc, char **argv)
     return (!r ? r :
            (r == 1 ? RETURN_ERROR : RETURN_FAIL));
 #else
-    // Ignore syntax error on non Amiga systems.
-    return (r == 1 ? 0 : r);
+    // Ignore errors on non Amiga systems.
+    return 0;
 #endif
 }
 

@@ -68,8 +68,8 @@ static bool arg_post(void)
         args[arg] = args[arg] ? DBG_ALLOC(strdup(args[arg])) : NULL;
     }
 
-    // All done.
-    return true;
+    // Script isn't optional.
+    return args[ARG_SCRIPT];
 }
 
 //------------------------------------------------------------------------------
