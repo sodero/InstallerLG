@@ -2418,11 +2418,11 @@ entry_p m_foreach(entry_p contxt)
                 char *buf = get_buf();
 
                 // Parse pattern.
-                switch(ParsePattern(pt, buf, buf_size()))
+                switch(ParsePatternNoCase(pt, buf, buf_size()))
                 {
                     // If we have any wildcards, try to match.
                     case 1:
-                        skip = MatchPattern(buf, top->name);
+                        skip = !MatchPatternNoCase(buf, top->name);
                         break;
 
                     // If no wildcards, do a simple string comparsion.
