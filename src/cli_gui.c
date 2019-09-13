@@ -12,6 +12,8 @@
 
 #include <stdio.h>
 
+#include <stdlib.h>
+
 #ifndef __GNUC__
 #define __attribute__(a)
 typedef LONG IPTR;
@@ -46,7 +48,7 @@ inp_t gui_working(const char *msg)
 
 void gui_abort(const char *msg)
 {
-
+    printf("Aborting\n");
 }
 
 inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def,
@@ -124,22 +126,33 @@ void gui_copyfiles_end(void)
 
 void gui_complete(int com)
 {
-    printf("Progress: %d complete.\n", com);
+    printf("Progress: %d% complete.\n", com);
 }
 
 inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 {
-    return G_TRUE;
+    printf("Confirm\n");
+    printf("%s\n", msg);
+    char response[5];
+    do {
+        printf("Y(confirm)/N(cancel)/H(help) > ");
+        fgets(response, 5, stdin);
+        if(strcmp(response, "H\n") == 0) {
+            printf("%s\n", hlp);
+        }
+    } while(strcmp(response, "Y\n") != 0 && strcmp(response, "N\n") != 0);
+    return strcmp(response, "Y\n") == 0 ? G_TRUE : G_FALSE;
 }
 
 void gui_error(int line, const char *type, const char *info)
 {
-
+    printf("Error of type %s on line %d.", type, line);
+    printf("Error info: %s", info);
 }
 
 void gui_effect(int eff, int cl1, int cl2)
 {
-
+    printf("Image effect %d with colors %d and %d", eff, cl1, cl2);
 }
 
 inp_t gui_closemedia(int mid)
