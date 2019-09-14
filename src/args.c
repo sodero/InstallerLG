@@ -214,7 +214,10 @@ bool arg_init(int argc, char **argv)
     arg_argc(argc);
 
     // Save current directory so that we can go back on exit.
-    args[ARG_OLDDIR] = DBG_ALLOC(get_current_dir_name());
+    if(getcwd(get_buf(), buf_size()) == get_buf())
+    {
+        args[ARG_OLDDIR] = DBG_ALLOC(strdup(get_buf()));
+    }
 
     // Invoked from CLI or WB.
     return argc ? arg_cli(argc, argv) : arg_wb(argv);
