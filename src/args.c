@@ -62,8 +62,9 @@ static bool arg_post(void)
     // Create a copy of the (hopefully) absolute path.
     args[ARG_SCRIPT] = DBG_ALLOC(strdup(get_buf()));
 
-    // Copy string arguments. Stop at LOGFILE since that is the last string.
-    for(size_t arg = ARG_APPNAME; arg < ARG_NOLOG; arg++)
+    // Copy string arguments. Stop at OLDDIR since that's already a copied and
+    // the items after that are (interpreted as) booleans.
+    for(size_t arg = ARG_APPNAME; arg < ARG_OLDDIR; arg++)
     {
         args[arg] = args[arg] ? DBG_ALLOC(strdup(args[arg])) : NULL;
     }
@@ -212,14 +213,11 @@ bool arg_init(int argc, char **argv)
     // Save argc, used later to determine whether we are invoked from CLI or WB.
     arg_argc(argc);
 
-    if(argc)
-    {
-        // Invoked from the commandline.
-        return arg_cli(argc, argv);
-    }
+    // Save current directory so that we can go back on exit.
+    args[ARG_OLDDIR] = DBG_ALLOC(get_current_dir_name());
 
-    // Invoked from WB. This should never happen on non Amigas.
-    return arg_wb(argv);
+    // Invoked from CLI or WB.
+    return argc ? arg_cli(argc, argv) : arg_wb(argv);
 }
 
 //------------------------------------------------------------------------------
@@ -266,8 +264,15 @@ int arg_argc(int argc)
 //------------------------------------------------------------------------------
 void arg_done(void)
 {
+    // Go back to the directory where we started. Don't rely on the existance
+    // of this string, we might be out of memory.
+    if(args[ARG_OLDDIR])
+    {
+        chdir(args[ARG_OLDDIR]);
+    }
+
     // Free what we have allocated. Note that we stop at LOGFILE since that is
-    // the last string. NOLOG and NOPRETEND are integers.
+    // the last string. NOLOG and NOPRETEND are (interpreted as) booleans.
     for(size_t arg = ARG_SCRIPT; arg < ARG_NOLOG; arg++)
     {
         free(args[arg]);
