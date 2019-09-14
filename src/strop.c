@@ -362,14 +362,14 @@ entry_p m_patmatch(entry_p contxt)
          *pat = str(C_ARG(1)),
          *mat = str(C_ARG(2));
 
-    LONG w = ParsePattern(pat, buf, buf_size());
+    LONG w = ParsePatternNoCase(pat, buf, buf_size());
 
     // Can we parse the pattern?
     if(w >= 0)
     {
         // Use pattern matching if we have one or more wildcards, otherwise use
         // plain strcmp().
-        int r = w ? MatchPattern(buf, mat) : !strcmp(pat, mat);
+        int r = w ? MatchPatternNoCase(buf, mat) : !strcmp(pat, mat);
         R_NUM(r ? 1 : 0);
     }
     else

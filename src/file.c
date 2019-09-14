@@ -572,7 +572,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     // this limitation.
                     static char pat[BUFSIZ];
                     #if defined(AMIGA) && !defined(LG_TEST)
-                    LONG w = ParsePattern(str(pattern), pat,
+                    LONG w = ParsePatternNoCase(str(pattern), pat,
                                           sizeof(pat));
 
                     // Can we parse the pattern?
@@ -581,7 +581,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         // Use pattern matching if we have one or
                         // more wildcards, otherwise use plain
                         // strcmp().
-                        if((w && MatchPattern(pat, entry->d_name))
+                        if((w && MatchPatternNoCase(pat, entry->d_name))
                            || (w && !strcmp(pat, entry->d_name)))
                         {
                             // Match, get proper type.
@@ -2140,7 +2140,7 @@ entry_p m_delete(entry_p contxt)
     char *file = str(C_ARG(1));
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    wild = ParsePattern(file, get_buf(), buf_size());
+    wild = ParsePatternNoCase(file, get_buf(), buf_size());
     #else
     wild = get_num(contxt, "@wild");
     #endif
