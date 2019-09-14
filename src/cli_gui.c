@@ -86,6 +86,33 @@ inp_t gui_number(const char *msg,
                  bool bck,
                  int *ret)
 {
+    printf("%s", msg);
+    printf("Choose a number between %d and %d (default is %d, H for help)\n", min, max, def);
+    char response[12];
+    bool choseAnswer = false;
+    do {
+        printf("Enter number > ");
+        fgets(response, 12, stdin);
+        if(strcmp(response, "H\n") == 0) {
+            printf("%s\n", hlp);
+        } else if(strcmp(response, "\n") == 0) {
+            *ret = def;
+            choseAnswer = true;
+        } else if(strcmp(response, "0\n") == 0) {
+            *ret = 0;
+            choseAnswer = true;
+        } else {
+            int res = atoi(response);
+            if(res != 0) {
+                if(res >= min && res <= max) {
+                    *ret = res;
+                    choseAnswer = true;
+                } else {
+                    printf("Number should be between %d and %d\n", min, max);
+                }
+            }
+        }
+    } while(choseAnswer == false);
     return G_TRUE;
 }
 
@@ -126,7 +153,7 @@ void gui_copyfiles_end(void)
 
 void gui_complete(int com)
 {
-    printf("Progress: %d% complete.\n", com);
+    printf("Progress: %d%% complete.\n", com);
 }
 
 inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
@@ -169,4 +196,3 @@ inp_t gui_showmedia(int *mid, const char* mda, int act)
 {
     return G_TRUE;
 }
-
