@@ -244,3 +244,4 @@
 - @icon now contains absolute path also when started from CLI.
 - All pattern matching is now case insensitive.
 - (foreeach) pattern matching fix.
+- (askchoice) clean up fix.
