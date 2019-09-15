@@ -338,7 +338,7 @@ char *h_pathonly(const char *full)
     }
 
     // Current dir.
-    return "";
+    return DBG_ALLOC(strdup(""));
 }
 
 //------------------------------------------------------------------------------
