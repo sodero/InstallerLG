@@ -9,6 +9,7 @@
 
 #include "args.h"
 #include "resource.h"
+#include "strop.h"
 #include "util.h"
 
 #ifdef AMIGA
@@ -59,18 +60,19 @@ static bool arg_post(void)
     snprintf(get_buf(), buf_size(), "./%s", args[ARG_SCRIPT]);
     #endif
 
-    // Create a copy of the (hopefully) absolute path.
+    // Copy of the (hopefully) absolute script path and working directory.
+    args[ARG_SCRIPTDIR] = DBG_ALLOC(h_pathonly(get_buf()));
     args[ARG_SCRIPT] = DBG_ALLOC(strdup(get_buf()));
 
-    // Copy string arguments. Stop at OLDDIR since that's already a copied and
-    // the items after that are (interpreted as) booleans.
+    // Copy string arguments. Stop at OLDDIR since items after that are either
+    // already copied or (interpreted as) booleans.
     for(size_t arg = ARG_APPNAME; arg < ARG_OLDDIR; arg++)
     {
         args[arg] = args[arg] ? DBG_ALLOC(strdup(args[arg])) : NULL;
     }
 
-    // Script isn't optional.
-    return args[ARG_SCRIPT];
+    // Script and script directory aren't optional.
+    return args[ARG_SCRIPT] && args[ARG_SCRIPTDIR];
 }
 
 //------------------------------------------------------------------------------
@@ -148,11 +150,8 @@ static bool arg_wb(char **argv)
         return false;
     }
 
-    // Change directory if applicable.
-    if(arg->wa_Lock)
-    {
-        CurrentDir(arg->wa_Lock);
-    }
+    // Change directory to that of the icon.
+    BPTR old = CurrentDir(arg->wa_Lock);
 
     // We have the script name if this is a 'project'.
     args[ARG_SCRIPT] = arg->wa_Name;
@@ -184,6 +183,9 @@ static bool arg_wb(char **argv)
 
     // Postprocess WB info.
     bool ret = arg_post();
+
+    // Go back to where we started from. We'll crash if we don't.
+    CurrentDir(old);
 
     // Disk object not needed, a deep copy is done in arg_post().
     if(dob)
@@ -220,7 +222,10 @@ bool arg_init(int argc, char **argv)
     }
 
     // Invoked from CLI or WB.
-    return argc ? arg_cli(argc, argv) : arg_wb(argv);
+    bool init = argc ? arg_cli(argc, argv) : arg_wb(argv);
+
+    // Go to script working directory and return.
+    return init && !chdir(args[ARG_SCRIPTDIR]);
 }
 
 //------------------------------------------------------------------------------
@@ -274,9 +279,9 @@ void arg_done(void)
         chdir(args[ARG_OLDDIR]);
     }
 
-    // Free what we have allocated. Note that we stop at LOGFILE since that is
+    // Free what we have allocated. Note that we stop at SCRIPTDIR since that's
     // the last string. NOLOG and NOPRETEND are (interpreted as) booleans.
-    for(size_t arg = ARG_SCRIPT; arg < ARG_NOLOG; arg++)
+    for(size_t arg = ARG_SCRIPT; arg <= ARG_SCRIPTDIR; arg++)
     {
         free(args[arg]);
     }

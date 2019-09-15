@@ -299,6 +299,49 @@ entry_p m_fmt(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_pathonly
+// Description: Get path part from file path.
+// Input:       const char *full:   Path to file.
+// Return:      const char *:       Path part of full or NULL on failure.
+//------------------------------------------------------------------------------
+char *h_pathonly(const char *full)
+{
+    size_t len = strlen(full);
+
+    // Scan backwards.
+    while(len--)
+    {
+        // If we find a delimiter, then we have the path to the left of it.
+        if(full[len] == '/' || full[len] == ':' )
+        {
+            // Get termination for free.
+            char *path = DBG_ALLOC(calloc(len + 2, 1));
+
+            if(!path)
+            {
+                // Out of memory.
+                return NULL;
+            }
+
+            // Copy full path.
+            memcpy(path, full, len + 1);
+
+            // Cut trailing '/' if preceeded by something absolute, dir or vol.
+            if(len > 1 && path[len] == '/' && path[len - 1] != '/' &&
+               path[len - 1] != ':')
+            {
+                path[len] = '\0';
+            }
+
+            return path;
+        }
+    }
+
+    // Current dir.
+    return "";
+}
+
+//------------------------------------------------------------------------------
 // (pathonly <path>)
 //     return dir part of path (see fileonly)
 //
@@ -309,40 +352,15 @@ entry_p m_pathonly(entry_p contxt)
     // One argument.
     C_SANE(1, NULL);
 
-    const char *arg = str(C_ARG(1));
-    size_t len = strlen(arg);
+    char *path = h_pathonly(str(C_ARG(1)));
 
-    // Scan backwards.
-    while(len--)
+    if(!path && PANIC(contxt))
     {
-        // If we find a delimiter, then we have the path to the left of it.
-        if(arg[len] == '/' || arg[len] == ':' )
-        {
-            // Get termination for free.
-            char *ret = DBG_ALLOC(calloc(len + 2, 1));
-
-            if(!ret && PANIC(contxt))
-            {
-                // Out of memory.
-                break;
-            }
-
-            // Copy full path.
-            memcpy(ret, arg, len + 1);
-
-            // Cut trailing '/' if preceeded by something absolute, dir or vol.
-            if(len > 1 && ret[len] == '/' && ret[len - 1] != '/' &&
-               ret[len - 1] != ':')
-            {
-                ret[len] = '\0';
-            }
-
-            R_STR(ret);
-        }
+        // Out of memory.
+        R_EST;
     }
 
-    // Current directory ''.
-    R_EST;
+    R_STR(path);
 }
 
 //------------------------------------------------------------------------------
