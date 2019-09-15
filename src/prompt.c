@@ -200,6 +200,9 @@ entry_p m_askchoice(entry_p contxt)
         off++;
     }
 
+    // Terminate list of choices.
+    chs[ndx] = NULL;
+
     // Exit if there's nothing to show.
     if(!ndx)
     {
