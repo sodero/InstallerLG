@@ -245,3 +245,4 @@
 - All pattern matching is now case insensitive.
 - (foreeach) pattern matching fix.
 - (askchoice) clean up fix.
+- (tooltype) ignore missing files (CManager).

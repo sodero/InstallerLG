@@ -3315,9 +3315,9 @@ entry_p m_tooltype(entry_p contxt)
                 // Done.
                 D_NUM = LG_TRUE;
             }
-            else
+            // Don't fail in sloppy mode.
+            else if(get_num(contxt, "@strict"))
             {
-                // We failed for some unknown reason.
                 ERR(ERR_WRITE_FILE, file);
             }
 
@@ -3337,9 +3337,9 @@ entry_p m_tooltype(entry_p contxt)
             // Free the DiskObject after restoring it to the original state.
             FreeDiskObject(obj);
         }
-        else
+        // Don't fail in sloppy mode.
+        else if(get_num(contxt, "@strict"))
         {
-            // More information? IoErr() is nice.
             ERR(ERR_READ_FILE, file);
         }
         #else
