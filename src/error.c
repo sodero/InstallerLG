@@ -27,9 +27,9 @@ int error(entry_p contxt, int line, err_t type, const char *info)
     // Last error.
     static err_t last;
 
-    // Get current state?
     if(type == ERR_NONE)
     {
+        // Return current state.
         return last;
     }
 

@@ -337,6 +337,42 @@ entry_p opt(entry_p contxt, opt_t type)
 }
 
 //------------------------------------------------------------------------------
+// Name:        x_exists
+// Description: Existence and ownership sanity check.
+// Input:       entry_p contxt:  The context.
+// Return:      bool:            'true' if child is valid, 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool x_exists(entry_p contxt, entry_p child)
+{
+    // Make sure we have something that belongs to us.
+    return child && child != end() && child->parent == contxt;
+}
+
+//------------------------------------------------------------------------------
+// Name:        x_name
+// Description: Child sanity check.
+// Input:       entry_p contxt:  The context.
+// Return:      bool:            'true' if child is valid, 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool x_name(entry_p child)
+{
+    // All but CONTXT and NUMBER are named.
+    return child->name || (child->type == CONTXT || child->type == NUMBER);
+}
+
+//------------------------------------------------------------------------------
+// Name:        x_children
+// Description: Context sanity check.
+// Input:       entry_p contxt:  The context.
+// Return:      bool:            'true' if context is valid, 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool x_children(entry_p contxt)
+{
+    // A CONTXT must have room for children.
+    return contxt->type != CONTXT || contxt->children;
+}
+
+//------------------------------------------------------------------------------
 // Name:        x_sane
 // Description: Sanity check to verify that we have the required number of
 //              children or symbols needed and that these are valid. This
@@ -348,31 +384,11 @@ entry_p opt(entry_p contxt, opt_t type)
 //------------------------------------------------------------------------------
 static bool x_sane(entry_p contxt, type_t type, size_t num)
 {
-    if(!contxt)
-    {
-        // No context.
-        dump(contxt);
-        return false;
-    }
+    // Verification of symbols or children.
+    entry_p *vec = type == NATIVE ? contxt->children : contxt->symbols;
 
-    // Assume verification of symbols.
-    entry_p *vec = contxt->symbols;
-
-    // Are we going to verify children?
-    if(type == NATIVE)
-    {
-        vec = contxt->children;
-
-        // All NATIVE have a default return value.
-        if(contxt->type == NATIVE && !contxt->resolved)
-        {
-            dump(contxt);
-            return false;
-        }
-    }
-
-    // Array needed if we're expecting more than 0 children or symbols.
-    if(num && !vec)
+    // Array of num or more, and if NATIVE, a resolved value is needed.
+    if((num && !vec) || (contxt->type == NATIVE && !contxt->resolved))
     {
         dump(contxt);
         return false;
@@ -381,37 +397,22 @@ static bool x_sane(entry_p contxt, type_t type, size_t num)
     // Expect at least num children.
     for(size_t i = 0; i < num; i++)
     {
-        // Make sure we have something.
-        if(!vec[i])
+        // Make sure we have something, and that it belongs to us.
+        if(!x_exists(contxt, vec[i]))
         {
             dump(contxt);
             return false;
         }
 
-        // It should not be a sentinel.
-        if(vec[i] == end())
-        {
-            dump(contxt);
-            return false;
-        }
-
-        // Make sure that it belongs to us.
-        if(vec[i]->parent != contxt)
-        {
-            dump(contxt);
-            return false;
-        }
-
-        // All but CONTXT / NUMBER are named.
-        if(!vec[i]->name && vec[i]->type != CONTXT &&
-            vec[i]->type != NUMBER)
+        // Make sure that names exist, if applicable.
+        if(!x_name(vec[i]))
         {
             dump(vec[i]);
             return false;
         }
 
-        // A CONTXT must have room for children.
-        if(vec[i]->type == CONTXT && !vec[i]->children)
+        // Make sure that there's room for children, if applicable.
+        if(!x_children(vec[i]))
         {
             dump(vec[i]);
             return false;
@@ -434,7 +435,7 @@ static bool x_sane(entry_p contxt, type_t type, size_t num)
 //------------------------------------------------------------------------------
 bool c_sane(entry_p contxt, size_t num)
 {
-    return x_sane(contxt, NATIVE, num);
+    return contxt && x_sane(contxt, NATIVE, num);
 }
 
 //------------------------------------------------------------------------------
@@ -449,7 +450,7 @@ bool c_sane(entry_p contxt, size_t num)
 //------------------------------------------------------------------------------
 bool s_sane(entry_p contxt, size_t num)
 {
-    return x_sane(contxt, SYMBOL, num);
+    return contxt && x_sane(contxt, SYMBOL, num);
 }
 
 //------------------------------------------------------------------------------
