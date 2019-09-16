@@ -589,11 +589,10 @@ entry_p merge(entry_p dst, entry_p src)
 //------------------------------------------------------------------------------
 entry_p push(entry_p dst, entry_p src)
 {
-    // Sanity check. All or nothing. Since we own 'src', we need to free it.
-    if(!dst || !src)
+    if((!dst || !src) && PANIC(NULL))
     {
+        // We own 'src'.
         kill(src);
-        PANIC(NULL);
         return dst;
     }
 
