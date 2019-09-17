@@ -710,7 +710,7 @@ static int h_getversion_res(const char *name)
     #else
     // Not used.
     (void) name;
-    return h_getversion_rsp(NULL);
+    return -1;
     #endif
 }
 
@@ -742,15 +742,14 @@ static int h_getversion_dev(const char *name)
 
     if(req)
     {
-        // Open device unit -1 without any flags.
+        // We don't know what unit to use. Try something.
         for(int unit = -1; unit < 16; unit++)
         {
             if(OpenDevice(name, unit, (struct IORequest *) req, 0) == 0)
             {
-                // Be paranoid.
+                // Translate version and revision to Installer format.
                 if(req->io_Device)
                 {
-                    // Translate version and revision to Installer format.
                     ver = req->io_Device->dd_Library.lib_Version << 16 |
                           req->io_Device->dd_Library.lib_Revision;
                 }
@@ -905,7 +904,12 @@ entry_p m_getversion(entry_p contxt)
         C_SANE(1, contxt);
 
         // Name of file / lib / etc.
-        const char *name = str(C_ARG(1)), *file = FilePart(name);
+        const char *name = str(C_ARG(1)),
+        #if defined(AMIGA) && !defined(LG_TEST)
+        *file = FilePart(name);
+        #else
+        *file = name;
+        #endif
 
         // Invalid version.
         int ver = -1;
