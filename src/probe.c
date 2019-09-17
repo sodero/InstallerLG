@@ -10,6 +10,7 @@
 #include "alloc.h"
 #include "error.h"
 #include "eval.h"
+#include "file.h"
 #include "probe.h"
 #include "util.h"
 #include <limits.h>
@@ -661,6 +662,59 @@ entry_p m_getsum(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_getversion_rsp
+// Description: Helper for h_getversion_rsp and h_getversion_dev. Get resident
+//              version from Resident struct.
+// Input:       struct Resident *rsp:   Resident struct from FindResident.
+// Return:      int:                    Resident version.
+//------------------------------------------------------------------------------
+#if defined(AMIGA) && !defined(LG_TEST)
+static int h_getversion_rsp(struct Resident *rsp)
+{
+    if(!rsp)
+    {
+        // Invalid.
+        return -1;
+    }
+
+    // Major and revision.
+    int maj, rev;
+
+    // Version string pattern.
+    const char *ids = rsp->rt_IdString;
+    const char *pat = "%*[^0123456789]%d.%d%*[^\0]";
+
+    // Find the revision in the id string. The major part of our parsed result
+    // should match rt_Version.
+    if(sscanf(ids, pat, &maj, &rev) == 2 && maj == rsp->rt_Version)
+    {
+        // We found both major and revision.
+        return (maj << 16) | rev;
+    }
+
+    // Don't trust the parsed result. Revision unknown.
+    return rsp->rt_Version << 16;
+}
+#endif
+
+//------------------------------------------------------------------------------
+// Name:        h_getversion_res
+// Description: Helper for m_getversion. Get resident version.
+// Input:       char *name: Resident name.
+// Return:      int:        Resident version.
+//------------------------------------------------------------------------------
+static int h_getversion_res(const char *name)
+{
+    #if defined(AMIGA) && !defined(LG_TEST)
+    return h_getversion_rsp(FindResident(name));
+    #else
+    // Not used.
+    (void) name;
+    return h_getversion_rsp(NULL);
+    #endif
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_getversion_dev
 // Description: Helper for m_getversion. Get device version.
 // Input:       char *name: Filename.
@@ -668,31 +722,54 @@ entry_p m_getsum(entry_p contxt)
 //------------------------------------------------------------------------------
 static int h_getversion_dev(const char *name)
 {
-    // Assume failure.
+    // Failure.
     int ver = -1;
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    struct IORequest req;
+    struct MsgPort *port = CreateMsgPort();
 
-    // Assume that 'name' is a device that can be opened.
-    if(!OpenDevice(name, 0, &req, 0))
+    if(!port)
     {
-        // Be paranoid.
-        if(req.io_Device)
+        // No port.
+        return ver;
+    }
+
+    // Big enough for all devices (magic number from Scout).
+    size_t size = sizeof(struct IOStdReq) + 128;
+
+    // Allocate and initialize standard request.
+    struct IOStdReq *req = CreateIORequest(port, size);
+
+    if(req)
+    {
+        // Open device unit -1 without any flags.
+        for(int unit = -1; unit < 16; unit++)
         {
-            // Get version and revision.
-            ver = req.io_Device->dd_Library.lib_Version << 16 |
-                  req.io_Device->dd_Library.lib_Revision;
+            if(OpenDevice(name, unit, (struct IORequest *) req, 0) == 0)
+            {
+                // Be paranoid.
+                if(req->io_Device)
+                {
+                    // Translate version and revision to Installer format.
+                    ver = req->io_Device->dd_Library.lib_Version << 16 |
+                          req->io_Device->dd_Library.lib_Revision;
+                }
+
+                CloseDevice((struct IORequest *) req);
+                break;
+            }
         }
 
-        // Device is no longer needed.
-        CloseDevice(&req);
+        DeleteIORequest(req);
     }
+
+    DeleteMsgPort(port);
     #else
     // Not used.
     (void) name;
     #endif
 
+    // Success or failure.
     return ver;
 }
 
@@ -709,7 +786,6 @@ static int h_getversion_lib(const char *name)
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct Library *lib = OpenLibrary(name, 0);
-
     // Assume that 'name' is a library that can be opened.
     if(lib)
     {
@@ -724,51 +800,7 @@ static int h_getversion_lib(const char *name)
     (void) name;
     #endif
 
-    return ver;
-}
-
-//------------------------------------------------------------------------------
-// Name:        h_getversion_res
-// Description: Helper for m_getversion. Get resident version.
-// Input:       char *name: Resident name.
-// Return:      int:        Resident version.
-//------------------------------------------------------------------------------
-static int h_getversion_res(const char *name)
-{
-    // Assume failure.
-    int ver = -1;
-
-    #if defined(AMIGA) && !defined(LG_TEST)
-    struct Resident *res = (struct Resident *) FindResident(name);
-
-    if(res)
-    {
-        // Version string pattern.
-        const char *pat = "%*[^0123456789]%d.%d%*[^\0]";
-        const char *ids = res->rt_IdString;
-
-        // Major and revision.
-        int maj, rev;
-
-        // Try to find the revision, if any, in the id string. The major part
-        // of our parsed result should match rt_Version.
-        if(sscanf(ids, pat, &maj, &rev) == 2 && maj == res->rt_Version)
-        {
-            // We found both major and revision.
-            ver = (maj << 16) | rev;
-        }
-        else
-        {
-            // We can't trust the parsed result. Use what we know, ignore the
-            // revision.
-            ver = res->rt_Version << 16;
-        }
-    }
-    #else
-    // Not used.
-    (void) name;
-    #endif
-
+    // Success or failure.
     return ver;
 }
 
@@ -782,12 +814,8 @@ int h_getversion_file(const char *name)
 {
     FILE *file = NULL;
 
-    // File path prefixes.
-    const char *pre[] = {"", "LIBS:", NULL};
-
     #if defined(AMIGA) && !defined(LG_TEST)
     struct Process *pro = (struct Process *) FindTask(NULL);
-
     // Save the current window ptr.
     APTR win = pro->pr_WindowPtr;
 
@@ -795,17 +823,8 @@ int h_getversion_file(const char *name)
     pro->pr_WindowPtr = (APTR) -1L;
     #endif
 
-    for(size_t ndx = 0; !file && pre[ndx]; ndx++)
-    {
-        // Use global buffer.
-        char *buf = get_buf();
-
-        // Format path string..
-        snprintf(buf, buf_size(), "%s%s", pre[ndx], name);
-
-        // Attempt to open file.
-        file = fopen(buf, "r");
-    }
+    // Attempt to open file.
+    file = fopen(name, "r");
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // Restore auto request.
@@ -815,7 +834,6 @@ int h_getversion_file(const char *name)
     // Invalid version.
     int ver = -1;
 
-    // Bail out on error.
     if(!file)
     {
         // Failure.
@@ -887,7 +905,7 @@ entry_p m_getversion(entry_p contxt)
         C_SANE(1, contxt);
 
         // Name of file / lib / etc.
-        const char *name = str(C_ARG(1));
+        const char *name = str(C_ARG(1)), *file = FilePart(name);
 
         // Invalid version.
         int ver = -1;
@@ -895,36 +913,35 @@ entry_p m_getversion(entry_p contxt)
         // Get resident module version.
         if(opt(contxt, OPT_RESIDENT))
         {
-            ver = h_getversion_res(name);
+            ver = h_getversion_res(file);
         }
-
-        // Get file version.
-        if(ver == -1)
+        else
         {
-            ver = h_getversion_file(name);
+            if(ver == -1)
+            {
+                // Get file version.
+                ver = h_getversion_file(name);
+            }
+
+            // Only attempt to open library / device if file doesn't exist.
+            if(h_exists(file) == LG_NONE)
+            {
+                if(ver == -1)
+                {
+                    // Get library version.
+                    ver = h_getversion_lib(file);
+                }
+
+                if(ver == -1)
+                {
+                    // Get device version.
+                    ver = h_getversion_dev(file);
+                }
+            }
         }
 
-        // Get library version.
-        if(ver == -1)
-        {
-            ver = h_getversion_lib(name);
-        }
-
-        // Get device version.
-        if(ver == -1)
-        {
-            ver = h_getversion_dev(name);
-        }
-
-        // Did all of the above fail?
-        if(ver == -1)
-        {
-            ver = 0;
-        }
-
-        // Return whatever we have, could be a failure (0) or version and
-        // revision information.
-        R_NUM(ver);
+        // Failure (0) or version / revision.
+        R_NUM((ver == -1) ? 0 : ver);
     }
 
     #if defined(AMIGA) && !defined(LG_TEST)
