@@ -250,7 +250,7 @@ int yyerror(yyscan_t scanner, const char *err)
 int main(int argc, char **argv)
 {
     // Assume failure.
-    int r = -1;
+    int ret = -1;
 
     // Initialize the argument handling. Transparent handling of Workbench and CLI arguments.
     if(arg_init(argc, argv))
@@ -261,27 +261,23 @@ int main(int argc, char **argv)
         if(yylex_init(&lexer) == 0)
         {
             // Get the name of the script from CLI or tooltypes / wb.
-            char *n = arg_get(ARG_SCRIPT);
-            FILE *f = fopen(n, "r");
+            char *name = arg_get(ARG_SCRIPT);
+            FILE *script = fopen(name, "r");
 
-            if(f)
+            if(script)
             {
                 // Set input file and parse.
-                yyset_in(f, lexer);
+                yyset_in(script, lexer);
 
-                // Save parser return value.
-                r = yyparse(lexer);
+                // Save parser return value, 1 on syntax error, 0 on success.
+                ret = yyparse(lexer);
 
-                // r = 1 on syntax error.
-                // r = 0 on success.
-
-                // Close the input file.
-                fclose(f);
+                fclose(script);
             }
             else
             {
                 // We can't read from the file.
-                fprintf(stderr, tr(S_CNOF), n);
+                fprintf(stderr, tr(S_CNOF), name);
             }
 
             // Free all resources allocated by the lexer.
@@ -292,15 +288,13 @@ int main(int argc, char **argv)
             // We most likely ran out of memory.
             fprintf(stderr, "%s\n", tr(S_UNER));
         }
-
-        // Free all resources allocated by the argument handling routines.
-        arg_done();
     }
 
+    // Free all resources allocated by the argument handling routines. This must be done even if arg_init() fails.
+    arg_done();
 #ifdef AMIGA
-    // Translate value of r to the appropriate Amiga DOS return value. Syntax error is an ERROR and file not found / readable a FAIL.
-    return (!r ? r :
-           (r == 1 ? RETURN_ERROR : RETURN_FAIL));
+    // Translate value of ret to the appropriate Amiga DOS return value. Syntax error is an ERROR and file not found / readable a FAIL.
+    return (!ret ? ret : (ret == 1 ? RETURN_ERROR : RETURN_FAIL));
 #else
     // Ignore errors on non Amiga systems.
     return 0;
