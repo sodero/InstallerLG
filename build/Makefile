@@ -98,7 +98,8 @@ endif
 
 .PHONY: install
 install:
-	Installer "/dist/InstallerLG installer"
+	cd ../dist && $(MAKE) && \
+	Installer "InstallerLG installer"
 
 .PHONY: clean
 clean:
