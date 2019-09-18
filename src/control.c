@@ -29,13 +29,13 @@ entry_p m_if(entry_p contxt)
     int val = tru(C_ARG(1));
 
     // Does the body contain anything?
-    if(C_ARG(2) && C_ARG(2) != end())
+    if(exists(C_ARG(2)))
     {
         // Select branch to execute.
         entry_p sel = val ? C_ARG(2) : C_ARG(3);
 
         // Is there a branch corresponding to the resolved truth value?
-        if(sel && sel != end())
+        if(exists(sel))
         {
             // Execute the branch by resolving it.
             return resolve(sel);
@@ -61,8 +61,7 @@ entry_p m_select(entry_p contxt)
     int ndx = 0, sel = num(C_ARG(1));
 
     // Find the n:th item, go one step at a time in case no such item exists.
-    for(entry_p *items = C_ARG(2)->children;
-        items[ndx] && items[ndx] != end(); ndx++)
+    for(entry_p *items = C_ARG(2)->children; exists(items[ndx]); ndx++)
     {
         // Are we there yet?
         if(ndx == sel)
@@ -213,35 +212,35 @@ entry_p m_retrace(entry_p contxt)
     top = top ? h_retrace(*top) : NULL;
 
     // Resolve if we have two trace points.
-    if(top)
+    if(!top)
     {
-        // Stack frame counter.
-        static int dep = 0;
-
-        // Keep track of the recursion depth.
-        if(++dep > LG_MAXDEP)
-        {
-            ERR(ERR_MAX_DEPTH, contxt->name);
-            R_NUM(LG_FALSE);
-        }
-
-        // Expect failure.
-        entry_p ret = end();
-
-        // Resolve children and save return values.
-        while(*top && *top != end() && !DID_ERR)
-        {
-            ret = resolve(*top);
-            top++;
-        }
-
-        // Leaving stack frame.
-        dep--;
-
-        // Return the last value.
-        return ret;
+        // Exit if there's nowhere to go.
+        R_NUM(HALT);
     }
 
-    // Exit if there's nowhere to go.
-    R_NUM(HALT);
+    // Stack frame counter.
+    static int dep = 0;
+
+    // Keep track of the recursion depth.
+    if(++dep > LG_MAXDEP)
+    {
+        ERR(ERR_MAX_DEPTH, contxt->name);
+        R_NUM(LG_FALSE);
+    }
+
+    // Expect failure.
+    entry_p ret = end();
+
+    // Resolve children and save return values.
+    while(exists(*top) && !DID_ERR)
+    {
+        ret = resolve(*top);
+        top++;
+    }
+
+    // Leaving stack frame.
+    dep--;
+
+    // Return the last value.
+    return ret;
 }

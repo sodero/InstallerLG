@@ -454,7 +454,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
         }
 
         // If there are more files, allocate memory for the next node.
-        if(*chl && *chl != end())
+        if(exists(*chl))
         {
             // Not necessary to check the return value.
             node->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
@@ -2435,7 +2435,7 @@ entry_p m_makeassign(entry_p contxt)
     int res = LG_FALSE;
 
     // Are we going to create an assign?
-    if(C_ARG(2) && C_ARG(2) != end() && C_ARG(2)->type != OPTION)
+    if(exists(C_ARG(2)) && C_ARG(2)->type != OPTION)
     {
         // The destination.
         char *dst = str(C_ARG(2));
@@ -2516,7 +2516,7 @@ entry_p m_makedir(entry_p contxt)
 
     // We need to pass a valid context to h_makedir. If we have a CONTXT with
     // options, that's the one to pass, otherwise we should pass the default.
-    entry_p con = C_ARG(2) && C_ARG(2) != end() ? C_ARG(2) : contxt;
+    entry_p con = exists(C_ARG(2)) ? C_ARG(2) : contxt;
 
     // Create directory.
     R_NUM(h_makedir(con, str(C_ARG(1)), 0 /* FIXME */));
@@ -2551,7 +2551,7 @@ entry_p m_protect(entry_p contxt)
     char *file = str(C_ARG(1));
     D_NUM = LG_FALSE;
 
-    if(C_ARG(2) && C_ARG(2) != end())
+    if(exists(C_ARG(2)))
     {
         // Get with option.
         if(C_ARG(2)->type == CONTXT)
@@ -3157,8 +3157,7 @@ entry_p m_tooltype(entry_p contxt)
                 while(*(tts + n++));
 
                 // Set value or create tooltype?
-                if(settooltype->children[1] &&
-                   settooltype->children[1] != end())
+                if(exists(settooltype->children[1]))
                 {
                     // Resolve tooltype value.
                     const char *v = str(settooltype->children[1]);

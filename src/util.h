@@ -42,6 +42,7 @@ size_t buf_size(void);
 void *dbg_alloc(int line, const char *file, const char *func, void *mem);
 entry_p native_exists(entry_p contxt, call_t f);
 size_t num_children(entry_p *vec);
+bool exists(entry_p entry);
 
 //------------------------------------------------------------------------------
 // Utility macros.

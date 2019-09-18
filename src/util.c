@@ -41,7 +41,7 @@ void ror(entry_p *entry)
     int lst = 0;
 
     // Let 'lst' be the index of the last entry.
-    while(entry[lst] && entry[lst] != end())
+    while(exists(entry[lst]))
     {
         lst++;
     }
@@ -176,7 +176,7 @@ entry_p native(entry_p entry)
 static void get_fake_opt(entry_p fake, entry_p *cache)
 {
     // Translate strings to options.
-    for(size_t i = 0; fake->children[i] && fake->children[i] != end(); i++)
+    for(size_t i = 0; exists(fake->children[i]); i++)
     {
         entry_p cur = fake->children[i];
         bool del = cur->parent->id == OPT_DELOPTS;
@@ -222,8 +222,8 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 
         // If the (cache[OPT_CONFIRM] ...) option contains something that can be
         // translated into a new threshold value...
-        if(cache[OPT_CONFIRM]->children && cache[OPT_CONFIRM]->children[0] &&
-           cache[OPT_CONFIRM]->children[0] != end())
+        if(cache[OPT_CONFIRM]->children &&
+           exists(cache[OPT_CONFIRM]->children[0]))
         {
             // ...then do so.
             thres = num(cache[OPT_CONFIRM]);
@@ -249,8 +249,7 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 static void opt_fill_cache(entry_p contxt, entry_p *cache)
 {
     // Iterate over all options to fill up the cache.
-    for(size_t i = 0; contxt->children[i] &&
-        contxt->children[i] != end() && i < OPT_LAST; i++)
+    for(size_t i = 0; exists(contxt->children[i]) && i < OPT_LAST; i++)
     {
         entry_p entry = contxt->children[i];
 
@@ -345,7 +344,7 @@ entry_p opt(entry_p contxt, opt_t type)
 static bool x_exists(entry_p contxt, entry_p child)
 {
     // Make sure we have something that belongs to us.
-    return child && child != end() && child->parent == contxt;
+    return exists(child) && child->parent == contxt;
 }
 
 //------------------------------------------------------------------------------
@@ -587,7 +586,7 @@ char *get_optstr(entry_p contxt, opt_t type)
     entry_p *child = contxt->children;
 
     // Count options of the given type.
-    while(*child && *child != end())
+    while(exists(*child))
     {
         if((*child)->type == OPTION && (*child)->id == (int32_t) type)
         {
@@ -620,7 +619,7 @@ char *get_optstr(entry_p contxt, opt_t type)
     size_t len = 1;
 
     // Evaluate options once and save strings.
-    for(size_t i = 0; i < cnt && *child && *child != end(); child++)
+    for(size_t i = 0; i < cnt && exists(*child); child++)
     {
         if((*child)->id == (int32_t) type && (*child)->type == OPTION)
         {
@@ -685,7 +684,7 @@ char *get_chlstr(entry_p contxt, bool pad)
     if(child)
     {
         // Count non context children.
-        while(child && *child && *child != end())
+        while(child && exists(*child))
         {
             cnt += ((*child)->type != CONTXT) ? 1 : 0;
             child++;
@@ -859,7 +858,7 @@ static void dump_indent(entry_p entry, int indent)
     // Pretty print all children.
     if(entry->children)
     {
-        for(entry_p *chl = entry->children; *chl && *chl != end(); chl++)
+        for(entry_p *chl = entry->children; exists(*chl); chl++)
         {
             DBG("%sChl:\t", type);
             dump_indent(*chl, indent + 1);
@@ -869,7 +868,7 @@ static void dump_indent(entry_p entry, int indent)
     // Pretty print all symbols.
     if(entry->symbols)
     {
-        for(entry_p *sym = entry->symbols; *sym && *sym != end(); sym++)
+        for(entry_p *sym = entry->symbols; exists(*sym); sym++)
         {
             DBG("%sSym:\t", type);
             dump_indent(*sym, indent + 1);
@@ -991,7 +990,7 @@ entry_p native_exists(entry_p contxt, call_t func)
     }
 
     // Iterate over all children and recur if needed.
-    for(entry_p *c = contxt->children; *c && *c != end() && !entry; c++)
+    for(entry_p *c = contxt->children; exists(*c) && !entry; c++)
     {
         if((*c)->type == NATIVE && (*c)->call == func)
         {
@@ -1021,7 +1020,7 @@ size_t num_children(entry_p *vec)
     size_t num = 0;
 
     // Count the number children.
-    while(vec && vec[num] && vec[num] != end())
+    while(vec && exists(vec[num]))
     {
         num++;
     }
@@ -1029,3 +1028,9 @@ size_t num_children(entry_p *vec)
     // Total count.
     return num;
 }
+
+bool exists(entry_p entry)
+{
+    return entry && entry != end();
+}
+

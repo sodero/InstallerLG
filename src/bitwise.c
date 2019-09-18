@@ -28,7 +28,7 @@ entry_p m_and(entry_p contxt)
     C_SANE(2, NULL);
 
     // Return false if any of the children are false.
-    for(entry_p *cur = contxt->children; *cur && *cur != end(); cur++)
+    for(entry_p *cur = contxt->children; exists(*cur); cur++)
     {
         if(!num(*cur))
         {
@@ -130,7 +130,7 @@ entry_p m_in(entry_p contxt)
     int mask = 0;
 
     // Create the bitmask of all children.
-    for(entry_p *cur = C_ARG(2)->children; *cur && *cur != end(); cur++)
+    for(entry_p *cur = C_ARG(2)->children; exists(*cur); cur++)
     {
         // Add current bit to the mask.
         mask += 1 << num(*cur);
@@ -155,7 +155,7 @@ entry_p m_or(entry_p contxt)
     C_SANE(2, NULL);
 
     // Return true if any of the children are true.
-    for(entry_p *cur = contxt->children; *cur && *cur != end(); cur++)
+    for(entry_p *cur = contxt->children; exists(*cur); cur++)
     {
         if(num(*cur))
         {

@@ -34,7 +34,7 @@ entry_p m_set(entry_p contxt)
     entry_p cus = custom(contxt);
 
     // Iterate over all symbol -> value tuples
-    while(*sym && *sym != end() && *val && *val != end())
+    while(exists(*sym) && exists(*val))
     {
         // Resolve the right hand side before setting the symbol value.
         entry_p rhs = resolve(*val);
@@ -53,8 +53,7 @@ entry_p m_set(entry_p contxt)
             // If so determine if this particular symbol is one of the local
             // ones (arguments), if it is, rather than the global context, the
             // local context should be the target.
-            for(entry_p *cur = cus->symbols;
-                cur && *cur && *cur != end(); cur++)
+            for(entry_p *cur = cus->symbols; cur && exists(*cur); cur++)
             {
                 // As always with symbols, ignore the case.
                 if(!strcasecmp((*cur)->name, (*sym)->name))
@@ -138,7 +137,7 @@ entry_p m_symbolset(entry_p contxt)
         entry_p *cur = contxt->children;
 
         // Iterate over all tuples.
-        while(*cur && *cur != end())
+        while(exists(*cur))
         {
             // Resolve symbol name and value.
             const char *lhs = str(*cur++);
@@ -189,7 +188,7 @@ entry_p m_symbolset(entry_p contxt)
             }
 
             // Do we already have a symbol with this name?
-            while(*sym && *sym != end())
+            while(exists(*sym))
             {
                 // If true, replace its resolved value with the copy of the rhs.
                 if(!strcasecmp((*sym)->name, lhs))

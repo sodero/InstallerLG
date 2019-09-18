@@ -56,7 +56,7 @@ entry_p m_debug(entry_p contxt)
     {
         // For all children, print the string representation, to stdout if we're
         // running in a shell or to the log when invoked from WB.
-        for(entry_p *cur = contxt->children; *cur && *cur != end(); cur++)
+        for(entry_p *cur = contxt->children; exists(*cur); cur++)
         {
             char *val = "<NIL>";
 

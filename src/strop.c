@@ -46,7 +46,7 @@ entry_p m_cat(entry_p contxt)
     size_t len = 0, cur = 0;
 
     // Iterate over all arguments.
-    while(contxt->children[cur] && contxt->children[cur] != end())
+    while(exists(contxt->children[cur]))
     {
         // Resolve and get a string representation
         // of the current argument.
@@ -178,7 +178,7 @@ entry_p m_fmt(entry_p contxt)
     {
         for(cnt = 0; sct[cnt]; cnt++)
         {
-            if(arg && *arg && *arg != end())
+            if(arg && exists(*arg))
             {
                 // Original string length.
                 size_t oln = strlen(sct[cnt]);
@@ -284,7 +284,7 @@ entry_p m_fmt(entry_p contxt)
     }
 
     // If in strict mode, fail on argument <-> specifier count mismatch.
-    if(arg && *arg && *arg != end() && get_num(contxt, "@strict"))
+    if(arg && exists(*arg) && get_num(contxt, "@strict"))
     {
         ERR(ERR_FMT_UNUSED, contxt->name);
     }
@@ -432,7 +432,7 @@ entry_p m_substr(entry_p contxt)
     int off = num(C_ARG(2)), len = (int) strlen(arg);
 
     // Is there a limitation on the number of characters?
-    if(C_ARG(3) && C_ARG(3) != end())
+    if(exists(C_ARG(3)))
     {
         // Get the number of characters to copy.
         int chr = num(C_ARG(3));

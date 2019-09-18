@@ -59,6 +59,37 @@ entry_p m_abort(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_exit_final
+// Description: Show final exit message unless quiet mode is set.
+// Input:       entry_p contxt:     The execution context.
+// Return:      -
+//------------------------------------------------------------------------------
+static void h_exit_final(entry_p contxt)
+{
+    // Show final message unless 'quiet' is set.
+    if(!opt(contxt, OPT_QUIET))
+    {
+        // Get name and location of application.
+        const char *app = get_str(contxt, "@app-name"),
+                   *dst = get_str(contxt, "@default-dest");
+
+        // Only display the 'the app can be found here' message if we know
+        // the name and location of the application.
+        if(*app && *dst)
+        {
+            // Display the full message.
+            snprintf(get_buf(), buf_size(), tr(S_CBFI), tr(S_ICPL), app, dst);
+            gui_finish(get_buf());
+        }
+        else
+        {
+            // Display the bare minimum.
+            gui_finish(tr(S_ICPL));
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
 // (exit <string> <string> ... (quiet))
 //     end installation after displaying strings (if provided)
 //
@@ -98,26 +129,7 @@ entry_p m_exit(entry_p contxt)
     }
 
     // Show final message unless 'quiet' is set.
-    if(!opt(contxt, OPT_QUIET))
-    {
-        // Get name and location of application.
-        const char *app = get_str(contxt, "@app-name"),
-                   *dst = get_str(contxt, "@default-dest");
-
-        // Only display the 'the app can be found here' message if we know
-        // the name and location of the application.
-        if(*app && *dst)
-        {
-            // Display the full message.
-            snprintf(get_buf(), buf_size(), tr(S_CBFI), tr(S_ICPL), app, dst);
-            gui_finish(get_buf());
-        }
-        else
-        {
-            // Display the bare minimum.
-            gui_finish(tr(S_ICPL));
-        }
-    }
+    h_exit_final(contxt);
 
     // Make invoke() halt.
     R_NUM(HALT);
@@ -149,7 +161,7 @@ entry_p m_onerror(entry_p contxt)
     // Make sure that '@onerror' exists. On out of memory it might be missing.
     entry_p *err = con->symbols;
 
-    while(*err && *err != end())
+    while(exists(*err))
     {
         if((*err)->type == CUSTOM && !strcasecmp((*err)->name, ref.name))
         {

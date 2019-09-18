@@ -155,10 +155,8 @@ entry_p m_setmedia(entry_p contxt)
         // Extra flags.
         char *par = NULL;
 
-        // If the command requires an extra parameter, resolved the next
-        // argument, if it exists.
-        if((cmd == STM_COMMAND || cmd == STM_LOCATE) &&
-            C_ARG(3) && C_ARG(3) != end())
+        // If an extra parameter is required, resolved it, if it exists.
+        if((cmd == STM_COMMAND || cmd == STM_LOCATE) && exists(C_ARG(3)))
         {
             // Resolve next.
             par = str(C_ARG(3));
@@ -203,7 +201,7 @@ entry_p m_showmedia(entry_p contxt)
               strcasecmp(att, "large_medium") == 0 ? G_LARGE | G_MORE : 0);
 
     // Get the rest of the flags.
-    for(size_t i = 6; C_ARG(i) && C_ARG(i) != end(); i++)
+    for(size_t i = 6; exists(C_ARG(i)); i++)
     {
         // Get current flag.
         att = str(C_ARG(i));
@@ -233,7 +231,7 @@ entry_p m_showmedia(entry_p contxt)
         entry_p *sym = contxt->symbols;
 
         // Symbol exists already?
-        while(*sym && *sym != end())
+        while(exists(*sym))
         {
             // If true, update current symbol.
             if(!strcasecmp((*sym)->name, var) && (*sym)->resolved)
