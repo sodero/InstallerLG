@@ -20,6 +20,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+// FIXME
+static bool moveable(entry_p entry)
+{
+   // Symbols at the root that don't belong to a CUSTOM can be moved.
+   return !entry->parent->parent && entry->parent->type != CUSTOM;
+}
+
 //------------------------------------------------------------------------------
 // Name:        find_symbol
 // Description: Find the referent of a symbolic reference.
@@ -29,11 +36,10 @@
 //------------------------------------------------------------------------------
 entry_p find_symbol(entry_p entry)
 {
-    // Local variables have priority. This currently implies function arguments
-    // only. We could enable local (set), but this might break old scripts.
+    // Local variables have priority. This currently implies function arguments.
     entry_p con = local(entry);
 
-    if(!con)
+    if(!con && PANIC(entry))
     {
         PANIC(entry);
         return end();
@@ -43,7 +49,7 @@ entry_p find_symbol(entry_p entry)
     do
     {
         // Iterate over all symbols in the current context.
-        for(entry_p *tmp = con->symbols; tmp && *tmp && *tmp != end(); tmp++)
+        for(entry_p *tmp = con->symbols; tmp && exists(*tmp); tmp++)
         {
             // Return value.
             entry_p ret = *tmp;
@@ -54,11 +60,9 @@ entry_p find_symbol(entry_p entry)
                 continue;
             }
 
-            // Rearrange symbols to make the next lookup faster. Don't do this
-            // unless we're at the root and not in a user defined procedure.
-            // This would break all positional symbols (procedure arguments).
-            if(!ret->parent->parent && ret->parent->type != CUSTOM)
+            if(moveable(ret))
             {
+                // Rearrange symbols to the next lookup faster.
                 *tmp = *(con->symbols);
                 *(con->symbols) = ret;
             }
@@ -72,15 +76,13 @@ entry_p find_symbol(entry_p entry)
     }
     while(con);
 
-    // Fail if in strict mode. Never recur when looking for @strict, it might
-    // not be there on OOM and then we'll run out of stack as well.
+    // Fail if in strict mode. Never recur, we might be out of memory.
     if(strcasecmp(entry->name, "@strict") && get_num(global(entry), "@strict"))
     {
-        // Undefined symbol.
         ERR_C(entry, ERR_UNDEF_VAR, entry->name);
     }
 
-    // A failure will be evaluated as as a zero or an empty string.
+    // Zero / empty string.
     return end();
 }
 
@@ -421,7 +423,7 @@ entry_p invoke(entry_p entry)
         {
             // As long as no one fails, resolve all children and save the return
             // value of the last one.
-            while(*cur && *cur != end() && !DID_ERR)
+            while(exists(*cur) && !DID_ERR)
             {
                 // Resolve and proceed.
                 ret = resolve(*cur);

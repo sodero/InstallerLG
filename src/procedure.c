@@ -40,7 +40,7 @@ entry_p m_gosub(entry_p contxt)
 
     // Search through all symbols and see if there's a used defined
     // procedure that matches the reference name.
-    for(entry_p *cus = con->symbols; *cus && *cus != end(); cus++)
+    for(entry_p *cus = con->symbols; exists(*cus); cus++)
     {
         // Skip symbol if we don't have a match.
         if((*cus)->type != CUSTOM || strcasecmp((*cus)->name, contxt->name))
@@ -66,7 +66,7 @@ entry_p m_gosub(entry_p contxt)
             //
             // (message (P_ADDMUL 1 2 3)) ; shows 9
             // (message (P_ADDMUL 4 5))   ; shows 27
-            while(*arg && *arg != end() && *ina && *ina != end())
+            while(exists(*arg) && exists(*ina))
             {
                 entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
 

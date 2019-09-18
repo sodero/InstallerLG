@@ -154,7 +154,7 @@ static void reparent_and_set(entry_p *chl, entry_p par, entry_p res)
     }
 
     // Reparent all given entries.
-    for(entry_p *cur = chl; *cur && *cur != end(); cur++)
+    for(entry_p *cur = chl; exists(*cur); cur++)
     {
         if(res)
         {
@@ -282,14 +282,14 @@ static void move_contxt(entry_p dst, entry_p src)
             *chl = dst->children = src->children;
 
     // Reparent children.
-    while(*chl && *chl != end())
+    while(exists(*chl))
     {
         (*chl)->parent = dst;
         chl++;
     }
 
     // Reparent symbols.
-    while(*sym && *sym != end())
+    while(exists(*sym))
     {
         (*sym)->parent = dst;
         sym++;
@@ -481,7 +481,7 @@ entry_p append(entry_p **dest, entry_p entry)
     size_t num = 0;
 
     // Find the first free slot if there is one.
-    while((*dest)[num] && (*dest)[num] != end())
+    while(exists((*dest)[num]))
     {
         num++;
     }
@@ -543,14 +543,14 @@ entry_p merge(entry_p dst, entry_p src)
             num = 0;
 
             // Copy current destination children.
-            for(size_t i = 0; dst->children[i] && dst->children[i] != end(); i++)
+            for(size_t i = 0; exists(dst->children[i]); i++)
             {
                 new[num] = dst->children[i];
                 new[num++]->parent = dst;
             }
 
             // Append children of the source.
-            for(size_t i = 0; src->children[i] && src->children[i] != end(); i++)
+            for(size_t i = 0; exists(src->children[i]); i++)
             {
                 new[num] = src->children[i];
                 new[num++]->parent = dst;
@@ -579,6 +579,20 @@ entry_p merge(entry_p dst, entry_p src)
 }
 
 //------------------------------------------------------------------------------
+// Name:        push_symbol
+// Description: Test whether a symbol is to be pushed or not.
+// Input:       entry_p dst:    The destination.
+//              entry_p src:    The source.
+// Return:      bool:           If pushable 'true', 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool push_symbol(entry_p dst, entry_p src)
+{
+    // Symbols and user-defined procedures are treated as equals.
+    return ((src->type == SYMBOL || src->type == CUSTOM) &&
+            (dst->type == CONTXT || dst->type == CUSTOM));
+}
+
+//------------------------------------------------------------------------------
 // Name:        push
 // Description: Type aware 'append' working on 'entry_t' level. Takes care of
 //              children and symbols, while avoiding duplicates of the latter.
@@ -600,11 +614,10 @@ entry_p push(entry_p dst, entry_p src)
     entry_p **dst_p = &dst->children;
 
     // Symbols and user-defined procedures are equals.
-    if((src->type == SYMBOL || src->type == CUSTOM) &&
-       (dst->type == CONTXT || dst->type == CUSTOM))
+    if(push_symbol(dst, src))
     {
         // We can't have multiple references.
-        for(size_t i = 0; dst->symbols[i] && dst->symbols[i] != end(); i++)
+        for(size_t i = 0; exists(dst->symbols[i]); i++)
         {
             // If duplicate reference, update the existing one.
             if(!strcasecmp(dst->symbols[i]->name, src->name))
@@ -654,7 +667,7 @@ static void kill_all(entry_p *chl, entry_p par)
     }
 
     // Free the entries we own. References can be anywhere.
-    for(entry_p *cur = chl; *cur && *cur != end(); cur++)
+    for(entry_p *cur = chl; exists(*cur); cur++)
     {
         if((*cur)->parent == par)
         {

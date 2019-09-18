@@ -220,7 +220,7 @@ entry_p m_database(entry_p contxt)
     }
 
     // Are we testing for a specific value?
-    if(C_ARG(2) && C_ARG(2) != end())
+    if(exists(C_ARG(2)))
     {
         ret = strcmp(ret, str(C_ARG(2))) ? "0" : "1";
     }
@@ -295,7 +295,7 @@ entry_p m_getassign(entry_p contxt)
     ULONG msk = LDF_READ;
 
     // Parse the option string if it exists.
-    if(opt && opt != end())
+    if(exists(opt))
     {
         const char *o = str(opt);
 
@@ -525,7 +525,7 @@ entry_p m_getdiskspace(entry_p contxt)
             // The parameter <unit> is optional and defines the unit for the
             // returned disk space: "B" (or omitted) is "Bytes", "K" is
             // "Kilobytes", "M" is "Megabytes" and "G" is "Gigabytes".
-            if(C_ARG(2) && C_ARG(2) != end())
+            if(exists(C_ARG(2)))
             {
                 switch(*str(C_ARG(2)))
                 {
@@ -1015,8 +1015,7 @@ entry_p m_iconinfo(entry_p contxt)
         }
 
         // Iterate over all its children.
-        for(size_t j = 0; types[i]->children[j] &&
-            types[i]->children[j] != end(); j++)
+        for(size_t j = 0; exists(types[i]->children[j]); j++)
         {
             // Get variable name.
             char *name = str(types[i]->children[j]);
@@ -1075,8 +1074,7 @@ entry_p m_iconinfo(entry_p contxt)
             // the value of the old one with the new value.
             if(contxt->symbols)
             {
-                for(size_t k = 0; contxt->symbols[k] &&
-                    contxt->symbols[k] != end(); k++)
+                for(size_t k = 0; exists(contxt->symbols[k]); k++)
                 {
                     if(!strcasecmp(contxt->symbols[k]->name, name))
                     {

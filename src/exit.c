@@ -149,7 +149,7 @@ entry_p m_onerror(entry_p contxt)
     // Make sure that '@onerror' exists. On out of memory it might be missing.
     entry_p *err = con->symbols;
 
-    while(*err && *err != end())
+    while(exists(*err))
     {
         if((*err)->type == CUSTOM && !strcasecmp((*err)->name, ref.name))
         {
