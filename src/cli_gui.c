@@ -54,6 +54,50 @@ void gui_abort(const char *msg)
 inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def,
                  bool bck, int *ret)
 {
+    int min = 0, max=0;
+    const char **countingNames = nms;
+    while(*countingNames)
+    {
+        max++;
+        countingNames++;
+    }
+    max--;
+
+    printf("%s\n", msg);
+    printf("Choose a number between %d and %d (default is %d, H for help)\n", min, max, def);
+    char response[5];
+    bool choseAnswer = false;
+    do {
+        int opt = 0;
+        const char **printingNames = nms;
+        while(*printingNames)
+        {
+            printf("%d: %s\n", opt, *printingNames);
+            opt++;
+            printingNames++;
+        }
+        printf("Enter number > ");
+        fgets(response, 12, stdin);
+        if(strcmp(response, "H\n") == 0) {
+            printf("%s\n", hlp);
+        } else if(strcmp(response, "\n") == 0) {
+            *ret = 1UL << def;
+            choseAnswer = true;
+        } else if(strcmp(response, "0\n") == 0) {
+            *ret = 1;
+            choseAnswer = true;
+        } else {
+            int res = atoi(response);
+            if(res != 0) {
+                if(res >= min && res <= max) {
+                    *ret = 1UL << res;
+                    choseAnswer = true;
+                } else {
+                    printf("Number should be between %d and %d\n", min, max);
+                }
+            }
+        }
+    } while(choseAnswer == false);
     return G_TRUE;
 }
 
