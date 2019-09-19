@@ -3040,7 +3040,7 @@ inp_t gui_init(bool scr)
         MUIA_Application_Title, tr(S_INST),
         MUIA_Application_Version, version + 1,
         MUIA_Application_Description, "App installation utility",
-        MUIA_Application_HelpFile, "Installer.guide",
+        MUIA_Application_HelpFile, "InstallerLG.guide",
         MUIA_Application_Window, Win = (Object *) NewObject(
             IGClass->mcc_Class, NULL,
             MUIA_IG_UseCustomScreen, scr ? TRUE : FALSE,
