@@ -476,9 +476,9 @@ struct MUIP_IG_GetCustomScreen
 #define B_NONE                   5
 
 //------------------------------------------------------------------------------
-// IGTrans - [PRIVATE] -
-// Input:    ULONG signal:  -
-// Return:   Gui ret val.
+// IGTrans - [PRIVATE] - Translate button input to GUI response value
+// Input:    ULONG signal: -
+// Return:   GUI response value
 //------------------------------------------------------------------------------
 static inline ULONG IGTrans(ULONG signal)
 {
@@ -510,9 +510,9 @@ static inline ULONG IGTrans(ULONG signal)
 
 //------------------------------------------------------------------------------
 // IGWait - [PRIVATE] Wait for notification(s)
-// Input:             ULONG notif:  Start notification value
-//                    ULONG range:  Number of values to check for
-// Return:            Notifcation val. / zero on return id quit
+// Input:   ULONG notif:  Start notification value
+//          ULONG range:  Number of values to check for
+// Return:  Notifcation val. / zero on return id quit
 //------------------------------------------------------------------------------
 static inline ULONG IGWait(Object *obj, ULONG notif, ULONG range)
 {
@@ -887,6 +887,51 @@ static inline IPTR IGWelcome(Class *cls, Object *obj,
 }
 
 //------------------------------------------------------------------------------
+// IGDirPart - [PRIVATE] - Return existing dir from random path 
+// Input:      ULONG Path: Random path.
+// Return:     ULONG:      Existing dir from path.
+//------------------------------------------------------------------------------
+static ULONG IGDirPart(Class *cls, Object *obj, ULONG Path)
+{
+    struct FileInfoBlock *fib = (struct FileInfoBlock *)
+           AllocDosObject(DOS_FIB, NULL);
+
+    if(fib)
+    {
+        struct IGData *my = INST_DATA(cls, obj);
+
+        // Copy path string.
+        strncpy(my->Buf, CAST(Path, const char *), sizeof(my->Buf));
+
+        // Attempt to lock file or directory.
+        BPTR lock = (BPTR) Lock(my->Buf, ACCESS_READ);
+
+        while(*(my->Buf) && (!lock || (Examine(lock, fib) &&
+              fib->fib_DirEntryType <= 0)))
+        {
+            // Release lock to file or directory.
+            UnLock(lock);
+
+            // Cut of the last part of the path.
+            *PathPart(my->Buf) = '\0';
+
+            // Try again.
+            lock = (BPTR) Lock(my->Buf, ACCESS_READ);
+        }
+
+        // Release lock to file or directory.
+        FreeDosObject(DOS_FIB, fib);
+        UnLock(lock);
+
+        return CAST(my->Buf, ULONG);
+    }
+
+    // Out of memory.
+    GERR(tr(S_UNER));
+    return Path;
+}
+
+//------------------------------------------------------------------------------
 // IGAskFile - Show file / directory requester
 // Input:      Message - The prompt
 //             Help - Help text
@@ -907,6 +952,12 @@ static inline IPTR IGAskFile(Class *cls,
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
        msg->Help, P_ASKFILE, B_PROCEED_ABORT))
     {
+        if(!msg->NewPath)
+        {
+            // Make sure that the default dir exists.
+            msg->Default = IGDirPart(cls, obj, msg->Default);
+        }
+
         // Create ASL file requester
         Object *str, *pop = (Object *) MUI_NewObject
         (
