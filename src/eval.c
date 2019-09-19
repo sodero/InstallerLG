@@ -194,24 +194,8 @@ static int opt_to_int(entry_p entry)
         return atoi(opt);
     }
 
-    // Special treatment of (confirm).
-    if(strcasecmp(opt, "novice") == 0)
-    {
-        return LG_NOVICE;
-    }
-    else
-    if(strcasecmp(opt, "average") == 0)
-    {
-        return LG_AVERAGE;
-    }
-    else
-    if(strcasecmp(opt, "expert") == 0)
-    {
-        return LG_EXPERT;
-    }
-
-    // Fall through.
-    return atoi(opt);
+    // Translate (confirm) to userlevel.
+    return str_to_userlevel(opt, atoi(opt));
 }
 
 //------------------------------------------------------------------------------

@@ -1029,8 +1029,50 @@ size_t num_children(entry_p *vec)
     return num;
 }
 
+//------------------------------------------------------------------------------
+// Name:        exists
+// Description: Verify that an entry exists.
+// Input:       entry_p entry: The entry to be verified.
+// Return:      bool:          If entry exists, 'true', 'false' otherwise..
+//------------------------------------------------------------------------------
 bool exists(entry_p entry)
 {
     return entry && entry != end();
 }
 
+//------------------------------------------------------------------------------
+// Name:        str_to_userlevel
+// Description: Convert userlevel strings to numeric userlevel.
+// Input:       const char *user: Userlevel string representation.
+//              int def:          Default value used if translation fails.
+// Return:      int:              Numeric Userlevel.
+//------------------------------------------------------------------------------
+int str_to_userlevel(const char *user, int def)
+{    
+    // NULL is a valid value. Return default.
+    if(!user)
+    {
+        return def;
+    }
+
+    // Case insensitve 'NOVICE'
+    if(strcasecmp(user, "novice") == 0)
+    {
+        return LG_NOVICE;
+    }
+
+    // Case insensitve 'AVERAGE'
+    if(strcasecmp(user, "average") == 0)
+    {
+        return LG_AVERAGE;
+    }
+
+    // Case insensitve 'EXPERT'
+    if(strcasecmp(user, "expert") == 0)
+    {
+        return LG_EXPERT;
+    }
+
+    // Not a userlevel. Return default user.
+    return def;
+}
