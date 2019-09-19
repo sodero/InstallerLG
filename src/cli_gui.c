@@ -66,7 +66,22 @@ inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def,
 inp_t gui_bool(const char *msg, const char *hlp, const char *yes,
                const char *nay, bool bck)
 {
-    return G_TRUE;
+    char response[5];
+    printf("%s\n", msg);
+    printf("Pick an option (H for help)\n");
+    do {
+        printf("Y: %s\n", yes);
+        printf("N: %s\n", nay);
+        printf("Y or N > ");
+        fgets(response, 5, stdin);
+        if(strcmp(response, "H\n") == 0) {
+            printf("%s\n", hlp);
+        } else if(strcmp(response, "Y\n") == 0 || strcmp(response, "Yes\n") == 0) {
+            return G_TRUE;
+        } else if(strcmp(response, "N\n") == 0 || strcmp(response, "No\n") == 0) {
+            return G_FALSE;
+        }
+    } while(true);
 }
 
 inp_t gui_string(const char *msg,
