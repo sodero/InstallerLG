@@ -75,6 +75,23 @@ inp_t gui_string(const char *msg,
                  bool bck,
                  const char **ret)
 {
+    printf("%s\n", msg);
+    printf("Enter a string (default is '%s', H for help)\n", def);
+    char response[255];
+    bool choseAnswer = false;
+    do {
+        printf("Enter string > ");
+        fgets(response, 255, stdin);
+        if(strcmp(response, "H\n") == 0) {
+            printf("%s\n", hlp);
+        } else if(strcmp(response, "\n") == 0) {
+            *ret = def;
+            choseAnswer = true;
+        } else  {
+            strcpy(*ret, response);
+            choseAnswer = true;
+        }
+    } while(choseAnswer == false);
     return G_TRUE;
 }
 
@@ -86,7 +103,7 @@ inp_t gui_number(const char *msg,
                  bool bck,
                  int *ret)
 {
-    printf("%s", msg);
+    printf("%s\n", msg);
     printf("Choose a number between %d and %d (default is %d, H for help)\n", min, max, def);
     char response[12];
     bool choseAnswer = false;

@@ -5,6 +5,7 @@
 *.swp
 build/_*
 build/Installer
+build/Installer68k
 build/Installer.tmp.*
 build/massif.out.*
 build/leak.tmp.*
