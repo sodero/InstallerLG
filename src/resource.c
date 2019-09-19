@@ -66,7 +66,6 @@ const char *tr(res_t res)
         /*69*/ "SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,NOLOG/S,NOPRETEND/S\n",
         /*70*/ "SCRIPT", /*71*/ "APPNAME", /*72*/ "MINUSER", /*73*/ "DEFUSER", /*74*/ "LANGUAGE",
         /*75*/ "LOGFILE", /*76*/ "NOLOG", /*77*/ "NOPRETEND",
-
         /*S_GONE*/ "OUT OF RANGE"
     };
 
