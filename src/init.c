@@ -48,6 +48,7 @@ static void init_num(entry_p contxt, char *sym, int num)
         // Out of memory.
         kill(var);
         kill(val);
+        return;
     }
 
     // Initialize tuple.
@@ -80,6 +81,7 @@ static void init_str(entry_p contxt, char *sym, char *str)
         // Out of memory.
         kill(var);
         kill(val);
+        return;
     }
 
     // Initialize tuple.
