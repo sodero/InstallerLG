@@ -21,6 +21,31 @@
 #include <string.h>
 
 //------------------------------------------------------------------------------
+// Name:        swap
+// Description: Swap symbols to accelerate lookups. The type of 'src' is checked,
+//              so that only those entries that can be moved, are moved.
+// Input:       entry_p *dst:  Pointer to where 'src' is going.
+//              entry_p *src:  Pointer to where 'dst' is goind.
+// Return:      entry_p:       The entry referred to by 'src'.
+//------------------------------------------------------------------------------
+static entry_p swap(entry_p *dst, entry_p *src)
+{
+    // Only symbols at the root that don't belong to a CUSTOM can be moved.
+    if(dst != src && !(*src)->parent->parent && (*src)->parent->type != CUSTOM)
+    {
+        entry_p tmp = *dst;
+        *dst = *src;
+        *src = tmp;
+
+        // New position of *src is *dst.
+        return *dst;
+    }
+    
+    // No swap.
+    return *src;
+}
+
+//------------------------------------------------------------------------------
 // Name:        find_symbol
 // Description: Find the referent of a symbolic reference.
 // Input:       entry_p entry:  A symbolic reference, SYMREF.
@@ -29,11 +54,10 @@
 //------------------------------------------------------------------------------
 entry_p find_symbol(entry_p entry)
 {
-    // Local variables have priority. This currently implies function arguments
-    // only. We could enable local (set), but this might break old scripts.
+    // Local variables have priority. This currently implies function arguments.
     entry_p con = local(entry);
 
-    if(!con)
+    if(!con && PANIC(entry))
     {
         PANIC(entry);
         return end();
@@ -43,28 +67,18 @@ entry_p find_symbol(entry_p entry)
     do
     {
         // Iterate over all symbols in the current context.
-        for(entry_p *tmp = con->symbols; tmp && *tmp && *tmp != end(); tmp++)
+        for(entry_p *tmp = con->symbols; tmp && exists(*tmp); tmp++)
         {
-            // Return value.
-            entry_p ret = *tmp;
-
-            // Entry might be a CUSTOM. Ignore everything SYMBOLS.
-            if(ret->type != SYMBOL || strcasecmp(ret->name, entry->name))
+            // Entry might be a CUSTOM. Ignore everything but SYMBOLS.
+            if((*tmp)->type != SYMBOL || strcasecmp((*tmp)->name, entry->name))
             {
                 continue;
             }
 
-            // Rearrange symbols to make the next lookup faster. Don't do this
-            // unless we're at the root and not in a user defined procedure.
-            // This would break all positional symbols (procedure arguments).
-            if(!ret->parent->parent && ret->parent->type != CUSTOM)
-            {
-                *tmp = *(con->symbols);
-                *(con->symbols) = ret;
-            }
-
-            // Symbol found.
-            return ret;
+            // If possible swap symbol order to speed up future lookups before
+            // returning. This is only done in the root and not inside CUSTOM,
+            // since those symbols determine the order of function arguments.
+            return swap(con->symbols, tmp);
         }
 
         // Nothing found in the current context. Climb one scope higher.
@@ -72,16 +86,38 @@ entry_p find_symbol(entry_p entry)
     }
     while(con);
 
-    // Fail if in strict mode. Never recur when looking for @strict, it might
-    // not be there on OOM and then we'll run out of stack as well.
+    // Fail if in strict mode. Never recur, we might be out of memory.
     if(strcasecmp(entry->name, "@strict") && get_num(global(entry), "@strict"))
     {
-        // Undefined symbol.
         ERR_C(entry, ERR_UNDEF_VAR, entry->name);
     }
 
-    // A failure will be evaluated as as a zero or an empty string.
+    // Zero / empty string.
     return end();
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_resolve_option
+// Description: Resolve all option types.
+// Input:       entry_p opt:  An OPTION.
+// Return:      entry_p:      Pointer to an entry_t primitive.
+//------------------------------------------------------------------------------
+static entry_p h_resolve_option(entry_p opt)
+{
+    // Dynamic options are native function calls.
+    if(opt->id == OPT_DYNOPT)
+    {
+        return opt->call(opt);
+    }
+
+    // Back options are treated like contexts.
+    if(opt->id == OPT_BACK)
+    {
+        return invoke(opt);
+    }
+
+    // A normal option.
+    return opt;
 }
 
 //------------------------------------------------------------------------------
@@ -94,10 +130,9 @@ entry_p find_symbol(entry_p entry)
 entry_p resolve(entry_p entry)
 {
     // Is there anything to resolve?
-    if(!entry)
+    if(!entry && PANIC(entry))
     {
         // Bad input.
-        PANIC(entry);
         return end();
     }
 
@@ -122,19 +157,7 @@ entry_p resolve(entry_p entry)
 
         // Special options.
         case OPTION:
-            // Dynamic options are treated like functions.
-            if(entry->id == OPT_DYNOPT)
-            {
-                return entry->call(entry);
-            }
-            else
-            // Back options are treated like contexts.
-            if(entry->id == OPT_BACK)
-            {
-                return invoke(entry);
-            }
-            // Ordinary options.
-            return entry;
+            return h_resolve_option(entry);
 
         // We already have a primitive.
         case NUMBER:
@@ -171,24 +194,8 @@ static int opt_to_int(entry_p entry)
         return atoi(opt);
     }
 
-    // Special treatment of (confirm).
-    if(strcasecmp(opt, "novice") == 0)
-    {
-        return LG_NOVICE;
-    }
-    else
-    if(strcasecmp(opt, "average") == 0)
-    {
-        return LG_AVERAGE;
-    }
-    else
-    if(strcasecmp(opt, "expert") == 0)
-    {
-        return LG_EXPERT;
-    }
-
-    // Fall through.
-    return atoi(opt);
+    // Translate (confirm) to userlevel.
+    return str_to_userlevel(opt, atoi(opt));
 }
 
 //------------------------------------------------------------------------------
@@ -259,10 +266,9 @@ int num(entry_p entry)
 //------------------------------------------------------------------------------
 bool tru(entry_p entry)
 {
-    // Anything to resolve?
-    if(!entry)
+    if(!entry && PANIC(entry))
     {
-        PANIC(entry);
+        // Bad input.
         return false;
     }
 
@@ -270,14 +276,86 @@ bool tru(entry_p entry)
     entry_p val = resolve(entry);
 
     // Only numerals and strings can be true.
-    if(((val->type == STRING && *(val->name)) ||
-        (val->type == NUMBER && val->id)) && !DID_ERR)
+    return (((val->type == STRING && *(val->name)) ||
+             (val->type == NUMBER && val->id)) && !DID_ERR);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_str_num
+// Description: Convert OPTION to string.
+// Input:       entry_p entry:  An entry_t pointer to a OPTION.
+// Return:      char *:         String representation of the input.
+//------------------------------------------------------------------------------
+static char *h_str_opt(entry_p opt)
+{
+    switch(opt->id)
     {
-        return true;
+        case OPT_APPEND:
+        case OPT_CONFIRM:
+        case OPT_DEFAULT:
+        case OPT_DEST:
+        case OPT_DISK:
+        case OPT_INCLUDE:
+        case OPT_NEWNAME:
+        case OPT_PATTERN:
+        case OPT_SETDEFAULTTOOL:
+        case OPT_SETSTACK:
+        case OPT_SOURCE:
+        case OPT_OVERRIDE:
+        case OPT_GETDEFAULTTOOL:
+        case OPT_GETSTACK:
+        case OPT_GETTOOLTYPE:
+            // All the options above have a single child.
+            return str(opt->children ? opt->children[0] : NULL);
+
+       case OPT_HELP:
+       case OPT_PROMPT:
+           // Concatenate children of (help) and (prompt).
+           free(opt->name);
+           opt->name = get_chlstr(opt, false);
+
+           if(!opt->name && PANIC(opt))
+           {
+               // Out of memory.
+               break;
+           }
+
+           // Return concatenated value.
+           return opt->name;
+
+       default:
+           // Fall through for all other option types.
+           break;
     }
 
-    // Something else.
-    return false;
+    // Always return a valid string.
+    return "";
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_str_num
+// Description: Convert NUMBER to string.
+// Input:       entry_p entry:  An entry_t pointer to a NUMBER.
+// Return:      char *:         String representation of the input.
+//------------------------------------------------------------------------------
+static char *h_str_num(entry_p opt)
+{
+    // We already have a string if we've done this number before.
+    if(!opt->name)
+    {
+        // Numbers can be LG_NUMLEN characters long.
+        opt->name = DBG_ALLOC(malloc(LG_NUMLEN));
+    }
+
+    if(!opt->name && PANIC(opt))
+    {
+        // Out of memory.
+        return "";
+    }
+
+    // Create formated string and return.
+    snprintf(opt->name, LG_NUMLEN, "%d", opt->id);
+    return opt->name;
 }
 
 //------------------------------------------------------------------------------
@@ -285,71 +363,23 @@ bool tru(entry_p entry)
 // Description: Get string representation of an entry. This implies resolving
 //              it, and, if necessary, converting it.
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
-// Return:      int:            String representation of the input.
+// Return:      char *:         String representation of the input.
 //------------------------------------------------------------------------------
 char *str(entry_p entry)
 {
-    // Is there anything to resolve?
-    if(!entry)
+    if(!entry && PANIC(entry))
     {
         // Bad input.
-        PANIC(entry);
         return "";
     }
 
     switch(entry->type)
     {
-        // Special treatment of options with a single string argument. Let
-        // other options fall through.
+        // Options need special treatment.
         case OPTION:
-            switch(entry->id)
-            {
-                case OPT_APPEND:
-                case OPT_CONFIRM:
-                case OPT_DEFAULT:
-                case OPT_DEST:
-                case OPT_DISK:
-                case OPT_INCLUDE:
-                case OPT_NEWNAME:
-                case OPT_PATTERN:
-                case OPT_SETDEFAULTTOOL:
-                case OPT_SETSTACK:
-                case OPT_SOURCE:
-                case OPT_OVERRIDE:
-                case OPT_GETDEFAULTTOOL:
-                case OPT_GETSTACK:
-                case OPT_GETTOOLTYPE:
-                    // All the options above have a single child.
-                    return str
-                    (
-                        entry->children ?
-                        entry->children[0] : NULL
-                    );
+            return h_str_opt(entry);
 
-                case OPT_HELP:
-                case OPT_PROMPT:
-                    // (help) and (prompt) may have multiple children that
-                    // must be concatenated.
-                    free(entry->name);
-                    entry->name = get_chlstr(entry, false);
-
-                    // On OOM, fall through.
-                    if(entry->name)
-                    {
-                        return entry->name;
-                    }
-
-                    // OOM.
-                    PANIC(entry);
-                    break;
-
-                default:
-                    break;
-            }
-            /* FALLTHRU */
-
-        // Dangling entries and options are considered empty strings with
-        // the exceptions above.
+        // Dangling entries are considered empty strings.
         case DANGLE:
             return "";
 
@@ -371,21 +401,9 @@ char *str(entry_p entry)
         case NATIVE:
             return str(entry->call(entry));
 
-        // Conversion. Please note the use of LG_NUMLEN.
+        // Convert number to string.
         case NUMBER:
-            // Have we converted this number to a string before?
-            if(!entry->name)
-            {
-                entry->name = DBG_ALLOC(malloc(LG_NUMLEN));
-            }
-
-            // On out of memory, fall through and PANIC below.
-            if(entry->name)
-            {
-                snprintf(entry->name, LG_NUMLEN, "%d", entry->id);
-                return entry->name;
-            }
-            break;
+            return h_str_num(entry);
 
         // We should never end up here.
         case CONTXT:
@@ -408,33 +426,28 @@ char *str(entry_p entry)
 //------------------------------------------------------------------------------
 entry_p invoke(entry_p entry)
 {
-    // Expect failure.
-    entry_p ret = end();
-
-    if(entry)
+    if(!entry && PANIC(entry))
     {
-        // Iterator.
-        entry_p *cur = entry->children;
-
-        // Empty procedures are allowed, there might be no children at all.
-        if(cur)
-        {
-            // As long as no one fails, resolve all children and save the return
-            // value of the last one.
-            while(*cur && *cur != end() && !DID_ERR)
-            {
-                // Resolve and proceed.
-                ret = resolve(*cur);
-                cur++;
-            }
-        }
-
-        // Return the last value.
-        return ret;
+        // Bad input.
+        return end();
     }
 
-    // Bad input.
-    PANIC(entry);
+    // Expect nothing.
+    entry_p ret = end();
+    entry_p *cur = entry->children;
+
+    // Empty procedures are allowed, there might be no children at all.
+    if(cur)
+    {
+        // Reesolve children and save the last return value.
+        while(exists(*cur) && !DID_ERR)
+        {
+            ret = resolve(*cur);
+            cur++;
+        }
+    }
+
+    // Return the last value.
     return ret;
 }
 
@@ -485,9 +498,7 @@ void run(entry_p entry)
         gui_exit();
     }
 
-    // i18n teardown.
+    // i18n and AST teardown.
     locale_exit();
-
-    // Free AST
     kill(entry);
 }

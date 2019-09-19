@@ -96,6 +96,11 @@ else
 	@echo "[SKIPPED] @sh ../test/run.sh ./$(EXE) ../test $(REXTRA)"
 endif
 
+.PHONY: install
+install:
+	cd ../dist && $(MAKE) && \
+	Installer "InstallerLG installer"
+
 .PHONY: clean
 clean:
 	chmod a+rwx _?* || true

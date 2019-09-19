@@ -39,6 +39,7 @@
 #define LG_VECLEN   4        // Default array size
 #define LG_NUMLEN   16       // Max string length of numerical values
 #define LG_MAXDEP   32       // Max recursion depth
+#define LG_STRLEN   64       // Default string length.
 
 //------------------------------------------------------------------------------
 // Data types.

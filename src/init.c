@@ -40,24 +40,24 @@ char *strcasestr(const char *, const char *);
 //------------------------------------------------------------------------------
 static void init_num(entry_p contxt, char *sym, int num)
 {
-    // Create SYMBOL VALUE tuple.
+    // Create SYMBOL -> VALUE tuple.
     entry_p var = new_symbol(DBG_ALLOC(strdup(sym))), val = new_number(num);
 
-    // Unless we're out of memory, init tuple.
-    if(var && val)
+    if(!var || !val)
     {
-        var->parent = contxt;
-        var->resolved = val;
-        val->parent = var;
-
-        // Insert result in CONTXT.
-        append(&contxt->symbols, var);
+        // Out of memory.
+        kill(var);
+        kill(val);
         return;
     }
 
-    // Don't leak on OOM.
-    kill(var);
-    kill(val);
+    // Initialize tuple.
+    var->parent = contxt;
+    var->resolved = val;
+    val->parent = var;
+
+    // Insert result in CONTXT.
+    append(&contxt->symbols, var);
 }
 
 //------------------------------------------------------------------------------
@@ -76,21 +76,21 @@ static void init_str(entry_p contxt, char *sym, char *str)
     entry_p var = new_symbol(DBG_ALLOC(strdup(sym))),
             val = new_string(DBG_ALLOC(strdup(str)));
 
-    // Unless we're OOM, init tuple.
-    if(var && val)
+    if(!var || !val)
     {
-        var->parent = contxt;
-        var->resolved = val;
-        val->parent = var;
-
-        // Insert result in CONTXT.
-        append(&contxt->symbols, var);
+        // Out of memory.
+        kill(var);
+        kill(val);
         return;
     }
 
-    // Don't leak on OOM.
-    kill(var);
-    kill(val);
+    // Initialize tuple.
+    var->parent = contxt;
+    var->resolved = val;
+    val->parent = var;
+
+    // Insert result in CONTXT.
+    append(&contxt->symbols, var);
 }
 
 //------------------------------------------------------------------------------
@@ -101,13 +101,17 @@ static void init_str(entry_p contxt, char *sym, char *str)
 //------------------------------------------------------------------------------
 static void init_tooltypes(entry_p contxt)
 {
-    // Get tooltype values / cli arguments.
-    char *a_app = arg_get(ARG_APPNAME),
-         *a_scr = arg_get(ARG_SCRIPT),
-         *a_min = arg_get(ARG_MINUSER),
-         *a_def = arg_get(ARG_DEFUSER),
-         *a_log = arg_get(ARG_LOGFILE),
-         *a_lng = arg_get(ARG_LANGUAGE);
+    // Get tooltypes / CLI arguments.
+    char *a_app = arg_get(ARG_APPNAME), *a_scr = arg_get(ARG_SCRIPT),
+         *a_log = arg_get(ARG_LOGFILE), *a_lng = arg_get(ARG_LANGUAGE);
+
+    // Userlevels: minimum 'NOVICE' and default 'AVERAGE'.
+    int l_def = str_to_userlevel(arg_get(ARG_DEFUSER), LG_AVERAGE),
+        l_min = str_to_userlevel(arg_get(ARG_MINUSER), LG_NOVICE);
+
+    // Cap userlevel values, default must be >= minimum.
+    init_num(contxt, "@user-level", l_def < l_min ? l_min : l_def);
+    init_num(contxt, "@user-min", l_min);
 
     // Modus.
     init_num(contxt, "@no-log", arg_get(ARG_NOLOG) ? 1 : 0);
@@ -118,51 +122,13 @@ static void init_tooltypes(entry_p contxt)
     init_str(contxt, "@app-name", a_app ? a_app : "Test App");
     init_str(contxt, "@log-file", a_log ? a_log : "install_log_file");
 
-    // Default and minimum user level.
-    int l_def = LG_AVERAGE, l_min = LG_NOVICE;
-
-    // Minimum user level setting?
-    if(a_min)
-    {
-        // LG_NOVICE is implicit.
-        if(strcasecmp("AVERAGE", a_min) == 0)
-        {
-            l_min = LG_AVERAGE;
-        }
-        else
-        if(strcasecmp("EXPERT", a_min) == 0)
-        {
-            l_min = LG_EXPERT;
-        }
-    }
-
-    // Default user level setting?
-    if(a_def)
-    {
-        // LG_AVERAGE is implicit.
-        if(strcasecmp("NOVICE", a_def) == 0)
-        {
-            l_def = LG_NOVICE;
-        }
-        else
-        if(strcasecmp("EXPERT", a_def) == 0)
-        {
-            l_def = LG_EXPERT;
-        }
-    }
-
-    // Set capped values, default must be >= minimum.
-    init_num(contxt, "@user-level", l_def < l_min ? l_min : l_def);
-    init_num(contxt, "@user-min", l_min);
-
     if(a_lng)
     {
         init_str(contxt, "@language", arg_get(ARG_LANGUAGE));
     }
     else
     {
-        // Don't use locale if in test mode, doing so
-        // would break tests using built in strings.
+        // Don't use locale if in test mode, doing so would break tests.
         #if defined(AMIGA) && !defined(LG_TEST)
         // Open the current default locale.
         struct Locale *loc = OpenLocale(NULL);
@@ -180,59 +146,95 @@ static void init_tooltypes(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
-// Name:        init
-// Description: Prepend / append startup and shutdown code.
-// Input:       entry_p contxt:  The start symbol, refer to the parser.
-// Return:      entry_p:         Start + startup / shutdown additions.
+// Name:        init_misc_num
+// Description: Init helper; Set misc default numerical symbols.
+// Input:       entry_p contxt: CONTXT.
+// Return:      -
 //------------------------------------------------------------------------------
-entry_p init(entry_p contxt)
+static void init_misc_num(entry_p contxt)
 {
-    // Sanity check. We need atleast one child. Anything else means out of
-    // memory since empty string == syntax error.
-    if(!c_sane(contxt, 1) || !s_sane(contxt, 0))
-    {
-        return(contxt);
-    }
+    // Set numerical values.
+    init_num(contxt, "@pretend", 0);
+    init_num(contxt, "@installer-version", (MAJOR << 16) | MINOR);
+    init_num(contxt, "@ioerr", 0);
+    init_num(contxt, "@log", 0);
+    init_num(contxt, "@yes", 0);
+    init_num(contxt, "@skip", 0);
+    init_num(contxt, "@abort", 0);
+    init_num(contxt, "@back", 0);
+    init_num(contxt, "@wild", 0);
+    init_num(contxt, "@each-type", 0);
+    init_num(contxt, "@debug", 0);
+    init_num(contxt, "@strict",
+    // In test mode, strict is default.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    0
+    #else
+    1
+    #endif
+    );
+}
 
-    // Is there a (welcome) already?
-    entry_p entry = native_exists(contxt, m_welcome);
+//------------------------------------------------------------------------------
+// Name:        init_misc_string
+// Description: Init helper; Set misc default string symbols.
+// Input:       entry_p contxt: CONTXT.
+// Return:      -
+//------------------------------------------------------------------------------
+static void init_misc_string(entry_p contxt)
+{
+    // Set strings values.
+    init_str(contxt, "@abort-button", "");
+    init_str(contxt, "@askoptions-help", "");
+    init_str(contxt, "@askchoice-help", "");
+    init_str(contxt, "@asknumber-help", "");
+    init_str(contxt, "@askstring-help", "");
+    init_str(contxt, "@askdisk-help", "");
+    init_str(contxt, "@askfile-help", "");
+    init_str(contxt, "@askdir-help", "");
+    init_str(contxt, "@copylib-help", "");
+    init_str(contxt, "@copyfiles-help", "");
+    init_str(contxt, "@makedir-help", "");
+    init_str(contxt, "@startup-help", "");
+    init_str(contxt, "@default-dest", "T:");
+    init_str(contxt, "@error-msg", "");
+    init_str(contxt, "@execute-dir", "");
+    init_str(contxt, "@special-msg", "");
+    init_str(contxt, "@each-name", "");
+    init_str(contxt, "@user-startup", "s:user-startup");
+    init_str(contxt, "fail", "fail");
+    init_str(contxt, "nofail", "nofail");
+    init_str(contxt, "oknodelete", "oknodelete");
+    init_str(contxt, "force", "force");
+    init_str(contxt, "askuser", "askuser");
+    init_str(contxt, "@null", "NULL");
+}
 
-    // If not, insert a default (welcome).
-    if(!entry)
-    {
-        // The line numbers and naming are for debugging purposes only.
-        entry = new_native
-        (
-            DBG_ALLOC(strdup("welcome")), __LINE__, m_welcome,
-            push
-            (
-                new_contxt(),
-                new_string(DBG_ALLOC(strdup("Welcome")))
-            ),
-            NUMBER
-        );
+//------------------------------------------------------------------------------
+// Name:        init_misc
+// Description: Init helper; Set misc default symbols.
+// Input:       entry_p contxt: CONTXT.
+// Return:      -
+//------------------------------------------------------------------------------
+static void init_misc(entry_p contxt)
+{
+    // Set numerical values.
+    init_misc_num(contxt);
 
-        #if defined(AMIGA) && !defined(LG_TEST)
-        // Not in test mode, else tests will break, they don't expect any
-        // default (welcome).
+    // Set string values.
+    init_misc_string(contxt);
+}
 
-        // Add to the root and reparent.
-        if(entry)
-        {
-            append(&contxt->children, entry);
-            entry->parent = contxt;
-        }
-
-        // Rotate right to make it end up on top.
-        ror(contxt->children);
-        #else
-        // We're not using this, kill it directly.
-        kill(entry);
-        #endif
-    }
-
-    // Create default error handler, it simply returns '0' without doing anything.
-    entry = new_native
+//------------------------------------------------------------------------------
+// Name:        init_error
+// Description: Init helper; Create default error handler.
+// Input:       entry_p contxt: CONTXT.
+// Return:      -
+//------------------------------------------------------------------------------
+static void init_error(entry_p contxt)
+{
+    // The default error handler returns '0' without doing anything.
+    entry_p entry = new_native
     (
         DBG_ALLOC(strdup("onerror")), __LINE__, m_procedure,
         push
@@ -266,7 +268,6 @@ entry_p init(entry_p contxt)
         DANGLE
     );
 
-    // Unless we're out of memory.
     if(entry)
     {
         // Add to the root and reparent.
@@ -276,16 +277,22 @@ entry_p init(entry_p contxt)
         // Rotate to put it on top.
         ror(contxt->children);
     }
+}
 
-    // Create default (exit). Line numbers and naming are for debugging
-    // purposes only.
-    entry = new_native(DBG_ALLOC(strdup("exit")), __LINE__, m_exit, NULL,
-                       NUMBER);
+//------------------------------------------------------------------------------
+// Name:        init_exit
+// Description: Init helper; Create default exit handler.
+// Input:       entry_p contxt: CONTXT.
+// Return:      -
+//------------------------------------------------------------------------------
+static void init_exit(entry_p contxt)
+{
+    // Line numbers and naming are for debugging purposes only.
+    entry_p entry = new_native(DBG_ALLOC(strdup("exit")), __LINE__, m_exit,
+                               NULL, NUMBER);
 
+    // Tests don't expect any default (exit).
     #if defined(AMIGA) && !defined(LG_TEST)
-    // Not in test mode, else tests will break, they don't expect any
-    // default (exit).
-
     // Add to the root and reparent.
     if(entry)
     {
@@ -295,59 +302,86 @@ entry_p init(entry_p contxt)
 
     // No rotation. Default (exit) should be last.
     #else
+    // Not used.
+    (void) contxt;
     // We're not using this, kill it directly.
     kill(entry);
     #endif
+}
+
+//------------------------------------------------------------------------------
+// Name:        init_welcome
+// Description: Init helper; Create default welcome screen.
+// Input:       entry_p contxt: CONTXT.
+// Return:      -
+//------------------------------------------------------------------------------
+static void init_welcome(entry_p contxt)
+{
+    // Is there a (welcome) already?
+    entry_p entry = native_exists(contxt, m_welcome);
+
+    // If not, insert a default (welcome).
+    if(!entry)
+    {
+        // The line numbers and naming are for debugging purposes only.
+        entry = new_native
+        (
+            DBG_ALLOC(strdup("welcome")), __LINE__, m_welcome,
+            push
+            (
+                new_contxt(),
+                new_string(DBG_ALLOC(strdup("Welcome")))
+            ),
+            NUMBER
+        );
+
+        // Tests don't expect a default (welcome).
+        #if defined(AMIGA) && !defined(LG_TEST)
+
+        // Add to the root and reparent.
+        if(entry)
+        {
+            append(&contxt->children, entry);
+            entry->parent = contxt;
+        }
+
+        // Rotate right to make it end up on top.
+        ror(contxt->children);
+        #else
+        // We're not using this, kill it directly.
+        kill(entry);
+        #endif
+    }
+}
+
+//------------------------------------------------------------------------------
+// Name:        init
+// Description: Prepend / append startup and shutdown code.
+// Input:       entry_p contxt:  The start symbol, refer to the parser.
+// Return:      entry_p:         Start + startup / shutdown additions.
+//------------------------------------------------------------------------------
+entry_p init(entry_p contxt)
+{
+    // We should have atleast one child. If we don't, we're out of memory.
+    if(!c_sane(contxt, 1) || !s_sane(contxt, 0))
+    {
+        return(contxt);
+    }
 
     // Get tooltype / cli arguments.
     init_tooltypes(contxt);
 
-    // Set misc numerical values.
-    init_num(contxt, "@pretend", 0);
-    init_num(contxt, "@installer-version", (MAJOR << 16) | MINOR);
-    init_num(contxt, "@ioerr", 0);
-    init_num(contxt, "@log", 0);
-    init_num(contxt, "@yes", 0);
-    init_num(contxt, "@skip", 0);
-    init_num(contxt, "@abort", 0);
-    init_num(contxt, "@back", 0);
-    init_num(contxt, "@wild", 0);
-    init_num(contxt, "@each-type", 0);
-    init_num(contxt, "@debug", 0);
-    init_num(contxt, "@strict",
-                     // In test mode, strict is default.
-                     #if defined(AMIGA) && !defined(LG_TEST)
-                     0
-                     #else
-                     1
-                     #endif
-                     );
+    // Create default (welcome).
+    init_welcome(contxt);
 
-    // Set misc strings values.
-    init_str(contxt, "@abort-button", "");
-    init_str(contxt, "@askoptions-help", "");
-    init_str(contxt, "@askchoice-help", "");
-    init_str(contxt, "@asknumber-help", "");
-    init_str(contxt, "@askstring-help", "");
-    init_str(contxt, "@askdisk-help", "");
-    init_str(contxt, "@askfile-help", "");
-    init_str(contxt, "@askdir-help", "");
-    init_str(contxt, "@copylib-help", "");
-    init_str(contxt, "@copyfiles-help", "");
-    init_str(contxt, "@makedir-help", "");
-    init_str(contxt, "@startup-help", "");
-    init_str(contxt, "@default-dest", "T:");
-    init_str(contxt, "@error-msg", "");
-    init_str(contxt, "@execute-dir", "");
-    init_str(contxt, "@special-msg", "");
-    init_str(contxt, "@each-name", "");
-    init_str(contxt, "@user-startup", "s:user-startup");
-    init_str(contxt, "fail", "fail");
-    init_str(contxt, "nofail", "nofail");
-    init_str(contxt, "oknodelete", "oknodelete");
-    init_str(contxt, "force", "force");
-    init_str(contxt, "askuser", "askuser");
-    init_str(contxt, "@null", "NULL");
+    // Create default (onerror).
+    init_error(contxt);
+
+    // Create default (exit).
+    init_exit(contxt);
+
+    // Set default symbols.
+    init_misc(contxt);
 
     return contxt;
 }

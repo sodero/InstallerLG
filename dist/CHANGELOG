@@ -242,3 +242,12 @@
 ===============
 - Dynamic options single branch fix (rc-ftpd).
 - @icon now contains absolute path also when started from CLI.
+- All pattern matching is now case insensitive.
+- (foreeach) pattern matching fix.
+- (askchoice) clean up fix.
+- (tooltype) ignore missing files (CManager).
+
+0.1.0-alpha.39:
+===============
+- (askdir) (newpath) fix.
+

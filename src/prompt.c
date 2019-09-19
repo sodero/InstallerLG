@@ -60,10 +60,9 @@ entry_p m_askbool(entry_p contxt)
         // Unless the parser is broken, we will have >= one child.
         entry_p *entry = choices->children;
 
-        // Pick up whatever we can, use the default value if we only have a
-        // single choice.
-        yes = *entry && *entry != end() ? str(*entry) : yes;
-        nay = *(++entry) && *entry != end() ? str(*entry) : nay;
+        // Pick up what we can, use default value if single choice.
+        yes = exists(*entry) ? str(*entry) : yes;
+        nay = exists(*(++entry)) ? str(*entry) : nay;
     }
 
     // Do we have a user specified default?
@@ -154,8 +153,7 @@ entry_p m_askchoice(entry_p contxt)
     static const char *chs[33];
 
     // Pick up a string representation of all the options.
-    for(entry_p *entry = choices->children; *entry && *entry != end() &&
-        off < 32; entry++)
+    for(entry_p *entry = choices->children; exists(*entry) && off < 32; entry++)
     {
         // Resolve once.
         char *opn = str(*entry);
@@ -199,6 +197,9 @@ entry_p m_askchoice(entry_p contxt)
         // these as well.
         off++;
     }
+
+    // Terminate list of choices.
+    chs[ndx] = NULL;
 
     // Exit if there's nothing to show.
     if(!ndx)
@@ -731,7 +732,7 @@ entry_p m_askoptions(entry_p contxt)
     int ndx = 0;
 
     // Pick up a string representation of all the options.
-    while(*chl && *chl != end() && ndx < 32)
+    while(exists(*chl) && ndx < 32)
     {
         char *cur = str(*chl);
 

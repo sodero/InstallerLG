@@ -41,7 +41,7 @@ void ror(entry_p *entry)
     int lst = 0;
 
     // Let 'lst' be the index of the last entry.
-    while(entry[lst] && entry[lst] != end())
+    while(exists(entry[lst]))
     {
         lst++;
     }
@@ -176,7 +176,7 @@ entry_p native(entry_p entry)
 static void get_fake_opt(entry_p fake, entry_p *cache)
 {
     // Translate strings to options.
-    for(size_t i = 0; fake->children[i] && fake->children[i] != end(); i++)
+    for(size_t i = 0; exists(fake->children[i]); i++)
     {
         entry_p cur = fake->children[i];
         bool del = cur->parent->id == OPT_DELOPTS;
@@ -222,8 +222,8 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 
         // If the (cache[OPT_CONFIRM] ...) option contains something that can be
         // translated into a new threshold value...
-        if(cache[OPT_CONFIRM]->children && cache[OPT_CONFIRM]->children[0] &&
-           cache[OPT_CONFIRM]->children[0] != end())
+        if(cache[OPT_CONFIRM]->children &&
+           exists(cache[OPT_CONFIRM]->children[0]))
         {
             // ...then do so.
             thres = num(cache[OPT_CONFIRM]);
@@ -249,8 +249,7 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 static void opt_fill_cache(entry_p contxt, entry_p *cache)
 {
     // Iterate over all options to fill up the cache.
-    for(size_t i = 0; contxt->children[i] &&
-        contxt->children[i] != end() && i < OPT_LAST; i++)
+    for(size_t i = 0; exists(contxt->children[i]) && i < OPT_LAST; i++)
     {
         entry_p entry = contxt->children[i];
 
@@ -337,6 +336,42 @@ entry_p opt(entry_p contxt, opt_t type)
 }
 
 //------------------------------------------------------------------------------
+// Name:        x_exists
+// Description: Existence and ownership sanity check.
+// Input:       entry_p contxt:  The context.
+// Return:      bool:            'true' if child is valid, 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool x_exists(entry_p contxt, entry_p child)
+{
+    // Make sure we have something that belongs to us.
+    return exists(child) && child->parent == contxt;
+}
+
+//------------------------------------------------------------------------------
+// Name:        x_name
+// Description: Child sanity check.
+// Input:       entry_p contxt:  The context.
+// Return:      bool:            'true' if child is valid, 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool x_name(entry_p child)
+{
+    // All but CONTXT and NUMBER are named.
+    return child->name || (child->type == CONTXT || child->type == NUMBER);
+}
+
+//------------------------------------------------------------------------------
+// Name:        x_children
+// Description: Context sanity check.
+// Input:       entry_p contxt:  The context.
+// Return:      bool:            'true' if context is valid, 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool x_children(entry_p contxt)
+{
+    // A CONTXT must have room for children.
+    return contxt->type != CONTXT || contxt->children;
+}
+
+//------------------------------------------------------------------------------
 // Name:        x_sane
 // Description: Sanity check to verify that we have the required number of
 //              children or symbols needed and that these are valid. This
@@ -348,31 +383,11 @@ entry_p opt(entry_p contxt, opt_t type)
 //------------------------------------------------------------------------------
 static bool x_sane(entry_p contxt, type_t type, size_t num)
 {
-    if(!contxt)
-    {
-        // No context.
-        dump(contxt);
-        return false;
-    }
+    // Verification of symbols or children.
+    entry_p *vec = type == NATIVE ? contxt->children : contxt->symbols;
 
-    // Assume verification of symbols.
-    entry_p *vec = contxt->symbols;
-
-    // Are we going to verify children?
-    if(type == NATIVE)
-    {
-        vec = contxt->children;
-
-        // All NATIVE have a default return value.
-        if(contxt->type == NATIVE && !contxt->resolved)
-        {
-            dump(contxt);
-            return false;
-        }
-    }
-
-    // Array needed if we're expecting more than 0 children or symbols.
-    if(num && !vec)
+    // Array of num or more, and if NATIVE, a resolved value is needed.
+    if((num && !vec) || (contxt->type == NATIVE && !contxt->resolved))
     {
         dump(contxt);
         return false;
@@ -381,37 +396,22 @@ static bool x_sane(entry_p contxt, type_t type, size_t num)
     // Expect at least num children.
     for(size_t i = 0; i < num; i++)
     {
-        // Make sure we have something.
-        if(!vec[i])
+        // Make sure we have something, and that it belongs to us.
+        if(!x_exists(contxt, vec[i]))
         {
             dump(contxt);
             return false;
         }
 
-        // It should not be a sentinel.
-        if(vec[i] == end())
-        {
-            dump(contxt);
-            return false;
-        }
-
-        // Make sure that it belongs to us.
-        if(vec[i]->parent != contxt)
-        {
-            dump(contxt);
-            return false;
-        }
-
-        // All but CONTXT / NUMBER are named.
-        if(!vec[i]->name && vec[i]->type != CONTXT &&
-            vec[i]->type != NUMBER)
+        // Make sure that names exist, if applicable.
+        if(!x_name(vec[i]))
         {
             dump(vec[i]);
             return false;
         }
 
-        // A CONTXT must have room for children.
-        if(vec[i]->type == CONTXT && !vec[i]->children)
+        // Make sure that there's room for children, if applicable.
+        if(!x_children(vec[i]))
         {
             dump(vec[i]);
             return false;
@@ -434,7 +434,7 @@ static bool x_sane(entry_p contxt, type_t type, size_t num)
 //------------------------------------------------------------------------------
 bool c_sane(entry_p contxt, size_t num)
 {
-    return x_sane(contxt, NATIVE, num);
+    return contxt && x_sane(contxt, NATIVE, num);
 }
 
 //------------------------------------------------------------------------------
@@ -449,7 +449,7 @@ bool c_sane(entry_p contxt, size_t num)
 //------------------------------------------------------------------------------
 bool s_sane(entry_p contxt, size_t num)
 {
-    return x_sane(contxt, SYMBOL, num);
+    return contxt && x_sane(contxt, SYMBOL, num);
 }
 
 //------------------------------------------------------------------------------
@@ -586,7 +586,7 @@ char *get_optstr(entry_p contxt, opt_t type)
     entry_p *child = contxt->children;
 
     // Count options of the given type.
-    while(*child && *child != end())
+    while(exists(*child))
     {
         if((*child)->type == OPTION && (*child)->id == (int32_t) type)
         {
@@ -619,7 +619,7 @@ char *get_optstr(entry_p contxt, opt_t type)
     size_t len = 1;
 
     // Evaluate options once and save strings.
-    for(size_t i = 0; i < cnt && *child && *child != end(); child++)
+    for(size_t i = 0; i < cnt && exists(*child); child++)
     {
         if((*child)->id == (int32_t) type && (*child)->type == OPTION)
         {
@@ -684,7 +684,7 @@ char *get_chlstr(entry_p contxt, bool pad)
     if(child)
     {
         // Count non context children.
-        while(child && *child && *child != end())
+        while(child && exists(*child))
         {
             cnt += ((*child)->type != CONTXT) ? 1 : 0;
             child++;
@@ -858,7 +858,7 @@ static void dump_indent(entry_p entry, int indent)
     // Pretty print all children.
     if(entry->children)
     {
-        for(entry_p *chl = entry->children; *chl && *chl != end(); chl++)
+        for(entry_p *chl = entry->children; exists(*chl); chl++)
         {
             DBG("%sChl:\t", type);
             dump_indent(*chl, indent + 1);
@@ -868,7 +868,7 @@ static void dump_indent(entry_p entry, int indent)
     // Pretty print all symbols.
     if(entry->symbols)
     {
-        for(entry_p *sym = entry->symbols; *sym && *sym != end(); sym++)
+        for(entry_p *sym = entry->symbols; exists(*sym); sym++)
         {
             DBG("%sSym:\t", type);
             dump_indent(*sym, indent + 1);
@@ -990,7 +990,7 @@ entry_p native_exists(entry_p contxt, call_t func)
     }
 
     // Iterate over all children and recur if needed.
-    for(entry_p *c = contxt->children; *c && *c != end() && !entry; c++)
+    for(entry_p *c = contxt->children; exists(*c) && !entry; c++)
     {
         if((*c)->type == NATIVE && (*c)->call == func)
         {
@@ -1020,11 +1020,59 @@ size_t num_children(entry_p *vec)
     size_t num = 0;
 
     // Count the number children.
-    while(vec && vec[num] && vec[num] != end())
+    while(vec && exists(vec[num]))
     {
         num++;
     }
 
     // Total count.
     return num;
+}
+
+//------------------------------------------------------------------------------
+// Name:        exists
+// Description: Verify that an entry exists.
+// Input:       entry_p entry: The entry to be verified.
+// Return:      bool:          If entry exists, 'true', 'false' otherwise..
+//------------------------------------------------------------------------------
+bool exists(entry_p entry)
+{
+    return entry && entry != end();
+}
+
+//------------------------------------------------------------------------------
+// Name:        str_to_userlevel
+// Description: Convert userlevel strings to numeric userlevel.
+// Input:       const char *user: Userlevel string representation.
+//              int def:          Default value used if translation fails.
+// Return:      int:              Numeric Userlevel.
+//------------------------------------------------------------------------------
+int str_to_userlevel(const char *user, int def)
+{
+    // NULL is a valid value. Return default.
+    if(!user)
+    {
+        return def;
+    }
+
+    // Case insensitve 'NOVICE'
+    if(*user == '0' || strcasecmp(user, "novice") == 0)
+    {
+        return LG_NOVICE;
+    }
+
+    // Case insensitve 'AVERAGE'
+    if(*user == '1' || strcasecmp(user, "average") == 0)
+    {
+        return LG_AVERAGE;
+    }
+
+    // Case insensitve 'EXPERT'
+    if(*user == '2' || strcasecmp(user, "expert") == 0)
+    {
+        return LG_EXPERT;
+    }
+
+    // Not a userlevel. Return default user.
+    return def;
 }

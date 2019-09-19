@@ -8,7 +8,7 @@ OBJS= arithmetic.o procedure.o exit.o alloc.o control.o error.o eval.o \
       external.o file.o information.o media.o probe.o prompt.o resource.o \
       strop.o symbol.o util.o wb.o args.o bitwise.o comparison.o gui.o init.o \
       strcasestr.o ../build/parser.o ../build/lexer.o
-CFLAGS= -c99 -Ivbcc:PosixLib/include -I. -I../build -O -DAMIGA -Dinline= -DMUIA_Dtpic_Name=0x80423d72 -DKPrintF=printf #-DLG_TEST
+CFLAGS= -c99 -Ivbcc:PosixLib/include -I. -I../build -O -dontwarn=153 -DAMIGA -DMUIA_Dtpic_Name=0x80423d72 -DKPrintF=printf #-DLG_TEST
 
 Installer: $(OBJS)
 	$(CC) -o /$@68k $(OBJS) -Lvbcc:PosixLib/AmigaOS3 -lposix -lamiga -lauto -lmieee
