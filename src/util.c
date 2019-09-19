@@ -1048,7 +1048,7 @@ bool exists(entry_p entry)
 // Return:      int:              Numeric Userlevel.
 //------------------------------------------------------------------------------
 int str_to_userlevel(const char *user, int def)
-{    
+{
     // NULL is a valid value. Return default.
     if(!user)
     {
@@ -1056,19 +1056,19 @@ int str_to_userlevel(const char *user, int def)
     }
 
     // Case insensitve 'NOVICE'
-    if(strcasecmp(user, "novice") == 0)
+    if(*user == '0' || strcasecmp(user, "novice") == 0)
     {
         return LG_NOVICE;
     }
 
     // Case insensitve 'AVERAGE'
-    if(strcasecmp(user, "average") == 0)
+    if(*user == '1' || strcasecmp(user, "average") == 0)
     {
         return LG_AVERAGE;
     }
 
     // Case insensitve 'EXPERT'
-    if(strcasecmp(user, "expert") == 0)
+    if(*user == '2' || strcasecmp(user, "expert") == 0)
     {
         return LG_EXPERT;
     }

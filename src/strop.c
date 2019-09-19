@@ -33,8 +33,8 @@ entry_p m_cat(entry_p contxt)
     // We need atleast one string.
     C_SANE(1, NULL);
 
-    // Start with a string length of 64.
-    size_t cnt = 64;
+    // Start with a string length of LG_STRLEN.
+    size_t cnt = LG_STRLEN, len = 0, cur = 0;
     char *buf = DBG_ALLOC(calloc(cnt + 1, 1));
 
     if(!buf && PANIC(contxt))
@@ -43,39 +43,30 @@ entry_p m_cat(entry_p contxt)
         R_CUR;
     }
 
-    size_t len = 0, cur = 0;
-
     // Iterate over all arguments.
     while(exists(contxt->children[cur]))
     {
-        // Resolve and get a string representation
-        // of the current argument.
+        // Resolve the current argument.
         const char *arg = str(contxt->children[cur++]);
-        size_t alen;
+        size_t alen = strlen(arg);
 
-        // If we couldn't resolve the current argument,
-        // return an empty string.
+        // Return an empty string if argument couldn't be resolved.
         if(DID_ERR)
         {
             free(buf);
             R_EST;
         }
 
-        // Get length of the current argument.
-        alen = strlen(arg);
-
-        // Is the current string empty?
+        // Next argument if the current is empty.
         if(!alen)
         {
-            // Proceed with the next argument.
             continue;
         }
 
         // Increase the total string length.
         len += strlen(arg);
 
-        // If we're about to exceed the current buffer,
-        // allocate a new one big enough.
+        // Allocate a bigger buffer if necessary.
         if(len > cnt)
         {
             char *tmp;
@@ -375,27 +366,23 @@ entry_p m_patmatch(entry_p contxt)
     C_SANE(2, NULL);
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    // Use the global buffer.
-    char *buf = get_buf(),
-         *pat = str(C_ARG(1)),
-         *mat = str(C_ARG(2));
+    // Pattern and string to match.
+    char *pat = str(C_ARG(1)), *mat = str(C_ARG(2));
 
-    LONG w = ParsePatternNoCase(pat, buf, buf_size());
+    // Try to tokenize pattern.
+    LONG w = ParsePatternNoCase(pat, get_buf(), buf_size());
 
     // Can we parse the pattern?
     if(w >= 0)
     {
-        // Use pattern matching if we have one or more wildcards, otherwise use
-        // plain strcmp().
-        int r = w ? MatchPatternNoCase(buf, mat) : !strcmp(pat, mat);
-        R_NUM(r ? 1 : 0);
+        // Use pattern matching or case insensitive string comparison.
+        int r = w ? MatchPatternNoCase(get_buf(), mat) : !strcasecmp(pat, mat);
+        R_NUM(r ? LG_TRUE : LG_FALSE);
     }
-    else
-    {
-        // We probably had a buffer overflow.
-        ERR(ERR_OVERFLOW, pat);
-        R_NUM(LG_FALSE);
-    }
+
+    // Buffer overflow.
+    ERR(ERR_OVERFLOW, pat);
+    R_NUM(LG_FALSE);
     #else
     // Testing.
     R_NUM(LG_FALSE);
@@ -502,10 +489,9 @@ entry_p m_tackon(entry_p contxt)
     // All work is done by the helper.
     char *ret = h_tackon(contxt, str(C_ARG(1)), str(C_ARG(2)));
 
-    // Did we fail?
     if(!ret)
     {
-        // Return empty string. Error codes are set by h_tackon().
+        // Empty string. Error codes are set by h_tackon().
         R_EST;
     }
 
@@ -523,9 +509,9 @@ entry_p m_tackon(entry_p contxt)
 //------------------------------------------------------------------------------
 char *h_tackon(entry_p contxt, const char *pre, const char *suf)
 {
-    // We need a path and a file.
     if(!pre || !suf)
     {
+        // Bad input.
         return NULL;
     }
 

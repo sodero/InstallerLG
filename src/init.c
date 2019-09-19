@@ -48,6 +48,7 @@ static void init_num(entry_p contxt, char *sym, int num)
         // Out of memory.
         kill(var);
         kill(val);
+        return;
     }
 
     // Initialize tuple.
@@ -80,6 +81,7 @@ static void init_str(entry_p contxt, char *sym, char *str)
         // Out of memory.
         kill(var);
         kill(val);
+        return;
     }
 
     // Initialize tuple.
@@ -366,6 +368,9 @@ entry_p init(entry_p contxt)
         return(contxt);
     }
 
+    // Get tooltype / cli arguments.
+    init_tooltypes(contxt);
+
     // Create default (welcome).
     init_welcome(contxt);
 
@@ -377,9 +382,6 @@ entry_p init(entry_p contxt)
 
     // Set default symbols.
     init_misc(contxt);
-
-    // Get tooltype / cli arguments.
-    init_tooltypes(contxt);
 
     return contxt;
 }
