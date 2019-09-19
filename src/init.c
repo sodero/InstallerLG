@@ -366,6 +366,9 @@ entry_p init(entry_p contxt)
         return(contxt);
     }
 
+    // Get tooltype / cli arguments.
+    init_tooltypes(contxt);
+
     // Create default (welcome).
     init_welcome(contxt);
 
@@ -377,9 +380,6 @@ entry_p init(entry_p contxt)
 
     // Set default symbols.
     init_misc(contxt);
-
-    // Get tooltype / cli arguments.
-    init_tooltypes(contxt);
 
     return contxt;
 }
