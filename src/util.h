@@ -73,9 +73,9 @@ int str_to_userlevel(const char *user, int def);
 #define S_SANE(N) if(!s_sane(contxt, N)) {PANIC(contxt); R_CUR;}
 
 #ifdef __AROS__
-#define B_TO_CSTR(S) AROS_BSTR_ADDR(S)
+#define B2CSTR(S) AROS_BSTR_ADDR(S)
 #else
-#define B_TO_CSTR(S) (*((char *) BADDR(S)) ? (((char *) BADDR(S)) + 1) : ((char *) BADDR(S)))
+#define B2CSTR(S) (*((char *) BADDR(S)) ? (((char *) BADDR(S)) + 1) : ((char *) BADDR(S)))
 #endif
 
 #endif
