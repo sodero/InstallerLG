@@ -28,7 +28,8 @@ ARCH := $(shell uname -m | tr -d ower)
 ARC := $(DIR)/$(NAME).$(ARCH)-$(OS).lha
 README := $(DIR)/$(NAME).$(ARCH)-$(OS).readme
 FILES := $(EXE) $(CAT) 'InstallerLG installer' 'InstallerLG installer.info'
-FILES += 'CHANGELOG' 'CHANGELOG.info' 'CREDITS' 'CREDITS.info'
+FILES += 'CHANGELOG' 'CHANGELOG.info' 'CREDITS' 'CREDITS.info' 'InstallerLG.guide'
+FILES += 'InstallerLG.guide.info'
 STEMS := $(sort $(basename $(notdir $(wildcard $(SRC)/*.c) $(wildcard $(BIN)/*.c))))
 
 #-----------------------------------------------------------------------------------#
