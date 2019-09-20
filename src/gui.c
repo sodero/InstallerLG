@@ -1354,6 +1354,15 @@ static inline IPTR IGCopyFilesAdd(Class *cls, Object *obj,
         MUIV_List_Insert_Bottom
     );
 
+    // All files are selected by default.
+    DoMethod
+    (
+        my->List, MUIM_List_Select,
+        MUIV_List_Select_All,
+        MUIV_List_Select_On,
+        NULL
+    );
+
     // The lister must be visible.
     set(my->List, MUIA_ShowMe, TRUE);
 
