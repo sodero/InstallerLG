@@ -906,28 +906,26 @@ entry_p m_getversion(entry_p contxt)
         {
             ver = h_getversion_res(file);
         }
-        else
+
+        if(ver == -1)
+        {
+            // Get file version.
+            ver = h_getversion_file(name);
+        }
+
+        // Only attempt to open library / device if file doesn't exist.
+        if(h_exists(file) == LG_NONE)
         {
             if(ver == -1)
             {
-                // Get file version.
-                ver = h_getversion_file(name);
+                // Get library version.
+                ver = h_getversion_lib(file);
             }
 
-            // Only attempt to open library / device if file doesn't exist.
-            if(h_exists(file) == LG_NONE)
+            if(ver == -1)
             {
-                if(ver == -1)
-                {
-                    // Get library version.
-                    ver = h_getversion_lib(file);
-                }
-
-                if(ver == -1)
-                {
-                    // Get device version.
-                    ver = h_getversion_dev(file);
-                }
+                // Get device version.
+                ver = h_getversion_dev(file);
             }
         }
 
