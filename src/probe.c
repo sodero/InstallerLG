@@ -342,7 +342,7 @@ entry_p m_getassign(entry_p contxt)
                                       NextDosEntry(dl, bits[i]);
                 while(dc)
                 {
-                    const char *n = B_TO_CSTR(dc->dol_Name);
+                    const char *n = B2CSTR(dc->dol_Name);
 
                     // Ignore case when looking for match.
                     if(!strcasecmp(asn, n))
@@ -433,60 +433,50 @@ entry_p m_getdevice(entry_p contxt)
     C_SANE(1, NULL);
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    // Attempt to lock path.
     BPTR lock = (BPTR) Lock(str(C_ARG(1)), ACCESS_READ);
+    struct InfoData id;
 
-    if(lock)
+    if(!lock)
     {
-        struct InfoData id;
+        // Use current directory as fallback.
+        lock = (BPTR) Lock("", ACCESS_READ);
+    }
 
-        // Get vol info from file / dir lock.
-        if(Info(lock, &id))
+    if(lock && Info(lock, &id))
+    {
+        UnLock(lock);
+        struct DosList *dl = (struct DosList *) BADDR(id.id_VolumeNode);
+
+        if(dl && dl->dol_Task)
         {
-            struct DosList *dl = (struct DosList *) id.id_VolumeNode;
-            UnLock(lock);
+            struct MsgPort *mp = dl->dol_Task;
+            ULONG msk = LDF_READ | LDF_DEVICES;
+            dl = (struct DosList *) LockDosList(msk);
 
-            if(dl)
+            while(dl && mp != dl->dol_Task)
             {
-                struct MsgPort *mp = dl->dol_Task;
-                ULONG msk = LDF_READ | LDF_DEVICES;
-
                 // Search for <path> handler in the list of devices.
-                dl = (struct DosList *) LockDosList(msk);
-
-                while(dl && mp != dl->dol_Task)
-                {
-                    dl = (struct DosList *) NextDosEntry(dl, LDF_DEVICES);
-                }
-
-                UnLockDosList(msk);
-
-                // If we found it, we also found the name of the device.
-                if(dl)
-                {
-                    const char *n = B_TO_CSTR(dl->dol_Name);
-
-                    // strdup(NULL) is undefined.
-                    if(n)
-                    {
-                        R_STR(DBG_ALLOC(strdup(n)));
-                    }
-
-                    // Unknown error.
-                    PANIC(contxt);
-                }
+                dl = (struct DosList *) NextDosEntry(dl, LDF_DEVICES);
             }
-        }
-        else
-        {
-            UnLock(lock);
+
+            // Did we find the device?
+            if(dl && B2CSTR(dl->dol_Name))
+            {
+                // Copy device name before unlocking just in case.
+                char *dev = DBG_ALLOC(strdup(B2CSTR(dl->dol_Name)));
+                UnLockDosList(msk);
+                R_STR(dev);
+            }
+
+            UnLockDosList(msk);
         }
     }
 
-    // Could not get information about <path>.
+    // Could not get <path> info.
     ERR(ERR_READ, str(C_ARG(1)));
+    #else
+    (void) contxt;
     #endif
-
     // Return empty string on failure.
     R_EST;
 }
@@ -708,7 +698,6 @@ static int h_getversion_res(const char *name)
     #if defined(AMIGA) && !defined(LG_TEST)
     return h_getversion_rsp(FindResident(name));
     #else
-    // Not used.
     (void) name;
     return -1;
     #endif
@@ -764,7 +753,6 @@ static int h_getversion_dev(const char *name)
 
     DeleteMsgPort(port);
     #else
-    // Not used.
     (void) name;
     #endif
 
@@ -795,7 +783,6 @@ static int h_getversion_lib(const char *name)
         CloseLibrary(lib);
     }
     #else
-    // Not used.
     (void) name;
     #endif
 

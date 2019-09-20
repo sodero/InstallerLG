@@ -365,7 +365,7 @@ entry_p init(entry_p contxt)
     // We should have atleast one child. If we don't, we're out of memory.
     if(!c_sane(contxt, 1) || !s_sane(contxt, 0))
     {
-        return(contxt);
+        return contxt;
     }
 
     // Get tooltype / cli arguments.

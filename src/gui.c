@@ -1354,6 +1354,15 @@ static inline IPTR IGCopyFilesAdd(Class *cls, Object *obj,
         MUIV_List_Insert_Bottom
     );
 
+    // All files are selected by default.
+    DoMethod
+    (
+        my->List, MUIM_List_Select,
+        MUIV_List_Select_All,
+        MUIV_List_Select_On,
+        NULL
+    );
+
     // The lister must be visible.
     set(my->List, MUIA_ShowMe, TRUE);
 
@@ -3040,7 +3049,7 @@ inp_t gui_init(bool scr)
         MUIA_Application_Title, tr(S_INST),
         MUIA_Application_Version, version + 1,
         MUIA_Application_Description, "App installation utility",
-        MUIA_Application_HelpFile, "Installer.guide",
+        MUIA_Application_HelpFile, "InstallerLG.guide",
         MUIA_Application_Window, Win = (Object *) NewObject(
             IGClass->mcc_Class, NULL,
             MUIA_IG_UseCustomScreen, scr ? TRUE : FALSE,

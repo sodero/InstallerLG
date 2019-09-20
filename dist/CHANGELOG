@@ -250,4 +250,6 @@
 0.1.0-alpha.39:
 ===============
 - (askdir) (newpath) fix.
+- (copyfiles) all files are selected by default in EXPERT mode.
+- MorphOS (getdevice) fix.
 
