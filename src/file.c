@@ -1082,12 +1082,16 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
         }
     }
 
-    // Preserve file permissions. On error, code will be set by h_protect_x().
-    int32_t prm = 0;
-
-    if(h_protect_get(contxt, src, &prm))
+    // Preserve permissions in strict mode.
+    if(get_num(contxt, "@strict"))
     {
-        h_protect_set(contxt, dst, prm);
+        int32_t prm = 0;
+
+        // Error code will be set by h_protect_x().
+        if(h_protect_get(contxt, src, &prm))
+        {
+            h_protect_set(contxt, dst, prm);
+        }
     }
 
     // Reset error codes if necessary.
@@ -1390,8 +1394,6 @@ entry_p m_copyfiles(entry_p contxt)
         // For all files / dirs in list, copy / create.
         for(; cur && grc == G_TRUE; cur = cur->next)
         {
-            int32_t prm = 0;
-
             // Copy file / create dir / skip if non existing.
             switch(cur->type)
             {
@@ -1404,13 +1406,24 @@ entry_p m_copyfiles(entry_p contxt)
                     break;
 
                 case LG_DIR:
-                    // Make dir and replicate source protection bits.
-                    if(!h_makedir(contxt, cur->copy, mode) ||
-                       !h_protect_get(contxt, cur->name, &prm) ||
-                       !h_protect_set(contxt, cur->copy, prm))
+                    if(!h_makedir(contxt, cur->copy, mode))
                     {
                         // Could not create directory.
                         grc = G_FALSE;
+                        break;
+                    }
+
+                    // Preserve permissions in strict mode.
+                    if(get_num(contxt, "@strict"))
+                    {
+                        int32_t prm = 0;
+
+                        if(!h_protect_get(contxt, cur->name, &prm) ||
+                           !h_protect_set(contxt, cur->copy, prm))
+                        {
+                            // Could not get / set permissons.
+                            grc = G_FALSE;
+                        }
                     }
                     break;
 
