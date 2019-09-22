@@ -48,34 +48,49 @@ inp_t gui_working(const char *msg)
 
 void gui_abort(const char *msg)
 {
-    printf("Aborting\n");
+    printf("Aborting %s\n", msg);
 }
 
-inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def,
-                 bool bck, int *ret)
-{
-    int min = 0, max=0;
-    const char **countingNames = nms;
-    while(*countingNames)
+int countList(const char** listOfStrings) {
+    int max = 0;
+    const char **countingStrings = listOfStrings;
+
+    if(!*countingStrings) return 0;
+
+    while(*countingStrings)
     {
         max++;
-        countingNames++;
+        countingStrings++;
     }
     max--;
 
+    return max;
+}
+
+void printList(const char** listOfStrings) {
+    int opt = 0;
+    const char **printingStrings = listOfStrings;
+
+    if(!*printingStrings) return;
+
+    while(*printingStrings)
+    {
+        printf("%d: %s\n", opt, *printingStrings);
+        opt++;
+        printingStrings++;
+    }
+}
+
+inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret)
+{
+    int max = countList(nms);
+
     printf("%s\n", msg);
-    printf("Choose a number between %d and %d (default is %d, H for help)\n", min, max, def);
+    printf("Choose a number between 0 and %d (default is %d, H for help)\n", max, def);
     char response[5];
     bool choseAnswer = false;
     do {
-        int opt = 0;
-        const char **printingNames = nms;
-        while(*printingNames)
-        {
-            printf("%d: %s\n", opt, *printingNames);
-            opt++;
-            printingNames++;
-        }
+        printList(nms);
         printf("Enter number > ");
         fgets(response, 12, stdin);
         if(strcmp(response, "H\n") == 0) {
@@ -89,11 +104,11 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def,
         } else {
             int res = atoi(response);
             if(res != 0) {
-                if(res >= min && res <= max) {
+                if(res >= 0 && res <= max) {
                     *ret = 1UL << res;
                     choseAnswer = true;
                 } else {
-                    printf("Number should be between %d and %d\n", min, max);
+                    printf("Number should be between 0 and %d\n", max);
                 }
             }
         }
@@ -101,14 +116,58 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def,
     return G_TRUE;
 }
 
-inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def,
-                  bool bck, int *ret)
+void printListWithSelection(const char** listOfStrings, int selected) {
+    int opt = 0;
+    const char **printingStrings = listOfStrings;
+
+    if(!*printingStrings) return;
+
+    while(*printingStrings)
+    {
+        char selectedOption = (selected & (1UL << opt)) ? 'X' : ' ';
+        printf("%d: [%c] - %s\n", opt, selectedOption, *printingStrings);
+        opt++;
+        printingStrings++;
+    }
+}
+
+inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret)
 {
+    int max = countList(nms);
+    int selected = def;
+
+    printf("%s\n", msg);
+    char response[5];
+    bool finished = false;
+    do {
+        printListWithSelection(nms, selected);
+        printf("Choose a number to toggle option (H for help, C to accept) > ");
+        printf("%d\n", selected);
+        fgets(response, 12, stdin);
+        if(strcmp(response, "H\n") == 0) {
+            printf("%s\n", hlp);
+        } else if(strcmp(response, "C\n") == 0) {
+            finished = true;
+        } else if(strcmp(response, "0\n") == 0) {
+            selected = selected ^ 1UL;
+        } else {
+            int res = atoi(response);
+            if(res != 0) {
+                if(res >= 0 && res <= max) {
+                    selected = selected ^ (1UL << res);
+                } else {
+                    printf("Number should be between 0 and %d\n", max);
+                }
+            } else {
+                printf("Number should be between 0 and %d\n", max);
+            }
+        }
+    } while(finished == false);
+    *ret = selected;
     return G_TRUE;
 }
 
-inp_t gui_bool(const char *msg, const char *hlp, const char *yes,
-               const char *nay, bool bck)
+inp_t gui_bool(const char *msg, const char *hlp, const char *yes, const char *nay, bool bck)
 {
     char response[5];
     printf("%s\n", msg);
@@ -128,11 +187,7 @@ inp_t gui_bool(const char *msg, const char *hlp, const char *yes,
     } while(true);
 }
 
-inp_t gui_string(const char *msg,
-                 const char *hlp,
-                 const char *def,
-                 bool bck,
-                 const char **ret)
+inp_t gui_string(const char *msg, const char *hlp, const char *def, bool bck, const char **ret)
 {
     printf("%s\n", msg);
     printf("Enter a string (default is '%s', H for help)\n", def);
@@ -154,13 +209,7 @@ inp_t gui_string(const char *msg,
     return G_TRUE;
 }
 
-inp_t gui_number(const char *msg,
-                 const char *hlp,
-                 int min,
-                 int max,
-                 int def,
-                 bool bck,
-                 int *ret)
+inp_t gui_number(const char *msg, const char *hlp, int min, int max, int def, bool bck, int *ret)
 {
     printf("%s\n", msg);
     printf("Choose a number between %d and %d (default is %d, H for help)\n", min, max, def);
@@ -192,15 +241,14 @@ inp_t gui_number(const char *msg,
     return G_TRUE;
 }
 
-inp_t gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min,
-                  bool npr, bool nlg)
+inp_t gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min, bool npr, bool nlg)
 {
     printf("%s", msg);
     return G_TRUE;
 }
 
 inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
-                 const char *def, bool bck, const char **ret)
+                const char *def, bool bck, const char **ret)
 {
     return G_TRUE;
 }
@@ -211,8 +259,7 @@ inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
     return G_TRUE;
 }
 
-inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst,
-                          bool cnf, bool bck)
+inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, bool cnf, bool bck)
 {
     return G_TRUE;
 }
