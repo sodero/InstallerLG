@@ -250,12 +250,46 @@ inp_t gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min, bool n
 inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
                 const char *def, bool bck, const char **ret)
 {
+    printf("%s\n", msg);
+    printf("Enter a directory path (default is '%s', H for help)\n", def);
+    char response[1024];
+    bool choseAnswer = false;
+    do {
+        printf("Enter path > ");
+        fgets(response, 1024, stdin);
+        if(strcmp(response, "H\n") == 0) {
+            printf("%s\n", hlp);
+        } else if(strcmp(response, "\n") == 0) {
+            *ret = def;
+            choseAnswer = true;
+        } else  {
+            strcpy(*ret, response);
+            choseAnswer = true;
+        }
+    } while(choseAnswer == false);
     return G_TRUE;
 }
 
 inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
                   const char *def, bool bck, const char **ret)
 {
+    printf("%s\n", msg);
+    printf("Enter a file name (default is '%s', H for help)\n", def);
+    char response[1024];
+    bool choseAnswer = false;
+    do {
+        printf("Enter file > ");
+        fgets(response, 1024, stdin);
+        if(strcmp(response, "H\n") == 0) {
+            printf("%s\n", hlp);
+        } else if(strcmp(response, "\n") == 0) {
+            *ret = def;
+            choseAnswer = true;
+        } else  {
+            strcpy(*ret, response);
+            choseAnswer = true;
+        }
+    } while(choseAnswer == false);
     return G_TRUE;
 }
 
