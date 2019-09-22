@@ -40,7 +40,7 @@ been replaced by a MUI / Zune based one.
 @{B}Notes on compatibility with the CBM implementation@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-TODO
+TODO: Working dir when executing from CLI.
 
 @ENDNODE
 
@@ -50,7 +50,10 @@ TODO
 @{B}Features beyond those of the original@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-TODO
+TODO: Multiple (effect) statements.
+TODO: Strict mode.
+TODO: Headless.
+TODO: Fake user input.
 
 @ENDNODE
 
