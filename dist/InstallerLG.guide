@@ -7,6 +7,8 @@
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{" Introduction     " LINK "Introduction"} What's InstallerLG?
+@{" Compatibility    " LINK "Compatibility"} Notes on compatibility with the CBM implementation
+@{" Extras           " LINK "Extras"} Features beyond those of the original
 @{" Contributions    " LINK "Contributions"} List of contributors
 @{" Changelog        " LINK "Changelog"} The complete changelog
 @{" License          " LINK "License"} InstallerLG software license
@@ -29,6 +31,26 @@ AmigaOS as of version 2.1. InstallerLG aims to be fully compatible with
 the original as described in the V44.10 guide. The resource limitations
 found in the Commodore implementation are gone and the original GUI has
 been replaced by a MUI / Zune based one.
+
+@ENDNODE
+
+@NODE "Compatibility" "Notes on compatibility with the CBM implementation"
+@TOC "Main"
+
+@{B}Notes on compatibility with the CBM implementation@{UB}
+@{B}-----------------------------------------------------------------------@{UB}
+
+TODO
+
+@ENDNODE
+
+@NODE "Extras" "Features beyond those of the original"
+@TOC "Main"
+
+@{B}Features beyond those of the original@{UB}
+@{B}-----------------------------------------------------------------------@{UB}
+
+TODO
 
 @ENDNODE
 
