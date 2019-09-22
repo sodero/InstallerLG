@@ -378,33 +378,36 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
     // We required a name of the option for debugging purposes.
     if(name && entry)
     {
-        // Let the type be our ID.
-        entry->id = (int) type;
-        entry->type = OPTION;
-        entry->name = name;
-
         // Dynamic options need a return value.
         entry->resolved = new_number(LG_FALSE);
 
-        // Set parent of return value.
-        entry->resolved->parent = entry;
-
-        // Adopt contents of CONTXT, if there is any.
-        if(chl && chl->type == CONTXT)
+        if(entry->resolved)
         {
-            // This is for options that contain more info than just 1 / 0, E.g
-            // (delopts) and (command).
-            move_contxt(entry, chl);
-        }
+            // Set parent of return value.
+            entry->resolved->parent = entry;
 
-        // Dynamic options must be resolved.
-        if(type == OPT_DYNOPT)
-        {
-            // Set callback. Only (if) is allowed.
-            entry->call = m_if;
-        }
+            // Let the type be our ID.
+            entry->id = (int) type;
+            entry->type = OPTION;
+            entry->name = name;
 
-        return entry;
+            // Adopt contents of CONTXT, if there is any.
+            if(chl && chl->type == CONTXT)
+            {
+                // This is for options that contain more info than just 1 / 0, E.g
+                // (delopts) and (command).
+                move_contxt(entry, chl);
+            }
+
+            // Dynamic options must be resolved.
+            if(type == OPT_DYNOPT)
+            {
+                // Set callback. Only (if) is allowed.
+                entry->call = m_if;
+            }
+
+            return entry;
+        }
     }
 
     // We need to free 'name' and 'chl' also, since we own them.
