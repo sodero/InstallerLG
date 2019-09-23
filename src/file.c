@@ -1493,6 +1493,54 @@ entry_p m_copyfiles(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_copylib_none
+// Description: Copy without overwrite. Used by m_copylib. Options must be
+//              validated before calling this function.
+// Input:       entry_p contxt:     The execution context.
+//              char *src:          Source file.
+//              char *dst:          Destination file.
+//              int ver:            Source file version.
+//              int mde:            Copy mode.
+// Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
+//------------------------------------------------------------------------------
+static inp_t h_copylib_none(entry_p contxt, char *src, char *dst, int ver,
+                            int mde)
+{
+    // All options are verified in m_copylib.
+    if(!opt(contxt, OPT_CONFIRM))
+    {
+        // No confirmation needed.
+        return h_copyfile(contxt, src, dst, false, mde);
+    }
+
+    if(ver < 0)
+    {
+        // The source file version is unknown.
+        if(h_confirm(contxt, "", "%s\n\n%s: %s\n%s\n\n%s: %s",
+           str(opt(contxt, OPT_PROMPT)), tr(S_VINS), tr(S_VUNK), tr(S_NINS),
+           tr(S_DDRW), str(opt(contxt, OPT_DEST))))
+        {
+            // User confirmed.
+            return h_copyfile(contxt, src, dst, false, mde);
+        }
+    }
+    else
+    {
+        // The source file version is known.
+        if(h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
+           str(opt(contxt, OPT_PROMPT)), tr(S_VINS), ver >> 16, ver & 0xffff,
+           tr(S_NINS), tr(S_DDRW), str(opt(contxt, OPT_DEST))))
+        {
+            // User confirmed.
+            return h_copyfile(contxt, src, dst, false, mde);
+        }
+    }
+
+    // User did not confirm.
+    return G_FALSE;
+}
+
+//------------------------------------------------------------------------------
 // (copylib (prompt..) (help..) (source..) (dest..) (newname..) (infos)
 //     (confirm) (safe) (optional <option> <option> ...) (delopts <option>
 //     <option> ...) (nogauge))
@@ -1622,39 +1670,11 @@ entry_p m_copylib(entry_p contxt)
     // return values anyway.
     inp_t grc = G_FALSE;
 
-    // Are we overwriting a file?
+    // Are we overwriting anything?
     if(type == LG_NONE)
     {
-        // No such file, copy source to the destination directory. If needed
-        // get confirmation.
-        if(confirm)
-        {
-            // Is the version of the source file unknown?
-            if(new < 0)
-            {
-                if(h_confirm(contxt, "", "%s\n\n%s: %s\n%s\n\n%s: %s",
-                    str(prompt), tr(S_VINS), tr(S_VUNK), tr(S_NINS), tr(S_DDRW),
-                    dst))
-                {
-                    grc = h_copyfile(contxt, src, name, back != false, mode);
-                }
-            }
-            // The version of the source file is known.
-            else
-            {
-                if(h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
-                    str(prompt), tr(S_VINS), new >> 16, new & 0xffff,
-                    tr(S_NINS), tr(S_DDRW), dst))
-                {
-                    grc = h_copyfile(contxt, src, name, back != false, mode);
-                }
-            }
-        }
-        else
-        {
-            // No confirmation needed.
-            grc = h_copyfile(contxt, src, name, back != false, mode);
-        }
+        // No we're not overwriting anything.
+        grc = h_copylib_none(contxt, src, name, new, mode);
     }
     else
     // It's a file.
