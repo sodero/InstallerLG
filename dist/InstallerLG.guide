@@ -7,6 +7,8 @@
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{" Introduction     " LINK "Introduction"} What's InstallerLG?
+@{" Compatibility    " LINK "Compatibility"} Notes on compatibility with the CBM implementation
+@{" Extras           " LINK "Extras"} Features beyond those of the original
 @{" Contributions    " LINK "Contributions"} List of contributors
 @{" Changelog        " LINK "Changelog"} The complete changelog
 @{" License          " LINK "License"} InstallerLG software license
@@ -29,6 +31,29 @@ AmigaOS as of version 2.1. InstallerLG aims to be fully compatible with
 the original as described in the V44.10 guide. The resource limitations
 found in the Commodore implementation are gone and the original GUI has
 been replaced by a MUI / Zune based one.
+
+@ENDNODE
+
+@NODE "Compatibility" "Notes on compatibility with the CBM implementation"
+@TOC "Main"
+
+@{B}Notes on compatibility with the CBM implementation@{UB}
+@{B}-----------------------------------------------------------------------@{UB}
+
+TODO: Working dir when executing from CLI.
+
+@ENDNODE
+
+@NODE "Extras" "Features beyond those of the original"
+@TOC "Main"
+
+@{B}Features beyond those of the original@{UB}
+@{B}-----------------------------------------------------------------------@{UB}
+
+TODO: Multiple (effect) statements.
+TODO: Strict mode.
+TODO: Headless.
+TODO: Fake user input.
 
 @ENDNODE
 
@@ -63,7 +88,7 @@ Italian translations.
 
 @{B}0.1.0-alpha.38 (2019-09-18)@{UB}
 - Dynamic options single branch fix (rc-ftpd).
-- @icon now contains absolute path also when started from CLI.
+- \@icon now contains absolute path also when started from CLI.
 - All pattern matching is now case insensitive.
 - (foreeach) pattern matching fix.
 - (askchoice) clean up fix.
@@ -92,7 +117,7 @@ Italian translations.
 - (showmedia) partial implementation (image support) (v44).
 - (closemedia) implemented (v44).
 - (tackon) parent fix (WormWars).
-- @installer-version bumped from 43.3 to 44.10
+- \@installer-version bumped from 43.3 to 44.10
 
 @{B}0.1.0-alpha.33 (2018-12-29)@{UB}
 - Improved robustness.
@@ -124,7 +149,7 @@ Italian translations.
 @{B}0.1.0-alpha.32 (2018-11-08)@{UB}
 - (askchoice) empty choices fixed.
 - Italian translation (Samir Hawamdeh).
-- LANGUAGE tooltype promoted to @language.
+- LANGUAGE tooltype promoted to \@language.
 - (copyfiles) directory (choices) fix.
 - Default (exit) fix.
 - Parent (tackon) fix.
@@ -146,13 +171,13 @@ Italian translations.
 - (database) runtime cpu detection fixed (Stefan Haubenthal).
 - (copyfiles) (choices) non strict mode (ign-addon-ods).
 - (copyfiles) (fonts) fixed.
-- (startup) @app-name fallback (OS4Emu_1.8).
+- (startup) \@app-name fallback (OS4Emu_1.8).
 
 @{B}0.1.0-alpha.29 (2018-09-28)@{UB}
 - '' handled by (exist).
 - Proper AmigaDOS return values.
 - Non naked options allowed (IconDeluxe).
-- Default @app-name set to 'Test App' (mimic CBM Installer).
+- Default \@app-name set to 'Test App' (mimic CBM Installer).
 - Fixed (abort) button.
 - (copyfiles) (choices) subdirectory fix.
 
@@ -183,7 +208,7 @@ Italian translations.
 - Help bubble fix.
 
 @{B}0.1.0-alpha.22 (2018-08-18)@{UB}
-- Default locale promoted to @language.
+- Default locale promoted to \@language.
 
 @{B}0.1.0-alpha.21 (2018-08-17)@{UB}
 - (message) abort fix.
@@ -207,7 +232,7 @@ Italian translations.
 
 @{B}0.1.0-alpha.15 (2018-08-05)@{UB}
 - Default (welcome) and (exit) fix.
-- Debug mode toggle (@debug 0/1)
+- Debug mode toggle (\@debug 0/1)
 - String delimiter fix.
 
 @{B}0.1.0-alpha.14 (2018-08-01)@{UB}
@@ -252,7 +277,7 @@ Italian translations.
 - Naked (welcome) (HWP_*)
 
 @{B}0.1.0-alpha.5 (2018-07-09)@{UB}
-- Strict mode toggle (@strict 0/1)
+- Strict mode toggle (\@strict 0/1)
 - (foreach) naked blocks allowed (FlexCat)
 
 @{B}0.1.0-alpha.4 (2018-07-08)@{UB}

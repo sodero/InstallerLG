@@ -869,8 +869,9 @@ int h_getversion_file(const char *name)
     // We're done.
     fclose(file);
 
-    // Version or -1;
-    return ver;
+    // If we have a valid version return that. Otherwise the file might be a
+    // library, try to get the library version and return that instead.
+    return ver != -1 ? ver : h_getversion_lib(name);
 }
 
 //------------------------------------------------------------------------------

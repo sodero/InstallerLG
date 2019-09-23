@@ -1082,12 +1082,16 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
         }
     }
 
-    // Preserve file permissions. On error, code will be set by h_protect_x().
-    int32_t prm = 0;
-
-    if(h_protect_get(contxt, src, &prm))
+    // Preserve permissions in strict mode.
+    if(get_num(contxt, "@strict"))
     {
-        h_protect_set(contxt, dst, prm);
+        int32_t prm = 0;
+
+        // Error code will be set by h_protect_x().
+        if(h_protect_get(contxt, src, &prm))
+        {
+            h_protect_set(contxt, dst, prm);
+        }
     }
 
     // Reset error codes if necessary.
@@ -1390,8 +1394,6 @@ entry_p m_copyfiles(entry_p contxt)
         // For all files / dirs in list, copy / create.
         for(; cur && grc == G_TRUE; cur = cur->next)
         {
-            int32_t prm = 0;
-
             // Copy file / create dir / skip if non existing.
             switch(cur->type)
             {
@@ -1404,13 +1406,24 @@ entry_p m_copyfiles(entry_p contxt)
                     break;
 
                 case LG_DIR:
-                    // Make dir and replicate source protection bits.
-                    if(!h_makedir(contxt, cur->copy, mode) ||
-                       !h_protect_get(contxt, cur->name, &prm) ||
-                       !h_protect_set(contxt, cur->copy, prm))
+                    if(!h_makedir(contxt, cur->copy, mode))
                     {
                         // Could not create directory.
                         grc = G_FALSE;
+                        break;
+                    }
+
+                    // Preserve permissions in strict mode.
+                    if(get_num(contxt, "@strict"))
+                    {
+                        int32_t prm = 0;
+
+                        if(!h_protect_get(contxt, cur->name, &prm) ||
+                           !h_protect_set(contxt, cur->copy, prm))
+                        {
+                            // Could not get / set permissons.
+                            grc = G_FALSE;
+                        }
                     }
                     break;
 
@@ -1477,6 +1490,54 @@ entry_p m_copyfiles(entry_p contxt)
 
     // We don't know if we're successsful, at this point, return what we have.
     R_CUR;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_copylib_none
+// Description: Copy without overwrite. Used by m_copylib. Options must be
+//              validated before calling this function.
+// Input:       entry_p contxt:     The execution context.
+//              char *src:          Source file.
+//              char *dst:          Destination file.
+//              int ver:            Source file version.
+//              int mde:            Copy mode.
+// Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
+//------------------------------------------------------------------------------
+static inp_t h_copylib_none(entry_p contxt, char *src, char *dst, int ver,
+                            int mde)
+{
+    // All options are verified in m_copylib.
+    if(!opt(contxt, OPT_CONFIRM))
+    {
+        // No confirmation needed.
+        return h_copyfile(contxt, src, dst, false, mde);
+    }
+
+    if(ver < 0)
+    {
+        // The source file version is unknown.
+        if(h_confirm(contxt, "", "%s\n\n%s: %s\n%s\n\n%s: %s",
+           str(opt(contxt, OPT_PROMPT)), tr(S_VINS), tr(S_VUNK), tr(S_NINS),
+           tr(S_DDRW), str(opt(contxt, OPT_DEST))))
+        {
+            // User confirmed.
+            return h_copyfile(contxt, src, dst, false, mde);
+        }
+    }
+    else
+    {
+        // The source file version is known.
+        if(h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
+           str(opt(contxt, OPT_PROMPT)), tr(S_VINS), ver >> 16, ver & 0xffff,
+           tr(S_NINS), tr(S_DDRW), str(opt(contxt, OPT_DEST))))
+        {
+            // User confirmed.
+            return h_copyfile(contxt, src, dst, false, mde);
+        }
+    }
+
+    // User did not confirm.
+    return G_FALSE;
 }
 
 //------------------------------------------------------------------------------
@@ -1609,39 +1670,11 @@ entry_p m_copylib(entry_p contxt)
     // return values anyway.
     inp_t grc = G_FALSE;
 
-    // Are we overwriting a file?
+    // Are we overwriting anything?
     if(type == LG_NONE)
     {
-        // No such file, copy source to the destination directory. If needed
-        // get confirmation.
-        if(confirm)
-        {
-            // Is the version of the source file unknown?
-            if(new < 0)
-            {
-                if(h_confirm(contxt, "", "%s\n\n%s: %s\n%s\n\n%s: %s",
-                    str(prompt), tr(S_VINS), tr(S_VUNK), tr(S_NINS), tr(S_DDRW),
-                    dst))
-                {
-                    grc = h_copyfile(contxt, src, name, back != false, mode);
-                }
-            }
-            // The version of the source file is known.
-            else
-            {
-                if(h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
-                    str(prompt), tr(S_VINS), new >> 16, new & 0xffff,
-                    tr(S_NINS), tr(S_DDRW), dst))
-                {
-                    grc = h_copyfile(contxt, src, name, back != false, mode);
-                }
-            }
-        }
-        else
-        {
-            // No confirmation needed.
-            grc = h_copyfile(contxt, src, name, back != false, mode);
-        }
+        // No we're not overwriting anything.
+        grc = h_copylib_none(contxt, src, name, new, mode);
     }
     else
     // It's a file.
