@@ -932,7 +932,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
             fclose(file);
         }
 
-        if(mde & CF_NOFAIL)
+        if(opt(contxt, OPT_NOFAIL))
         {
             // Ignore failure.
             h_log(contxt, tr(S_NCPY), src, dst);
@@ -948,7 +948,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
     if(!access(dst, F_OK) && access(dst, W_OK))
     {
         // No need to ask if only (force).
-        if((mde & CF_FORCE) && !(mde & CF_ASKUSER))
+        if(opt(contxt, OPT_FORCE) && !opt(contxt, OPT_ASKUSER))
         {
             // Unprotect file.
             chmod(dst, S_IRWXU);
@@ -956,8 +956,8 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
         else
         // Confirm if (askuser) unless we're running in novice mode and (force)
         // at the same time.
-        if((mde & CF_ASKUSER) && ((mde & CF_FORCE) ||
-            get_num(contxt, "@user-level") != LG_NOVICE))
+        if(opt(contxt, OPT_ASKUSER) && ((mde & CF_FORCE) ||
+           get_num(contxt, "@user-level") != LG_NOVICE))
         {
             if(h_confirm(contxt, "", tr(S_OWRT), dst))
             {
@@ -981,7 +981,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
         // The source handle is open.
         fclose(file);
 
-        if((mde & CF_NOFAIL) || (mde & CF_OKNODELETE))
+        if(opt(contxt, OPT_NOFAIL) || opt(contxt, OPT_OKNODELETE))
         {
             // Ignore failure.
             h_log(contxt, tr(S_NCPY), src, dst);
@@ -1036,7 +1036,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
     h_log(contxt, tr(S_CPYD), src, dst);
 
     // Are we going to copy the icon as well?
-    if(mde & CF_INFOS)
+    if(opt(contxt, OPT_INFOS))
     {
         // The source icon.
         static char icon[PATH_MAX];
