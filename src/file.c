@@ -904,7 +904,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
     // Show GUI unless we're in silent mode.
     if(!(mde & CF_SILENT))
     {
-        grc = gui_copyfiles_setcur(src, mde & CF_NOGAUGE, bck);
+        grc = gui_copyfiles_setcur(src, opt(contxt, OPT_NOGAUGE), bck);
     }
 
     // Prepare GUI unless we're in silent mode as used by copylib.
@@ -956,7 +956,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
         else
         // Confirm if (askuser) unless we're running in novice mode and (force)
         // at the same time.
-        if(opt(contxt, OPT_ASKUSER) && ((mde & CF_FORCE) ||
+        if(opt(contxt, OPT_ASKUSER) && (opt(contxt, OPT_FORCE) ||
            get_num(contxt, "@user-level") != LG_NOVICE))
         {
             if(h_confirm(contxt, "", tr(S_OWRT), dst))
@@ -1001,7 +1001,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
             // Update GUI unless we're in silent mode.
             if(!(mde & CF_SILENT))
             {
-                grc = gui_copyfiles_setcur(NULL, mde & CF_NOGAUGE, bck);
+                grc = gui_copyfiles_setcur(NULL, opt(contxt, OPT_NOGAUGE), bck);
             }
 
             if(grc == G_TRUE)
@@ -1056,7 +1056,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
 
             #if defined(AMIGA) && !defined(LG_TEST)
             // Reset icon position?
-            if(grc == G_TRUE && mde & CF_NOPOSITION)
+            if(grc == G_TRUE && opt(contxt, OPT_NOPOSITION))
             {
                 struct DiskObject *obj = (struct DiskObject *)
                     GetDiskObject(dst);
@@ -1097,7 +1097,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
     // Reset error codes if necessary.
     if(DID_ERR)
     {
-        if(mde & CF_NOFAIL)
+        if(opt(contxt, OPT_NOFAIL))
         {
             // Clear errors.
             RESET;
