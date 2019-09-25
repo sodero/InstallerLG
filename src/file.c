@@ -878,13 +878,49 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 #define CF_SILENT       (1 << 8)
 
 //------------------------------------------------------------------------------
+// Name:        h_copyfile_reset
+// Description: Reset icon position.
+// Input:       char *name: File / directory name.
+// Return:      inp_t:      G_TRUE / G_FALSE.
+//------------------------------------------------------------------------------
+static inp_t h_copyfile_reset(char *name)
+{
+    inp_t grc = G_TRUE;
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    // Read from icon, .info suffix should'nt be there.
+    struct DiskObject *obj = (struct DiskObject *) GetDiskObject(name);
+
+    if(obj)
+    {
+        // Reset icon position.
+        obj->do_CurrentX = NO_ICON_POSITION;
+        obj->do_CurrentY = NO_ICON_POSITION;
+
+        // Save changes to the .info file.
+        if(!PutDiskObject(name, obj))
+        {
+            ERR(ERR_WRITE_FILE, copy);
+            grc = G_FALSE;
+        }
+
+        FreeDiskObject(obj);
+    }
+    #else
+    printf("R:%s\n", name);
+    #endif
+
+    return grc;
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_copyfile
 // Description: Copy file. Helper used by m_copyfiles and m_copylib.
 // Input:       entry_p contxt:     The execution context.
 //              char *src:          Source file.
 //              char *dst:          Destination file.
-//              int mde:            Copy mode, see CF_*.
 //              bool bck:           Enable back mode.
+//              bool sln:           Silent mode.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
 static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln)
@@ -1051,31 +1087,11 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
             // copied as well.
             grc = h_copyfile(contxt, icon, copy, bck, sln);
 
-            #if defined(AMIGA) && !defined(LG_TEST)
             // Reset icon position?
             if(grc == G_TRUE && opt(contxt, OPT_NOPOSITION))
             {
-                struct DiskObject *obj = (struct DiskObject *)
-                    GetDiskObject(dst);
-
-                if(obj)
-                {
-                    // Reset icon position.
-                    obj->do_CurrentX = NO_ICON_POSITION;
-                    obj->do_CurrentY = NO_ICON_POSITION;
-
-                    // Save the changes to the .info file.
-                    if(!PutDiskObject(dst, obj))
-                    {
-                        // We failed for some unknown reason.
-                        ERR(ERR_WRITE_FILE, copy);
-                        grc = G_FALSE;
-                    }
-
-                    FreeDiskObject(obj);
-                }
+                grc = h_copyfile_reset(dst);
             }
-            #endif
         }
     }
 
@@ -1497,7 +1513,6 @@ entry_p m_copyfiles(entry_p contxt)
 //              char *src:          Source file.
 //              char *dst:          Destination file.
 //              int ver:            Source file version.
-//              int mde:            Copy mode.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
 static inp_t h_copylib_none(entry_p contxt, char *src, char *dst, int ver)
@@ -3452,7 +3467,6 @@ entry_p m_rename(entry_p contxt)
         // Rename if target doesn't exist.
         if(h_exists(new) == LG_NONE && !rename(old, new))
         {
-            // Success.
             h_log(contxt, tr(S_FRND), old, new);
             R_NUM(-1);
         }
@@ -3461,8 +3475,6 @@ entry_p m_rename(entry_p contxt)
         ERR(ERR_RENAME_FILE, old);
         R_NUM(LG_FALSE);
     }
-
-    // No, we're going to relabel a volume.
     #if defined(AMIGA) && !defined(LG_TEST)
     // Rename volume.
     if(!Relabel(old, new))
@@ -3471,7 +3483,6 @@ entry_p m_rename(entry_p contxt)
         R_NUM(LG_FALSE);
     }
     #endif
-
     // Successfully relabeled volume.
     h_log(contxt, tr(S_FRND), old, new);
     R_NUM(-1);
@@ -3511,19 +3522,16 @@ void h_log(entry_p contxt, const char *fmt, ...)
         // Append formatted string.
         if(cnt > 0)
         {
-            // Use whatever format and arguments we get
             va_list arg;
-
             va_start(arg, fmt);
             cnt = vfprintf(file, fmt, arg);
             va_end(arg);
         }
 
-        // Done.
         fclose(file);
     }
 
-    // Could we open the file AND write all data to it?
+    // Could we open the file and write all data to it?
     if(cnt < 0)
     {
         ERR(ERR_WRITE_FILE, get_str(contxt, "@log-file"));
