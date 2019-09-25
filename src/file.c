@@ -150,28 +150,25 @@ static int h_exists_amiga_type(const char *name)
     BPTR lock = (BPTR) Lock(name, ACCESS_READ);
     int type = LG_NONE;
 
-    if(lock)
+    // Get information from lock.
+    if(lock && Examine(lock, fib))
     {
-        // Get information from lock.
-        if(Examine(lock, fib))
+        // ST_FILE (-3) ST_LINKFILE (-4)
+        if(fib->fib_DirEntryType < 0)
         {
-            // ST_FILE (-3) ST_LINKFILE (-4)
-            if(fib->fib_DirEntryType < 0)
-            {
-                // It's a file.
-                type = LG_FILE;
-            }
-            // ST_ROOT (1) ST_USERDIR (2) ST_SOFTLINK (3) ST_LINKDIR (4)
-            else if(fib->fib_DirEntryType > 0)
-            {
-                // It's a directory.
-                type = LG_DIR;
-            }
+            // It's a file.
+            type = LG_FILE;
         }
-
-        // Release lock to file or directory.
-        UnLock(lock);
+        // ST_ROOT (1) ST_USERDIR (2) ST_SOFTLINK (3) ST_LINKDIR (4)
+        else if(fib->fib_DirEntryType > 0)
+        {
+            // It's a directory.
+            type = LG_DIR;
+        }
     }
+
+    // Release lock to file, directory or nothing.
+    UnLock(lock);
 
     FreeDosObject(DOS_FIB, fib);
     return type;
@@ -890,7 +887,7 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 //              bool bck:           Enable back mode.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
+static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln)
 {
     if((!contxt || !src || !dst) && PANIC(contxt))
     {
@@ -902,7 +899,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
     inp_t grc = G_TRUE;
 
     // Show GUI unless we're in silent mode.
-    if(!(mde & CF_SILENT))
+    if(!sln)
     {
         grc = gui_copyfiles_setcur(src, opt(contxt, OPT_NOGAUGE), bck);
     }
@@ -999,7 +996,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
         if(fwrite(buf, 1, cnt, dest) == cnt)
         {
             // Update GUI unless we're in silent mode.
-            if(!(mde & CF_SILENT))
+            if(!sln)
             {
                 grc = gui_copyfiles_setcur(NULL, opt(contxt, OPT_NOGAUGE), bck);
             }
@@ -1050,9 +1047,9 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, int mde)
             // The destination icon.
             snprintf(copy, sizeof(copy), "%s.info", dst);
 
-            // Recur without info set.
-            grc = h_copyfile(contxt, icon, copy, bck,
-                             mde & ~CF_INFOS);
+            // Recur to copy icon. If info.[...].info exist, they will all be
+            // copied as well.
+            grc = h_copyfile(contxt, icon, copy, bck, sln);
 
             #if defined(AMIGA) && !defined(LG_TEST)
             // Reset icon position?
@@ -1402,7 +1399,7 @@ entry_p m_copyfiles(entry_p contxt)
 
                 case LG_FILE:
                     grc = h_copyfile(contxt, cur->name, cur->copy,
-                                     back != false, mode);
+                                     back != false, false);
                     break;
 
                 case LG_DIR:
@@ -1503,14 +1500,13 @@ entry_p m_copyfiles(entry_p contxt)
 //              int mde:            Copy mode.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copylib_none(entry_p contxt, char *src, char *dst, int ver,
-                            int mde)
+static inp_t h_copylib_none(entry_p contxt, char *src, char *dst, int ver)
 {
     // All options are verified in m_copylib.
     if(!opt(contxt, OPT_CONFIRM))
     {
         // No confirmation needed.
-        return h_copyfile(contxt, src, dst, false, mde);
+        return h_copyfile(contxt, src, dst, false, true);
     }
 
     if(ver < 0)
@@ -1521,18 +1517,21 @@ static inp_t h_copylib_none(entry_p contxt, char *src, char *dst, int ver,
            tr(S_DDRW), str(opt(contxt, OPT_DEST))))
         {
             // User confirmed.
-            return h_copyfile(contxt, src, dst, false, mde);
+            return h_copyfile(contxt, src, dst, false, true);
         }
     }
     else
     {
+        // Major and minor version.
+        int maj = ver >> 16, min = ver & 0xffff;
+
         // The source file version is known.
         if(h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
-           str(opt(contxt, OPT_PROMPT)), tr(S_VINS), ver >> 16, ver & 0xffff,
-           tr(S_NINS), tr(S_DDRW), str(opt(contxt, OPT_DEST))))
+           str(opt(contxt, OPT_PROMPT)), tr(S_VINS), maj, min, tr(S_NINS),
+           tr(S_DDRW), str(opt(contxt, OPT_DEST))))
         {
             // User confirmed.
-            return h_copyfile(contxt, src, dst, false, mde);
+            return h_copyfile(contxt, src, dst, false, true);
         }
     }
 
@@ -1559,17 +1558,12 @@ entry_p m_copylib(entry_p contxt)
             source     = opt(contxt, OPT_SOURCE),
             dest       = opt(contxt, OPT_DEST),
             newname    = opt(contxt, OPT_NEWNAME),
-            infos      = opt(contxt, OPT_INFOS),
             confirm    = opt(contxt, OPT_CONFIRM),
             safe       = opt(contxt, OPT_SAFE),
-            nogauge    = opt(contxt, OPT_NOGAUGE),
-            noposition = opt(contxt, OPT_NOPOSITION),
             back       = opt(contxt, OPT_BACK),
             fail       = opt(contxt, OPT_FAIL),
             nofail     = opt(contxt, OPT_NOFAIL),
-            oknodelete = opt(contxt, OPT_OKNODELETE),
-            force      = opt(contxt, OPT_FORCE),
-            askuser    = opt(contxt, OPT_ASKUSER);
+            oknodelete = opt(contxt, OPT_OKNODELETE);
 
     // The (fail) (nofail) and (oknodelete) options are mutually exclusive.
     if((fail && (nofail || oknodelete)) || (nofail && (fail || oknodelete)) ||
@@ -1657,12 +1651,6 @@ entry_p m_copylib(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    // Set copy mode.
-    int mode = CF_SILENT | (infos ? CF_INFOS : 0) |
-               (noposition ? CF_NOPOSITION : 0) | (nogauge ? CF_NOGAUGE : 0) |
-               (nofail ? CF_NOFAIL : 0) | (oknodelete ? CF_OKNODELETE : 0) |
-               (force ? CF_FORCE : 0) | (askuser ? CF_ASKUSER : 0);
-
     // Get 'name' type info.
     type = h_exists(name);
 
@@ -1674,7 +1662,7 @@ entry_p m_copylib(entry_p contxt)
     if(type == LG_NONE)
     {
         // No we're not overwriting anything.
-        grc = h_copylib_none(contxt, src, name, new, mode);
+        grc = h_copylib_none(contxt, src, name, new);
     }
     else
     // It's a file.
@@ -1682,6 +1670,10 @@ entry_p m_copylib(entry_p contxt)
     {
         // Get version of existing file.
         int old = h_getversion_file(name);
+
+        // New and old major and minor version.
+        int nmj = new >> 16, nmn = new & 0xffff, omj = old >> 16,
+            omn = old & 0xffff;
 
         // Is the version of the existing file unknown?
         if(old < 0)
@@ -1700,8 +1692,8 @@ entry_p m_copylib(entry_p contxt)
                 {
                     // Both target and source file have an unknown version.
                     if(h_confirm(contxt, "", "%s\n\n%s: %s\n%s: %s\n\n%s: %s",
-                        str(prompt), tr(S_VINS), tr(S_VUNK), tr(S_VCUR),
-                        tr(S_VUNK), tr(S_DDRW), dst))
+                       str(prompt), tr(S_VINS), tr(S_VUNK), tr(S_VCUR),
+                       tr(S_VUNK), tr(S_DDRW), dst))
                     {
                         new = old + 1;
                     }
@@ -1715,9 +1707,9 @@ entry_p m_copylib(entry_p contxt)
                     // The source file is version is known, thh target version
                     // is unknown.
                     if(h_confirm(contxt, "",
-                        "%s\n\n%s: %d.%d\n%s: %s\n\n%s: %s",
-                        str(prompt), tr(S_VINS), new >> 16, new & 0xffff,
-                        tr(S_VCUR), tr(S_VUNK), tr(S_DDRW), dst))
+                       "%s\n\n%s: %d.%d\n%s: %s\n\n%s: %s", str(prompt),
+                       tr(S_VINS), nmj, nmn, tr(S_VCUR), tr(S_VUNK), tr(S_DDRW),
+                       dst))
                     {
                         new = old + 1;
                     }
@@ -1739,8 +1731,7 @@ entry_p m_copylib(entry_p contxt)
             // Is the version of the source file unknown?
             if(new < 0 && h_confirm(contxt, "",
                "%s\n\n%s: %s\n%s: %d.%d\n\n%s: %s", str(prompt), tr(S_VINS),
-               tr(S_VUNK), tr(S_VCUR), old >> 16, old & 0xffff, tr(S_DDRW),
-               dst))
+               tr(S_VUNK), tr(S_VCUR), omj, omn, tr(S_DDRW), dst))
             {
                 new = old + 1;
                 confirm = NULL;
@@ -1755,10 +1746,10 @@ entry_p m_copylib(entry_p contxt)
             if(confirm)
             {
                 if(h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
-                   str(prompt), tr(S_VINS), new >> 16, new & 0xffff, tr(S_VCUR),
-                   old >> 16, old & 0xffff, tr(S_DDRW), dst))
+                   str(prompt), tr(S_VINS), nmj, nmn, tr(S_VCUR), omj, omn,
+                   tr(S_DDRW), dst))
                 {
-                    grc = h_copyfile(contxt, src, name, back != false, mode);
+                    grc = h_copyfile(contxt, src, name, back != false, true);
                 }
             }
             else
@@ -1767,7 +1758,7 @@ entry_p m_copylib(entry_p contxt)
                 // existing one, overwrite.
                 if(new > old)
                 {
-                    grc = h_copyfile(contxt, src, name, back != false, mode);
+                    grc = h_copyfile(contxt, src, name, back != false, true);
                 }
                 else
                 {
@@ -1777,10 +1768,10 @@ entry_p m_copylib(entry_p contxt)
                     if(get_num(contxt, "@user-level") == LG_EXPERT &&
                        h_confirm(contxt, "",
                        "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s", str(prompt),
-                       tr(S_VINS), new >> 16, new & 0xffff, tr(S_VCUR),
-                       old >> 16, old & 0xffff, tr(S_DDRW), dst))
+                       tr(S_VINS), nmj, nmn, tr(S_VCUR), omj, omn, tr(S_DDRW),
+                       dst))
                     {
-                        grc = h_copyfile(contxt, src, name, back != false, mode);
+                        grc = h_copyfile(contxt, src, name, back != false, true);
                     }
                 }
             }
