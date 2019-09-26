@@ -3,7 +3,8 @@ run()
     export _INSTALLER_LG_=yes
     instfile=`mktemp Installer.tmp.XXXXXX`
     echo $1 > $instfile
-    if [ `which valgrind` ]; then
+
+    if [ `which valgrind` ] && [ -z "${LG_SMOKE}" ]; then
         l=`mktemp leak.tmp.XXXXXX`
         o=`valgrind --track-fds=yes --errors-for-leak-kinds=all --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 $prg $instfile 2>$l`
         if [ $? -ne 0 ]; then
@@ -59,7 +60,7 @@ evl()
             fi
         fi
     fi
-    if [ `which valgrind` ]; then
+    if [ `which valgrind` ] && [ -z "${LG_SMOKE}" ]; then
         if [ -n "$pre" ]; then
             eval "$pre" 2>&1
         fi
@@ -79,7 +80,6 @@ evl()
 
 prg=$1
 tst=$2
-oom=$3
 nfl=0
 nok=0
 
@@ -104,7 +104,7 @@ do
                echo "OK -> $p" 
                nok=$(( $nok + 1 ))
            elif [ $s -eq 0 ]; then
-               if [ ! -z "$oom" ]; then
+               if [ ! -z "${LG_FAIL}" ]; then
                    echo "IGNORE -> $p"
                    nok=$(( $nok + 1 ))
                else
@@ -125,7 +125,7 @@ else
 fi
 echo "--------------------------------------------"
 
-if [ `which valgrind` ]; then
+if [ `which valgrind` ] && [ -z "${LG_SMOKE}" ]; then
     echo Peak stack in $(grep -h mem_stacks_B massif.out.* | sort -h -k 2 -t '=' | tail -1 | sed -e 's/mem_stacks_B=//') bytes
     echo Peak heap in $(grep -h mem_heap_B massif.out.* | sort -h -k 2 -t '=' | tail -1 | sed -e 's/mem_heap_B=//') bytes
     rm -f massif.out.*
