@@ -60,7 +60,7 @@ evl()
             fi
         fi
     fi
-    if [ `which valgrind` ] && [ -z "${LG_SMOKE}" ]; then
+    if [ `which valgrind` ] && [ -z "${LG_SMOKE}" ] && [ -z "${LG_FAIL}" ]; then
         if [ -n "$pre" ]; then
             eval "$pre" 2>&1
         fi
