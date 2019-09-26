@@ -351,8 +351,6 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                           entry_p files, entry_p fonts, entry_p choices,
                           entry_p pattern, entry_p infos);
 //------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
 // Name:        h_choices
 // Description: Helper for h_filetree handling (choices). Generating a complete
 //              file / directory tree with source and destination tuples.
@@ -605,17 +603,8 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     {
                         // Get tree of subdirectory. Don't promote (choices),
                         // dirs will be considered files and things will break.
-                        node->next = h_filetree
-                        (
-                            contxt,
-                            n_src,
-                            n_dst,
-                            files,
-                            fonts,
-                            NULL,
-                            pattern,
-                            NULL
-                        );
+                        node->next = h_filetree(contxt, n_src, n_dst, files,
+                                                fonts, NULL, pattern, NULL);
 
                         // Fast forward to the end of the list.
                         while(node->next)
@@ -762,7 +751,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
 //              int32_t *mask:      Pointer to the result.
-// Return:      int:                On success '1', else '0'.
+// Return:      int:                LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
 static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
 {
@@ -836,7 +825,7 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
 //              LONG mask:          Protection bits
-// Return:      int:                On success '1', else '0'.
+// Return:      int:                LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
 static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 {
@@ -1179,7 +1168,7 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
 // Input:       entry_p contxt:     The execution context.
 //              char *dst:          The directory.
 //              int mode:           FIXME.
-// Return:      int:                On success '1', else '0'.
+// Return:      int:                LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
 static int h_makedir(entry_p contxt, char *dst, int mode)
 {
@@ -1810,11 +1799,40 @@ entry_p m_copylib(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_delete_info
+// Description: Delete .info file. Helper used by h_delete_file.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   File whose .info to delete.
+// Return:      int:                LG_TRUE / LG_FALSE.
+//------------------------------------------------------------------------------
+static int h_delete_info(entry_p contxt, const char *file)
+{
+    // Do we have an .info file?
+    char *info = h_suffix(file, "info");
+
+    if(h_exists(info) == LG_FILE)
+    {
+        // Set write permission and delete file.
+        if(chmod(info, S_IRWXU) || remove(info))
+        {
+            ERR(ERR_DELETE_FILE, info);
+            return LG_FALSE;
+        }
+
+        // The info file has been deleted.
+        h_log(contxt, tr(S_DLTD), info);
+    }
+
+    // Succeed if .info deleted or non existent.
+    return LG_TRUE;
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_delete_file
 // Description: Delete file. Helper used by m_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File to delete.
-// Return:      int:                On success '1', else '0'.
+// Return:      int:                LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
 static int h_delete_file(entry_p contxt, const char *file)
 {
@@ -1827,33 +1845,28 @@ static int h_delete_file(entry_p contxt, const char *file)
     // If (force) is used, give permissions so that delete can succeed.
     if(opt(C_ARG(2), OPT_FORCE))
     {
-        // No need to check to return value since errors will be caught below.
         chmod(file, S_IRWXU);
     }
     else
     {
         if(access(file, W_OK))
         {
-            // Do we need to ask for confirmation?
-            if(opt(C_ARG(2), OPT_ASKUSER))
+            if(!opt(C_ARG(2), OPT_ASKUSER))
             {
-                // Ask for confirmation if we're not running in novice mode.
-                if(get_num(contxt, "@user-level") != LG_NOVICE &&
-                   h_confirm(contxt, "", tr(S_DWRT), file))
-                {
-                    // Give permissions so that delete can succeed. No need to
-                    // check the return value since errors will be caught below.
-                    chmod(file, S_IRWXU);
-                }
-                else
-                {
-                    // Halt is set by h_confirm. Skip will result in nothing.
-                    return LG_FALSE;
-                }
+                // Fail silently just like the original.
+                return LG_FALSE;
+            }
+
+            // Ask for confirmation if we're not running in novice mode.
+            if(get_num(contxt, "@user-level") != LG_NOVICE &&
+               h_confirm(contxt, "", tr(S_DWRT), file))
+            {
+                // Give permissions so that delete can succeed.
+                chmod(file, S_IRWXU);
             }
             else
             {
-                // Fail silently just like the original.
+                // Halt is set by h_confirm. Skip will result in nothing.
                 return LG_FALSE;
             }
         }
@@ -1870,31 +1883,8 @@ static int h_delete_file(entry_p contxt, const char *file)
     // The file has been deleted.
     h_log(contxt, tr(S_DLTD), file);
 
-    // Shall we delete the info file as well?
-    if(!opt(C_ARG(2), OPT_INFOS))
-    {
-        // No, we're done.
-        return LG_TRUE;
-    }
-
-    // Do we have a corresponding .info file?
-    char *info = h_suffix(file, "info");
-
-    if(h_exists(h_suffix(file, "info")) == LG_FILE)
-    {
-        // Set write permission and delete file.
-        if(chmod(info, S_IRWXU) || remove(info))
-        {
-            ERR(ERR_DELETE_FILE, info);
-            return LG_FALSE;
-        }
-
-        // The info file has been deleted.
-        h_log(contxt, tr(S_DLTD), info);
-    }
-
-    // All done.
-    return LG_TRUE;
+    // Delete .info file or LG_TRUE.
+    return opt(C_ARG(2), OPT_INFOS) ? h_delete_info(contxt, file) : LG_TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -1902,7 +1892,7 @@ static int h_delete_file(entry_p contxt, const char *file)
 // Description: Delete directory. Helper used by m_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *name:   Directory to delete.
-// Return:      int:                On success '1', else '0'.
+// Return:      int:                LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
 static int h_delete_dir(entry_p contxt, const char *name)
 {
@@ -2056,7 +2046,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
 // Description: Delete file / dir matching pattern. Helper used by m_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *pat:    Pattern.
-// Return:      int:                On success '1', else '0'.
+// Return:      int:                LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
 static int h_delete_pattern(entry_p contxt, const char *pat)
 {
@@ -2776,12 +2766,10 @@ entry_p m_startup(entry_p contxt)
     }
 
     const char *fln = get_str(contxt, "@user-startup");
-    const size_t len = strlen(";BEGIN ") + strlen(app),
-                 ins = strlen(cmd) + 2;
+    const size_t len = strlen(";BEGIN ") + strlen(app), ins = strlen(cmd) + 2;
 
     char *pre = DBG_ALLOC(calloc(len + 1, 1)),
-         *pst = DBG_ALLOC(calloc(len + 1, 1)),
-         *buf = NULL;
+         *pst = DBG_ALLOC(calloc(len + 1, 1)), *buf = NULL;
 
     if(pre && pst)
     {
@@ -3039,7 +3027,7 @@ entry_p m_textfile(entry_p contxt)
     // Assume success.
     D_NUM = LG_TRUE;
 
-    // Append to empty file. Strange but it's how the CBM installer works.
+    // Append to empty file. Strange, but it's how the CBM installer works.
     if(post)
     {
         // Gather and merge all (append) strings.
@@ -3068,7 +3056,7 @@ entry_p m_textfile(entry_p contxt)
     }
 
     // Include a file at the end of the new file (append proper)?
-    if(include && D_NUM)
+    if(include && D_NUM == LG_TRUE)
     {
         // File to copy.
         const char *incl = str(include);
