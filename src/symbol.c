@@ -196,9 +196,6 @@ entry_p m_symbolset(entry_p contxt)
                     ret = res;
                     break;
                 }
-
-                // Iterate over all symbols in this context.
-                sym++;
             }
 
             if(ret == res)
