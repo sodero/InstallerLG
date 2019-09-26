@@ -3456,8 +3456,7 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
     return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesSetCur, cur, nga, bck);
     #else
     (void) cur;
-    (void) nga;
-    (void) bck;
+    printf("N%dB%d\n", nga, bck);
     return G_TRUE;
     #endif
 }

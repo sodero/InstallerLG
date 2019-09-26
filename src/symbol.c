@@ -16,6 +16,41 @@
 #include <string.h>
 
 //------------------------------------------------------------------------------
+// Name:        h_copydeep
+// Description: Do a deep copy of an entry.
+// Input:       entry_p entry:      The entry to be copied.
+// Return:      entry_p:               If confirmed 'true' else 'false'. Both
+//                                  skip and abort will return 'false'.
+//------------------------------------------------------------------------------
+static entry_p h_copydeep(entry_p entry)
+{
+    entry_p copy = DBG_ALLOC(malloc(sizeof(entry_t)));
+
+    if(!copy && PANIC(entry))
+    {
+        // Out of memory.
+        return NULL;
+    }
+
+    // Do a straight copy of everything.
+    memmove(copy, entry, sizeof(entry_t));
+
+    // Copy string value if there is one.
+    if(entry->name)
+    {
+        copy->name = DBG_ALLOC(strdup(entry->name));
+
+        if(!copy->name && PANIC(entry))
+        {
+            // Out of memory.
+            free(copy);
+        }
+    }
+
+    return copy;
+}
+
+//------------------------------------------------------------------------------
 // (set <varname> <value> [<varname2> <value2> ...])
 //      sets the variable `<varname>' to the indicated value.
 //
@@ -40,19 +75,17 @@ entry_p m_set(entry_p contxt)
         entry_p rhs = resolve(*val);
         entry_p dst = global(contxt);
 
-        // Did we manage to resolve the rhs?
         if(DID_ERR)
         {
-            // Ignore the rest of the tuples.
+            // Ignore the rest of the tuples if resolve failed.
             break;
         }
 
-        // Are we within the contxt of a custom procedure?
         if(cus)
         {
-            // If so determine if this particular symbol is one of the local
-            // ones (arguments), if it is, rather than the global context, the
-            // local context should be the target.
+            // If we are within the contxt of a custom procedure? determine if
+            // this particular symbol is one of the local ones (arguments), if
+            // it is, the local context should be the target.
             for(entry_p *cur = cus->symbols; cur && exists(*cur); cur++)
             {
                 // As always with symbols, ignore the case.
@@ -65,28 +98,12 @@ entry_p m_set(entry_p contxt)
         }
 
         // Create a copy of the contents of the rhs.
-        entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
+        entry_p res = h_copydeep(rhs);
 
-        if(!res && PANIC(contxt))
+        if(!res)
         {
-            // Out of memory.
+            // PANIC in h_copydeep() if we're  out of memory.
             break;
-        }
-
-        // Do a deep copy of the value.
-        memmove(res, rhs, sizeof(entry_t));
-
-        // Copy name string if such exists.
-        if(res->name)
-        {
-            res->name = DBG_ALLOC(strdup(res->name));
-
-            if(!res->name && PANIC(contxt))
-            {
-                // Out of memory.
-                free(res);
-                break;
-            }
         }
 
         // In non strict mode we might have a DANGLE on the right hand side if a
@@ -106,7 +123,6 @@ entry_p m_set(entry_p contxt)
         push(dst, *sym);
         (*sym)->parent = contxt;
 
-        // Are there any more tuples?
         if(*(++sym) == *(++val))
         {
             // We're at the end of the list.
@@ -143,52 +159,32 @@ entry_p m_symbolset(entry_p contxt)
             const char *lhs = str(*cur++);
             entry_p rhs = resolve(*cur++);
 
-            // Did we manage to resolve the rhs?
             if(DID_ERR)
             {
-                // Error already set by resolve().
+                // Error set by resolve() if rhs is unresolvable.
                 R_CUR;
             }
 
             // Create a copy of the evaluated rhs.
-            entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
+            entry_p res = h_copydeep(rhs);
 
-            if(!res && PANIC(contxt))
+            if(!res)
             {
-                // Out of memory.
+                // PANIC in h_copydeep() if we're  out of memory.
                 R_CUR;
             }
 
-            entry_p *sym = contxt->symbols;
-            memmove(res, rhs, sizeof(entry_t));
-
-            // Do a deep copy if necessary.
-            if(res->name)
-            {
-                res->name = DBG_ALLOC(strdup(res->name));
-
-                if(!res->name && PANIC(contxt))
-                {
-                    // Out of memory.
-                    free(res);
-                    break;
-                }
-            }
-
-            // In non strict mode we might have a
-            // DANGLE on the right hand side if a
-            // bogus resolve was done. To prevent
-            // leaks we need to typecast the rhs.
+            // In non strict mode we might have a DANGLE on the right hand side
+            // if a bogus resolve was done. Typecast rhs to prevent leaks.
             if(res->type == DANGLE)
             {
-                // Typecast to string. The string
-                // will be empty. If evaluated as
+                // Typecast to string. The string will be empty. If evaluated as
                 // a number, it will be zero.
                 res->type = STRING;
             }
 
             // Do we already have a symbol with this name?
-            while(exists(*sym))
+            for(entry_p *sym = contxt->symbols; exists(*sym); sym++)
             {
                 // If true, replace its resolved value with the copy of the rhs.
                 if(!strcasecmp((*sym)->name, lhs))
@@ -205,10 +201,9 @@ entry_p m_symbolset(entry_p contxt)
                 sym++;
             }
 
-            // Does this symbol exist already?
             if(ret == res)
             {
-                // Next tuple.
+                // Pick the next tuple this symbol already exists.
                 continue;
             }
 

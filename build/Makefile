@@ -90,18 +90,27 @@ cat:
 .PHONY: test
 test: $(EXE)
 ifneq ($(AMIGA),true)
-	@$(RM) $(EXE).tmp.* leak.* err.* massif.*
-	@sh ../test/run.sh ./$(EXE) ../test $(REXTRA)
+	@chmod a+rwx _?* || true
+	@$(RM) -R $(EXE).tmp.* leak.* err.* massif.* _?*
+	@sh ../test/run.sh ./$(EXE) ../test
 else
-	@echo "[SKIPPED] @sh ../test/run.sh ./$(EXE) ../test $(REXTRA)"
+	@echo "[SKIPPED] @sh ../test/run.sh ./$(EXE) ../test"
 endif
+
+.PHONY: smoke
+smoke:
+	@LG_SMOKE=yes $(MAKE) test
+
+.PHONY: fail
+fail:
+	@LG_FAIL=yes $(MAKE) test
 
 .PHONY: install
 install:
-	cd ../dist && $(MAKE) && \
-	Installer "InstallerLG installer"
+	@cd ../dist && $(MAKE) && \
+	./Installer "InstallerLG installer"
 
 .PHONY: clean
 clean:
-	chmod a+rwx _?* || true
-	$(RM) -R Catalogs *.o $(EXE) $(EXE).tmp.* leak.* err.* massif.* _?*
+	@chmod a+rwx _?* || true
+	@$(RM) -R Catalogs *.o $(EXE) $(EXE).tmp.* leak.* err.* massif.* _?*
