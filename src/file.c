@@ -863,8 +863,6 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
 #define CF_OKNODELETE   (1 << 4)
 #define CF_FORCE        (1 << 5)
 #define CF_ASKUSER      (1 << 6)
-#define CF_NOPOSITION   (1 << 7)
-#define CF_SILENT       (1 << 8)
 
 //------------------------------------------------------------------------------
 // Name:        h_copyfile_reset
