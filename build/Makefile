@@ -90,7 +90,7 @@ cat:
 .PHONY: test
 test: $(EXE)
 ifneq ($(AMIGA),true)
-	@chmod a+rwx _?* || true
+	@chmod a+rwx _?* 2> /dev/null || true
 	@$(RM) -R $(EXE).tmp.* leak.* err.* massif.* _?*
 	@sh ../test/run.sh ./$(EXE) ../test
 else
@@ -112,5 +112,5 @@ install:
 
 .PHONY: clean
 clean:
-	@chmod a+rwx _?* || true
+	@chmod a+rwx _?* 2> /dev/null || true
 	@$(RM) -R Catalogs *.o $(EXE) $(EXE).tmp.* leak.* err.* massif.* _?*
