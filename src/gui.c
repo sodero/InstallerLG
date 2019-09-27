@@ -3456,7 +3456,14 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
     return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesSetCur, cur, nga, bck);
     #else
     (void) cur;
-    printf("N%dB%d\n", nga, bck);
+    static bool done;
+    if(!done)
+    {
+        // We can't do this more than once. If we do, tests will depend on the
+        // order of files and directories on the host system.
+        printf("N%dB%d\n", nga, bck);
+        done = true;
+    }
     return G_TRUE;
     #endif
 }
