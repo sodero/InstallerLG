@@ -44,6 +44,7 @@ static entry_p h_copydeep(entry_p entry)
         {
             // Out of memory.
             free(copy);
+            return NULL;
         }
     }
 
@@ -102,7 +103,7 @@ entry_p m_set(entry_p contxt)
 
         if(!res)
         {
-            // PANIC in h_copydeep() if we're  out of memory.
+            // PANIC in h_copydeep() if we're out of memory.
             break;
         }
 
