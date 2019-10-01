@@ -82,6 +82,7 @@ Italian translations.
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{B}0.1.0-alpha.39 (2019-not-yet)@{UB}
+- Improved robustness.
 - (askdir) (newpath) fix.
 - (copyfiles) all files are selected by default in EXPERT mode.
 - MorphOS (getdevice) fix.
