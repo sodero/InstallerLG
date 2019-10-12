@@ -664,7 +664,7 @@ static int h_getversion_rsp(struct Resident *rsp)
     if(!rsp)
     {
         // Invalid.
-        return -1;
+        return LG_NOVER;
     }
 
     // Major and revision.
@@ -699,7 +699,7 @@ static int h_getversion_res(const char *name)
     return h_getversion_rsp(FindResident(name));
     #else
     (void) name;
-    return -1;
+    return LG_NOVER;
     #endif
 }
 
@@ -712,7 +712,7 @@ static int h_getversion_res(const char *name)
 static int h_getversion_dev(const char *name)
 {
     // Failure.
-    int ver = -1;
+    int ver = LG_NOVER;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct MsgPort *port = CreateMsgPort();
@@ -769,7 +769,7 @@ static int h_getversion_dev(const char *name)
 static int h_getversion_lib(const char *name)
 {
     // Assume failure.
-    int ver = -1;
+    int ver = LG_NOVER;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct Library *lib = OpenLibrary(name, 0);
@@ -818,7 +818,7 @@ int h_getversion_file(const char *name)
     #endif
 
     // Invalid version.
-    int ver = -1;
+    int ver = LG_NOVER;
 
     if(!file)
     {
@@ -871,7 +871,7 @@ int h_getversion_file(const char *name)
 
     // If we have a valid version return that. Otherwise the file might be a
     // library, try to get the library version and return that instead.
-    return ver != -1 ? ver : h_getversion_lib(name);
+    return ver != LG_NOVER ? ver : h_getversion_lib(name);
 }
 
 //------------------------------------------------------------------------------
@@ -900,7 +900,7 @@ entry_p m_getversion(entry_p contxt)
         #endif
 
         // Invalid version.
-        int ver = -1;
+        int ver = LG_NOVER;
 
         // Get resident module version.
         if(opt(contxt, OPT_RESIDENT))
@@ -908,7 +908,7 @@ entry_p m_getversion(entry_p contxt)
             ver = h_getversion_res(file);
         }
 
-        if(ver == -1)
+        if(ver == LG_NOVER)
         {
             // Get file version.
             ver = h_getversion_file(name);
@@ -917,13 +917,13 @@ entry_p m_getversion(entry_p contxt)
         // Only attempt to open library / device if file doesn't exist.
         if(h_exists(file) == LG_NONE)
         {
-            if(ver == -1)
+            if(ver == LG_NOVER)
             {
                 // Get library version.
                 ver = h_getversion_lib(file);
             }
 
-            if(ver == -1)
+            if(ver == LG_NOVER)
             {
                 // Get device version.
                 ver = h_getversion_dev(file);
@@ -931,7 +931,7 @@ entry_p m_getversion(entry_p contxt)
         }
 
         // Failure (0) or version / revision.
-        R_NUM((ver == -1) ? 0 : ver);
+        R_NUM((ver == LG_NOVER) ? 0 : ver);
     }
 
     #if defined(AMIGA) && !defined(LG_TEST)
