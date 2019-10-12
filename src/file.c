@@ -887,7 +887,6 @@ static inp_t h_copyfile_reset(char *name)
         // Save changes to the .info file.
         if(!PutDiskObject(name, obj))
         {
-            ERR(ERR_WRITE_FILE, copy);
             grc = G_FALSE;
         }
 

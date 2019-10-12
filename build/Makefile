@@ -3,7 +3,7 @@
 #---------------------------------------------------------------------------------#
 VPATH := ../src
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
-OS := $(shell uname)
+OS ?= $(shell uname)
 DATE := $(shell date +%d.%m.%Y || echo Unknown)
 EXE := Installer
 
@@ -19,7 +19,7 @@ ifeq ($(OS),Darwin)
 CGEN = -g -std=c99
 CWRN += -Werror -Weverything -Wno-format-nonliteral -Wno-date-time
 else
-CC := gcc
+CC ?= gcc
 AMIGA = true
 CWRN = -Wall -Wextra -Wno-pointer-sign
 CGEN = -Os -std=gnu99 -DAMIGA
