@@ -8,9 +8,9 @@ else
 SED := sed
 endif
 ifeq ($(OS),MorphOS)
-LHAFLAGS := a -r
+LHAFLAGS := -0r a
 else
-LHAFLAGS := a
+LHAFLAGS := a0
 endif
 
 #-----------------------------------------------------------------------------------#

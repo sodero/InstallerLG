@@ -1492,52 +1492,280 @@ entry_p m_copyfiles(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_copylib_none
-// Description: Copy without overwrite. Used by m_copylib. Options must be
-//              validated before calling this function.
+// Name:        h_copylib_unknown_none
+// Description: Prompt and copy without overwriting anything. Source version is
+//              unknown. Options must be validated before calling this function.
+//              Used by h_copylib_none.
+//
+// Prompt example:
+//
+// Version to install: Unknown version
+// There is no currently installed version
+//
 // Input:       entry_p contxt:     The execution context.
 //              char *src:          Source file.
 //              char *dst:          Destination file.
-//              int ver:            Source file version.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copylib_none(entry_p contxt, char *src, char *dst, int ver)
+static inp_t h_copylib_unknown_none(entry_p contxt, char *src, char *dst)
 {
-    // All options are verified in m_copylib.
+    if(!h_confirm(contxt, "", "%s\n\n%s: %s\n%s\n\n%s: %s",
+       str(opt(contxt, OPT_PROMPT)), tr(S_VINS), tr(S_VUNK), tr(S_NINS),
+       tr(S_DDRW), str(opt(contxt, OPT_DEST))))
+    {
+        // No confirmation.
+        return G_FALSE;
+    }
+
+    // User confirmed. Go ahead and copy file.
+    return h_copyfile(contxt, src, dst, false, true);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_copylib_known_none
+// Description: Prompt and copy without overwriting anything. Source version is
+//              known. Options must be validated before calling this function.
+//              Used by h_copylib_none.
+//
+// Prompt example:
+//
+// Version to install: 12.3
+// There is no currently installed version
+//
+// Input:       entry_p contxt:     The execution context.
+//              char *src:          Source file.
+//              char *dst:          Destination file.
+//              int ver:            Source version.
+// Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
+//------------------------------------------------------------------------------
+static inp_t h_copylib_known_none(entry_p contxt, char *src, char *dst, int ver)
+{
+    // Major and minor version.
+    int maj = ver >> 16, min = ver & 0xffff;
+
+    if(!h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
+       str(opt(contxt, OPT_PROMPT)), tr(S_VINS), maj, min, tr(S_NINS),
+       tr(S_DDRW), str(opt(contxt, OPT_DEST))))
+    {
+        // No confirmation.
+        return G_FALSE;
+    }
+
+    // User confirmed. Go ahead and copy file.
+    return h_copyfile(contxt, src, dst, false, true);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_copylib_none
+// Description: Prompt and copy without overwriting anything. Source version
+//              can be either known or unknown. Options must be validated before
+//              calling this function.
+//
+// Input:       entry_p contxt:     The execution context.
+//              char *src:          Source file.
+//              char *dst:          Destination file.
+// Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
+//------------------------------------------------------------------------------
+static inp_t h_copylib_none(entry_p contxt, char *src, char *dst)
+{
     if(!opt(contxt, OPT_CONFIRM))
     {
         // No confirmation needed.
         return h_copyfile(contxt, src, dst, false, true);
     }
 
-    if(ver < 0)
-    {
-        // The source file version is unknown.
-        if(h_confirm(contxt, "", "%s\n\n%s: %s\n%s\n\n%s: %s",
-           str(opt(contxt, OPT_PROMPT)), tr(S_VINS), tr(S_VUNK), tr(S_NINS),
-           tr(S_DDRW), str(opt(contxt, OPT_DEST))))
-        {
-            // User confirmed.
-            return h_copyfile(contxt, src, dst, false, true);
-        }
-    }
-    else
-    {
-        // Major and minor version.
-        int maj = ver >> 16, min = ver & 0xffff;
+    // Get source file version.
+    int ver = h_getversion_file(src);
 
-        // The source file version is known.
-        if(h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
-           str(opt(contxt, OPT_PROMPT)), tr(S_VINS), maj, min, tr(S_NINS),
-           tr(S_DDRW), str(opt(contxt, OPT_DEST))))
-        {
-            // User confirmed.
-            return h_copyfile(contxt, src, dst, false, true);
-        }
+    if(ver == LG_NOVER)
+    {
+        // Unknown source version.
+        return h_copylib_unknown_none(contxt, src, dst);
     }
 
-    // User did not confirm.
-    return G_FALSE;
+    // Source version is known.
+    return h_copylib_known_none(contxt, src, dst, ver);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_copylib_unknown_unknown
+// Description: Prompt and copy with file overwrite. Both destination and
+//              source version are unknown. Options must be validated before
+//              calling this function.
+//
+// Prompt example:
+//
+// Version to install: Unknown version
+// Version currently installed: Unknown version
+//
+// Input:       entry_p contxt:     The execution context.
+//              char *src:          Source file.
+//              char *dst:          Destination file.
+// Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
+//------------------------------------------------------------------------------
+static inp_t h_copylib_unknown_unknown(entry_p contxt, char *src, char *dst)
+{
+    if(!h_confirm(contxt, "", "%s\n\n%s: %s\n%s: %s\n\n%s: %s",
+       str(opt(contxt, OPT_PROMPT)), tr(S_VINS), tr(S_VUNK), tr(S_VCUR),
+       tr(S_VUNK), tr(S_DDRW), str(opt(contxt, OPT_DEST))))
+    {
+        // No confirmation.
+        return G_FALSE;
+    }
+
+    // User confirmed. Go ahead and copy file.
+    return h_copyfile(contxt, src, dst, false, true);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_copylib_unknown_known
+// Description: Prompt and copy with file overwrite. Destination version is
+//              known but source version is unknown. Options must be validated
+//              before calling this function.
+//
+// Prompt example:
+//
+// Version to install: Unknown version
+// Version currently installed: 12.3
+//
+// Input:       entry_p contxt:     The execution context.
+//              char *src:          Source file.
+//              char *dst:          Destination file.
+//              int ver:            Destination file version.
+// Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
+//------------------------------------------------------------------------------
+static inp_t h_copylib_unknown_known(entry_p contxt, char *src, char *dst,
+                                     int ver)
+{
+    // Destination major and minor version.
+    int maj = ver >> 16, min = ver & 0xffff;
+
+    if(!h_confirm(contxt, "", "%s\n\n%s: %s\n%s: %d.%d\n\n%s: %s",
+       str(opt(contxt, OPT_PROMPT)), tr(S_VINS), tr(S_VUNK), tr(S_VCUR),
+       maj, min, tr(S_DDRW), str(opt(contxt, OPT_DEST))))
+    {
+        // No confirmation.
+        return G_FALSE;
+    }
+
+    // User confirmed. Go ahead and copy file.
+    return h_copyfile(contxt, src, dst, false, true);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_copylib_known_unknown
+// Description: Prompt and copy with file overwrite. Source version is known but
+//              destination version is unknown. Options must be validated before
+//              calling this function.
+//
+// Prompt example:
+//
+// Version to install: 12.3
+// Version currently installed: Unknown version
+//
+// Input:       entry_p contxt:     The execution context.
+//              char *src:          Source file.
+//              char *dst:          Destination file.
+//              int ver:            Source file version.
+// Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
+//------------------------------------------------------------------------------
+static inp_t h_copylib_known_unknown(entry_p contxt, char *src, char *dst,
+                                     int ver)
+{
+    // Source major and minor version.
+    int maj = ver >> 16, min = ver & 0xffff;
+
+    if(!h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s: %s\n\n%s: %s",
+       str(opt(contxt, OPT_PROMPT)), tr(S_VINS), maj, min, tr(S_VCUR),
+       tr(S_VUNK), tr(S_DDRW), str(opt(contxt, OPT_DEST))))
+    {
+        // No confirmation.
+        return G_FALSE;
+    }
+
+    // User confirmed. Go ahead and copy file.
+    return h_copyfile(contxt, src, dst, false, true);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_copylib_known_known
+// Description: Prompt and copy with file overwrite. Source and destination
+//              versions are known. Options must be validated before calling
+//              this function.
+//
+// Prompt example:
+//
+// Version to install: 12.3
+// Version currently installed: 45.6
+//
+// Input:       entry_p contxt:     The execution context.
+//              char *src:          Source file.
+//              char *dst:          Destination file.
+//              int old:            Source file version.
+//              int new:            Destination file version.
+// Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
+//------------------------------------------------------------------------------
+static inp_t h_copylib_known_known(entry_p contxt, char *src, char *dst,
+                                   int old, int new)
+{
+    // Source and destination files major and minor versions.
+    int nmj = new >> 16, nmn = new & 0xffff, omj = old >> 16,
+        omn = old & 0xffff;
+
+    if(!h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
+       str(opt(contxt, OPT_PROMPT)), tr(S_VINS), nmj, nmn, tr(S_VCUR), omj, omn,
+       tr(S_DDRW), str(opt(contxt, OPT_DEST))))
+    {
+        // No confirmation.
+        return G_FALSE;
+    }
+
+    // User confirmed. Go ahead and copy file.
+    return h_copyfile(contxt, src, dst, false, true);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_copylib_file
+// Description: Copy with file overwrite. Used by m_copylib. Options must be
+//              validated before calling this function. If necessary user will
+//              be prompted for confirmation.
+// Input:       entry_p contxt:     The execution context.
+//              char *src:          Source file.
+//              char *dst:          Destination file.
+//              int ver:            Source file version.
+// Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
+//------------------------------------------------------------------------------
+static inp_t h_copylib_file(entry_p contxt, char *src, char *dst)
+{
+    // Get version of source and destination file.
+    int old = h_getversion_file(dst), new = h_getversion_file(src);
+
+    if(!opt(contxt, OPT_CONFIRM))
+    {
+        // No confirmation. Copy file unless it's older than the destination.
+        return new >= old ? h_copyfile(contxt, src, dst, false, true) : G_FALSE;
+    }
+
+    if(new == old && new == LG_NOVER)
+    {
+        // Both source and destination versions are unknown.
+        return h_copylib_unknown_unknown(contxt, src, dst);
+    }
+
+    if(new == LG_NOVER)
+    {
+        // Destination version is known, source version is not.
+        return h_copylib_unknown_known(contxt, src, dst, old);
+    }
+
+    if(old == LG_NOVER)
+    {
+        // Source version is known, destination version is not.
+        return h_copylib_known_unknown(contxt, src, dst, new);
+    }
+
+    // Source and destination versions are known but differ.
+    return h_copylib_known_known(contxt, src, dst, old, new);
 }
 
 //------------------------------------------------------------------------------
@@ -1559,9 +1787,7 @@ entry_p m_copylib(entry_p contxt)
             source     = opt(contxt, OPT_SOURCE),
             dest       = opt(contxt, OPT_DEST),
             newname    = opt(contxt, OPT_NEWNAME),
-            confirm    = opt(contxt, OPT_CONFIRM),
             safe       = opt(contxt, OPT_SAFE),
-            back       = opt(contxt, OPT_BACK),
             fail       = opt(contxt, OPT_FAIL),
             nofail     = opt(contxt, OPT_NOFAIL),
             oknodelete = opt(contxt, OPT_OKNODELETE);
@@ -1574,6 +1800,7 @@ entry_p m_copylib(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
+    // FIXME - Ignore the dox and mimic the CBM impl. instead.
     // We always need a prompt and help since trying to overwrite new files
     // with older ones will force a confirm if we're in expert mode. The CBM
     // Installer doesn't behave this way, but the Installer guide says so, and
@@ -1587,13 +1814,12 @@ entry_p m_copylib(entry_p contxt)
     }
 
     char *src = str(source), *dst = str(dest);
-    bool strict = get_num(contxt, "@strict");
 
     // Does the source file exist?
     if(h_exists(src) != LG_FILE)
     {
         // Only fail if we're in 'strict' mode.
-        if(strict)
+        if(get_num(contxt, "@strict"))
         {
             ERR(ERR_NOT_A_FILE, src);
         }
@@ -1602,8 +1828,8 @@ entry_p m_copylib(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    // Source version and destination type.
-    int new = h_getversion_file(src), type = h_exists(dst);
+    // Destination type.
+    int type = h_exists(dst);
 
     // A non safe operation in pretend mode always succeeds.
     if(!safe && get_num(contxt, "@pretend"))
@@ -1611,19 +1837,16 @@ entry_p m_copylib(entry_p contxt)
         R_NUM(LG_TRUE);
     }
 
-    // Only fail if we're in 'strict' mode.
-    if(new < 0 && strict)
+    // Destination must be a directory.
+    if(type == LG_FILE)
     {
-        // Could not find version string.
-        ERR(ERR_NO_VERSION, src);
-        R_NUM(LG_FALSE);
-    }
+        // Fail silently in sloppy mode.
+        if(get_num(contxt, "@strict"))
+        {
+            ERR(ERR_NOT_A_DIR, dst);
+        }
 
-    // Only fail if we're in 'strict' mode.
-    if(type == LG_FILE && strict)
-    {
-        // Destination is a file, not a dir.
-        ERR(ERR_NOT_A_DIR, dst);
+        // Nothing to do.
         R_NUM(LG_FALSE);
     }
 
@@ -1663,126 +1886,19 @@ entry_p m_copylib(entry_p contxt)
     if(type == LG_NONE)
     {
         // No we're not overwriting anything.
-        grc = h_copylib_none(contxt, src, name, new);
+        grc = h_copylib_none(contxt, src, name);
     }
     else
     // It's a file.
     if(type == LG_FILE)
     {
-        // Get version of existing file.
-        int old = h_getversion_file(name);
-
-        // New and old major and minor version.
-        int nmj = new >> 16, nmn = new & 0xffff, omj = old >> 16,
-            omn = old & 0xffff;
-
-        // Is the version of the existing file unknown?
-        if(old < 0)
-        {
-            // Only fail if we're in 'strict' mode.
-            if(strict)
-            {
-                // Could not find version string.
-                ERR(ERR_NO_VERSION, name);
-                new = old;
-            }
-            else
-            {
-                // Is the version of the source file unknown?
-                if(new < 0)
-                {
-                    // Both target and source file have an unknown version.
-                    if(h_confirm(contxt, "", "%s\n\n%s: %s\n%s: %s\n\n%s: %s",
-                       str(prompt), tr(S_VINS), tr(S_VUNK), tr(S_VCUR),
-                       tr(S_VUNK), tr(S_DDRW), dst))
-                    {
-                        new = old + 1;
-                    }
-                    else
-                    {
-                        new = old;
-                    }
-                }
-                else
-                {
-                    // The source file is version is known, thh target version
-                    // is unknown.
-                    if(h_confirm(contxt, "",
-                       "%s\n\n%s: %d.%d\n%s: %s\n\n%s: %s", str(prompt),
-                       tr(S_VINS), nmj, nmn, tr(S_VCUR), tr(S_VUNK), tr(S_DDRW),
-                       dst))
-                    {
-                        new = old + 1;
-                    }
-                    else
-                    {
-                        new = old;
-                    }
-                }
-
-                if(new > old)
-                {
-                    confirm = NULL;
-                }
-            }
-        }
-        // The target file version is known.
-        else
-        {
-            // Is the version of the source file unknown?
-            if(new < 0 && h_confirm(contxt, "",
-               "%s\n\n%s: %s\n%s: %d.%d\n\n%s: %s", str(prompt), tr(S_VINS),
-               tr(S_VUNK), tr(S_VCUR), omj, omn, tr(S_DDRW), dst))
-            {
-                new = old + 1;
-                confirm = NULL;
-            }
-        }
-
-        // Did we find a version not equal to that of the current file?
-        if(new != old)
-        {
-            // If we ask for confirmation and get it, copy the file no matter
-            // what version it (and the existing destination file) has.
-            if(confirm)
-            {
-                if(h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
-                   str(prompt), tr(S_VINS), nmj, nmn, tr(S_VCUR), omj, omn,
-                   tr(S_DDRW), dst))
-                {
-                    grc = h_copyfile(contxt, src, name, back != false, true);
-                }
-            }
-            else
-            {
-                // If the file to be copied has a higher version number than the
-                // existing one, overwrite.
-                if(new > old)
-                {
-                    grc = h_copyfile(contxt, src, name, back != false, true);
-                }
-                else
-                {
-                    // If the file to be copied has a lower version number than
-                    // the existing one, and we're in expert mode, ask the user
-                    // to confirm. If we get a confirmation, overwrite.
-                    if(get_num(contxt, "@user-level") == LG_EXPERT &&
-                       h_confirm(contxt, "",
-                       "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s", str(prompt),
-                       tr(S_VINS), nmj, nmn, tr(S_VCUR), omj, omn, tr(S_DDRW),
-                       dst))
-                    {
-                        grc = h_copyfile(contxt, src, name, back != false, true);
-                    }
-                }
-            }
-        }
+        grc = h_copylib_file(contxt, src, name);
     }
     // It's a dir.
     else
     {
         // Dest file exists, but is a directory. Fail in strict mode.
-        if(strict)
+        if(get_num(contxt, "@strict"))
         {
             ERR(ERR_NOT_A_FILE, name);
         }
@@ -1869,7 +1985,6 @@ static int h_delete_file(entry_p contxt, const char *file)
         }
     }
 
-    // If yes, this must succeed, otherwise we will abort with an error.
     if(remove(file))
     {
         // Could not delete file.
