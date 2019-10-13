@@ -30,7 +30,7 @@ InstallerLG is a reimplementation of the 'Installer' tool included with
 AmigaOS as of version 2.1. InstallerLG aims to be fully compatible with
 the original as described in the V44.10 guide. The resource limitations
 found in the Commodore implementation are gone and the original GUI has
-been replaced by a MUI / Zune based one.
+been replaced by a MUI/Zune based one.
 
 @ENDNODE
 
@@ -40,7 +40,16 @@ been replaced by a MUI / Zune based one.
 @{B}Notes on compatibility with the CBM implementation@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-TODO: Working dir when executing from CLI.
+When executing InstallerLG from shell, the working directory will be set
+to that of the installer script since that's what most scripts expect. I
+have yet to find an exception to this rule. The Commodore installer does
+not work like this. It doesn't change working directory which results in
+most scripts failing unless executed from the directory of the script.
+
+The implementation of (asknumber) is not identical with the installer in
+AmigaOS. Instead of a string gadget, a slider is used to pick a value in
+a given range. For aesthetic reasons the default range is 0-100 which is
+less than the range used by the Commodore implementation.
 
 @ENDNODE
 
@@ -50,8 +59,21 @@ TODO: Working dir when executing from CLI.
 @{B}Features beyond those of the original@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-TODO: Multiple (effect) statements.
-TODO: Strict mode.
+The error handling in the Commodore implementation is far from strict.
+Installers often fail silently, giving the impression that the script
+works / the installation succeeded, despite critical errors. To mimic
+this behaviour, InstallerLG ignores a lot of problems per default. If
+desired, stricter error handling can be enabled in runtime by setting
+the variable \@strict to 1. When developing new scripts, this can save
+a lot of frustration since it can help you detect problems like using
+undefined variables, invalid string formats, file permission problems
+and more. Please note that setting this variable won't break anything
+if another interpreter is used.
+
+Unlike the original AmigaOS implementation, the (effect) statement is
+treated like any other statement by InstallerLG. This means that it's
+possible to change effect during the installation.
+
 TODO: Headless.
 TODO: Fake user input.
 
