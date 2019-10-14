@@ -60,7 +60,7 @@ evl()
             fi
         fi
     fi
-    if [ `which valgrind` ] && [ -z "${LG_SMOKE}" ] && [ -z "${LG_FAIL}" ]; then
+    if [ `which valgrind` ] && [ -z "${LG_SMOKE}" ] && [ -z "${LG_QUICK}" ]; then
         if [ -n "$pre" ]; then
             eval "$pre" 2>&1
         fi
@@ -104,7 +104,7 @@ do
                echo "OK -> $p" 
                nok=$(( $nok + 1 ))
            elif [ $s -eq 0 ]; then
-               if [ ! -z "${LG_FAIL}" ]; then
+               if [ ! -z "${LG_QUICK}" ]; then
                    echo "IGNORE -> $p"
                    nok=$(( $nok + 1 ))
                else
