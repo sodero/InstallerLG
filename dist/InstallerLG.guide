@@ -1,7 +1,7 @@
 @DATABASE "Default"
 @NODE Main "InstallerLG Guide"
 @TOC Contents
-@$VER: InstallerLG.guide 0.1.0 (20.09.19) english
+@$VER: InstallerLG.guide 0.1.0 (20.10.19) english
 
 @{B}Contents@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
@@ -74,8 +74,8 @@ Unlike the original AmigaOS implementation, the (effect) statement is
 treated like any other statement by InstallerLG. This means that it's
 possible to change effect during the installation.
 
-TODO: Headless.
-TODO: Fake user input.
+To be written: Headless.
+To be written: Fake user input.
 
 @ENDNODE
 
@@ -103,7 +103,7 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-@{B}0.1.0-alpha.39 (2019-not-yet)@{UB}
+@{B}0.1.0-alpha.39 (2019-10-20)@{UB}
 - Improved robustness.
 - (askdir) (newpath) fix.
 - (copylib (confirm)) fix.
