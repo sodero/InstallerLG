@@ -103,6 +103,9 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}0.1.0-alpha.40 (2019-NOT-YET)@{UB}
+- ?
+
 @{B}0.1.0-alpha.39 (2019-10-20)@{UB}
 - Improved robustness.
 - (askdir) (newpath) fix.
