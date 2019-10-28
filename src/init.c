@@ -165,6 +165,7 @@ static void init_misc_num(entry_p contxt)
     init_num(contxt, "@wild", 0);
     init_num(contxt, "@each-type", 0);
     init_num(contxt, "@debug", 0);
+    init_num(contxt, "@trap", 0);
     init_num(contxt, "@strict",
     // In test mode, strict is default.
     #if defined(AMIGA) && !defined(LG_TEST)

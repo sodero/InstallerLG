@@ -101,9 +101,13 @@ endif
 smoke:
 	@LG_SMOKE=yes $(MAKE) test
 
+.PHONY: quick
+quick:
+	@LG_QUICK=yes $(MAKE) test
+
 .PHONY: fail
 fail:
-	@LG_FAIL=yes $(MAKE) test
+	@LG_QUICK=yes $(MAKE) test
 
 .PHONY: install
 install:

@@ -268,9 +268,9 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
         // Dynamic options must be resolved.
         else if(entry->id == OPT_DYNOPT)
         {
-            // Replace with its resolved value.
+            // Don't replace unless an option was resolved.
             entry_p res = resolve(entry);
-            cache[res->id] = res;
+            cache[res->id] = res->type == OPTION ? res : NULL;
         }
         // A real option.
         else

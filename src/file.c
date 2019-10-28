@@ -923,7 +923,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     // Show GUI unless we're in silent mode.
     if(!sln)
     {
-        grc = gui_copyfiles_setcur(src, opt(contxt, OPT_NOGAUGE), bck);
+        grc = gui_copyfiles_setcur(src, opt(contxt, OPT_NOGAUGE) != NULL, bck);
     }
 
     // Prepare GUI unless we're in silent mode as used by copylib.
@@ -1020,7 +1020,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
             // Update GUI unless we're in silent mode.
             if(!sln)
             {
-                grc = gui_copyfiles_setcur(NULL, opt(contxt, OPT_NOGAUGE), bck);
+                grc = gui_copyfiles_setcur(NULL, opt(contxt, OPT_NOGAUGE) != NULL, bck);
             }
 
             if(grc == G_TRUE)
