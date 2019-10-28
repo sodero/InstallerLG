@@ -68,7 +68,11 @@ int error(entry_p contxt, int line, err_t type, const char *info)
         /*35*/ "Invalid assign", /*36*/ "Options are mutually exclusive", /*37*/ "Invalid value"
     };
 
-    // Show error in window / console.
-    gui_error(line, des[type], info);
+    // Show error in window / console unless trap mode is active.
+    if(!get_num(contxt, "@trap"))
+    {
+        gui_error(line, des[type], info);
+    }
+
     return last;
 }

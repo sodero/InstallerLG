@@ -165,8 +165,7 @@ entry_p m_onerror(entry_p contxt)
     {
         if((*err)->type == CUSTOM && !strcasecmp((*err)->name, ref.name))
         {
-            // Reset error code otherwise m_gosub / invoke will halt
-            // immediately.
+            // Clear errors otherwise m_gosub / invoke will halt.
             RESET;
 
             // Connect reference to the current context.
@@ -192,16 +191,25 @@ entry_p m_onerror(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //
-// Despite what the Installer.guide says, the implementaion of 'trap' in OS 3.9
-// seems like a stub, it doesn't work at all. Let's just leave this one empty.
+// TODO: Currently all errors are trapped. Implement error categories.
 //------------------------------------------------------------------------------
 entry_p m_trap(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
 
-    // Dummy.
-    R_NUM(LG_TRUE);
+    // Enter trap mode.
+    set_num(contxt, "@trap", num(C_ARG(1)));
+
+    // Resolve statements.
+    entry_p ret = resolve(C_ARG(2));
+
+    // Leave trap mode and clear errors.
+    set_num(contxt, "@trap", 0);
+    RESET;
+
+    // Return resolved value.
+    return ret;
 }
 
 //------------------------------------------------------------------------------
