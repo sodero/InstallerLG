@@ -259,23 +259,34 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
             continue;
         }
 
-        // Fake option.
+        // Cast dake options to real options.
         if(entry->id == OPT_OPTIONAL || entry->id == OPT_DELOPTS)
         {
-            // Cast to real option.
             get_fake_opt(entry, cache);
         }
         // Dynamic options must be resolved.
         else if(entry->id == OPT_DYNOPT)
         {
-            // Don't replace unless an option was resolved.
             entry_p res = resolve(entry);
-            cache[res->id] = res->type == OPTION ? res : NULL;
+
+            if(res->type != OPTION)
+            {
+                // Non-existing conditional path.
+                continue;
+            }
+
+            // Cache all options if we're in a block.
+            if(res->parent->type == CONTXT)
+            {
+                opt_fill_cache(res->parent, cache);
+            }
+
+            // Resolved value is a real option.
+            cache[res->id] = res;
         }
-        // A real option.
         else
         {
-            // Save it as is.
+            // Save real options as they are.
             cache[entry->id] = entry;
         }
     }
