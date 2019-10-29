@@ -24,7 +24,7 @@
 %define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
-%expect 3
+%expect 5
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- primitives ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %token<s> /* string pri. */ SYM STR OOM
@@ -497,6 +497,7 @@ swapcolors:     '(' SWAPCOLORS ')'               { $$ = new_option(strdup("swapc
 optional:       '(' OPTIONAL ps ')'              { $$ = new_option(strdup("optional"), OPT_OPTIONAL, $3); };
 resident:       '(' RESIDENT ')'                 { $$ = new_option(strdup("resident"), OPT_RESIDENT, NULL); };
 override:       '(' OVERRIDE p ')'               { $$ = new_option(strdup("override"), OPT_OVERRIDE, push(new_contxt(), $3)); };
-dynopt:         '(' IF p opts ')'                { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, merge(push(new_contxt(), $3), $4)); };
+dynopt:         '(' IF p opts ')'                { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(new_contxt(), $3), $4)); } |
+                '(' IF p opts opts ')'           { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(push(new_contxt(), $3), $4), $5)); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %%
