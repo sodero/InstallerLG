@@ -495,7 +495,6 @@ swapcolors:     '(' SWAPCOLORS ')'               { $$ = new_option(strdup("swapc
 optional:       '(' OPTIONAL ps ')'              { $$ = new_option(strdup("optional"), OPT_OPTIONAL, $3); };
 resident:       '(' RESIDENT ')'                 { $$ = new_option(strdup("resident"), OPT_RESIDENT, NULL); };
 override:       '(' OVERRIDE p ')'               { $$ = new_option(strdup("override"), OPT_OVERRIDE, push(new_contxt(), $3)); };
-dynopt:         '(' IF p opt opt ')'             { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(push(new_contxt(), $3), $4), $5)); } |
-                '(' IF p opt ')'                 { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(new_contxt(), $3), $4)); };
+dynopt:         '(' IF p opts ')'                { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, merge(push(new_contxt(), $3), $4)); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %%
