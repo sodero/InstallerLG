@@ -113,6 +113,7 @@ static char *strduptr(const char *str);
 "getsum"                { return GETSUM;         }
 "getversion"            { return GETVERSION;     }
 "iconinfo"              { return ICONINFO;       }
+"querydisplay"          { return QUERYDISPLAY;   }
 "pathonly"              { return PATHONLY;       }
 "patmatch"              { return PATMATCH;       }
 "select"                { return SELECT;         }
@@ -236,7 +237,7 @@ int yyerror(yyscan_t scanner, const char *err)
     }
     else
     {
-        // A slightly less detailed graphical error report.
+        // Less details in the GUI.
         error(NULL, line, ERR_PARSE, err);
     }
 

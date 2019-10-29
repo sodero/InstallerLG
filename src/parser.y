@@ -20,7 +20,7 @@
 #define YYDEBUG 1
 %}
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* We need the parser to be reentrant, not because we want to, but because it will leak memory otherwise. */
+/* We need the parser to be reentrant. It will leak memory otherwise. */
 %define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
@@ -42,7 +42,7 @@
 %token /* information.c  */ COMPLETE DEBUG MESSAGE USER WELCOME WORKING
 %token /* media.c        */ CLOSEMEDIA EFFECT SETMEDIA SHOWMEDIA
 %token /* probe.c|h      */ DATABASE EARLIER GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM
-       /*                */ GETVERSION ICONINFO
+       /*                */ GETVERSION ICONINFO QUERYDISPLAY
 %token /* procedure.c|h  */ CUS DCL
 %token /* prompt.c|h     */ ASKBOOL ASKCHOICE ASKDIR ASKDISK ASKFILE ASKNUMBER ASKOPTIONS ASKSTRING
 %token /* strop.c|h      */ CAT EXPANDPATH FMT PATHONLY PATMATCH STRLEN SUBSTR TACKON
@@ -61,12 +61,12 @@
        /*                */ bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring
        /*                */ asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier
        /*                */ fileonly getassign getdefaulttool getposition getstack gettooltype getdevice
-       /*                */ getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch div
-       /*                */ select symbolset symbolval tackon transcript complete user working welcome
-       /*                */ abort copyfiles copylib database debug delete execute exit foreach makeassign
-       /*                */ makedir message onerror protect rename rexx run startup textfile tooltype
-       /*                */ trap reboot all append assigns choices command compression confirm default mul
-       /*                */ delopts dest disk files fonts help infos include newname newpath optional back
+       /*                */ getdiskspace getenv getsize getsum getversion iconinfo querydisplay pathonly
+       /*                */ patmatch div select symbolset symbolval tackon transcript complete user working
+       /*                */ welcome abort copyfiles copylib database debug delete execute exit foreach
+       /*                */ makeassign makedir message onerror protect rename rexx run startup textfile
+       /*                */ tooltype trap reboot all append assigns choices command compression confirm default
+       /*                */ mul delopts dest disk files fonts help infos include newname newpath optional back
        /*                */ nogauge noposition noreq pattern prompt quiet range safe resident override
        /*                */ setdefaulttool setposition setstack settooltype source swapcolors openwbobject
        /*                */ showwbobject closewbobject trace retrace closemedia effect setmedia showmedia
@@ -82,9 +82,9 @@
                             shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice
                             askoptions askbool askdisk exists expandpath earlier fileonly getassign pattern
                             getdefaulttool getposition getstack gettooltype optional resident override source
-                            getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch
-                            select symbolset symbolval tackon transcript complete user working welcome abort
-                            copyfiles copylib database debug delete execute exit foreach makeassign makedir
+                            getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay pathonly
+                            patmatch select symbolset symbolval tackon transcript complete user working welcome
+                            abort copyfiles copylib database debug delete execute exit foreach makeassign makedir
                             message onerror protect rename rexx run startup textfile tooltype trap reboot all
                             assigns choices command compression confirm default delopts dest disk lt lte neq
                             files fonts help infos include newname newpath nogauge noposition settooltype cat
@@ -244,6 +244,7 @@ ivp:            add        /* arithmetic.c|h */  |
                 getsum                           |
                 getversion                       |
                 iconinfo                         |
+                querydisplay                     |
                 cus         /* procedure.c|h */  |
                 dcl                              |
                 askbool        /* prompt.c|h */  |
@@ -402,6 +403,7 @@ getversion:     '(' GETVERSION ')'               { $$ = new_native(strdup("getve
                 '(' GETVERSION p ')'             { $$ = new_native(strdup("getversion"), LINE, m_getversion, push(new_contxt(), $3), NUMBER); } |
                 '(' GETVERSION p resident ')'    { $$ = new_native(strdup("getversion"), LINE, m_getversion, push(push(new_contxt(), $3), $4), NUMBER); };
 iconinfo:       '(' ICONINFO opts ')'            { $$ = new_native(strdup("iconinfo"), LINE, m_iconinfo, $3, NUMBER); };
+querydisplay:   '(' QUERYDISPLAY pp ')'          { $$ = new_native(strdup("querydisplay"), LINE, m_querydisplay, $3, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* procedure.c|h -------------------------------------------------------------------------------------------------------------------------------------------------------*/
 dcl:            '(' DCL SYM par s ')'            { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, $4, $5)), NUMBER); } |
