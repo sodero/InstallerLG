@@ -1113,3 +1113,21 @@ entry_p m_iconinfo(entry_p contxt)
     // Success.
     R_NUM(LG_TRUE);
 }
+
+//------------------------------------------------------------------------------
+// (querydisplay <object> <option>)
+//
+//      Returns information about the current display environment for
+//      Installer.  This can be used to open different medias (pictures or
+//      animations) for different number of colors or screen sizes.
+//
+// Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
+//------------------------------------------------------------------------------
+entry_p m_querydisplay(entry_p contxt)
+{
+    // We need 2 arguments.
+    C_SANE(2, NULL);
+
+    // Dummy.
+    R_NUM(LG_TRUE);
+}
