@@ -1232,9 +1232,6 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
                 // We're done if this is the full path.
                 if(i == len)
                 {
-                    free(dir);
-                    h_log(contxt, tr(S_CRTD), dst);
-
                     // Create icon if (infos) is set and there's no icon.
                     if(opt(contxt, OPT_INFOS) &&
                        !h_exists(h_suffix(dir, "info")) &&
@@ -1243,6 +1240,9 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
                         // Failed creating icon.
                         return LG_FALSE;
                     }
+
+                    free(dir);
+                    h_log(contxt, tr(S_CRTD), dst);
 
                     return LG_TRUE;
                 }
