@@ -1237,7 +1237,7 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
 
                     // Create icon if (infos) is set and there's no icon.
                     if(opt(contxt, OPT_INFOS) &&
-                       !h_exists(h_suffix(dir, "info")) &&
+                       !h_exists(h_suffix(dst, "info")) &&
                        !h_makedir_create_icon(contxt, dst))
                     {
                         // Failed creating icon.
