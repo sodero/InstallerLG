@@ -106,6 +106,8 @@ Italian translations.
 @{B}0.1.0-alpha.40 (2019-NOT-YET)@{UB}
 - (trap) MVP (Roadshow).
 - Dynamic options block support (AmiTradeCenter).
+- (makedir (infos)) bug fixed (Deluxe Music).
+- ?
 
 @{B}0.1.0-alpha.39 (2019-10-20)@{UB}
 - Improved robustness.
