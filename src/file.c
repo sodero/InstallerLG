@@ -1175,18 +1175,19 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
         return LG_FALSE;
     }
 
-    // Create icon if (infos) is set and there is no icon already.
-    if(opt(contxt, OPT_INFOS) && !h_exists(h_suffix(dst, "info")) &&
-      !h_makedir_create_icon(contxt, dst))
-    {
-        // Failed creating icon.
-        ERR(ERR_WRITE_DIR, dst);
-        return LG_FALSE;
-    }
-
     // Return immediately if directory exists.
     if(h_exists(dst) == LG_DIR)
     {
+        // Create icon if (infos) is set and there's no icon.
+        if(opt(contxt, OPT_INFOS) &&
+           !h_exists(h_suffix(dst, "info")) &&
+           !h_makedir_create_icon(contxt, dst))
+        {
+            // Failed creating icon.
+            ERR(ERR_WRITE_DIR, dst);
+            return LG_FALSE;
+        }
+
         h_log(contxt, tr(S_EDIR), dst);
         return LG_TRUE;
     }
@@ -1235,6 +1236,17 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
                 {
                     free(dir);
                     h_log(contxt, tr(S_CRTD), dst);
+
+                    // Create icon if (infos) is set and there's no icon.
+                    if(opt(contxt, OPT_INFOS) &&
+                       !h_exists(h_suffix(dir, "info")) &&
+                       !h_makedir_create_icon(contxt, dst))
+                    {
+                        // Failed creating icon.
+                        ERR(ERR_WRITE_DIR, dst);
+                        return LG_FALSE;
+                    }
+
                     return LG_TRUE;
                 }
 
