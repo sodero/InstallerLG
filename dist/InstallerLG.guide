@@ -107,6 +107,7 @@ Italian translations.
 - (trap) MVP (Roadshow).
 - Dynamic options block support (AmiTradeCenter).
 - (makedir (infos)) bug fixed (Deluxe Music).
+- (makedir) error message line number bug fixed.
 - ?
 
 @{B}0.1.0-alpha.39 (2019-10-20)@{UB}

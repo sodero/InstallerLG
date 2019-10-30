@@ -1179,12 +1179,10 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
     if(h_exists(dst) == LG_DIR)
     {
         // Create icon if (infos) is set and there's no icon.
-        if(opt(contxt, OPT_INFOS) &&
-           !h_exists(h_suffix(dst, "info")) &&
+        if(opt(contxt, OPT_INFOS) && !h_exists(h_suffix(dst, "info")) &&
            !h_makedir_create_icon(contxt, dst))
         {
             // Failed creating icon.
-            ERR(ERR_WRITE_DIR, dst);
             return LG_FALSE;
         }
 
@@ -1243,7 +1241,6 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
                        !h_makedir_create_icon(contxt, dst))
                     {
                         // Failed creating icon.
-                        ERR(ERR_WRITE_DIR, dst);
                         return LG_FALSE;
                     }
 
@@ -1273,7 +1270,6 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
     }
 
     // For some unknown reason, we can't create the directory.
-    ERR(ERR_WRITE_DIR, dst);
     return LG_FALSE;
 }
 
@@ -1420,6 +1416,7 @@ entry_p m_copyfiles(entry_p contxt)
                     if(!h_makedir(contxt, cur->copy, mode))
                     {
                         // Could not create directory.
+                        ERR(ERR_WRITE_DIR, dst);
                         grc = G_FALSE;
                         break;
                     }
@@ -2670,9 +2667,18 @@ entry_p m_makedir(entry_p contxt)
     // We need to pass a valid context to h_makedir. If we have a CONTXT with
     // options, that's the one to pass, otherwise we should pass the default.
     entry_p con = exists(C_ARG(2)) ? C_ARG(2) : contxt;
+    char *dir = str(C_ARG(1));
 
     // Create directory.
-    R_NUM(h_makedir(con, str(C_ARG(1)), 0 /* FIXME */));
+    if(!h_makedir(con, dir, 0 /* FIXME */))
+    {
+        // Could not create directory.
+        ERR(ERR_WRITE_DIR, dir);
+        R_NUM(LG_FALSE);
+    }
+
+    // Directory created.
+    R_NUM(LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
