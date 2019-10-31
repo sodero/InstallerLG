@@ -110,7 +110,7 @@ fail:
 	@LG_QUICK=yes $(MAKE) test
 
 .PHONY: install
-install:
+install: cat
 	@cd ../dist && $(MAKE) && \
 	./Installer "InstallerLG installer"
 
