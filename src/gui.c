@@ -120,44 +120,46 @@ CLASS_DEF(IG)
 //------------------------------------------------------------------------------
 // IG - Public methods
 //------------------------------------------------------------------------------
-#define MUIM_IG_Init             (TAGBASE_LG + 101)
-#define MUIM_IG_Welcome          (TAGBASE_LG + 102)
-#define MUIM_IG_CopyFilesStart   (TAGBASE_LG + 104)
-#define MUIM_IG_CopyFilesSetCur  (TAGBASE_LG + 105)
-#define MUIM_IG_CopyFilesEnd     (TAGBASE_LG + 106)
-#define MUIM_IG_Exit             (TAGBASE_LG + 107)
-#define MUIM_IG_Complete         (TAGBASE_LG + 108)
-#define MUIM_IG_Ticker           (TAGBASE_LG + 109)
-#define MUIM_IG_CopyFilesAdd     (TAGBASE_LG + 110)
-#define MUIM_IG_Confirm          (TAGBASE_LG + 111)
-#define MUIM_IG_Message          (TAGBASE_LG + 112)
-#define MUIM_IG_Abort            (TAGBASE_LG + 113)
-#define MUIM_IG_Radio            (TAGBASE_LG + 114)
-#define MUIM_IG_Bool             (TAGBASE_LG + 115)
-#define MUIM_IG_String           (TAGBASE_LG + 116)
-#define MUIM_IG_Number           (TAGBASE_LG + 117)
-#define MUIM_IG_CheckBoxes       (TAGBASE_LG + 118)
-#define MUIM_IG_AskFile          (TAGBASE_LG + 119)
-#define MUIM_IG_PageSet          (TAGBASE_LG + 120)
-#define MUIM_IG_Finish           (TAGBASE_LG + 121)
-#define MUIM_IG_Working          (TAGBASE_LG + 122)
-#define MUIM_IG_Effect           (TAGBASE_LG + 123)
-#define MUIM_IG_CloseMedia       (TAGBASE_LG + 124)
-#define MUIM_IG_SetMedia         (TAGBASE_LG + 125)
-#define MUIM_IG_ShowMedia        (TAGBASE_LG + 126)
-#define MUIM_IG_ShowPicture      (TAGBASE_LG + 127)
-#define MUIM_IG_GetCustomScreen  (TAGBASE_LG + 128)
+#define MUIM_IG_Init                (TAGBASE_LG + 101)
+#define MUIM_IG_Welcome             (TAGBASE_LG + 102)
+#define MUIM_IG_CopyFilesStart      (TAGBASE_LG + 104)
+#define MUIM_IG_CopyFilesSetCur     (TAGBASE_LG + 105)
+#define MUIM_IG_CopyFilesEnd        (TAGBASE_LG + 106)
+#define MUIM_IG_Exit                (TAGBASE_LG + 107)
+#define MUIM_IG_Complete            (TAGBASE_LG + 108)
+#define MUIM_IG_Ticker              (TAGBASE_LG + 109)
+#define MUIM_IG_CopyFilesAdd        (TAGBASE_LG + 110)
+#define MUIM_IG_Confirm             (TAGBASE_LG + 111)
+#define MUIM_IG_Message             (TAGBASE_LG + 112)
+#define MUIM_IG_Abort               (TAGBASE_LG + 113)
+#define MUIM_IG_Radio               (TAGBASE_LG + 114)
+#define MUIM_IG_Bool                (TAGBASE_LG + 115)
+#define MUIM_IG_String              (TAGBASE_LG + 116)
+#define MUIM_IG_Number              (TAGBASE_LG + 117)
+#define MUIM_IG_CheckBoxes          (TAGBASE_LG + 118)
+#define MUIM_IG_AskFile             (TAGBASE_LG + 119)
+#define MUIM_IG_PageSet             (TAGBASE_LG + 120)
+#define MUIM_IG_Finish              (TAGBASE_LG + 121)
+#define MUIM_IG_Working             (TAGBASE_LG + 122)
+#define MUIM_IG_Effect              (TAGBASE_LG + 123)
+#define MUIM_IG_CloseMedia          (TAGBASE_LG + 124)
+#define MUIM_IG_SetMedia            (TAGBASE_LG + 125)
+#define MUIM_IG_ShowMedia           (TAGBASE_LG + 126)
+#define MUIM_IG_ShowPicture         (TAGBASE_LG + 127)
+#define MUIM_IG_GetCustomScreen     (TAGBASE_LG + 128)
+#define MUIM_IG_GetScreenProp       (TAGBASE_LG + 129)
+#define MUIM_IG_GetWindowProp       (TAGBASE_LG + 130)
 
 //------------------------------------------------------------------------------
 // IG - Attributes
 //------------------------------------------------------------------------------
-#define MUIA_IG_UseCustomScreen  (TAGBASE_LG + 201)
+#define MUIA_IG_UseCustomScreen     (TAGBASE_LG + 201)
 
 //------------------------------------------------------------------------------
 // IG - Media ID
 //------------------------------------------------------------------------------
-#define MUIA_IG_MediaBase        (TAGBASE_LG + 301)
-#define MUIA_IG_MediaMax         (TAGBASE_LG + 399)
+#define MUIA_IG_MediaBase           (TAGBASE_LG + 301)
+#define MUIA_IG_MediaMax            (TAGBASE_LG + 399)
 
 //------------------------------------------------------------------------------
 // IG - Init parameters
@@ -438,6 +440,32 @@ struct MUIP_IG_PageSet
 struct MUIP_IG_GetCustomScreen
 {
     ULONG MethodID;
+};
+
+//------------------------------------------------------------------------------
+// IG - GetScreenProp
+//------------------------------------------------------------------------------
+struct MUIP_IG_GetScreenProp
+{
+    ULONG MethodID;
+    ULONG Width;
+    ULONG Height;
+    ULONG Depth;
+    ULONG Colors;
+};
+
+//------------------------------------------------------------------------------
+// IG - GetWindowProp
+//------------------------------------------------------------------------------
+struct MUIP_IG_GetWindowProp
+{
+    ULONG MethodID;
+    ULONG Width;
+    ULONG Height;
+    ULONG Upper;
+    ULONG Lower;
+    ULONG Left;
+    ULONG Right;
 };
 
 //------------------------------------------------------------------------------
@@ -1609,6 +1637,53 @@ static inline IPTR IGGetCustomScreen(Class *cls, Object *obj)
 {
     struct IGData *my = INST_DATA(cls, obj);
     return (IPTR) my->Scr;
+}
+
+//------------------------------------------------------------------------------
+// IGGetScreenProp   FIXME
+// Input:            FIXME
+// Return:           FIXME
+//------------------------------------------------------------------------------
+static inline IPTR IGGetScreenProp(Class *cls, Object *obj,
+                                   struct MUIP_IG_GetScreenProp *msg)
+{
+    (void) cls;
+    (void) obj;
+
+    int *width = (int *) msg->Width, *height = (int *) msg->Height,
+        *depth = (int *) msg->Depth, *colors = (int *) msg->Colors;
+
+    *width = 0;
+    *height = 0;
+    *depth = 0;
+    *colors = 0;
+
+    return (IPTR) NULL;
+}
+
+//------------------------------------------------------------------------------
+// IGGetWindowProp   FIXME
+// Input:            FIXME
+// Return:           FIXME
+//------------------------------------------------------------------------------
+static inline IPTR IGGetWindowProp(Class *cls, Object *obj,
+                                   struct MUIP_IG_GetWindowProp *msg)
+{
+    (void) cls;
+    (void) obj;
+
+    int *width = (int *) msg->Width, *height = (int *) msg->Height,
+        *upper = (int *) msg->Upper, *lower = (int *) msg->Lower,
+        *left = (int *) msg->Left, *right = (int *) msg->Right;
+
+    *width = 0;
+    *height = 0;
+    *upper = 0;
+    *lower = 0;
+    *left = 0;
+    *right = 0;
+
+    return (IPTR) NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -2906,6 +2981,14 @@ DISPATCH(IG)
         case MUIM_IG_GetCustomScreen:
             return IGGetCustomScreen(cls, obj);
 
+        case MUIM_IG_GetScreenProp:
+            return IGGetScreenProp(cls, obj,
+                                  (struct MUIP_IG_GetScreenProp *) msg);
+
+        case MUIM_IG_GetWindowProp:
+            return IGGetWindowProp(cls, obj,
+                                  (struct MUIP_IG_GetWindowProp *) msg);
+
         case MUIM_IG_Welcome:
             return IGWelcome(cls, obj, (struct MUIP_IG_Welcome *) msg);
 
@@ -2988,32 +3071,24 @@ DISPATCH(IG)
 #endif /* AMIGA */
 
 
-//____________________________________________________________________________
-//############################################################################
-//############################################################################
-//############################################################################
-//****************************************************************************
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-//............................................................................
-//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-//.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  .
-//
+//.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//******************************************************************************
+//##############################################################################
+//##############################################################################
+//******************************************************************************
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+//..............................................................................
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+//.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 //
 // The gui_* functions below serve as glue between the platform independent
 // parts of InstallerLG and the Amiga specific Zune / MUI parts. On non Amiga
 // systems, arguments are written to stdout to facilitate testing.
 //
-//
-//.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  .
-//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//****************************************************************************
-//############################################################################
-//############################################################################
-//############################################################################
-
 //------------------------------------------------------------------------------
 // Name:        gui_init
 // Description: Initialize and show GUI.
@@ -3455,6 +3530,7 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
     #if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesSetCur, cur, nga, bck);
     #else
+    // Testing purposes.
     (void) cur;
     static bool done;
     if(!done)
@@ -3479,7 +3555,7 @@ void gui_copyfiles_end(void)
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CopyFilesEnd);
     #else
-    // End copy.
+    // Testing purposes.
     puts("ec");
     #endif
 }
@@ -3541,6 +3617,7 @@ void gui_error(int line, const char *type, const char *info)
     // We don't have any way of knowing whether this really works out...
     EasyRequest(NULL, &es, NULL);
     #else
+    // Testing purposes.
     fprintf(stderr, tr(S_LERR), line, type, info);
     #endif
 }
@@ -3571,10 +3648,10 @@ void gui_effect(int eff, int cl1, int cl2)
 //------------------------------------------------------------------------------
 inp_t gui_closemedia(int mid)
 {
-    // Testing purposes.
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CloseMedia, mid);
     #else
+    // Testing purposes.
     printf("%d\n", mid);
     #endif
     return G_TRUE;
@@ -3590,10 +3667,10 @@ inp_t gui_closemedia(int mid)
 //------------------------------------------------------------------------------
 inp_t gui_setmedia(int mid, int act, const char *par)
 {
-    // Testing purposes.
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_SetMedia, mid, act, par);
     #else
+    // Testing purposes.
     printf("%d:%d:%s\n", mid, act, par ? par : "_");
     #endif
     return G_TRUE;
@@ -3607,10 +3684,10 @@ inp_t gui_setmedia(int mid, int act, const char *par)
 //------------------------------------------------------------------------------
 inp_t gui_showmedia(int *mid, const char* mda, int act)
 {
-    // Testing purposes.
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_ShowMedia, mid, mda, act);
     #else
+    // Testing purposes.
     static int num;
     *mid = num++;
     printf("%d:%d:%s\n", *mid, act, mda ? mda : "_");
@@ -3618,3 +3695,41 @@ inp_t gui_showmedia(int *mid, const char* mda, int act)
     return G_TRUE;
 }
 
+//------------------------------------------------------------------------------
+// Name:        gui_query_screen
+// Description: FIXME
+// Input:       FIXME
+// Return:      FIXME
+//------------------------------------------------------------------------------
+void gui_query_screen(int *width, int *height, int *depth, int *colors)
+{
+    #if defined(AMIGA) && !defined(LG_TEST)
+    DoMethod(Win, MUIM_IG_GetScreenProp, width, height, depth, colors);
+    #else
+    // Testing purposes.
+    *width = 640;
+    *height = 256;
+    *colors = 4;
+    *depth = 2;
+    #endif
+}
+
+//------------------------------------------------------------------------------
+// Name:        gui_query_window
+// Description: FIXME
+// Input:       FIXME
+// Return:      FIXME
+//------------------------------------------------------------------------------
+void gui_query_window(int *width, int *height, int *upper, int *lower,
+                      int *left, int *right)
+{
+    #if defined(AMIGA) && !defined(LG_TEST)
+    DoMethod(Win, MUIM_IG_GetWindowProp, width, height, upper, lower, left,
+             right);
+    #else
+    // Testing purposes.
+    *width = *right = 320;
+    *height = *lower = 128;
+    *upper = *left = 0;
+    #endif
+}

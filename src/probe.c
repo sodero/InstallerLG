@@ -1128,6 +1128,21 @@ entry_p m_querydisplay(entry_p contxt)
     // We need 2 arguments.
     C_SANE(2, NULL);
 
+    /* 'screen'
+     *      'width'
+     *      'height'
+     *      'depth'
+     *      'colors'
+     *
+     * 'window'
+     *      'width'
+     *      'height'
+     *      'upper'
+     *      'lower'
+     *      'left'
+     *      'right'
+    */
+
     // Dummy.
     R_NUM(LG_TRUE);
 }
