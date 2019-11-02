@@ -1649,7 +1649,14 @@ static inline IPTR IGGetScreenProp(Class *cls, Object *obj,
 {
     (void) cls;
     (void) obj;
-    (void) msg;
+
+    int *width = (int *) msg->Width, *height = (int *) msg->Height,
+        *depth = (int *) msg->Depth, *colors = (int *) msg->Colors;
+
+    *width = 0;
+    *height = 0;
+    *depth = 0;
+    *colors = 0;
 
     return (IPTR) NULL;
 }
@@ -1664,7 +1671,17 @@ static inline IPTR IGGetWindowProp(Class *cls, Object *obj,
 {
     (void) cls;
     (void) obj;
-    (void) msg;
+
+    int *width = (int *) msg->Width, *height = (int *) msg->Height,
+        *upper = (int *) msg->Upper, *lower = (int *) msg->Lower,
+        *left = (int *) msg->Left, *right = (int *) msg->Right;
+
+    *width = 0;
+    *height = 0;
+    *upper = 0;
+    *lower = 0;
+    *left = 0;
+    *right = 0;
 
     return (IPTR) NULL;
 }
@@ -3687,6 +3704,7 @@ inp_t gui_showmedia(int *mid, const char* mda, int act)
 void gui_query_screen(int *width, int *height, int *depth, int *colors)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
+    DoMethod(Win, MUIM_IG_GetScreenProp, width, height, depth, colors);
     #else
     // Testing purposes.
     *width = 640;
@@ -3706,6 +3724,8 @@ void gui_query_window(int *width, int *height, int *upper, int *lower,
                       int *left, int *right)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
+    DoMethod(Win, MUIM_IG_GetWindowProp, width, height, upper, lower, left,
+             right);
     #else
     // Testing purposes.
     *width = *right = 320;
