@@ -11,6 +11,7 @@
 #include "error.h"
 #include "eval.h"
 #include "file.h"
+#include "gui.h"
 #include "probe.h"
 #include "util.h"
 #include <limits.h>
@@ -1142,6 +1143,11 @@ entry_p m_querydisplay(entry_p contxt)
      *      'left'
      *      'right'
     */
+
+    int width, height, depth, colors, upper, lower, left, right;
+
+    gui_query_screen(&width, &height, &depth, &colors);
+    gui_query_window(&width, &height, &upper, &lower, &left, &right);
 
     // Dummy.
     R_NUM(LG_TRUE);
