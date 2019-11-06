@@ -104,6 +104,7 @@ Italian translations.
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{B}0.1.0-alpha.40 (2019-NOT-YET)@{UB}
+- (querydisplay) implemented.
 - (trap) MVP (Roadshow).
 - Dynamic options block support (AmiTradeCenter).
 - (makedir (infos)) bug fixed (Deluxe Music).

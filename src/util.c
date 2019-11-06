@@ -183,15 +183,15 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
         char *fop = str(cur);
 
         // Set or delete option.
-        cache[OPT_FAIL] = strcmp(fop, "fail") ?
+        cache[OPT_FAIL] = strcasecmp(fop, "fail") ?
         cache[OPT_FAIL] : (del ? NULL : cur);
-        cache[OPT_FORCE] = strcmp(fop, "force") ?
+        cache[OPT_FORCE] = strcasecmp(fop, "force") ?
         cache[OPT_FORCE] : (del ? NULL : cur);
-        cache[OPT_NOFAIL] = strcmp(fop, "nofail") ?
+        cache[OPT_NOFAIL] = strcasecmp(fop, "nofail") ?
         cache[OPT_NOFAIL] : (del ? NULL : cur);
-        cache[OPT_ASKUSER] = strcmp(fop, "askuser") ?
+        cache[OPT_ASKUSER] = strcasecmp(fop, "askuser") ?
         cache[OPT_ASKUSER] : (del ? NULL : cur);
-        cache[OPT_OKNODELETE] = strcmp(fop, "oknodelete") ?
+        cache[OPT_OKNODELETE] = strcasecmp(fop, "oknodelete") ?
         cache[OPT_OKNODELETE] : (del ? NULL : cur);
     }
 }
