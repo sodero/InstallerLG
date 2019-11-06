@@ -1129,26 +1129,28 @@ entry_p m_querydisplay(entry_p contxt)
     // We need 2 arguments.
     C_SANE(2, NULL);
 
-    /* 'screen'
-     *      'width'
-     *      'height'
-     *      'depth'
-     *      'colors'
-     *
-     * 'window'
-     *      'width'
-     *      'height'
-     *      'upper'
-     *      'lower'
-     *      'left'
-     *      'right'
-    */
+    char *obj = str(C_ARG(1)), *opt = str(C_ARG(2));
+    int width = 0, height = 0, depth = 0, colors = 0, upper = 0, lower = 0,
+        left = 0, right = 0;
 
-    int width, height, depth, colors, upper, lower, left, right;
+    // Object 'screen'
+    if(strcasecmp(obj, "screen") == 0)
+    {
+        gui_query_screen(&width, &height, &depth, &colors);
+    }
+    // Object 'window'
+    else if(strcasecmp(obj, "window") == 0)
+    {
+        gui_query_window(&width, &height, &upper, &lower, &left, &right);
+    }
 
-    gui_query_screen(&width, &height, &depth, &colors);
-    gui_query_window(&width, &height, &upper, &lower, &left, &right);
-
-    // Dummy.
-    R_NUM(LG_TRUE);
+    // Return translated option.
+    R_NUM(strcasecmp(opt, "width") == 0 ? width :
+          strcasecmp(opt, "height") == 0 ? height :
+          strcasecmp(opt, "depth") == 0 ? depth :
+          strcasecmp(opt, "colors") == 0 ? colors :
+          strcasecmp(opt, "upper") == 0 ? upper :
+          strcasecmp(opt, "lower") == 0 ? lower :
+          strcasecmp(opt, "left") == 0 ? left :
+          strcasecmp(opt, "right") == 0 ? right : 0);
 }
