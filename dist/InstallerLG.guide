@@ -109,6 +109,7 @@ Italian translations.
 - Dynamic options block support (AmiTradeCenter).
 - (makedir (infos)) bug fixed (Deluxe Music).
 - (makedir) error message line number bug fixed.
+- CRLF (Windows) and CR (Mac OS9 and older) line ending support.
 - ?
 
 @{B}0.1.0-alpha.39 (2019-10-20)@{UB}
