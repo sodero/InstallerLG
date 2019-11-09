@@ -17,7 +17,7 @@
 // Input:       err_t type:         Type of error.
 // Return:      const char *:       Error description.
 //------------------------------------------------------------------------------
-const char * h_error_str(err_t err)
+static const char * h_error_str(err_t err)
 {
     static const char *des[] =
     {
