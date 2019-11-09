@@ -291,7 +291,7 @@ static char *h_suffix(const char *name, const char *suffix)
     // Append suffix. Don't trust the input.
     if(name && suffix)
     {
-        // Copy name to make chomp possible.
+        // Copy file or directory name.
         char *tmp = get_buf();
         strncpy(tmp, name, buf_size());
         size_t len = strlen(tmp);
@@ -299,14 +299,22 @@ static char *h_suffix(const char *name, const char *suffix)
         // Chomp trailing slashes if any.
         while(len && tmp[len - 1] == '/')
         {
-            tmp[len--] = '\0';
+            len--;
         }
 
-        // Append suffix to chomp:ed result.
-        snprintf(tmp + len, buf_size() - len, ".%s", suffix);
+        // Don't append suffix to devices or empty strings.
+        if(len && tmp[len - 1] != ':')
+        {
+            // Append suffix to chomp:ed result.
+            snprintf(tmp + len, buf_size() - len, ".%s", suffix);
+        }
+        else
+        {
+            // Invalid input.
+            *tmp = '\0';
+        }
     }
 
-    // Success or failure.
     return get_buf();
 }
 
@@ -1187,18 +1195,24 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
         return LG_FALSE;
     }
 
-    // Return immediately if directory exists.
     if(h_exists(dst) == LG_DIR)
     {
-        // Create icon if (infos) is set and there's no icon.
-        if(opt(contxt, OPT_INFOS) && !h_exists(h_suffix(dst, "info")) &&
-           !h_makedir_create_icon(contxt, dst))
+        // Directory already exists.
+        h_log(contxt, tr(S_EDIR), dst);
+
+        // We're done if no icon is to be created.
+        if(!opt(contxt, OPT_INFOS))
         {
-            // Failed creating icon.
-            return LG_FALSE;
+            return LG_TRUE;
         }
 
-        h_log(contxt, tr(S_EDIR), dst);
+        // Create icon if there's no icon already.
+        if(h_exists(h_suffix(dst, "info")) == LG_NONE)
+        {
+            h_makedir_create_icon(contxt, dst);
+        }
+
+        // Always succeed. Ignore icon problems.
         return LG_TRUE;
     }
 
@@ -1244,18 +1258,22 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
                 // We're done if this is the full path.
                 if(i == len)
                 {
-                    // Create icon if (infos) is set and there's no icon.
-                    if(opt(contxt, OPT_INFOS) &&
-                       !h_exists(h_suffix(dst, "info")) &&
-                       !h_makedir_create_icon(contxt, dst))
-                    {
-                        // Failed creating icon.
-                        return LG_FALSE;
-                    }
-
                     free(dir);
                     h_log(contxt, tr(S_CRTD), dst);
 
+                    // We're done if no icon is to be created.
+                    if(!opt(contxt, OPT_INFOS))
+                    {
+                        return LG_TRUE;
+                    }
+
+                    // Create icon if there's no icon already.
+                    if(h_exists(h_suffix(dst, "info")) == LG_NONE)
+                    {
+                        h_makedir_create_icon(contxt, dst);
+                    }
+
+                    // Always succeed. Ignore icon problems.
                     return LG_TRUE;
                 }
 
