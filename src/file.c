@@ -291,7 +291,19 @@ static char *h_suffix(const char *name, const char *suffix)
     // Append suffix. Don't trust the input.
     if(name && suffix)
     {
-        snprintf(get_buf(), buf_size(), "%s.%s", name, suffix);
+        // Copy name to make chomp possible.
+        char *tmp = get_buf();
+        strncpy(tmp, name, buf_size());
+        size_t len = strlen(tmp);
+
+        // Chomp trailing slashes if any.
+        while(len && tmp[len - 1] == '/')
+        {
+            tmp[len--] = '\0';
+        }
+
+        // Append suffix to chomp:ed result.
+        snprintf(tmp + len, buf_size() - len, ".%s", suffix);
     }
 
     // Success or failure.
