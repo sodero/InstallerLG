@@ -286,35 +286,40 @@ static const char *h_fileonly(entry_p contxt, const char *path)
 //              const char *suffix:   Suffix to append.
 // Return:      char *:               File or directory with suffix.
 //------------------------------------------------------------------------------
-static char *h_suffix(const char *name, const char *suffix)
+static char *h_suffix(const char *stem, const char *suffix)
 {
-    // Append suffix. Don't trust the input.
-    if(name && suffix)
+    // Don't trust the input.
+    if(!stem || !suffix)
     {
-        // Copy file or directory name.
-        char *tmp = get_buf();
-        strncpy(tmp, name, buf_size());
-        size_t len = strlen(tmp);
-
-        // Chomp trailing slashes if any.
-        while(len && tmp[len - 1] == '/')
-        {
-            len--;
-        }
-
-        // Don't append suffix to devices or empty strings.
-        if(len && tmp[len - 1] != ':')
-        {
-            // Append suffix to chomp:ed result.
-            snprintf(tmp + len, buf_size() - len, ".%s", suffix);
-        }
-        else
-        {
-            // Invalid input.
-            *tmp = '\0';
-        }
+        return "";
     }
 
+    // Copy file or directory stem.
+    strncpy(get_buf(), stem, buf_size());
+    size_t len = strlen(get_buf());
+
+    // Chomp trailing slashes if any.
+    while(len && *(get_buf() + len - 1) == '/')
+    {
+        len--;
+    }
+
+    // Don't append to devices or empty strings.
+    if(!len || *(get_buf() + len - 1) == ':')
+    {
+        *get_buf() = '\0';
+        return get_buf();
+    }
+
+    // If suffix is empty, return chomp:ed stem.
+    if(*suffix == '\0')
+    {
+        *(get_buf() + len) = '\0';
+        return get_buf();
+    }
+
+    // Append suffix to chomp:ed stem.
+    snprintf(get_buf() + len, buf_size() - len, ".%s", suffix);
     return get_buf();
 }
 
@@ -1163,7 +1168,7 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
     // Save default icon if we have one.
     #if defined(AMIGA) && !defined(LG_TEST)
     // Create new .info.
-    bool done = PutDiskObject(dst, obj);
+    bool done = PutDiskObject(h_suffix(dst, ""), obj);
     #else
     bool done = fputs("icon", obj) != EOF;
     #endif
