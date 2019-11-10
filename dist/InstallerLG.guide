@@ -103,14 +103,13 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-@{B}0.1.0-alpha.40 (2019-NOT-YET)@{UB}
+@{B}0.1.0-alpha.40 (2019-11-10)@{UB}
 - (querydisplay) implemented.
 - (trap) MVP (Roadshow).
 - Dynamic options block support (AmiTradeCenter).
 - (makedir (infos)) bug fixed (Deluxe Music).
 - (makedir) error message line number bug fixed.
 - CRLF (Windows) and CR (Mac OS9 and older) line ending support.
-- ?
 
 @{B}0.1.0-alpha.39 (2019-10-20)@{UB}
 - Improved robustness.
