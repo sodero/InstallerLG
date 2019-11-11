@@ -290,15 +290,15 @@ entry_p m_getassign(entry_p contxt)
     }
 
     // The second argument is optional.
-    entry_p opt = C_ARG(2);
+    entry_p option = C_ARG(2);
 
     // The bitmask must contain atleast this LDF_READ.
     ULONG msk = LDF_READ;
 
     // Parse the option string if it exists.
-    if(exists(opt))
+    if(exists(option))
     {
-        const char *o = str(opt);
+        const char *o = str(option);
 
         if(*o)
         {
@@ -1129,7 +1129,7 @@ entry_p m_querydisplay(entry_p contxt)
     // We need 2 arguments.
     C_SANE(2, NULL);
 
-    char *obj = str(C_ARG(1)), *opt = str(C_ARG(2));
+    char *obj = str(C_ARG(1)), *option = str(C_ARG(2));
     int width = 0, height = 0, depth = 0, colors = 0, upper = 0, lower = 0,
         left = 0, right = 0;
 
@@ -1145,12 +1145,12 @@ entry_p m_querydisplay(entry_p contxt)
     }
 
     // Return translated option.
-    R_NUM(strcasecmp(opt, "width") == 0 ? width :
-          strcasecmp(opt, "height") == 0 ? height :
-          strcasecmp(opt, "depth") == 0 ? depth :
-          strcasecmp(opt, "colors") == 0 ? colors :
-          strcasecmp(opt, "upper") == 0 ? upper :
-          strcasecmp(opt, "lower") == 0 ? lower :
-          strcasecmp(opt, "left") == 0 ? left :
-          strcasecmp(opt, "right") == 0 ? right : 0);
+    R_NUM(strcasecmp(option, "width") == 0 ? width :
+          strcasecmp(option, "height") == 0 ? height :
+          strcasecmp(option, "depth") == 0 ? depth :
+          strcasecmp(option, "colors") == 0 ? colors :
+          strcasecmp(option, "upper") == 0 ? upper :
+          strcasecmp(option, "lower") == 0 ? lower :
+          strcasecmp(option, "left") == 0 ? left :
+          strcasecmp(option, "right") == 0 ? right : 0);
 }

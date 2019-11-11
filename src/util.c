@@ -249,7 +249,7 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 static void opt_fill_cache(entry_p contxt, entry_p *cache)
 {
     // Iterate over all options to fill up the cache.
-    for(size_t i = 0; exists(contxt->children[i]) && i < OPT_LAST; i++)
+    for(size_t i = 0; i < OPT_LAST && exists(contxt->children[i]); i++)
     {
         entry_p entry = contxt->children[i];
 
@@ -1028,16 +1028,16 @@ entry_p native_exists(entry_p contxt, call_t func)
 size_t num_children(entry_p *vec)
 {
     // Counter.
-    size_t num = 0;
+    size_t count = 0;
 
     // Count the number children.
-    while(vec && exists(vec[num]))
+    while(vec && exists(vec[count]))
     {
-        num++;
+        count++;
     }
 
     // Total count.
-    return num;
+    return count;
 }
 
 //------------------------------------------------------------------------------

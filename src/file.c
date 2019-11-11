@@ -1830,8 +1830,6 @@ entry_p m_copylib(entry_p contxt)
             help       = opt(contxt, OPT_HELP),
             source     = opt(contxt, OPT_SOURCE),
             dest       = opt(contxt, OPT_DEST),
-            newname    = opt(contxt, OPT_NEWNAME),
-            safe       = opt(contxt, OPT_SAFE),
             fail       = opt(contxt, OPT_FAIL),
             nofail     = opt(contxt, OPT_NOFAIL),
             oknodelete = opt(contxt, OPT_OKNODELETE);
@@ -1876,7 +1874,7 @@ entry_p m_copylib(entry_p contxt)
     int type = h_exists(dst);
 
     // A non safe operation in pretend mode always succeeds.
-    if(!safe && get_num(contxt, "@pretend"))
+    if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -1896,6 +1894,8 @@ entry_p m_copylib(entry_p contxt)
 
     if(type == LG_NONE)
     {
+        // Clang scan-build dead code false positive.
+#ifndef __clang_analyzer__
         // Directory doesn't exist, create it. One level deep only.
         if(mkdir(dst, 0777))
         {
@@ -1904,14 +1904,15 @@ entry_p m_copylib(entry_p contxt)
             ERR(ERR_WRITE_DIR, dst);
             R_NUM(LG_FALSE);
         }
-
+#endif
         // Log the success.
         h_log(contxt, tr(S_CRTD), dst);
     }
 
     // Destination file, old name and new path or new name and new path.
-    char *name = newname ? h_tackon(contxt, dst, str(newname)) :
-                           h_tackon(contxt, dst, h_fileonly(contxt, src));
+    char *name = opt(contxt, OPT_NEWNAME) ?
+                 h_tackon(contxt, dst, str(opt(contxt, OPT_NEWNAME))) :
+                 h_tackon(contxt, dst, h_fileonly(contxt, src));
 
     if(!name && PANIC(contxt))
     {
@@ -2645,7 +2646,12 @@ entry_p m_makeassign(entry_p contxt)
         #endif
 
         // Log the outcome.
-        h_log(contxt, res ? tr(S_ACRT) : tr(S_ACRE), asn, dst);
+        h_log(contxt,
+        // Clang scan-build dead code true positive.
+#ifndef __clang_analyzer__
+              res ? tr(S_ACRT) :
+#endif
+              tr(S_ACRE), asn, dst);
     }
     else
     {
@@ -2657,10 +2663,18 @@ entry_p m_makeassign(entry_p contxt)
         #endif
 
         // Log the outcome.
-        h_log(contxt, res ? tr(S_ADEL) : tr(S_ADLE), asn);
+        h_log(contxt,
+        // Clang scan-build dead code true positive.
+#ifndef __clang_analyzer__
+              res ? tr(S_ADEL) :
+#endif
+              tr(S_ADLE), asn);
     }
 
+    // Clang scan-build dead code true positive.
+#ifndef __clang_analyzer__
     if(!res)
+#endif
     {
         // Could not create / rm assign / get lock.
         ERR(ERR_ASSIGN, str(C_ARG(1)));

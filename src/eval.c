@@ -40,7 +40,7 @@ static entry_p swap(entry_p *dst, entry_p *src)
         // New position of *src is *dst.
         return *dst;
     }
-    
+
     // No swap.
     return *src;
 }
@@ -185,17 +185,17 @@ entry_p resolve(entry_p entry)
 static int opt_to_int(entry_p entry)
 {
     // Resolve once.
-    char *opt = str(entry);
+    char *option = str(entry);
 
     // Is this an ordinary option?
     if(entry->id != OPT_CONFIRM)
     {
         // No translation needed.
-        return atoi(opt);
+        return atoi(option);
     }
 
     // Translate (confirm) to userlevel.
-    return str_to_userlevel(opt, atoi(opt));
+    return str_to_userlevel(option, atoi(option));
 }
 
 //------------------------------------------------------------------------------
