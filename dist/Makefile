@@ -65,16 +65,16 @@ clean:
 	$(RM) -R $(NAME) Catalogs
 	$(RM) $(SRC)/*.swp ../test/*.swp $(BIN)/_*
 
-$(ARC): $(EXE) $(CAT)
-	lha $(LHAFLAGS) $@ $(FILES)
+$(ARC): $(CAT) $(EXE)
+	sleep 3 && lha $(LHAFLAGS) $@ $(FILES)
 
 $(CAT):
-	$(MAKE) -C $(BIN) cat
-	cp -R $(BIN)/$(CAT) .
+	$(MAKE) -C $(BIN) cat && \
+	mv $(BIN)/$(CAT) $@
 
 $(EXE):
 	$(MAKE) -C $(BIN) $(EXE)
-	cp $(BIN)/$(EXE) $(EXE)
+	mv $(BIN)/$(EXE) $@
 
 $(README): $(DIR)/$(NAME).readme
 	cat $^ | $(SED) -e 's/__ARCH__/$(ARCH)-$(OS)/' > $@

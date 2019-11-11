@@ -36,8 +36,7 @@ entry_p m_abort(entry_p contxt)
     // Concatenate all children.
     char *msg = get_chlstr(contxt, false);
 
-    // Make sure that we're not out of memory and that all children are
-    // resolvable.
+    // Bail out on out of memory or if we have unresolvable children.
     if((!msg && PANIC(contxt)) || DID_ERR)
     {
         free(msg);
@@ -139,11 +138,8 @@ entry_p m_exit(entry_p contxt)
 // (onerror (<statements>))
 //     general error trap
 //
-// ******************************************************
-// In part implemented using m_procedure. This function just invokes the
-// @onerror custom procedure inserted using (onerror) which is a special case of
-// (procedure)
-// ******************************************************
+// In part implemented using m_procedure. This function invokes the @onerror
+// procedure inserted using (onerror), which is a special case of (procedure)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
@@ -171,8 +167,7 @@ entry_p m_onerror(entry_p contxt)
             // Connect reference to the current context.
             ref.parent = contxt;
 
-            // Invoke @onerror by calling m_gosub just like any non-native
-            // function call.
+            // Invoke @onerror by calling m_gosub
             return m_gosub(&ref);
         }
 

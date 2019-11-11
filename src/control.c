@@ -13,6 +13,10 @@
 #include "eval.h"
 #include "util.h"
 
+// Iteration mode.
+#define LG_UNTIL 1
+#define LG_WHILE 0
+
 //------------------------------------------------------------------------------
 // (if <condition> <then-statement> [<else-statements>])
 //     conditional
@@ -117,7 +121,7 @@ static entry_p h_whunt(entry_p contxt, int mode)
 entry_p m_until(entry_p contxt)
 {
     // Implemented in h_whunt.
-    return h_whunt(contxt, 1);
+    return h_whunt(contxt, LG_UNTIL);
 }
 
 //------------------------------------------------------------------------------
@@ -129,7 +133,7 @@ entry_p m_until(entry_p contxt)
 entry_p m_while(entry_p contxt)
 {
     // Implemented in h_whunt.
-    return h_whunt(contxt, 0);
+    return h_whunt(contxt, LG_WHILE);
 }
 
 //------------------------------------------------------------------------------

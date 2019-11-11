@@ -1273,13 +1273,8 @@ MUIDSP IGCopyFilesSetCur(Class *cls, Object *obj,
 
         // Get the number of characters that can be shown given the width of
         // the gauge and the contents of the string.
-        ULONG max = TextFit
-        (
-            _rp(my->Progress),
-            file, len, &ext, NULL, 1,
-            _mwidth(my->Progress),
-            _mheight(my->Progress)
-        );
+        ULONG max = TextFit(_rp(my->Progress), file, len, &ext, NULL, 1,
+                            _mwidth(my->Progress), _mheight(my->Progress));
 
         // Do we need to truncate the file string to not wreck the gauge?
         if(len > max)
@@ -1371,21 +1366,12 @@ MUIDSP IGCopyFilesAdd(Class *cls, Object *obj,
     struct IGData *my = INST_DATA(cls, obj);
 
     // Insert filename.
-    DoMethod
-    (
-        my->List, MUIM_List_Insert,
-        &(msg->File), 1,
-        MUIV_List_Insert_Bottom
-    );
+    DoMethod(my->List, MUIM_List_Insert, &(msg->File), 1,
+             MUIV_List_Insert_Bottom);
 
     // All files are selected by default.
-    DoMethod
-    (
-        my->List, MUIM_List_Select,
-        MUIV_List_Select_All,
-        MUIV_List_Select_On,
-        NULL
-    );
+    DoMethod(my->List, MUIM_List_Select, MUIV_List_Select_All,
+             MUIV_List_Select_On, NULL);
 
     // The lister must be visible.
     set(my->List, MUIA_ShowMe, TRUE);
@@ -1464,10 +1450,8 @@ MUIDSP IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
             // Get 8-bit RGB start and stop values.
             int r1 = msg->ColorStart >> 16,
                 g1 = (msg->ColorStart >> 8) & 0xff,
-                b1 = msg->ColorStart & 0xff,
-                r2 = msg->ColorEnd >> 16,
-                g2 = (msg->ColorEnd >> 8) & 0xff,
-                b2 = msg->ColorEnd & 0xff,
+                b1 = msg->ColorStart & 0xff, r2 = msg->ColorEnd >> 16,
+                g2 = (msg->ColorEnd >> 8) & 0xff, b2 = msg->ColorEnd & 0xff,
 
                 // Minimum chunk = 1 << ct pixels, to save time when drawing.
                 ct = 2, s = my->Win->Height >> ct;
@@ -1508,20 +1492,14 @@ MUIDSP IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
                 }
 
                 // Set backdrop pen.
-                SetRPAttrs
-                (
-                    my->Win->RPort,
-                    RPTAG_APen, pn,
-                    RPTAG_BPen, pn,
-                    TAG_END
-                );
+                SetRPAttrs(my->Win->RPort, RPTAG_APen, pn, RPTAG_BPen, pn,
+                           TAG_END);
 
                 // Draw effect if it's enabled.
                 if(msg->Effect & G_EFFECT)
                 {
                     // Start from the bottom, one delta at a time.
-                    int d = 1 << ct,
-                        v = my->Win->Height;
+                    int d = 1 << ct, v = my->Win->Height;
 
                     // For all colors in gradient, draw rectangle with delta
                     // height.
@@ -1531,23 +1509,14 @@ MUIDSP IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
                         i -= 3;
 
                         // Use the same pen again and again.
-                        SetRGB32
-                        (
-                            &my->Scr->ViewPort, pn,
-                            cv[i],
-                            cv[i + 1],
-                            cv[i + 2]
-                        );
+                        SetRGB32(&my->Scr->ViewPort, pn, cv[i], cv[i + 1],
+                                 cv[i + 2]);
 
                         // From bottom to top.
                         v -= d;
 
                         // Draw rectangle.
-                        RectFill
-                        (
-                            my->Win->RPort, 0, v,
-                            my->Win->Width, v + d
-                        );
+                        RectFill(my->Win->RPort, 0, v, my->Win->Width, v + d);
                     }
                 }
 
@@ -1737,9 +1706,9 @@ MUIDSP IGShowPicture(Class *cls, Object *obj, struct MUIP_IG_ShowPicture *msg)
 
                 // Height of the window depends on the width.
                 ys = (msg->Action & G_MORE) ? scr->Height >>
-                         ((msg->Action & G_LARGE) ? 2 : 1) :
+                     ((msg->Action & G_LARGE) ? 2 : 1) :
                      (msg->Action & G_LESS) ? scr->Height >>
-                         ((msg->Action & G_SMALL) ? 2 : 3) :
+                     ((msg->Action & G_SMALL) ? 2 : 3) :
                      scr->Height >> ((msg->Action & G_SMALL) ? 3 :
                                      (msg->Action & G_LARGE) ? 1 : 2);
             }
@@ -1876,12 +1845,9 @@ MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
                 // We only support pictures at the moment.
                 if(gid == GID_PICTURE)
                 {
-                    DoMethod
-                    (
-                        obj, MUIM_IG_ShowPicture,
-                        mid + MUIA_IG_MediaBase,
-                        msg->Media, msg->Action
-                    );
+                    DoMethod(obj, MUIM_IG_ShowPicture,
+                             mid + MUIA_IG_MediaBase,
+                             msg->Media, msg->Action);
 
                     // Return current media ID.
                     *CAST(msg->MediaID, int *) = mid;
@@ -1959,12 +1925,10 @@ MUIDSP IGMessage(Class *cls, Object *obj, struct MUIP_IG_Message *msg)
         // G_TRUE / G_ABORT / G_EXIT
         return rc;
     }
-    else
-    {
-        // Unknown error.
-        GERR(tr(S_UNER));
-        return G_ERR;
-    }
+
+    // Unknown error.
+    GERR(tr(S_UNER));
+    return G_ERR;
 }
 
 //------------------------------------------------------------------------------
@@ -2384,7 +2348,6 @@ MUIDSP IGCheckBoxes(Class *cls, Object *obj,
 
                     get(cb[i], MUIA_Selected, &sel);
                     *CAST(msg->Bitmap, ULONG *) |= (sel ? (1 << i) : 0);
-
                     DoMethod(my->Empty, OM_REMMEMBER, cb[i]);
                     MUI_DisposeObject(cb[i]);
                 }
@@ -2543,25 +2506,15 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
     // Open backdrop screen / window on demand.
     if(GetTagData(MUIA_IG_UseCustomScreen, FALSE, msg->ops_AttrList))
     {
-        scr = OpenScreenTags
-        (
-            NULL,
-            SA_PubName, "Installer",
-            SA_LikeWorkbench, TRUE,
-            SA_ShowTitle, FALSE,
-            TAG_END
-        );
+        scr = OpenScreenTags(NULL, SA_PubName, "Installer",
+                             SA_LikeWorkbench, TRUE, SA_ShowTitle, FALSE,
+                             TAG_END);
 
         if(scr)
         {
-            win = OpenWindowTags
-            (
-                NULL,
-                WA_CustomScreen, scr,
-                WA_Borderless, TRUE,
-                WA_Backdrop, TRUE,
-                TAG_END
-            );
+            win = OpenWindowTags(NULL, WA_CustomScreen, scr,
+                                 WA_Borderless, TRUE, WA_Backdrop, TRUE,
+                                 TAG_END);
         }
     }
 
@@ -3347,11 +3300,8 @@ inp_t gui_bool(const char *msg, const char *hlp, const char *yes,
 //              const char **ret:   String value from user.
 // Return:      inp_t: G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-inp_t gui_string(const char *msg,
-                 const char *hlp,
-                 const char *def,
-                 bool bck,
-                 const char **ret)
+inp_t gui_string(const char *msg, const char *hlp, const char *def,
+                 bool bck, const char **ret)
 {
     inp_t grc =
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -3376,13 +3326,8 @@ inp_t gui_string(const char *msg,
 //              int *ret:           Return value.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-inp_t gui_number(const char *msg,
-                 const char *hlp,
-                 int min,
-                 int max,
-                 int def,
-                 bool bck,
-                 int *ret)
+inp_t gui_number(const char *msg, const char *hlp, int min, int max,
+                 int def, bool bck, int *ret)
 {
     inp_t grc =
     #if defined(AMIGA) && !defined(LG_TEST)

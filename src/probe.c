@@ -164,13 +164,13 @@ entry_p m_database(entry_p contxt)
     int memf = -1;
     char *feat = str(C_ARG(1)), *ret = "Unknown";
 
-    if(strcmp(feat, "cpu") == 0)
+    if(strcasecmp(feat, "cpu") == 0)
     {
         // Get host CPU name.
         ret = h_cpu_name();
     }
     else
-    if(strcmp(feat, "os") == 0)
+    if(strcasecmp(feat, "os") == 0)
     {
         // Get OS name.
         #if defined(AMIGA) && !defined(LG_TEST)
@@ -194,7 +194,7 @@ entry_p m_database(entry_p contxt)
 
     }
     else
-    if(strcmp(feat, "graphics-mem") == 0)
+    if(strcasecmp(feat, "graphics-mem") == 0)
     {
         memf =
         #if defined(AMIGA) && !defined(LG_TEST)
@@ -204,7 +204,7 @@ entry_p m_database(entry_p contxt)
         #endif
     }
     else
-    if(!strcmp(feat, "total-mem"))
+    if(!strcasecmp(feat, "total-mem"))
     {
         memf =
         #if defined(AMIGA) && !defined(LG_TEST)
@@ -223,7 +223,7 @@ entry_p m_database(entry_p contxt)
     // Are we testing for a specific value?
     if(exists(C_ARG(2)))
     {
-        ret = strcmp(ret, str(C_ARG(2))) ? "0" : "1";
+        ret = strcasecmp(ret, str(C_ARG(2))) ? "0" : "1";
     }
 
     // Return string value.

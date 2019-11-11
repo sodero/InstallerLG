@@ -18,10 +18,7 @@
 //------------------------------------------------------------------------------
 // (<procedure-name>)
 //
-// ********************************
-// Trampoline function for invoking
-// user defined procedures.
-// ********************************
+// Trampoline function for invoking user defined procedures.
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
@@ -38,8 +35,7 @@ entry_p m_gosub(entry_p contxt)
         return end();
     }
 
-    // Search through all symbols and see if there's a used defined
-    // procedure that matches the reference name.
+    // Search for a procedure that matches the reference name.
     for(entry_p *cus = con->symbols; exists(*cus); cus++)
     {
         // Skip symbol if we don't have a match.
@@ -93,8 +89,7 @@ entry_p m_gosub(entry_p contxt)
         // Recursion depth.
         static int dep;
 
-        // Keep track of the recursion depth. Do not invoke if we're
-        // beyond LG_MAXDEP.
+        // Keep track of the recursion depth. Do not go beyond LG_MAXDEP.
         if(dep++ < LG_MAXDEP)
         {
             // Return value.
