@@ -32,7 +32,6 @@
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*- tokens -------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*        arithmetic.c|h */ /* '+' '/' '*' '-' */
-%token /* bitwise.c|h    */ AND BITAND BITNOT BITOR BITXOR NOT IN OR SHIFTLEFT SHIFTRIGHT XOR
 %token /* comparison.c|h */ EQ GT GTE LT LTE NEQ
 %token /* control.c|h    */ IF SELECT UNTIL WHILE TRACE RETRACE
 %token /* external.c|h   */ EXECUTE REXX RUN
@@ -40,6 +39,7 @@
 %token /* file.c|h       */ COPYFILES COPYLIB DELETE EXISTS FILEONLY FOREACH MAKEASSIGN MAKEDIR PROTECT
        /*                */ STARTUP TEXTFILE TOOLTYPE TRANSCRIPT RENAME
 %token /* information.c  */ COMPLETE DEBUG MESSAGE USER WELCOME WORKING
+%token /* logic.c|h      */ AND BITAND BITNOT BITOR BITXOR NOT IN OR SHIFTLEFT SHIFTRIGHT XOR
 %token /* media.c        */ CLOSEMEDIA EFFECT SETMEDIA SHOWMEDIA
 %token /* probe.c|h      */ DATABASE EARLIER GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM
        /*                */ GETVERSION ICONINFO QUERYDISPLAY
@@ -179,7 +179,7 @@ ivp:            add        /* arithmetic.c|h */  |
                 div                              |
                 mul                              |
                 sub                              |
-                and           /* bitwise.c|h */  |
+                and           /* logic.c|h */    |
                 bitand                           |
                 bitnot                           |
                 bitor                            |
@@ -276,19 +276,6 @@ div:            '(' '/' pp ')'                   { $$ = new_native(strdup("/"), 
 mul:            '(' '*' ps ')'                   { $$ = new_native(strdup("*"), LINE, m_mul, $3, NUMBER); };
 sub:            '(' '-' pp ')'                   { $$ = new_native(strdup("-"), LINE, m_sub, $3, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* bitwise.c|h ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
-and:            '(' AND ps ')'                   { $$ = new_native(strdup("AND"), LINE, m_and, $3, NUMBER); };
-bitand:         '(' BITAND pp ')'                { $$ = new_native(strdup("BITAND"), LINE, m_bitand, $3, NUMBER); };
-bitnot:         '(' BITNOT p ')'                 { $$ = new_native(strdup("BITNOT"), LINE, m_bitnot, push(new_contxt(), $3), NUMBER); };
-bitor:          '(' BITOR pp ')'                 { $$ = new_native(strdup("BITOR"), LINE, m_bitor, $3, NUMBER); };
-bitxor:         '(' BITXOR pp ')'                { $$ = new_native(strdup("BITXOR"), LINE, m_bitxor, $3, NUMBER); };
-not:            '(' NOT p ')'                    { $$ = new_native(strdup("NOT"), LINE, m_not, push(new_contxt(), $3), NUMBER); };
-in:             '(' IN p ps ')'                  { $$ = new_native(strdup("IN"), LINE, m_in, push(push(new_contxt(), $3), $4), NUMBER); };
-or:             '(' OR ps ')'                    { $$ = new_native(strdup("OR"), LINE, m_or, $3, NUMBER); };
-shiftleft:      '(' SHIFTLEFT pp ')'             { $$ = new_native(strdup("shiftleft"), LINE, m_shiftleft, $3, NUMBER); };
-shiftright:     '(' SHIFTRIGHT pp ')'            { $$ = new_native(strdup("shiftright"), LINE, m_shiftright, $3, NUMBER); };
-xor:            '(' XOR pp ')'                   { $$ = new_native(strdup("XOR"), LINE, m_xor, $3, NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* comparison.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------*/
 eq:             '(' '=' pp ')'                   { $$ = new_native(strdup("="), LINE, m_eq, $3, NUMBER); };
 gt:             '(' '>' pp ')'                   { $$ = new_native(strdup(">"), LINE, m_gt, $3, NUMBER); };
@@ -379,6 +366,19 @@ user:           '(' USER p ')'                   { $$ = new_native(strdup("user"
 welcome:        '(' WELCOME ps ')'               { $$ = new_native(strdup("welcome"), LINE, m_welcome, $3, NUMBER); } |
                 '(' WELCOME ')'                  { $$ = new_native(strdup("welcome"), LINE, m_welcome, NULL, NUMBER); };
 working:        '(' WORKING ps ')'               { $$ = new_native(strdup("working"), LINE, m_working, $3, NUMBER); };
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* logic.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+and:            '(' AND ps ')'                   { $$ = new_native(strdup("AND"), LINE, m_and, $3, NUMBER); };
+bitand:         '(' BITAND pp ')'                { $$ = new_native(strdup("BITAND"), LINE, m_bitand, $3, NUMBER); };
+bitnot:         '(' BITNOT p ')'                 { $$ = new_native(strdup("BITNOT"), LINE, m_bitnot, push(new_contxt(), $3), NUMBER); };
+bitor:          '(' BITOR pp ')'                 { $$ = new_native(strdup("BITOR"), LINE, m_bitor, $3, NUMBER); };
+bitxor:         '(' BITXOR pp ')'                { $$ = new_native(strdup("BITXOR"), LINE, m_bitxor, $3, NUMBER); };
+not:            '(' NOT p ')'                    { $$ = new_native(strdup("NOT"), LINE, m_not, push(new_contxt(), $3), NUMBER); };
+in:             '(' IN p ps ')'                  { $$ = new_native(strdup("IN"), LINE, m_in, push(push(new_contxt(), $3), $4), NUMBER); };
+or:             '(' OR ps ')'                    { $$ = new_native(strdup("OR"), LINE, m_or, $3, NUMBER); };
+shiftleft:      '(' SHIFTLEFT pp ')'             { $$ = new_native(strdup("shiftleft"), LINE, m_shiftleft, $3, NUMBER); };
+shiftright:     '(' SHIFTRIGHT pp ')'            { $$ = new_native(strdup("shiftright"), LINE, m_shiftright, $3, NUMBER); };
+xor:            '(' XOR pp ')'                   { $$ = new_native(strdup("XOR"), LINE, m_xor, $3, NUMBER); };
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* media.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 closemedia:     '(' CLOSEMEDIA p ')'             { $$ = new_native(strdup("closemedia"), LINE, m_closemedia, push(new_contxt(), $3), NUMBER); };
