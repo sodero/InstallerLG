@@ -25,8 +25,7 @@
 //------------------------------------------------------------------------------
 entry_p m_if(entry_p contxt)
 {
-    // Allow empty bodies. If empty, resolve the conditional so that side
-    // effects, if any, will come into being.
+    // Allow empty bodies. Always resolve the conditional to evoke side effects.
     C_SANE(1, NULL);
 
     // Truth value of the condition.
