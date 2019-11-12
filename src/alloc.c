@@ -394,8 +394,8 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
             // Adopt contents of CONTXT, if there is any.
             if(chl && chl->type == CONTXT)
             {
-                // This is for options that contain more info than just 1 / 0, E.g
-                // (delopts) and (command).
+                // This is for options that contain more info than just 1 / 0,
+                // e.g (delopts) and (command).
                 move_contxt(entry, chl);
             }
 

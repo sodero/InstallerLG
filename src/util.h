@@ -50,7 +50,7 @@ int str_to_userlevel(const char *user, int def);
 //------------------------------------------------------------------------------
 #define D_CUR    contxt->resolved
 #define D_NUM    contxt->resolved->id
-#define R_CUR    if(contxt) return contxt->resolved; return NULL
+#define R_CUR    return contxt ? contxt->resolved : NULL
 #define R_NUM(X) contxt->resolved->id = X; return contxt->resolved
 #define R_STR(X) char *r_str = X; if(r_str) {free(contxt->resolved->name);\
                  contxt->resolved->name = r_str;} else { PANIC(contxt);\
@@ -68,13 +68,13 @@ int str_to_userlevel(const char *user, int def);
 #define HERE DBG_PRINT("%s:%s:%d\n", __FILE__, __func__, __LINE__)
 #define THIS(X) DBG_PRINT("%p <- %s:%s:%d\n", X, __FILE__, __func__, __LINE__)
 #ifndef __clang_analyzer__
-#define C_SANE(N,O) if(!c_sane(contxt, N)) {PANIC(contxt); R_CUR;}\
+#define C_SANE(N,O) if(!c_sane(contxt, N)) {PANIC(contxt); return end();}\
                     {entry_p op_ = O; if(op_ && opt(O,OPT_INIT) && DID_ERR)\
-                    {R_CUR;}}
+                    {return contxt->resolved;}}
 #else
 #define C_SANE(N,O)
 #endif
-#define S_SANE(N) if(!s_sane(contxt, N)) {PANIC(contxt); R_CUR;}
+#define S_SANE(N) if(!s_sane(contxt, N)) {PANIC(contxt); return end();}
 #ifdef __AROS__
 #define B2CSTR(S) AROS_BSTR_ADDR(S)
 #else

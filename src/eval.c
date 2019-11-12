@@ -465,8 +465,7 @@ void run(entry_p entry)
     // i18n setup.
     locale_init();
 
-    // Initialize GUI before starting the execution. If (effect) type is set,
-    // use a custom screen.
+    // Initialize GUI. Use a custom screen if (effect) statement exists.
     if(gui_init(status != false))
     {
         // If an 'effect' statement exists, execute this first of all.
