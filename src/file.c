@@ -65,7 +65,7 @@ entry_p m_expandpath(entry_p contxt)
         if(NameFromLock(lock, get_buf(), buf_size()))
         {
             UnLock(lock);
-            R_STR(strdup(get_buf()));
+            R_STR(DBG_ALLOC(strdup(get_buf())));
         }
 
         // Buffer overflow.
@@ -77,7 +77,7 @@ entry_p m_expandpath(entry_p contxt)
     R_EST;
     #else
     // Testing only.
-    R_STR(strdup(pth));
+    R_STR(DBG_ALLOC(strdup(pth)));
     #endif
 }
 
@@ -2394,7 +2394,7 @@ entry_p m_fileonly(entry_p contxt)
     C_SANE(1, NULL);
 
     // Implementation in helper function.
-    R_STR(strdup(h_fileonly(contxt, str(C_ARG(1)))));
+    R_STR(DBG_ALLOC(strdup(h_fileonly(contxt, str(C_ARG(1))))));
 }
 
 //------------------------------------------------------------------------------
