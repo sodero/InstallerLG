@@ -22,25 +22,25 @@
 //------------------------------------------------------------------------------
 // Utility functions.
 //------------------------------------------------------------------------------
-void ror(entry_p *e);
-entry_p local(entry_p e);
-entry_p global(entry_p e);
-entry_p custom(entry_p e);
-entry_p native(entry_p e);
-entry_p opt(entry_p c, opt_t t);
-bool c_sane(entry_p c, size_t n);
-bool s_sane(entry_p c, size_t n);
+void ror(entry_p *entry);
+entry_p local(entry_p entry);
+entry_p global(entry_p entry);
+entry_p custom(entry_p entry);
+entry_p native(entry_p entry);
+entry_p opt(entry_p contxt, opt_t type);
+bool c_sane(entry_p contxt, size_t num);
+bool s_sane(entry_p contxt, size_t num);
 void dump(entry_p entry);
-int get_num(entry_p c, char *v);
-char *get_str(entry_p c, char *v);
-char *get_optstr(entry_p c, opt_t t);
-char *get_chlstr(entry_p c, bool p);
-void set_num(entry_p c, char *v, int n);
-void set_str(entry_p c, char *v, char *n);
+int get_num(entry_p contxt, char *var);
+char *get_str(entry_p contxt, char *var);
+char *get_optstr(entry_p contxt, opt_t type);
+char *get_chlstr(entry_p contxt, bool pad);
+void set_num(entry_p contxt, char *var, int val);
+void set_str(entry_p contxt, char *var, char *val);
 char *get_buf(void);
 size_t buf_size(void);
 void *dbg_alloc(int line, const char *file, const char *func, void *mem);
-entry_p native_exists(entry_p contxt, call_t f);
+entry_p native_exists(entry_p contxt, call_t func);
 size_t num_children(entry_p *vec);
 bool exists(entry_p entry);
 int str_to_userlevel(const char *user, int def);

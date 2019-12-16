@@ -467,13 +467,13 @@ entry_p new_cusref(char *name, int line, entry_p arg)
 //------------------------------------------------------------------------------
 // Name:        append
 // Description: Append entry to array. Grow array if necessary.
-// Input:       entry_p **dest:  The array.
+// Input:       entry_p **dst:  The array.
 //              entry_p entry:   The entry.
 // Return:      entry_p:         On success, the entry. On failure, NULL.
 //------------------------------------------------------------------------------
-entry_p append(entry_p **dest, entry_p entry)
+entry_p append(entry_p **dst, entry_p ent)
 {
-    if(!entry || !dest || !*dest)
+    if(!ent || !dst || !*dst)
     {
         // Bad input.
         PANIC(NULL);
@@ -484,13 +484,13 @@ entry_p append(entry_p **dest, entry_p entry)
     size_t num = 0;
 
     // Find the first free slot if there is one.
-    while(exists((*dest)[num]))
+    while(exists((*dst)[num]))
     {
         num++;
     }
 
     // No free slot available. More memory needed.
-    if((*dest)[num])
+    if((*dst)[num])
     {
         // Everything must be set to '0'. Make the array twice as big.
         entry_p *new = DBG_ALLOC(calloc((num << 1) + 1, sizeof(entry_p)));
@@ -499,26 +499,26 @@ entry_p append(entry_p **dest, entry_p entry)
         if(new)
         {
             new[num << 1] = end();
-            memcpy(new, *dest, num * sizeof(entry_p));
-            free(*dest);
-            *dest = new;
+            memcpy(new, *dst, num * sizeof(entry_p));
+            free(*dst);
+            *dst = new;
         }
         else
         {
             // Out of memory. This is a very rude way of not leaking memory
             // when out of memory. Simply overwrite previous elements after
             // killing them of.
-            kill((*dest)[0]);
-            (*dest)[0] = entry;
+            kill((*dst)[0]);
+            (*dst)[0] = ent;
 
-            PANIC(entry);
-            return entry;
+            PANIC(ent);
+            return ent;
         }
     }
 
     // Let entry be the new tail.
-    (*dest)[num] = entry;
-    return entry;
+    (*dst)[num] = ent;
+    return ent;
 }
 
 //------------------------------------------------------------------------------

@@ -100,7 +100,7 @@ typedef enum
     S_GONE,
 } res_t;
 
-const char *tr(res_t r);
+const char *tr(res_t res);
 void locale_init(void);
 void locale_exit(void);
 
