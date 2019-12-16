@@ -671,7 +671,7 @@ char *get_optstr(entry_p contxt, opt_t type)
 }
 
 //------------------------------------------------------------------------------
-// Name:        get_chlst
+// Name:        get_chlstr
 // Description: Concatenate the string representations of all non context
 //              children of a context.
 // Input:       entry_p contxt:  The context.

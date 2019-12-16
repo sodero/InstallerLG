@@ -23,7 +23,7 @@ entry_p m_tackon(entry_p contxt);
 //------------------------------------------------------------------------------
 // Helper functions
 //------------------------------------------------------------------------------
-char *h_tackon(entry_p contxt, const char *p, const char *f);
-char *h_pathonly(const char *f);
+char *h_tackon(entry_p contxt, const char *pre, const char *suf);
+char *h_pathonly(const char *full);
 
 #endif
