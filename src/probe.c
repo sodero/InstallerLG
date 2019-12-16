@@ -475,8 +475,6 @@ entry_p m_getdevice(entry_p contxt)
 
     // Could not get <path> info.
     ERR(ERR_READ, str(C_ARG(1)));
-    #else
-    (void) contxt;
     #endif
     // Return empty string on failure.
     R_EST;
@@ -872,7 +870,7 @@ int h_getversion_file(const char *name)
 
     // If we have a valid version return that. Otherwise the file might be a
     // library, try to get the library version and return that instead.
-    return ver != LG_NOVER ? ver : h_getversion_lib(name);
+    return ver == LG_NOVER ? h_getversion_lib(name) : ver;
 }
 
 //------------------------------------------------------------------------------
