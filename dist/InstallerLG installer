@@ -158,7 +158,7 @@
                 (while (> (strlen (to_lang i n)) 0)
                     (if (bitand cats (shiftleft 1 i))
                         (copyfiles
-                            (source ("Catalogs/%s/Installer.catalog" (to_lang i 1)))
+                            (source ("Catalogs/%s/InstallerLG.catalog" (to_lang i 1)))
                             (dest ("LOCALE:Catalogs/%s" (to_lang i n)))
                             (optional "force")
                         )
