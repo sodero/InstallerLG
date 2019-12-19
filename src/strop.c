@@ -439,11 +439,9 @@ entry_p m_substr(entry_p contxt)
             R_EST;
         }
 
-        // Cap all values.
+        // Cap values, set and return.
         len -= off;
         len = len < chr ? len : chr;
-
-        // Copy, set and return.
         memcpy(ret, arg + off, len);
         R_STR(ret);
     }
@@ -543,13 +541,11 @@ char *h_tackon(entry_p contxt, const char *pre, const char *suf)
     {
         char *ret = DBG_ALLOC(strdup(lep ? pre : suf));
 
-        if(!ret)
+        if(!ret && PANIC(contxt))
         {
             // Out of memory.
-            PANIC(contxt);
+            return NULL;
         }
-
-        return ret;
     }
 
     // Allocate memory to hold path, filename, delimiter and termination.

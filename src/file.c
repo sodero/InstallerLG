@@ -1282,8 +1282,7 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
                     return LG_TRUE;
                 }
 
-                // Not the full path, reinstate delimiter and start all over
-                // again with the full path.
+                // Not the full path, reinstate delimiter and start over.
                 dir[i] = del;
                 break;
             }
