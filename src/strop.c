@@ -541,11 +541,13 @@ char *h_tackon(entry_p contxt, const char *pre, const char *suf)
     {
         char *ret = DBG_ALLOC(strdup(lep ? pre : suf));
 
-        if(!ret && PANIC(contxt))
+        if(!ret)
         {
             // Out of memory.
-            return NULL;
+            PANIC(contxt);
         }
+
+        return ret;
     }
 
     // Allocate memory to hold path, filename, delimiter and termination.
