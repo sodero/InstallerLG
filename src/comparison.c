@@ -37,14 +37,14 @@ static bool h_cmp_numbers(entry_p alfa, entry_p beta)
 //------------------------------------------------------------------------------
 static bool h_cmp_strings(entry_p alfa, entry_p beta)
 {
-    // Do not trust strings, we might be out of memory.
+    // Don't trust strings, we might be out of memory.
     return alfa->type == STRING && alfa->name && beta->type == STRING &&
            beta->name;
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_cmp
-// Description: Helper function for m_eq, m_gt, m_gte, m_lt, m_lte, m_ne.
+// Name:        h_cmp_mixed
+// Description: Compare arguments of different primitive types.
 // Input:       entry_p lhs:    Left argument.
 //              entry_p rhs:    Right argument.
 // Return:      int:            Left - right.
