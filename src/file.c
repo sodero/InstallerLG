@@ -2272,6 +2272,32 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_delete
+// Description: Delete file / dir.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   The file / dir.
+// Return:      int:                LG_TRUE / LG_FALSE / ERR_PANIC.
+//------------------------------------------------------------------------------
+static int h_delete(entry_p contxt, const char *file)
+{
+    switch(h_exists(file))
+    {
+        case LG_NONE:
+            h_log(contxt, tr(S_NSFL), file);
+            return LG_FALSE;
+
+        case LG_FILE:
+            return h_delete_file(contxt, file);
+
+        case LG_DIR:
+            return h_delete_dir(contxt, file);
+
+        default:
+            return PANIC(contxt);
+    }
+}
+
+//------------------------------------------------------------------------------
 // (delete file (help..) (prompt..) (confirm..)
 //     (infos) (optional <option> <option> ...) (all)
 //     (delopts <option> <option> ...) (safe))
@@ -2285,13 +2311,12 @@ entry_p m_delete(entry_p contxt)
     // One argument and options.
     C_SANE(1, C_ARG(2));
 
-    int wild = 0;
     char *file = str(C_ARG(1));
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    wild = ParsePatternNoCase(file, get_buf(), buf_size());
+    int wild = ParsePatternNoCase(file, get_buf(), buf_size());
     #else
-    wild = get_num(contxt, "@wild");
+    int wild = get_num(contxt, "@wild");
     #endif
 
     // Can we parse the input string?
@@ -2302,13 +2327,9 @@ entry_p m_delete(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    entry_p help     = opt(C_ARG(2), OPT_HELP),
-            prompt   = opt(C_ARG(2), OPT_PROMPT),
-            confirm  = opt(C_ARG(2), OPT_CONFIRM);
-
-    // If we need confirmation and the user skips or aborts, return. On
-    // abort, the HALT will be set by h_confirm.
-    if(confirm && !h_confirm(C_ARG(2), str(help), str(prompt)))
+    // Return on abort or if the user doesn't confirm when (confirm) is set.
+    if(opt(C_ARG(2), OPT_CONFIRM) && !h_confirm(C_ARG(2),
+       str(opt(C_ARG(2), OPT_HELP)), str(opt(C_ARG(2), OPT_PROMPT))))
     {
         R_NUM(LG_FALSE);
     }
@@ -2326,21 +2347,7 @@ entry_p m_delete(entry_p contxt)
         R_NUM(h_delete_pattern(contxt, file));
     }
 
-    switch(h_exists(file))
-    {
-        case LG_NONE:
-            h_log(contxt, tr(S_NSFL), file);
-            R_NUM(LG_FALSE);
-
-        case LG_FILE:
-            R_NUM(h_delete_file(contxt, file));
-
-        case LG_DIR:
-            R_NUM(h_delete_dir(contxt, file));
-
-        default:
-            R_NUM(PANIC(contxt));
-    }
+    R_NUM(h_delete(contxt, file));
 }
 
 //------------------------------------------------------------------------------
@@ -2695,19 +2702,14 @@ entry_p m_makedir(entry_p contxt)
     // One argument and options.
     C_SANE(1, C_ARG(2));
 
-    entry_p prompt   = opt(C_ARG(2), OPT_PROMPT),
-            help     = opt(C_ARG(2), OPT_HELP),
-            confirm  = opt(C_ARG(2), OPT_CONFIRM);
-
-    // If we need confirmation and the user skips or aborts, return. On abort,
-    // the HALT will be set by h_confirm.
-    if(confirm && !h_confirm(C_ARG(2), str(help), str(prompt)))
+    // Return on abort or if the user doesn't confirm when (confirm) is set.
+    if(opt(C_ARG(2), OPT_CONFIRM) && !h_confirm(C_ARG(2),
+       str(opt(C_ARG(2), OPT_HELP)), str(opt(C_ARG(2), OPT_PROMPT))))
     {
         R_NUM(LG_FALSE);
     }
 
-    // Succeed immediately if this operation is unsafe and we're running in
-    // pretend mode.
+    // Succeed immediately if non-safe in pretend mode.
     if(!opt(C_ARG(2), OPT_SAFE) && get_num(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
@@ -2919,9 +2921,8 @@ entry_p m_startup(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    // If we need confirmation and the user skips or aborts, return. On abort,
-    // the HALT will be set by h_confirm. Confirmation is needed when user level
-    // is expert or when (confirm) is used.
+    // Return on abort or if the user doesn't confirm when (confirm) is set or
+    // when the user level is expert.
     if((opt(C_ARG(2), OPT_CONFIRM) ||
         get_num(contxt, "@user-level") == LG_EXPERT) &&
         !h_confirm(C_ARG(2), str(help), str(prompt)))
@@ -3179,14 +3180,13 @@ entry_p m_textfile(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    // If we need confirmation and the user skips or aborts, return. On abort,
-    // HALT will be set by h_confirm.
+    // Return on abort or if the user doesn't confirm when (confirm) is set.
     if(confirm && !h_confirm(contxt, str(help), str(prompt)))
     {
         R_NUM(LG_FALSE);
     }
 
-    // Is this a safe operation or are we not running in pretend mode?
+    // Succeed immediately if non-safe in pretend mode.
     if(!safe && get_num(contxt, "@pretend"))
     {
         // A non safe operation in pretend mode always succeeds.
@@ -3615,8 +3615,7 @@ entry_p m_rename(entry_p contxt)
     // Old and new file name.
     const char *old = str(C_ARG(1)), *new = str(C_ARG(2));
 
-    // If we need confirmation and the user skips or aborts, return. On abort,
-    // HALT will be set by h_confirm.
+    // Return on abort or if the user doesn't confirm when (confirm) is set.
     if(confirm && !h_confirm(C_ARG(3), str(help), str(prompt)))
     {
         R_NUM(LG_FALSE);
