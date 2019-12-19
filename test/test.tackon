@@ -19,6 +19,8 @@
 (set @strict 0) (tackon "work:tools/yam/" "//") ; "","work:tools/yam///",""
 (set @strict 0) (tackon "work:tools/yam/" "//test") ; "","work:tools/yam///test",""
 (tackon "" "") ; "","",""
+(set @strict 0) (tackon "" "") ; "","",""
+(set @strict 0) (tackon "dir" "") ; "","dir",""
 (tackon "" "file") ; "","file",""
 (tackon "") ; "","Line 1: syntax error, unexpected ')' ')'",""
 (tackon "/" "file") ; "","/file",""

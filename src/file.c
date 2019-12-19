@@ -1282,8 +1282,7 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
                     return LG_TRUE;
                 }
 
-                // Not the full path, reinstate delimiter and start all over
-                // again with the full path.
+                // Not the full path, reinstate delimiter and start over.
                 dir[i] = del;
                 break;
             }
@@ -2272,6 +2271,32 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_delete
+// Description: Delete file / dir.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   The file / dir.
+// Return:      int:                LG_TRUE / LG_FALSE / ERR_PANIC.
+//------------------------------------------------------------------------------
+static int h_delete(entry_p contxt, const char *file)
+{
+    switch(h_exists(file))
+    {
+        case LG_NONE:
+            h_log(contxt, tr(S_NSFL), file);
+            return LG_FALSE;
+
+        case LG_FILE:
+            return h_delete_file(contxt, file);
+
+        case LG_DIR:
+            return h_delete_dir(contxt, file);
+
+        default:
+            return PANIC(contxt);
+    }
+}
+
+//------------------------------------------------------------------------------
 // (delete file (help..) (prompt..) (confirm..)
 //     (infos) (optional <option> <option> ...) (all)
 //     (delopts <option> <option> ...) (safe))
@@ -2285,13 +2310,12 @@ entry_p m_delete(entry_p contxt)
     // One argument and options.
     C_SANE(1, C_ARG(2));
 
-    int wild = 0;
     char *file = str(C_ARG(1));
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    wild = ParsePatternNoCase(file, get_buf(), buf_size());
+    int wild = ParsePatternNoCase(file, get_buf(), buf_size());
     #else
-    wild = get_num(contxt, "@wild");
+    int wild = get_num(contxt, "@wild");
     #endif
 
     // Can we parse the input string?
@@ -2302,13 +2326,9 @@ entry_p m_delete(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    entry_p help     = opt(C_ARG(2), OPT_HELP),
-            prompt   = opt(C_ARG(2), OPT_PROMPT),
-            confirm  = opt(C_ARG(2), OPT_CONFIRM);
-
-    // If we need confirmation and the user skips or aborts, return. On
-    // abort, the HALT will be set by h_confirm.
-    if(confirm && !h_confirm(C_ARG(2), str(help), str(prompt)))
+    // Return on abort or if the user doesn't confirm when (confirm) is set.
+    if(opt(C_ARG(2), OPT_CONFIRM) && !h_confirm(C_ARG(2),
+       str(opt(C_ARG(2), OPT_HELP)), str(opt(C_ARG(2), OPT_PROMPT))))
     {
         R_NUM(LG_FALSE);
     }
@@ -2326,21 +2346,7 @@ entry_p m_delete(entry_p contxt)
         R_NUM(h_delete_pattern(contxt, file));
     }
 
-    switch(h_exists(file))
-    {
-        case LG_NONE:
-            h_log(contxt, tr(S_NSFL), file);
-            R_NUM(LG_FALSE);
-
-        case LG_FILE:
-            R_NUM(h_delete_file(contxt, file));
-
-        case LG_DIR:
-            R_NUM(h_delete_dir(contxt, file));
-
-        default:
-            R_NUM(PANIC(contxt));
-    }
+    R_NUM(h_delete(contxt, file));
 }
 
 //------------------------------------------------------------------------------
@@ -2695,19 +2701,14 @@ entry_p m_makedir(entry_p contxt)
     // One argument and options.
     C_SANE(1, C_ARG(2));
 
-    entry_p prompt   = opt(C_ARG(2), OPT_PROMPT),
-            help     = opt(C_ARG(2), OPT_HELP),
-            confirm  = opt(C_ARG(2), OPT_CONFIRM);
-
-    // If we need confirmation and the user skips or aborts, return. On abort,
-    // the HALT will be set by h_confirm.
-    if(confirm && !h_confirm(C_ARG(2), str(help), str(prompt)))
+    // Return on abort or if the user doesn't confirm when (confirm) is set.
+    if(opt(C_ARG(2), OPT_CONFIRM) && !h_confirm(C_ARG(2),
+       str(opt(C_ARG(2), OPT_HELP)), str(opt(C_ARG(2), OPT_PROMPT))))
     {
         R_NUM(LG_FALSE);
     }
 
-    // Succeed immediately if this operation is unsafe and we're running in
-    // pretend mode.
+    // Succeed immediately if non-safe in pretend mode.
     if(!opt(C_ARG(2), OPT_SAFE) && get_num(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
@@ -2919,9 +2920,8 @@ entry_p m_startup(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    // If we need confirmation and the user skips or aborts, return. On abort,
-    // the HALT will be set by h_confirm. Confirmation is needed when user level
-    // is expert or when (confirm) is used.
+    // Return on abort or if the user doesn't confirm when (confirm) is set or
+    // when the user level is expert.
     if((opt(C_ARG(2), OPT_CONFIRM) ||
         get_num(contxt, "@user-level") == LG_EXPERT) &&
         !h_confirm(C_ARG(2), str(help), str(prompt)))
@@ -3152,136 +3152,157 @@ entry_p m_startup(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_textfile_append
+// Description: Append h_textfile helper.
+// Input:       entry_p contxt:     The execution context.
+//              FILE *file:         Output file handle.
+//              const char *name:   Output file name.
+// Return:      int:                LG_TRUE or LG_FALSE.
+//------------------------------------------------------------------------------
+static int h_textfile_append(entry_p contxt, FILE *file, const char *name)
+{
+    // Gather and merge all (append) strings.
+    char *app = get_optstr(contxt, OPT_APPEND);
+
+    if(!app && PANIC(contxt))
+    {
+        // Out of memory.
+        return LG_FALSE;
+    }
+
+    // Log operation.
+    h_log(contxt, tr(S_APND), app, file);
+
+    if(fputs(app, file) == EOF)
+    {
+        // Couldn't write to file.
+        ERR(ERR_WRITE_FILE, name);
+    }
+
+    // Free concatenation.
+    free(app);
+
+    // Success or failure.
+    return DID_ERR ? LG_FALSE : LG_TRUE;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_textfile_include
+// Description: Include h_textfile helper.
+// Input:       entry_p contxt:     The execution context.
+//              FILE *file:         Output file handle.
+//              const char *name:   Output file name.
+// Return:      int:                LG_TRUE or LG_FALSE.
+//------------------------------------------------------------------------------
+static int h_textfile_include(entry_p contxt, FILE *file, const char *name)
+{
+    const char *incl = str(opt(contxt, OPT_INCLUDE));
+    FILE *finc = fopen(incl, "r");
+
+    if(!finc)
+    {
+        // Fail silently.
+        return LG_TRUE;
+    }
+
+    // Copy the complete file in buf_size() sized chunks.
+    for(size_t cnt = fread(get_buf(), 1, buf_size(), finc); cnt;
+               cnt = fread(get_buf(), 1, buf_size(), finc))
+    {
+        // Write to destination file.
+        if(fwrite(get_buf(), 1, cnt, file) != cnt)
+        {
+            ERR(ERR_WRITE_FILE, name);
+            break;
+        }
+    }
+
+    // All done.
+    fclose(finc);
+
+    // Success or failure.
+    return DID_ERR ? LG_FALSE : LG_TRUE;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_textfile
+// Description: Include / append m_textfile helper.
+// Input:       entry_p contxt:     The execution context.
+// Return:      int:                LG_TRUE or LG_FALSE.
+//------------------------------------------------------------------------------
+static int h_textfile(entry_p contxt)
+{
+    // Overwrite existing file.
+    const char *name = str(opt(contxt, OPT_DEST));
+    FILE *file = fopen(name, "w");
+
+    if(!file)
+    {
+        ERR(ERR_WRITE_FILE, name);
+        return LG_FALSE;
+    }
+
+    // Assume success.
+    int ret = LG_TRUE;
+
+    if(opt(contxt, OPT_APPEND))
+    {
+        // Append to empty file. It's how the CBM installer works.
+        ret = h_textfile_append(contxt, file, name);
+    }
+
+    if(ret == LG_TRUE && opt(contxt, OPT_INCLUDE))
+    {
+        // Include a file at the end of the new file (append proper).
+        ret = h_textfile_include(contxt, file, name);
+    }
+
+    // We're done writing to the newly created file.
+    fclose(file);
+
+    // Success or failure.
+    return ret; 
+}
+
+//------------------------------------------------------------------------------
 // (textfile (prompt..) (help..) (dest..) (append) (include..) (confirm..) (safe))
 //      create text file from other text files and strings
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-//
 //------------------------------------------------------------------------------
 entry_p m_textfile(entry_p contxt)
 {
     // One or more arguments / options.
     C_SANE(1, contxt);
 
-    entry_p prompt   = opt(contxt, OPT_PROMPT),
-            help     = opt(contxt, OPT_HELP),
-            dest     = opt(contxt, OPT_DEST),
-            post     = opt(contxt, OPT_APPEND),
-            include  = opt(contxt, OPT_INCLUDE),
-            confirm  = opt(contxt, OPT_CONFIRM),
-            safe     = opt(contxt, OPT_SAFE);
-
-    D_NUM = LG_FALSE;
-
-    if(!dest)
+    if(!opt(contxt, OPT_DEST))
     {
         ERR(ERR_MISSING_OPTION, "dest");
         R_NUM(LG_FALSE);
     }
 
-    // If we need confirmation and the user skips or aborts, return. On abort,
-    // HALT will be set by h_confirm.
-    if(confirm && !h_confirm(contxt, str(help), str(prompt)))
-    {
-        R_NUM(LG_FALSE);
-    }
-
-    // Is this a safe operation or are we not running in pretend mode?
-    if(!safe && get_num(contxt, "@pretend"))
-    {
-        // A non safe operation in pretend mode always succeeds.
-        R_NUM(LG_TRUE);
-    }
-
-    // Overwrite existing file.
-    const char *name = str(dest);
-    FILE *file = fopen(name, "w");
-
-    if(!file)
-    {
-        ERR(ERR_WRITE_FILE, name);
-        R_NUM(LG_FALSE);
-    }
-
-    // Assume success.
-    D_NUM = LG_TRUE;
-
-    // Append to empty file. Strange, but it's how the CBM installer works.
-    if(post)
-    {
-        // Gather and merge all (append) strings.
-        char *app = get_optstr(contxt, OPT_APPEND);
-
-        if(app)
-        {
-            // Log operation.
-            h_log(contxt, tr(S_APND), app, name);
-
-            if(fputs(app, file) == EOF)
-            {
-                ERR(ERR_WRITE_FILE, name);
-                D_NUM = LG_FALSE;
-            }
-
-            // Free concatenation.
-            free(app);
-        }
-        else
-        {
-            // Out of memory.
-            PANIC(contxt);
-            D_NUM = LG_FALSE;
-        }
-    }
-
-    // Include a file at the end of the new file (append proper)?
-    if(include && D_NUM == LG_TRUE)
-    {
-        // File to copy.
-        const char *incl = str(include);
-        FILE *finc = fopen(incl, "r");
-
-        if(finc)
-        {
-            // Use the global buffer.
-            char *buf = get_buf();
-            size_t siz = buf_size(), cnt = fread(buf, 1, siz, finc);
-
-            // Log operation.
-            h_log(contxt, tr(S_INCL), incl, name);
-
-            // Copy the whole file.
-            while(cnt)
-            {
-                // Write to destination file.
-                if(fwrite(buf, 1, cnt, file) != cnt)
-                {
-                    ERR(ERR_WRITE_FILE, name);
-                    D_NUM = LG_FALSE;
-                    break;
-                }
-
-                // Do we have more data?
-                cnt = fread(buf, 1, siz, finc);
-            }
-
-            // We're done reading from the include file.
-            fclose(finc);
-        }
-    }
-
-    // We're done writing to the newly created file.
-    fclose(file);
-
     // We must append and / or include, or else this doesn't make sense.
-    if(!post && !include)
+    if(!opt(contxt, OPT_APPEND) && !opt(contxt, OPT_INCLUDE))
     {
         ERR(ERR_NOTHING_TO_DO, contxt->name);
         R_NUM(LG_FALSE);
     }
 
-    // Success or failure.
-    R_CUR;
+    // Return on abort or if the user doesn't confirm when (confirm) is set.
+    if(opt(contxt, OPT_CONFIRM) && !h_confirm(contxt,
+       str(opt(contxt, OPT_HELP)), str(opt(contxt, OPT_PROMPT))))
+    {
+        R_NUM(LG_FALSE);
+    }
+
+    // Succeed immediately if non-safe in pretend mode.
+    if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
+    {
+        R_NUM(LG_TRUE);
+    }
+
+    // The real work is done by the helper.
+    R_NUM(h_textfile(contxt));
 }
 
 //------------------------------------------------------------------------------
@@ -3615,8 +3636,7 @@ entry_p m_rename(entry_p contxt)
     // Old and new file name.
     const char *old = str(C_ARG(1)), *new = str(C_ARG(2));
 
-    // If we need confirmation and the user skips or aborts, return. On abort,
-    // HALT will be set by h_confirm.
+    // Return on abort or if the user doesn't confirm when (confirm) is set.
     if(confirm && !h_confirm(C_ARG(3), str(help), str(prompt)))
     {
         R_NUM(LG_FALSE);

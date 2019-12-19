@@ -5,6 +5,7 @@ VPATH := ../src
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 OS ?= $(shell uname)
 DATE := $(shell date +%d.%m.%Y || echo Unknown)
+APP := InstallerLG
 EXE := Installer
 
 #---------------------------------------------------------------------------------#
@@ -78,10 +79,10 @@ gui.o: gui.c gui.h version.h
 cat:
 	for CAT in $(subst .ct,,$(notdir $(wildcard $(VPATH)/*.ct))); do \
 	mkdir -p Catalogs/$$CAT && \
-	catcomp $(DD)/src/$(EXE).cd TRANSLATION $(DD)/src/$$CAT.ct \
-            CATALOG Catalogs/$$CAT/$(EXE).catalog 2> /dev/null || \
-	flexcat $(DD)/src/$(EXE).cd $(DD)/src/$$CAT.ct \
-            CATALOG Catalogs/$$CAT/$(EXE).catalog || \
+	catcomp $(DD)/src/$(APP).cd TRANSLATION $(DD)/src/$$CAT.ct \
+            CATALOG Catalogs/$$CAT/$(APP).catalog 2> /dev/null || \
+	flexcat $(DD)/src/$(APP).cd $(DD)/src/$$CAT.ct \
+            CATALOG Catalogs/$$CAT/$(APP).catalog || \
 	rm -Rf Catalogs; done
 
 #---------------------------------------------------------------------------------#

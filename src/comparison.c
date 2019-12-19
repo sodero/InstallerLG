@@ -15,29 +15,42 @@
 #include <string.h>
 
 //------------------------------------------------------------------------------
-// < <= == >= >
-//     helper function for m_eq, m_gt, m_gte, m_lt, m_lte, m_ne.
+// Name:        h_cmp_numbers
+// Description: Verify that both arguments can be interpreted as numbers.
+// Input:       entry_p lhs:    Left argument.
+//              entry_p rhs:    Right argument.
+// Return:      bool:           'true' or 'false'.
 //------------------------------------------------------------------------------
-static int h_cmp(entry_p lhs, entry_p rhs)
+static bool h_cmp_numbers(entry_p alfa, entry_p beta)
 {
-    // Resolve both arguments. We don't need to check for failures; we will
-    // always get something to compare.
-    entry_p alfa = resolve(lhs), beta = resolve(rhs);
-
     // Numbers and dangles can be treated as equals.
-    if((alfa->type == NUMBER || alfa->type == DANGLE) &&
-       (beta->type == NUMBER || beta->type == DANGLE))
-    {
-        return alfa->id - beta->id;
-    }
+    return (alfa->type == NUMBER || alfa->type == DANGLE) &&
+           (beta->type == NUMBER || beta->type == DANGLE);
+}
 
-    // Use normal string comparison if both arguments are strings.
-    if(alfa->type == STRING && alfa->name && beta->type == STRING && beta->name)
-    {
-        return strcmp(alfa->name, beta->name);
-    }
+//------------------------------------------------------------------------------
+// Name:        h_cmp_strings
+// Description: Verify that both arguments can be treated as strings.
+// Input:       entry_p lhs:    Left argument.
+//              entry_p rhs:    Right argument.
+// Return:      bool:           'true' or 'false'.
+//------------------------------------------------------------------------------
+static bool h_cmp_strings(entry_p alfa, entry_p beta)
+{
+    // Don't trust strings, we might be out of memory.
+    return alfa->type == STRING && alfa->name && beta->type == STRING &&
+           beta->name;
+}
 
-    // We have a string and a number / dangle. Is the first argument a string?
+//------------------------------------------------------------------------------
+// Name:        h_cmp_mixed
+// Description: Compare arguments of different primitive types.
+// Input:       entry_p lhs:    Left argument.
+//              entry_p rhs:    Right argument.
+// Return:      int:            Left - right.
+//------------------------------------------------------------------------------
+static int h_cmp_mixed(entry_p alfa, entry_p beta)
+{
     if(alfa->type == STRING && alfa->name)
     {
         // Empty strings are less than all numbers.
@@ -63,6 +76,35 @@ static int h_cmp(entry_p lhs, entry_p rhs)
     // Alfa > Beta.
     return 1;
 }
+
+//------------------------------------------------------------------------------
+// Name:        h_cmp
+// Description: Helper function for m_eq, m_gt, m_gte, m_lt, m_lte, m_ne.
+// Input:       entry_p lhs:    Left argument.
+//              entry_p rhs:    Right argument.
+// Return:      int:            Left - right.
+//------------------------------------------------------------------------------
+static int h_cmp(entry_p lhs, entry_p rhs)
+{
+    // Resolve both arguments. We don't need to check for failures; we will
+    // always get something to compare.
+    entry_p alfa = resolve(lhs), beta = resolve(rhs);
+
+    // Do we have two numbers (or something that can be treated as such)?
+    if(h_cmp_numbers(alfa, beta))
+    {
+        return alfa->id - beta->id;
+    }
+
+    // Use normal string comparison if both arguments are strings.
+    if(h_cmp_strings(alfa, beta))
+    {
+        return strcmp(alfa->name, beta->name);
+    }
+
+    // We have a string and a number / dangle.
+    return h_cmp_mixed(alfa, beta);
+ }
 
 //------------------------------------------------------------------------------
 // (= <expr1> <expr2>)

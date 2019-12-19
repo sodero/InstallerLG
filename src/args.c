@@ -181,10 +181,8 @@ static bool arg_wb(char **argv)
         args[ARG_NOPRETEND] = (char *) FindToolType((STRPTR *) tts, "NOPRETEND");
     }
 
-    // Postprocess WB info.
+    // Postprocess WB info and go back. We'll crash if we don't.
     bool ret = arg_post();
-
-    // Go back to where we started from. We'll crash if we don't.
     CurrentDir(old);
 
     // Disk object not needed, a deep copy is done in arg_post().

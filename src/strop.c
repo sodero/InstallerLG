@@ -439,11 +439,9 @@ entry_p m_substr(entry_p contxt)
             R_EST;
         }
 
-        // Cap all values.
+        // Cap values, set and return.
         len -= off;
         len = len < chr ? len : chr;
-
-        // Copy, set and return.
         memcpy(ret, arg + off, len);
         R_STR(ret);
     }
