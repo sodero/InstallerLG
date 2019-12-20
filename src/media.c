@@ -157,7 +157,7 @@ entry_p m_setmedia(entry_p contxt)
     // Extra flags.
     char *par = NULL;
 
-    // If an extra parameter is required, resolved it, if it exists.
+    // If an extra parameter is required, resolve it, if it exists.
     if((cmd == STM_COMMAND || cmd == STM_LOCATE) && exists(C_ARG(3)))
     {
         // Resolve next.
