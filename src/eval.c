@@ -70,15 +70,13 @@ entry_p find_symbol(entry_p entry)
         for(entry_p *tmp = con->symbols; tmp && exists(*tmp); tmp++)
         {
             // Entry might be a CUSTOM. Ignore everything but SYMBOLS.
-            if((*tmp)->type != SYMBOL || strcasecmp((*tmp)->name, entry->name))
+            if((*tmp)->type == SYMBOL && !strcasecmp((*tmp)->name, entry->name))
             {
-                continue;
+                // If possible swap symbol order to speed up future lookups before
+                // returning. This is only done in the root and not inside CUSTOM,
+                // since those symbols determine the order of function arguments.
+                return swap(con->symbols, tmp);
             }
-
-            // If possible swap symbol order to speed up future lookups before
-            // returning. This is only done in the root and not inside CUSTOM,
-            // since those symbols determine the order of function arguments.
-            return swap(con->symbols, tmp);
         }
 
         // Nothing found in the current context. Climb one scope higher.
