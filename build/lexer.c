@@ -1403,7 +1403,7 @@ YY_RULE_SETUP
 { return ')';            }
 	YY_BREAK
 /*----------------------------------------------------------------------------------------------------------------------------------------------*/
-/*- builting functions and options -------------------------------------------------------------------------------------------------------------*/
+/*- builtin functions and options --------------------------------------------------------------------------------------------------------------*/
 /*----------------------------------------------------------------------------------------------------------------------------------------------*/
 case 6:
 YY_RULE_SETUP
@@ -3397,7 +3397,7 @@ int main(int argc, char **argv)
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* strduptr(const char *str) - Duplicate string and translate */
-/* escpate characters according to the Installer V42.6 guide  */
+/* escape characters according to the Installer V42.6 guide   */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 static char *strduptr(const char *str)
 {
@@ -3421,82 +3421,86 @@ static char *strduptr(const char *str)
     static char chr[] = "nrthvbf\"'\\\0";
     static char raw[] = "\n\r\t\t\v\b\f\"'\\\0";
 
-    // Please note 'len -1', we strip the " from the string at this point, str index starts at 1 and we skip the last character.
+    // Please note 'len - 1', delimiters are stripped from the string, str index starts at 1 and the last character is skipped.
     char *out = calloc(len - 1, 1);
 
-    if(out)
+    if(!out)
     {
-        int io = 0;
+        // Out of memory. This will be trapped by the OOM token and the parser will abort.
+        return NULL;
+    }
 
-        for(int i = 1; i < len - 1; i++)
+    // Current position.
+    int io = 0;
+
+    for(int i = 1; i < len - 1; i++)
+    {
+        char cr = str[i];
+
+        // Are we dealing with a control character?
+        if(str[i] == '\\' && i + 1 < len - 1)
         {
-            char cr = str[i];
-
-            // Are we dealing with a control character?
-            if(str[i] == '\\' && i + 1 < len - 1)
+            // Are we within the limits of the string?
+            if(i + 3 < len - 1)
             {
-                // Are we within the limits of the string?
-                if(i + 3 < len - 1)
+                // Is this a hex number that needs to be translated into a character?
+                if(str[i + 1] == 'x' && (
+                  ((str[i + 2] >= 48 && str[i + 2] <= 57) ||
+                   (str[i + 2] >= 65 && str[i + 2] <= 70) ||
+                   (str[i + 2] >= 97 && str[i + 2] <= 102)) &&
+                  ((str[i + 3] >= 48 && str[i + 3] <= 57) ||
+                   (str[i + 3] >= 65 && str[i + 3] <= 70) ||
+                   (str[i + 3] >= 97 && str[i + 3] <= 102))))
                 {
-                    // Is this a hex number that needs to be translated into a character?
-                    if(str[i + 1] == 'x' && (
-                      ((str[i + 2] >= 48 && str[i + 2] <= 57) ||
-                       (str[i + 2] >= 65 && str[i + 2] <= 70) ||
-                       (str[i + 2] >= 97 && str[i + 2] <= 102)) &&
-                      ((str[i + 3] >= 48 && str[i + 3] <= 57) ||
-                       (str[i + 3] >= 65 && str[i + 3] <= 70) ||
-                       (str[i + 3] >= 97 && str[i + 3] <= 102))))
-                    {
-                        // Temporary string for conversion
-                        char h[] = { str[i + 2], str[i + 3], '\0' };
+                    // Temporary string for conversion.
+                    char h[] = { str[i + 2], str[i + 3], '\0' };
 
-                        // Three digits, \ooo.
-                        i += 3;
+                    // Three digits, \ooo.
+                    i += 3;
 
-                        // Convert temp string to character.
-                        out[io++] = (char) strtol(h, NULL, 16);
+                    // Convert temp string to character.
+                    out[io++] = (char) strtol(h, NULL, 16);
 
-                        // Continue with the rest of the string.
-                        continue;
-                    }
-                    // Is this a oct number that needs to be translated into a character?
-                    if(str[i + 1] >= 48 && str[i + 1] <= 55 &&
-                       str[i + 2] >= 48 && str[i + 2] <= 55 &&
-                       str[i + 3] >= 48 && str[i + 3] <= 55)
-                    {
-                        // Temporary string for conversion
-                        char h[] = { str[i + 1], str[i + 2], str[i + 3], '\0' };
-
-                        // Two digits + 'x', \xXX.
-                        i += 3;
-
-                        // Convert temp string to character.
-                        out[io++] = (char) strtol(h, NULL, 8);
-
-                        // Continue with the rest of the string.
-                        continue;
-                    }
+                    // Continue with the rest of the string.
+                    continue;
                 }
-
-                // Standard escape sequence.
-                for(int j = 0; chr[j]; j++)
+                // Is this a oct number that needs to be translated into a character?
+                if(str[i + 1] >= 48 && str[i + 1] <= 55 &&
+                   str[i + 2] >= 48 && str[i + 2] <= 55 &&
+                   str[i + 3] >= 48 && str[i + 3] <= 55)
                 {
-                    // A direct mapping between the current character and the value representing the full escape sequence.
-                    if(str[i + 1] == chr[j])
-                    {
-                        i++;
-                        cr = raw[j];
-                        break;
-                    }
+                    // Temporary string for conversion.
+                    char h[] = { str[i + 1], str[i + 2], str[i + 3], '\0' };
+
+                    // Two digits + 'x', \xXX.
+                    i += 3;
+
+                    // Convert temp string to character.
+                    out[io++] = (char) strtol(h, NULL, 8);
+
+                    // Continue with the rest of the string.
+                    continue;
                 }
             }
 
-            // Copy input to ouput. The 'cr' might have been translated, maybe it's just a copy.
-            out[io++] = cr;
+            // Standard escape sequence.
+            for(int j = 0; chr[j]; j++)
+            {
+                // A direct mapping between the current character and the value representing the full escape sequence.
+                if(str[i + 1] == chr[j])
+                {
+                    i++;
+                    cr = raw[j];
+                    break;
+                }
+            }
         }
+
+        // Copy input to ouput. The 'cr' might have been translated, maybe it's just a copy.
+        out[io++] = cr;
     }
 
-    // Unless we're out of memory, out will be a copy of str. If we're out of memory this will be trapped by the OOM token and the parser will abort.
+    // Out is a copy of str but without delimiters.
     return out;
 }
 

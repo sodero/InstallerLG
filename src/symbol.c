@@ -144,100 +144,93 @@ entry_p m_set(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p m_symbolset(entry_p contxt)
 {
-    // Symbol destination.
-    entry_p dst = global(contxt);
-
     // We need one or more tuples of symbol name and value.
-    if(c_sane(contxt, 2) && dst)
+    C_SANE(2, NULL); S_SANE(0);
+
+    entry_p ret = D_CUR;
+    entry_p *cur = contxt->children;
+
+    // Iterate over all tuples.
+    while(exists(*cur))
     {
-        entry_p ret = D_CUR;
-        entry_p *cur = contxt->children;
+        // Resolve symbol name and value.
+        const char *lhs = str(*cur++);
+        entry_p rhs = resolve(*cur++);
 
-        // Iterate over all tuples.
-        while(exists(*cur))
+        if(DID_ERR)
         {
-            // Resolve symbol name and value.
-            const char *lhs = str(*cur++);
-            entry_p rhs = resolve(*cur++);
-
-            if(DID_ERR)
-            {
-                // Error set by resolve() if rhs is unresolvable.
-                R_CUR;
-            }
-
-            // Create a copy of the evaluated rhs.
-            entry_p res = h_copydeep(rhs);
-
-            if(!res)
-            {
-                // PANIC in h_copydeep() if we're  out of memory.
-                R_CUR;
-            }
-
-            // In non strict mode we might have a DANGLE on the right hand side
-            // if a bogus resolve was done. Typecast rhs to prevent leaks.
-            if(res->type == DANGLE)
-            {
-                // Typecast to string. The string will be empty. If evaluated as
-                // a number, it will be zero.
-                res->type = STRING;
-            }
-
-            // Do we already have a symbol with this name?
-            for(entry_p *sym = contxt->symbols; exists(*sym); sym++)
-            {
-                // If true, replace its resolved value with the copy of the rhs.
-                if(!strcasecmp((*sym)->name, lhs))
-                {
-                    kill((*sym)->resolved);
-                    (*sym)->resolved = res;
-                    push(dst, *sym);
-                    res->parent = *sym;
-                    ret = res;
-                    break;
-                }
-            }
-
-            if(ret == res)
-            {
-                // Pick the next tuple this symbol already exists.
-                continue;
-            }
-
-            // This is a new symbol.
-            entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs)));
-
-            if(!nsm && PANIC(contxt))
-            {
-                // Out of memory.
-                kill(res);
-                break;
-            }
-
-            res->parent = nsm;
-            nsm->resolved = res;
-
-            // Append the symbol to the current context and create a global ref.
-            if(append(&contxt->symbols, nsm))
-            {
-                push(dst, nsm);
-                nsm->parent = contxt;
-                ret = res;
-                continue;
-            }
-
-            // Out of memory.
-            kill(nsm);
-            kill(res);
+            // Error set by resolve() if rhs is unresolvable.
+            R_CUR;
         }
 
-        // Return the last rhs.
-        return ret;
+        // Create a copy of the evaluated rhs.
+        entry_p res = h_copydeep(rhs);
+
+        if(!res)
+        {
+            // PANIC in h_copydeep() if we're  out of memory.
+            R_CUR;
+        }
+
+        // In non strict mode we might have a DANGLE on the right hand side
+        // if a bogus resolve was done. Typecast rhs to prevent leaks.
+        if(res->type == DANGLE)
+        {
+            // Typecast to string. The string will be empty. If evaluated as
+            // a number, it will be zero.
+            res->type = STRING;
+        }
+
+        // Do we already have a symbol with this name?
+        for(entry_p *sym = contxt->symbols; exists(*sym); sym++)
+        {
+            // If true, replace its resolved value with the copy of the rhs.
+            if(!strcasecmp((*sym)->name, lhs))
+            {
+                kill((*sym)->resolved);
+                (*sym)->resolved = res;
+                push(global(contxt), *sym);
+                res->parent = *sym;
+                ret = res;
+                break;
+            }
+        }
+
+        if(ret == res)
+        {
+            // Pick the next tuple if this symbol already exists.
+            continue;
+        }
+
+        // This is a new symbol.
+        entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs)));
+
+        if(!nsm && PANIC(contxt))
+        {
+            // Out of memory.
+            kill(res);
+            break;
+        }
+
+        res->parent = nsm;
+        nsm->resolved = res;
+
+        // Append the symbol to the current context and create a global ref.
+        if(append(&contxt->symbols, nsm))
+        {
+            push(global(contxt), nsm);
+            nsm->parent = contxt;
+            ret = res;
+            continue;
+        }
+
+        // Out of memory.
+        kill(nsm);
+        kill(res);
     }
 
-    // Broken parser
-    R_CUR;
+    // Return the last rhs.
+    return ret;
 }
 
 //------------------------------------------------------------------------------

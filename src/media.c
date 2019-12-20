@@ -230,8 +230,7 @@ static int h_showmedia_create_id(entry_p contxt, int mid)
 entry_p m_showmedia(entry_p contxt)
 {
     // We need atleast 5 arguments.
-    C_SANE(5, NULL);
-    S_SANE(0);
+    C_SANE(5, NULL); S_SANE(0);
 
     // Get size.
     char *att = str(C_ARG(4));
