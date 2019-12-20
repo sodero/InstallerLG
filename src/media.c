@@ -54,7 +54,7 @@ entry_p m_closemedia(entry_p contxt)
     int mid = num(C_ARG(1));
 
     // Invoke GUI to close media.
-    R_NUM(gui_closemedia(mid) == G_TRUE ? 1 : 0);
+    R_NUM(gui_closemedia(mid) == G_TRUE ? LG_TRUE : LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -93,32 +93,30 @@ entry_p m_effect(entry_p contxt)
     // Effect type.
     bool effect = ief & G_EFFECT;
 
-    // Known effect type?
-    if(effect)
+    if(!effect)
     {
-        // Invalid initial values.
-        static int oc1, oc2, oef = G_RADIAL | G_HORIZONTAL;
-
-        // Only show something if this is the first invocation or if the input
-        // has changed.
-        if(ief != oef || ic1 != oc1 || ic2 != oc2)
-        {
-            // Show gradient.
-            gui_effect(ief, ic1, ic2);
-
-            // Save current values.
-            oef = ief;
-            oc1 = ic1;
-            oc2 = ic2;
-        }
-
-        // Always.
-        R_NUM(LG_TRUE);
+        // Unknown effect type.
+        ERR(ERR_VAL_INVALID, est);
+        R_NUM(LG_FALSE);
     }
 
-    // Missing effect type.
-    ERR(ERR_VAL_INVALID, est);
-    R_NUM(LG_FALSE);
+    // Invalid values to enable the first invocation.
+    static int oc1, oc2, oef = G_RADIAL | G_HORIZONTAL;
+
+    // Show gradient on the first invocation or if the input has changed.
+    if(ief != oef || ic1 != oc1 || ic2 != oc2)
+    {
+        // Show gradient.
+        gui_effect(ief, ic1, ic2);
+
+        // Save current values.
+        oef = ief;
+        oc1 = ic1;
+        oc2 = ic2;
+    }
+
+    // Always.
+    R_NUM(LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -149,29 +147,28 @@ entry_p m_setmedia(entry_p contxt)
               strcasecmp(act, "stop") == 0 ? STM_STOP :
               strcasecmp(act, "locate") == 0 ? STM_LOCATE : 0;
 
-    // Valid action?
-    if(cmd)
+    if(!cmd)
     {
-        // Extra flags.
-        char *par = NULL;
-
-        // If an extra parameter is required, resolved it, if it exists.
-        if((cmd == STM_COMMAND || cmd == STM_LOCATE) && exists(C_ARG(3)))
-        {
-            // Resolve next.
-            par = str(C_ARG(3));
-        }
-
-        // Media identifier.
-        int mid = num(C_ARG(1));
-
-        // Invoke GUI to perform action.
-        R_NUM(gui_setmedia(mid, cmd, par) == G_TRUE ? 1 : 0);
+        // Invalid action.
+        ERR(ERR_VAL_INVALID, act);
+        R_NUM(LG_FALSE);
     }
 
-    // Invalid action.
-    ERR(ERR_VAL_INVALID, act);
-    R_NUM(LG_FALSE);
+    // Extra flags.
+    char *par = NULL;
+
+    // If an extra parameter is required, resolved it, if it exists.
+    if((cmd == STM_COMMAND || cmd == STM_LOCATE) && exists(C_ARG(3)))
+    {
+        // Resolve next.
+        par = str(C_ARG(3));
+    }
+
+    // Media identifier.
+    int mid = num(C_ARG(1));
+
+    // Invoke GUI to perform action.
+    R_NUM(gui_setmedia(mid, cmd, par) == G_TRUE ? 1 : 0);
 }
 
 //------------------------------------------------------------------------------
