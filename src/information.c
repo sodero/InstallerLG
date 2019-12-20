@@ -40,6 +40,59 @@ entry_p m_complete(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_debug_all
+// Description: m_debug helper printing the value of all children in a contxt.
+// Input:       entry_p contxt: Execution context.
+// Return:      -
+//------------------------------------------------------------------------------
+static void h_debug_all(entry_p contxt)
+{
+    // Print string representation of all children.
+    for(entry_p *cur = contxt->children; exists(*cur); cur++)
+    {
+        char *val = "<NIL>";
+
+        // Test if variable is defined, if not print <NIL>.
+        if((*cur)->type == SYMREF)
+        {
+            // Save level of strictness.
+            int mode = get_num(contxt, "@strict");
+
+            // Set non strict mode to supress errors.
+            set_num(contxt, "@strict", 0);
+
+            // Save string if the symbol is defined.
+            if(find_symbol(*cur)->type != DANGLE)
+            {
+                // Resolve string.
+                val = str(*cur);
+            }
+
+            // Restore level of strictness.
+            set_num(contxt, "@strict", mode);
+        }
+        else
+        {
+            // Resolve string.
+            val = str(*cur);
+        }
+
+        if(arg_argc(-1))
+        {
+            // Invoked from CLI.
+            printf("%s ", val);
+        }
+        #ifdef AMIGA
+        else
+        {
+            // Invoked from WB.
+            KPrintF("%s ", val);
+        }
+        #endif
+    }
+}
+
+//------------------------------------------------------------------------------
 // (debug <anything> <anything> ...)
 //    print to stdout when running from a shell
 //
@@ -47,59 +100,13 @@ entry_p m_complete(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p m_debug(entry_p contxt)
 {
-    // No arguments required. This doesn't make sense, but that's how the CBM
-    // Installer works.
+    // No arguments required. Weird, but that's how the CBM Installer works.
     C_SANE(0, NULL);
 
     // Is there anything to print?
     if(contxt->children)
     {
-        // For all children, print the string representation, to stdout if we're
-        // running in a shell or to the log when invoked from WB.
-        for(entry_p *cur = contxt->children; exists(*cur); cur++)
-        {
-            char *val = "<NIL>";
-
-            // Test if variable is defined, if not print <NIL>.
-            if((*cur)->type == SYMREF)
-            {
-                // Save level of strictness.
-                int mode = get_num(contxt, "@strict");
-
-                // Set non strict mode and search for symbol. By doing it this
-                // way we supress error messages, if any.
-                set_num(contxt, "@strict", 0);
-                entry_p res = find_symbol(*cur);
-
-                // Save string representation of symbol if it exists.
-                if(res->type != DANGLE)
-                {
-                    // Resolve string.
-                    val = str(*cur);
-                }
-
-                // Restore level of strictness.
-                set_num(contxt, "@strict", mode);
-            }
-            else
-            {
-                // Resolve string.
-                val = str(*cur);
-            }
-
-            if(arg_argc(-1))
-            {
-                // Invoked from CLI.
-                printf("%s ", val);
-            }
-            #ifdef AMIGA
-            else
-            {
-                // Invoked from WB.
-                KPrintF("%s ", val);
-            }
-            #endif
-        }
+        h_debug_all(contxt);
     }
 
     // Append final newline.
