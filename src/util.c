@@ -460,7 +460,8 @@ bool c_sane(entry_p contxt, size_t num)
 //------------------------------------------------------------------------------
 bool s_sane(entry_p contxt, size_t num)
 {
-    return contxt && x_sane(contxt, SYMBOL, num);
+    return contxt && contxt->symbols && global(contxt) &&
+           x_sane(contxt, SYMBOL, num);
 }
 
 //------------------------------------------------------------------------------

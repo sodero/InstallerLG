@@ -175,6 +175,53 @@ entry_p m_setmedia(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_showmedia_create_id
+// Description: m_showmedia helper creating a user defined media ID variable.
+// Input:       entry_p contxt: Execution context.
+//              int mid:        Media ID.
+// Return:      int:            LG_TRUE / LG_FALSE.
+//------------------------------------------------------------------------------
+static int h_showmedia_create_id(entry_p contxt, int mid)
+{
+    // First argument is the variable name.
+    char *var = str(C_ARG(1));
+
+    // If we already have a symbol with this name, update it.
+    for(entry_p *sym = contxt->symbols; exists(*sym); sym++)
+    {
+        if(!strcasecmp((*sym)->name, var) && (*sym)->resolved)
+        {
+            (*sym)->resolved->id = mid;
+            return LG_TRUE;
+        }
+    }
+
+    // Create media ID and a symbol with the user defined name.
+    entry_p nid = new_number(mid), nsm = new_symbol(DBG_ALLOC(strdup(var)));
+
+    if(nid && nsm)
+    {
+        // Reparent value.
+        nid->parent = nsm;
+        nsm->resolved = nid;
+
+        // Append symbol to current context.
+        if(append(&contxt->symbols, nsm))
+        {
+            // Set global reference.
+            push(global(contxt), nsm);
+            nsm->parent = contxt;
+            return LG_TRUE;
+        }
+    }
+
+    // Out of memory.
+    kill(nid);
+    kill(nsm);
+    return LG_FALSE;
+}
+
+//------------------------------------------------------------------------------
 // (showmedia <medianame> <filename> <position> <size> <borderflag> ...)
 //      open datatype and present it to the user.
 //
@@ -183,7 +230,7 @@ entry_p m_setmedia(entry_p contxt)
 entry_p m_showmedia(entry_p contxt)
 {
     // We need atleast 5 arguments.
-    C_SANE(5, NULL);
+    C_SANE(5, NULL); S_SANE(0);
 
     // Get size.
     char *att = str(C_ARG(4));
@@ -222,67 +269,6 @@ entry_p m_showmedia(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    // Symbol destination.
-    entry_p dst = global(contxt);
-
-    if(dst)
-    {
-        char *var = str(C_ARG(1));
-        entry_p *sym = contxt->symbols;
-
-        // Symbol exists already?
-        while(exists(*sym))
-        {
-            // If true, update current symbol.
-            if(!strcasecmp((*sym)->name, var) && (*sym)->resolved)
-            {
-                // Success.
-                (*sym)->resolved->id = mid;
-                R_NUM(LG_TRUE);
-            }
-
-            // Next symbol.
-            sym++;
-        }
-
-        // Create the new media ID.
-        entry_p nid = new_number(mid);
-
-        if(nid)
-        {
-            // Create new symbol with user defined name.
-            entry_p nsm = new_symbol(DBG_ALLOC(strdup(var)));
-
-            if(nsm)
-            {
-                // Reparent value.
-                nid->parent = nsm;
-                nsm->resolved = nid;
-
-                // Append the symbol to the current context and create a global
-                // ref.
-                if(append(&contxt->symbols, nsm))
-                {
-                    // Reparent symbol.
-                    push(dst, nsm);
-                    nsm->parent = contxt;
-
-                    // Success.
-                    R_NUM(LG_TRUE);
-                }
-
-                // Out of memory.
-                kill(nsm);
-            }
-            else
-            {
-                // Out of memory.
-                kill(nid);
-            }
-        }
-    }
-
-    // Broken parser / out of memory.
-    PANIC(contxt);
-    R_CUR;
+    // Create media ID user variable.
+    R_NUM(h_showmedia_create_id(contxt, mid));
 }
