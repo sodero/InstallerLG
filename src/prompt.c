@@ -629,23 +629,20 @@ entry_p m_asknumber(entry_p contxt)
 
     if(range)
     {
-        if(c_sane(range, 2))
-        {
-            min = num(range->children[0]);
-            max = num(range->children[1]);
-
-            // Use default range when the user given range is invalid.
-            if(min >= max)
-            {
-                max = 100;
-                min = 0;
-            }
-        }
-        else
+        if(!c_sane(range, 2) && PANIC(contxt))
         {
             // The parser is broken
-            PANIC(contxt);
             R_CUR;
+        }
+
+        min = num(range->children[0]);
+        max = num(range->children[1]);
+
+        // Use default range when the user given range is invalid.
+        if(min >= max)
+        {
+            max = 100;
+            min = 0;
         }
     }
 
