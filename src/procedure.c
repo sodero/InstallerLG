@@ -24,19 +24,15 @@
 //------------------------------------------------------------------------------
 entry_p m_gosub(entry_p contxt)
 {
-    // Global context where the user defined procedures are found.
-    entry_p con = global(contxt);
-
-    // Is the global context in order?
-    if(!s_sane(con, 0))
+    // A valid global context is needed.
+    if(!s_sane(global(contxt), 0) && PANIC(contxt))
     {
         // The parser is broken
-        PANIC(contxt);
         return end();
     }
 
     // Search for a procedure that matches the reference name.
-    for(entry_p *cus = con->symbols; exists(*cus); cus++)
+    for(entry_p *cus = global(contxt)->symbols; exists(*cus); cus++)
     {
         // Skip symbol if we don't have a match.
         if((*cus)->type != CUSTOM || strcasecmp((*cus)->name, contxt->name))
@@ -162,21 +158,13 @@ entry_p m_gosub(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p m_procedure(entry_p contxt)
 {
-    // The global context is where we want the user procedure to end up.
-    entry_p dst = global(contxt);
+    // One argument; the function to be defined.
+    S_SANE(1);
 
-    // We have a single argument, the function to add to the global context.
-    if(dst && s_sane(contxt, 1))
-    {
-        // Push the function and let the global context be its parent.
-        push(dst, contxt->symbols[0]);
-        contxt->symbols[0]->parent = contxt;
+    // Make the function global and set parent.
+    push(global(contxt), contxt->symbols[0]);
+    contxt->symbols[0]->parent = contxt;
 
-        // Return the function itself.
-        return contxt->symbols[0];
-    }
-
-    // Everything is broken.
-    PANIC(contxt);
-    R_CUR;
+    // Return the function itself.
+    return contxt->symbols[0];
 }
