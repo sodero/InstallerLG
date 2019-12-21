@@ -84,29 +84,13 @@
     )
 )
 
-(if (= (getversion #app-bin) (getversion (tackon @default-dest #app-bin)))
-    ; Same version.
-    (
-        (if (<> (getsum #app-bin) (getsum (tackon @default-dest #app-bin)))
-            ; Different checksum.
-            (copyfiles
-                (prompt (#copy_same_str @default-dest))
-                (help #copy_same_hlp_str)
-                (source #app-bin)
-                (dest @default-dest)
-            )
-        )
-    )
-    ; Different version.
-    (
-        (copylib
-            (prompt (#copy_diff_str #app-bin (tackon @default-dest #app-bin)))
-            (help #copy_diff_hlp_str)
-            (source #app-bin)
-            (dest @default-dest)
-            (confirm 0)
-        )
-    )
+; Copy binary with version check.
+(copylib
+    (prompt (#copy_diff_str #app-bin (tackon @default-dest #app-bin)))
+    (help #copy_diff_hlp_str)
+    (source #app-bin)
+    (dest @default-dest)
+    (confirm 0)
 )
 
 ;---------------------------------------------------------------------------------------------------------------------------------------------
@@ -147,11 +131,15 @@
         ; If any of the catalogs were chosen
         (if (<> cats 0)
             (
+                ; Get absolute Catalog path.
+                (set catdir (tackon (getassign "LOCALE") "Catalogs"))
+
                 ; Create 'Catalogs' if it's missing.
-                (if (not (exists "LOCALE:Catalogs"))
-                    (makedir "LOCALE:Catalogs")
+                (if (not (exists catdir))
+                    (makedir catdir)
                 )
 
+                ; Iterator
                 (set i 0)
 
                 ; Copy all selected catalogs.
@@ -159,10 +147,11 @@
                     (if (bitand cats (shiftleft 1 i))
                         (copyfiles
                             (source ("Catalogs/%s/InstallerLG.catalog" (to_lang i 1)))
-                            (dest ("LOCALE:Catalogs/%s" (to_lang i n)))
+                            (dest (tackon catdir (to_lang i n)))
                             (optional "force")
                         )
                     )
+                    ; Next catalog
                     (set i (+ i 1))
                 )
             )
