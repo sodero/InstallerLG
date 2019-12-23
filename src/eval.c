@@ -204,41 +204,44 @@ static int opt_to_int(entry_p entry)
 //------------------------------------------------------------------------------
 int num(entry_p entry)
 {
-    if(entry)
+    if(!entry && PANIC(entry))
     {
-        switch(entry->type)
-        {
-            // Translate options.
-            case OPTION:
-                return opt_to_int(entry);
+        // Bad input.
+        return 0;
+    }
 
-            // These are numeric values:
-            case DANGLE:
-            case NUMBER:
-                return entry->id;
+    switch(entry->type)
+    {
+        // Translate options.
+        case OPTION:
+            return opt_to_int(entry);
 
-            // Recur.
-            case SYMBOL:
-                return num(entry->resolved);
+        // These are numeric values:
+        case DANGLE:
+        case NUMBER:
+            return entry->id;
 
-            // Recur.
-            case SYMREF:
-                return num(find_symbol(entry));
+        // Recur.
+        case SYMBOL:
+            return num(entry->resolved);
 
-            // Recur.
-            case CUSREF:
-            case NATIVE:
-                return num(entry->call(entry));
+        // Recur.
+        case SYMREF:
+            return num(find_symbol(entry));
 
-            // Attempt to convert string.
-            case STRING:
-                return entry->name ? atoi(entry->name) : 0;
+        // Recur.
+        case CUSREF:
+        case NATIVE:
+            return num(entry->call(entry));
 
-            // We should never end up here.
-            case CONTXT:
-            case CUSTOM:
-                break;
-        }
+        // Attempt to convert string.
+        case STRING:
+            return entry->name ? atoi(entry->name) : 0;
+
+        // We should never end up here.
+        case CONTXT:
+        case CUSTOM:
+            break;
     }
 
     // Bad input.
