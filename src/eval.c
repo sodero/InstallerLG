@@ -59,7 +59,7 @@ entry_p find_symbol(entry_p entry)
 
     if(!con && PANIC(entry))
     {
-        PANIC(entry);
+        // Broken context.
         return end();
     }
 
@@ -127,7 +127,6 @@ static entry_p h_resolve_option(entry_p opt)
 //------------------------------------------------------------------------------
 entry_p resolve(entry_p entry)
 {
-    // Is there anything to resolve?
     if(!entry && PANIC(entry))
     {
         // Bad input.
@@ -140,7 +139,7 @@ entry_p resolve(entry_p entry)
         case SYMBOL:
             return entry->resolved;
 
-        // Symbolic references are resolved by resolving the symbol it refers to.
+        // References are resolved by resolving the symbol it refers to.
         case SYMREF:
             return resolve(find_symbol(entry));
 
@@ -205,7 +204,6 @@ static int opt_to_int(entry_p entry)
 //------------------------------------------------------------------------------
 int num(entry_p entry)
 {
-    // Is there anything to resolve?
     if(entry)
     {
         switch(entry->type)
@@ -234,13 +232,7 @@ int num(entry_p entry)
 
             // Attempt to convert string.
             case STRING:
-                // Don't trust strings, we might be out of memory.
-                if(entry->name)
-                {
-                    return atoi(entry->name);
-                }
-                // Panic.
-                break;
+                return entry->name ? atoi(entry->name) : 0;
 
             // We should never end up here.
             case CONTXT:
