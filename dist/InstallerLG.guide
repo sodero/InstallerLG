@@ -104,6 +104,7 @@ Italian translations.
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{B}0.1.0-alpha.41 (2019-NOT-YET)@{UB}
+- (effect) in (procedure) support (AmiTradeCenter).
 - (database) is now case insensitive.
 - Installer script catalog handling fixed.
 - Improved robustness.

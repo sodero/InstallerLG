@@ -995,31 +995,48 @@ void *dbg_alloc(int line, const char *file, const char *func, void *mem)
 //------------------------------------------------------------------------------
 entry_p native_exists(entry_p contxt, call_t func)
 {
+    if(!contxt)
+    {
+        // Not here.
+        return NULL;
+    }
+
+    // Nothing found yet.
     entry_p entry = NULL;
 
-    // NULL are valid values.
-    if(!contxt || !contxt->children)
+    if(contxt->children)
     {
-        // Doesn't exists.
-        return entry;
-    }
+        // Iterate over all children and recur if needed.
+        for(entry_p *cur = contxt->children; exists(*cur) && !entry; cur++)
+        {
+            if((*cur)->type == NATIVE && (*cur)->call == func)
+            {
+                // It exists.
+                return *cur;
+            }
 
-    // Iterate over all children and recur if needed.
-    for(entry_p *c = contxt->children; exists(*c) && !entry; c++)
-    {
-        if((*c)->type == NATIVE && (*c)->call == func)
-        {
-            // Found it.
-            entry = *c;
-        }
-        else
-        {
-            // Recur.
-            entry = native_exists(*c, func);
+            // Recur, depth first.
+            entry = native_exists(*cur, func);
         }
     }
 
-    // NULL or callback.
+    if(!entry && contxt->symbols)
+    {
+        // Iterate over all symbols and recur if needed.
+        for(entry_p *cur = contxt->symbols; exists(*cur) && !entry; cur++)
+        {
+            if((*cur)->type == NATIVE && (*cur)->call == func)
+            {
+                // It exists.
+                return *cur;
+            }
+
+            // Recur, depth first.
+            entry = native_exists(*cur, func);
+        }
+    }
+
+    // NATIVE or NULL.
     return entry;
 }
 
