@@ -120,6 +120,29 @@ entry_p m_effect(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_action
+// Description: Get (setmedia) action as bitmask.
+// Input:       const char *:   Installer media action string.
+// Return:      int:            Datatype action string.
+//------------------------------------------------------------------------------
+static int h_action(const char *act)
+{
+    // Translate action to command bitmask.
+    return strcasecmp(act, "pause") == 0 ? STM_PAUSE :
+           strcasecmp(act, "play") == 0 ? STM_PLAY :
+           strcasecmp(act, "contents") == 0 ? STM_CONTENTS :
+           strcasecmp(act, "index") == 0 ? STM_INDEX :
+           strcasecmp(act, "retrace") == 0 ? STM_RETRACE :
+           strcasecmp(act, "browser_prev") == 0 ? STM_BROWSE_PREV :
+           strcasecmp(act, "browser_next") == 0 ? STM_BROWSE_NEXT :
+           strcasecmp(act, "command") == 0 ? STM_COMMAND :
+           strcasecmp(act, "rewind") == 0 ? STM_REWIND :
+           strcasecmp(act, "fastforward") == 0 ? STM_FASTFORWARD :
+           strcasecmp(act, "stop") == 0 ? STM_STOP :
+           strcasecmp(act, "locate") == 0 ? STM_LOCATE : 0;
+}
+
+//------------------------------------------------------------------------------
 // (setmedia <media> <action> [parameter])
 //      perform action on datatype
 //
@@ -132,20 +155,7 @@ entry_p m_setmedia(entry_p contxt)
 
     // Action to perform.
     char *act = str(C_ARG(2));
-
-    // Translate action to command.
-    int cmd = strcasecmp(act, "pause") == 0 ? STM_PAUSE :
-              strcasecmp(act, "play") == 0 ? STM_PLAY :
-              strcasecmp(act, "contents") == 0 ? STM_CONTENTS :
-              strcasecmp(act, "index") == 0 ? STM_INDEX :
-              strcasecmp(act, "retrace") == 0 ? STM_RETRACE :
-              strcasecmp(act, "browser_prev") == 0 ? STM_BROWSE_PREV :
-              strcasecmp(act, "browser_next") == 0 ? STM_BROWSE_NEXT :
-              strcasecmp(act, "command") == 0 ? STM_COMMAND :
-              strcasecmp(act, "rewind") == 0 ? STM_REWIND :
-              strcasecmp(act, "fastforward") == 0 ? STM_FASTFORWARD :
-              strcasecmp(act, "stop") == 0 ? STM_STOP :
-              strcasecmp(act, "locate") == 0 ? STM_LOCATE : 0;
+    int cmd = h_action(act);
 
     if(!cmd)
     {
@@ -172,13 +182,13 @@ entry_p m_setmedia(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_showmedia_create_id
+// Name:        h_create_id
 // Description: m_showmedia helper creating a user defined media ID variable.
 // Input:       entry_p contxt: Execution context.
 //              int mid:        Media ID.
 // Return:      int:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_showmedia_create_id(entry_p contxt, int mid)
+static int h_create_id(entry_p contxt, int mid)
 {
     // First argument is the variable name.
     char *var = str(C_ARG(1));
@@ -219,6 +229,39 @@ static int h_showmedia_create_id(entry_p contxt, int mid)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_size
+// Description: Get (showmedia) size as bitmask.
+// Input:       const char *atr:    Attribute name.
+// Return:      int:                G_* bitmask.
+//------------------------------------------------------------------------------
+static int h_size(const char *atr)
+{
+    return strcasecmp(atr, "small") == 0 ? G_SMALL :
+           strcasecmp(atr, "small_medium") == 0 ? G_SMALL | G_LESS :
+           strcasecmp(atr, "small_large") == 0 ? G_SMALL | G_MORE :
+           strcasecmp(atr, "medium") == 0 ? G_MEDIUM :
+           strcasecmp(atr, "medium_small") == 0 ? G_MEDIUM | G_LESS :
+           strcasecmp(atr, "medium_large") == 0 ? G_MEDIUM | G_MORE :
+           strcasecmp(atr, "large") == 0 ? G_LARGE :
+           strcasecmp(atr, "large_small") == 0 ? G_LARGE | G_LESS :
+           strcasecmp(atr, "large_medium") == 0 ? G_LARGE | G_MORE : 0;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_extra
+// Description: Get (showmedia) extra flags as bitmask.
+// Input:       const char *atr:    Attribute name.
+// Return:      int:                G_* bitmask.
+//------------------------------------------------------------------------------
+static int h_extra(const char *atr)
+{
+    return strcasecmp(atr, "wordwrap") == 0 ? G_WORDWRAP :
+           strcasecmp(atr, "panel") == 0 ? G_PANEL :
+           strcasecmp(atr, "play") == 0 ? G_PLAY :
+           strcasecmp(atr, "repeat") == 0 ? G_REPEAT : 0;
+}
+
+//------------------------------------------------------------------------------
 // (showmedia <medianame> <filename> <position> <size> <borderflag> ...)
 //      open datatype and present it to the user.
 //
@@ -229,32 +272,15 @@ entry_p m_showmedia(entry_p contxt)
     // We need atleast 5 arguments.
     C_SANE(5, NULL); S_SANE(0);
 
-    // Get size.
-    char *att = str(C_ARG(4));
-
     // Set size bitmask.
-    int msk = h_pos(str(C_ARG(3))) | (num(C_ARG(5)) ? G_BORDER : 0) | (
-              strcasecmp(att, "small") == 0 ? G_SMALL :
-              strcasecmp(att, "small_medium") == 0 ? G_SMALL | G_LESS :
-              strcasecmp(att, "small_large") == 0 ? G_SMALL | G_MORE :
-              strcasecmp(att, "medium") == 0 ? G_MEDIUM :
-              strcasecmp(att, "medium_small") == 0 ? G_MEDIUM | G_LESS :
-              strcasecmp(att, "medium_large") == 0 ? G_MEDIUM | G_MORE :
-              strcasecmp(att, "large") == 0 ? G_LARGE :
-              strcasecmp(att, "large_small") == 0 ? G_LARGE | G_LESS :
-              strcasecmp(att, "large_medium") == 0 ? G_LARGE | G_MORE : 0);
+    int msk = h_pos(str(C_ARG(3))) | (num(C_ARG(5)) ? G_BORDER : 0) |
+              h_size(str(C_ARG(4)));
 
     // Get the rest of the flags.
     for(size_t i = 6; exists(C_ARG(i)); i++)
     {
-        // Get current flag.
-        att = str(C_ARG(i));
-
-        // Translate into bitmask.
-        msk |= (strcasecmp(att, "wordwrap") == 0 ? G_WORDWRAP :
-                strcasecmp(att, "panel") == 0 ? G_PANEL :
-                strcasecmp(att, "play") == 0 ? G_PLAY :
-                strcasecmp(att, "repeat") == 0 ? G_REPEAT : 0);
+        // Translate flag to bitmask.
+        msk |= h_extra(str(C_ARG(i)));
     }
 
     // Invalid media ID.
@@ -267,5 +293,5 @@ entry_p m_showmedia(entry_p contxt)
     }
 
     // Create media ID user variable.
-    R_NUM(h_showmedia_create_id(contxt, mid));
+    R_NUM(h_create_id(contxt, mid));
 }

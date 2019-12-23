@@ -715,57 +715,60 @@ char *get_chlstr(entry_p contxt, bool pad)
     // Allocate memory to hold one string pointer per child.
     char **stv = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
 
-    if(stv)
+    if(!stv)
     {
-        // Total length.
-        size_t len = 0;
-
-        // Save all string pointers so that we don't evaluate children twice
-        // and thereby set of side effects more than once.
-        while(cnt > 0)
-        {
-            entry_p cur = *(--child);
-
-            // Ignore contexts.
-            if(cur->type == CONTXT)
-            {
-                continue;
-            }
-
-            // Go backwards, evaluate and increase total string length as
-            // we go. Also, include padding if necessary.
-            stv[--cnt] = str(cur);
-            len += strlen(stv[cnt]) + (pad ? 1 : 0);
-        }
-
-        // Memory to hold the full concatenation.
-        ret = len ? DBG_ALLOC(calloc(len + 1, 1)) : NULL;
-
-        if(ret)
-        {
-            // The concatenation, 'stv' is null terminated.
-            while(stv[cnt])
-            {
-                strncat(ret, stv[cnt], len + 1 - strlen(ret));
-                cnt++;
-
-                // Is padding applicable?
-                if(pad && stv[cnt])
-                {
-                    // Insert whitespace.
-                    strncat(ret, " ", len + 1 - strlen(ret));
-                }
-            }
-        }
-        else
-        {
-            // No data to concatenate.
-            ret = DBG_ALLOC(strdup(""));
-        }
-
-        // Free references before returning.
-        free(stv);
+        // Out of memory.
+        return NULL;
     }
+
+    // Total length.
+    size_t len = 0;
+
+    // Save all string pointers so that we don't evaluate children twice
+    // and thereby set of side effects more than once.
+    while(cnt > 0)
+    {
+        entry_p cur = *(--child);
+
+        // Ignore contexts.
+        if(cur->type == CONTXT)
+        {
+            continue;
+        }
+
+        // Go backwards, evaluate and increase total string length as
+        // we go. Also, include padding if necessary.
+        stv[--cnt] = str(cur);
+        len += strlen(stv[cnt]) + (pad ? 1 : 0);
+    }
+
+    // Memory to hold the full concatenation.
+    ret = len ? DBG_ALLOC(calloc(len + 1, 1)) : NULL;
+
+    if(ret)
+    {
+        // The concatenation, 'stv' is null terminated.
+        while(stv[cnt])
+        {
+            strncat(ret, stv[cnt], len + 1 - strlen(ret));
+            cnt++;
+
+            // Is padding applicable?
+            if(pad && stv[cnt])
+            {
+                // Insert whitespace.
+                strncat(ret, " ", len + 1 - strlen(ret));
+            }
+        }
+    }
+    else
+    {
+        // No data to concatenate.
+        ret = DBG_ALLOC(strdup(""));
+    }
+
+    // Free references before returning.
+    free(stv);
 
     // We could be in any state here, success or panic.
     return ret;

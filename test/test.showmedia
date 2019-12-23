@@ -12,7 +12,7 @@
 (set zero 303 one 606 two 808) (debug zero one two) (showmedia "zero" "file" "nopos" "nosize" 0) (debug zero one two) (showmedia "one" "file" "nopos" "nosize" 0) (debug zero one two) (showmedia "two" "file" "nopos" "nosize" 0) (debug zero one two); "","303 606 808 0:0:file 0 606 808 1:0:file 0 1 808 2:0:file 0 1 2 1",""
 (set zero 303 one 606 two 808) (debug zero one two) (showmedia "zero" "file" "nopos" "nosize" 0) (showmedia "zero" "file" "nopos" "nosize" 0) (debug zero one two) (showmedia "one" "file" "nopos" "nosize" 0) (debug zero one two) (showmedia "two" "file" "nopos" "nosize" 0) (debug zero one two); "","303 606 808 0:0:file 1:0:file 1 606 808 2:0:file 1 2 808 3:0:file 1 2 3 1",""
 (showmedia "m" "file" "nopos" "nosize" 0) (showmedia "m" "file" "nopos" "nosize" 0) (showmedia "m" "file" "nopos" "nosize" 0) ; "","0:0:file 1:0:file 2:0:file 1",""
-(showmedia m f p s b) ; "","Line 1: Undefined variable 's' Line 1: Undefined variable 'p' Line 1: Undefined variable 'b' Line 1: Undefined variable 'f' Line 1: Undefined variable 'm' 0:0: 0",""
+(showmedia m f p s b) ; "","Line 1: Undefined variable 'p' Line 1: Undefined variable 'b' Line 1: Undefined variable 's' Line 1: Undefined variable 'f' Line 1: Undefined variable 'm' 0:0: 0",""
 (showmedia) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (showmedia m) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (showmedia m f) ; "","Line 1: syntax error, unexpected ')' ')'",""
