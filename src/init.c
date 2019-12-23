@@ -72,7 +72,7 @@ static void init_num(entry_p contxt, char *sym, int num)
 //------------------------------------------------------------------------------
 static void init_str(entry_p contxt, char *sym, char *str)
 {
-    // Create SYMBOL VALUE tuple.
+    // Create SYMBOL -> VALUE tuple.
     entry_p var = new_symbol(DBG_ALLOC(strdup(sym))),
             val = new_string(DBG_ALLOC(strdup(str)));
 
@@ -105,7 +105,7 @@ static void init_tooltypes(entry_p contxt)
     char *a_app = arg_get(ARG_APPNAME), *a_scr = arg_get(ARG_SCRIPT),
          *a_log = arg_get(ARG_LOGFILE), *a_lng = arg_get(ARG_LANGUAGE);
 
-    // Userlevels: minimum 'NOVICE' and default 'AVERAGE'.
+    // User levels: minimum 'NOVICE' and default 'AVERAGE'.
     int l_def = str_to_userlevel(arg_get(ARG_DEFUSER), LG_AVERAGE),
         l_min = str_to_userlevel(arg_get(ARG_MINUSER), LG_NOVICE);
 
@@ -338,7 +338,6 @@ static void init_welcome(entry_p contxt)
 
         // Tests don't expect a default (welcome).
         #if defined(AMIGA) && !defined(LG_TEST)
-
         // Add to the root and reparent.
         if(entry)
         {

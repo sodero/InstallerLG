@@ -483,7 +483,7 @@ void run(entry_p entry)
         // Output what we have unless we're running from WB.
         if(arg_argc(-1))
         {
-            printf("%s\n", str(status));
+            puts(str(status));
         }
 
         // GUI teardown.
