@@ -65,14 +65,14 @@ clean:
 	$(RM) -R $(NAME) Catalogs
 	$(RM) $(SRC)/*.swp ../test/*.swp $(BIN)/_*
 
-$(ARC): $(CAT) $(EXE)
-	sleep 3 && lha $(LHAFLAGS) $@ $(FILES)
+$(ARC): $(EXE)
+	lha $(LHAFLAGS) $@ $(FILES)
 
 $(CAT):
 	$(MAKE) -C $(BIN) cat && \
 	mv $(BIN)/$(CAT) $@
 
-$(EXE):
+$(EXE): $(CAT)
 	$(MAKE) -C $(BIN) $(EXE)
 	mv $(BIN)/$(EXE) $@
 
