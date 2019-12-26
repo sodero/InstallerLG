@@ -1627,7 +1627,7 @@ MUIDSP IGGetScreenProp(Class *cls, Object *obj,
     *width = scr->Width;
     *height = scr->Height;
     *depth = GetBitMapAttr(scr->RastPort.BitMap, BMA_DEPTH);
-    *colors = 1 << *depth;
+    *colors = 1 << (*depth > 24 ? 24 : *depth);
 
     return G_TRUE;
 }
@@ -2515,6 +2515,12 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
             win = OpenWindowTags(NULL, WA_CustomScreen, scr,
                                  WA_Borderless, TRUE, WA_Backdrop, TRUE,
                                  TAG_END);
+        }
+
+        if(!scr || !win)
+        {
+            // Unknown error.
+            GERR(tr(S_UNER));
         }
     }
 

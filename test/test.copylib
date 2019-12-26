@@ -1,3 +1,4 @@
+(user 0) (set @strict 0) (copylib  (confirm) (source "_clf_") (dest "_cld_")) ; "rm -Rf _cld_ _clf_","0","test ! -f _cld_/_clf_ && rm -Rf _clf_ _cld_"
 (user 0) (copylib  (source "_clf_") (dest "_cld_")) ; "rm -Rf _cld_ _clf_ && cp ../test/data.copylib.i1.TheBar_2619_Aros_i386 _clf_","Line 1: Missing option 'prompt' 0","test ! -d _cld_ && rm -Rf _clf_ _cld_"
 (user 0) (copylib  (prompt "p") (source "_clf_") (dest "_cld_")) ; "rm -Rf _cld_ _clf_ && cp ../test/data.copylib.i1.TheBar_2619_Aros_i386 _clf_","Line 1: Missing option 'help' 0","test ! -d _cld_ && rm -Rf _clf_ _cld_"
 (user 0) (set @strict 0) (copylib  (source "_clf_") (dest "_cld_")) ; "rm -Rf _cld_ _clf_ && cp ../test/data.copylib.i1.TheBar_2619_Aros_i386 _clf_","1","cmp ../test/data.copylib.i1.TheBar_2619_Aros_i386 _cld_/_clf_ && rm -Rf _clf_ _cld_"
