@@ -106,7 +106,8 @@ Italian translations.
 @{B}0.1.0-alpha.41 (2019-NOT-YET)@{UB}
 - (effect) in (procedure) support (AmiTradeCenter).
 - (database) is now case insensitive.
-- (querydisplay) can now handle 32-bit screens.
+- (copyfiles) (optional "nofail") read error bug fixed (AmiTradeCenter).
+- (querydisplay) 32-bit screen bug fixed..
 - Installer script catalog handling fixed.
 - Improved robustness.
 - ?

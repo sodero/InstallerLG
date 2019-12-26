@@ -438,7 +438,8 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
         // Make sure that the file / dir exists. But only in strict mode,
         // otherwise just go on, missing files will be skipped during file
         // copy anyway.
-        if(node->type == LG_NONE && get_num(contxt, "@strict"))
+        if(node->type == LG_NONE && get_num(contxt, "@strict") &&
+          !opt(contxt, OPT_NOFAIL))
         {
             // File or directory doesn't exist.
             ERR(ERR_NO_SUCH_FILE_OR_DIR, node->name);
@@ -525,6 +526,18 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
     }
 
     int type = h_exists(src);
+
+    if(type == LG_NONE)
+    {
+        if(!opt(contxt, OPT_NOFAIL))
+        {
+            // We shouldn't ignore this failure.
+            ERR(ERR_NO_SUCH_FILE_OR_DIR, src);
+        }
+        
+        // It's neither a directory or a file.
+        return NULL;
+    }
 
     // Is source a directory?
     if(type == LG_DIR)
@@ -752,13 +765,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
         free(head);
         free(file);
     }
-    else
-    {
-        // It's neither a directory or a file.
-        ERR(ERR_NO_SUCH_FILE_OR_DIR, src);
-        return NULL;
-    }
-
+    
     // Out of memory.
     PANIC(contxt);
 
@@ -1395,7 +1402,7 @@ entry_p m_copyfiles(entry_p contxt)
             chmod(dst, S_IRWXU);
         }
     }
-
+    
     // Traverse source directory and create destination strings.
     pnode_p tree = h_filetree(contxt, src, dst, files, fonts, choices,
                               pattern, infos);
