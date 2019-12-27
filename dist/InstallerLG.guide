@@ -103,6 +103,10 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}0.1.0-alpha.42 (2020-NOT-YET)@{UB}
+- Improved robustness.
+- ?
+
 @{B}0.1.0-alpha.41 (2019-12-26)@{UB}
 - (effect) in (procedure) support (AmiTradeCenter).
 - (database) is now case insensitive.
