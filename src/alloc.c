@@ -255,6 +255,7 @@ entry_p new_symref(char *name, int line)
 
     // We need to free 'name', since we own it.
     free(name);
+    free(entry);
 
     // Out of memory / bad input.
     PANIC(NULL);
