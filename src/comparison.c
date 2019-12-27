@@ -16,7 +16,7 @@
 
 //------------------------------------------------------------------------------
 // Name:        h_cmp_numbers
-// Description: Verify that both arguments can be interpreted as numbers.
+// Description: Test if both arguments can be interpreted as numbers.
 // Input:       entry_p lhs:    Left argument.
 //              entry_p rhs:    Right argument.
 // Return:      bool:           'true' or 'false'.
@@ -30,7 +30,7 @@ static bool h_cmp_numbers(entry_p alfa, entry_p beta)
 
 //------------------------------------------------------------------------------
 // Name:        h_cmp_strings
-// Description: Verify that both arguments can be treated as strings.
+// Description: Test if both arguments can be treated as strings.
 // Input:       entry_p lhs:    Left argument.
 //              entry_p rhs:    Right argument.
 // Return:      bool:           'true' or 'false'.
@@ -40,6 +40,17 @@ static bool h_cmp_strings(entry_p alfa, entry_p beta)
     // Don't trust strings, we might be out of memory.
     return alfa->type == STRING && alfa->name && beta->type == STRING &&
            beta->name;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_cmp_string_0
+// Description: Test if string can be treated as zero.
+// Input:       entry_p alfa:   String.
+// Return:      bool:           'true' if zero, false 'false'.
+//------------------------------------------------------------------------------
+static bool h_cmp_string_0(entry_p alfa)
+{
+    return alfa->name && alfa->name[0] == '0' && !alfa->name[1];
 }
 
 //------------------------------------------------------------------------------
@@ -61,14 +72,14 @@ static int h_cmp_mixed(entry_p alfa, entry_p beta)
         }
 
         // Do we have a number != 0 or a '0' string?
-        if(num(alfa) || (alfa->name[0] == '0' && !alfa->name[1]))
+        if(num(alfa) || h_cmp_string_0(alfa))
         {
             return num(alfa) - beta->id;
         }
     }
 
     // Beta is a string. A nonzero number or a '0' string?
-    if(num(beta) || (beta->name && beta->name[0] == '0' && !beta->name[1]))
+    if(num(beta) || h_cmp_string_0(beta))
     {
         return alfa->id - num(beta);
     }

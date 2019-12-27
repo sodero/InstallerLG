@@ -124,6 +124,33 @@ static bool arg_cli(int argc, char **argv)
     #endif
 }
 
+#if defined(AMIGA) && !defined(LG_TEST)
+//------------------------------------------------------------------------------
+// Name:        arg_find_tts
+// Description: Find tooltypes in string list.
+// Input:       STRPTR *tts:    List of tooltype strings.
+//              bool tool:      'true' if invoked as tool, 'false' if project.
+// Return:      -
+//------------------------------------------------------------------------------
+static void arg_find_tts(STRPTR *tts, bool tool)
+{
+    // We need to find the script path if we're invoked as a tool.
+    if(tool)
+    {
+        args[ARG_SCRIPT] = (char *) FindToolType(tts, (STRPTR) tr(S_SCRI));
+    }
+
+    // The rest of the 'tooltypes' are the same for 'projects' and 'tools'.
+    args[ARG_APPNAME] = (char *) FindToolType((STRPTR *) tts, "APPNAME");
+    args[ARG_MINUSER] = (char *) FindToolType((STRPTR *) tts, "MINUSER");
+    args[ARG_DEFUSER] = (char *) FindToolType((STRPTR *) tts, "DEFUSER");
+    args[ARG_LANGUAGE] = (char *) FindToolType((STRPTR *) tts, "LANGUAGE");
+    args[ARG_LOGFILE] = (char *) FindToolType((STRPTR *) tts, "LOGFILE");
+    args[ARG_NOLOG] = (char *) FindToolType((STRPTR *) tts, "NOLOG");
+    args[ARG_NOPRETEND] = (char *) FindToolType((STRPTR *) tts, "NOPRETEND");
+}
+#endif
+
 //------------------------------------------------------------------------------
 // Name:        arg_wb
 // Description: Get WB tooltype information.
@@ -156,29 +183,12 @@ static bool arg_wb(char **argv)
     // We have the script name if this is a 'project'.
     args[ARG_SCRIPT] = arg->wa_Name;
 
-    // Read information from icon.
+    // Get info from icon if we can, otherwise continue.
     struct DiskObject *dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
 
-    // Get info from icon if we can, otherwise continue.
     if(dob && dob->do_ToolTypes)
     {
-        char **tts = (char **) dob->do_ToolTypes;
-
-        // We need to find the script path if we're invoked as a tool.
-        if(wb->sm_NumArgs == 1)
-        {
-            args[ARG_SCRIPT] = (char *) FindToolType ((STRPTR *) tts,
-                                                      (STRPTR) tr(S_SCRI));
-        }
-
-        // The rest of the 'tooltypes' are the same for 'projects' and 'tools'.
-        args[ARG_APPNAME] = (char *) FindToolType((STRPTR *) tts, "APPNAME");
-        args[ARG_MINUSER] = (char *) FindToolType((STRPTR *) tts, "MINUSER");
-        args[ARG_DEFUSER] = (char *) FindToolType((STRPTR *) tts, "DEFUSER");
-        args[ARG_LANGUAGE] = (char *) FindToolType((STRPTR *) tts, "LANGUAGE");
-        args[ARG_LOGFILE] = (char *) FindToolType((STRPTR *) tts, "LOGFILE");
-        args[ARG_NOLOG] = (char *) FindToolType((STRPTR *) tts, "NOLOG");
-        args[ARG_NOPRETEND] = (char *) FindToolType((STRPTR *) tts, "NOPRETEND");
+        arg_find_tts(dob->do_ToolTypes, wb->sm_NumArgs == 1);
     }
 
     // Postprocess WB info and go back. We'll crash if we don't.
@@ -191,7 +201,6 @@ static bool arg_wb(char **argv)
         FreeDiskObject(dob);
     }
 
-    // Return the result of arg_post().
     return ret;
     #else
     // We should never end up here.
