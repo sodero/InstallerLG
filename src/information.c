@@ -172,8 +172,8 @@ entry_p m_message(entry_p contxt)
     }
 
     // Translate response.
-    R_NUM(((grc == G_ABORT || grc == G_EXIT) && HALT) ? 0 :
-          ((grc == G_TRUE) ? 1 : 0));
+    R_NUM(((grc == G_ABORT || grc == G_EXIT) && HALT) ? LG_FALSE :
+          ((grc == G_TRUE) ? LG_TRUE : LG_FALSE));
 }
 
 //------------------------------------------------------------------------------
@@ -243,7 +243,7 @@ entry_p m_welcome(entry_p contxt)
     set_num(contxt, "@log", lgf);
 
     // Proceed, halt or error.
-    R_NUM((grc == G_TRUE) ? 1 : 0);
+    R_NUM((grc == G_TRUE) ? LG_TRUE : LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
