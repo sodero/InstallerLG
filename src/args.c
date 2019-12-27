@@ -183,10 +183,9 @@ static bool arg_wb(char **argv)
     // We have the script name if this is a 'project'.
     args[ARG_SCRIPT] = arg->wa_Name;
 
-    // Read information from icon.
+    // Get info from icon if we can, otherwise continue.
     struct DiskObject *dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
 
-    // Get info from icon if we can, otherwise continue.
     if(dob && dob->do_ToolTypes)
     {
         arg_find_tts(dob->do_ToolTypes, wb->sm_NumArgs == 1);
@@ -202,7 +201,6 @@ static bool arg_wb(char **argv)
         FreeDiskObject(dob);
     }
 
-    // Return the result of arg_post().
     return ret;
     #else
     // We should never end up here.
