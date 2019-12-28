@@ -188,7 +188,7 @@ static cpu_t h_cpu_id(void)
 //------------------------------------------------------------------------------
 static char *h_cpu_name(void)
 {
-    // CPU or 'Unknown'.
+    // Translate CPU ID to string.
     switch(h_cpu_id())
     {
         case ARM:
@@ -211,9 +211,12 @@ static char *h_cpu_name(void)
             return "68040";
         case M68060:
             return "68060";
-        default:
-            return "Unknown";
+        case NONE:
+            break;
     }
+
+    // CPU not supported.
+    return "Unknown";
 }
 
 //------------------------------------------------------------------------------
