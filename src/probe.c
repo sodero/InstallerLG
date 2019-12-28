@@ -188,35 +188,12 @@ static cpu_t h_cpu_id(void)
 //------------------------------------------------------------------------------
 static char *h_cpu_name(void)
 {
-    // Translate CPU ID to string.
-    switch(h_cpu_id())
-    {
-        case ARM:
-            return "ARM";
-        case PPC:
-            return "PowerPC";
-        case X86:
-            return "x86";
-        case X86_64:
-            return "x86_46";
-        case M68000:
-            return "68000";
-        case M68010:
-            return "68010";
-        case M68020:
-            return "68020";
-        case M68030:
-            return "68030";
-        case M68040:
-            return "68040";
-        case M68060:
-            return "68060";
-        case NONE:
-            break;
-    }
+    char *cpu[] = { "Unknown", "PowerPC", "ARM", "M68000", "M68010", "M68020",
+                    "M68030", "M68040", "M68060", "X86", "X86_64"};
 
-    // CPU not supported.
-    return "Unknown";
+    // Trans ID to string.
+    cpu_t cid  = h_cpu_id();
+    return cpu[cid < sizeof(cpu) ? cid : NONE];
 }
 
 //------------------------------------------------------------------------------
@@ -299,7 +276,6 @@ entry_p m_database(entry_p contxt)
     // We need atleast one argument
     C_SANE(1, NULL);
 
-    int memf = -1;
     char *feat = str(C_ARG(1)), *ret = "Unknown";
 
     if(strcasecmp(feat, "cpu") == 0)
@@ -317,19 +293,15 @@ entry_p m_database(entry_p contxt)
     if(strcasecmp(feat, "graphics-mem") == 0)
     {
         // Get free chipmem.
-        memf = h_chipmem();
+        ret = get_buf();
+        snprintf(ret, buf_size(), "%d", h_chipmem());
     }
     else
-    if(!strcasecmp(feat, "total-mem"))
+    if(strcasecmp(feat, "total-mem") == 0)
     {
         // Get free fast + chipmem.
-        memf = h_totalmem();
-    }
-
-    if(memf != -1)
-    {
-        snprintf(get_buf(), buf_size(), "%d", memf);
         ret = get_buf();
+        snprintf(ret, buf_size(), "%d", h_totalmem());
     }
 
     // Are we testing for a specific value?
