@@ -193,7 +193,7 @@ static char *h_cpu_name(void)
 
     // Trans ID to string.
     cpu_t cid  = h_cpu_id();
-    return cpu[cid < sizeof(cpu) ? cid : NONE];
+    return cpu[(cid < (sizeof(cpu) / sizeof(cpu[NONE]))) ? cid : NONE];
 }
 
 //------------------------------------------------------------------------------
