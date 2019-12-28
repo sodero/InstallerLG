@@ -16,9 +16,7 @@ endif
 #-----------------------------------------------------------------------------------#
 # Configuration
 #-----------------------------------------------------------------------------------#
-FLT := aros
 DIR := aminet
-SRC := ../src
 BIN := ../build
 EXE := Installer
 CAT := Catalogs
@@ -29,7 +27,6 @@ ARC := $(DIR)/$(NAME).$(ARCH)-$(OS).lha
 README := $(DIR)/$(NAME).$(ARCH)-$(OS).readme
 FILES := $(EXE) $(CAT) 'InstallerLG installer' 'InstallerLG installer.info'
 FILES += 'InstallerLG.guide' 'InstallerLG.guide.info'
-STEMS := $(sort $(basename $(notdir $(wildcard $(SRC)/*.c) $(wildcard $(BIN)/*.c))))
 
 #-----------------------------------------------------------------------------------#
 # Targets
@@ -37,33 +34,13 @@ STEMS := $(sort $(basename $(notdir $(wildcard $(SRC)/*.c) $(wildcard $(BIN)/*.c
 .PHONY: dist
 dist: $(ARC) $(README)
 
-.PHONY: aros
-aros:
-	cp $(SRC)/*.c $(FLT)
-	cp $(SRC)/*.h $(FLT)
-	cp $(BIN)/*.c $(FLT)
-	cp $(BIN)/*.h $(FLT)
-	$(SED) -i 's/FILES :=.*$$/FILES := $(STEMS)/' $(FLT)/mmakefile.src
-
-.PHONY: src
-src: clean
-	mkdir $(NAME)
-	cp ../LICENSE $(NAME)
-	cp ../README.md $(NAME)
-	cp -R $(BIN) $(NAME)
-	cp -R $(SRC) $(NAME)
-	cp -R ../test $(NAME)
-	lha $(LHAFLAGS) $(DIR)/$(NAME).src.lha $(NAME)
-
 .PHONY: clean
 clean:
 	$(MAKE) -C $(BIN) $@
 	$(RM) $(EXE)
 	$(RM) $(README)
 	$(RM) $(DIR)/*.lha
-	$(RM) $(FLT)/*.c $(FLT)/*.h
 	$(RM) -R $(NAME) Catalogs
-	$(RM) $(SRC)/*.swp ../test/*.swp $(BIN)/_*
 
 $(ARC): $(EXE)
 	lha $(LHAFLAGS) $@ $(FILES)

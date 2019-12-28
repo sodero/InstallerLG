@@ -4,7 +4,7 @@ Uploader:     rolfkopman@gmail.com (Ola Söder)
 Type:         util/sys
 Architecture: __ARCH__
 Requires:     MUI 3.8
-Version:      0.1.0-alpha.41
+Version:      0.1.0-alpha.42
 Distribution: Aminet
 
 InstallerLG
@@ -15,3 +15,7 @@ version 2.1. InstallerLG aims to be fully compatible with the original as
 described in the V44.10 documentation. Most resource limitations found in
 the Commodore implementation are gone, and the GUI has been replaced by a
 MUI / Zune based one.
+
+The source code is available here:
+https://github.com/sodero/InstallerLG
+https://sourceforge.net/projects/installerlg/
