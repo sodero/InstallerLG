@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // probe.c:
 //
-// Environment information retrieval
+// Host system information retrieval
 //------------------------------------------------------------------------------
 // Copyright (C) 2018-2019, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
@@ -39,6 +39,148 @@
 #endif
 
 //------------------------------------------------------------------------------
+// CPU ID:s
+//------------------------------------------------------------------------------
+typedef enum {NONE, PPC, ARM, M68000, M68010, M68020, M68030, M68040, M68060,
+              X86, X86_64} cpu_t;
+
+#if defined(__MORPHOS__) && !defined(LG_TEST)
+//------------------------------------------------------------------------------
+// Name:        h_cpu_id
+// Description: Get host CPU ID. MorphOS implementation.
+// Input:       ---
+// Return:      cpu_t: Host CPU architecture ID.
+//------------------------------------------------------------------------------
+static cpu_t h_cpu_id(void)
+{
+    uint32_t arc = NONE;
+
+    NewGetSystemAttrs(&arc, sizeof(arc), SYSTEMINFOTYPE_MACHINE);
+
+    // On MorphOS, there is only PPC (and no define).
+    return arc == 1 ? PPC : NONE;
+}
+
+#elif defined(__AROS__) && !defined(LG_TEST)
+//------------------------------------------------------------------------------
+// Name:        h_cpu_id
+// Description: Get host CPU ID. AROS implementation.
+// Input:       ---
+// Return:      cpu_t: Host CPU architecture ID.
+//------------------------------------------------------------------------------
+static cpu_t h_cpu_id(void)
+{
+    APTR ProcessorBase = OpenResource("processor.resource");
+
+    if(!ProcessorBase)
+    {
+        // Unknown error.
+        return NONE;
+    }
+
+    ULONG fam;
+    struct TagItem tags[] = {{GCIT_Family, (IPTR) &fam}, {TAG_DONE, TAG_DONE}};
+    GetCPUInfo(tags);
+
+    switch(fam)
+    {
+        case CPUFAMILY_60X:
+        case CPUFAMILY_7X0:
+        case CPUFAMILY_74XX:
+        case CPUFAMILY_4XX:
+           return PPC;
+
+        case CPUFAMILY_ARM_3:
+        case CPUFAMILY_ARM_4:
+        case CPUFAMILY_ARM_4T:
+        case CPUFAMILY_ARM_5:
+        case CPUFAMILY_ARM_5T:
+        case CPUFAMILY_ARM_5TE:
+        case CPUFAMILY_ARM_5TEJ:
+        case CPUFAMILY_ARM_6:
+        case CPUFAMILY_ARM_7:
+           return ARM;
+
+        case CPUFAMILY_MOTOROLA_68000:
+           return M68000;
+
+        case CPUFAMILY_AMD_K5:
+        case CPUFAMILY_AMD_K6:
+        case CPUFAMILY_AMD_K7:
+        case CPUFAMILY_INTEL_486:
+        case CPUFAMILY_INTEL_PENTIUM:
+        case CPUFAMILY_INTEL_PENTIUM_PRO:
+        case CPUFAMILY_INTEL_PENTIUM4:
+           return X86;
+
+        case CPUFAMILY_AMD_K8:
+        case CPUFAMILY_AMD_K9:
+        case CPUFAMILY_AMD_K10:
+           return X86_64;
+
+        default:
+           return NONE;
+    }
+}
+
+#elif defined(AMIGA) && !defined(LG_TEST)
+//------------------------------------------------------------------------------
+// Name:        h_cpu_id
+// Description: Get host CPU ID. AmigaOS implementation.
+//
+//              Beware: ### NOT TESTED ###
+//
+// Input:       ---
+// Return:      cpu_t: Host CPU architecture ID.
+//------------------------------------------------------------------------------
+static cpu_t h_cpu_id(void)
+{
+    // This might work on OS3. OS4 probably needs some sugar on top.
+    struct ExecBase *AbsSysBase = *((struct ExecBase **) 4);
+    UWORD flags = AbsSysBase->AttnFlags;
+
+    if(flags & AFF_68010)
+    {
+        return M68010;
+    }
+    else if(flags & AFF_68020)
+    {
+        return M68020;
+    }
+    else if(flags & AFF_68030)
+    {
+        return M68030;
+    }
+    else if(flags & AFF_68040)
+    {
+        return M68040;
+    }
+    else if(flags & AFF_68060)
+    {
+        return M68060;
+    }
+    else
+    {
+        return M68000;
+    }
+}
+
+#else
+//------------------------------------------------------------------------------
+// Name:        h_cpu_id
+// Description: Get host CPU ID. Dummy / test implementation.
+// Input:       ---
+// Return:      cpu_t: Host CPU architecture ID.
+//------------------------------------------------------------------------------
+static cpu_t h_cpu_id(void)
+{
+    // In test mode / on non Amigas we shouldn't report anything but 'Unknown'.
+    // Doing so would create dependencies between test results and host system.
+    return NONE;
+}
+#endif
+
+//------------------------------------------------------------------------------
 // Name:        h_cpu_name
 // Description: Helper for m_database. Get host CPU architecture.
 // Input:       ---
@@ -46,107 +188,100 @@
 //------------------------------------------------------------------------------
 static char *h_cpu_name(void)
 {
-    enum { ERR, PPC, ARM, M68000, M68010, M68020, M68030, M68040, M68060, X86,
-           X86_64, ALL };
-
-    static char *cpu[ALL] = { "Unknown", "PowerPC", "ARM", "68000", "68010",
-                              "68020", "68030", "68040", "68060", "x86",
-                              "x84_64" };
-    uint32_t arc = ERR;
-
-    #if defined(__MORPHOS__) && !defined(LG_TEST)
-    // On MorphOS, there is only PPC (for now) (and no define).
-    NewGetSystemAttrs(&arc, sizeof(arc), SYSTEMINFOTYPE_MACHINE);
-    arc = arc == 1 ? PPC : ERR;
-    #elif defined(__AROS__) && !defined(LG_TEST)
-    // On AROS, everything is possible.
-    APTR ProcessorBase = OpenResource("processor.resource");
-
-    if(ProcessorBase)
-    {
-        ULONG fam;
-
-        struct TagItem tags[] = { { GCIT_Family, (IPTR) &fam },
-                                  { TAG_DONE, TAG_DONE } };
-
-        GetCPUInfo(tags);
-
-        switch(fam)
-        {
-            case CPUFAMILY_60X:
-            case CPUFAMILY_7X0:
-            case CPUFAMILY_74XX:
-            case CPUFAMILY_4XX:
-               arc = PPC;
-               break;
-
-            case CPUFAMILY_ARM_3:
-            case CPUFAMILY_ARM_4:
-            case CPUFAMILY_ARM_4T:
-            case CPUFAMILY_ARM_5:
-            case CPUFAMILY_ARM_5T:
-            case CPUFAMILY_ARM_5TE:
-            case CPUFAMILY_ARM_5TEJ:
-            case CPUFAMILY_ARM_6:
-            case CPUFAMILY_ARM_7:
-               arc = ARM;
-               break;
-
-            case CPUFAMILY_MOTOROLA_68000:
-               arc = M68000;
-               break;
-
-            case CPUFAMILY_AMD_K5:
-            case CPUFAMILY_AMD_K6:
-            case CPUFAMILY_AMD_K7:
-            case CPUFAMILY_INTEL_486:
-            case CPUFAMILY_INTEL_PENTIUM:
-            case CPUFAMILY_INTEL_PENTIUM_PRO:
-            case CPUFAMILY_INTEL_PENTIUM4:
-               arc = X86;
-               break;
-
-            case CPUFAMILY_AMD_K8:
-            case CPUFAMILY_AMD_K9:
-            case CPUFAMILY_AMD_K10:
-               arc = X86_64;
-               break;
-
-            }
-    }
-    #elif defined(AMIGA) && !defined(LG_TEST)
-    // AmigaOS3 - Beware, !NOT TESTED!.
-    struct ExecBase *AbsSysBase = *((struct ExecBase **)4);
-    UWORD flags = AbsSysBase->AttnFlags;
-
-    if(flags & AFF_68010)
-    {
-        arc = M68010;
-    }
-    else if(flags & AFF_68020)
-    {
-        arc = M68020;
-    }
-    else if(flags & AFF_68030)
-    {
-        arc = M68030;
-    }
-    else if(flags & AFF_68040)
-    {
-        arc = M68040;
-    }
-    else if(flags & AFF_68060)
-    {
-        arc = M68060;
-    }
-    else
-    {
-        arc = M68000;
-    }
-    #endif
-
     // CPU or 'Unknown'.
-    return cpu[arc];
+    switch(h_cpu_id())
+    {
+        case ARM:
+            return "ARM";
+        case PPC:
+            return "PowerPC";
+        case X86:
+            return "x86";
+        case X86_64:
+            return "x86_46";
+        case M68000:
+            return "68000";
+        case M68010:
+            return "68010";
+        case M68020:
+            return "68020";
+        case M68030:
+            return "68030";
+        case M68040:
+            return "68040";
+        case M68060:
+            return "68060";
+        default:
+            return "Unknown";
+    }
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_os_name
+// Description: Helper for m_database. Get name of host OS.
+// Input:       ---
+// Return:      char *: Name of host OS.
+//------------------------------------------------------------------------------
+static char *h_os_name(void)
+{
+    // Host OS or 'Unknown'.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    if(FindResident("MorphOS"))
+    {
+        return "MorphOS";
+    }
+
+    // TODO - Try to open aros.library instead?
+    if(FindResident("processor.resource"))
+    {
+        return "AROS";
+    }
+
+    // Use AmigaOS as fallback.
+    return "AmigaOS";
+    #else
+    // In test mode / on non Amigas we shouldn't report anything but 'Unknown'.
+    // Doing so would create dependencies between test results and host system.
+    return NONE;
+    #endif
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_chipmem.
+// Description: Helper for m_database. Get free chipmem in bytes.
+// Input:       ---
+// Return:      int:    Free chipmem.
+//------------------------------------------------------------------------------
+static int h_chipmem(void)
+{
+    return
+    #if defined(AMIGA) && !defined(LG_TEST)
+    AvailMem(MEMF_CHIP);
+    #else
+    // In test mode / on non Amigas we shouldn't report anything but a dummy
+    // value. Doing so would create dependencies between test results and host
+    // system. Pretend that we have 512 KiB free chipmem.
+    1 << 19;
+    #endif
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_totalmem.
+// Description: Helper for m_database. Get free chipmem + fastmem in bytes.
+// Input:       ---
+// Return:      int:    Free chipmem + fastmem.
+//------------------------------------------------------------------------------
+static int h_totalmem(void)
+{
+    return
+    #if defined(AMIGA) && !defined(LG_TEST)
+    AvailMem(MEMF_ANY);
+    #else
+    // In test mode / on non Amigas we shouldn't report anything but a dummy
+    // value. Doing so would create dependencies between test results and host
+    // system. Pretend that we have 1 MiB free chipmem + fastmem.
+    1 << 20;
+    #endif
 }
 
 //------------------------------------------------------------------------------
@@ -172,52 +307,26 @@ entry_p m_database(entry_p contxt)
     else
     if(strcasecmp(feat, "os") == 0)
     {
-        // Get OS name.
-        #if defined(AMIGA) && !defined(LG_TEST)
-        if(FindResident("MorphOS"))
-        {
-            ret = "MorphOS";
-        }
-        else
-        // TODO - Try to open aros.library instead?
-        if(FindResident("processor.resource"))
-        {
-            ret = "AROS";
-        }
-        else
-        {
-            ret = "AmigaOS";
-        }
-        #else
-        ret = "Unknown";
-        #endif
-
+        // Get name of host OS.
+        ret = h_os_name();
     }
     else
     if(strcasecmp(feat, "graphics-mem") == 0)
     {
-        memf =
-        #if defined(AMIGA) && !defined(LG_TEST)
-        AvailMem(MEMF_CHIP);
-        #else
-        524288;
-        #endif
+        // Get free chipmem.
+        memf = h_chipmem();
     }
     else
     if(!strcasecmp(feat, "total-mem"))
     {
-        memf =
-        #if defined(AMIGA) && !defined(LG_TEST)
-        AvailMem(MEMF_ANY);
-        #else
-        524288;
-        #endif
+        // Get free fast + chipmem.
+        memf = h_totalmem();
     }
 
     if(memf != -1)
     {
-        ret = get_buf();
         snprintf(get_buf(), buf_size(), "%d", memf);
+        ret = get_buf();
     }
 
     // Are we testing for a specific value?
