@@ -242,7 +242,7 @@ static char *h_os_name(void)
     #else
     // In test mode / on non Amigas we shouldn't report anything but 'Unknown'.
     // Doing so would create dependencies between test results and host system.
-    return NONE;
+    return "Unknown";
     #endif
 }
 
