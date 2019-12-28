@@ -65,26 +65,28 @@ entry_p m_abort(entry_p contxt)
 //------------------------------------------------------------------------------
 static void h_exit_final(entry_p contxt)
 {
-    // Show final message unless 'quiet' is set.
-    if(!opt(contxt, OPT_QUIET))
+    // Nothing to do if 'quiet' is set.
+    if(opt(contxt, OPT_QUIET))
     {
-        // Get name and location of application.
-        const char *app = get_str(contxt, "@app-name"),
-                   *dst = get_str(contxt, "@default-dest");
+        return;
+    }
 
-        // Only display the 'the app can be found here' message if we know
-        // the name and location of the application.
-        if(*app && *dst)
-        {
-            // Display the full message.
-            snprintf(get_buf(), buf_size(), tr(S_CBFI), tr(S_ICPL), app, dst);
-            gui_finish(get_buf());
-        }
-        else
-        {
-            // Display the bare minimum.
-            gui_finish(tr(S_ICPL));
-        }
+    // Get name and location of application.
+    const char *app = get_str(contxt, "@app-name"),
+               *dst = get_str(contxt, "@default-dest");
+
+    // Display the 'the app can be found here' message if we know the name and
+    // location of the application.
+    if(*app && *dst)
+    {
+        // Display the full message.
+        snprintf(get_buf(), buf_size(), tr(S_CBFI), tr(S_ICPL), app, dst);
+        gui_finish(get_buf());
+    }
+    else
+    {
+        // Display the bare minimum.
+        gui_finish(tr(S_ICPL));
     }
 }
 
