@@ -16,6 +16,54 @@
 #include <string.h>
 
 //------------------------------------------------------------------------------
+// Name:        h_gosub_fmt
+// Description: Helper for m_gosub. Handling one of those strange CBM Installer
+//              features / bugs. The syntax of user defined procedure calls and
+//              string formating is ambiguous, so that a function call such as
+//              (f1 a1 a2 ... ) is transformed into a format string expression
+//              ("%ld%ld" a1 a2 ...) if the function ('f1') is not defined and
+//              a symbol ('f1') that can be resolved as a format string exists.
+//              In strict mode this isn't allowed.
+// Input:       entry_p contxt: Execution context.
+// Return:      entry_p:        Resolved STRING result.
+//------------------------------------------------------------------------------
+static entry_p h_gosub_fmt(entry_p contxt)
+{
+    if(!contxt->resolved)
+    {
+        // Create resolved value on the first invocation.
+        contxt->resolved = new_string(DBG_ALLOC(strdup("")));
+
+        if(!contxt->resolved)
+        {
+            // Out of memory.
+            return end();
+        }
+
+        // Reparent the resolved value.
+        contxt->resolved->parent = contxt;
+    }
+
+    // Save name to be able to resolve the format string multiple times.
+    char *old = contxt->name;
+
+    // Set format, type and callback to mimic a ("%ld" ..) function call.
+    contxt->call = m_fmt;
+    contxt->type = NATIVE;
+    contxt->name = get_str(contxt, contxt->name);
+
+    // Resolve the things we've stitched together.
+    entry_p res = resolve(contxt);
+
+    // Restore name to be able to resolve the format string multiple times.
+    contxt->name = old;
+    contxt->call = m_gosub;
+    contxt->type = CUSREF;
+
+    return res;
+}
+
+//------------------------------------------------------------------------------
 // (<procedure-name>)
 //
 // Trampoline function for invoking user defined procedures.
@@ -24,7 +72,6 @@
 //------------------------------------------------------------------------------
 entry_p m_gosub(entry_p contxt)
 {
-    // A valid global context is needed.
     if(!s_sane(global(contxt), 0) && PANIC(contxt))
     {
         // The parser is broken
@@ -34,9 +81,9 @@ entry_p m_gosub(entry_p contxt)
     // Search for a procedure that matches the reference name.
     for(entry_p *cus = global(contxt)->symbols; exists(*cus); cus++)
     {
-        // Skip symbol if we don't have a match.
         if((*cus)->type != CUSTOM || strcasecmp((*cus)->name, contxt->name))
         {
+            // Skip symbol if we don't have a match.
             continue;
         }
 
@@ -88,7 +135,7 @@ entry_p m_gosub(entry_p contxt)
         // Keep track of the recursion depth. Do not go beyond LG_MAXDEP.
         if(dep++ < LG_MAXDEP)
         {
-            // Return value.
+            // Invoke user defined procedure.
             entry_p ret = invoke(*cus);
             dep--;
             return ret;
@@ -99,55 +146,15 @@ entry_p m_gosub(entry_p contxt)
         return end();
     }
 
-    // In non strict mode, transform the syntax of a function call such as
-    // (f1 arg1 arg2 ...) into a format string expression ("%s%ld.." ...) if
-    // the function is not defined and a symbol that can be resolved into a
-    // format string exists.
-    if(!get_num(contxt, "@strict"))
+    if(get_num(contxt, "@strict"))
     {
-        // First invocation?
-        if(!contxt->resolved)
-        {
-            // We need a resolved dummy. See new_*. In this case we're
-            // mimicing a NATIVE returning a STRING.
-            contxt->resolved = new_string(DBG_ALLOC(strdup("")));
-
-            if(!contxt->resolved)
-            {
-                // Panic already set.
-                return end();
-            }
-
-            // Reparent the dummy.
-            contxt->resolved->parent = contxt;
-        }
-
-        // Save the old name. We need to do this in order to resolve the
-        // format string multiple times when needed.
-        char *old = contxt->name;
-
-        // Set format string, type and callback to mimic a real ("%ld" ..)
-        // function.
-        contxt->call = m_fmt;
-        contxt->type = NATIVE;
-        contxt->name = get_str(contxt, contxt->name);
-
-        // Get the resolved value of the things we've stitched together.
-        entry_p res = resolve(contxt);
-
-        // Restore everything so that we can do this again, once again
-        // resolving the format string.
-        contxt->name = old;
-        contxt->call = m_gosub;
-        contxt->type = CUSREF;
-
-        // Success.
-        return res;
+        // There's no such procedure.
+        ERR(ERR_UNDEF_FNC, contxt->name);
+        return end();
     }
 
-    // Undefined user procedure.
-    ERR(ERR_UNDEF_FNC, contxt->name);
-    return end();
+    // Transform into a string format call. See description of h_gosub_fmt)=.
+    return h_gosub_fmt(contxt);
 }
 
 //------------------------------------------------------------------------------

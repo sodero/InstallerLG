@@ -468,7 +468,7 @@ entry_p new_cusref(char *name, int line, entry_p arg)
 //------------------------------------------------------------------------------
 // Name:        append
 // Description: Append entry to array. Grow array if necessary.
-// Input:       entry_p **dst:  The array.
+// Input:       entry_p **dst:   The array.
 //              entry_p entry:   The entry.
 // Return:      entry_p:         On success, the entry. On failure, NULL.
 //------------------------------------------------------------------------------
