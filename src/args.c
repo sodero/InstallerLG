@@ -181,7 +181,10 @@ static bool arg_wb(char **argv)
     BPTR old = CurrentDir(arg->wa_Lock);
 
     // We have the script name if this is a 'project'.
-    args[ARG_SCRIPT] = arg->wa_Name;
+    if(wb->sm_NumArgs == 2)
+    {
+        args[ARG_SCRIPT] = arg->wa_Name;
+    }
 
     // Get info from icon if we can, otherwise continue.
     struct DiskObject *dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
@@ -232,7 +235,7 @@ bool arg_init(int argc, char **argv)
     bool init = argc ? arg_cli(argc, argv) : arg_wb(argv);
 
     // Go to script working directory and return.
-    return init && !chdir(args[ARG_SCRIPTDIR]);
+    return init && args[ARG_SCRIPTDIR] && !chdir(args[ARG_SCRIPTDIR]);
 }
 
 //------------------------------------------------------------------------------
@@ -280,8 +283,8 @@ int arg_argc(int argc)
 void arg_done(void)
 {
     // Go back to the directory where we started. Don't rely on the existance
-    // of this string, we might be out of memory.
-    if(args[ARG_OLDDIR])
+    // of these strings, we might be out of memory.
+    if(args[ARG_SCRIPTDIR] && args[ARG_OLDDIR])
     {
         chdir(args[ARG_OLDDIR]);
     }
