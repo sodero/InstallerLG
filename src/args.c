@@ -66,7 +66,7 @@ static bool arg_post(void)
 
     // Copy string arguments. Stop at OLDDIR since items after that are either
     // already copied or (interpreted as) booleans.
-    for(size_t arg = ARG_APPNAME; arg <= ARG_OLDDIR; arg++)
+    for(size_t arg = ARG_APPNAME; arg < ARG_OLDDIR; arg++)
     {
         args[arg] = args[arg] ? DBG_ALLOC(strdup(args[arg])) : NULL;
     }
