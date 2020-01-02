@@ -105,6 +105,7 @@ Italian translations.
 
 @{B}0.1.0-alpha.42 (2020-NOT-YET)@{UB}
 - Improved robustness.
+- Memory problem when using Installer as a tool without SCRIPT fixed.
 - ?
 
 @{B}0.1.0-alpha.41 (2019-12-26)@{UB}
