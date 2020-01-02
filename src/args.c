@@ -38,35 +38,35 @@ static char *args[ARG_NUMBER_OF];
 //------------------------------------------------------------------------------
 static bool arg_post(void)
 {
-    // We need a script name.
-    if(!args[ARG_SCRIPT])
+    // We might not have a script but we must continue with the rest of the
+    // strings in case those are tooltypes. Otherwise we'll free memory in
+    // arg_done() that is already freed by FreeDiskObject in arg_wb().
+    if(args[ARG_SCRIPT])
     {
-        return false;
+        #if defined(AMIGA) && !defined(LG_TEST)
+        BPTR lock = (BPTR) Lock(args[ARG_SCRIPT], ACCESS_READ);
+
+        // Use script name if we fail to get the absolute path.
+        if(!lock || !NameFromLock(lock, get_buf(), buf_size()))
+        {
+            strncpy(get_buf(), args[ARG_SCRIPT], buf_size());
+        }
+
+        // Lock might be invalid. The script might not exist.
+        UnLock(lock);
+        #else
+        // Prepend redundant path in test mode.
+        snprintf(get_buf(), buf_size(), "./%s", args[ARG_SCRIPT]);
+        #endif
+
+        // Copy of the (hopefully) absolute script path and working directory.
+        args[ARG_SCRIPTDIR] = DBG_ALLOC(h_pathonly(get_buf()));
+        args[ARG_SCRIPT] = DBG_ALLOC(strdup(get_buf()));
     }
-
-    #if defined(AMIGA) && !defined(LG_TEST)
-    BPTR lock = (BPTR) Lock(args[ARG_SCRIPT], ACCESS_READ);
-
-    // Use script name if we fail to get the absolute path.
-    if(!lock || !NameFromLock(lock, get_buf(), buf_size()))
-    {
-        strncpy(get_buf(), args[ARG_SCRIPT], buf_size());
-    }
-
-    // Lock might be invalid. The script might not exist.
-    UnLock(lock);
-    #else
-    // Prepend redundant path in test mode.
-    snprintf(get_buf(), buf_size(), "./%s", args[ARG_SCRIPT]);
-    #endif
-
-    // Copy of the (hopefully) absolute script path and working directory.
-    args[ARG_SCRIPTDIR] = DBG_ALLOC(h_pathonly(get_buf()));
-    args[ARG_SCRIPT] = DBG_ALLOC(strdup(get_buf()));
 
     // Copy string arguments. Stop at OLDDIR since items after that are either
     // already copied or (interpreted as) booleans.
-    for(size_t arg = ARG_APPNAME; arg < ARG_OLDDIR; arg++)
+    for(size_t arg = ARG_APPNAME; arg <= ARG_OLDDIR; arg++)
     {
         args[arg] = args[arg] ? DBG_ALLOC(strdup(args[arg])) : NULL;
     }
