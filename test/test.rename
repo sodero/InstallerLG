@@ -16,6 +16,7 @@
 (rename) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (rename "_rn_") ; "","Line 1: syntax error, unexpected ')' ')'",""
 (rename "_rn_" "_rm_") ; "touch _rn_ && touch _rm_","Line 1: Could not rename file '_rn_' 0","rm -Rf _rm_ _rn_"
+(set @strict 0) (rename "_rn_" "_rm_") ; "touch _rn_ && touch _rm_","0","rm -Rf _rm_ _rn_"
 (rename "_rn_" "_rm_") ; "rm -Rf _rn_ && touch _rm_","Line 1: Could not rename file '_rn_' 0","rm -Rf _rm_"
 (rename "_rn_" "_rm_") ; "rm -Rf _rm_ && touch _rn_","-1","test -e _rm_ && test ! -e _rn_ && rm -Rf _rm_ _rn_"
 (rename "_rn_" "_rm_") ; "touch _rn_ && touch _rm_","Line 1: Could not rename file '_rn_' 0","test -e _rm_ && test -e _rn_ && rm -Rf _rm_ _rn_"

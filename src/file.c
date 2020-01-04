@@ -534,7 +534,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
             // We shouldn't ignore this failure.
             ERR(ERR_NO_SUCH_FILE_OR_DIR, src);
         }
-        
+
         // It's neither a directory or a file.
         return NULL;
     }
@@ -3665,8 +3665,12 @@ entry_p m_rename(entry_p contxt)
             R_NUM(-1);
         }
 
-        // Fail if target exists.
-        ERR(ERR_RENAME_FILE, old);
+        // Fail if target exists in strict mode.
+        if(get_num(contxt, "@strict"))
+        {
+            ERR(ERR_RENAME_FILE, old);
+        }
+
         R_NUM(LG_FALSE);
     }
     #if defined(AMIGA) && !defined(LG_TEST)
