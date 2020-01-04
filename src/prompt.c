@@ -109,7 +109,7 @@ entry_p m_askbool(entry_p contxt)
             }
 
             // Translate return code.
-            R_NUM((grc == G_TRUE) ? 1 : 0);
+            R_NUM((grc == G_TRUE) ? LG_TRUE : LG_FALSE);
         }
     }
 
