@@ -54,38 +54,27 @@ static entry_p swap(entry_p *dst, entry_p *src)
 //------------------------------------------------------------------------------
 entry_p find_symbol(entry_p entry)
 {
-    // Local variables have priority. This currently implies function arguments.
-    entry_p con = local(entry);
+    // All symbols are global.
+    entry_p contxt = global(entry);
 
-    if(!con && PANIC(entry))
-    {
-        // Broken context.
-        return end();
-    }
+    // No panic if symbols don't exist.
+    S_SANE(0);
 
-    // Traverse tree until we reach the top.
-    do
+    // Iterate over all symbols in the global context.
+    for(entry_p *tmp = contxt->symbols; exists(*tmp); tmp++)
     {
-        // Iterate over all symbols in the current context.
-        for(entry_p *tmp = con->symbols; tmp && exists(*tmp); tmp++)
+        // Entry might be a CUSTOM. Ignore everything but SYMBOLS.
+        if((*tmp)->type == SYMBOL && !strcasecmp((*tmp)->name, entry->name))
         {
-            // Entry might be a CUSTOM. Ignore everything but SYMBOLS.
-            if((*tmp)->type == SYMBOL && !strcasecmp((*tmp)->name, entry->name))
-            {
-                // If possible swap symbol order to speed up future lookups before
-                // returning. This is only done in the root and not inside CUSTOM,
-                // since those symbols determine the order of function arguments.
-                return swap(con->symbols, tmp);
-            }
+            // If possible swap symbol order to speed up future lookups before
+            // returning. This is only done in the root and not inside CUSTOM,
+            // since those symbols determine the order of function arguments.
+            return swap(contxt->symbols, tmp);
         }
-
-        // Nothing found in the current context. Climb one scope higher.
-        con = local(con->parent);
     }
-    while(con);
 
     // Fail if in strict mode. Never recur, we might be out of memory.
-    if(strcasecmp(entry->name, "@strict") && get_num(global(entry), "@strict"))
+    if(strcasecmp(entry->name, "@strict") && get_num(contxt, "@strict"))
     {
         ERR_C(entry, ERR_UNDEF_VAR, entry->name);
     }
