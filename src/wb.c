@@ -30,18 +30,15 @@ entry_p m_openwbobject(entry_p contxt)
     // We need a single argument.
     C_SANE(1, C_ARG(2));
 
-    entry_p prompt     = opt(C_ARG(2), OPT_PROMPT),
-            help       = opt(C_ARG(2), OPT_HELP),
-            confirm    = opt(C_ARG(2), OPT_CONFIRM),
-            safe       = opt(C_ARG(2), OPT_SAFE);
-
     // A non safe operation in pretend mode always succeeds.
-    if(get_num(contxt, "@pretend") && !safe)
+    if(get_num(contxt, "@pretend") && !opt(C_ARG(2), OPT_SAFE))
     {
         R_NUM(LG_TRUE);
     }
 
-    if(!confirm || h_confirm(C_ARG(2), str(help), str(prompt)))
+    // Get confirmation if necessary.
+    if(!opt(C_ARG(2), OPT_CONFIRM) || h_confirm(C_ARG(2),
+        str(opt(C_ARG(2), OPT_HELP)), str(opt(C_ARG(2), OPT_PROMPT))))
     {
         #if defined(AMIGA) && !defined(LG_TEST)
         R_NUM(OpenWorkbenchObjectA(str(C_ARG(1)), NULL) ? 1 : 0);
