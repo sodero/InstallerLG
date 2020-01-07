@@ -13,7 +13,7 @@
 (set a "alfa" b "beta") (procedure f1 a b (cat a b)) (f1); "","",""
 (procedure f1 a b (cat a b)) (set a "alfa" b "beta") (f1); "","alfabeta",""
 (procedure f1 a b (debug (cat a b))) (f1 "alfa" "beta") (f1 "gamma"); "","alfabeta gammabeta 1",""
-(procedure f1 a b c) (+ (f1 1 2 3)); "sleep 100","0",""
+(procedure f1 a b c) (+ (f1 1 2 3)); "","0",""
 (procedure f1 (+ 1 1) (+ 1 2)) (f1); "","3",""
 (procedure f1 ((+ 1 1) (+ 1 2))) (f1); "","3",""
 (procedure f1 (+ 1 2)); "","f1",""
