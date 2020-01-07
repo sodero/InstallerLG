@@ -110,6 +110,10 @@ quick:
 fail:
 	@LG_QUICK=yes $(MAKE) test
 
+.PHONY: debug
+debug:
+	@CFLAGS=-'DLG_DEBUG -Wno-unused-function' $(MAKE) $(EXE)
+
 .PHONY: install
 install: cat
 	@cd ../dist && $(MAKE) && \

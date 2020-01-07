@@ -367,7 +367,7 @@ entry_p init(entry_p contxt)
     {
         return contxt;
     }
-
+#ifndef LG_DEBUG
     // Get tooltype / cli arguments.
     init_tooltypes(contxt);
 
@@ -382,6 +382,6 @@ entry_p init(entry_p contxt)
 
     // Set default symbols.
     init_misc(contxt);
-
+#endif
     return contxt;
 }
