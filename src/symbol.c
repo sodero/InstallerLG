@@ -115,7 +115,7 @@ entry_p m_set(entry_p contxt)
     entry_p *sym = contxt->symbols, *val = contxt->children;
 
     // Iterate over all symbol -> value tuples
-    for(entry_p cus = custom(contxt); exists(*sym) && exists(*val);)
+    while(exists(*sym) && exists(*val))
     {
         // Resolve the RHS and do a deep copy of it.
         entry_p rhs = resolve(*val), dst = global(contxt),
@@ -129,12 +129,6 @@ entry_p m_set(entry_p contxt)
 
         // Make sure the RHS isn't dangling, we'll leak memory if it does.
         h_set_undangle(res);
-
-        // The local context is the target if this is a function argument.
-        if(h_set_find(cus, (*sym)->name))
-        {
-            dst = cus;
-        }
 
         // Reparent and create global reference.
         res->parent = *sym;

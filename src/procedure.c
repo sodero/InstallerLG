@@ -122,17 +122,20 @@ entry_p m_gosub(entry_p contxt)
                 kill((*arg)->resolved);
                 (*arg)->resolved = res;
 
-                // Continue until we have no more arguments from the caller or
-                // that the procedure doesn't take any more arguments.
+                // Turn function arguments into global variables.
+                push(global(contxt), *arg);
+                (*arg)->parent = *cus;
+
+                // Continue until we have no more arguments or until the
+                // procedure doesn't take any more arguments.
                 arg++;
                 ina++;
             }
         }
 
-        // Recursion depth.
+        // Keep track of the recursion depth. Do not go beyond LG_MAXDEP.
         static int dep;
 
-        // Keep track of the recursion depth. Do not go beyond LG_MAXDEP.
         if(dep++ < LG_MAXDEP)
         {
             // Invoke user defined procedure.
@@ -153,7 +156,7 @@ entry_p m_gosub(entry_p contxt)
         return end();
     }
 
-    // Transform into a string format call. See description of h_gosub_fmt)=.
+    // Transform into a string format call. See description of h_gosub_fmt().
     return h_gosub_fmt(contxt);
 }
 
@@ -165,13 +168,29 @@ entry_p m_gosub(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p m_procedure(entry_p contxt)
 {
-    // One argument; the function to be defined.
+    // One argument.
     S_SANE(1);
 
-    // Make the function global and set parent.
-    push(global(contxt), contxt->symbols[0]);
-    contxt->symbols[0]->parent = contxt;
+    // The function itself and all arguments are global.
+    entry_p cus = contxt->symbols[0], dst = global(contxt);
+
+    // Create reference and reparent.
+    push(dst, cus);
+    cus->parent = contxt;
+
+    if(!cus->symbols)
+    {
+        // No arguments.
+        return cus;
+    }
+
+    // Create global reference to arguments and reparent.
+    for(entry_p *arg = cus->symbols; exists(*arg); arg++)
+    {
+        push(dst, *arg);
+        (*arg)->parent = cus;
+    }
 
     // Return the function itself.
-    return contxt->symbols[0];
+    return cus;
 }
