@@ -88,9 +88,6 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             R_CUR;
         }
 
-        // Working dir.
-        char *cwd = NULL;
-
         // DOS / Arexx script?
         if(pre)
         {
@@ -110,18 +107,18 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             cmd = tmp;
         }
 
+        // Working dir.
+        char *cwd = NULL;
+
         // If we have a valid destination dir, change to that directory. We're
         // not treating errors as such.
         if(dir && *dir && h_exists(dir))
         {
-            // Use the global buffer.
-            char *buf = get_buf();
-
             // Try to get current working dir before changing to the new dir
             // Save the old one so that we can go back afterwards.
-            if(getcwd(buf, buf_size()) == buf && !chdir(dir))
+            if(getcwd(buf_raw(), buf_len()) == buf_raw() && !chdir(dir))
             {
-                cwd = buf;
+                cwd = buf_raw();
             }
         }
 

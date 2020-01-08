@@ -914,25 +914,74 @@ void dump(entry_p entry)
 
 #define LG_BUFSIZ (BUFSIZ + PATH_MAX + 1)
 static char buf[LG_BUFSIZ];
+static const char *buf_usr;
 
 //------------------------------------------------------------------------------
-// Name:        get_buf
-// Description: Get pointer to temporary buffer.
+// Name:        buf_raw
+// Description: Unsafe access to temporary buffer.
 // Input:       -
 // Return:      char *: Buffer pointer.
 //------------------------------------------------------------------------------
-char *get_buf(void)
+char *buf_raw(void)
 {
     return buf;
 }
 
 //------------------------------------------------------------------------------
-// Name:        buf_size
-// Description: Get size of temporary buffer.
+// Name:        buf_get
+// Description: Safe access to temporary buffer. Initial call will lock buffer.
+// Input:       const char *usr: Unique string pointer used as key.
+// Return:      char *: Buffer pointer.
+//------------------------------------------------------------------------------
+char *buf_get(const char *usr)
+{
+    // Lock buffer if it's unlocked.
+    if(!buf_usr)
+    {
+        buf_usr = usr;
+        return buf;
+    }
+
+    // The lock should belong to the caller.
+    if(buf_usr != usr)
+    {
+        // The lock doesn't belong to the caller.
+        DBG("Invalid lock by %s. Lock owned by %s\n", usr, buf_usr);
+    }
+
+    // Return buffer no matter what.
+    return buf;
+}
+
+//------------------------------------------------------------------------------
+// Name:        buf_put
+// Description: Unlock temporary buffer.
+// Input:       const char *usr: Unique string pointer used as key.
+// Return:      char *: Buffer pointer.
+//------------------------------------------------------------------------------
+char *buf_put(const char *usr)
+{
+    // Unlock buffer if the lock belongs to the caller.
+    if(buf_usr == usr)
+    {
+        buf_usr = NULL;
+        return buf;
+    }
+
+    // The lock doesn't belong to the caller.
+    DBG("Invalid unlock by %s. Lock owned by %s\n", usr, buf_usr);
+
+    // Return buffer no matter what.
+    return buf;
+}
+
+//------------------------------------------------------------------------------
+// Name:        buf_len
+// Description: Get length of temporary buffer.
 // Input:       -
 // Return:      size_t: Buffer size.
 //------------------------------------------------------------------------------
-size_t buf_size(void)
+size_t buf_len(void)
 {
     return sizeof(buf) - 1;
 }

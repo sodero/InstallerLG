@@ -788,37 +788,39 @@ entry_p m_askoptions(entry_p contxt)
     const char *prt = str(prompt), *hlp = str(help);
 
     // Only show requester if we could resolve all options.
-    if(!DID_ERR)
+    if(DID_ERR)
     {
-        // Prompt user.
-        inp_t grc = gui_options(prt, hlp, chs, ndx, back != false, &D_NUM);
+        R_NUM(-1);
+    }
 
-        // Is the back option available?
-        if(back)
+    // Prompt user.
+    inp_t grc = gui_options(prt, hlp, chs, ndx, back != false, &D_NUM);
+
+    // Is the back option available?
+    if(back)
+    {
+        // Fake input?
+        if(get_num(contxt, "@back"))
         {
-            // Fake input?
-            if(get_num(contxt, "@back"))
-            {
-                grc = G_ABORT;
-            }
-
-            // On abort execute.
-            if(grc == G_ABORT)
-            {
-                return resolve(back);
-            }
+            grc = G_ABORT;
         }
+
+        // On abort execute.
+        if(grc == G_ABORT)
+        {
+            return resolve(back);
+        }
+    }
 //
 // See file.c 116++
 //
-        // FIXME
-        if(grc == G_ABORT || grc == G_EXIT)
-        {
-            HALT;
-        }
+    // FIXME
+    if(grc == G_ABORT || grc == G_EXIT)
+    {
+        HALT;
     }
 
-    // Success, failure or broken parser.
+    // Success or failure.
     R_CUR;
 }
 

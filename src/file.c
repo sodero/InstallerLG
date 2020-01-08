@@ -62,14 +62,14 @@ entry_p m_expandpath(entry_p contxt)
     if(lock)
     {
         // Get full name from lock.
-        if(NameFromLock(lock, get_buf(), buf_size()))
+        if(NameFromLock(lock, buf_get(B_KEY), buf_len()))
         {
             UnLock(lock);
-            R_STR(DBG_ALLOC(strdup(get_buf())));
+            R_STR(DBG_ALLOC(strdup(buf_put(B_KEY))));
         }
 
         // Buffer overflow.
-        ERR(ERR_OVERFLOW, pth);
+        ERR(ERR_OVERFLOW, buf_put(B_KEY));
         UnLock(lock);
     }
 
@@ -104,18 +104,18 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
                 get_num(contxt, "@skip") ? G_FALSE :
                 get_num(contxt, "@yes") ? G_TRUE : G_EXIT;
 
-    va_list ap;
-
-    // Format messsage string.
-    va_start(ap, msg);
-    vsnprintf(get_buf(), buf_size(), msg, ap);
-    va_end(ap);
-
     // Get confirmation unless @yes, @skip or @abort are set.
     if(grc == G_EXIT)
     {
+        va_list ap;
+
+        // Format messsage string.
+        va_start(ap, msg);
+        vsnprintf(buf_get(B_KEY), buf_len(), msg, ap);
+        va_end(ap);
+
         entry_p back = opt(contxt, OPT_BACK);
-        grc = gui_confirm(get_buf(), hlp, back != false);
+        grc = gui_confirm(buf_put(B_KEY), hlp, back != false);
 
         // If (back) exists, execute body on user / fake abort.
         if(back && (grc == G_ABORT || get_num(contxt, "@back")))
@@ -295,32 +295,32 @@ static char *h_suffix(const char *stem, const char *suffix)
     }
 
     // Copy file or directory stem.
-    strncpy(get_buf(), stem, buf_size());
-    size_t len = strlen(get_buf());
+    strncpy(buf_get(B_KEY), stem, buf_len());
+    size_t len = strlen(buf_get(B_KEY));
 
     // Chomp trailing slashes if any.
-    while(len && *(get_buf() + len - 1) == '/')
+    while(len && *(buf_get(B_KEY) + len - 1) == '/')
     {
         len--;
     }
 
     // Don't append to devices or empty strings.
-    if(!len || *(get_buf() + len - 1) == ':')
+    if(!len || *(buf_get(B_KEY) + len - 1) == ':')
     {
-        *get_buf() = '\0';
-        return get_buf();
+        *buf_get(B_KEY) = '\0';
+        return buf_put(B_KEY);
     }
 
     // If suffix is empty, return chomp:ed stem.
     if(*suffix == '\0')
     {
-        *(get_buf() + len) = '\0';
-        return get_buf();
+        *(buf_get(B_KEY) + len) = '\0';
+        return buf_put(B_KEY);
     }
 
     // Append suffix to chomp:ed stem.
-    snprintf(get_buf() + len, buf_size() - len, ".%s", suffix);
-    return get_buf();
+    snprintf(buf_get(B_KEY) + len, buf_len() - len, ".%s", suffix);
+    return buf_put(B_KEY);
 }
 
 //------------------------------------------------------------------------------
@@ -725,17 +725,17 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     }
 
                     // Font = file + .font.
-                    snprintf(get_buf(), buf_size(), "%s.font", n_src);
+                    snprintf(buf_raw(), buf_len(), "%s.font", n_src);
 
-                    if(h_exists(get_buf()) == LG_FILE)
+                    if(h_exists(buf_raw()) == LG_FILE)
                     {
                         pnode_p font = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
                         if(font)
                         {
-                            font->name = DBG_ALLOC(strdup(get_buf()));
+                            font->name = DBG_ALLOC(strdup(buf_raw()));
                             font->copy = h_tackon(contxt, dst,
-                                                  h_fileonly(contxt, get_buf()));
+                                                  h_fileonly(contxt, buf_raw()));
 
                             // Add the font to the list.
                             if(font->name && font->copy)
@@ -2181,8 +2181,8 @@ static int h_delete_dir(entry_p contxt, const char *name)
     }
 
     // Info = file + .info.
-    char *info = get_buf();
-    snprintf(info, buf_size(), "%s.info", name);
+    char *info = buf_raw();
+    snprintf(info, buf_len(), "%s.info", name);
 
     // We're done if there's no icon.
     if(h_exists(info) != LG_FILE)
@@ -2320,7 +2320,7 @@ entry_p m_delete(entry_p contxt)
     char *file = str(C_ARG(1));
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    int wild = ParsePatternNoCase(file, get_buf(), buf_size());
+    int wild = ParsePatternNoCase(file, buf_raw(), buf_len());
     #else
     int wild = get_num(contxt, "@wild");
     #endif
@@ -2436,11 +2436,11 @@ entry_p m_foreach(entry_p contxt)
     if(dir)
     {
         // Use global buffer.
-        char *cwd = get_buf();
+        char *cwd = buf_raw();
         struct dirent *ent = readdir(dir);
 
         // Save current working directory and enter the directory <drawer name>
-        if(getcwd(cwd, buf_size()) == cwd && !chdir(dname))
+        if(getcwd(cwd, buf_len()) == cwd && !chdir(dname))
         {
             // Allocate memory for the start node.
             pnode_p cur;
@@ -2569,10 +2569,10 @@ entry_p m_foreach(entry_p contxt)
             if(!err)
             {
                 // Use global buffer.
-                char *buf = get_buf();
+                char *buf = buf_raw();
 
                 // Parse pattern.
-                switch(ParsePatternNoCase(pt, buf, buf_size()))
+                switch(ParsePatternNoCase(pt, buf, buf_len()))
                 {
                     // If we have any wildcards, try to match.
                     case 1:
@@ -3212,12 +3212,12 @@ static int h_textfile_include(entry_p contxt, FILE *file, const char *name)
         return LG_TRUE;
     }
 
-    // Copy the complete file in buf_size() sized chunks.
-    for(size_t cnt = fread(get_buf(), 1, buf_size(), finc); cnt;
-               cnt = fread(get_buf(), 1, buf_size(), finc))
+    // Copy the complete file in buf_len() sized chunks.
+    for(size_t cnt = fread(buf_raw(), 1, buf_len(), finc); cnt;
+               cnt = fread(buf_raw(), 1, buf_len(), finc))
     {
         // Write to destination file.
-        if(fwrite(get_buf(), 1, cnt, file) != cnt)
+        if(fwrite(buf_raw(), 1, cnt, file) != cnt)
         {
             ERR(ERR_WRITE_FILE, name);
             break;
@@ -3421,16 +3421,16 @@ entry_p m_tooltype(entry_p contxt)
                                     if(strlen(v))
                                     {
                                         // Tooltype with value.
-                                        snprintf(get_buf(), buf_size(), "%s=%s", t, v);
+                                        snprintf(buf_raw(), buf_len(), "%s=%s", t, v);
                                     }
                                     else
                                     {
                                         // Naked tooltype.
-                                        snprintf(get_buf(), buf_size(), "%s", t);
+                                        snprintf(buf_raw(), buf_len(), "%s", t);
                                     }
 
                                     // Overwrite the old tooltype.
-                                    *nts = get_buf();
+                                    *nts = buf_raw();
                                     break;
                                 }
 
@@ -3460,16 +3460,16 @@ entry_p m_tooltype(entry_p contxt)
                             if(strlen(v))
                             {
                                 // Tooltype with value.
-                                snprintf(get_buf(), buf_size(), "%s=%s", t, v);
+                                snprintf(buf_raw(), buf_len(), "%s=%s", t, v);
                             }
                             else
                             {
                                 // Naked tooltype.
-                                snprintf(get_buf(), buf_size(), "%s", t);
+                                snprintf(buf_raw(), buf_len(), "%s", t);
                             }
 
                             // Append tooltype.
-                            *(nts + n - 1) = get_buf();
+                            *(nts + n - 1) = buf_raw();
                         }
                         else
                         {

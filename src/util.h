@@ -37,8 +37,10 @@ char *get_optstr(entry_p contxt, opt_t type);
 char *get_chlstr(entry_p contxt, bool pad);
 void set_num(entry_p contxt, char *var, int val);
 void set_str(entry_p contxt, char *var, char *val);
-char *get_buf(void);
-size_t buf_size(void);
+char *buf_raw(void);
+char *buf_get(const char *usr);
+char *buf_put(const char *usr);
+size_t buf_len(void);
 void *dbg_alloc(int line, const char *file, const char *func, void *mem);
 entry_p native_exists(entry_p contxt, call_t func);
 size_t num_children(entry_p *vec);
@@ -59,6 +61,7 @@ int str_to_userlevel(const char *user, int def);
                  return contxt->resolved
 #define C_ARG(X) contxt->children[(X) - 1]
 #define C_SYM(X) contxt->symbols[(X) - 1]
+#define B_KEY __func__
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, __func__, M)
 #ifdef AMIGA
 #define DBG_PRINT KPrintF

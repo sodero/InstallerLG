@@ -370,13 +370,13 @@ entry_p m_patmatch(entry_p contxt)
     char *pat = str(C_ARG(1)), *mat = str(C_ARG(2));
 
     // Try to tokenize pattern.
-    LONG w = ParsePatternNoCase(pat, get_buf(), buf_size());
+    LONG w = ParsePatternNoCase(pat, buf_raw(), buf_len());
 
     // Can we parse the pattern?
     if(w >= 0)
     {
         // Use pattern matching or case insensitive string comparison.
-        int r = w ? MatchPatternNoCase(get_buf(), mat) : !strcasecmp(pat, mat);
+        int r = w ? MatchPatternNoCase(buf_raw(), mat) : !strcasecmp(pat, mat);
         R_NUM(r ? LG_TRUE : LG_FALSE);
     }
 

@@ -58,12 +58,12 @@ entry_p m_abort(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_exit_final
+// Name:        h_exit
 // Description: Show final exit message unless quiet mode is set.
 // Input:       entry_p contxt:     The execution context.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_exit_final(entry_p contxt)
+static void h_exit(entry_p contxt)
 {
     // Nothing to do if 'quiet' is set.
     if(opt(contxt, OPT_QUIET))
@@ -80,8 +80,8 @@ static void h_exit_final(entry_p contxt)
     if(*app && *dst)
     {
         // Display the full message.
-        snprintf(get_buf(), buf_size(), tr(S_CBFI), tr(S_ICPL), app, dst);
-        gui_finish(get_buf());
+        snprintf(buf_get(B_KEY), buf_len(), tr(S_CBFI), tr(S_ICPL), app, dst);
+        gui_finish(buf_put(B_KEY));
     }
     else
     {
@@ -130,7 +130,7 @@ entry_p m_exit(entry_p contxt)
     }
 
     // Show final message unless 'quiet' is set.
-    h_exit_final(contxt);
+    h_exit(contxt);
 
     // Make invoke() halt.
     R_NUM(HALT);

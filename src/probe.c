@@ -283,25 +283,22 @@ entry_p m_database(entry_p contxt)
         // Get host CPU name.
         ret = h_cpu_name();
     }
-    else
-    if(strcasecmp(feat, "os") == 0)
+    else if(strcasecmp(feat, "os") == 0)
     {
         // Get name of host OS.
         ret = h_os_name();
     }
-    else
-    if(strcasecmp(feat, "graphics-mem") == 0)
+    else if(strcasecmp(feat, "graphics-mem") == 0)
     {
         // Get free chipmem.
-        ret = get_buf();
-        snprintf(ret, buf_size(), "%d", h_chipmem());
+        snprintf(buf_get(B_KEY), buf_len(), "%d", h_chipmem());
+        ret = buf_put(B_KEY);
     }
-    else
-    if(strcasecmp(feat, "total-mem") == 0)
+    else if(strcasecmp(feat, "total-mem") == 0)
     {
         // Get free fast + chipmem.
-        ret = get_buf();
-        snprintf(ret, buf_size(), "%d", h_totalmem());
+        snprintf(buf_get(B_KEY), buf_len(), "%d", h_totalmem());
+        ret = buf_put(B_KEY);
     }
 
     // Are we testing for a specific value?
@@ -923,14 +920,11 @@ int h_getversion_file(const char *name)
     // Did we find the key?
     if(!key[ndx])
     {
-        // Use global buffer.
-        char *buf = get_buf();
-
         // Fill up buffer with enough data to hold any realistic version string.
-        fread(buf, 1, buf_size(), file);
+        fread(buf_get(B_KEY), 1, buf_len(), file);
 
         // Begin after whitespace.
-        char *data = strchr(buf, ' ');
+        char *data = strchr(buf_put(B_KEY), ' ');
 
         if(data)
         {
@@ -1106,16 +1100,14 @@ entry_p m_iconinfo(entry_p contxt)
                 int v = (type == OPT_GETSTACK ? obj->do_StackSize : j == 0 ?
                          obj->do_CurrentX : obj->do_CurrentY);
 
-                snprintf(get_buf(), buf_size(), "%d", v);
-                svl = get_buf();
+                snprintf(buf_raw(), buf_len(), "%d", v);
+                svl = buf_raw();
             }
-            else
-            if(type == OPT_GETDEFAULTTOOL && obj->do_DefaultTool)
+            else if(type == OPT_GETDEFAULTTOOL && obj->do_DefaultTool)
             {
                 svl = obj->do_DefaultTool;
             }
-            else
-            if(type == OPT_GETTOOLTYPE && obj->do_ToolTypes)
+            else if(type == OPT_GETTOOLTYPE && obj->do_ToolTypes)
             {
                 svl = (char *) FindToolType(obj->do_ToolTypes, name);
                 name = str(types[i]->children[++j]);
@@ -1125,8 +1117,8 @@ entry_p m_iconinfo(entry_p contxt)
             svl = svl ? svl : "";
             #else
             // Testing purposes only.
-            snprintf(get_buf(), buf_size(), "%d:%zu", type, j);
-            svl = get_buf();
+            snprintf(buf_raw(), buf_len(), "%d:%zu", type, j);
+            svl = buf_raw();
             #endif
 
             // Always a valid (string).
