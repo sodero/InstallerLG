@@ -61,6 +61,7 @@ int str_to_userlevel(const char *user, int def);
                  return contxt->resolved
 #define C_ARG(X) contxt->children[(X) - 1]
 #define C_SYM(X) contxt->symbols[(X) - 1]
+#define B_KEY __func__
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, __func__, M)
 #ifdef AMIGA
 #define DBG_PRINT KPrintF

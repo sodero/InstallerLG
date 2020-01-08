@@ -62,14 +62,14 @@ entry_p m_expandpath(entry_p contxt)
     if(lock)
     {
         // Get full name from lock.
-        if(NameFromLock(lock, buf_get(__func__), buf_len()))
+        if(NameFromLock(lock, buf_get(B_KEY), buf_len()))
         {
             UnLock(lock);
-            R_STR(DBG_ALLOC(strdup(buf_put(__func__))));
+            R_STR(DBG_ALLOC(strdup(buf_put(B_KEY))));
         }
 
         // Buffer overflow.
-        ERR(ERR_OVERFLOW, buf_put(__func__));
+        ERR(ERR_OVERFLOW, buf_put(B_KEY));
         UnLock(lock);
     }
 
@@ -111,11 +111,11 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 
         // Format messsage string.
         va_start(ap, msg);
-        vsnprintf(buf_get(__func__), buf_len(), msg, ap);
+        vsnprintf(buf_get(B_KEY), buf_len(), msg, ap);
         va_end(ap);
 
         entry_p back = opt(contxt, OPT_BACK);
-        grc = gui_confirm(buf_put(__func__), hlp, back != false);
+        grc = gui_confirm(buf_put(B_KEY), hlp, back != false);
 
         // If (back) exists, execute body on user / fake abort.
         if(back && (grc == G_ABORT || get_num(contxt, "@back")))
@@ -295,32 +295,32 @@ static char *h_suffix(const char *stem, const char *suffix)
     }
 
     // Copy file or directory stem.
-    strncpy(buf_raw(), stem, buf_len());
-    size_t len = strlen(buf_raw());
+    strncpy(buf_get(B_KEY), stem, buf_len());
+    size_t len = strlen(buf_get(B_KEY));
 
     // Chomp trailing slashes if any.
-    while(len && *(buf_raw() + len - 1) == '/')
+    while(len && *(buf_get(B_KEY) + len - 1) == '/')
     {
         len--;
     }
 
     // Don't append to devices or empty strings.
-    if(!len || *(buf_raw() + len - 1) == ':')
+    if(!len || *(buf_get(B_KEY) + len - 1) == ':')
     {
-        *buf_raw() = '\0';
-        return buf_raw();
+        *buf_get(B_KEY) = '\0';
+        return buf_put(B_KEY);
     }
 
     // If suffix is empty, return chomp:ed stem.
     if(*suffix == '\0')
     {
-        *(buf_raw() + len) = '\0';
-        return buf_raw();
+        *(buf_get(B_KEY) + len) = '\0';
+        return buf_put(B_KEY);
     }
 
     // Append suffix to chomp:ed stem.
-    snprintf(buf_raw() + len, buf_len() - len, ".%s", suffix);
-    return buf_raw();
+    snprintf(buf_get(B_KEY) + len, buf_len() - len, ".%s", suffix);
+    return buf_put(B_KEY);
 }
 
 //------------------------------------------------------------------------------

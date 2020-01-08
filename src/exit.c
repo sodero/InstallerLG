@@ -80,8 +80,8 @@ static void h_exit(entry_p contxt)
     if(*app && *dst)
     {
         // Display the full message.
-        snprintf(buf_get(__func__), buf_len(), tr(S_CBFI), tr(S_ICPL), app, dst);
-        gui_finish(buf_put(__func__));
+        snprintf(buf_get(B_KEY), buf_len(), tr(S_CBFI), tr(S_ICPL), app, dst);
+        gui_finish(buf_put(B_KEY));
     }
     else
     {
