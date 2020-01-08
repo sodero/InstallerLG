@@ -291,14 +291,14 @@ entry_p m_database(entry_p contxt)
     else if(strcasecmp(feat, "graphics-mem") == 0)
     {
         // Get free chipmem.
-        snprintf(buf_get(m_database), buf_len(), "%d", h_chipmem());
-        ret = buf_put(m_database);
+        snprintf(buf_get(__func__), buf_len(), "%d", h_chipmem());
+        ret = buf_put(__func__);
     }
     else if(strcasecmp(feat, "total-mem") == 0)
     {
         // Get free fast + chipmem.
-        snprintf(buf_get(m_database), buf_len(), "%d", h_totalmem());
-        ret = buf_put(m_database);
+        snprintf(buf_get(__func__), buf_len(), "%d", h_totalmem());
+        ret = buf_put(__func__);
     }
 
     // Are we testing for a specific value?
@@ -921,10 +921,10 @@ int h_getversion_file(const char *name)
     if(!key[ndx])
     {
         // Fill up buffer with enough data to hold any realistic version string.
-        fread(buf_get(h_getversion_file), 1, buf_len(), file);
+        fread(buf_get(__func__), 1, buf_len(), file);
 
         // Begin after whitespace.
-        char *data = strchr(buf_put(h_getversion_file), ' ');
+        char *data = strchr(buf_put(__func__), ' ');
 
         if(data)
         {

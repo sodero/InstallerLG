@@ -62,14 +62,14 @@ entry_p m_expandpath(entry_p contxt)
     if(lock)
     {
         // Get full name from lock.
-        if(NameFromLock(lock, buf_get(m_expandpath), buf_len()))
+        if(NameFromLock(lock, buf_get(__func__), buf_len()))
         {
             UnLock(lock);
-            R_STR(DBG_ALLOC(strdup(buf_put(m_expandpath))));
+            R_STR(DBG_ALLOC(strdup(buf_put(__func__))));
         }
 
         // Buffer overflow.
-        ERR(ERR_OVERFLOW, buf_put(m_expandpath));
+        ERR(ERR_OVERFLOW, buf_put(__func__));
         UnLock(lock);
     }
 
@@ -111,11 +111,11 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 
         // Format messsage string.
         va_start(ap, msg);
-        vsnprintf(buf_get(h_confirm), buf_len(), msg, ap);
+        vsnprintf(buf_get(__func__), buf_len(), msg, ap);
         va_end(ap);
 
         entry_p back = opt(contxt, OPT_BACK);
-        grc = gui_confirm(buf_put(h_confirm), hlp, back != false);
+        grc = gui_confirm(buf_put(__func__), hlp, back != false);
 
         // If (back) exists, execute body on user / fake abort.
         if(back && (grc == G_ABORT || get_num(contxt, "@back")))

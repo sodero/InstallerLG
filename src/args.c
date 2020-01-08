@@ -47,21 +47,21 @@ static bool arg_post(void)
         BPTR lock = (BPTR) Lock(args[ARG_SCRIPT], ACCESS_READ);
 
         // Use script name if we fail to get the absolute path.
-        if(!lock || !NameFromLock(lock, buf_get(arg_post), buf_len()))
+        if(!lock || !NameFromLock(lock, buf_get(__func__), buf_len()))
         {
-            strncpy(buf_get(arg_post), args[ARG_SCRIPT], buf_len());
+            strncpy(buf_get(__func__), args[ARG_SCRIPT], buf_len());
         }
 
         // Lock might be invalid. The script might not exist.
         UnLock(lock);
         #else
         // Prepend redundant path in test mode.
-        snprintf(buf_get(arg_post), buf_len(), "./%s", args[ARG_SCRIPT]);
+        snprintf(buf_get(__func__), buf_len(), "./%s", args[ARG_SCRIPT]);
         #endif
 
         // Copy of the (hopefully) absolute script path and working directory.
-        args[ARG_SCRIPTDIR] = DBG_ALLOC(h_pathonly(buf_get(arg_post)));
-        args[ARG_SCRIPT] = DBG_ALLOC(strdup(buf_put(arg_post)));
+        args[ARG_SCRIPTDIR] = DBG_ALLOC(h_pathonly(buf_get(__func__)));
+        args[ARG_SCRIPT] = DBG_ALLOC(strdup(buf_put(__func__)));
     }
 
     // Copy string arguments. Stop at OLDDIR since items after that are either
@@ -226,9 +226,9 @@ bool arg_init(int argc, char **argv)
     arg_argc(argc);
 
     // Save current directory so that we can go back on exit.
-    if(getcwd(buf_get(arg_init), buf_len()) == buf_get(arg_init))
+    if(getcwd(buf_get(__func__), buf_len()) == buf_get(__func__))
     {
-        args[ARG_OLDDIR] = DBG_ALLOC(strdup(buf_put(arg_init)));
+        args[ARG_OLDDIR] = DBG_ALLOC(strdup(buf_put(__func__)));
     }
 
     // Invoked from CLI or WB.

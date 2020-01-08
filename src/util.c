@@ -914,7 +914,7 @@ void dump(entry_p entry)
 
 #define LG_BUFSIZ (BUFSIZ + PATH_MAX + 1)
 static char buf[LG_BUFSIZ];
-static void *buf_usr;
+static const char *buf_usr;
 
 //------------------------------------------------------------------------------
 // Name:        buf_raw
@@ -930,10 +930,10 @@ char *buf_raw(void)
 //------------------------------------------------------------------------------
 // Name:        buf_get
 // Description: Safe access to temporary buffer. Initial call will lock buffer.
-// Input:       void *usr: The calling function (used as ownership key).
+// Input:       const char *usr: Unique string pointer used as key.
 // Return:      char *: Buffer pointer.
 //------------------------------------------------------------------------------
-char *buf_get(void *usr)
+char *buf_get(const char *usr)
 {
     // Lock buffer if it's unlocked.
     if(!buf_usr)
@@ -946,7 +946,7 @@ char *buf_get(void *usr)
     if(buf_usr != usr)
     {
         // The lock doesn't belong to the caller.
-        DBG("Buffer already locked: %p != %p\n", usr, buf_usr);
+        DBG("Invalid lock by %s. Lock owned by %s\n", usr, buf_usr);
     }
 
     // Return buffer no matter what.
@@ -956,10 +956,10 @@ char *buf_get(void *usr)
 //------------------------------------------------------------------------------
 // Name:        buf_put
 // Description: Unlock temporary buffer.
-// Input:       void *usr: The calling function (used as ownership key).
+// Input:       const char *usr: Unique string pointer used as key.
 // Return:      char *: Buffer pointer.
 //------------------------------------------------------------------------------
-char *buf_put(void *usr)
+char *buf_put(const char *usr)
 {
     // Unlock buffer if the lock belongs to the caller.
     if(buf_usr == usr)
@@ -969,7 +969,7 @@ char *buf_put(void *usr)
     }
 
     // The lock doesn't belong to the caller.
-    DBG("Buffer invalid unlock: %p != %p\n", usr, buf_usr);
+    DBG("Invalid unlock by %s. Lock owned by %s\n", usr, buf_usr);
 
     // Return buffer no matter what.
     return buf;
