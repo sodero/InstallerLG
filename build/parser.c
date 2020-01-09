@@ -68,14 +68,14 @@
 /* First part of user prologue.  */
 #line 1 "../src/parser.y"
 
-//------------------------------------------------------------------------------
-// parser.y:
-//
-// InstallerLG parser
-//------------------------------------------------------------------------------
-// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
-// Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//------------------------------------------------------------------------------
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* parser.y:                                                                                                                                                                            */
+/*                                                                                                                                                                                      */
+/* InstallerLG parser                                                                                                                                                                   */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Copyright (C) 2018-2020, Ola Söder. All rights reserved.                                                                                                                             */
+/* Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1                                                                                                                             */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 #include "all.h"
 #include "alloc.h"
@@ -578,43 +578,43 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    97,    97,    98,   101,   102,   103,   104,   105,   106,
+       0,    86,    86,    87,    91,    92,    93,    94,    95,    96,
+      97,    98,    99,   100,   101,   102,   103,   104,   105,   106,
      107,   108,   109,   110,   111,   112,   113,   114,   115,   116,
-     117,   118,   119,   120,   121,   122,   123,   124,   125,   126,
-     127,   128,   129,   130,   131,   132,   135,   136,   137,   138,
-     139,   140,   141,   142,   143,   144,   145,   146,   147,   148,
-     149,   150,   151,   152,   153,   154,   155,   156,   157,   158,
-     159,   160,   161,   162,   163,   164,   165,   166,   167,   168,
-     169,   170,   171,   172,   173,   174,   175,   178,   179,   180,
-     181,   182,   183,   184,   185,   186,   187,   188,   189,   190,
-     191,   192,   193,   194,   195,   196,   197,   198,   199,   200,
-     201,   202,   203,   204,   205,   206,   207,   208,   209,   210,
-     211,   212,   213,   214,   215,   216,   217,   218,   219,   220,
-     221,   222,   223,   224,   225,   226,   227,   228,   229,   230,
-     231,   232,   233,   234,   235,   236,   237,   238,   239,   240,
-     241,   242,   243,   244,   245,   246,   247,   248,   249,   250,
-     251,   252,   253,   254,   255,   256,   257,   258,   259,   260,
-     261,   262,   263,   264,   265,   266,   267,   268,   269,   270,
-     271,   274,   275,   276,   277,   280,   281,   282,   283,   284,
-     285,   288,   289,   290,   291,   292,   293,   294,   295,   298,
-     299,   300,   301,   302,   303,   304,   305,   306,   307,   308,
-     309,   312,   313,   314,   315,   316,   317,   318,   320,   321,
-     324,   325,   326,   327,   328,   329,   330,   331,   332,   333,
-     334,   335,   336,   337,   338,   339,   340,   341,   342,   343,
-     344,   345,   346,   347,   348,   349,   350,   351,   352,   353,
-     354,   355,   358,   359,   360,   361,   362,   363,   364,   365,
-     366,   367,   368,   371,   372,   373,   374,   375,   376,   377,
-     378,   379,   380,   381,   384,   385,   386,   387,   388,   391,
-     392,   393,   394,   395,   396,   397,   398,   399,   400,   401,
-     402,   403,   404,   405,   406,   409,   410,   411,   412,   413,
-     414,   417,   418,   419,   420,   421,   422,   423,   424,   425,
-     426,   427,   428,   429,   432,   433,   434,   435,   436,   437,
-     438,   439,   440,   441,   444,   445,   446,   449,   450,   451,
-     452,   453,   454,   457,   458,   459,   460,   461,   462,   463,
-     464,   465,   466,   467,   468,   469,   470,   471,   472,   473,
-     474,   475,   476,   477,   478,   479,   480,   481,   482,   483,
-     484,   485,   486,   487,   488,   489,   490,   491,   492,   493,
-     494,   495,   496,   497,   498,   499,   500,   501
+     117,   118,   119,   120,   121,   122,   126,   127,   128,   129,
+     130,   131,   132,   133,   134,   135,   136,   137,   138,   139,
+     140,   141,   142,   143,   144,   145,   146,   147,   148,   149,
+     150,   151,   152,   153,   154,   155,   156,   157,   158,   159,
+     160,   161,   162,   163,   164,   165,   166,   170,   171,   172,
+     173,   174,   175,   176,   177,   178,   179,   180,   181,   182,
+     183,   184,   185,   186,   187,   188,   189,   190,   191,   192,
+     193,   194,   195,   196,   197,   198,   199,   200,   201,   202,
+     203,   204,   205,   206,   207,   208,   209,   210,   211,   212,
+     213,   214,   215,   216,   217,   218,   219,   220,   221,   222,
+     223,   224,   225,   226,   227,   228,   229,   230,   231,   232,
+     233,   234,   235,   236,   237,   238,   239,   240,   241,   242,
+     243,   244,   245,   246,   247,   248,   249,   250,   251,   252,
+     253,   254,   255,   256,   257,   258,   259,   260,   261,   262,
+     263,   267,   268,   269,   270,   274,   275,   276,   277,   278,
+     279,   283,   284,   285,   286,   287,   288,   289,   290,   294,
+     295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
+     305,   309,   310,   311,   312,   313,   314,   315,   317,   318,
+     322,   323,   324,   325,   326,   327,   328,   329,   330,   331,
+     332,   333,   334,   335,   336,   337,   338,   339,   340,   341,
+     342,   343,   344,   345,   346,   347,   348,   349,   350,   351,
+     352,   353,   357,   358,   359,   360,   361,   362,   363,   364,
+     365,   366,   367,   371,   372,   373,   374,   375,   376,   377,
+     378,   379,   380,   381,   385,   386,   387,   388,   389,   393,
+     394,   395,   396,   397,   398,   399,   400,   401,   402,   403,
+     404,   405,   406,   407,   408,   412,   413,   414,   415,   416,
+     417,   421,   422,   423,   424,   425,   426,   427,   428,   429,
+     430,   431,   432,   433,   437,   438,   439,   440,   441,   442,
+     443,   444,   445,   446,   450,   451,   452,   456,   457,   458,
+     459,   460,   461,   465,   466,   467,   468,   469,   470,   471,
+     472,   473,   474,   475,   476,   477,   478,   479,   480,   481,
+     482,   483,   484,   485,   486,   487,   488,   489,   490,   491,
+     492,   493,   494,   495,   496,   497,   498,   499,   500,   501,
+     502,   503,   504,   505,   506,   507,   508,   509
 };
 #endif
 
@@ -1927,931 +1927,931 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, yyscan_t scanner)
   switch (yytype)
     {
     case 3: /* SYM  */
-#line 78 "../src/parser.y"
+#line 72 "../src/parser.y"
       { free(((*yyvaluep).s)); }
 #line 1933 "parser.c"
         break;
 
     case 4: /* STR  */
-#line 78 "../src/parser.y"
+#line 72 "../src/parser.y"
       { free(((*yyvaluep).s)); }
 #line 1939 "parser.c"
         break;
 
     case 149: /* start  */
-#line 76 "../src/parser.y"
+#line 70 "../src/parser.y"
       { run(((*yyvaluep).e));  }
 #line 1945 "parser.c"
         break;
 
     case 150: /* s  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 1951 "parser.c"
         break;
 
     case 151: /* p  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 1957 "parser.c"
         break;
 
     case 152: /* pp  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 1963 "parser.c"
         break;
 
     case 153: /* ps  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 1969 "parser.c"
         break;
 
     case 154: /* pps  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 1975 "parser.c"
         break;
 
     case 155: /* vp  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 1981 "parser.c"
         break;
 
     case 156: /* vps  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 1987 "parser.c"
         break;
 
     case 157: /* opts  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 1993 "parser.c"
         break;
 
     case 158: /* xpb  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 1999 "parser.c"
         break;
 
     case 159: /* xpbs  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2005 "parser.c"
         break;
 
     case 160: /* np  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2011 "parser.c"
         break;
 
     case 161: /* sps  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2017 "parser.c"
         break;
 
     case 162: /* par  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2023 "parser.c"
         break;
 
     case 163: /* cv  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2029 "parser.c"
         break;
 
     case 164: /* cvv  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2035 "parser.c"
         break;
 
     case 165: /* opt  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2041 "parser.c"
         break;
 
     case 166: /* ivp  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2047 "parser.c"
         break;
 
     case 167: /* add  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2053 "parser.c"
         break;
 
     case 168: /* div  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2059 "parser.c"
         break;
 
     case 169: /* mul  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2065 "parser.c"
         break;
 
     case 170: /* sub  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2071 "parser.c"
         break;
 
     case 171: /* eq  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2077 "parser.c"
         break;
 
     case 172: /* gt  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2083 "parser.c"
         break;
 
     case 173: /* gte  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2089 "parser.c"
         break;
 
     case 174: /* lt  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2095 "parser.c"
         break;
 
     case 175: /* lte  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2101 "parser.c"
         break;
 
     case 176: /* neq  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2107 "parser.c"
         break;
 
     case 177: /* if  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2113 "parser.c"
         break;
 
     case 178: /* select  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2119 "parser.c"
         break;
 
     case 179: /* until  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2125 "parser.c"
         break;
 
     case 180: /* while  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2131 "parser.c"
         break;
 
     case 181: /* trace  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2137 "parser.c"
         break;
 
     case 182: /* retrace  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2143 "parser.c"
         break;
 
     case 183: /* execute  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2149 "parser.c"
         break;
 
     case 184: /* rexx  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2155 "parser.c"
         break;
 
     case 185: /* run  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2161 "parser.c"
         break;
 
     case 186: /* abort  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2167 "parser.c"
         break;
 
     case 187: /* exit  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2173 "parser.c"
         break;
 
     case 188: /* onerror  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2179 "parser.c"
         break;
 
     case 189: /* reboot  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2185 "parser.c"
         break;
 
     case 190: /* trap  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2191 "parser.c"
         break;
 
     case 191: /* copyfiles  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2197 "parser.c"
         break;
 
     case 192: /* copylib  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2203 "parser.c"
         break;
 
     case 193: /* delete  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2209 "parser.c"
         break;
 
     case 194: /* exists  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2215 "parser.c"
         break;
 
     case 195: /* fileonly  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2221 "parser.c"
         break;
 
     case 196: /* foreach  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2227 "parser.c"
         break;
 
     case 197: /* makeassign  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2233 "parser.c"
         break;
 
     case 198: /* makedir  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2239 "parser.c"
         break;
 
     case 199: /* protect  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2245 "parser.c"
         break;
 
     case 200: /* startup  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2251 "parser.c"
         break;
 
     case 201: /* textfile  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2257 "parser.c"
         break;
 
     case 202: /* tooltype  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2263 "parser.c"
         break;
 
     case 203: /* transcript  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2269 "parser.c"
         break;
 
     case 204: /* rename  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2275 "parser.c"
         break;
 
     case 205: /* complete  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2281 "parser.c"
         break;
 
     case 206: /* debug  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2287 "parser.c"
         break;
 
     case 207: /* message  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2293 "parser.c"
         break;
 
     case 208: /* user  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2299 "parser.c"
         break;
 
     case 209: /* welcome  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2305 "parser.c"
         break;
 
     case 210: /* working  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2311 "parser.c"
         break;
 
     case 211: /* and  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2317 "parser.c"
         break;
 
     case 212: /* bitand  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2323 "parser.c"
         break;
 
     case 213: /* bitnot  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2329 "parser.c"
         break;
 
     case 214: /* bitor  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2335 "parser.c"
         break;
 
     case 215: /* bitxor  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2341 "parser.c"
         break;
 
     case 216: /* not  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2347 "parser.c"
         break;
 
     case 217: /* in  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2353 "parser.c"
         break;
 
     case 218: /* or  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2359 "parser.c"
         break;
 
     case 219: /* shiftleft  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2365 "parser.c"
         break;
 
     case 220: /* shiftright  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2371 "parser.c"
         break;
 
     case 221: /* xor  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2377 "parser.c"
         break;
 
     case 222: /* closemedia  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2383 "parser.c"
         break;
 
     case 223: /* effect  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2389 "parser.c"
         break;
 
     case 224: /* setmedia  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2395 "parser.c"
         break;
 
     case 225: /* showmedia  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2401 "parser.c"
         break;
 
     case 226: /* database  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2407 "parser.c"
         break;
 
     case 227: /* earlier  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2413 "parser.c"
         break;
 
     case 228: /* getassign  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2419 "parser.c"
         break;
 
     case 229: /* getdevice  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2425 "parser.c"
         break;
 
     case 230: /* getdiskspace  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2431 "parser.c"
         break;
 
     case 231: /* getenv  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2437 "parser.c"
         break;
 
     case 232: /* getsize  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2443 "parser.c"
         break;
 
     case 233: /* getsum  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2449 "parser.c"
         break;
 
     case 234: /* getversion  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2455 "parser.c"
         break;
 
     case 235: /* iconinfo  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2461 "parser.c"
         break;
 
     case 236: /* querydisplay  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2467 "parser.c"
         break;
 
     case 237: /* dcl  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2473 "parser.c"
         break;
 
     case 238: /* cus  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2479 "parser.c"
         break;
 
     case 239: /* askbool  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2485 "parser.c"
         break;
 
     case 240: /* askchoice  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2491 "parser.c"
         break;
 
     case 241: /* askdir  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2497 "parser.c"
         break;
 
     case 242: /* askdisk  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2503 "parser.c"
         break;
 
     case 243: /* askfile  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2509 "parser.c"
         break;
 
     case 244: /* asknumber  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2515 "parser.c"
         break;
 
     case 245: /* askoptions  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2521 "parser.c"
         break;
 
     case 246: /* askstring  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2527 "parser.c"
         break;
 
     case 247: /* cat  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2533 "parser.c"
         break;
 
     case 248: /* expandpath  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2539 "parser.c"
         break;
 
     case 249: /* fmt  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2545 "parser.c"
         break;
 
     case 250: /* pathonly  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2551 "parser.c"
         break;
 
     case 251: /* patmatch  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2557 "parser.c"
         break;
 
     case 252: /* strlen  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2563 "parser.c"
         break;
 
     case 253: /* substr  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2569 "parser.c"
         break;
 
     case 254: /* tackon  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2575 "parser.c"
         break;
 
     case 255: /* set  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2581 "parser.c"
         break;
 
     case 256: /* symbolset  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2587 "parser.c"
         break;
 
     case 257: /* symbolval  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2593 "parser.c"
         break;
 
     case 258: /* openwbobject  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2599 "parser.c"
         break;
 
     case 259: /* showwbobject  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2605 "parser.c"
         break;
 
     case 260: /* closewbobject  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2611 "parser.c"
         break;
 
     case 261: /* all  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2617 "parser.c"
         break;
 
     case 262: /* append  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2623 "parser.c"
         break;
 
     case 263: /* assigns  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2629 "parser.c"
         break;
 
     case 264: /* back  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2635 "parser.c"
         break;
 
     case 265: /* choices  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2641 "parser.c"
         break;
 
     case 266: /* command  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2647 "parser.c"
         break;
 
     case 267: /* compression  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2653 "parser.c"
         break;
 
     case 268: /* confirm  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2659 "parser.c"
         break;
 
     case 269: /* default  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2665 "parser.c"
         break;
 
     case 270: /* delopts  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2671 "parser.c"
         break;
 
     case 271: /* dest  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2677 "parser.c"
         break;
 
     case 272: /* disk  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2683 "parser.c"
         break;
 
     case 273: /* files  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2689 "parser.c"
         break;
 
     case 274: /* fonts  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2695 "parser.c"
         break;
 
     case 275: /* getdefaulttool  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2701 "parser.c"
         break;
 
     case 276: /* getposition  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2707 "parser.c"
         break;
 
     case 277: /* getstack  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2713 "parser.c"
         break;
 
     case 278: /* gettooltype  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2719 "parser.c"
         break;
 
     case 279: /* help  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2725 "parser.c"
         break;
 
     case 280: /* infos  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2731 "parser.c"
         break;
 
     case 281: /* include  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2737 "parser.c"
         break;
 
     case 282: /* newname  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2743 "parser.c"
         break;
 
     case 283: /* newpath  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2749 "parser.c"
         break;
 
     case 284: /* nogauge  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2755 "parser.c"
         break;
 
     case 285: /* noposition  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2761 "parser.c"
         break;
 
     case 286: /* noreq  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2767 "parser.c"
         break;
 
     case 287: /* pattern  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2773 "parser.c"
         break;
 
     case 288: /* prompt  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2779 "parser.c"
         break;
 
     case 289: /* quiet  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2785 "parser.c"
         break;
 
     case 290: /* range  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2791 "parser.c"
         break;
 
     case 291: /* safe  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2797 "parser.c"
         break;
 
     case 292: /* setdefaulttool  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2803 "parser.c"
         break;
 
     case 293: /* setposition  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2809 "parser.c"
         break;
 
     case 294: /* setstack  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2815 "parser.c"
         break;
 
     case 295: /* settooltype  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2821 "parser.c"
         break;
 
     case 296: /* source  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2827 "parser.c"
         break;
 
     case 297: /* swapcolors  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2833 "parser.c"
         break;
 
     case 298: /* optional  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2839 "parser.c"
         break;
 
     case 299: /* resident  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2845 "parser.c"
         break;
 
     case 300: /* override  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2851 "parser.c"
         break;
 
     case 301: /* dynopt  */
-#line 80 "../src/parser.y"
+#line 74 "../src/parser.y"
       { kill(((*yyvaluep).e)); }
 #line 2857 "parser.c"
         break;
@@ -3121,668 +3121,668 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 97 "../src/parser.y"
+#line 86 "../src/parser.y"
     { (yyval.e) = init((yyvsp[0].e)); }
 #line 3127 "parser.c"
     break;
 
   case 6:
-#line 103 "../src/parser.y"
+#line 93 "../src/parser.y"
     { (yyval.e) = push(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[0].e)); }
 #line 3133 "parser.c"
     break;
 
   case 7:
-#line 104 "../src/parser.y"
+#line 94 "../src/parser.y"
     { (yyval.e) = push((yyvsp[-1].e), (yyvsp[0].e)); }
 #line 3139 "parser.c"
     break;
 
   case 8:
-#line 105 "../src/parser.y"
+#line 95 "../src/parser.y"
     { (yyval.e) = push(new_contxt(), (yyvsp[0].e)); }
 #line 3145 "parser.c"
     break;
 
   case 9:
-#line 106 "../src/parser.y"
+#line 96 "../src/parser.y"
     { (yyval.e) = push(push((yyvsp[-2].e), (yyvsp[-1].e)), (yyvsp[0].e)); }
 #line 3151 "parser.c"
     break;
 
   case 12:
-#line 109 "../src/parser.y"
+#line 99 "../src/parser.y"
     { (yyval.e) = (yyvsp[-1].e); }
 #line 3157 "parser.c"
     break;
 
   case 13:
-#line 110 "../src/parser.y"
+#line 100 "../src/parser.y"
     { (yyval.e) = merge((yyvsp[-1].e), (yyvsp[0].e)); }
 #line 3163 "parser.c"
     break;
 
   case 14:
-#line 111 "../src/parser.y"
+#line 101 "../src/parser.y"
     { (yyval.e) = push(new_contxt(), (yyvsp[0].e)); }
 #line 3169 "parser.c"
     break;
 
   case 15:
-#line 112 "../src/parser.y"
+#line 102 "../src/parser.y"
     { (yyval.e) = (yyvsp[-1].e); }
 #line 3175 "parser.c"
     break;
 
   case 16:
-#line 113 "../src/parser.y"
+#line 103 "../src/parser.y"
     { (yyval.e) = merge((yyvsp[-1].e), (yyvsp[0].e)); }
 #line 3181 "parser.c"
     break;
 
   case 17:
-#line 114 "../src/parser.y"
+#line 104 "../src/parser.y"
     { (yyval.e) = push(new_contxt(), (yyvsp[0].e)); }
 #line 3187 "parser.c"
     break;
 
   case 18:
-#line 115 "../src/parser.y"
+#line 105 "../src/parser.y"
     { (yyval.e) = (yyvsp[-1].e); }
 #line 3193 "parser.c"
     break;
 
   case 19:
-#line 116 "../src/parser.y"
+#line 106 "../src/parser.y"
     { (yyval.e) = (yyvsp[-1].e); }
 #line 3199 "parser.c"
     break;
 
   case 20:
-#line 117 "../src/parser.y"
+#line 107 "../src/parser.y"
     { (yyval.e) = push((yyvsp[-2].e), (yyvsp[-1].e)); }
 #line 3205 "parser.c"
     break;
 
   case 21:
-#line 118 "../src/parser.y"
+#line 108 "../src/parser.y"
     { (yyval.e) = push(new_contxt(), (yyvsp[0].e)); }
 #line 3211 "parser.c"
     break;
 
   case 22:
-#line 119 "../src/parser.y"
+#line 109 "../src/parser.y"
     { (yyval.e) = push(new_contxt(), (yyvsp[0].e)); }
 #line 3217 "parser.c"
     break;
 
   case 23:
-#line 120 "../src/parser.y"
+#line 110 "../src/parser.y"
     { (yyval.e) = push((yyvsp[-1].e), (yyvsp[0].e)); }
 #line 3223 "parser.c"
     break;
 
   case 24:
-#line 121 "../src/parser.y"
+#line 111 "../src/parser.y"
     { (yyval.e) = new_number((yyvsp[0].n)); }
 #line 3229 "parser.c"
     break;
 
   case 25:
-#line 122 "../src/parser.y"
+#line 112 "../src/parser.y"
     { (yyval.e) = new_number((yyvsp[0].n)); }
 #line 3235 "parser.c"
     break;
 
   case 26:
-#line 123 "../src/parser.y"
+#line 113 "../src/parser.y"
     { (yyval.e) = new_number((yyvsp[0].n)); }
 #line 3241 "parser.c"
     break;
 
   case 27:
-#line 124 "../src/parser.y"
+#line 114 "../src/parser.y"
     { (yyval.e) = new_string((yyvsp[0].s)); }
 #line 3247 "parser.c"
     break;
 
   case 28:
-#line 125 "../src/parser.y"
+#line 115 "../src/parser.y"
     { (yyval.e) = new_symref((yyvsp[0].s), LINE); }
 #line 3253 "parser.c"
     break;
 
   case 29:
-#line 126 "../src/parser.y"
+#line 116 "../src/parser.y"
     { (yyval.e) = NULL; YYFPRINTF(stderr, "Out of memory in line %d\n", LINE); YYABORT; }
 #line 3259 "parser.c"
     break;
 
   case 30:
-#line 127 "../src/parser.y"
+#line 117 "../src/parser.y"
     { (yyval.e) = push(push((yyvsp[-2].e), new_symbol((yyvsp[-1].s))), (yyvsp[0].e)) ; }
 #line 3265 "parser.c"
     break;
 
   case 31:
-#line 128 "../src/parser.y"
+#line 118 "../src/parser.y"
     { (yyval.e) = push(push(new_contxt(), new_symbol((yyvsp[-1].s))), (yyvsp[0].e)); }
 #line 3271 "parser.c"
     break;
 
   case 32:
-#line 129 "../src/parser.y"
+#line 119 "../src/parser.y"
     { (yyval.e) = push((yyvsp[-1].e), new_symbol((yyvsp[0].s))); }
 #line 3277 "parser.c"
     break;
 
   case 33:
-#line 130 "../src/parser.y"
+#line 120 "../src/parser.y"
     { (yyval.e) = push(new_contxt(), new_symbol((yyvsp[0].s))); }
 #line 3283 "parser.c"
     break;
 
   case 34:
-#line 131 "../src/parser.y"
+#line 121 "../src/parser.y"
     { (yyval.e) = push(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[0].e)); }
 #line 3289 "parser.c"
     break;
 
   case 35:
-#line 132 "../src/parser.y"
+#line 122 "../src/parser.y"
     { (yyval.e) = push(push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), (yyvsp[0].e)); }
 #line 3295 "parser.c"
     break;
 
   case 171:
-#line 274 "../src/parser.y"
+#line 267 "../src/parser.y"
     { (yyval.e) = new_native(strdup("+"), LINE, m_add, (yyvsp[-1].e), NUMBER); }
 #line 3301 "parser.c"
     break;
 
   case 172:
-#line 275 "../src/parser.y"
+#line 268 "../src/parser.y"
     { (yyval.e) = new_native(strdup("/"), LINE, m_div, (yyvsp[-1].e), NUMBER); }
 #line 3307 "parser.c"
     break;
 
   case 173:
-#line 276 "../src/parser.y"
+#line 269 "../src/parser.y"
     { (yyval.e) = new_native(strdup("*"), LINE, m_mul, (yyvsp[-1].e), NUMBER); }
 #line 3313 "parser.c"
     break;
 
   case 174:
-#line 277 "../src/parser.y"
+#line 270 "../src/parser.y"
     { (yyval.e) = new_native(strdup("-"), LINE, m_sub, (yyvsp[-1].e), NUMBER); }
 #line 3319 "parser.c"
     break;
 
   case 175:
-#line 280 "../src/parser.y"
+#line 274 "../src/parser.y"
     { (yyval.e) = new_native(strdup("="), LINE, m_eq, (yyvsp[-1].e), NUMBER); }
 #line 3325 "parser.c"
     break;
 
   case 176:
-#line 281 "../src/parser.y"
+#line 275 "../src/parser.y"
     { (yyval.e) = new_native(strdup(">"), LINE, m_gt, (yyvsp[-1].e), NUMBER); }
 #line 3331 "parser.c"
     break;
 
   case 177:
-#line 282 "../src/parser.y"
+#line 276 "../src/parser.y"
     { (yyval.e) = new_native(strdup(">="), LINE, m_gte, (yyvsp[-1].e), NUMBER); }
 #line 3337 "parser.c"
     break;
 
   case 178:
-#line 283 "../src/parser.y"
+#line 277 "../src/parser.y"
     { (yyval.e) = new_native(strdup("<"), LINE, m_lt, (yyvsp[-1].e), NUMBER); }
 #line 3343 "parser.c"
     break;
 
   case 179:
-#line 284 "../src/parser.y"
+#line 278 "../src/parser.y"
     { (yyval.e) = new_native(strdup("<="), LINE, m_lte, (yyvsp[-1].e), NUMBER); }
 #line 3349 "parser.c"
     break;
 
   case 180:
-#line 285 "../src/parser.y"
+#line 279 "../src/parser.y"
     { (yyval.e) = new_native(strdup("<>"), LINE, m_neq, (yyvsp[-1].e), NUMBER); }
 #line 3355 "parser.c"
     break;
 
   case 181:
-#line 288 "../src/parser.y"
+#line 283 "../src/parser.y"
     { (yyval.e) = new_native(strdup("if"), LINE, m_if, (yyvsp[-1].e), NUMBER); }
 #line 3361 "parser.c"
     break;
 
   case 182:
-#line 289 "../src/parser.y"
+#line 284 "../src/parser.y"
     { (yyval.e) = new_native(strdup("if"), LINE, m_if, (yyvsp[-1].e), NUMBER); }
 #line 3367 "parser.c"
     break;
 
   case 183:
-#line 290 "../src/parser.y"
+#line 285 "../src/parser.y"
     { (yyval.e) = new_native(strdup("if"), LINE, m_if, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3373 "parser.c"
     break;
 
   case 184:
-#line 291 "../src/parser.y"
+#line 286 "../src/parser.y"
     { (yyval.e) = new_native(strdup("select"), LINE, m_select, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3379 "parser.c"
     break;
 
   case 185:
-#line 292 "../src/parser.y"
+#line 287 "../src/parser.y"
     { (yyval.e) = new_native(strdup("until"), LINE, m_until, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3385 "parser.c"
     break;
 
   case 186:
-#line 293 "../src/parser.y"
+#line 288 "../src/parser.y"
     { (yyval.e) = new_native(strdup("while"), LINE, m_while, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3391 "parser.c"
     break;
 
   case 187:
-#line 294 "../src/parser.y"
+#line 289 "../src/parser.y"
     { (yyval.e) = new_native(strdup("trace"), LINE, m_trace, NULL, NUMBER); }
 #line 3397 "parser.c"
     break;
 
   case 188:
-#line 295 "../src/parser.y"
+#line 290 "../src/parser.y"
     { (yyval.e) = new_native(strdup("retrace"), LINE, m_retrace, NULL, NUMBER); }
 #line 3403 "parser.c"
     break;
 
   case 189:
-#line 298 "../src/parser.y"
+#line 294 "../src/parser.y"
     { (yyval.e) = new_native(strdup("execute"), LINE, m_execute, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3409 "parser.c"
     break;
 
   case 190:
-#line 299 "../src/parser.y"
+#line 295 "../src/parser.y"
     { (yyval.e) = new_native(strdup("execute"), LINE, m_execute, push((yyvsp[-1].e), (yyvsp[-2].e)), NUMBER); }
 #line 3415 "parser.c"
     break;
 
   case 191:
-#line 300 "../src/parser.y"
+#line 296 "../src/parser.y"
     { (yyval.e) = new_native(strdup("execute"), LINE, m_execute, push((yyvsp[-2].e), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
 #line 3421 "parser.c"
     break;
 
   case 192:
-#line 301 "../src/parser.y"
+#line 297 "../src/parser.y"
     { (yyval.e) = new_native(strdup("execute"), LINE, m_execute, (yyvsp[-1].e), NUMBER); }
 #line 3427 "parser.c"
     break;
 
   case 193:
-#line 302 "../src/parser.y"
+#line 298 "../src/parser.y"
     { (yyval.e) = new_native(strdup("rexx"), LINE, m_rexx, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3433 "parser.c"
     break;
 
   case 194:
-#line 303 "../src/parser.y"
+#line 299 "../src/parser.y"
     { (yyval.e) = new_native(strdup("rexx"), LINE, m_rexx, push((yyvsp[-1].e), (yyvsp[-2].e)), NUMBER); }
 #line 3439 "parser.c"
     break;
 
   case 195:
-#line 304 "../src/parser.y"
+#line 300 "../src/parser.y"
     { (yyval.e) = new_native(strdup("rexx"), LINE, m_rexx, push((yyvsp[-2].e), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
 #line 3445 "parser.c"
     break;
 
   case 196:
-#line 305 "../src/parser.y"
+#line 301 "../src/parser.y"
     { (yyval.e) = new_native(strdup("rexx"), LINE, m_rexx, (yyvsp[-1].e), NUMBER); }
 #line 3451 "parser.c"
     break;
 
   case 197:
-#line 306 "../src/parser.y"
+#line 302 "../src/parser.y"
     { (yyval.e) = new_native(strdup("run"), LINE, m_run, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3457 "parser.c"
     break;
 
   case 198:
-#line 307 "../src/parser.y"
+#line 303 "../src/parser.y"
     { (yyval.e) = new_native(strdup("run"), LINE, m_run, push((yyvsp[-1].e), (yyvsp[-2].e)), NUMBER); }
 #line 3463 "parser.c"
     break;
 
   case 199:
-#line 308 "../src/parser.y"
+#line 304 "../src/parser.y"
     { (yyval.e) = new_native(strdup("run"), LINE, m_run, push((yyvsp[-2].e), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
 #line 3469 "parser.c"
     break;
 
   case 200:
-#line 309 "../src/parser.y"
+#line 305 "../src/parser.y"
     { (yyval.e) = new_native(strdup("run"), LINE, m_run, (yyvsp[-1].e), NUMBER); }
 #line 3475 "parser.c"
     break;
 
   case 201:
-#line 312 "../src/parser.y"
+#line 309 "../src/parser.y"
     { (yyval.e) = new_native(strdup("abort"), LINE, m_abort, (yyvsp[-1].e), NUMBER); }
 #line 3481 "parser.c"
     break;
 
   case 202:
-#line 313 "../src/parser.y"
+#line 310 "../src/parser.y"
     { (yyval.e) = new_native(strdup("exit"), LINE, m_exit, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3487 "parser.c"
     break;
 
   case 203:
-#line 314 "../src/parser.y"
+#line 311 "../src/parser.y"
     { (yyval.e) = new_native(strdup("exit"), LINE, m_exit, push((yyvsp[-1].e), (yyvsp[-2].e)), NUMBER); }
 #line 3493 "parser.c"
     break;
 
   case 204:
-#line 315 "../src/parser.y"
+#line 312 "../src/parser.y"
     { (yyval.e) = new_native(strdup("exit"), LINE, m_exit, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3499 "parser.c"
     break;
 
   case 205:
-#line 316 "../src/parser.y"
+#line 313 "../src/parser.y"
     { (yyval.e) = new_native(strdup("exit"), LINE, m_exit, (yyvsp[-1].e), NUMBER); }
 #line 3505 "parser.c"
     break;
 
   case 206:
-#line 317 "../src/parser.y"
+#line 314 "../src/parser.y"
     { (yyval.e) = new_native(strdup("exit"), LINE, m_exit, NULL, NUMBER); }
 #line 3511 "parser.c"
     break;
 
   case 207:
-#line 318 "../src/parser.y"
+#line 315 "../src/parser.y"
     { (yyval.e) = new_native(strdup("onerror"), LINE, m_procedure, push(new_contxt(),
                                                         new_custom(strdup("@onerror"), LINE, NULL, (yyvsp[-1].e))), DANGLE); }
 #line 3518 "parser.c"
     break;
 
   case 208:
-#line 320 "../src/parser.y"
+#line 317 "../src/parser.y"
     { (yyval.e) = new_native(strdup("reboot"), LINE, m_reboot, NULL, NUMBER); }
 #line 3524 "parser.c"
     break;
 
   case 209:
-#line 321 "../src/parser.y"
+#line 318 "../src/parser.y"
     { (yyval.e) = new_native(strdup("trap"), LINE, m_trap, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3530 "parser.c"
     break;
 
   case 210:
-#line 324 "../src/parser.y"
+#line 322 "../src/parser.y"
     { (yyval.e) = new_native(strdup("copyfiles"), LINE, m_copyfiles, (yyvsp[-1].e), NUMBER); }
 #line 3536 "parser.c"
     break;
 
   case 211:
-#line 325 "../src/parser.y"
+#line 323 "../src/parser.y"
     { (yyval.e) = new_native(strdup("copylib"), LINE, m_copylib, (yyvsp[-1].e), NUMBER); }
 #line 3542 "parser.c"
     break;
 
   case 212:
-#line 326 "../src/parser.y"
+#line 324 "../src/parser.y"
     { (yyval.e) = new_native(strdup("delete"), LINE, m_delete, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3548 "parser.c"
     break;
 
   case 213:
-#line 327 "../src/parser.y"
+#line 325 "../src/parser.y"
     { (yyval.e) = new_native(strdup("delete"), LINE, m_delete, push(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
 #line 3554 "parser.c"
     break;
 
   case 214:
-#line 328 "../src/parser.y"
+#line 326 "../src/parser.y"
     { (yyval.e) = new_native(strdup("delete"), LINE, m_delete, push(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
 #line 3560 "parser.c"
     break;
 
   case 215:
-#line 329 "../src/parser.y"
+#line 327 "../src/parser.y"
     { (yyval.e) = new_native(strdup("delete"), LINE, m_delete, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3566 "parser.c"
     break;
 
   case 216:
-#line 330 "../src/parser.y"
+#line 328 "../src/parser.y"
     { (yyval.e) = new_native(strdup("exists"), LINE, m_exists, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3572 "parser.c"
     break;
 
   case 217:
-#line 331 "../src/parser.y"
+#line 329 "../src/parser.y"
     { (yyval.e) = new_native(strdup("exists"), LINE, m_exists, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3578 "parser.c"
     break;
 
   case 218:
-#line 332 "../src/parser.y"
+#line 330 "../src/parser.y"
     { (yyval.e) = new_native(strdup("exists"), LINE, m_exists, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3584 "parser.c"
     break;
 
   case 219:
-#line 333 "../src/parser.y"
+#line 331 "../src/parser.y"
     { (yyval.e) = new_native(strdup("fileonly"), LINE, m_fileonly, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 3590 "parser.c"
     break;
 
   case 220:
-#line 334 "../src/parser.y"
+#line 332 "../src/parser.y"
     { (yyval.e) = new_native(strdup("foreach"), LINE, m_foreach, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3596 "parser.c"
     break;
 
   case 221:
-#line 335 "../src/parser.y"
+#line 333 "../src/parser.y"
     { (yyval.e) = new_native(strdup("makeassign"), LINE, m_makeassign, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3602 "parser.c"
     break;
 
   case 222:
-#line 336 "../src/parser.y"
+#line 334 "../src/parser.y"
     { (yyval.e) = new_native(strdup("makeassign"), LINE, m_makeassign, (yyvsp[-1].e), NUMBER); }
 #line 3608 "parser.c"
     break;
 
   case 223:
-#line 337 "../src/parser.y"
+#line 335 "../src/parser.y"
     { (yyval.e) = new_native(strdup("makeassign"), LINE, m_makeassign, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3614 "parser.c"
     break;
 
   case 224:
-#line 338 "../src/parser.y"
+#line 336 "../src/parser.y"
     { (yyval.e) = new_native(strdup("makeassign"), LINE, m_makeassign, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3620 "parser.c"
     break;
 
   case 225:
-#line 339 "../src/parser.y"
+#line 337 "../src/parser.y"
     { (yyval.e) = new_native(strdup("makedir"), LINE, m_makedir, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3626 "parser.c"
     break;
 
   case 226:
-#line 340 "../src/parser.y"
+#line 338 "../src/parser.y"
     { (yyval.e) = new_native(strdup("makedir"), LINE, m_makedir, push(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
 #line 3632 "parser.c"
     break;
 
   case 227:
-#line 341 "../src/parser.y"
+#line 339 "../src/parser.y"
     { (yyval.e) = new_native(strdup("makedir"), LINE, m_makedir, push(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
 #line 3638 "parser.c"
     break;
 
   case 228:
-#line 342 "../src/parser.y"
+#line 340 "../src/parser.y"
     { (yyval.e) = new_native(strdup("makedir"), LINE, m_makedir, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3644 "parser.c"
     break;
 
   case 229:
-#line 343 "../src/parser.y"
+#line 341 "../src/parser.y"
     { (yyval.e) = new_native(strdup("protect"), LINE, m_protect, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3650 "parser.c"
     break;
 
   case 230:
-#line 344 "../src/parser.y"
+#line 342 "../src/parser.y"
     { (yyval.e) = new_native(strdup("protect"), LINE, m_protect, (yyvsp[-1].e), NUMBER); }
 #line 3656 "parser.c"
     break;
 
   case 231:
-#line 345 "../src/parser.y"
+#line 343 "../src/parser.y"
     { (yyval.e) = new_native(strdup("protect"), LINE, m_protect, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3662 "parser.c"
     break;
 
   case 232:
-#line 346 "../src/parser.y"
+#line 344 "../src/parser.y"
     { (yyval.e) = new_native(strdup("protect"), LINE, m_protect, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3668 "parser.c"
     break;
 
   case 233:
-#line 347 "../src/parser.y"
+#line 345 "../src/parser.y"
     { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3674 "parser.c"
     break;
 
   case 234:
-#line 348 "../src/parser.y"
+#line 346 "../src/parser.y"
     { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
 #line 3680 "parser.c"
     break;
 
   case 235:
-#line 349 "../src/parser.y"
+#line 347 "../src/parser.y"
     { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
 #line 3686 "parser.c"
     break;
 
   case 236:
-#line 350 "../src/parser.y"
+#line 348 "../src/parser.y"
     { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), new_symref(strdup("@app-name"), LINE)), (yyvsp[-1].e)), NUMBER); }
 #line 3692 "parser.c"
     break;
 
   case 237:
-#line 351 "../src/parser.y"
+#line 349 "../src/parser.y"
     { (yyval.e) = new_native(strdup("textfile"), LINE, m_textfile, (yyvsp[-1].e), NUMBER); }
 #line 3698 "parser.c"
     break;
 
   case 238:
-#line 352 "../src/parser.y"
+#line 350 "../src/parser.y"
     { (yyval.e) = new_native(strdup("tooltype"), LINE, m_tooltype, (yyvsp[-1].e), NUMBER); }
 #line 3704 "parser.c"
     break;
 
   case 239:
-#line 353 "../src/parser.y"
+#line 351 "../src/parser.y"
     { (yyval.e) = new_native(strdup("transcript"), LINE, m_transcript, (yyvsp[-1].e), NUMBER); }
 #line 3710 "parser.c"
     break;
 
   case 240:
-#line 354 "../src/parser.y"
+#line 352 "../src/parser.y"
     { (yyval.e) = new_native(strdup("rename"), LINE, m_rename, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3716 "parser.c"
     break;
 
   case 241:
-#line 355 "../src/parser.y"
+#line 353 "../src/parser.y"
     { (yyval.e) = new_native(strdup("rename"), LINE, m_rename, (yyvsp[-1].e), NUMBER); }
 #line 3722 "parser.c"
     break;
 
   case 242:
-#line 358 "../src/parser.y"
+#line 357 "../src/parser.y"
     { (yyval.e) = new_native(strdup("complete"), LINE, m_complete, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3728 "parser.c"
     break;
 
   case 243:
-#line 359 "../src/parser.y"
+#line 358 "../src/parser.y"
     { (yyval.e) = new_native(strdup("debug"), LINE, m_debug, (yyvsp[-1].e), NUMBER); }
 #line 3734 "parser.c"
     break;
 
   case 244:
-#line 360 "../src/parser.y"
+#line 359 "../src/parser.y"
     { (yyval.e) = new_native(strdup("debug"), LINE, m_debug, NULL, NUMBER); }
 #line 3740 "parser.c"
     break;
 
   case 245:
-#line 361 "../src/parser.y"
+#line 360 "../src/parser.y"
     { (yyval.e) = new_native(strdup("message"), LINE, m_message, merge((yyvsp[-1].e), (yyvsp[-2].e)), NUMBER); }
 #line 3746 "parser.c"
     break;
 
   case 246:
-#line 362 "../src/parser.y"
+#line 361 "../src/parser.y"
     { (yyval.e) = new_native(strdup("message"), LINE, m_message, merge((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3752 "parser.c"
     break;
 
   case 247:
-#line 363 "../src/parser.y"
+#line 362 "../src/parser.y"
     { (yyval.e) = new_native(strdup("message"), LINE, m_message, push(merge((yyvsp[-3].e), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
 #line 3758 "parser.c"
     break;
 
   case 248:
-#line 364 "../src/parser.y"
+#line 363 "../src/parser.y"
     { (yyval.e) = new_native(strdup("message"), LINE, m_message, (yyvsp[-1].e), NUMBER); }
 #line 3764 "parser.c"
     break;
 
   case 249:
-#line 365 "../src/parser.y"
+#line 364 "../src/parser.y"
     { (yyval.e) = new_native(strdup("user"), LINE, m_user, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3770 "parser.c"
     break;
 
   case 250:
-#line 366 "../src/parser.y"
+#line 365 "../src/parser.y"
     { (yyval.e) = new_native(strdup("welcome"), LINE, m_welcome, (yyvsp[-1].e), NUMBER); }
 #line 3776 "parser.c"
     break;
 
   case 251:
-#line 367 "../src/parser.y"
+#line 366 "../src/parser.y"
     { (yyval.e) = new_native(strdup("welcome"), LINE, m_welcome, NULL, NUMBER); }
 #line 3782 "parser.c"
     break;
 
   case 252:
-#line 368 "../src/parser.y"
+#line 367 "../src/parser.y"
     { (yyval.e) = new_native(strdup("working"), LINE, m_working, (yyvsp[-1].e), NUMBER); }
 #line 3788 "parser.c"
     break;
@@ -3854,625 +3854,625 @@ yyreduce:
     break;
 
   case 264:
-#line 384 "../src/parser.y"
+#line 385 "../src/parser.y"
     { (yyval.e) = new_native(strdup("closemedia"), LINE, m_closemedia, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3860 "parser.c"
     break;
 
   case 265:
-#line 385 "../src/parser.y"
+#line 386 "../src/parser.y"
     { (yyval.e) = new_native(strdup("effect"), LINE, m_effect, merge((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3866 "parser.c"
     break;
 
   case 266:
-#line 386 "../src/parser.y"
+#line 387 "../src/parser.y"
     { (yyval.e) = new_native(strdup("setmedia"), LINE, m_setmedia, (yyvsp[-1].e), NUMBER); }
 #line 3872 "parser.c"
     break;
 
   case 267:
-#line 387 "../src/parser.y"
+#line 388 "../src/parser.y"
     { (yyval.e) = new_native(strdup("setmedia"), LINE, m_setmedia, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3878 "parser.c"
     break;
 
   case 268:
-#line 388 "../src/parser.y"
+#line 389 "../src/parser.y"
     { (yyval.e) = new_native(strdup("showmedia"), LINE, m_showmedia, merge(merge((yyvsp[-3].e), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3884 "parser.c"
     break;
 
   case 269:
-#line 391 "../src/parser.y"
+#line 393 "../src/parser.y"
     { (yyval.e) = new_native(strdup("database"), LINE, m_database, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 3890 "parser.c"
     break;
 
   case 270:
-#line 392 "../src/parser.y"
+#line 394 "../src/parser.y"
     { (yyval.e) = new_native(strdup("database"), LINE, m_database, (yyvsp[-1].e), STRING); }
 #line 3896 "parser.c"
     break;
 
   case 271:
-#line 393 "../src/parser.y"
+#line 395 "../src/parser.y"
     { (yyval.e) = new_native(strdup("earlier"), LINE, m_earlier, (yyvsp[-1].e), NUMBER); }
 #line 3902 "parser.c"
     break;
 
   case 272:
-#line 394 "../src/parser.y"
+#line 396 "../src/parser.y"
     { (yyval.e) = new_native(strdup("getassign"), LINE, m_getassign, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 3908 "parser.c"
     break;
 
   case 273:
-#line 395 "../src/parser.y"
+#line 397 "../src/parser.y"
     { (yyval.e) = new_native(strdup("getassign"), LINE, m_getassign, (yyvsp[-1].e), STRING); }
 #line 3914 "parser.c"
     break;
 
   case 274:
-#line 396 "../src/parser.y"
+#line 398 "../src/parser.y"
     { (yyval.e) = new_native(strdup("getdevice"), LINE, m_getdevice, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 3920 "parser.c"
     break;
 
   case 275:
-#line 397 "../src/parser.y"
+#line 399 "../src/parser.y"
     { (yyval.e) = new_native(strdup("getdiskspace"), LINE, m_getdiskspace, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3926 "parser.c"
     break;
 
   case 276:
-#line 398 "../src/parser.y"
+#line 400 "../src/parser.y"
     { (yyval.e) = new_native(strdup("getdiskspace"), LINE, m_getdiskspace, (yyvsp[-1].e), NUMBER); }
 #line 3932 "parser.c"
     break;
 
   case 277:
-#line 399 "../src/parser.y"
+#line 401 "../src/parser.y"
     { (yyval.e) = new_native(strdup("getenv"), LINE, m_getenv, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 3938 "parser.c"
     break;
 
   case 278:
-#line 400 "../src/parser.y"
+#line 402 "../src/parser.y"
     { (yyval.e) = new_native(strdup("getsize"), LINE, m_getsize, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3944 "parser.c"
     break;
 
   case 279:
-#line 401 "../src/parser.y"
+#line 403 "../src/parser.y"
     { (yyval.e) = new_native(strdup("getsum"), LINE, m_getsum, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3950 "parser.c"
     break;
 
   case 280:
-#line 402 "../src/parser.y"
+#line 404 "../src/parser.y"
     { (yyval.e) = new_native(strdup("getversion"), LINE, m_getversion, NULL, NUMBER); }
 #line 3956 "parser.c"
     break;
 
   case 281:
-#line 403 "../src/parser.y"
+#line 405 "../src/parser.y"
     { (yyval.e) = new_native(strdup("getversion"), LINE, m_getversion, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 3962 "parser.c"
     break;
 
   case 282:
-#line 404 "../src/parser.y"
+#line 406 "../src/parser.y"
     { (yyval.e) = new_native(strdup("getversion"), LINE, m_getversion, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3968 "parser.c"
     break;
 
   case 283:
-#line 405 "../src/parser.y"
+#line 407 "../src/parser.y"
     { (yyval.e) = new_native(strdup("iconinfo"), LINE, m_iconinfo, (yyvsp[-1].e), NUMBER); }
 #line 3974 "parser.c"
     break;
 
   case 284:
-#line 406 "../src/parser.y"
+#line 408 "../src/parser.y"
     { (yyval.e) = new_native(strdup("querydisplay"), LINE, m_querydisplay, (yyvsp[-1].e), NUMBER); }
 #line 3980 "parser.c"
     break;
 
   case 285:
-#line 409 "../src/parser.y"
+#line 412 "../src/parser.y"
     { (yyval.e) = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom((yyvsp[-3].s), LINE, (yyvsp[-2].e), (yyvsp[-1].e))), NUMBER); }
 #line 3986 "parser.c"
     break;
 
   case 286:
-#line 410 "../src/parser.y"
+#line 413 "../src/parser.y"
     { (yyval.e) = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom((yyvsp[-2].s), LINE, (yyvsp[-1].e), NULL)), NUMBER); }
 #line 3992 "parser.c"
     break;
 
   case 287:
-#line 411 "../src/parser.y"
+#line 414 "../src/parser.y"
     { (yyval.e) = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom((yyvsp[-2].s), LINE, NULL, (yyvsp[-1].e))), NUMBER); }
 #line 3998 "parser.c"
     break;
 
   case 288:
-#line 412 "../src/parser.y"
+#line 415 "../src/parser.y"
     { (yyval.e) = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom((yyvsp[-1].s), LINE, NULL, NULL)), NUMBER); }
 #line 4004 "parser.c"
     break;
 
   case 289:
-#line 413 "../src/parser.y"
+#line 416 "../src/parser.y"
     { (yyval.e) = new_cusref((yyvsp[-2].s), LINE, (yyvsp[-1].e)); }
 #line 4010 "parser.c"
     break;
 
   case 290:
-#line 414 "../src/parser.y"
+#line 417 "../src/parser.y"
     { (yyval.e) = new_cusref((yyvsp[-1].s), LINE, NULL); }
 #line 4016 "parser.c"
     break;
 
   case 291:
-#line 417 "../src/parser.y"
+#line 421 "../src/parser.y"
     { (yyval.e) = new_native(strdup("askbool"), LINE, m_askbool, NULL, NUMBER); }
 #line 4022 "parser.c"
     break;
 
   case 292:
-#line 418 "../src/parser.y"
+#line 422 "../src/parser.y"
     { (yyval.e) = new_native(strdup("askbool"), LINE, m_askbool, (yyvsp[-1].e), NUMBER); }
 #line 4028 "parser.c"
     break;
 
   case 293:
-#line 419 "../src/parser.y"
+#line 423 "../src/parser.y"
     { (yyval.e) = new_native(strdup("askchoice"), LINE, m_askchoice, (yyvsp[-1].e), NUMBER); }
 #line 4034 "parser.c"
     break;
 
   case 294:
-#line 420 "../src/parser.y"
+#line 424 "../src/parser.y"
     { (yyval.e) = new_native(strdup("askdir"), LINE, m_askdir, NULL, STRING); }
 #line 4040 "parser.c"
     break;
 
   case 295:
-#line 421 "../src/parser.y"
+#line 425 "../src/parser.y"
     { (yyval.e) = new_native(strdup("askdir"), LINE, m_askdir, (yyvsp[-1].e), STRING); }
 #line 4046 "parser.c"
     break;
 
   case 296:
-#line 422 "../src/parser.y"
+#line 426 "../src/parser.y"
     { (yyval.e) = new_native(strdup("askdisk"), LINE, m_askdisk, (yyvsp[-1].e), NUMBER); }
 #line 4052 "parser.c"
     break;
 
   case 297:
-#line 423 "../src/parser.y"
+#line 427 "../src/parser.y"
     { (yyval.e) = new_native(strdup("askfile"), LINE, m_askfile, NULL, STRING); }
 #line 4058 "parser.c"
     break;
 
   case 298:
-#line 424 "../src/parser.y"
+#line 428 "../src/parser.y"
     { (yyval.e) = new_native(strdup("askfile"), LINE, m_askfile, (yyvsp[-1].e), STRING); }
 #line 4064 "parser.c"
     break;
 
   case 299:
-#line 425 "../src/parser.y"
+#line 429 "../src/parser.y"
     { (yyval.e) = new_native(strdup("asknumber"), LINE, m_asknumber, NULL, NUMBER); }
 #line 4070 "parser.c"
     break;
 
   case 300:
-#line 426 "../src/parser.y"
+#line 430 "../src/parser.y"
     { (yyval.e) = new_native(strdup("asknumber"), LINE, m_asknumber, (yyvsp[-1].e), NUMBER); }
 #line 4076 "parser.c"
     break;
 
   case 301:
-#line 427 "../src/parser.y"
+#line 431 "../src/parser.y"
     { (yyval.e) = new_native(strdup("askoptions"), LINE, m_askoptions, (yyvsp[-1].e), NUMBER); }
 #line 4082 "parser.c"
     break;
 
   case 302:
-#line 428 "../src/parser.y"
+#line 432 "../src/parser.y"
     { (yyval.e) = new_native(strdup("askstring"), LINE, m_askstring, NULL, STRING); }
 #line 4088 "parser.c"
     break;
 
   case 303:
-#line 429 "../src/parser.y"
+#line 433 "../src/parser.y"
     { (yyval.e) = new_native(strdup("askstring"), LINE, m_askstring, (yyvsp[-1].e), STRING); }
 #line 4094 "parser.c"
     break;
 
   case 304:
-#line 432 "../src/parser.y"
+#line 437 "../src/parser.y"
     { (yyval.e) = new_native(strdup("cat"), LINE, m_cat, (yyvsp[-1].e), STRING); }
 #line 4100 "parser.c"
     break;
 
   case 305:
-#line 433 "../src/parser.y"
+#line 438 "../src/parser.y"
     { (yyval.e) = new_native(strdup("expandpath"), LINE, m_expandpath, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 4106 "parser.c"
     break;
 
   case 306:
-#line 434 "../src/parser.y"
+#line 439 "../src/parser.y"
     { (yyval.e) = new_native((yyvsp[-2].s), LINE, m_fmt, (yyvsp[-1].e), STRING); }
 #line 4112 "parser.c"
     break;
 
   case 307:
-#line 435 "../src/parser.y"
+#line 440 "../src/parser.y"
     { (yyval.e) = new_native((yyvsp[-1].s), LINE, m_fmt, NULL, STRING); }
 #line 4118 "parser.c"
     break;
 
   case 308:
-#line 436 "../src/parser.y"
+#line 441 "../src/parser.y"
     { (yyval.e) = new_native(strdup("pathonly"), LINE, m_pathonly, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 4124 "parser.c"
     break;
 
   case 309:
-#line 437 "../src/parser.y"
+#line 442 "../src/parser.y"
     { (yyval.e) = new_native(strdup("patmatch"), LINE, m_patmatch, (yyvsp[-1].e), NUMBER); }
 #line 4130 "parser.c"
     break;
 
   case 310:
-#line 438 "../src/parser.y"
+#line 443 "../src/parser.y"
     { (yyval.e) = new_native(strdup("strlen"), LINE, m_strlen, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4136 "parser.c"
     break;
 
   case 311:
-#line 439 "../src/parser.y"
+#line 444 "../src/parser.y"
     { (yyval.e) = new_native(strdup("substr"), LINE, m_substr, (yyvsp[-1].e), STRING); }
 #line 4142 "parser.c"
     break;
 
   case 312:
-#line 440 "../src/parser.y"
+#line 445 "../src/parser.y"
     { (yyval.e) = new_native(strdup("substr"), LINE, m_substr, push((yyvsp[-2].e), (yyvsp[-1].e)), STRING); }
 #line 4148 "parser.c"
     break;
 
   case 313:
-#line 441 "../src/parser.y"
+#line 446 "../src/parser.y"
     { (yyval.e) = new_native(strdup("tackon"), LINE, m_tackon, (yyvsp[-1].e), STRING); }
 #line 4154 "parser.c"
     break;
 
   case 314:
-#line 444 "../src/parser.y"
+#line 450 "../src/parser.y"
     { (yyval.e) = new_native(strdup("set"), LINE, m_set, (yyvsp[-1].e), DANGLE); }
 #line 4160 "parser.c"
     break;
 
   case 315:
-#line 445 "../src/parser.y"
+#line 451 "../src/parser.y"
     { (yyval.e) = new_native(strdup("symbolset"), LINE, m_symbolset, (yyvsp[-1].e), DANGLE); }
 #line 4166 "parser.c"
     break;
 
   case 316:
-#line 446 "../src/parser.y"
+#line 452 "../src/parser.y"
     { (yyval.e) = new_native(strdup("symbolval"), LINE, m_symbolval, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4172 "parser.c"
     break;
 
   case 317:
-#line 449 "../src/parser.y"
+#line 456 "../src/parser.y"
     { (yyval.e) = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4178 "parser.c"
     break;
 
   case 318:
-#line 450 "../src/parser.y"
+#line 457 "../src/parser.y"
     { (yyval.e) = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 4184 "parser.c"
     break;
 
   case 319:
-#line 451 "../src/parser.y"
+#line 458 "../src/parser.y"
     { (yyval.e) = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
 #line 4190 "parser.c"
     break;
 
   case 320:
-#line 452 "../src/parser.y"
+#line 459 "../src/parser.y"
     { (yyval.e) = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
 #line 4196 "parser.c"
     break;
 
   case 321:
-#line 453 "../src/parser.y"
+#line 460 "../src/parser.y"
     { (yyval.e) = new_native(strdup("showwbobject"), LINE, m_showwbobject, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4202 "parser.c"
     break;
 
   case 322:
-#line 454 "../src/parser.y"
+#line 461 "../src/parser.y"
     { (yyval.e) = new_native(strdup("closewbobject"), LINE, m_closewbobject, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4208 "parser.c"
     break;
 
   case 323:
-#line 457 "../src/parser.y"
+#line 465 "../src/parser.y"
     { (yyval.e) = new_option(strdup("all"), OPT_ALL, NULL); }
 #line 4214 "parser.c"
     break;
 
   case 324:
-#line 458 "../src/parser.y"
+#line 466 "../src/parser.y"
     { (yyval.e) = new_option(strdup("append"), OPT_APPEND, (yyvsp[-1].e)); }
 #line 4220 "parser.c"
     break;
 
   case 325:
-#line 459 "../src/parser.y"
+#line 467 "../src/parser.y"
     { (yyval.e) = new_option(strdup("assigns"), OPT_ASSIGNS, NULL); }
 #line 4226 "parser.c"
     break;
 
   case 326:
-#line 460 "../src/parser.y"
+#line 468 "../src/parser.y"
     { (yyval.e) = new_option(strdup("back"), OPT_BACK, (yyvsp[-1].e)); }
 #line 4232 "parser.c"
     break;
 
   case 327:
-#line 461 "../src/parser.y"
+#line 469 "../src/parser.y"
     { (yyval.e) = new_option(strdup("choices"), OPT_CHOICES, (yyvsp[-1].e)); }
 #line 4238 "parser.c"
     break;
 
   case 328:
-#line 462 "../src/parser.y"
+#line 470 "../src/parser.y"
     { (yyval.e) = new_option(strdup("command"), OPT_COMMAND, (yyvsp[-1].e)); }
 #line 4244 "parser.c"
     break;
 
   case 329:
-#line 463 "../src/parser.y"
+#line 471 "../src/parser.y"
     { (yyval.e) = new_option(strdup("compression"), OPT_COMPRESSION, NULL); }
 #line 4250 "parser.c"
     break;
 
   case 330:
-#line 464 "../src/parser.y"
+#line 472 "../src/parser.y"
     { (yyval.e) = new_option(strdup("confirm"), OPT_CONFIRM, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4256 "parser.c"
     break;
 
   case 331:
-#line 465 "../src/parser.y"
+#line 473 "../src/parser.y"
     { (yyval.e) = new_option(strdup("confirm"), OPT_CONFIRM, NULL); }
 #line 4262 "parser.c"
     break;
 
   case 332:
-#line 466 "../src/parser.y"
+#line 474 "../src/parser.y"
     { (yyval.e) = new_option(strdup("default"), OPT_DEFAULT, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4268 "parser.c"
     break;
 
   case 333:
-#line 467 "../src/parser.y"
+#line 475 "../src/parser.y"
     { (yyval.e) = new_option(strdup("delopts"), OPT_DELOPTS, (yyvsp[-1].e)); }
 #line 4274 "parser.c"
     break;
 
   case 334:
-#line 468 "../src/parser.y"
+#line 476 "../src/parser.y"
     { (yyval.e) = new_option(strdup("dest"), OPT_DEST, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4280 "parser.c"
     break;
 
   case 335:
-#line 469 "../src/parser.y"
+#line 477 "../src/parser.y"
     { (yyval.e) = new_option(strdup("disk"), OPT_DISK, NULL); }
 #line 4286 "parser.c"
     break;
 
   case 336:
-#line 470 "../src/parser.y"
+#line 478 "../src/parser.y"
     { (yyval.e) = new_option(strdup("files"), OPT_FILES, NULL); }
 #line 4292 "parser.c"
     break;
 
   case 337:
-#line 471 "../src/parser.y"
+#line 479 "../src/parser.y"
     { (yyval.e) = new_option(strdup("fonts"), OPT_FONTS, NULL); }
 #line 4298 "parser.c"
     break;
 
   case 338:
-#line 472 "../src/parser.y"
+#line 480 "../src/parser.y"
     { (yyval.e) = new_option(strdup("getdefaulttool"), OPT_GETDEFAULTTOOL, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4304 "parser.c"
     break;
 
   case 339:
-#line 473 "../src/parser.y"
+#line 481 "../src/parser.y"
     { (yyval.e) = new_option(strdup("getposition"), OPT_GETPOSITION, (yyvsp[-1].e)); }
 #line 4310 "parser.c"
     break;
 
   case 340:
-#line 474 "../src/parser.y"
+#line 482 "../src/parser.y"
     { (yyval.e) = new_option(strdup("getstack"), OPT_GETSTACK, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4316 "parser.c"
     break;
 
   case 341:
-#line 475 "../src/parser.y"
+#line 483 "../src/parser.y"
     { (yyval.e) = new_option(strdup("gettooltype"), OPT_GETTOOLTYPE, (yyvsp[-1].e)); }
 #line 4322 "parser.c"
     break;
 
   case 342:
-#line 476 "../src/parser.y"
+#line 484 "../src/parser.y"
     { (yyval.e) = new_option(strdup("help"), OPT_HELP, (yyvsp[-1].e)); }
 #line 4328 "parser.c"
     break;
 
   case 343:
-#line 477 "../src/parser.y"
+#line 485 "../src/parser.y"
     { (yyval.e) = new_option(strdup("help"), OPT_HELP, push(new_contxt(), new_symref(strdup("@null"), LINE))); }
 #line 4334 "parser.c"
     break;
 
   case 344:
-#line 478 "../src/parser.y"
+#line 486 "../src/parser.y"
     { (yyval.e) = new_option(strdup("infos"), OPT_INFOS, NULL); }
 #line 4340 "parser.c"
     break;
 
   case 345:
-#line 479 "../src/parser.y"
+#line 487 "../src/parser.y"
     { (yyval.e) = new_option(strdup("include"), OPT_INCLUDE, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4346 "parser.c"
     break;
 
   case 346:
-#line 480 "../src/parser.y"
+#line 488 "../src/parser.y"
     { (yyval.e) = new_option(strdup("newname"), OPT_NEWNAME, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4352 "parser.c"
     break;
 
   case 347:
-#line 481 "../src/parser.y"
+#line 489 "../src/parser.y"
     { (yyval.e) = new_option(strdup("newpath"), OPT_NEWPATH, NULL); }
 #line 4358 "parser.c"
     break;
 
   case 348:
-#line 482 "../src/parser.y"
+#line 490 "../src/parser.y"
     { (yyval.e) = new_option(strdup("nogauge"), OPT_NOGAUGE, NULL); }
 #line 4364 "parser.c"
     break;
 
   case 349:
-#line 483 "../src/parser.y"
+#line 491 "../src/parser.y"
     { (yyval.e) = new_option(strdup("noposition"), OPT_NOPOSITION, NULL); }
 #line 4370 "parser.c"
     break;
 
   case 350:
-#line 484 "../src/parser.y"
+#line 492 "../src/parser.y"
     { (yyval.e) = new_option(strdup("noreq"), OPT_NOREQ, NULL); }
 #line 4376 "parser.c"
     break;
 
   case 351:
-#line 485 "../src/parser.y"
+#line 493 "../src/parser.y"
     { (yyval.e) = new_option(strdup("pattern"), OPT_PATTERN, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4382 "parser.c"
     break;
 
   case 352:
-#line 486 "../src/parser.y"
+#line 494 "../src/parser.y"
     { (yyval.e) = new_option(strdup("prompt"), OPT_PROMPT, (yyvsp[-1].e)); }
 #line 4388 "parser.c"
     break;
 
   case 353:
-#line 487 "../src/parser.y"
+#line 495 "../src/parser.y"
     { (yyval.e) = new_option(strdup("quiet"), OPT_QUIET, NULL); }
 #line 4394 "parser.c"
     break;
 
   case 354:
-#line 488 "../src/parser.y"
+#line 496 "../src/parser.y"
     { (yyval.e) = new_option(strdup("range"), OPT_RANGE, (yyvsp[-1].e)); }
 #line 4400 "parser.c"
     break;
 
   case 355:
-#line 489 "../src/parser.y"
+#line 497 "../src/parser.y"
     { (yyval.e) = new_option(strdup("safe"), OPT_SAFE, NULL); }
 #line 4406 "parser.c"
     break;
 
   case 356:
-#line 490 "../src/parser.y"
+#line 498 "../src/parser.y"
     { (yyval.e) = new_option(strdup("setdefaulttool"), OPT_SETDEFAULTTOOL, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4412 "parser.c"
     break;
 
   case 357:
-#line 491 "../src/parser.y"
+#line 499 "../src/parser.y"
     { (yyval.e) = new_option(strdup("setposition"), OPT_SETPOSITION, (yyvsp[-1].e)); }
 #line 4418 "parser.c"
     break;
 
   case 358:
-#line 492 "../src/parser.y"
+#line 500 "../src/parser.y"
     { (yyval.e) = new_option(strdup("setstack"), OPT_SETSTACK, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4424 "parser.c"
     break;
 
   case 359:
-#line 493 "../src/parser.y"
+#line 501 "../src/parser.y"
     { (yyval.e) = new_option(strdup("settooltype"), OPT_SETTOOLTYPE, (yyvsp[-1].e)); }
 #line 4430 "parser.c"
     break;
 
   case 360:
-#line 494 "../src/parser.y"
+#line 502 "../src/parser.y"
     { (yyval.e) = new_option(strdup("settooltype"), OPT_SETTOOLTYPE, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4436 "parser.c"
     break;
 
   case 361:
-#line 495 "../src/parser.y"
+#line 503 "../src/parser.y"
     { (yyval.e) = new_option(strdup("source"), OPT_SOURCE, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4442 "parser.c"
     break;
 
   case 362:
-#line 496 "../src/parser.y"
+#line 504 "../src/parser.y"
     { (yyval.e) = new_option(strdup("swapcolors"), OPT_SWAPCOLORS, NULL); }
 #line 4448 "parser.c"
     break;
 
   case 363:
-#line 497 "../src/parser.y"
+#line 505 "../src/parser.y"
     { (yyval.e) = new_option(strdup("optional"), OPT_OPTIONAL, (yyvsp[-1].e)); }
 #line 4454 "parser.c"
     break;
 
   case 364:
-#line 498 "../src/parser.y"
+#line 506 "../src/parser.y"
     { (yyval.e) = new_option(strdup("resident"), OPT_RESIDENT, NULL); }
 #line 4460 "parser.c"
     break;
 
   case 365:
-#line 499 "../src/parser.y"
+#line 507 "../src/parser.y"
     { (yyval.e) = new_option(strdup("override"), OPT_OVERRIDE, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4466 "parser.c"
     break;
 
   case 366:
-#line 500 "../src/parser.y"
+#line 508 "../src/parser.y"
     { (yyval.e) = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e))); }
 #line 4472 "parser.c"
     break;
 
   case 367:
-#line 501 "../src/parser.y"
+#line 509 "../src/parser.y"
     { (yyval.e) = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(push(new_contxt(), (yyvsp[-3].e)), (yyvsp[-2].e)), (yyvsp[-1].e))); }
 #line 4478 "parser.c"
     break;
@@ -4710,5 +4710,5 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 503 "../src/parser.y"
+#line 511 "../src/parser.y"
 
