@@ -924,6 +924,13 @@ static const char *buf_usr;
 //------------------------------------------------------------------------------
 char *buf_raw(void)
 {
+    if(buf_usr)
+    {
+        // Buffer shouldn't be locked.
+        DBG("Invalid peek. Lock owned by %s\n", buf_usr);
+    }
+
+    // Return buffer no matter what.
     return buf;
 }
 
