@@ -233,29 +233,24 @@ entry_p m_symbolset(entry_p contxt)
 entry_p m_symbolval(entry_p contxt)
 {
     // We need one argument, the name of the symbol.
-    if(c_sane(contxt, 1))
+    C_SANE(1, NULL);
+
+    static entry_t entry = { .type = SYMREF };
+    entry_p ret;
+
+    // Initialize and resolve dummy.
+    entry.parent = contxt;
+    entry.id = contxt->id;
+    entry.name = str(C_ARG(1));
+
+    ret = resolve(&entry);
+
+    // Return the resolved value if the symbol could be found.
+    if(!DID_ERR)
     {
-        static entry_t entry = { .type = SYMREF };
-        entry_p ret;
-
-        // Initialize and resolve dummy.
-        entry.parent = contxt;
-        entry.id = contxt->id;
-        entry.name = str(C_ARG(1));
-
-        ret = resolve(&entry);
-
-        // Return the resolved value if the symbol could be found.
-        if(!DID_ERR)
-        {
-            return ret;
-        }
-
-        // Symbol not found.
-        R_NUM(LG_FALSE);
+        return ret;
     }
 
-    // The parser is broken
-    PANIC(contxt);
-    R_CUR;
+    // Symbol not found.
+    R_NUM(LG_FALSE);
 }
