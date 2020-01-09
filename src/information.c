@@ -263,7 +263,7 @@ entry_p m_working(entry_p contxt)
     if(!msg && PANIC(contxt))
     {
         // Out of memory.
-        R_CUR;
+        return end();
     }
 
     // Did we fail while resolving one or more of our children?
@@ -282,8 +282,9 @@ entry_p m_working(entry_p contxt)
 
     if(!con && PANIC(contxt))
     {
+        // Out of memory.
         free(msg);
-        R_CUR;
+        return end();
     }
 
     // Concatenate and free buffer.

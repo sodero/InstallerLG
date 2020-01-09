@@ -85,7 +85,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         if(!cmd && PANIC(contxt))
         {
             // Out of memory.
-            R_CUR;
+            return end();
         }
 
         // DOS / Arexx script?
@@ -98,7 +98,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             {
                 // Out of memory
                 free(cmd);
-                R_CUR;
+                return end();
             }
 
             // Prepend prefix to command string.

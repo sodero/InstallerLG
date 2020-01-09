@@ -623,7 +623,7 @@ entry_p m_asknumber(entry_p contxt)
         if(!c_sane(range, 2) && PANIC(contxt))
         {
             // The parser is broken
-            R_CUR;
+            return end();
         }
 
         min = num(range->children[0]);
@@ -678,7 +678,7 @@ entry_p m_asknumber(entry_p contxt)
         HALT;
     }
 
-    // Success, failure or broken parser.
+    // Success or failure.
     R_CUR;
 }
 
