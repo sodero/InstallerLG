@@ -40,7 +40,7 @@ entry_p m_cat(entry_p contxt)
     if(!buf && PANIC(contxt))
     {
         // Out of memory.
-        R_CUR;
+        return end();
     }
 
     // Iterate over all arguments.
@@ -54,7 +54,7 @@ entry_p m_cat(entry_p contxt)
         if(DID_ERR)
         {
             free(buf);
-            R_EST;
+            return end();
         }
 
         // Next argument if the current is empty.
@@ -81,10 +81,11 @@ entry_p m_cat(entry_p contxt)
 
             if((!tmp || !cnt) && PANIC(contxt))
             {
-                // Out of memory.
                 free(tmp);
                 free(buf);
-                R_EST;
+
+                // Out of memory.
+                return end();
             }
 
             // Copy contents to the new buffer and free the old one.
@@ -119,7 +120,7 @@ entry_p m_fmt(entry_p contxt)
     if(!sct && PANIC(contxt))
     {
         // Out of memory.
-        R_EST;
+        return end();
     }
 
     size_t ndx = 0, off = 0, cnt = 0, len = 0;
@@ -284,9 +285,11 @@ entry_p m_fmt(entry_p contxt)
         R_STR(ret);
     }
 
-    // Return empty string on failure.
+    // No need for the formated string.
     free(ret);
-    R_EST;
+
+    // Empty string.
+    return end();
 }
 
 //------------------------------------------------------------------------------
@@ -348,7 +351,7 @@ entry_p m_pathonly(entry_p contxt)
     if(!path && PANIC(contxt))
     {
         // Out of memory.
-        R_EST;
+        return end();
     }
 
     R_STR(path);
@@ -427,8 +430,8 @@ entry_p m_substr(entry_p contxt)
         // Use the limitations used by the CBM installer.
         if(off >= len || chr <= 0 || off < 0)
         {
-            // Empty string fallback.
-            R_EST;
+            // Empty string.
+            return end();
         }
 
         char *ret = DBG_ALLOC(calloc((size_t) len + 1, 1));
@@ -436,7 +439,7 @@ entry_p m_substr(entry_p contxt)
         if(!ret && PANIC(contxt))
         {
             // Out of memory.
-            R_EST;
+            return end();
         }
 
         // Cap values, set and return.
@@ -449,8 +452,8 @@ entry_p m_substr(entry_p contxt)
     // Copy until the end of the string. Max cap.
     if(off >= len)
     {
-        // Empty string fallback.
-        R_EST;
+        // Empty string.
+        return end();
     }
 
     // Min cap.
@@ -461,7 +464,7 @@ entry_p m_substr(entry_p contxt)
         if(!ret && PANIC(contxt))
         {
             // Out of memory.
-            R_EST;
+            return end();
         }
 
         // All values are already capped, just copy.
@@ -489,8 +492,8 @@ entry_p m_tackon(entry_p contxt)
 
     if(!ret)
     {
-        // Empty string. Error codes are set by h_tackon().
-        R_EST;
+        // Empty string. Error set by h_tackon().
+        return end();
     }
 
     // Success.
