@@ -3273,7 +3273,9 @@ static int h_textfile(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
-// (textfile (prompt..) (help..) (dest..) (append) (include..) (confirm..) (safe))
+// (textfile (prompt..) (help..) (dest..) (append) (include..) (confirm..)
+//           (safe))
+//
 //      create text file from other text files and strings
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
