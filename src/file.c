@@ -46,14 +46,8 @@ entry_p m_expandpath(entry_p contxt)
     // One argument and no options.
     C_SANE(1, NULL);
 
-    // Short path.
+    // Short path. No need to check for ERR.
     char *pth = str(C_ARG(1));
-
-    // Make sure that the argument is resolvable.
-    if(DID_ERR)
-    {
-        R_EST;
-    }
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // Lock whatever resource the argument corresponds to.
@@ -74,7 +68,7 @@ entry_p m_expandpath(entry_p contxt)
     }
 
     // Empty string fallback.
-    R_EST;
+    return end();
     #else
     // Testing only.
     R_STR(DBG_ALLOC(strdup(pth)));

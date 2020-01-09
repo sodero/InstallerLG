@@ -79,7 +79,7 @@ entry_p find_symbol(entry_p entry)
         ERR_C(entry, ERR_UNDEF_VAR, entry->name);
     }
 
-    // Zero / empty string.
+    // Dangle: Zero / empty string.
     return end();
 }
 

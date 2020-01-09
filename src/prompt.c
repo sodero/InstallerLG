@@ -309,7 +309,7 @@ entry_p m_askdir(entry_p contxt)
     if(!prompt || !help || !deflt)
     {
         ERR(ERR_MISSING_OPTION, prompt ? help ? "default" : "help" : "prompt");
-        R_EST;
+        return end();
     }
 
     // Return default value if we're executing in 'novice' mode.
@@ -323,7 +323,7 @@ entry_p m_askdir(entry_p contxt)
     // Could we resolve all options?
     if(DID_ERR)
     {
-        R_EST;
+        return end();
     }
 
     // Prompt user.
@@ -350,7 +350,7 @@ entry_p m_askdir(entry_p contxt)
     if(grc == G_ABORT || grc == G_EXIT)
     {
         HALT;
-        R_EST;
+        return end();
     }
 
     // We have a directory.
@@ -538,7 +538,7 @@ entry_p m_askfile(entry_p contxt)
     if(!prompt || !help || !deflt)
     {
         ERR(ERR_MISSING_OPTION, prompt ? help ? "default" : "help" : "prompt");
-        R_EST;
+        return end();
     }
 
     // Return default value if we're executing in 'novice' mode.
@@ -552,7 +552,7 @@ entry_p m_askfile(entry_p contxt)
     // Could we resolve all options?
     if(DID_ERR)
     {
-        R_EST;
+        return end();
     }
 
     // Prompt user.
@@ -579,7 +579,7 @@ entry_p m_askfile(entry_p contxt)
     if(grc == G_ABORT || grc == G_EXIT)
     {
         HALT;
-        R_EST;
+        return end();
     }
 
     // We have a file.
@@ -844,7 +844,7 @@ entry_p m_askstring(entry_p contxt)
     if(!prompt || !help || !deflt)
     {
         ERR(ERR_MISSING_OPTION, prompt ? help ? "default" : "help" : "prompt");
-        R_EST;
+        return end();
     }
 
     // Return default value if we're executing in 'novice' mode.
@@ -859,7 +859,7 @@ entry_p m_askstring(entry_p contxt)
     if(DID_ERR)
     {
         // Return empty string.
-        R_EST;
+        return end();
     }
 
     // Prompt user.
@@ -885,7 +885,7 @@ entry_p m_askstring(entry_p contxt)
     if(grc == G_ABORT || grc == G_EXIT)
     {
         HALT;
-        R_EST;
+        return end();
     }
 
     // We have a string.

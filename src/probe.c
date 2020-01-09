@@ -365,9 +365,8 @@ entry_p m_getassign(entry_p contxt)
 
     if(!asnl)
     {
-        // Invalid name of assign, and the empty string is how the CBM
-        // installer fails.
-        R_EST;
+        // Invalid assign; an empty string is how the CBM installer fails.
+        return end();
     }
 
     // The second argument is optional.
@@ -394,9 +393,8 @@ entry_p m_getassign(entry_p contxt)
         }
         else
         {
-            // The CBM installer returns an empty string if option string is
-            // empty.
-            R_EST;
+            // The CBM installer returns an empty string if option is empty.
+            return end();
         }
     }
     else
@@ -476,7 +474,7 @@ entry_p m_getassign(entry_p contxt)
                         {
                             // Out of memory
                             PANIC(contxt);
-                            R_EST;
+                            return end();
                         }
                     }
                     else
@@ -500,7 +498,7 @@ entry_p m_getassign(entry_p contxt)
     #endif
 
     // Return empty string on failure.
-    R_EST;
+    return end();
 }
 
 //------------------------------------------------------------------------------
@@ -558,7 +556,7 @@ entry_p m_getdevice(entry_p contxt)
     ERR(ERR_READ, str(C_ARG(1)));
     #endif
     // Return empty string on failure.
-    R_EST;
+    return end();
 }
 
 //------------------------------------------------------------------------------
@@ -654,7 +652,7 @@ entry_p m_getenv(entry_p contxt)
     }
 
     // Nothing found, return empty string.
-    R_EST;
+    return end();
 }
 
 //------------------------------------------------------------------------------
