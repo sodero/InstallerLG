@@ -1,3 +1,4 @@
+(textfile (dest "_tf_") (include "../test/data.textfile.i2") (append "1")) (rename "_tf_" "_tff_" (confirm 0) (prompt "p") (help "h")) ; "rm -Rf _tf_ _tff_","ph0 -1","test ! -f _tf_ && cmp _tff_ ../test/data.textfile.o4 && rm -Rf _tff_"
 (textfile (dest "_tf_") (include "../test/data.textfile.i1") (append "1" "2" "3") (append "4") (append "5" "6")) ; "cp ../test/data.textfile.i1 _tf_","1","cmp _tf_ ../test/data.textfile.o5 && rm -Rf _tf_"
 (textfile (dest "_tf_") (include "../test/data.textfile.i1") (append "1" "2" "3")) ; "cp ../test/data.textfile.i1 _tf_","1","cmp _tf_ ../test/data.textfile.o6 && rm -Rf _tf_"
 (textfile (dest "_tf_") (include "../test/data.textfile.i1") (append "" "12" "3")) ; "cp ../test/data.textfile.i1 _tf_","1","cmp _tf_ ../test/data.textfile.o6 && rm -Rf _tf_"

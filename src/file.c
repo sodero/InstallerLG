@@ -3212,15 +3212,12 @@ static int h_textfile_include(entry_p contxt, FILE *file, const char *name)
         return LG_TRUE;
     }
 
-    // Get global buffer lock.
-    char *buf = buf_get(B_KEY);
-
     // Copy the complete file in buf_len() sized chunks.
-    for(size_t cnt = fread(buf, 1, buf_len(), finc); cnt;
-        cnt = fread(buf, 1, buf_len(), finc))
+    for(size_t cnt = fread(buf_get(B_KEY), 1, buf_len(), finc);
+          cnt; cnt = fread(buf_get(B_KEY), 1, buf_len(), finc))
     {
         // Write to destination file.
-        if(fwrite(buf, 1, cnt, file) != cnt)
+        if(fwrite(buf_get(B_KEY), 1, cnt, file) != cnt)
         {
             ERR(ERR_WRITE_FILE, name);
             break;
