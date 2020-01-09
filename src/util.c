@@ -927,7 +927,7 @@ char *buf_raw(void)
     if(buf_usr)
     {
         // Buffer shouldn't be locked.
-        DBG("Invalid peek. Lock owned by %s\n", buf_usr);
+        DBG("Invalid peek. Lock owned by %s\n", buf_usr ? buf_usr : "NULL");
     }
 
     // Return buffer no matter what.
@@ -953,7 +953,8 @@ char *buf_get(const char *usr)
     if(buf_usr != usr)
     {
         // The lock doesn't belong to the caller.
-        DBG("Invalid lock by %s. Lock owned by %s\n", usr, buf_usr);
+        DBG("Invalid lock by %s. Lock owned by %s\n", usr ? usr : "NULL",
+            buf_usr ? buf_usr : "NULL");
     }
 
     // Return buffer no matter what.
@@ -976,7 +977,8 @@ char *buf_put(const char *usr)
     }
 
     // The lock doesn't belong to the caller.
-    DBG("Invalid unlock by %s. Lock owned by %s\n", usr, buf_usr);
+    DBG("Invalid unlock by %s. Lock owned by %s\n", usr ? usr : "NULL",
+        buf_usr ? buf_usr : "NULL");
 
     // Return buffer no matter what.
     return buf;
