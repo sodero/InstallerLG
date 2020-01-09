@@ -357,18 +357,19 @@ char *str(entry_p entry)
 
     switch(entry->type)
     {
+        // Strings, dangles and function names can be returned directly.
+        case DANGLE:
+        case CUSTOM:
+        case STRING:
+            if(entry->name)
+            {
+                return entry->name;
+            }
+            break;
+
         // Options need special treatment.
         case OPTION:
             return h_str_opt(entry);
-
-        // Dangling entries are considered empty strings.
-        case DANGLE:
-            return "";
-
-        // Strings and function names can be returned directly.
-        case CUSTOM:
-        case STRING:
-            return entry->name;
 
         // Recur.
         case SYMBOL:
