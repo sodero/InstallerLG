@@ -725,17 +725,17 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     }
 
                     // Font = file + .font.
-                    snprintf(buf_raw(), buf_len(), "%s.font", n_src);
+                    snprintf(buf_get(B_KEY), buf_len(), "%s.font", n_src);
 
-                    if(h_exists(buf_raw()) == LG_FILE)
+                    if(h_exists(buf_put(B_KEY)) == LG_FILE)
                     {
                         pnode_p font = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
                         if(font)
                         {
-                            font->name = DBG_ALLOC(strdup(buf_raw()));
+                            font->name = DBG_ALLOC(strdup(buf_get(B_KEY)));
                             font->copy = h_tackon(contxt, dst,
-                                                  h_fileonly(contxt, buf_raw()));
+                                         h_fileonly(contxt, buf_put(B_KEY)));
 
                             // Add the font to the list.
                             if(font->name && font->copy)
@@ -2181,8 +2181,8 @@ static int h_delete_dir(entry_p contxt, const char *name)
     }
 
     // Info = file + .info.
-    char *info = buf_raw();
-    snprintf(info, buf_len(), "%s.info", name);
+    snprintf(buf_get(B_KEY), buf_len(), "%s.info", name);
+    char *info = buf_put(B_KEY);
 
     // We're done if there's no icon.
     if(h_exists(info) != LG_FILE)
@@ -3212,19 +3212,23 @@ static int h_textfile_include(entry_p contxt, FILE *file, const char *name)
         return LG_TRUE;
     }
 
+    // Get global buffer lock.
+    char *buf = buf_get(B_KEY);
+
     // Copy the complete file in buf_len() sized chunks.
-    for(size_t cnt = fread(buf_raw(), 1, buf_len(), finc); cnt;
-               cnt = fread(buf_raw(), 1, buf_len(), finc))
+    for(size_t cnt = fread(buf, 1, buf_len(), finc); cnt;
+        cnt = fread(buf, 1, buf_len(), finc))
     {
         // Write to destination file.
-        if(fwrite(buf_raw(), 1, cnt, file) != cnt)
+        if(fwrite(buf, 1, cnt, file) != cnt)
         {
             ERR(ERR_WRITE_FILE, name);
             break;
         }
     }
 
-    // All done.
+    // Unlock buffer and close file.
+    buf_put(B_KEY);
     fclose(finc);
 
     // Success or failure.

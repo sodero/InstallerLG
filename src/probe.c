@@ -1100,8 +1100,8 @@ entry_p m_iconinfo(entry_p contxt)
                 int v = (type == OPT_GETSTACK ? obj->do_StackSize : j == 0 ?
                          obj->do_CurrentX : obj->do_CurrentY);
 
-                snprintf(buf_raw(), buf_len(), "%d", v);
-                svl = buf_raw();
+                snprintf(buf_get(B_KEY), buf_len(), "%d", v);
+                svl = buf_put(B_KEY);
             }
             else if(type == OPT_GETDEFAULTTOOL && obj->do_DefaultTool)
             {
@@ -1117,8 +1117,8 @@ entry_p m_iconinfo(entry_p contxt)
             svl = svl ? svl : "";
             #else
             // Testing purposes only.
-            snprintf(buf_raw(), buf_len(), "%d:%zu", type, j);
-            svl = buf_raw();
+            snprintf(buf_get(B_KEY), buf_len(), "%d:%zu", type, j);
+            svl = buf_put(B_KEY);
             #endif
 
             // Always a valid (string).
