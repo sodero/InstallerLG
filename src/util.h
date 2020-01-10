@@ -1,9 +1,9 @@
 //------------------------------------------------------------------------------
 // util.h:
 //
-// Misc utility functions primarily used by the 'native' methods.
+// Misc utility functions.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -50,7 +50,6 @@ int str_to_userlevel(const char *user, int def);
 //------------------------------------------------------------------------------
 // Utility macros.
 //------------------------------------------------------------------------------
-#define D_CUR    contxt->resolved
 #define D_NUM    contxt->resolved->id
 #define R_CUR    return contxt ? contxt->resolved : NULL
 #define R_NUM(X) contxt->resolved->id = X; return contxt->resolved
