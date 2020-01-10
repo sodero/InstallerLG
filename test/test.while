@@ -1,3 +1,6 @@
+(while (= 1 2) (+ 3)) ; "","0",""
+(set a 1) (while (<= a 1) (set a (+ a 1)) (+ 0)) ; "","0",""
+(set a 1) (while (<= a 1) (set a (+ a 1)) (+ -1)) ; "","-1",""
 (while (<= a 100) ((set a (+ a 1)) (set a (+ a 1)))) ; "","Line 1: Undefined variable 'a' 0",""
 (set @strict 0) (while (<= a 100) ((set a (+ a 1)) (set a (+ a 1)))) ; "","102",""
 (set a 1) (while (<= a 1) (set a (+ a 1))) ; "","2",""
