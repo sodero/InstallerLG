@@ -718,10 +718,10 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         return head;
                     }
 
-                    // Font = file + .font.
+                    // Font file = name + .font.
                     snprintf(buf_get(B_KEY), buf_len(), "%s.font", n_src);
 
-                    if(h_exists(buf_put(B_KEY)) == LG_FILE)
+                    if(h_exists(buf_get(B_KEY)) == LG_FILE)
                     {
                         pnode_p font = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
@@ -729,13 +729,16 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         {
                             font->name = DBG_ALLOC(strdup(buf_get(B_KEY)));
                             font->copy = h_tackon(contxt, dst,
-                                         h_fileonly(contxt, buf_put(B_KEY)));
+                                         h_fileonly(contxt, buf_get(B_KEY)));
 
                             // Add the font to the list.
                             if(font->name && font->copy)
                             {
                                 font->type = LG_FILE;
                                 file->next = font;
+
+                                // Unlock before return.
+                                buf_put(B_KEY);
 
                                 // The list is complete.
                                 return head;
@@ -747,6 +750,9 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                             free(font);
                         }
                     }
+
+                    // Name no longer needed.
+                    buf_put(B_KEY);
                 }
 
                 // Out of memory.
@@ -759,7 +765,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
         free(head);
         free(file);
     }
-    
+
     // Out of memory.
     PANIC(contxt);
 
