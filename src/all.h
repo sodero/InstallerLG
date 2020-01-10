@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // all.h:
 //
-// Protypes for all implementation functions m_*
+// Protypes for all implementations m_* of (...)
 //------------------------------------------------------------------------------
 // Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1

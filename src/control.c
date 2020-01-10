@@ -90,11 +90,8 @@ static entry_p h_whunt(entry_p contxt, int mode)
     // Two arguments, the condition and the body of the loop.
     C_SANE(2, NULL);
 
-    // Reset return value.
-    D_NUM = 0;
-
-    // Prepare to return the resolved value of this function if the condition
-    // is false from the start.
+    // Prepare to return the resolved value (which is always 0) of this function
+    // if the condition is false from the start.
     entry_p ret = contxt->resolved;
 
     // Use XOR to support both 'while' and 'until'. Break if something goes
