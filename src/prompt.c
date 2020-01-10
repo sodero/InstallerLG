@@ -256,7 +256,7 @@ entry_p m_askchoice(entry_p contxt)
     inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back != false, &res);
 
     // Add skipper. Don't trust the GUI.
-    res += ((D_NUM < 32 && D_NUM >= 0) ? add[D_NUM] : 0);
+    res += ((res < 32 && res >= 0) ? add[res] : 0);
 
     // Is the back option available?
     if(back)
@@ -384,19 +384,18 @@ entry_p m_askdisk(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    D_NUM = LG_FALSE;
-
-    char dsk[PATH_MAX];
-
     // Append ':' to turn 'dest' into something we can lock.
-    snprintf(dsk, sizeof(dsk), "%s:", str(dest));
+    snprintf(buf_get(B_KEY), buf_len(), "%s:", str(dest));
 
     // Volume names must be > 0 (+ :) characters long.
-    if(strlen(dsk) < 2)
+    if(strlen(buf_get(B_KEY)) < 2)
     {
-        ERR(ERR_INVALID_VOLUME, dsk);
+        ERR(ERR_INVALID_VOLUME, buf_put(B_KEY));
         R_NUM(LG_FALSE);
     }
+
+    // Return code.
+    int ret = LG_FALSE;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct Process *p = (struct Process *) FindTask(NULL);
@@ -408,7 +407,8 @@ entry_p m_askdisk(entry_p contxt)
     p->pr_WindowPtr = (APTR) -1L;
 
     // Is this volume present already?
-    BPTR l = (BPTR) Lock(dsk, ACCESS_READ);
+    BPTR l = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
+
     if(!l)
     {
         const char *msg = str(prompt), *hlp = str(help),
@@ -425,7 +425,7 @@ entry_p m_askdisk(entry_p contxt)
 
                 if(grc == G_TRUE)
                 {
-                    l = (BPTR) Lock(dsk, ACCESS_READ);
+                    l = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
                 }
                 else
                 {
@@ -441,9 +441,10 @@ entry_p m_askdisk(entry_p contxt)
                         // On abort execute.
                         if(grc == G_ABORT)
                         {
-                            // Restore auto request before executing
-                            // the 'back' code.
+                            // Restore auto request before and unlock buffer
+                            // before resolving (back).
                             p->pr_WindowPtr = w;
+                            buf_put(B_KEY);
                             return resolve(back);
                         }
                     }
@@ -460,6 +461,9 @@ entry_p m_askdisk(entry_p contxt)
         }
     }
 
+    // Volume not needed anymore.
+    buf_put(B_KEY);
+
     // Did the user abort?
     if(l)
     {
@@ -473,10 +477,10 @@ entry_p m_askdisk(entry_p contxt)
             {
                 // On success, the lock belongs to
                 // the system. Do not UnLock().
-                D_NUM = AssignLock(nn, l) ? LG_TRUE : LG_FALSE;
+                ret = AssignLock(nn, l) ? LG_TRUE : LG_FALSE;
 
                 // On failure, we need to UnLock() it ourselves.
-                if(D_NUM == LG_FALSE)
+                if(ret == LG_FALSE)
                 {
                     // Could not create 'newname' assign.
                     ERR(ERR_ASSIGN, str(C_ARG(1)));
@@ -493,7 +497,7 @@ entry_p m_askdisk(entry_p contxt)
         else
         {
             // Sucess.
-            D_NUM = LG_TRUE;
+            ret = LG_TRUE;
             UnLock(l);
         }
     }
@@ -502,14 +506,14 @@ entry_p m_askdisk(entry_p contxt)
     p->pr_WindowPtr = w;
     #else
     // On non-Amiga systems, or in test mode, we always succeed.
-    D_NUM = LG_TRUE;
+    ret = LG_TRUE;
 
     // For testing purposes only.
-    printf("%d", (newname || back) ? LG_TRUE : LG_FALSE);
+    printf("%s%d", buf_put(B_KEY), (newname || back) ? LG_TRUE : LG_FALSE);
     #endif
 
     // Success or failure.
-    R_CUR;
+    R_NUM(ret);
 }
 
 //------------------------------------------------------------------------------

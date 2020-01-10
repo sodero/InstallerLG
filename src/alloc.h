@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // alloc.h:
 //
-// Functions for allocation of entry_t data and closely related functions.
+// Functions for allocation and management of entry_t data objects.
 //------------------------------------------------------------------------------
 // Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
@@ -26,7 +26,7 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl);
 entry_p new_native(char *name, int line, call_t call, entry_p chl, type_t type);
 
 //------------------------------------------------------------------------------
-// Utilities.
+// Utility functions.
 //------------------------------------------------------------------------------
 void kill(entry_p entry);
 entry_p append(entry_p **dst, entry_p ent);

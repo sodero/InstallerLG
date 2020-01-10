@@ -40,7 +40,8 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             safe     = opt(C_ARG(2), OPT_SAFE),
             back     = opt(C_ARG(2), OPT_BACK);
 
-    D_NUM = 0;
+    // Error status.
+    int err = LG_FALSE;
 
     // Do we need confirmation?
     if(confirm)
@@ -72,7 +73,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         // FIXME
         if(grc != G_TRUE)
         {
-            R_CUR;
+            R_NUM(err);
         }
     }
 
@@ -136,7 +137,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             if(out)
             {
                 // Execute whatever we have in cmd.
-                D_NUM = SystemTags
+                err = SystemTags
                 (
                     cmd,
                     SYS_Input, inp,
@@ -145,7 +146,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                 );
 
                 // On error, get secondary status.
-                if(D_NUM)
+                if(err)
                 {
                     LONG ioe = IoErr();
 
@@ -159,7 +160,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             else
             {
                 // Unknown error.
-                D_NUM = -1;
+                err = -1;
             }
 
             // We probably don't need to close NIL: but it doesn't hurt.
@@ -168,7 +169,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         else
         {
             // Unknown error.
-            D_NUM = -1;
+            err = -1;
         }
         #else
         // For testing purposes only.
@@ -183,7 +184,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         }
 
         // OK == 0. Only fail in 'strict' mode.
-        if(D_NUM && get_num(contxt, "@strict"))
+        if(err && get_num(contxt, "@strict"))
         {
             ERR(ERR_EXEC, cmd);
         }
@@ -196,7 +197,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
     h_log(contxt, tr(S_XCTD), str(C_ARG(1)));
 
     // Success or failure.
-    R_CUR;
+    R_NUM(err);
 }
 
 //------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // alloc.c:
 //
-// Functions for allocation and management of entry_t data.
+// Functions for allocation and management of entry_t data objects.
 //------------------------------------------------------------------------------
 // Copyright (C) 2018-2020, Ola Söder. All rights reserved
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
