@@ -1344,8 +1344,6 @@ entry_p m_copyfiles(entry_p contxt)
             askuser    = opt(contxt, OPT_ASKUSER),
             files      = opt(contxt, OPT_FILES);
 
-    D_NUM = LG_FALSE;
-
     // The (pattern) (choices) and (all) options are mutually exclusive.
     if((pattern && (choices || all)) || (choices && (pattern || all)) ||
        (all && (choices || pattern)))
@@ -1396,15 +1394,14 @@ entry_p m_copyfiles(entry_p contxt)
             chmod(dst, S_IRWXU);
         }
     }
-    
+
     // Traverse source directory and create destination strings.
     pnode_p tree = h_filetree(contxt, src, dst, files, fonts, choices,
                               pattern, infos);
 
     if(!tree)
     {
-        // Either we could not read from source directory or we're out of
-        // memory. Error or PANIC is set by h_filetree.
+        // I/O error or out of memory. Status set by h_filetree.
         R_NUM(LG_FALSE);
     }
 
@@ -1423,6 +1420,9 @@ entry_p m_copyfiles(entry_p contxt)
     inp_t grc = gui_copyfiles_start(prompt ? str(prompt) : NULL,
                                     confirm ? str(help) : NULL, cur,
                                     confirm != false, back != false);
+
+    // Return value.
+    int ret = LG_FALSE;
 
     // Start copy unless skip / abort / back.
     if(grc == G_TRUE)
@@ -1477,15 +1477,15 @@ entry_p m_copyfiles(entry_p contxt)
             }
         }
 
-        // Translate return code.
-        D_NUM = (grc == G_TRUE) ? LG_TRUE : LG_FALSE;
+        // Translate return value.
+        ret = (grc == G_TRUE) ? LG_TRUE : LG_FALSE;
     }
 
     // GUI teardown.
     gui_copyfiles_end();
 
     // Back return value.
-    entry_p ret = NULL;
+    entry_p bck = NULL;
 
     // FIXME
     if(grc != G_TRUE)
@@ -1502,7 +1502,7 @@ entry_p m_copyfiles(entry_p contxt)
             // On abort execute.
             if(grc == G_ABORT)
             {
-                ret = resolve(back);
+                bck = resolve(back);
             }
         }
 
@@ -1525,14 +1525,14 @@ entry_p m_copyfiles(entry_p contxt)
         free(tree);
     }
 
-    // If we've executed any 'back' code, return its return value.
-    if(ret)
+    // Return resolved (back) if it exists.
+    if(bck)
     {
-        return ret;
+        return bck;
     }
 
-    // We don't know if we're successsful, at this point, return what we have.
-    R_CUR;
+    // Success or failure.
+    R_NUM(ret);
 }
 
 //------------------------------------------------------------------------------

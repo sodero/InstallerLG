@@ -256,7 +256,7 @@ entry_p m_askchoice(entry_p contxt)
     inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back != false, &res);
 
     // Add skipper. Don't trust the GUI.
-    res += ((D_NUM < 32 && D_NUM >= 0) ? add[D_NUM] : 0);
+    res += ((res < 32 && res >= 0) ? add[res] : 0);
 
     // Is the back option available?
     if(back)
