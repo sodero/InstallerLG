@@ -188,7 +188,7 @@ static cpu_t h_cpu_id(void)
 //------------------------------------------------------------------------------
 static char *h_cpu_name(void)
 {
-    char *cpu[] = { "Unknown", "PowerPC", "ARM", "M68000", "M68010", "M68020",
+    char *cpu[] = { "Unknown CPU", "PowerPC", "ARM", "M68000", "M68010", "M68020",
                     "M68030", "M68040", "M68060", "X86", "X86_64"};
 
     // Trans ID to string.
@@ -222,7 +222,7 @@ static char *h_os_name(void)
     #else
     // In test mode / on non Amigas we shouldn't report anything but 'Unknown'.
     // Doing so would create dependencies between test results and host system.
-    return "Unknown";
+    return "Unknown OS";
     #endif
 }
 
@@ -276,39 +276,49 @@ entry_p m_database(entry_p contxt)
     // We need atleast one argument
     C_SANE(1, NULL);
 
-    char *feat = str(C_ARG(1)), *ret = "Unknown";
+    char *feat = str(C_ARG(1));
 
     if(strcasecmp(feat, "cpu") == 0)
     {
         // Get host CPU name.
-        ret = h_cpu_name();
+        snprintf(buf_get(B_KEY), buf_len(), "%s", h_cpu_name());
     }
     else if(strcasecmp(feat, "os") == 0)
     {
-        // Get name of host OS.
-        ret = h_os_name();
+        // Get host OS name.
+        snprintf(buf_get(B_KEY), buf_len(), "%s", h_os_name());
     }
     else if(strcasecmp(feat, "graphics-mem") == 0)
     {
         // Get free chipmem.
         snprintf(buf_get(B_KEY), buf_len(), "%d", h_chipmem());
-        ret = buf_put(B_KEY);
     }
     else if(strcasecmp(feat, "total-mem") == 0)
     {
         // Get free fast + chipmem.
         snprintf(buf_get(B_KEY), buf_len(), "%d", h_totalmem());
-        ret = buf_put(B_KEY);
+    }
+    else
+    {
+        // Missing: 'vblank', 'fpu' and 'chiprev'.
+        snprintf(buf_get(B_KEY), buf_len(), "%s", "Unknown");
     }
 
     // Are we testing for a specific value?
     if(exists(C_ARG(2)))
     {
-        ret = strcasecmp(ret, str(C_ARG(2))) ? "0" : "1";
+        if(strcasecmp(buf_put(B_KEY), str(C_ARG(2))) == 0)
+        {
+            // Value <-> result match.
+            R_STR(DBG_ALLOC(strdup("1")));
+        }
+
+        // Value <-> result mismatch.
+        R_STR(DBG_ALLOC(strdup("0")));
     }
 
-    // Return string value.
-    R_STR(DBG_ALLOC(strdup(ret)));
+    // Return result as string.
+    R_STR(DBG_ALLOC(strdup(buf_put(B_KEY))));
 }
 
 //------------------------------------------------------------------------------
