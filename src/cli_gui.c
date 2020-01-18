@@ -353,3 +353,14 @@ inp_t gui_showmedia(int *mid, const char* mda, int act)
 {
     return G_TRUE;
 }
+
+void gui_query_screen(int *width, int *height, int *depth, int *colors)
+{
+
+}
+
+void gui_query_window(int *width, int *height, int *upper, int *lower,
+                      int *left, int *right)
+{
+
+}

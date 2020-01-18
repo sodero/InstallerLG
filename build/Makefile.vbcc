@@ -12,10 +12,10 @@ endif
 
 CC= vc +aos68k
 OBJS= alloc.o symbol.o init.o resource.o util.o error.o file.o control.o \
-      exit.o gui.o logic.o probe.o procedure.o media.o prompt.o strcasestr.o \
+      exit.o $(GUIOBJ) logic.o probe.o procedure.o media.o prompt.o strcasestr.o \
       strop.o wb.o args.o arithmetic.o comparison.o eval.o external.o \
       information.o ../build/parser.o ../build/lexer.o
-CFLAGS= -c99 -Ivbcc:PosixLib/include -I. -I../build -O -dontwarn=153 -DAMIGA -DMUIA_Dtpic_Name=0x80423d72 -DKPrintF=printf #-DLG_TEST
+CFLAGS= -I$(VBCC)/PosixLib/include $(GUIFLAGS) -I. -I../build -I../src -O -dontwarn=153 -DAMIGA -DKPrintF=printf #-DLG_TEST
 
 Installer: $(OBJS)
 	$(CC) -o $@68k $(OBJS) -L$(VBCC)/PosixLib/AmigaOS3 -lposix -lamiga -lauto -lmieee
