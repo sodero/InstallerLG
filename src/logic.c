@@ -1,14 +1,14 @@
 //------------------------------------------------------------------------------
-// bitwise.c:
+// logic.c:
 //
-// Bitwise operations
+// Logic operations
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
 #include "alloc.h"
-#include "bitwise.h"
+#include "logic.h"
 #include "error.h"
 #include "eval.h"
 #include "util.h"

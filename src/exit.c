@@ -3,7 +3,7 @@
 //
 // Interuption of program execution
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -36,8 +36,7 @@ entry_p m_abort(entry_p contxt)
     // Concatenate all children.
     char *msg = get_chlstr(contxt, false);
 
-    // Make sure that we're not out of memory and that all children are
-    // resolvable.
+    // Bail out on out of memory or if we have unresolvable children.
     if((!msg && PANIC(contxt)) || DID_ERR)
     {
         free(msg);
@@ -59,33 +58,35 @@ entry_p m_abort(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_exit_final
+// Name:        h_exit
 // Description: Show final exit message unless quiet mode is set.
 // Input:       entry_p contxt:     The execution context.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_exit_final(entry_p contxt)
+static void h_exit(entry_p contxt)
 {
-    // Show final message unless 'quiet' is set.
-    if(!opt(contxt, OPT_QUIET))
+    // Nothing to do if 'quiet' is set.
+    if(opt(contxt, OPT_QUIET))
     {
-        // Get name and location of application.
-        const char *app = get_str(contxt, "@app-name"),
-                   *dst = get_str(contxt, "@default-dest");
+        return;
+    }
 
-        // Only display the 'the app can be found here' message if we know
-        // the name and location of the application.
-        if(*app && *dst)
-        {
-            // Display the full message.
-            snprintf(get_buf(), buf_size(), tr(S_CBFI), tr(S_ICPL), app, dst);
-            gui_finish(get_buf());
-        }
-        else
-        {
-            // Display the bare minimum.
-            gui_finish(tr(S_ICPL));
-        }
+    // Get name and location of application.
+    const char *app = get_str(contxt, "@app-name"),
+               *dst = get_str(contxt, "@default-dest");
+
+    // Display the 'the app can be found here' message if we know the name and
+    // location of the application.
+    if(*app && *dst)
+    {
+        // Display the full message.
+        snprintf(buf_get(B_KEY), buf_len(), tr(S_CBFI), tr(S_ICPL), app, dst);
+        gui_finish(buf_put(B_KEY));
+    }
+    else
+    {
+        // Display the bare minimum.
+        gui_finish(tr(S_ICPL));
     }
 }
 
@@ -129,7 +130,7 @@ entry_p m_exit(entry_p contxt)
     }
 
     // Show final message unless 'quiet' is set.
-    h_exit_final(contxt);
+    h_exit(contxt);
 
     // Make invoke() halt.
     R_NUM(HALT);
@@ -139,11 +140,8 @@ entry_p m_exit(entry_p contxt)
 // (onerror (<statements>))
 //     general error trap
 //
-// ******************************************************
-// In part implemented using m_procedure. This function just invokes the
-// @onerror custom procedure inserted using (onerror) which is a special case of
-// (procedure)
-// ******************************************************
+// In part implemented using m_procedure. This function invokes the @onerror
+// procedure inserted using (onerror), which is a special case of (procedure)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
@@ -165,15 +163,13 @@ entry_p m_onerror(entry_p contxt)
     {
         if((*err)->type == CUSTOM && !strcasecmp((*err)->name, ref.name))
         {
-            // Reset error code otherwise m_gosub / invoke will halt
-            // immediately.
+            // Clear errors otherwise m_gosub / invoke will halt.
             RESET;
 
             // Connect reference to the current context.
             ref.parent = contxt;
 
-            // Invoke @onerror by calling m_gosub just like any non-native
-            // function call.
+            // Invoke @onerror by calling m_gosub
             return m_gosub(&ref);
         }
 
@@ -183,7 +179,7 @@ entry_p m_onerror(entry_p contxt)
 
     // @onerror not found. Init is broken.
     PANIC(contxt);
-    R_CUR;
+    return end();
 }
 
 //------------------------------------------------------------------------------
@@ -192,16 +188,25 @@ entry_p m_onerror(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //
-// Despite what the Installer.guide says, the implementaion of 'trap' in OS 3.9
-// seems like a stub, it doesn't work at all. Let's just leave this one empty.
+// TODO: Currently all errors are trapped. Implement error categories.
 //------------------------------------------------------------------------------
 entry_p m_trap(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
 
-    // Dummy.
-    R_NUM(LG_TRUE);
+    // Enter trap mode.
+    set_num(contxt, "@trap", num(C_ARG(1)));
+
+    // Resolve statements.
+    entry_p ret = resolve(C_ARG(2));
+
+    // Leave trap mode and clear errors.
+    set_num(contxt, "@trap", 0);
+    RESET;
+
+    // Return resolved value.
+    return ret;
 }
 
 //------------------------------------------------------------------------------

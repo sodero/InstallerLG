@@ -3,7 +3,7 @@
 //
 // Datatypes and constants used everywhere.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -25,6 +25,11 @@
 #define LG_NOVICE   0
 #define LG_AVERAGE  1
 #define LG_EXPERT   2
+
+//------------------------------------------------------------------------------
+// Version return value according to the CBM installer documentation.
+//------------------------------------------------------------------------------
+#define LG_NOVER  -1
 
 //------------------------------------------------------------------------------
 // Default return values.

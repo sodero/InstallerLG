@@ -3,7 +3,7 @@
 //
 // Multimedia features
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ entry_p m_closemedia(entry_p contxt)
     int mid = num(C_ARG(1));
 
     // Invoke GUI to close media.
-    R_NUM(gui_closemedia(mid) == G_TRUE ? 1 : 0);
+    R_NUM(gui_closemedia(mid) == G_TRUE ? LG_TRUE : LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -93,32 +93,53 @@ entry_p m_effect(entry_p contxt)
     // Effect type.
     bool effect = ief & G_EFFECT;
 
-    // Known effect type?
-    if(effect)
+    if(!effect)
     {
-        // Invalid initial values.
-        static int oc1, oc2, oef = G_RADIAL | G_HORIZONTAL;
-
-        // Only show something if this is the first invocation or if the input
-        // has changed.
-        if(ief != oef || ic1 != oc1 || ic2 != oc2)
-        {
-            // Show gradient.
-            gui_effect(ief, ic1, ic2);
-
-            // Save current values.
-            oef = ief;
-            oc1 = ic1;
-            oc2 = ic2;
-        }
-
-        // Always.
-        R_NUM(LG_TRUE);
+        // Unknown effect type.
+        ERR(ERR_VAL_INVALID, est);
+        R_NUM(LG_FALSE);
     }
 
-    // Missing effect type.
-    ERR(ERR_VAL_INVALID, est);
-    R_NUM(LG_FALSE);
+    // Invalid values to enable the first invocation.
+    static int oc1, oc2, oef = G_RADIAL | G_HORIZONTAL;
+
+    // Show gradient on the first invocation or if the input has changed.
+    if(ief != oef || ic1 != oc1 || ic2 != oc2)
+    {
+        // Show gradient.
+        gui_effect(ief, ic1, ic2);
+
+        // Save current values.
+        oef = ief;
+        oc1 = ic1;
+        oc2 = ic2;
+    }
+
+    // Always.
+    R_NUM(LG_TRUE);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_action
+// Description: Get (setmedia) action as bitmask.
+// Input:       const char *:   Installer media action string.
+// Return:      int:            Datatype action string.
+//------------------------------------------------------------------------------
+static int h_action(const char *act)
+{
+    // Translate action to command bitmask.
+    return strcasecmp(act, "pause") == 0 ? STM_PAUSE :
+           strcasecmp(act, "play") == 0 ? STM_PLAY :
+           strcasecmp(act, "contents") == 0 ? STM_CONTENTS :
+           strcasecmp(act, "index") == 0 ? STM_INDEX :
+           strcasecmp(act, "retrace") == 0 ? STM_RETRACE :
+           strcasecmp(act, "browser_prev") == 0 ? STM_BROWSE_PREV :
+           strcasecmp(act, "browser_next") == 0 ? STM_BROWSE_NEXT :
+           strcasecmp(act, "command") == 0 ? STM_COMMAND :
+           strcasecmp(act, "rewind") == 0 ? STM_REWIND :
+           strcasecmp(act, "fastforward") == 0 ? STM_FASTFORWARD :
+           strcasecmp(act, "stop") == 0 ? STM_STOP :
+           strcasecmp(act, "locate") == 0 ? STM_LOCATE : 0;
 }
 
 //------------------------------------------------------------------------------
@@ -134,44 +155,110 @@ entry_p m_setmedia(entry_p contxt)
 
     // Action to perform.
     char *act = str(C_ARG(2));
+    int cmd = h_action(act);
 
-    // Translate action to command.
-    int cmd = strcasecmp(act, "pause") == 0 ? STM_PAUSE :
-              strcasecmp(act, "play") == 0 ? STM_PLAY :
-              strcasecmp(act, "contents") == 0 ? STM_CONTENTS :
-              strcasecmp(act, "index") == 0 ? STM_INDEX :
-              strcasecmp(act, "retrace") == 0 ? STM_RETRACE :
-              strcasecmp(act, "browser_prev") == 0 ? STM_BROWSE_PREV :
-              strcasecmp(act, "browser_next") == 0 ? STM_BROWSE_NEXT :
-              strcasecmp(act, "command") == 0 ? STM_COMMAND :
-              strcasecmp(act, "rewind") == 0 ? STM_REWIND :
-              strcasecmp(act, "fastforward") == 0 ? STM_FASTFORWARD :
-              strcasecmp(act, "stop") == 0 ? STM_STOP :
-              strcasecmp(act, "locate") == 0 ? STM_LOCATE : 0;
-
-    // Valid action?
-    if(cmd)
+    if(!cmd)
     {
-        // Extra flags.
-        char *par = NULL;
-
-        // If an extra parameter is required, resolved it, if it exists.
-        if((cmd == STM_COMMAND || cmd == STM_LOCATE) && exists(C_ARG(3)))
-        {
-            // Resolve next.
-            par = str(C_ARG(3));
-        }
-
-        // Media identifier.
-        int mid = num(C_ARG(1));
-
-        // Invoke GUI to perform action.
-        R_NUM(gui_setmedia(mid, cmd, par) == G_TRUE ? 1 : 0);
+        // Invalid action.
+        ERR(ERR_VAL_INVALID, act);
+        R_NUM(LG_FALSE);
     }
 
-    // Invalid action.
-    ERR(ERR_VAL_INVALID, act);
-    R_NUM(LG_FALSE);
+    // Extra flags.
+    char *par = NULL;
+
+    // If an extra parameter is required, resolve it, if it exists.
+    if((cmd == STM_COMMAND || cmd == STM_LOCATE) && exists(C_ARG(3)))
+    {
+        // Resolve next.
+        par = str(C_ARG(3));
+    }
+
+    // Media identifier.
+    int mid = num(C_ARG(1));
+
+    // Invoke GUI to perform action.
+    R_NUM(gui_setmedia(mid, cmd, par) == G_TRUE ? 1 : 0);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_create_id
+// Description: m_showmedia helper creating a user defined media ID variable.
+// Input:       entry_p contxt: Execution context.
+//              int mid:        Media ID.
+// Return:      int:            LG_TRUE / LG_FALSE.
+//------------------------------------------------------------------------------
+static int h_create_id(entry_p contxt, int mid)
+{
+    // First argument is the variable name.
+    char *var = str(C_ARG(1));
+
+    // If we already have a symbol with this name, update it.
+    for(entry_p *sym = contxt->symbols; exists(*sym); sym++)
+    {
+        if(!strcasecmp((*sym)->name, var) && (*sym)->resolved)
+        {
+            (*sym)->resolved->id = mid;
+            return LG_TRUE;
+        }
+    }
+
+    // Create media ID and a symbol with the user defined name.
+    entry_p nid = new_number(mid), nsm = new_symbol(DBG_ALLOC(strdup(var)));
+
+    if(nid && nsm)
+    {
+        // Reparent value.
+        nid->parent = nsm;
+        nsm->resolved = nid;
+
+        // Append symbol to current context.
+        if(append(&contxt->symbols, nsm))
+        {
+            // Set global reference.
+            push(global(contxt), nsm);
+            nsm->parent = contxt;
+            return LG_TRUE;
+        }
+    }
+
+    // Out of memory.
+    kill(nid);
+    kill(nsm);
+    return LG_FALSE;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_size
+// Description: Get (showmedia) size as bitmask.
+// Input:       const char *atr:    Attribute name.
+// Return:      int:                G_* bitmask.
+//------------------------------------------------------------------------------
+static int h_size(const char *atr)
+{
+    return strcasecmp(atr, "small") == 0 ? G_SMALL :
+           strcasecmp(atr, "small_medium") == 0 ? G_SMALL | G_LESS :
+           strcasecmp(atr, "small_large") == 0 ? G_SMALL | G_MORE :
+           strcasecmp(atr, "medium") == 0 ? G_MEDIUM :
+           strcasecmp(atr, "medium_small") == 0 ? G_MEDIUM | G_LESS :
+           strcasecmp(atr, "medium_large") == 0 ? G_MEDIUM | G_MORE :
+           strcasecmp(atr, "large") == 0 ? G_LARGE :
+           strcasecmp(atr, "large_small") == 0 ? G_LARGE | G_LESS :
+           strcasecmp(atr, "large_medium") == 0 ? G_LARGE | G_MORE : 0;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_extra
+// Description: Get (showmedia) extra flags as bitmask.
+// Input:       const char *atr:    Attribute name.
+// Return:      int:                G_* bitmask.
+//------------------------------------------------------------------------------
+static int h_extra(const char *atr)
+{
+    return strcasecmp(atr, "wordwrap") == 0 ? G_WORDWRAP :
+           strcasecmp(atr, "panel") == 0 ? G_PANEL :
+           strcasecmp(atr, "play") == 0 ? G_PLAY :
+           strcasecmp(atr, "repeat") == 0 ? G_REPEAT : 0;
 }
 
 //------------------------------------------------------------------------------
@@ -183,34 +270,17 @@ entry_p m_setmedia(entry_p contxt)
 entry_p m_showmedia(entry_p contxt)
 {
     // We need atleast 5 arguments.
-    C_SANE(5, NULL);
-
-    // Get size.
-    char *att = str(C_ARG(4));
+    C_SANE(5, NULL); S_SANE(0);
 
     // Set size bitmask.
-    int msk = h_pos(str(C_ARG(3))) | (num(C_ARG(5)) ? G_BORDER : 0) | (
-              strcasecmp(att, "small") == 0 ? G_SMALL :
-              strcasecmp(att, "small_medium") == 0 ? G_SMALL | G_LESS :
-              strcasecmp(att, "small_large") == 0 ? G_SMALL | G_MORE :
-              strcasecmp(att, "medium") == 0 ? G_MEDIUM :
-              strcasecmp(att, "medium_small") == 0 ? G_MEDIUM | G_LESS :
-              strcasecmp(att, "medium_large") == 0 ? G_MEDIUM | G_MORE :
-              strcasecmp(att, "large") == 0 ? G_LARGE :
-              strcasecmp(att, "large_small") == 0 ? G_LARGE | G_LESS :
-              strcasecmp(att, "large_medium") == 0 ? G_LARGE | G_MORE : 0);
+    int msk = h_pos(str(C_ARG(3))) | (num(C_ARG(5)) ? G_BORDER : 0) |
+              h_size(str(C_ARG(4)));
 
     // Get the rest of the flags.
     for(size_t i = 6; exists(C_ARG(i)); i++)
     {
-        // Get current flag.
-        att = str(C_ARG(i));
-
-        // Translate into bitmask.
-        msk |= (strcasecmp(att, "wordwrap") == 0 ? G_WORDWRAP :
-                strcasecmp(att, "panel") == 0 ? G_PANEL :
-                strcasecmp(att, "play") == 0 ? G_PLAY :
-                strcasecmp(att, "repeat") == 0 ? G_REPEAT : 0);
+        // Translate flag to bitmask.
+        msk |= h_extra(str(C_ARG(i)));
     }
 
     // Invalid media ID.
@@ -222,67 +292,6 @@ entry_p m_showmedia(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    // Symbol destination.
-    entry_p dst = global(contxt);
-
-    if(dst)
-    {
-        char *var = str(C_ARG(1));
-        entry_p *sym = contxt->symbols;
-
-        // Symbol exists already?
-        while(exists(*sym))
-        {
-            // If true, update current symbol.
-            if(!strcasecmp((*sym)->name, var) && (*sym)->resolved)
-            {
-                // Success.
-                (*sym)->resolved->id = mid;
-                R_NUM(LG_TRUE);
-            }
-
-            // Next symbol.
-            sym++;
-        }
-
-        // Create the new media ID.
-        entry_p nid = new_number(mid);
-
-        if(nid)
-        {
-            // Create new symbol with user defined name.
-            entry_p nsm = new_symbol(DBG_ALLOC(strdup(var)));
-
-            if(nsm)
-            {
-                // Reparent value.
-                nid->parent = nsm;
-                nsm->resolved = nid;
-
-                // Append the symbol to the current context and create a global
-                // ref.
-                if(append(&contxt->symbols, nsm))
-                {
-                    // Reparent symbol.
-                    push(dst, nsm);
-                    nsm->parent = contxt;
-
-                    // Success.
-                    R_NUM(LG_TRUE);
-                }
-
-                // Out of memory.
-                kill(nsm);
-            }
-            else
-            {
-                // Out of memory.
-                kill(nid);
-            }
-        }
-    }
-
-    // Broken parser / out of memory.
-    PANIC(contxt);
-    R_CUR;
+    // Create media ID user variable.
+    R_NUM(h_create_id(contxt, mid));
 }

@@ -3,7 +3,7 @@
 //
 // Environment information retrieval
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -22,6 +22,7 @@ entry_p m_getsize(entry_p contxt);
 entry_p m_getsum(entry_p contxt);
 entry_p m_getversion(entry_p contxt);
 entry_p m_iconinfo(entry_p contxt);
+entry_p m_querydisplay(entry_p contxt);
 
 int h_getversion_file(const char *name);
 

@@ -4,7 +4,7 @@
 // MUI based GUI. On non Amiga systems this is, except for some stdout prints
 // to aid testing, a stub.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -84,6 +84,7 @@ APTR STDARGS DoSuperNew(struct IClass *cl, APTR obj, ULONG tag1, ...)
 #define CLASS_DATA(C) C ## Data
 #define TAGBASE_LG (TAG_USER | 27<<16)
 #define CAST(P,T) ((T) ((uintptr_t) P))
+#define MUIDSP static inline IPTR __attribute__((always_inline))
 
 //------------------------------------------------------------------------------
 // Debug and logging macros
@@ -120,44 +121,46 @@ CLASS_DEF(IG)
 //------------------------------------------------------------------------------
 // IG - Public methods
 //------------------------------------------------------------------------------
-#define MUIM_IG_Init             (TAGBASE_LG + 101)
-#define MUIM_IG_Welcome          (TAGBASE_LG + 102)
-#define MUIM_IG_CopyFilesStart   (TAGBASE_LG + 104)
-#define MUIM_IG_CopyFilesSetCur  (TAGBASE_LG + 105)
-#define MUIM_IG_CopyFilesEnd     (TAGBASE_LG + 106)
-#define MUIM_IG_Exit             (TAGBASE_LG + 107)
-#define MUIM_IG_Complete         (TAGBASE_LG + 108)
-#define MUIM_IG_Ticker           (TAGBASE_LG + 109)
-#define MUIM_IG_CopyFilesAdd     (TAGBASE_LG + 110)
-#define MUIM_IG_Confirm          (TAGBASE_LG + 111)
-#define MUIM_IG_Message          (TAGBASE_LG + 112)
-#define MUIM_IG_Abort            (TAGBASE_LG + 113)
-#define MUIM_IG_Radio            (TAGBASE_LG + 114)
-#define MUIM_IG_Bool             (TAGBASE_LG + 115)
-#define MUIM_IG_String           (TAGBASE_LG + 116)
-#define MUIM_IG_Number           (TAGBASE_LG + 117)
-#define MUIM_IG_CheckBoxes       (TAGBASE_LG + 118)
-#define MUIM_IG_AskFile          (TAGBASE_LG + 119)
-#define MUIM_IG_PageSet          (TAGBASE_LG + 120)
-#define MUIM_IG_Finish           (TAGBASE_LG + 121)
-#define MUIM_IG_Working          (TAGBASE_LG + 122)
-#define MUIM_IG_Effect           (TAGBASE_LG + 123)
-#define MUIM_IG_CloseMedia       (TAGBASE_LG + 124)
-#define MUIM_IG_SetMedia         (TAGBASE_LG + 125)
-#define MUIM_IG_ShowMedia        (TAGBASE_LG + 126)
-#define MUIM_IG_ShowPicture      (TAGBASE_LG + 127)
-#define MUIM_IG_GetCustomScreen  (TAGBASE_LG + 128)
+#define MUIM_IG_Init                (TAGBASE_LG + 101)
+#define MUIM_IG_Welcome             (TAGBASE_LG + 102)
+#define MUIM_IG_CopyFilesStart      (TAGBASE_LG + 104)
+#define MUIM_IG_CopyFilesSetCur     (TAGBASE_LG + 105)
+#define MUIM_IG_CopyFilesEnd        (TAGBASE_LG + 106)
+#define MUIM_IG_Exit                (TAGBASE_LG + 107)
+#define MUIM_IG_Complete            (TAGBASE_LG + 108)
+#define MUIM_IG_Ticker              (TAGBASE_LG + 109)
+#define MUIM_IG_CopyFilesAdd        (TAGBASE_LG + 110)
+#define MUIM_IG_Confirm             (TAGBASE_LG + 111)
+#define MUIM_IG_Message             (TAGBASE_LG + 112)
+#define MUIM_IG_Abort               (TAGBASE_LG + 113)
+#define MUIM_IG_Radio               (TAGBASE_LG + 114)
+#define MUIM_IG_Bool                (TAGBASE_LG + 115)
+#define MUIM_IG_String              (TAGBASE_LG + 116)
+#define MUIM_IG_Number              (TAGBASE_LG + 117)
+#define MUIM_IG_CheckBoxes          (TAGBASE_LG + 118)
+#define MUIM_IG_AskFile             (TAGBASE_LG + 119)
+#define MUIM_IG_PageSet             (TAGBASE_LG + 120)
+#define MUIM_IG_Finish              (TAGBASE_LG + 121)
+#define MUIM_IG_Working             (TAGBASE_LG + 122)
+#define MUIM_IG_Effect              (TAGBASE_LG + 123)
+#define MUIM_IG_CloseMedia          (TAGBASE_LG + 124)
+#define MUIM_IG_SetMedia            (TAGBASE_LG + 125)
+#define MUIM_IG_ShowMedia           (TAGBASE_LG + 126)
+#define MUIM_IG_ShowPicture         (TAGBASE_LG + 127)
+#define MUIM_IG_GetCustomScreen     (TAGBASE_LG + 128)
+#define MUIM_IG_GetScreenProp       (TAGBASE_LG + 129)
+#define MUIM_IG_GetWindowProp       (TAGBASE_LG + 130)
 
 //------------------------------------------------------------------------------
 // IG - Attributes
 //------------------------------------------------------------------------------
-#define MUIA_IG_UseCustomScreen  (TAGBASE_LG + 201)
+#define MUIA_IG_UseCustomScreen     (TAGBASE_LG + 201)
 
 //------------------------------------------------------------------------------
 // IG - Media ID
 //------------------------------------------------------------------------------
-#define MUIA_IG_MediaBase        (TAGBASE_LG + 301)
-#define MUIA_IG_MediaMax         (TAGBASE_LG + 399)
+#define MUIA_IG_MediaBase           (TAGBASE_LG + 301)
+#define MUIA_IG_MediaMax            (TAGBASE_LG + 399)
 
 //------------------------------------------------------------------------------
 // IG - Init parameters
@@ -441,6 +444,32 @@ struct MUIP_IG_GetCustomScreen
 };
 
 //------------------------------------------------------------------------------
+// IG - GetScreenProp
+//------------------------------------------------------------------------------
+struct MUIP_IG_GetScreenProp
+{
+    ULONG MethodID;
+    ULONG Width;
+    ULONG Height;
+    ULONG Depth;
+    ULONG Colors;
+};
+
+//------------------------------------------------------------------------------
+// IG - GetWindowProp
+//------------------------------------------------------------------------------
+struct MUIP_IG_GetWindowProp
+{
+    ULONG MethodID;
+    ULONG Width;
+    ULONG Height;
+    ULONG Upper;
+    ULONG Lower;
+    ULONG Left;
+    ULONG Right;
+};
+
+//------------------------------------------------------------------------------
 // IG - private values
 //------------------------------------------------------------------------------
 #define MUIV_IG_FirstButton      (TAGBASE_LG + 200)
@@ -476,11 +505,11 @@ struct MUIP_IG_GetCustomScreen
 #define B_NONE                   5
 
 //------------------------------------------------------------------------------
-// IGTrans - [PRIVATE] - Translate button input to GUI response value
+// IGTrans - [PRIVATE] Translate button input to GUI response value
 // Input:    ULONG signal: -
 // Return:   GUI response value
 //------------------------------------------------------------------------------
-static inline ULONG IGTrans(ULONG signal)
+static ULONG IGTrans(ULONG signal)
 {
     switch(signal)
     {
@@ -514,7 +543,7 @@ static inline ULONG IGTrans(ULONG signal)
 //          ULONG range:  Number of values to check for
 // Return:  Notifcation val. / zero on return id quit
 //------------------------------------------------------------------------------
-static inline ULONG IGWait(Object *obj, ULONG notif, ULONG range)
+static ULONG IGWait(Object *obj, ULONG notif, ULONG range)
 {
     ULONG sig = 0, ret = 0, n;
 
@@ -614,7 +643,7 @@ static inline ULONG IGWait(Object *obj, ULONG notif, ULONG range)
 // Input:   -
 // Return:  On success TRUE, FALSE otherwise.
 //------------------------------------------------------------------------------
-static inline IPTR IGInit(Class *cls, Object *obj)
+MUIDSP IGInit(Class *cls, Object *obj)
 {
     static ULONG i = MUIV_IG_FirstButton;
 
@@ -680,9 +709,7 @@ static inline IPTR IGInit(Class *cls, Object *obj)
 //                       ULONG msg: Top text message
 // Return:               TRUE on success, FALSE otherwise
 //------------------------------------------------------------------------------
-//
-static inline IPTR IGPageSet(Class *cls, Object *obj,
-                             struct MUIP_IG_PageSet *msg)
+MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -776,8 +803,7 @@ static inline IPTR IGPageSet(Class *cls, Object *obj,
 //             NoLog - Disable logging
 // Return:     G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGWelcome(Class *cls, Object *obj,
-                             struct MUIP_IG_Welcome *msg)
+MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
 {
     // Show welcome page.
     if(DoMethod(obj, MUIM_IG_PageSet,
@@ -944,9 +970,7 @@ static ULONG IGDirPart(Class *cls, Object *obj, ULONG Path)
 //             File - File / dir return value.
 // Return:     G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGAskFile(Class *cls,
-                             Object *obj,
-                             struct MUIP_IG_AskFile *msg)
+MUIDSP IGAskFile(Class *cls, Object *obj, struct MUIP_IG_AskFile *msg)
 {
     // Show file requester page.
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
@@ -1068,8 +1092,8 @@ static inline IPTR IGAskFile(Class *cls,
 //                    Confirm - User confirmation
 // Return:            G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGCopyFilesStart(Class *cls, Object *obj,
-                                    struct MUIP_IG_CopyFilesStart *msg)
+MUIDSP IGCopyFilesStart(Class *cls, Object *obj,
+                        struct MUIP_IG_CopyFilesStart *msg)
 {
 
     struct IGData *my = INST_DATA(cls, obj);
@@ -1225,8 +1249,8 @@ static inline IPTR IGCopyFilesStart(Class *cls, Object *obj,
 //                     Back - Use 'Back' instead of 'Abort'.
 // Return:             G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGCopyFilesSetCur(Class *cls, Object *obj,
-                                     struct MUIP_IG_CopyFilesSetCur *msg)
+MUIDSP IGCopyFilesSetCur(Class *cls, Object *obj,
+                         struct MUIP_IG_CopyFilesSetCur *msg)
 {
     if(msg->File)
     {
@@ -1249,13 +1273,8 @@ static inline IPTR IGCopyFilesSetCur(Class *cls, Object *obj,
 
         // Get the number of characters that can be shown given the width of
         // the gauge and the contents of the string.
-        ULONG max = TextFit
-        (
-            _rp(my->Progress),
-            file, len, &ext, NULL, 1,
-            _mwidth(my->Progress),
-            _mheight(my->Progress)
-        );
+        ULONG max = TextFit(_rp(my->Progress), file, len, &ext, NULL, 1,
+                            _mwidth(my->Progress), _mheight(my->Progress));
 
         // Do we need to truncate the file string to not wreck the gauge?
         if(len > max)
@@ -1320,7 +1339,7 @@ static inline IPTR IGCopyFilesSetCur(Class *cls, Object *obj,
 // Input:           -
 // Return:          G_TRUE
 //------------------------------------------------------------------------------
-static inline IPTR IGCopyFilesEnd(Class *cls, Object *obj)
+MUIDSP IGCopyFilesEnd(Class *cls, Object *obj)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -1341,18 +1360,18 @@ static inline IPTR IGCopyFilesEnd(Class *cls, Object *obj)
 // Input:           File - Name of file (or dir)
 // Return:          TRUE
 //------------------------------------------------------------------------------
-static inline IPTR IGCopyFilesAdd(Class *cls, Object *obj,
-                                  struct MUIP_IG_CopyFilesAdd *msg)
+MUIDSP IGCopyFilesAdd(Class *cls, Object *obj,
+                      struct MUIP_IG_CopyFilesAdd *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
     // Insert filename.
-    DoMethod
-    (
-        my->List, MUIM_List_Insert,
-        &(msg->File), 1,
-        MUIV_List_Insert_Bottom
-    );
+    DoMethod(my->List, MUIM_List_Insert, &(msg->File), 1,
+             MUIV_List_Insert_Bottom);
+
+    // All files are selected by default.
+    DoMethod(my->List, MUIM_List_Select, MUIV_List_Select_All,
+             MUIV_List_Select_On, NULL);
 
     // The lister must be visible.
     set(my->List, MUIA_ShowMe, TRUE);
@@ -1367,7 +1386,7 @@ static inline IPTR IGCopyFilesAdd(Class *cls, Object *obj,
 // Input    Message - The prompt
 // Return:  TRUE
 //------------------------------------------------------------------------------
-static inline IPTR IGExit(Class *cls, Object *obj, struct MUIP_IG_Exit *msg)
+MUIDSP IGExit(Class *cls, Object *obj, struct MUIP_IG_Exit *msg)
 {
     // Silence.
     (void) cls;
@@ -1383,8 +1402,7 @@ static inline IPTR IGExit(Class *cls, Object *obj, struct MUIP_IG_Exit *msg)
 // Input:      Message - The message
 // Return:     G_TRUE / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGWorking(Class *cls, Object *obj,
-                             struct MUIP_IG_Working *msg)
+MUIDSP IGWorking(Class *cls, Object *obj, struct MUIP_IG_Working *msg)
 {
     // Silence.
     (void) cls;
@@ -1392,7 +1410,7 @@ static inline IPTR IGWorking(Class *cls, Object *obj,
     // Set correct page and button combination.
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE, B_NONE))
     {
-        // We don't do anything. The message is already shown.
+        // The message is already shown.
         return G_TRUE;
     }
 
@@ -1408,7 +1426,7 @@ static inline IPTR IGWorking(Class *cls, Object *obj,
 //             ColorEnd - Last color in gradient.
 // Return:     G_TRUE / G_FALSE / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
+MUIDSP IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -1432,10 +1450,8 @@ static inline IPTR IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
             // Get 8-bit RGB start and stop values.
             int r1 = msg->ColorStart >> 16,
                 g1 = (msg->ColorStart >> 8) & 0xff,
-                b1 = msg->ColorStart & 0xff,
-                r2 = msg->ColorEnd >> 16,
-                g2 = (msg->ColorEnd >> 8) & 0xff,
-                b2 = msg->ColorEnd & 0xff,
+                b1 = msg->ColorStart & 0xff, r2 = msg->ColorEnd >> 16,
+                g2 = (msg->ColorEnd >> 8) & 0xff, b2 = msg->ColorEnd & 0xff,
 
                 // Minimum chunk = 1 << ct pixels, to save time when drawing.
                 ct = 2, s = my->Win->Height >> ct;
@@ -1476,20 +1492,14 @@ static inline IPTR IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
                 }
 
                 // Set backdrop pen.
-                SetRPAttrs
-                (
-                    my->Win->RPort,
-                    RPTAG_APen, pn,
-                    RPTAG_BPen, pn,
-                    TAG_END
-                );
+                SetRPAttrs(my->Win->RPort, RPTAG_APen, pn, RPTAG_BPen, pn,
+                           TAG_END);
 
                 // Draw effect if it's enabled.
                 if(msg->Effect & G_EFFECT)
                 {
                     // Start from the bottom, one delta at a time.
-                    int d = 1 << ct,
-                        v = my->Win->Height;
+                    int d = 1 << ct, v = my->Win->Height;
 
                     // For all colors in gradient, draw rectangle with delta
                     // height.
@@ -1499,23 +1509,14 @@ static inline IPTR IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
                         i -= 3;
 
                         // Use the same pen again and again.
-                        SetRGB32
-                        (
-                            &my->Scr->ViewPort, pn,
-                            cv[i],
-                            cv[i + 1],
-                            cv[i + 2]
-                        );
+                        SetRGB32(&my->Scr->ViewPort, pn, cv[i], cv[i + 1],
+                                 cv[i + 2]);
 
                         // From bottom to top.
                         v -= d;
 
                         // Draw rectangle.
-                        RectFill
-                        (
-                            my->Win->RPort, 0, v,
-                            my->Win->Width, v + d
-                        );
+                        RectFill(my->Win->RPort, 0, v, my->Win->Width, v + d);
                     }
                 }
 
@@ -1541,8 +1542,7 @@ static inline IPTR IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
 // Input:          FIXME
 // Return:         G_TRUE / G_FALSE
 //------------------------------------------------------------------------------
-static inline IPTR IGCloseMedia(Class *cls, Object *obj,
-                                struct MUIP_IG_CloseMedia *msg)
+MUIDSP IGCloseMedia(Class *cls, Object *obj, struct MUIP_IG_CloseMedia *msg)
 {
     // Silence.
     (void) cls;
@@ -1573,8 +1573,7 @@ static inline IPTR IGCloseMedia(Class *cls, Object *obj,
 // Input:        FIXME
 // Return:       G_TRUE / G_FALSE / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGSetMedia(Class *cls, Object *obj,
-                              struct MUIP_IG_SetMedia *msg)
+MUIDSP IGSetMedia(Class *cls, Object *obj, struct MUIP_IG_SetMedia *msg)
 {
     // Silence.
     (void) cls;
@@ -1596,10 +1595,78 @@ static inline IPTR IGSetMedia(Class *cls, Object *obj,
 // Input:            -
 // Return:           struct Screen * if open, NULL otherwise.
 //------------------------------------------------------------------------------
-static inline IPTR IGGetCustomScreen(Class *cls, Object *obj)
+MUIDSP IGGetCustomScreen(Class *cls, Object *obj)
 {
     struct IGData *my = INST_DATA(cls, obj);
     return (IPTR) my->Scr;
+}
+
+//------------------------------------------------------------------------------
+// IGGetScreenProp   FIXME
+// Input:            FIXME
+// Return:           FIXME
+//------------------------------------------------------------------------------
+MUIDSP IGGetScreenProp(Class *cls, Object *obj,
+                       struct MUIP_IG_GetScreenProp *msg)
+{
+    (void) cls;
+
+    struct Screen *scr = NULL;
+    get(obj, MUIA_Window_Screen, &scr);
+
+    if(!scr)
+    {
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
+    }
+
+    int *width = (int *) msg->Width, *height = (int *) msg->Height,
+        *depth = (int *) msg->Depth, *colors = (int *) msg->Colors;
+
+    *width = scr->Width;
+    *height = scr->Height;
+    *depth = GetBitMapAttr(scr->RastPort.BitMap, BMA_DEPTH);
+    *colors = 1 << (*depth > 24 ? 24 : *depth);
+
+    return G_TRUE;
+}
+
+//------------------------------------------------------------------------------
+// IGGetWindowProp   FIXME
+// Input:            FIXME
+// Return:           FIXME
+//------------------------------------------------------------------------------
+MUIDSP IGGetWindowProp(Class *cls, Object *obj,
+                       struct MUIP_IG_GetWindowProp *msg)
+{
+    (void) cls;
+
+    struct Window *win = NULL;
+    struct Screen *scr = NULL;
+
+    get(obj, MUIA_Window_Window, &win);
+    get(obj, MUIA_Window_Screen, &scr);
+
+    if(!win || !scr)
+    {
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
+    }
+
+    int *width = (int *) msg->Width, *height = (int *) msg->Height,
+        *upper = (int *) msg->Upper, *lower = (int *) msg->Lower,
+        *left = (int *) msg->Left, *right = (int *) msg->Right;
+
+    *width = win->Width;
+    *height = win->Height;
+    *left = win->LeftEdge;
+    *right = scr->Width - *width - *left;
+    *upper = win->TopEdge;
+    *lower = scr->Height - *height - *upper;
+
+    return G_TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -1608,8 +1675,7 @@ static inline IPTR IGGetCustomScreen(Class *cls, Object *obj)
 //                  Action - FIXME
 // Return:          FIXME
 //------------------------------------------------------------------------------
-static inline IPTR IGShowPicture(Class *cls, Object *obj,
-                                 struct MUIP_IG_ShowPicture *msg)
+MUIDSP IGShowPicture(Class *cls, Object *obj, struct MUIP_IG_ShowPicture *msg)
 {
     // Silence.
     (void) cls;
@@ -1640,9 +1706,9 @@ static inline IPTR IGShowPicture(Class *cls, Object *obj,
 
                 // Height of the window depends on the width.
                 ys = (msg->Action & G_MORE) ? scr->Height >>
-                         ((msg->Action & G_LARGE) ? 2 : 1) :
+                     ((msg->Action & G_LARGE) ? 2 : 1) :
                      (msg->Action & G_LESS) ? scr->Height >>
-                         ((msg->Action & G_SMALL) ? 2 : 3) :
+                     ((msg->Action & G_SMALL) ? 2 : 3) :
                      scr->Height >> ((msg->Action & G_SMALL) ? 3 :
                                      (msg->Action & G_LARGE) ? 1 : 2);
             }
@@ -1747,8 +1813,7 @@ static inline IPTR IGShowPicture(Class *cls, Object *obj,
 //                Action - FIXME
 // Return:        G_TRUE / G_FALSE / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGShowMedia(Class *cls, Object *obj,
-                               struct MUIP_IG_ShowMedia *msg)
+MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
 {
     // Silence.
     (void) cls;
@@ -1780,12 +1845,9 @@ static inline IPTR IGShowMedia(Class *cls, Object *obj,
                 // We only support pictures at the moment.
                 if(gid == GID_PICTURE)
                 {
-                    DoMethod
-                    (
-                        obj, MUIM_IG_ShowPicture,
-                        mid + MUIA_IG_MediaBase,
-                        msg->Media, msg->Action
-                    );
+                    DoMethod(obj, MUIM_IG_ShowPicture,
+                             mid + MUIA_IG_MediaBase,
+                             msg->Media, msg->Action);
 
                     // Return current media ID.
                     *CAST(msg->MediaID, int *) = mid;
@@ -1831,8 +1893,7 @@ static inline IPTR IGShowMedia(Class *cls, Object *obj,
 //             Back - Use 'Back' instead of 'Abort'.
 // Return:     G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGMessage(Class *cls, Object *obj,
-                             struct MUIP_IG_Message *msg)
+MUIDSP IGMessage(Class *cls, Object *obj, struct MUIP_IG_Message *msg)
 {
     // Set correct page and button combination.
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE,
@@ -1864,12 +1925,10 @@ static inline IPTR IGMessage(Class *cls, Object *obj,
         // G_TRUE / G_ABORT / G_EXIT
         return rc;
     }
-    else
-    {
-        // Unknown error.
-        GERR(tr(S_UNER));
-        return G_ERR;
-    }
+
+    // Unknown error.
+    GERR(tr(S_UNER));
+    return G_ERR;
 }
 
 //------------------------------------------------------------------------------
@@ -1877,8 +1936,7 @@ static inline IPTR IGMessage(Class *cls, Object *obj,
 // Input:     Message - The message
 // Return:    G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGFinish(Class *cls, Object *obj,
-                            struct MUIP_IG_Finish *msg)
+MUIDSP IGFinish(Class *cls, Object *obj, struct MUIP_IG_Finish *msg)
 {
     // Silence.
     (void) cls;
@@ -1900,8 +1958,7 @@ static inline IPTR IGFinish(Class *cls, Object *obj,
 // Input:    Message - The message to be shown
 // Return:   G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGAbort(Class *cls, Object *obj,
-                           struct MUIP_IG_Abort *msg)
+MUIDSP IGAbort(Class *cls, Object *obj, struct MUIP_IG_Abort *msg)
 {
     // Silence.
     (void) cls;
@@ -1928,8 +1985,7 @@ static inline IPTR IGAbort(Class *cls, Object *obj,
 //           Select - Zero index representing the selected button
 // Return:   G_TRUE / G_ABORT / G_EXIT / G_ERR.
 //------------------------------------------------------------------------------
-static inline IPTR IGRadio(Class *cls, Object *obj,
-                           struct MUIP_IG_Radio *msg)
+MUIDSP IGRadio(Class *cls, Object *obj, struct MUIP_IG_Radio *msg)
 {
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
                                                                B_PROCEED_ABORT))
@@ -2032,9 +2088,7 @@ static inline IPTR IGRadio(Class *cls, Object *obj,
 //          Back - Use 'Back' instead of 'Abort'.
 // Return:  G_TRUE / G_FALSE / G_ABORT / G_ERR
 //------------------------------------------------------------------------------
-static inline IPTR IGBool(Class *cls,
-                          Object *obj,
-                          struct MUIP_IG_Bool *msg)
+MUIDSP IGBool(Class *cls, Object *obj, struct MUIP_IG_Bool *msg)
 {
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
                                                                B_YES_NO_ABORT))
@@ -2082,9 +2136,7 @@ static inline IPTR IGBool(Class *cls,
 //            String - String return value
 // Return:    G_TRUE / G_FALSE / G_ABORT / G_ERR
 //------------------------------------------------------------------------------
-static inline IPTR IGString(Class *cls,
-                            Object *obj,
-                            struct MUIP_IG_String *msg)
+MUIDSP IGString(Class *cls, Object *obj, struct MUIP_IG_String *msg)
 {
     // Show string widget page.
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_STRING,
@@ -2139,8 +2191,7 @@ static inline IPTR IGString(Class *cls,
 //            Number - Return value
 // Return:    G_TRUE / G_ABORT / G_EXIT / G_ERR
 //------------------------------------------------------------------------------
-static inline IPTR IGNumber(Class *cls, Object *obj,
-                            struct MUIP_IG_Number *msg)
+MUIDSP IGNumber(Class *cls, Object *obj, struct MUIP_IG_Number *msg)
 {
     // Show slider.
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_NUMBER,
@@ -2196,7 +2247,7 @@ static inline IPTR IGNumber(Class *cls, Object *obj,
 //                Bitmap - A bitmask representing the selected button(s)
 // Return:        G_TRUE / G_ABORT / G_EXIT / G_ERR
 //------------------------------------------------------------------------------
-static inline IPTR IGCheckBoxes(Class *cls, Object *obj,
+MUIDSP IGCheckBoxes(Class *cls, Object *obj,
                                 struct MUIP_IG_CheckBoxes *msg)
 {
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
@@ -2297,7 +2348,6 @@ static inline IPTR IGCheckBoxes(Class *cls, Object *obj,
 
                     get(cb[i], MUIA_Selected, &sel);
                     *CAST(msg->Bitmap, ULONG *) |= (sel ? (1 << i) : 0);
-
                     DoMethod(my->Empty, OM_REMMEMBER, cb[i]);
                     MUI_DisposeObject(cb[i]);
                 }
@@ -2321,8 +2371,7 @@ static inline IPTR IGCheckBoxes(Class *cls, Object *obj,
 // Input:       Progress - Installer progress in %
 // Return:      G_TRUE / G_FALSE.
 //------------------------------------------------------------------------------
-static inline IPTR IGComplete(Class *cls, Object *obj,
-                              struct MUIP_IG_Complete *msg)
+MUIDSP IGComplete(Class *cls, Object *obj, struct MUIP_IG_Complete *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -2350,8 +2399,7 @@ static inline IPTR IGComplete(Class *cls, Object *obj,
 //             Back - Use 'Back' instead of 'Abort'.
 // Return:     '1' = proceed, '0' = skip, '-1' = abort
 //------------------------------------------------------------------------------
-static inline IPTR IGConfirm(Class *cls, Object *obj,
-                             struct MUIP_IG_Confirm *msg)
+MUIDSP IGConfirm(Class *cls, Object *obj, struct MUIP_IG_Confirm *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
     ULONG top = 0, btm = 0, str = 0;
@@ -2425,8 +2473,7 @@ static inline IPTR IGConfirm(Class *cls, Object *obj,
 // Input:  See BOOPSI docs
 // Return: See BOOPSI docs
 //------------------------------------------------------------------------------
-static inline IPTR IGNew(Class *cls, Object *obj,
-                         struct opSet *msg)
+MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
 {
     // Temp widgets.
     Object *el, *ul, *fp, *cm, *pr, *st, *nm, *bp, *em, *tx, *ls, *lg, *tp, *af,
@@ -2459,25 +2506,21 @@ static inline IPTR IGNew(Class *cls, Object *obj,
     // Open backdrop screen / window on demand.
     if(GetTagData(MUIA_IG_UseCustomScreen, FALSE, msg->ops_AttrList))
     {
-        scr = OpenScreenTags
-        (
-            NULL,
-            SA_PubName, "Installer",
-            SA_LikeWorkbench, TRUE,
-            SA_ShowTitle, FALSE,
-            TAG_END
-        );
+        scr = OpenScreenTags(NULL, SA_PubName, "Installer",
+                             SA_LikeWorkbench, TRUE, SA_ShowTitle, FALSE,
+                             TAG_END);
 
         if(scr)
         {
-            win = OpenWindowTags
-            (
-                NULL,
-                WA_CustomScreen, scr,
-                WA_Borderless, TRUE,
-                WA_Backdrop, TRUE,
-                TAG_END
-            );
+            win = OpenWindowTags(NULL, WA_CustomScreen, scr,
+                                 WA_Borderless, TRUE, WA_Backdrop, TRUE,
+                                 TAG_END);
+        }
+
+        if(!scr || !win)
+        {
+            // Unknown error.
+            GERR(tr(S_UNER));
         }
     }
 
@@ -2825,7 +2868,7 @@ static inline IPTR IGNew(Class *cls, Object *obj,
 // Input:    See MUI docs
 // Return:   See MUI docs
 //------------------------------------------------------------------------------
-static inline IPTR IGSetup(Class *cls, Object *obj, struct MUI_RenderInfo *msg)
+MUIDSP IGSetup(Class *cls, Object *obj, struct MUI_RenderInfo *msg)
 {
     // Let our parent set itself up first
     if(!DoSuperMethodA (cls, obj, (Msg) msg))
@@ -2843,7 +2886,7 @@ static inline IPTR IGSetup(Class *cls, Object *obj, struct MUI_RenderInfo *msg)
 // Input:      See BOOPSI docs
 // Return:     See BOOPSI docs
 //------------------------------------------------------------------------------
-static inline IPTR IGDispose (Class *cls, Object *obj, Msg msg)
+MUIDSP IGDispose (Class *cls, Object *obj, Msg msg)
 {
 
     struct IGData *my = INST_DATA(cls, obj);
@@ -2862,7 +2905,7 @@ static inline IPTR IGDispose (Class *cls, Object *obj, Msg msg)
 // Input:      See MUI docs
 // Return:     See MUI docs
 //------------------------------------------------------------------------------
-static inline IPTR IGCleanup (Class *cls, Object *obj, Msg msg)
+MUIDSP IGCleanup (Class *cls, Object *obj, Msg msg)
 {
     return (IPTR) DoSuperMethodA(cls, obj, (Msg) msg);
 }
@@ -2896,6 +2939,14 @@ DISPATCH(IG)
 
         case MUIM_IG_GetCustomScreen:
             return IGGetCustomScreen(cls, obj);
+
+        case MUIM_IG_GetScreenProp:
+            return IGGetScreenProp(cls, obj,
+                                  (struct MUIP_IG_GetScreenProp *) msg);
+
+        case MUIM_IG_GetWindowProp:
+            return IGGetWindowProp(cls, obj,
+                                  (struct MUIP_IG_GetWindowProp *) msg);
 
         case MUIM_IG_Welcome:
             return IGWelcome(cls, obj, (struct MUIP_IG_Welcome *) msg);
@@ -2979,32 +3030,24 @@ DISPATCH(IG)
 #endif /* AMIGA */
 
 
-//____________________________________________________________________________
-//############################################################################
-//############################################################################
-//############################################################################
-//****************************************************************************
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-//............................................................................
-//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-//.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  .
-//
+//.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//******************************************************************************
+//##############################################################################
+//##############################################################################
+//******************************************************************************
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+//..............................................................................
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+//.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 //
 // The gui_* functions below serve as glue between the platform independent
 // parts of InstallerLG and the Amiga specific Zune / MUI parts. On non Amiga
 // systems, arguments are written to stdout to facilitate testing.
 //
-//
-//.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  .
-//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//****************************************************************************
-//############################################################################
-//############################################################################
-//############################################################################
-
 //------------------------------------------------------------------------------
 // Name:        gui_init
 // Description: Initialize and show GUI.
@@ -3040,7 +3083,7 @@ inp_t gui_init(bool scr)
         MUIA_Application_Title, tr(S_INST),
         MUIA_Application_Version, version + 1,
         MUIA_Application_Description, "App installation utility",
-        MUIA_Application_HelpFile, "Installer.guide",
+        MUIA_Application_HelpFile, "InstallerLG.guide",
         MUIA_Application_Window, Win = (Object *) NewObject(
             IGClass->mcc_Class, NULL,
             MUIA_IG_UseCustomScreen, scr ? TRUE : FALSE,
@@ -3263,11 +3306,8 @@ inp_t gui_bool(const char *msg, const char *hlp, const char *yes,
 //              const char **ret:   String value from user.
 // Return:      inp_t: G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-inp_t gui_string(const char *msg,
-                 const char *hlp,
-                 const char *def,
-                 bool bck,
-                 const char **ret)
+inp_t gui_string(const char *msg, const char *hlp, const char *def,
+                 bool bck, const char **ret)
 {
     inp_t grc =
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -3292,13 +3332,8 @@ inp_t gui_string(const char *msg,
 //              int *ret:           Return value.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-inp_t gui_number(const char *msg,
-                 const char *hlp,
-                 int min,
-                 int max,
-                 int def,
-                 bool bck,
-                 int *ret)
+inp_t gui_number(const char *msg, const char *hlp, int min, int max,
+                 int def, bool bck, int *ret)
 {
     inp_t grc =
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -3446,9 +3481,16 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
     #if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesSetCur, cur, nga, bck);
     #else
+    // Testing purposes.
     (void) cur;
-    (void) nga;
-    (void) bck;
+    static bool done;
+    if(!done)
+    {
+        // We can't do this more than once. If we do, tests will depend on the
+        // order of files and directories on the host system.
+        printf("N%dB%d\n", nga, bck);
+        done = true;
+    }
     return G_TRUE;
     #endif
 }
@@ -3464,7 +3506,7 @@ void gui_copyfiles_end(void)
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CopyFilesEnd);
     #else
-    // End copy.
+    // Testing purposes.
     puts("ec");
     #endif
 }
@@ -3526,6 +3568,7 @@ void gui_error(int line, const char *type, const char *info)
     // We don't have any way of knowing whether this really works out...
     EasyRequest(NULL, &es, NULL);
     #else
+    // Testing purposes.
     fprintf(stderr, tr(S_LERR), line, type, info);
     #endif
 }
@@ -3556,10 +3599,10 @@ void gui_effect(int eff, int cl1, int cl2)
 //------------------------------------------------------------------------------
 inp_t gui_closemedia(int mid)
 {
-    // Testing purposes.
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CloseMedia, mid);
     #else
+    // Testing purposes.
     printf("%d\n", mid);
     #endif
     return G_TRUE;
@@ -3575,10 +3618,10 @@ inp_t gui_closemedia(int mid)
 //------------------------------------------------------------------------------
 inp_t gui_setmedia(int mid, int act, const char *par)
 {
-    // Testing purposes.
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_SetMedia, mid, act, par);
     #else
+    // Testing purposes.
     printf("%d:%d:%s\n", mid, act, par ? par : "_");
     #endif
     return G_TRUE;
@@ -3592,10 +3635,10 @@ inp_t gui_setmedia(int mid, int act, const char *par)
 //------------------------------------------------------------------------------
 inp_t gui_showmedia(int *mid, const char* mda, int act)
 {
-    // Testing purposes.
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_ShowMedia, mid, mda, act);
     #else
+    // Testing purposes.
     static int num;
     *mid = num++;
     printf("%d:%d:%s\n", *mid, act, mda ? mda : "_");
@@ -3603,3 +3646,41 @@ inp_t gui_showmedia(int *mid, const char* mda, int act)
     return G_TRUE;
 }
 
+//------------------------------------------------------------------------------
+// Name:        gui_query_screen
+// Description: FIXME
+// Input:       FIXME
+// Return:      FIXME
+//------------------------------------------------------------------------------
+void gui_query_screen(int *width, int *height, int *depth, int *colors)
+{
+    #if defined(AMIGA) && !defined(LG_TEST)
+    DoMethod(Win, MUIM_IG_GetScreenProp, width, height, depth, colors);
+    #else
+    // Testing purposes.
+    *width = 640;
+    *height = 256;
+    *colors = 4;
+    *depth = 2;
+    #endif
+}
+
+//------------------------------------------------------------------------------
+// Name:        gui_query_window
+// Description: FIXME
+// Input:       FIXME
+// Return:      FIXME
+//------------------------------------------------------------------------------
+void gui_query_window(int *width, int *height, int *upper, int *lower,
+                      int *left, int *right)
+{
+    #if defined(AMIGA) && !defined(LG_TEST)
+    DoMethod(Win, MUIM_IG_GetWindowProp, width, height, upper, lower, left,
+             right);
+    #else
+    // Testing purposes.
+    *width = *right = 320;
+    *height = *lower = 128;
+    *upper = *left = 0;
+    #endif
+}

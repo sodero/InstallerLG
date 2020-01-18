@@ -8,17 +8,15 @@ else
 SED := sed
 endif
 ifeq ($(OS),MorphOS)
-LHAFLAGS := a -r
+LHAFLAGS := -r a
 else
-LHAFLAGS := a
+LHAFLAGS := ao5
 endif
 
 #-----------------------------------------------------------------------------------#
 # Configuration
 #-----------------------------------------------------------------------------------#
-FLT := aros
 DIR := aminet
-SRC := ../src
 BIN := ../build
 EXE := Installer
 CAT := Catalogs
@@ -28,8 +26,7 @@ ARCH := $(shell uname -m | tr -d ower)
 ARC := $(DIR)/$(NAME).$(ARCH)-$(OS).lha
 README := $(DIR)/$(NAME).$(ARCH)-$(OS).readme
 FILES := $(EXE) $(CAT) 'InstallerLG installer' 'InstallerLG installer.info'
-FILES += 'CHANGELOG' 'CHANGELOG.info' 'CREDITS' 'CREDITS.info'
-STEMS := $(sort $(basename $(notdir $(wildcard $(SRC)/*.c) $(wildcard $(BIN)/*.c))))
+FILES += 'InstallerLG.guide' 'InstallerLG.guide.info'
 
 #-----------------------------------------------------------------------------------#
 # Targets
@@ -37,44 +34,24 @@ STEMS := $(sort $(basename $(notdir $(wildcard $(SRC)/*.c) $(wildcard $(BIN)/*.c
 .PHONY: dist
 dist: $(ARC) $(README)
 
-.PHONY: aros
-aros:
-	cp $(SRC)/*.c $(FLT)
-	cp $(SRC)/*.h $(FLT)
-	cp $(BIN)/*.c $(FLT)
-	cp $(BIN)/*.h $(FLT)
-	$(SED) -i 's/FILES :=.*$$/FILES := $(STEMS)/' $(FLT)/mmakefile.src
-
-.PHONY: src
-src: clean
-	mkdir $(NAME)
-	cp ../LICENSE $(NAME)
-	cp ../README.md $(NAME)
-	cp -R $(BIN) $(NAME)
-	cp -R $(SRC) $(NAME)
-	cp -R ../test $(NAME)
-	lha $(LHAFLAGS) $(DIR)/$(NAME).src.lha $(NAME)
-
 .PHONY: clean
 clean:
 	$(MAKE) -C $(BIN) $@
 	$(RM) $(EXE)
 	$(RM) $(README)
 	$(RM) $(DIR)/*.lha
-	$(RM) $(FLT)/*.c $(FLT)/*.h
 	$(RM) -R $(NAME) Catalogs
-	$(RM) $(SRC)/*.swp ../test/*.swp $(BIN)/_*
 
-$(ARC): $(EXE) $(CAT)
+$(ARC): $(EXE)
 	lha $(LHAFLAGS) $@ $(FILES)
 
 $(CAT):
-	$(MAKE) -C $(BIN) cat
-	cp -R $(BIN)/$(CAT) .
+	$(MAKE) -C $(BIN) cat && \
+	mv $(BIN)/$(CAT) $@
 
-$(EXE):
+$(EXE): $(CAT)
 	$(MAKE) -C $(BIN) $(EXE)
-	cp $(BIN)/$(EXE) $(EXE)
+	mv $(BIN)/$(EXE) $@
 
 $(README): $(DIR)/$(NAME).readme
 	cat $^ | $(SED) -e 's/__ARCH__/$(ARCH)-$(OS)/' > $@

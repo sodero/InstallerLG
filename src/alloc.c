@@ -1,9 +1,9 @@
 //------------------------------------------------------------------------------
 // alloc.c:
 //
-// Functions for allocation of entry_t data and closely related functions.
+// Functions for allocation and management of entry_t data objects.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -255,6 +255,7 @@ entry_p new_symref(char *name, int line)
 
     // We need to free 'name', since we own it.
     free(name);
+    free(entry);
 
     // Out of memory / bad input.
     PANIC(NULL);
@@ -378,33 +379,36 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
     // We required a name of the option for debugging purposes.
     if(name && entry)
     {
-        // Let the type be our ID.
-        entry->id = (int) type;
-        entry->type = OPTION;
-        entry->name = name;
-
         // Dynamic options need a return value.
         entry->resolved = new_number(LG_FALSE);
 
-        // Set parent of return value.
-        entry->resolved->parent = entry;
-
-        // Adopt contents of CONTXT, if there is any.
-        if(chl && chl->type == CONTXT)
+        if(entry->resolved)
         {
-            // This is for options that contain more info than just 1 / 0, E.g
-            // (delopts) and (command).
-            move_contxt(entry, chl);
-        }
+            // Set parent of return value.
+            entry->resolved->parent = entry;
 
-        // Dynamic options must be resolved.
-        if(type == OPT_DYNOPT)
-        {
-            // Set callback. Only (if) is allowed.
-            entry->call = m_if;
-        }
+            // Let the type be our ID.
+            entry->id = (int) type;
+            entry->type = OPTION;
+            entry->name = name;
 
-        return entry;
+            // Adopt contents of CONTXT, if there is any.
+            if(chl && chl->type == CONTXT)
+            {
+                // This is for options that contain more info than just 1 / 0,
+                // e.g (delopts) and (command).
+                move_contxt(entry, chl);
+            }
+
+            // Dynamic options must be resolved.
+            if(type == OPT_DYNOPT)
+            {
+                // Set callback. Only (if) is allowed.
+                entry->call = m_if;
+            }
+
+            return entry;
+        }
     }
 
     // We need to free 'name' and 'chl' also, since we own them.
@@ -464,13 +468,13 @@ entry_p new_cusref(char *name, int line, entry_p arg)
 //------------------------------------------------------------------------------
 // Name:        append
 // Description: Append entry to array. Grow array if necessary.
-// Input:       entry_p **dest:  The array.
+// Input:       entry_p **dst:   The array.
 //              entry_p entry:   The entry.
 // Return:      entry_p:         On success, the entry. On failure, NULL.
 //------------------------------------------------------------------------------
-entry_p append(entry_p **dest, entry_p entry)
+entry_p append(entry_p **dst, entry_p ent)
 {
-    if(!entry || !dest || !*dest)
+    if(!ent || !dst || !*dst)
     {
         // Bad input.
         PANIC(NULL);
@@ -481,13 +485,13 @@ entry_p append(entry_p **dest, entry_p entry)
     size_t num = 0;
 
     // Find the first free slot if there is one.
-    while(exists((*dest)[num]))
+    while(exists((*dst)[num]))
     {
         num++;
     }
 
     // No free slot available. More memory needed.
-    if((*dest)[num])
+    if((*dst)[num])
     {
         // Everything must be set to '0'. Make the array twice as big.
         entry_p *new = DBG_ALLOC(calloc((num << 1) + 1, sizeof(entry_p)));
@@ -496,26 +500,26 @@ entry_p append(entry_p **dest, entry_p entry)
         if(new)
         {
             new[num << 1] = end();
-            memcpy(new, *dest, num * sizeof(entry_p));
-            free(*dest);
-            *dest = new;
+            memcpy(new, *dst, num * sizeof(entry_p));
+            free(*dst);
+            *dst = new;
         }
         else
         {
             // Out of memory. This is a very rude way of not leaking memory
             // when out of memory. Simply overwrite previous elements after
             // killing them of.
-            kill((*dest)[0]);
-            (*dest)[0] = entry;
+            kill((*dst)[0]);
+            (*dst)[0] = ent;
 
-            PANIC(entry);
-            return entry;
+            PANIC(ent);
+            return ent;
         }
     }
 
     // Let entry be the new tail.
-    (*dest)[num] = entry;
-    return entry;
+    (*dst)[num] = ent;
+    return ent;
 }
 
 //------------------------------------------------------------------------------

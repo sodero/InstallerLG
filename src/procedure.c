@@ -3,7 +3,7 @@
 //
 // Management of user defined procedures
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -16,35 +16,74 @@
 #include <string.h>
 
 //------------------------------------------------------------------------------
+// Name:        h_gosub_fmt
+// Description: Helper for m_gosub. Handling one of those strange CBM Installer
+//              features / bugs. The syntax of user defined procedure calls and
+//              string formating is ambiguous, so that a function call such as
+//              (f1 a1 a2 ... ) is transformed into a format string expression
+//              ("%ld%ld" a1 a2 ...) if the function ('f1') is not defined and
+//              a symbol ('f1') that can be resolved as a format string exists.
+//              In strict mode this isn't allowed.
+// Input:       entry_p contxt: Execution context.
+// Return:      entry_p:        Resolved STRING result.
+//------------------------------------------------------------------------------
+static entry_p h_gosub_fmt(entry_p contxt)
+{
+    if(!contxt->resolved)
+    {
+        // Create resolved value on the first invocation.
+        contxt->resolved = new_string(DBG_ALLOC(strdup("")));
+
+        if(!contxt->resolved)
+        {
+            // Out of memory.
+            return end();
+        }
+
+        // Reparent the resolved value.
+        contxt->resolved->parent = contxt;
+    }
+
+    // Save name to be able to resolve the format string multiple times.
+    char *old = contxt->name;
+
+    // Set format, type and callback to mimic a ("%ld" ..) function call.
+    contxt->call = m_fmt;
+    contxt->type = NATIVE;
+    contxt->name = get_str(contxt, contxt->name);
+
+    // Resolve the things we've stitched together.
+    entry_p res = resolve(contxt);
+
+    // Restore name to be able to resolve the format string multiple times.
+    contxt->name = old;
+    contxt->call = m_gosub;
+    contxt->type = CUSREF;
+
+    return res;
+}
+
+//------------------------------------------------------------------------------
 // (<procedure-name>)
 //
-// ********************************
-// Trampoline function for invoking
-// user defined procedures.
-// ********************************
+// Trampoline function for invoking user defined procedures.
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
 entry_p m_gosub(entry_p contxt)
 {
-    // Global context where the user defined procedures are found.
-    entry_p con = global(contxt);
-
-    // Is the global context in order?
-    if(!s_sane(con, 0))
+    if(!s_sane(global(contxt), 0) && PANIC(contxt))
     {
         // The parser is broken
-        PANIC(contxt);
         return end();
     }
 
-    // Search through all symbols and see if there's a used defined
-    // procedure that matches the reference name.
-    for(entry_p *cus = con->symbols; exists(*cus); cus++)
+    // Search for a procedure that matches the reference name.
+    for(entry_p *cus = global(contxt)->symbols; exists(*cus); cus++)
     {
-        // Skip symbol if we don't have a match.
         if((*cus)->type != CUSTOM || strcasecmp((*cus)->name, contxt->name))
         {
+            // Skip symbol if we don't have a match.
             continue;
         }
 
@@ -83,21 +122,23 @@ entry_p m_gosub(entry_p contxt)
                 kill((*arg)->resolved);
                 (*arg)->resolved = res;
 
-                // Continue until we have no more arguments from the caller or
-                // that the procedure doesn't take any more arguments.
+                // Turn function arguments into global variables.
+                push(global(contxt), *arg);
+                (*arg)->parent = *cus;
+
+                // Continue until we have no more arguments or until the
+                // procedure doesn't take any more arguments.
                 arg++;
                 ina++;
             }
         }
 
-        // Recursion depth.
+        // Keep track of the recursion depth. Do not go beyond LG_MAXDEP.
         static int dep;
 
-        // Keep track of the recursion depth. Do not invoke if we're
-        // beyond LG_MAXDEP.
         if(dep++ < LG_MAXDEP)
         {
-            // Return value.
+            // Invoke user defined procedure.
             entry_p ret = invoke(*cus);
             dep--;
             return ret;
@@ -108,55 +149,15 @@ entry_p m_gosub(entry_p contxt)
         return end();
     }
 
-    // In non strict mode, transform the syntax of a function call such as
-    // (f1 arg1 arg2 ...) into a format string expression ("%s%ld.." ...) if
-    // the function is not defined and a symbol that can be resolved into a
-    // format string exists.
-    if(!get_num(contxt, "@strict"))
+    if(get_num(contxt, "@strict"))
     {
-        // First invocation?
-        if(!contxt->resolved)
-        {
-            // We need a resolved dummy. See new_*. In this case we're
-            // mimicing a NATIVE returning a STRING.
-            contxt->resolved = new_string(DBG_ALLOC(strdup("")));
-
-            if(!contxt->resolved)
-            {
-                // Panic already set.
-                return end();
-            }
-
-            // Reparent the dummy.
-            contxt->resolved->parent = contxt;
-        }
-
-        // Save the old name. We need to do this in order to resolve the
-        // format string multiple times when needed.
-        char *old = contxt->name;
-
-        // Set format string, type and callback to mimic a real ("%ld" ..)
-        // function.
-        contxt->call = m_fmt;
-        contxt->type = NATIVE;
-        contxt->name = get_str(contxt, contxt->name);
-
-        // Get the resolved value of the things we've stitched together.
-        entry_p res = resolve(contxt);
-
-        // Restore everything so that we can do this again, once again
-        // resolving the format string.
-        contxt->name = old;
-        contxt->call = m_gosub;
-        contxt->type = CUSREF;
-
-        // Success.
-        return res;
+        // There's no such procedure.
+        ERR(ERR_UNDEF_FNC, contxt->name);
+        return end();
     }
 
-    // Undefined user procedure.
-    ERR(ERR_UNDEF_FNC, contxt->name);
-    return end();
+    // Transform into a string format call. See description of h_gosub_fmt().
+    return h_gosub_fmt(contxt);
 }
 
 //------------------------------------------------------------------------------
@@ -167,21 +168,29 @@ entry_p m_gosub(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p m_procedure(entry_p contxt)
 {
-    // The global context is where we want the user procedure to end up.
-    entry_p dst = global(contxt);
+    // One argument.
+    S_SANE(1);
 
-    // We have a single argument, the function to add to the global context.
-    if(dst && s_sane(contxt, 1))
+    // The function itself and all arguments are global.
+    entry_p cus = contxt->symbols[0], dst = global(contxt);
+
+    // Create reference and reparent.
+    push(dst, cus);
+    cus->parent = contxt;
+
+    if(!cus->symbols)
     {
-        // Push the function and let the global context be its parent.
-        push(dst, contxt->symbols[0]);
-        contxt->symbols[0]->parent = contxt;
-
-        // Return the function itself.
-        return contxt->symbols[0];
+        // No arguments.
+        return cus;
     }
 
-    // Everything is broken.
-    PANIC(contxt);
-    R_CUR;
+    // Create global reference to arguments and reparent.
+    for(entry_p *arg = cus->symbols; exists(*arg); arg++)
+    {
+        push(dst, *arg);
+        (*arg)->parent = cus;
+    }
+
+    // Return the function itself.
+    return cus;
 }

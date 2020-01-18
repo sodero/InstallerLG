@@ -1,9 +1,9 @@
 //------------------------------------------------------------------------------
 // probe.c:
 //
-// Environment information retrieval
+// Host system information retrieval
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -11,6 +11,7 @@
 #include "error.h"
 #include "eval.h"
 #include "file.h"
+#include "gui.h"
 #include "probe.h"
 #include "util.h"
 #include <limits.h>
@@ -38,6 +39,148 @@
 #endif
 
 //------------------------------------------------------------------------------
+// CPU ID:s
+//------------------------------------------------------------------------------
+typedef enum {NONE, PPC, ARM, M68000, M68010, M68020, M68030, M68040, M68060,
+              X86, X86_64} cpu_t;
+
+#if defined(__MORPHOS__) && !defined(LG_TEST)
+//------------------------------------------------------------------------------
+// Name:        h_cpu_id
+// Description: Get host CPU ID. MorphOS implementation.
+// Input:       ---
+// Return:      cpu_t: Host CPU architecture ID.
+//------------------------------------------------------------------------------
+static cpu_t h_cpu_id(void)
+{
+    uint32_t arc = NONE;
+
+    NewGetSystemAttrs(&arc, sizeof(arc), SYSTEMINFOTYPE_MACHINE);
+
+    // On MorphOS, there is only PPC (and no define).
+    return arc == 1 ? PPC : NONE;
+}
+
+#elif defined(__AROS__) && !defined(LG_TEST)
+//------------------------------------------------------------------------------
+// Name:        h_cpu_id
+// Description: Get host CPU ID. AROS implementation.
+// Input:       ---
+// Return:      cpu_t: Host CPU architecture ID.
+//------------------------------------------------------------------------------
+static cpu_t h_cpu_id(void)
+{
+    APTR ProcessorBase = OpenResource("processor.resource");
+
+    if(!ProcessorBase)
+    {
+        // Unknown error.
+        return NONE;
+    }
+
+    ULONG fam;
+    struct TagItem tags[] = {{GCIT_Family, (IPTR) &fam}, {TAG_DONE, TAG_DONE}};
+    GetCPUInfo(tags);
+
+    switch(fam)
+    {
+        case CPUFAMILY_60X:
+        case CPUFAMILY_7X0:
+        case CPUFAMILY_74XX:
+        case CPUFAMILY_4XX:
+           return PPC;
+
+        case CPUFAMILY_ARM_3:
+        case CPUFAMILY_ARM_4:
+        case CPUFAMILY_ARM_4T:
+        case CPUFAMILY_ARM_5:
+        case CPUFAMILY_ARM_5T:
+        case CPUFAMILY_ARM_5TE:
+        case CPUFAMILY_ARM_5TEJ:
+        case CPUFAMILY_ARM_6:
+        case CPUFAMILY_ARM_7:
+           return ARM;
+
+        case CPUFAMILY_MOTOROLA_68000:
+           return M68000;
+
+        case CPUFAMILY_AMD_K5:
+        case CPUFAMILY_AMD_K6:
+        case CPUFAMILY_AMD_K7:
+        case CPUFAMILY_INTEL_486:
+        case CPUFAMILY_INTEL_PENTIUM:
+        case CPUFAMILY_INTEL_PENTIUM_PRO:
+        case CPUFAMILY_INTEL_PENTIUM4:
+           return X86;
+
+        case CPUFAMILY_AMD_K8:
+        case CPUFAMILY_AMD_K9:
+        case CPUFAMILY_AMD_K10:
+           return X86_64;
+
+        default:
+           return NONE;
+    }
+}
+
+#elif defined(AMIGA) && !defined(LG_TEST)
+//------------------------------------------------------------------------------
+// Name:        h_cpu_id
+// Description: Get host CPU ID. AmigaOS implementation.
+//
+//              Beware: ### NOT TESTED ###
+//
+// Input:       ---
+// Return:      cpu_t: Host CPU architecture ID.
+//------------------------------------------------------------------------------
+static cpu_t h_cpu_id(void)
+{
+    // This might work on OS3. OS4 probably needs some sugar on top.
+    struct ExecBase *AbsSysBase = *((struct ExecBase **) 4);
+    UWORD flags = AbsSysBase->AttnFlags;
+
+    if(flags & AFF_68010)
+    {
+        return M68010;
+    }
+    else if(flags & AFF_68020)
+    {
+        return M68020;
+    }
+    else if(flags & AFF_68030)
+    {
+        return M68030;
+    }
+    else if(flags & AFF_68040)
+    {
+        return M68040;
+    }
+    else if(flags & AFF_68060)
+    {
+        return M68060;
+    }
+    else
+    {
+        return M68000;
+    }
+}
+
+#else
+//------------------------------------------------------------------------------
+// Name:        h_cpu_id
+// Description: Get host CPU ID. Dummy / test implementation.
+// Input:       ---
+// Return:      cpu_t: Host CPU architecture ID.
+//------------------------------------------------------------------------------
+static cpu_t h_cpu_id(void)
+{
+    // In test mode / on non Amigas we shouldn't report anything but 'Unknown'.
+    // Doing so would create dependencies between test results and host system.
+    return NONE;
+}
+#endif
+
+//------------------------------------------------------------------------------
 // Name:        h_cpu_name
 // Description: Helper for m_database. Get host CPU architecture.
 // Input:       ---
@@ -45,107 +188,80 @@
 //------------------------------------------------------------------------------
 static char *h_cpu_name(void)
 {
-    enum { ERR, PPC, ARM, M68000, M68010, M68020, M68030, M68040, M68060, X86,
-           X86_64, ALL };
+    char *cpu[] = { "Unknown CPU", "PowerPC", "ARM", "M68000", "M68010", "M68020",
+                    "M68030", "M68040", "M68060", "X86", "X86_64"};
 
-    static char *cpu[ALL] = { "Unknown", "PowerPC", "ARM", "68000", "68010",
-                              "68020", "68030", "68040", "68060", "x86",
-                              "x84_64" };
-    uint32_t arc = ERR;
+    // Trans ID to string.
+    cpu_t cid  = h_cpu_id();
+    return cpu[(cid < (sizeof(cpu) / sizeof(cpu[NONE]))) ? cid : NONE];
+}
 
-    #if defined(__MORPHOS__) && !defined(LG_TEST)
-    // On MorphOS, there is only PPC (for now) (and no define).
-    NewGetSystemAttrs(&arc, sizeof(arc), SYSTEMINFOTYPE_MACHINE);
-    arc = arc == 1 ? PPC : ERR;
-    #elif defined(__AROS__) && !defined(LG_TEST)
-    // On AROS, everything is possible.
-    APTR ProcessorBase = OpenResource("processor.resource");
-
-    if(ProcessorBase)
+//------------------------------------------------------------------------------
+// Name:        h_os_name
+// Description: Helper for m_database. Get name of host OS.
+// Input:       ---
+// Return:      char *: Name of host OS.
+//------------------------------------------------------------------------------
+static char *h_os_name(void)
+{
+    // Host OS or 'Unknown'.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    if(FindResident("MorphOS"))
     {
-        ULONG fam;
-
-        struct TagItem tags[] = { { GCIT_Family, (IPTR) &fam },
-                                  { TAG_DONE, TAG_DONE } };
-
-        GetCPUInfo(tags);
-
-        switch(fam)
-        {
-            case CPUFAMILY_60X:
-            case CPUFAMILY_7X0:
-            case CPUFAMILY_74XX:
-            case CPUFAMILY_4XX:
-               arc = PPC;
-               break;
-
-            case CPUFAMILY_ARM_3:
-            case CPUFAMILY_ARM_4:
-            case CPUFAMILY_ARM_4T:
-            case CPUFAMILY_ARM_5:
-            case CPUFAMILY_ARM_5T:
-            case CPUFAMILY_ARM_5TE:
-            case CPUFAMILY_ARM_5TEJ:
-            case CPUFAMILY_ARM_6:
-            case CPUFAMILY_ARM_7:
-               arc = ARM;
-               break;
-
-            case CPUFAMILY_MOTOROLA_68000:
-               arc = M68000;
-               break;
-
-            case CPUFAMILY_AMD_K5:
-            case CPUFAMILY_AMD_K6:
-            case CPUFAMILY_AMD_K7:
-            case CPUFAMILY_INTEL_486:
-            case CPUFAMILY_INTEL_PENTIUM:
-            case CPUFAMILY_INTEL_PENTIUM_PRO:
-            case CPUFAMILY_INTEL_PENTIUM4:
-               arc = X86;
-               break;
-
-            case CPUFAMILY_AMD_K8:
-            case CPUFAMILY_AMD_K9:
-            case CPUFAMILY_AMD_K10:
-               arc = X86_64;
-               break;
-
-            }
+        return "MorphOS";
     }
-    #elif defined(AMIGA) && !defined(LG_TEST)
-    // AmigaOS3 - Beware, !NOT TESTED!.
-    struct ExecBase *AbsSysBase = *((struct ExecBase **)4);
-    UWORD flags = AbsSysBase->AttnFlags;
 
-    if(flags & AFF_68010)
+    // TODO - Try to open aros.library instead?
+    if(FindResident("processor.resource"))
     {
-        arc = M68010;
+        return "AROS";
     }
-    else if(flags & AFF_68020)
-    {
-        arc = M68020;
-    }
-    else if(flags & AFF_68030)
-    {
-        arc = M68030;
-    }
-    else if(flags & AFF_68040)
-    {
-        arc = M68040;
-    }
-    else if(flags & AFF_68060)
-    {
-        arc = M68060;
-    }
-    else
-    {
-        arc = M68000;
-    }
+
+    // Use AmigaOS as fallback.
+    return "AmigaOS";
+    #else
+    // In test mode / on non Amigas we shouldn't report anything but 'Unknown'.
+    // Doing so would create dependencies between test results and host system.
+    return "Unknown OS";
     #endif
+}
 
-    // CPU or 'Unknown'.
-    return cpu[arc];
+//------------------------------------------------------------------------------
+// Name:        h_chipmem.
+// Description: Helper for m_database. Get free chipmem in bytes.
+// Input:       ---
+// Return:      int:    Free chipmem.
+//------------------------------------------------------------------------------
+static int h_chipmem(void)
+{
+    return
+    #if defined(AMIGA) && !defined(LG_TEST)
+    AvailMem(MEMF_CHIP);
+    #else
+    // In test mode / on non Amigas we shouldn't report anything but a dummy
+    // value. Doing so would create dependencies between test results and host
+    // system. Pretend that we have 512 KiB free chipmem.
+    1 << 19;
+    #endif
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_totalmem.
+// Description: Helper for m_database. Get free chipmem + fastmem in bytes.
+// Input:       ---
+// Return:      int:    Free chipmem + fastmem.
+//------------------------------------------------------------------------------
+static int h_totalmem(void)
+{
+    return
+    #if defined(AMIGA) && !defined(LG_TEST)
+    AvailMem(MEMF_ANY);
+    #else
+    // In test mode / on non Amigas we shouldn't report anything but a dummy
+    // value. Doing so would create dependencies between test results and host
+    // system. Pretend that we have 1 MiB free chipmem + fastmem.
+    1 << 20;
+    #endif
 }
 
 //------------------------------------------------------------------------------
@@ -160,73 +276,49 @@ entry_p m_database(entry_p contxt)
     // We need atleast one argument
     C_SANE(1, NULL);
 
-    int memf = -1;
-    char *feat = str(C_ARG(1)), *ret = "Unknown";
+    char *feat = str(C_ARG(1));
 
-    if(strcmp(feat, "cpu") == 0)
+    if(strcasecmp(feat, "cpu") == 0)
     {
         // Get host CPU name.
-        ret = h_cpu_name();
+        snprintf(buf_get(B_KEY), buf_len(), "%s", h_cpu_name());
+    }
+    else if(strcasecmp(feat, "os") == 0)
+    {
+        // Get host OS name.
+        snprintf(buf_get(B_KEY), buf_len(), "%s", h_os_name());
+    }
+    else if(strcasecmp(feat, "graphics-mem") == 0)
+    {
+        // Get free chipmem.
+        snprintf(buf_get(B_KEY), buf_len(), "%d", h_chipmem());
+    }
+    else if(strcasecmp(feat, "total-mem") == 0)
+    {
+        // Get free fast + chipmem.
+        snprintf(buf_get(B_KEY), buf_len(), "%d", h_totalmem());
     }
     else
-    if(strcmp(feat, "os") == 0)
     {
-        // Get OS name.
-        #if defined(AMIGA) && !defined(LG_TEST)
-        if(FindResident("MorphOS"))
-        {
-            ret = "MorphOS";
-        }
-        else
-        // TODO - Try to open aros.library instead?
-        if(FindResident("processor.resource"))
-        {
-            ret = "AROS";
-        }
-        else
-        {
-            ret = "AmigaOS";
-        }
-        #else
-        ret = "Unknown";
-        #endif
-
-    }
-    else
-    if(strcmp(feat, "graphics-mem") == 0)
-    {
-        memf =
-        #if defined(AMIGA) && !defined(LG_TEST)
-        AvailMem(MEMF_CHIP);
-        #else
-        524288;
-        #endif
-    }
-    else
-    if(!strcmp(feat, "total-mem"))
-    {
-        memf =
-        #if defined(AMIGA) && !defined(LG_TEST)
-        AvailMem(MEMF_ANY);
-        #else
-        524288;
-        #endif
-    }
-
-    if(memf != -1)
-    {
-        ret = get_buf();
-        snprintf(get_buf(), buf_size(), "%d", memf);
+        // Missing: 'vblank', 'fpu' and 'chiprev'.
+        snprintf(buf_get(B_KEY), buf_len(), "%s", "Unknown");
     }
 
     // Are we testing for a specific value?
     if(exists(C_ARG(2)))
     {
-        ret = strcmp(ret, str(C_ARG(2))) ? "0" : "1";
+        if(strcasecmp(buf_put(B_KEY), str(C_ARG(2))) == 0)
+        {
+            // Value <-> result match.
+            R_STR(DBG_ALLOC(strdup("1")));
+        }
+
+        // Value <-> result mismatch.
+        R_STR(DBG_ALLOC(strdup("0")));
     }
 
-    // Return string value.
-    R_STR(DBG_ALLOC(strdup(ret)));
+    // Return result as string.
+    R_STR(DBG_ALLOC(strdup(buf_put(B_KEY))));
 }
 
 //------------------------------------------------------------------------------
@@ -283,21 +375,20 @@ entry_p m_getassign(entry_p contxt)
 
     if(!asnl)
     {
-        // Invalid name of assign, and the empty string is how the CBM
-        // installer fails.
-        R_EST;
+        // Invalid assign; an empty string is how the CBM installer fails.
+        return end();
     }
 
     // The second argument is optional.
-    entry_p opt = C_ARG(2);
+    entry_p option = C_ARG(2);
 
     // The bitmask must contain atleast this LDF_READ.
     ULONG msk = LDF_READ;
 
     // Parse the option string if it exists.
-    if(exists(opt))
+    if(exists(option))
     {
-        const char *o = str(opt);
+        const char *o = str(option);
 
         if(*o)
         {
@@ -312,9 +403,8 @@ entry_p m_getassign(entry_p contxt)
         }
         else
         {
-            // The CBM installer returns an empty string if option string is
-            // empty.
-            R_EST;
+            // The CBM installer returns an empty string if option is empty.
+            return end();
         }
     }
     else
@@ -342,7 +432,7 @@ entry_p m_getassign(entry_p contxt)
                                       NextDosEntry(dl, bits[i]);
                 while(dc)
                 {
-                    const char *n = B_TO_CSTR(dc->dol_Name);
+                    const char *n = B2CSTR(dc->dol_Name);
 
                     // Ignore case when looking for match.
                     if(!strcasecmp(asn, n))
@@ -394,7 +484,7 @@ entry_p m_getassign(entry_p contxt)
                         {
                             // Out of memory
                             PANIC(contxt);
-                            R_EST;
+                            return end();
                         }
                     }
                     else
@@ -418,7 +508,7 @@ entry_p m_getassign(entry_p contxt)
     #endif
 
     // Return empty string on failure.
-    R_EST;
+    return end();
 }
 
 //------------------------------------------------------------------------------
@@ -433,62 +523,50 @@ entry_p m_getdevice(entry_p contxt)
     C_SANE(1, NULL);
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    // Attempt to lock path.
     BPTR lock = (BPTR) Lock(str(C_ARG(1)), ACCESS_READ);
+    struct InfoData id;
 
-    if(lock)
+    if(!lock)
     {
-        struct InfoData id;
+        // Use current directory as fallback.
+        lock = (BPTR) Lock("", ACCESS_READ);
+    }
 
-        // Get vol info from file / dir lock.
-        if(Info(lock, &id))
+    if(lock && Info(lock, &id))
+    {
+        UnLock(lock);
+        struct DosList *dl = (struct DosList *) BADDR(id.id_VolumeNode);
+
+        if(dl && dl->dol_Task)
         {
-            struct DosList *dl = (struct DosList *) id.id_VolumeNode;
-            UnLock(lock);
+            struct MsgPort *mp = dl->dol_Task;
+            ULONG msk = LDF_READ | LDF_DEVICES;
+            dl = (struct DosList *) LockDosList(msk);
 
-            if(dl)
+            while(dl && mp != dl->dol_Task)
             {
-                struct MsgPort *mp = dl->dol_Task;
-                ULONG msk = LDF_READ | LDF_DEVICES;
-
                 // Search for <path> handler in the list of devices.
-                dl = (struct DosList *) LockDosList(msk);
-
-                while(dl && mp != dl->dol_Task)
-                {
-                    dl = (struct DosList *) NextDosEntry(dl, LDF_DEVICES);
-                }
-
-                UnLockDosList(msk);
-
-                // If we found it, we also found the name of the device.
-                if(dl)
-                {
-                    const char *n = B_TO_CSTR(dl->dol_Name);
-
-                    // strdup(NULL) is undefined.
-                    if(n)
-                    {
-                        R_STR(DBG_ALLOC(strdup(n)));
-                    }
-
-                    // Unknown error.
-                    PANIC(contxt);
-                }
+                dl = (struct DosList *) NextDosEntry(dl, LDF_DEVICES);
             }
-        }
-        else
-        {
-            UnLock(lock);
+
+            // Did we find the device?
+            if(dl && B2CSTR(dl->dol_Name))
+            {
+                // Copy device name before unlocking just in case.
+                char *dev = DBG_ALLOC(strdup(B2CSTR(dl->dol_Name)));
+                UnLockDosList(msk);
+                R_STR(dev);
+            }
+
+            UnLockDosList(msk);
         }
     }
 
-    // Could not get information about <path>.
+    // Could not get <path> info.
     ERR(ERR_READ, str(C_ARG(1)));
     #endif
-
     // Return empty string on failure.
-    R_EST;
+    return end();
 }
 
 //------------------------------------------------------------------------------
@@ -584,7 +662,7 @@ entry_p m_getenv(entry_p contxt)
     }
 
     // Nothing found, return empty string.
-    R_EST;
+    return end();
 }
 
 //------------------------------------------------------------------------------
@@ -674,7 +752,7 @@ static int h_getversion_rsp(struct Resident *rsp)
     if(!rsp)
     {
         // Invalid.
-        return -1;
+        return LG_NOVER;
     }
 
     // Major and revision.
@@ -708,9 +786,8 @@ static int h_getversion_res(const char *name)
     #if defined(AMIGA) && !defined(LG_TEST)
     return h_getversion_rsp(FindResident(name));
     #else
-    // Not used.
     (void) name;
-    return -1;
+    return LG_NOVER;
     #endif
 }
 
@@ -723,7 +800,7 @@ static int h_getversion_res(const char *name)
 static int h_getversion_dev(const char *name)
 {
     // Failure.
-    int ver = -1;
+    int ver = LG_NOVER;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct MsgPort *port = CreateMsgPort();
@@ -764,7 +841,6 @@ static int h_getversion_dev(const char *name)
 
     DeleteMsgPort(port);
     #else
-    // Not used.
     (void) name;
     #endif
 
@@ -781,7 +857,7 @@ static int h_getversion_dev(const char *name)
 static int h_getversion_lib(const char *name)
 {
     // Assume failure.
-    int ver = -1;
+    int ver = LG_NOVER;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct Library *lib = OpenLibrary(name, 0);
@@ -795,7 +871,6 @@ static int h_getversion_lib(const char *name)
         CloseLibrary(lib);
     }
     #else
-    // Not used.
     (void) name;
     #endif
 
@@ -831,7 +906,7 @@ int h_getversion_file(const char *name)
     #endif
 
     // Invalid version.
-    int ver = -1;
+    int ver = LG_NOVER;
 
     if(!file)
     {
@@ -853,14 +928,11 @@ int h_getversion_file(const char *name)
     // Did we find the key?
     if(!key[ndx])
     {
-        // Use global buffer.
-        char *buf = get_buf();
-
         // Fill up buffer with enough data to hold any realistic version string.
-        fread(buf, 1, buf_size(), file);
+        fread(buf_get(B_KEY), 1, buf_len(), file);
 
         // Begin after whitespace.
-        char *data = strchr(buf, ' ');
+        char *data = strchr(buf_put(B_KEY), ' ');
 
         if(data)
         {
@@ -882,8 +954,9 @@ int h_getversion_file(const char *name)
     // We're done.
     fclose(file);
 
-    // Version or -1;
-    return ver;
+    // If we have a valid version return that. Otherwise the file might be a
+    // library, try to get the library version and return that instead.
+    return ver == LG_NOVER ? h_getversion_lib(name) : ver;
 }
 
 //------------------------------------------------------------------------------
@@ -912,40 +985,38 @@ entry_p m_getversion(entry_p contxt)
         #endif
 
         // Invalid version.
-        int ver = -1;
+        int ver = LG_NOVER;
 
         // Get resident module version.
         if(opt(contxt, OPT_RESIDENT))
         {
             ver = h_getversion_res(file);
         }
-        else
+
+        if(ver == LG_NOVER)
         {
-            if(ver == -1)
+            // Get file version.
+            ver = h_getversion_file(name);
+        }
+
+        // Only attempt to open library / device if file doesn't exist.
+        if(h_exists(file) == LG_NONE)
+        {
+            if(ver == LG_NOVER)
             {
-                // Get file version.
-                ver = h_getversion_file(name);
+                // Get library version.
+                ver = h_getversion_lib(file);
             }
 
-            // Only attempt to open library / device if file doesn't exist.
-            if(h_exists(file) == LG_NONE)
+            if(ver == LG_NOVER)
             {
-                if(ver == -1)
-                {
-                    // Get library version.
-                    ver = h_getversion_lib(file);
-                }
-
-                if(ver == -1)
-                {
-                    // Get device version.
-                    ver = h_getversion_dev(file);
-                }
+                // Get device version.
+                ver = h_getversion_dev(file);
             }
         }
 
         // Failure (0) or version / revision.
-        R_NUM((ver == -1) ? 0 : ver);
+        R_NUM((ver == LG_NOVER) ? 0 : ver);
     }
 
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -1037,16 +1108,14 @@ entry_p m_iconinfo(entry_p contxt)
                 int v = (type == OPT_GETSTACK ? obj->do_StackSize : j == 0 ?
                          obj->do_CurrentX : obj->do_CurrentY);
 
-                snprintf(get_buf(), buf_size(), "%d", v);
-                svl = get_buf();
+                snprintf(buf_get(B_KEY), buf_len(), "%d", v);
+                svl = buf_put(B_KEY);
             }
-            else
-            if(type == OPT_GETDEFAULTTOOL && obj->do_DefaultTool)
+            else if(type == OPT_GETDEFAULTTOOL && obj->do_DefaultTool)
             {
                 svl = obj->do_DefaultTool;
             }
-            else
-            if(type == OPT_GETTOOLTYPE && obj->do_ToolTypes)
+            else if(type == OPT_GETTOOLTYPE && obj->do_ToolTypes)
             {
                 svl = (char *) FindToolType(obj->do_ToolTypes, name);
                 name = str(types[i]->children[++j]);
@@ -1056,8 +1125,8 @@ entry_p m_iconinfo(entry_p contxt)
             svl = svl ? svl : "";
             #else
             // Testing purposes only.
-            snprintf(get_buf(), buf_size(), "%d:%zu", type, j);
-            svl = get_buf();
+            snprintf(buf_get(B_KEY), buf_len(), "%d:%zu", type, j);
+            svl = buf_put(B_KEY);
             #endif
 
             // Always a valid (string).
@@ -1126,4 +1195,44 @@ entry_p m_iconinfo(entry_p contxt)
 
     // Success.
     R_NUM(LG_TRUE);
+}
+
+//------------------------------------------------------------------------------
+// (querydisplay <object> <option>)
+//
+//      Returns information about the current display environment for
+//      Installer.  This can be used to open different medias (pictures or
+//      animations) for different number of colors or screen sizes.
+//
+// Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
+//------------------------------------------------------------------------------
+entry_p m_querydisplay(entry_p contxt)
+{
+    // We need 2 arguments.
+    C_SANE(2, NULL);
+
+    char *obj = str(C_ARG(1)), *option = str(C_ARG(2));
+    int width = 0, height = 0, depth = 0, colors = 0, upper = 0, lower = 0,
+        left = 0, right = 0;
+
+    // Object 'screen'
+    if(strcasecmp(obj, "screen") == 0)
+    {
+        gui_query_screen(&width, &height, &depth, &colors);
+    }
+    // Object 'window'
+    else if(strcasecmp(obj, "window") == 0)
+    {
+        gui_query_window(&width, &height, &upper, &lower, &left, &right);
+    }
+
+    // Return translated option.
+    R_NUM(strcasecmp(option, "width") == 0 ? width :
+          strcasecmp(option, "height") == 0 ? height :
+          strcasecmp(option, "depth") == 0 ? depth :
+          strcasecmp(option, "colors") == 0 ? colors :
+          strcasecmp(option, "upper") == 0 ? upper :
+          strcasecmp(option, "lower") == 0 ? lower :
+          strcasecmp(option, "left") == 0 ? left :
+          strcasecmp(option, "right") == 0 ? right : 0);
 }

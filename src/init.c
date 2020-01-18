@@ -3,7 +3,7 @@
 //
 // Initilization by means of prepending and appending code.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ static void init_num(entry_p contxt, char *sym, int num)
 //------------------------------------------------------------------------------
 static void init_str(entry_p contxt, char *sym, char *str)
 {
-    // Create SYMBOL VALUE tuple.
+    // Create SYMBOL -> VALUE tuple.
     entry_p var = new_symbol(DBG_ALLOC(strdup(sym))),
             val = new_string(DBG_ALLOC(strdup(str)));
 
@@ -105,7 +105,7 @@ static void init_tooltypes(entry_p contxt)
     char *a_app = arg_get(ARG_APPNAME), *a_scr = arg_get(ARG_SCRIPT),
          *a_log = arg_get(ARG_LOGFILE), *a_lng = arg_get(ARG_LANGUAGE);
 
-    // Userlevels: minimum 'NOVICE' and default 'AVERAGE'.
+    // User levels: minimum 'NOVICE' and default 'AVERAGE'.
     int l_def = str_to_userlevel(arg_get(ARG_DEFUSER), LG_AVERAGE),
         l_min = str_to_userlevel(arg_get(ARG_MINUSER), LG_NOVICE);
 
@@ -165,6 +165,7 @@ static void init_misc_num(entry_p contxt)
     init_num(contxt, "@wild", 0);
     init_num(contxt, "@each-type", 0);
     init_num(contxt, "@debug", 0);
+    init_num(contxt, "@trap", 0);
     init_num(contxt, "@strict",
     // In test mode, strict is default.
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -337,7 +338,6 @@ static void init_welcome(entry_p contxt)
 
         // Tests don't expect a default (welcome).
         #if defined(AMIGA) && !defined(LG_TEST)
-
         // Add to the root and reparent.
         if(entry)
         {
@@ -365,9 +365,9 @@ entry_p init(entry_p contxt)
     // We should have atleast one child. If we don't, we're out of memory.
     if(!c_sane(contxt, 1) || !s_sane(contxt, 0))
     {
-        return(contxt);
+        return contxt;
     }
-
+#ifndef LG_DEBUG
     // Get tooltype / cli arguments.
     init_tooltypes(contxt);
 
@@ -382,6 +382,6 @@ entry_p init(entry_p contxt)
 
     // Set default symbols.
     init_misc(contxt);
-
+#endif
     return contxt;
 }

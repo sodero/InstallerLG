@@ -3,7 +3,7 @@
 //
 // Control structures
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -13,6 +13,10 @@
 #include "eval.h"
 #include "util.h"
 
+// Iteration mode.
+#define LG_UNTIL 1
+#define LG_WHILE 0
+
 //------------------------------------------------------------------------------
 // (if <condition> <then-statement> [<else-statements>])
 //     conditional
@@ -21,8 +25,7 @@
 //------------------------------------------------------------------------------
 entry_p m_if(entry_p contxt)
 {
-    // Allow empty bodies. If empty, resolve the conditional so that side
-    // effects, if any, will come into being.
+    // Allow empty bodies. Always resolve the conditional to evoke side effects.
     C_SANE(1, NULL);
 
     // Truth value of the condition.
@@ -87,11 +90,8 @@ static entry_p h_whunt(entry_p contxt, int mode)
     // Two arguments, the condition and the body of the loop.
     C_SANE(2, NULL);
 
-    // Reset return value.
-    D_NUM = 0;
-
-    // Prepare to return the resolved value of this function if the condition
-    // is false from the start.
+    // Prepare to return the resolved value (which is always 0) of this function
+    // if the condition is false from the start.
     entry_p ret = contxt->resolved;
 
     // Use XOR to support both 'while' and 'until'. Break if something goes
@@ -117,7 +117,7 @@ static entry_p h_whunt(entry_p contxt, int mode)
 entry_p m_until(entry_p contxt)
 {
     // Implemented in h_whunt.
-    return h_whunt(contxt, 1);
+    return h_whunt(contxt, LG_UNTIL);
 }
 
 //------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ entry_p m_until(entry_p contxt)
 entry_p m_while(entry_p contxt)
 {
     // Implemented in h_whunt.
-    return h_whunt(contxt, 0);
+    return h_whunt(contxt, LG_WHILE);
 }
 
 //------------------------------------------------------------------------------

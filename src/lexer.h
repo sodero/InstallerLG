@@ -1,9 +1,9 @@
 //------------------------------------------------------------------------------
 // lexer.h:
 //
-// InstallerNG tokenizer
+// InstallerLG tokenizer
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 

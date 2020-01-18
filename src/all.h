@@ -1,9 +1,9 @@
 //------------------------------------------------------------------------------
 // all.h:
 //
-// Protypes for all implementation functions m_*
+// Protypes for all implementations m_* of (...)
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -11,13 +11,13 @@
 #define ALL_H_
 
 #include "arithmetic.h"
-#include "bitwise.h"
 #include "control.h"
 #include "comparison.h"
 #include "exit.h"
 #include "external.h"
 #include "file.h"
 #include "information.h"
+#include "logic.h"
 #include "media.h"
 #include "probe.h"
 #include "procedure.h"

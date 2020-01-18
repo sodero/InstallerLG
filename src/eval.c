@@ -3,7 +3,7 @@
 //
 // Functions for evaluation of entry_t objects.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ static entry_p swap(entry_p *dst, entry_p *src)
         // New position of *src is *dst.
         return *dst;
     }
-    
+
     // No swap.
     return *src;
 }
@@ -54,45 +54,32 @@ static entry_p swap(entry_p *dst, entry_p *src)
 //------------------------------------------------------------------------------
 entry_p find_symbol(entry_p entry)
 {
-    // Local variables have priority. This currently implies function arguments.
-    entry_p con = local(entry);
+    // All symbols are global.
+    entry_p contxt = global(entry);
 
-    if(!con && PANIC(entry))
-    {
-        PANIC(entry);
-        return end();
-    }
+    // No panic if symbols don't exist.
+    S_SANE(0);
 
-    // Traverse tree until we reach the top.
-    do
+    // Iterate over all symbols in the global context.
+    for(entry_p *tmp = contxt->symbols; exists(*tmp); tmp++)
     {
-        // Iterate over all symbols in the current context.
-        for(entry_p *tmp = con->symbols; tmp && exists(*tmp); tmp++)
+        // Entry might be a CUSTOM. Ignore everything but SYMBOLS.
+        if((*tmp)->type == SYMBOL && !strcasecmp((*tmp)->name, entry->name))
         {
-            // Entry might be a CUSTOM. Ignore everything but SYMBOLS.
-            if((*tmp)->type != SYMBOL || strcasecmp((*tmp)->name, entry->name))
-            {
-                continue;
-            }
-
             // If possible swap symbol order to speed up future lookups before
             // returning. This is only done in the root and not inside CUSTOM,
             // since those symbols determine the order of function arguments.
-            return swap(con->symbols, tmp);
+            return swap(contxt->symbols, tmp);
         }
-
-        // Nothing found in the current context. Climb one scope higher.
-        con = local(con->parent);
     }
-    while(con);
 
     // Fail if in strict mode. Never recur, we might be out of memory.
-    if(strcasecmp(entry->name, "@strict") && get_num(global(entry), "@strict"))
+    if(strcasecmp(entry->name, "@strict") && get_num(contxt, "@strict"))
     {
         ERR_C(entry, ERR_UNDEF_VAR, entry->name);
     }
 
-    // Zero / empty string.
+    // Dangle: Zero / empty string.
     return end();
 }
 
@@ -129,7 +116,6 @@ static entry_p h_resolve_option(entry_p opt)
 //------------------------------------------------------------------------------
 entry_p resolve(entry_p entry)
 {
-    // Is there anything to resolve?
     if(!entry && PANIC(entry))
     {
         // Bad input.
@@ -142,7 +128,7 @@ entry_p resolve(entry_p entry)
         case SYMBOL:
             return entry->resolved;
 
-        // Symbolic references are resolved by resolving the symbol it refers to.
+        // References are resolved by resolving the symbol it refers to.
         case SYMREF:
             return resolve(find_symbol(entry));
 
@@ -185,17 +171,17 @@ entry_p resolve(entry_p entry)
 static int opt_to_int(entry_p entry)
 {
     // Resolve once.
-    char *opt = str(entry);
+    char *option = str(entry);
 
     // Is this an ordinary option?
     if(entry->id != OPT_CONFIRM)
     {
         // No translation needed.
-        return atoi(opt);
+        return atoi(option);
     }
 
     // Translate (confirm) to userlevel.
-    return str_to_userlevel(opt, atoi(opt));
+    return str_to_userlevel(option, atoi(option));
 }
 
 //------------------------------------------------------------------------------
@@ -207,48 +193,44 @@ static int opt_to_int(entry_p entry)
 //------------------------------------------------------------------------------
 int num(entry_p entry)
 {
-    // Is there anything to resolve?
-    if(entry)
+    if(!entry && PANIC(entry))
     {
-        switch(entry->type)
-        {
-            // Translate options.
-            case OPTION:
-                return opt_to_int(entry);
+        // Bad input.
+        return 0;
+    }
 
-            // These are numeric values:
-            case DANGLE:
-            case NUMBER:
-                return entry->id;
+    switch(entry->type)
+    {
+        // Translate options.
+        case OPTION:
+            return opt_to_int(entry);
 
-            // Recur.
-            case SYMBOL:
-                return num(entry->resolved);
+        // These are numeric values:
+        case DANGLE:
+        case NUMBER:
+            return entry->id;
 
-            // Recur.
-            case SYMREF:
-                return num(find_symbol(entry));
+        // Recur.
+        case SYMBOL:
+            return num(entry->resolved);
 
-            // Recur.
-            case CUSREF:
-            case NATIVE:
-                return num(entry->call(entry));
+        // Recur.
+        case SYMREF:
+            return num(find_symbol(entry));
 
-            // Attempt to convert string.
-            case STRING:
-                // Don't trust strings, we might be out of memory.
-                if(entry->name)
-                {
-                    return atoi(entry->name);
-                }
-                // Panic.
-                break;
+        // Recur.
+        case CUSREF:
+        case NATIVE:
+            return num(entry->call(entry));
 
-            // We should never end up here.
-            case CONTXT:
-            case CUSTOM:
-                break;
-        }
+        // Attempt to convert string.
+        case STRING:
+            return entry->name ? atoi(entry->name) : 0;
+
+        // We should never end up here.
+        case CONTXT:
+        case CUSTOM:
+            break;
     }
 
     // Bad input.
@@ -375,18 +357,19 @@ char *str(entry_p entry)
 
     switch(entry->type)
     {
+        // Strings, dangles and function names can be returned directly.
+        case DANGLE:
+        case CUSTOM:
+        case STRING:
+            if(entry->name)
+            {
+                return entry->name;
+            }
+            break;
+
         // Options need special treatment.
         case OPTION:
             return h_str_opt(entry);
-
-        // Dangling entries are considered empty strings.
-        case DANGLE:
-            return "";
-
-        // Strings and function names can be returned directly.
-        case CUSTOM:
-        case STRING:
-            return entry->name;
 
         // Recur.
         case SYMBOL:
@@ -465,8 +448,7 @@ void run(entry_p entry)
     // i18n setup.
     locale_init();
 
-    // Initialize GUI before starting the execution. If (effect) type is set,
-    // use a custom screen.
+    // Initialize GUI. Use a custom screen if (effect) statement exists.
     if(gui_init(status != false))
     {
         // If an 'effect' statement exists, execute this first of all.
@@ -491,7 +473,7 @@ void run(entry_p entry)
         // Output what we have unless we're running from WB.
         if(arg_argc(-1))
         {
-            printf("%s\n", str(status));
+            puts(str(status));
         }
 
         // GUI teardown.

@@ -3,7 +3,7 @@
 //
 // InstallerLG version information
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -12,7 +12,7 @@
 
 #define MAJOR 44
 #define MINOR 10
-#define BUILD 39
+#define BUILD 42
 #define PHASE "ALPHA"
 
 #define STY(X) #X

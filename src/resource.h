@@ -3,7 +3,7 @@
 //
 // Encapsulation of resources that we might want to localize later on.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -100,7 +100,7 @@ typedef enum
     S_GONE,
 } res_t;
 
-const char *tr(res_t r);
+const char *tr(res_t res);
 void locale_init(void);
 void locale_exit(void);
 

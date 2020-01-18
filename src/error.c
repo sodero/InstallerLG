@@ -3,14 +3,66 @@
 //
 // Functions for setting, getting and communicating errors.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
 #include "error.h"
 #include "gui.h"
 #include "util.h"
-#include <stdio.h>
+
+//------------------------------------------------------------------------------
+// Name:        h_error_str
+// Description: Translate error code to a human readable description.
+// Input:       err_t type:         Type of error.
+// Return:      const char *:       Error description.
+//------------------------------------------------------------------------------
+static const char * h_error_str(err_t err)
+{
+    static const char *des[] =
+    {
+        NULL,                                    // ERR_NONE
+        "Halt",                                  // ERR_HALT
+        "Abort",                                 // ERR_ABORT
+        "Reset",                                 // ERR_RESET
+        "Parse error",                           // ERR_PARSE
+        "Internal error",                        // ERR_PANIC
+        "Buffer overflow",                       // ERR_OVERFLOW
+        "Read error",                            // ERR_READ
+        "Could not read from file",              // ERR_READ_FILE
+        "Could not read directory",              // ERR_READ_DIR
+        "Could not write to file",               // ERR_WRITE_FILE
+        "Could not create directory",            // ERR_WRITE_DIR
+        "Could not rename file",                 // ERR_RENAME_FILE
+        "Could not delete file",                 // ERR_DELETE_FILE
+        "Version not found",                     // ERR_NO_VERSION
+        "Not a file",                            // ERR_NOT_A_FILE
+        "Not a directory",                       // ERR_NOT_A_DIR
+        "No such file or directory",             // ERR_NO_SUCH_FILE_OR_DIR
+        "Could not get file / dir permissions",  // ERR_GET_PERM
+        "Could not set file / dir permissions",  // ERR_SET_PERM
+        "Could not execute command",             // ERR_EXEC
+        "Could not create / remove assign",      // ERR_ASSIGN
+        "Undefined function",                    // ERR_UNDEF_FNC
+        "Undefined variable",                    // ERR_UNDEF_VAR
+        "Max recursion depth exceeded",          // ERR_MAX_DEPTH
+        "Missing option",                        // ERR_MISSING_OPTION
+        "Nothing to do",                         // ERR_NOTHING_TO_DO
+        "Division by zero",                      // ERR_DIV_BY_ZERO
+        "Invalid format string",                 // ERR_FMT_INVALID
+        "Format string type mismatch",           // ERR_FMT_MISMATCH
+        "Missing format string arguments",       // ERR_FMT_MISSING
+        "Unused format string arguments",        // ERR_FMT_UNUSED
+        "No such item",                          // ERR_NO_ITEM
+        "Invalid application name",              // ERR_INVALID_APP
+        "Invalid name of volume",                // ERR_INVALID_VOLUME
+        "Invalid assign",                        // ERR_INVALID_ASSIGN
+        "Options are mutually exclusive",        // ERR_OPTION_MUTEX
+        "Invalid value"                          // ERR_VAL_INVALID
+    };
+
+    return des[err < ERR_VAL_INVALID ? err : ERR_VAL_INVALID];
+}
 
 //------------------------------------------------------------------------------
 // Name:        error
@@ -49,26 +101,11 @@ int error(entry_p contxt, int line, err_t type, const char *info)
         return type;
     }
 
-    static const char *des[] =
+    // Show error in window / console unless trap mode is active.
+    if(!get_num(contxt, "@trap"))
     {
-        /*0*/ NULL, /*1*/ "Halt", /*2*/ "Abort", /*3*/ "Reset", /*4*/ "Parse error",
-        /*5*/ "Internal error", /*6*/ "Buffer overflow", /*7*/ "Read error",
-        /*8*/ "Could not read from file", /*9*/ "Could not read directory",
-        /*10*/ "Could not write to file", /*11*/ "Could not create directory",
-        /*12*/ "Could not rename file", /*13*/ "Could not delete file",
-        /*14*/ "Version not found", /*15*/ "Not a file", /*16*/ "Not a directory",
-        /*17*/ "No such file or directory", /*18*/ "Could not get file / dir permissions",
-        /*19*/ "Could not set file / dir permissions", /*20*/ "Could not execute command",
-        /*21*/ "Could not create / remove assign", /*22*/ "Undefined function",
-        /*23*/ "Undefined variable", /*24*/ "Max recursion depth exceeded", /*25*/ "Missing option",
-        /*26*/ "Nothing to do", /*27*/ "Division by zero", /*28*/ "Invalid format string",
-        /*29*/ "Format string type mismatch", /*30*/ "Missing format string arguments",
-        /*31*/ "Unused format string arguments", /*32*/ "No such item",
-        /*33*/ "Invalid application name", /*34*/ "Invalid name of volume",
-        /*35*/ "Invalid assign", /*36*/ "Options are mutually exclusive", /*37*/ "Invalid value"
-    };
+        gui_error(line, h_error_str(type), info);
+    }
 
-    // Show error in window / console.
-    gui_error(line, des[type], info);
     return last;
 }

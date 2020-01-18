@@ -3,7 +3,7 @@
 //
 // Functions for handling command line arguments and workbench tooltypes.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -38,31 +38,31 @@ static char *args[ARG_NUMBER_OF];
 //------------------------------------------------------------------------------
 static bool arg_post(void)
 {
-    // We need a script name.
-    if(!args[ARG_SCRIPT])
+    // We might not have a script but we must continue with the rest of the
+    // strings in case those are tooltypes. Otherwise we'll free memory in
+    // arg_done() that is already freed by FreeDiskObject in arg_wb().
+    if(args[ARG_SCRIPT])
     {
-        return false;
+        #if defined(AMIGA) && !defined(LG_TEST)
+        BPTR lock = (BPTR) Lock(args[ARG_SCRIPT], ACCESS_READ);
+
+        // Use script name if we fail to get the absolute path.
+        if(!lock || !NameFromLock(lock, buf_get(B_KEY), buf_len()))
+        {
+            strncpy(buf_get(B_KEY), args[ARG_SCRIPT], buf_len());
+        }
+
+        // Lock might be invalid. The script might not exist.
+        UnLock(lock);
+        #else
+        // Prepend redundant path in test mode.
+        snprintf(buf_get(B_KEY), buf_len(), "./%s", args[ARG_SCRIPT]);
+        #endif
+
+        // Copy of the (hopefully) absolute script path and working directory.
+        args[ARG_SCRIPTDIR] = DBG_ALLOC(h_pathonly(buf_get(B_KEY)));
+        args[ARG_SCRIPT] = DBG_ALLOC(strdup(buf_put(B_KEY)));
     }
-
-    #if defined(AMIGA) && !defined(LG_TEST)
-    BPTR lock = (BPTR) Lock(args[ARG_SCRIPT], ACCESS_READ);
-
-    // Use script name if we fail to get the absolute path.
-    if(!lock || !NameFromLock(lock, get_buf(), buf_size()))
-    {
-        strncpy(get_buf(), args[ARG_SCRIPT], buf_size());
-    }
-
-    // Lock might be invalid. The script might not exist.
-    UnLock(lock);
-    #else
-    // Prepend redundant path in test mode.
-    snprintf(get_buf(), buf_size(), "./%s", args[ARG_SCRIPT]);
-    #endif
-
-    // Copy of the (hopefully) absolute script path and working directory.
-    args[ARG_SCRIPTDIR] = DBG_ALLOC(h_pathonly(get_buf()));
-    args[ARG_SCRIPT] = DBG_ALLOC(strdup(get_buf()));
 
     // Copy string arguments. Stop at OLDDIR since items after that are either
     // already copied or (interpreted as) booleans.
@@ -124,6 +124,33 @@ static bool arg_cli(int argc, char **argv)
     #endif
 }
 
+#if defined(AMIGA) && !defined(LG_TEST)
+//------------------------------------------------------------------------------
+// Name:        arg_find_tts
+// Description: Find tooltypes in string list.
+// Input:       STRPTR *tts:    List of tooltype strings.
+//              bool tool:      'true' if invoked as tool, 'false' if project.
+// Return:      -
+//------------------------------------------------------------------------------
+static void arg_find_tts(STRPTR *tts, bool tool)
+{
+    // We need to find the script path if we're invoked as a tool.
+    if(tool)
+    {
+        args[ARG_SCRIPT] = (char *) FindToolType(tts, (STRPTR) tr(S_SCRI));
+    }
+
+    // The rest of the 'tooltypes' are the same for 'projects' and 'tools'.
+    args[ARG_APPNAME] = (char *) FindToolType((STRPTR *) tts, "APPNAME");
+    args[ARG_MINUSER] = (char *) FindToolType((STRPTR *) tts, "MINUSER");
+    args[ARG_DEFUSER] = (char *) FindToolType((STRPTR *) tts, "DEFUSER");
+    args[ARG_LANGUAGE] = (char *) FindToolType((STRPTR *) tts, "LANGUAGE");
+    args[ARG_LOGFILE] = (char *) FindToolType((STRPTR *) tts, "LOGFILE");
+    args[ARG_NOLOG] = (char *) FindToolType((STRPTR *) tts, "NOLOG");
+    args[ARG_NOPRETEND] = (char *) FindToolType((STRPTR *) tts, "NOPRETEND");
+}
+#endif
+
 //------------------------------------------------------------------------------
 // Name:        arg_wb
 // Description: Get WB tooltype information.
@@ -154,37 +181,21 @@ static bool arg_wb(char **argv)
     BPTR old = CurrentDir(arg->wa_Lock);
 
     // We have the script name if this is a 'project'.
-    args[ARG_SCRIPT] = arg->wa_Name;
-
-    // Read information from icon.
-    struct DiskObject *dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
-
-    // Get info from icon if we can, otherwise continue.
-    if(dob && dob->do_ToolTypes)
+    if(wb->sm_NumArgs == 2)
     {
-        char **tts = (char **) dob->do_ToolTypes;
-
-        // We need to find the script path if we're invoked as a tool.
-        if(wb->sm_NumArgs == 1)
-        {
-            args[ARG_SCRIPT] = (char *) FindToolType ((STRPTR *) tts,
-                                                      (STRPTR) tr(S_SCRI));
-        }
-
-        // The rest of the 'tooltypes' are the same for 'projects' and 'tools'.
-        args[ARG_APPNAME] = (char *) FindToolType((STRPTR *) tts, "APPNAME");
-        args[ARG_MINUSER] = (char *) FindToolType((STRPTR *) tts, "MINUSER");
-        args[ARG_DEFUSER] = (char *) FindToolType((STRPTR *) tts, "DEFUSER");
-        args[ARG_LANGUAGE] = (char *) FindToolType((STRPTR *) tts, "LANGUAGE");
-        args[ARG_LOGFILE] = (char *) FindToolType((STRPTR *) tts, "LOGFILE");
-        args[ARG_NOLOG] = (char *) FindToolType((STRPTR *) tts, "NOLOG");
-        args[ARG_NOPRETEND] = (char *) FindToolType((STRPTR *) tts, "NOPRETEND");
+        args[ARG_SCRIPT] = arg->wa_Name;
     }
 
-    // Postprocess WB info.
-    bool ret = arg_post();
+    // Get info from icon if we can, otherwise continue.
+    struct DiskObject *dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
 
-    // Go back to where we started from. We'll crash if we don't.
+    if(dob && dob->do_ToolTypes)
+    {
+        arg_find_tts(dob->do_ToolTypes, wb->sm_NumArgs == 1);
+    }
+
+    // Postprocess WB info and go back. We'll crash if we don't.
+    bool ret = arg_post();
     CurrentDir(old);
 
     // Disk object not needed, a deep copy is done in arg_post().
@@ -193,7 +204,6 @@ static bool arg_wb(char **argv)
         FreeDiskObject(dob);
     }
 
-    // Return the result of arg_post().
     return ret;
     #else
     // We should never end up here.
@@ -216,16 +226,16 @@ bool arg_init(int argc, char **argv)
     arg_argc(argc);
 
     // Save current directory so that we can go back on exit.
-    if(getcwd(get_buf(), buf_size()) == get_buf())
+    if(getcwd(buf_get(B_KEY), buf_len()) == buf_get(B_KEY))
     {
-        args[ARG_OLDDIR] = DBG_ALLOC(strdup(get_buf()));
+        args[ARG_OLDDIR] = DBG_ALLOC(strdup(buf_put(B_KEY)));
     }
 
     // Invoked from CLI or WB.
     bool init = argc ? arg_cli(argc, argv) : arg_wb(argv);
 
     // Go to script working directory and return.
-    return init && !chdir(args[ARG_SCRIPTDIR]);
+    return init && args[ARG_SCRIPTDIR] && !chdir(args[ARG_SCRIPTDIR]);
 }
 
 //------------------------------------------------------------------------------
@@ -273,8 +283,8 @@ int arg_argc(int argc)
 void arg_done(void)
 {
     // Go back to the directory where we started. Don't rely on the existance
-    // of this string, we might be out of memory.
-    if(args[ARG_OLDDIR])
+    // of these strings, we might be out of memory.
+    if(args[ARG_SCRIPTDIR] && args[ARG_OLDDIR])
     {
         chdir(args[ARG_OLDDIR]);
     }

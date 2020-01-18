@@ -3,7 +3,7 @@
 //
 // User prompting
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ entry_p m_askbool(entry_p contxt)
             choices  = opt(contxt, OPT_CHOICES);
 
     // Default = 'no'.
-    int ans = 0;
+    int ans = LG_FALSE;
 
     // Do we have both prompt and help text?
     if(!prompt || !help)
@@ -68,7 +68,7 @@ entry_p m_askbool(entry_p contxt)
     // Do we have a user specified default?
     if(deflt)
     {
-        ans = num(deflt);
+        ans = num(deflt) ? LG_TRUE : LG_FALSE;
     }
 
     // Show requester unless we're executing in 'novice' mode.
@@ -109,7 +109,7 @@ entry_p m_askbool(entry_p contxt)
             }
 
             // Translate return code.
-            R_NUM((grc == G_TRUE) ? 1 : 0);
+            R_NUM((grc == G_TRUE) ? LG_TRUE : LG_FALSE);
         }
     }
 
@@ -256,7 +256,7 @@ entry_p m_askchoice(entry_p contxt)
     inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back != false, &res);
 
     // Add skipper. Don't trust the GUI.
-    res += ((D_NUM < 32 && D_NUM >= 0) ? add[D_NUM] : 0);
+    res += ((res < 32 && res >= 0) ? add[res] : 0);
 
     // Is the back option available?
     if(back)
@@ -309,7 +309,7 @@ entry_p m_askdir(entry_p contxt)
     if(!prompt || !help || !deflt)
     {
         ERR(ERR_MISSING_OPTION, prompt ? help ? "default" : "help" : "prompt");
-        R_EST;
+        return end();
     }
 
     // Return default value if we're executing in 'novice' mode.
@@ -323,7 +323,7 @@ entry_p m_askdir(entry_p contxt)
     // Could we resolve all options?
     if(DID_ERR)
     {
-        R_EST;
+        return end();
     }
 
     // Prompt user.
@@ -350,7 +350,7 @@ entry_p m_askdir(entry_p contxt)
     if(grc == G_ABORT || grc == G_EXIT)
     {
         HALT;
-        R_EST;
+        return end();
     }
 
     // We have a directory.
@@ -368,157 +368,152 @@ entry_p m_askdir(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p m_askdisk(entry_p contxt)
 {
-    if(contxt)
+    // One or more arguments / options.
+    C_SANE(1, contxt);
+
+    entry_p prompt   = opt(contxt, OPT_PROMPT),
+            help     = opt(contxt, OPT_HELP),
+            back     = opt(contxt, OPT_BACK),
+            dest     = opt(contxt, OPT_DEST),
+            newname  = opt(contxt, OPT_NEWNAME);
+
+    // Are all mandatory options (?) present?
+    if(!prompt || !help || !dest)
     {
-        entry_p prompt   = opt(contxt, OPT_PROMPT),
-                help     = opt(contxt, OPT_HELP),
-                back     = opt(contxt, OPT_BACK),
-                dest     = opt(contxt, OPT_DEST),
-                newname  = opt(contxt, OPT_NEWNAME);
+        ERR(ERR_MISSING_OPTION, prompt ? help ? "dest" : "help" : "prompt");
+        R_NUM(LG_FALSE);
+    }
 
-        D_NUM = 0;
+    // Append ':' to turn 'dest' into something we can lock.
+    snprintf(buf_get(B_KEY), buf_len(), "%s:", str(dest));
 
-        // Are all mandatory options (!?) present?
-        if(prompt && help && dest)
+    // Volume names must be > 0 (+ :) characters long.
+    if(strlen(buf_get(B_KEY)) < 2)
+    {
+        ERR(ERR_INVALID_VOLUME, buf_put(B_KEY));
+        R_NUM(LG_FALSE);
+    }
+
+    // Return code.
+    int ret = LG_FALSE;
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    struct Process *p = (struct Process *) FindTask(NULL);
+
+    // Save the current window ptr.
+    APTR w = p->pr_WindowPtr;
+
+    // Disable auto request.
+    p->pr_WindowPtr = (APTR) -1L;
+
+    // Is this volume present already?
+    BPTR l = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
+
+    if(!l)
+    {
+        const char *msg = str(prompt), *hlp = str(help),
+                   *bt1 = tr(S_RTRY), *bt2 = tr(S_SKIP);
+
+        // Only show requester if we could resolve all options.
+        if(!DID_ERR)
         {
-            char dsk[PATH_MAX];
-
-            // Append ':' to turn 'dest' into something we can 'Lock'.
-            snprintf(dsk, sizeof(dsk), "%s:", str(dest));
-
-            // Volume names must be > 0 characters long.
-            if(strlen(dsk) > 1)
+            // Retry until we can get a lock or the user aborts.
+            while(!l)
             {
-                #if defined(AMIGA) && !defined(LG_TEST)
-                struct Process *p = (struct Process *) FindTask(NULL);
+                // Prompt user.
+                inp_t grc = gui_bool(msg, hlp, bt1, bt2, back != false);
 
-                // Save the current window ptr.
-                APTR w = p->pr_WindowPtr;
-
-                // Disable auto request.
-                p->pr_WindowPtr = (APTR) -1L;
-
-                // Is this volume present already?
-                BPTR l = (BPTR) Lock(dsk, ACCESS_READ);
-                if(!l)
+                if(grc == G_TRUE)
                 {
-                    const char *msg = str(prompt), *hlp = str(help),
-                               *bt1 = tr(S_RTRY), *bt2 = tr(S_SKIP);
-
-                    // Only show requester if we could resolve all options.
-                    if(!DID_ERR)
-                    {
-                        // Retry until we can get a lock or the user aborts.
-                        while(!l)
-                        {
-                            // Prompt user.
-                            inp_t grc = gui_bool(msg, hlp, bt1, bt2, back != false);
-
-                            if(grc == G_TRUE)
-                            {
-                                l = (BPTR) Lock(dsk, ACCESS_READ);
-                            }
-                            else
-                            {
-                                // Is the back option available?
-                                if(back)
-                                {
-                                    // Fake input?
-                                    if(get_num(contxt, "@back"))
-                                    {
-                                        grc = G_ABORT;
-                                    }
-
-                                    // On abort execute.
-                                    if(grc == G_ABORT)
-                                    {
-                                        // Restore auto request before executing
-                                        // the 'back' code.
-                                        p->pr_WindowPtr = w;
-                                        return resolve(back);
-                                    }
-                                }
-                                // FIXME
-                                if(grc == G_ABORT || grc == G_EXIT)
-                                {
-                                    HALT;
-                                }
-
-                                // User abort or err.
-                                break;
-                            }
-                        }
-                    }
+                    l = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
                 }
-
-                // Did the user abort?
-                if(l)
+                else
                 {
-                    // Are we going to create an assign aliasing 'dest'?
-                    if(newname)
+                    // Is the back option available?
+                    if(back)
                     {
-                        const char *nn = str(newname);
-
-                        // Assigns must be > 0 characters long.
-                        if(*nn)
+                        // Fake input?
+                        if(get_num(contxt, "@back"))
                         {
-                            // On success, the lock belongs to
-                            // the system. Do not UnLock().
-                            D_NUM = AssignLock(nn, l) ? 1 : 0;
-
-                            // On failure, we need to UnLock() it ourselves.
-                            if(!D_NUM)
-                            {
-                                // Could not create 'newname' assign.
-                                ERR(ERR_ASSIGN, str(C_ARG(1)));
-                                UnLock(l);
-                            }
+                            grc = G_ABORT;
                         }
-                        else
+
+                        // On abort execute.
+                        if(grc == G_ABORT)
                         {
-                            // An assign must contain at least one character.
-                            ERR(ERR_INVALID_ASSIGN, nn);
-                            UnLock(l);
+                            // Restore auto request before and unlock buffer
+                            // before resolving (back).
+                            p->pr_WindowPtr = w;
+                            buf_put(B_KEY);
+                            return resolve(back);
                         }
                     }
-                    else
+                    // FIXME
+                    if(grc == G_ABORT || grc == G_EXIT)
                     {
-                        // Sucess.
-                        D_NUM = 1;
-                        UnLock(l);
+                        HALT;
                     }
+
+                    // User abort or err.
+                    break;
                 }
+            }
+        }
+    }
 
-                // Restore auto request.
-                p->pr_WindowPtr = w;
-                #else
-                // On non-Amiga systems, or in test mode, we always succeed.
-                D_NUM = 1;
+    // Volume not needed anymore.
+    buf_put(B_KEY);
 
-                // For testing purposes only.
-                printf("%d", (newname || back) ? 1 : 0);
-                #endif
+    // Did the user abort?
+    if(l)
+    {
+        // Are we going to create an assign aliasing 'dest'?
+        if(newname)
+        {
+            const char *nn = str(newname);
+
+            // Assigns must be > 0 characters long.
+            if(*nn)
+            {
+                // On success, the lock belongs to
+                // the system. Do not UnLock().
+                ret = AssignLock(nn, l) ? LG_TRUE : LG_FALSE;
+
+                // On failure, we need to UnLock() it ourselves.
+                if(ret == LG_FALSE)
+                {
+                    // Could not create 'newname' assign.
+                    ERR(ERR_ASSIGN, str(C_ARG(1)));
+                    UnLock(l);
+                }
             }
             else
             {
-                // A volume name must contain at least one character.
-                ERR(ERR_INVALID_VOLUME, dsk);
+                // An assign must contain at least one character.
+                ERR(ERR_INVALID_ASSIGN, nn);
+                UnLock(l);
             }
         }
         else
         {
-            // Missing one or more options.
-            ERR(ERR_MISSING_OPTION, prompt ? help ? "dest" : "help" : "prompt");
+            // Sucess.
+            ret = LG_TRUE;
+            UnLock(l);
         }
     }
-    else
-    {
-        // The parser is broken
-        PANIC(contxt);
-    }
 
-    // Success, failure or broken parser.
-    R_CUR;
+    // Restore auto request.
+    p->pr_WindowPtr = w;
+    #else
+    // On non-Amiga systems, or in test mode, we always succeed.
+    ret = LG_TRUE;
+
+    // For testing purposes only.
+    printf("%s%d", buf_put(B_KEY), (newname || back) ? LG_TRUE : LG_FALSE);
+    #endif
+
+    // Success or failure.
+    R_NUM(ret);
 }
 
 //------------------------------------------------------------------------------
@@ -547,7 +542,7 @@ entry_p m_askfile(entry_p contxt)
     if(!prompt || !help || !deflt)
     {
         ERR(ERR_MISSING_OPTION, prompt ? help ? "default" : "help" : "prompt");
-        R_EST;
+        return end();
     }
 
     // Return default value if we're executing in 'novice' mode.
@@ -561,7 +556,7 @@ entry_p m_askfile(entry_p contxt)
     // Could we resolve all options?
     if(DID_ERR)
     {
-        R_EST;
+        return end();
     }
 
     // Prompt user.
@@ -588,7 +583,7 @@ entry_p m_askfile(entry_p contxt)
     if(grc == G_ABORT || grc == G_EXIT)
     {
         HALT;
-        R_EST;
+        return end();
     }
 
     // We have a file.
@@ -629,23 +624,20 @@ entry_p m_asknumber(entry_p contxt)
 
     if(range)
     {
-        if(c_sane(range, 2))
-        {
-            min = num(range->children[0]);
-            max = num(range->children[1]);
-
-            // Use default range when the user given range is invalid.
-            if(min >= max)
-            {
-                max = 100;
-                min = 0;
-            }
-        }
-        else
+        if(!c_sane(range, 2) && PANIC(contxt))
         {
             // The parser is broken
-            PANIC(contxt);
-            R_CUR;
+            return end();
+        }
+
+        min = num(range->children[0]);
+        max = num(range->children[1]);
+
+        // Use default range when the user given range is invalid.
+        if(min >= max)
+        {
+            max = 100;
+            min = 0;
         }
     }
 
@@ -690,7 +682,7 @@ entry_p m_asknumber(entry_p contxt)
         HALT;
     }
 
-    // Success, failure or broken parser.
+    // Success or failure.
     R_CUR;
 }
 
@@ -800,37 +792,39 @@ entry_p m_askoptions(entry_p contxt)
     const char *prt = str(prompt), *hlp = str(help);
 
     // Only show requester if we could resolve all options.
-    if(!DID_ERR)
+    if(DID_ERR)
     {
-        // Prompt user.
-        inp_t grc = gui_options(prt, hlp, chs, ndx, back != false, &D_NUM);
+        R_NUM(-1);
+    }
 
-        // Is the back option available?
-        if(back)
+    // Prompt user.
+    inp_t grc = gui_options(prt, hlp, chs, ndx, back != false, &D_NUM);
+
+    // Is the back option available?
+    if(back)
+    {
+        // Fake input?
+        if(get_num(contxt, "@back"))
         {
-            // Fake input?
-            if(get_num(contxt, "@back"))
-            {
-                grc = G_ABORT;
-            }
-
-            // On abort execute.
-            if(grc == G_ABORT)
-            {
-                return resolve(back);
-            }
+            grc = G_ABORT;
         }
+
+        // On abort execute.
+        if(grc == G_ABORT)
+        {
+            return resolve(back);
+        }
+    }
 //
 // See file.c 116++
 //
-        // FIXME
-        if(grc == G_ABORT || grc == G_EXIT)
-        {
-            HALT;
-        }
+    // FIXME
+    if(grc == G_ABORT || grc == G_EXIT)
+    {
+        HALT;
     }
 
-    // Success, failure or broken parser.
+    // Success or failure.
     R_CUR;
 }
 
@@ -854,7 +848,7 @@ entry_p m_askstring(entry_p contxt)
     if(!prompt || !help || !deflt)
     {
         ERR(ERR_MISSING_OPTION, prompt ? help ? "default" : "help" : "prompt");
-        R_EST;
+        return end();
     }
 
     // Return default value if we're executing in 'novice' mode.
@@ -869,7 +863,7 @@ entry_p m_askstring(entry_p contxt)
     if(DID_ERR)
     {
         // Return empty string.
-        R_EST;
+        return end();
     }
 
     // Prompt user.
@@ -895,7 +889,7 @@ entry_p m_askstring(entry_p contxt)
     if(grc == G_ABORT || grc == G_EXIT)
     {
         HALT;
-        R_EST;
+        return end();
     }
 
     // We have a string.

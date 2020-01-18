@@ -3,7 +3,7 @@
 //
 // Symbol manipulation
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -14,6 +14,91 @@
 #include "util.h"
 #include <stdlib.h>
 #include <string.h>
+
+//------------------------------------------------------------------------------
+// Name:        h_copy_deep
+// Description: Do a deep copy of an entry.
+// Input:       entry_p entry:      The entry to be copied.
+// Return:      entry_p:            A copy of 'entry' or NULL on failure.
+//------------------------------------------------------------------------------
+static entry_p h_copy_deep(entry_p entry)
+{
+    entry_p copy = DBG_ALLOC(malloc(sizeof(entry_t)));
+
+    if(!copy && PANIC(entry))
+    {
+        // Out of memory.
+        return NULL;
+    }
+
+    // Do a straight copy of everything.
+    memmove(copy, entry, sizeof(entry_t));
+
+    // Copy string value if there is one.
+    if(entry->name)
+    {
+        copy->name = DBG_ALLOC(strdup(entry->name));
+
+        if(!copy->name && PANIC(entry))
+        {
+            // Out of memory.
+            free(copy);
+            return NULL;
+        }
+    }
+
+    return copy;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_set_undangle
+// Description: m_set helper. Cast entry to a non-dangling type.
+// Input:       entry_p entry:  The entry to be cast.
+// Return:      -
+//------------------------------------------------------------------------------
+static void h_set_undangle(entry_p entry)
+{
+    // In non strict mode we might have a DANGLE on the right hand side if a
+    // bogus resolve was done. To prevent leaks after a deep copy we need to
+    // typecast the RHS.
+    if(!entry || entry->type != DANGLE)
+    {
+        return;
+    }
+
+    // Typecast to string. The string will be empty. If evaluated as a number,
+    // it will be zero.
+    entry->type = STRING;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_set_find
+// Description: m_set helper. Find symbol with a given name in symbol array.
+// Input:       entry_p contxt:     Execution context.
+//              const char *name:   Symbol name.
+// Return:      entry_p:            The symbol if found, NULL otherwise.
+//------------------------------------------------------------------------------
+static entry_p h_set_find(entry_p contxt, const char *name)
+{
+    if(!contxt || !contxt->symbols || !name)
+    {
+        // No search possible.
+        return NULL;
+    }
+
+    // Iterate over all symbols in the current context.
+    for(entry_p *cur = contxt->symbols; exists(*cur); cur++)
+    {
+        if(!strcasecmp((*cur)->name, name))
+        {
+            // Found it.
+            return *cur;
+        }
+    }
+
+    // Not found.
+    return NULL;
+}
 
 //------------------------------------------------------------------------------
 // (set <varname> <value> [<varname2> <value2> ...])
@@ -29,92 +114,40 @@ entry_p m_set(entry_p contxt)
     // Function argument tuples.
     entry_p *sym = contxt->symbols, *val = contxt->children;
 
-    // The custom procedure contxt if we're in one. If so we need to handle
-    // local variables (args).
-    entry_p cus = custom(contxt);
-
     // Iterate over all symbol -> value tuples
     while(exists(*sym) && exists(*val))
     {
-        // Resolve the right hand side before setting the symbol value.
-        entry_p rhs = resolve(*val);
-        entry_p dst = global(contxt);
+        // Resolve the RHS and do a deep copy of it.
+        entry_p rhs = resolve(*val), dst = global(contxt),
+                res = DID_ERR ? NULL : h_copy_deep(rhs);
 
-        // Did we manage to resolve the rhs?
-        if(DID_ERR)
+        if(!res)
         {
-            // Ignore the rest of the tuples.
-            break;
+            // Error / out of memory.
+            return end();
         }
 
-        // Are we within the contxt of a custom procedure?
-        if(cus)
-        {
-            // If so determine if this particular symbol is one of the local
-            // ones (arguments), if it is, rather than the global context, the
-            // local context should be the target.
-            for(entry_p *cur = cus->symbols; cur && exists(*cur); cur++)
-            {
-                // As always with symbols, ignore the case.
-                if(!strcasecmp((*cur)->name, (*sym)->name))
-                {
-                    // Set destination to the local context if we have a match.
-                    dst = cus;
-                }
-            }
-        }
+        // Make sure the RHS isn't dangling, we'll leak memory if it does.
+        h_set_undangle(res);
 
-        // Create a copy of the contents of the rhs.
-        entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
-
-        if(!res && PANIC(contxt))
-        {
-            // Out of memory.
-            break;
-        }
-
-        // Do a deep copy of the value.
-        memmove(res, rhs, sizeof(entry_t));
-
-        // Copy name string if such exists.
-        if(res->name)
-        {
-            res->name = DBG_ALLOC(strdup(res->name));
-
-            if(!res->name && PANIC(contxt))
-            {
-                // Out of memory.
-                free(res);
-                break;
-            }
-        }
-
-        // In non strict mode we might have a DANGLE on the right hand side if a
-        // bogus resolve was done. To prevent leaks we need to typecast the rhs.
-        if(res->type == DANGLE)
-        {
-            // Typecast to string. The string will be empty. If evaluated as a
-            // number, it will be zero.
-            res->type = STRING;
-        }
-
-        // Reparent the value and free the old resolved value if any, and create
-        // a reference from the global context to the symbol.
+        // Reparent and create global reference.
         res->parent = *sym;
         kill((*sym)->resolved);
         (*sym)->resolved = res;
+
+        // Push cannot fail in this context.
         push(dst, *sym);
         (*sym)->parent = contxt;
 
-        // Are there any more tuples?
+        // We're at the end of the list when both are NULL or end().
         if(*(++sym) == *(++val))
         {
-            // We're at the end of the list.
             return res;
         }
     }
 
-    // Unresolvable right hand side or broken parser.
+    // Broken parser.
+    PANIC(contxt);
     return end();
 }
 
@@ -127,124 +160,67 @@ entry_p m_set(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p m_symbolset(entry_p contxt)
 {
-    // Symbol destination.
-    entry_p dst = global(contxt);
-
     // We need one or more tuples of symbol name and value.
-    if(c_sane(contxt, 2) && dst)
+    C_SANE(2, NULL); S_SANE(0);
+
+    entry_p ret = end();
+
+    // Iterate over all name -> value tuples
+    for(entry_p *cur = contxt->children; exists(*cur);)
     {
-        entry_p ret = D_CUR;
-        entry_p *cur = contxt->children;
+        // Resolve LHS and RHS and do a deep copy of RHS.
+        const char *lhs = str(*cur++);
+        entry_p rhs = resolve(*cur++), res = DID_ERR ? NULL : h_copy_deep(rhs);
 
-        // Iterate over all tuples.
-        while(exists(*cur))
+        if(!res)
         {
-            // Resolve symbol name and value.
-            const char *lhs = str(*cur++);
-            entry_p rhs = resolve(*cur++);
+            // Error / out of memory.
+            return end();
+        }
 
-            // Did we manage to resolve the rhs?
-            if(DID_ERR)
-            {
-                // Error already set by resolve().
-                R_CUR;
-            }
+        // Make sure the RHS isn't dangling, we'll leak memory if it does.
+        h_set_undangle(res);
 
-            // Create a copy of the evaluated rhs.
-            entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
+        // Do we have an existing symbol with this name?
+        entry_p esm = h_set_find(contxt, lhs);
 
-            if(!res && PANIC(contxt))
-            {
-                // Out of memory.
-                R_CUR;
-            }
+        if(esm)
+        {
+            // Reparent and continue with the next tuple.
+            kill(esm->resolved);
+            esm->resolved = res;
 
-            entry_p *sym = contxt->symbols;
-            memmove(res, rhs, sizeof(entry_t));
-
-            // Do a deep copy if necessary.
-            if(res->name)
-            {
-                res->name = DBG_ALLOC(strdup(res->name));
-
-                if(!res->name && PANIC(contxt))
-                {
-                    // Out of memory.
-                    free(res);
-                    break;
-                }
-            }
-
-            // In non strict mode we might have a
-            // DANGLE on the right hand side if a
-            // bogus resolve was done. To prevent
-            // leaks we need to typecast the rhs.
-            if(res->type == DANGLE)
-            {
-                // Typecast to string. The string
-                // will be empty. If evaluated as
-                // a number, it will be zero.
-                res->type = STRING;
-            }
-
-            // Do we already have a symbol with this name?
-            while(exists(*sym))
-            {
-                // If true, replace its resolved value with the copy of the rhs.
-                if(!strcasecmp((*sym)->name, lhs))
-                {
-                    kill((*sym)->resolved);
-                    (*sym)->resolved = res;
-                    push(dst, *sym);
-                    res->parent = *sym;
-                    ret = res;
-                    break;
-                }
-
-                // Iterate over all symbols in this context.
-                sym++;
-            }
-
-            // Does this symbol exist already?
-            if(ret == res)
-            {
-                // Next tuple.
-                continue;
-            }
-
-            // This is a new symbol.
+            // Push cannot fail in this context.
+            push(global(contxt), esm);
+            res->parent = esm;
+            ret = res;
+        }
+        else
+        {
+            // Append new symbol to current context.
             entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs)));
 
-            if(!nsm && PANIC(contxt))
+            if(!nsm || !append(&contxt->symbols, nsm))
             {
                 // Out of memory.
+                kill(nsm);
                 kill(res);
-                break;
+                return end();
             }
 
+            // Reparent and create global reference.
             res->parent = nsm;
             nsm->resolved = res;
 
-            // Append the symbol to the current context and create a global ref.
-            if(append(&contxt->symbols, nsm))
-            {
-                push(dst, nsm);
-                nsm->parent = contxt;
-                ret = res;
-                continue;
-            }
-
-            // Out of memory.
-            kill(nsm);
-            kill(res);
+            // Push cannot fail in this context.
+            push(global(contxt), nsm);
+            nsm->parent = contxt;
+            ret = res;
         }
-
-        // Return the last rhs.
-        return ret;
     }
 
-    // Broken parser
-    R_CUR;
+    // Return the last RHS.
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -257,29 +233,24 @@ entry_p m_symbolset(entry_p contxt)
 entry_p m_symbolval(entry_p contxt)
 {
     // We need one argument, the name of the symbol.
-    if(c_sane(contxt, 1))
+    C_SANE(1, NULL);
+
+    static entry_t entry = { .type = SYMREF };
+    entry_p ret;
+
+    // Initialize and resolve dummy.
+    entry.parent = contxt;
+    entry.id = contxt->id;
+    entry.name = str(C_ARG(1));
+
+    ret = resolve(&entry);
+
+    // Return the resolved value if the symbol could be found.
+    if(!DID_ERR)
     {
-        static entry_t entry = { .type = SYMREF };
-        entry_p ret;
-
-        // Initialize and resolve dummy.
-        entry.parent = contxt;
-        entry.id = contxt->id;
-        entry.name = str(C_ARG(1));
-
-        ret = resolve(&entry);
-
-        // Return the resolved value if the symbol could be found.
-        if(!DID_ERR)
-        {
-            return ret;
-        }
-
-        // Symbol not found.
-        R_NUM(LG_FALSE);
+        return ret;
     }
 
-    // The parser is broken
-    PANIC(contxt);
-    R_CUR;
+    // Symbol not found.
+    R_NUM(LG_FALSE);
 }

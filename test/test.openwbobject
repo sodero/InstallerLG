@@ -8,6 +8,7 @@
 (set @pretend 1) (openwbobject "RAM:") ; "","1",""
 (set @pretend 1) (openwbobject "RAM:" (prompt "p") (help "h") (confirm)) ; "","1",""
 (set @pretend 1) (openwbobject "RAM:" (prompt "p") (help "h") (confirm 0)) ; "","1",""
+(set @pretend 1) (openwbobject "RAM:" (prompt "p") (help "h") (confirm 0) (safe)) ; "","ph0 -1",""
 (set @skip 1) (openwbobject "RAM:" (prompt "p") (help "h") (confirm 0)) ; "","0",""
 (set @strict 0) (openwbobject "RAM:" (confirm)) ; "","-1",""
 (set @strict 0) (openwbobject "RAM:" (confirm 0)) ; "","0 -1",""

@@ -3,7 +3,7 @@
 //
 // String operations
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ entry_p m_tackon(entry_p contxt);
 //------------------------------------------------------------------------------
 // Helper functions
 //------------------------------------------------------------------------------
-char *h_tackon(entry_p contxt, const char *p, const char *f);
-char *h_pathonly(const char *f);
+char *h_tackon(entry_p contxt, const char *pre, const char *suf);
+char *h_pathonly(const char *full);
 
 #endif

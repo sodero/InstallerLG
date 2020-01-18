@@ -1,12 +1,12 @@
 %{
-//------------------------------------------------------------------------------
-// parser.y:
-//
-// InstallerLG parser
-//------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
-// Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
-//------------------------------------------------------------------------------
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* parser.y:                                                                                                                                                                            */
+/*                                                                                                                                                                                      */
+/* InstallerLG parser                                                                                                                                                                   */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Copyright (C) 2018-2020, Ola Söder. All rights reserved.                                                                                                                             */
+/* Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1                                                                                                                             */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 #include "all.h"
 #include "alloc.h"
@@ -19,85 +19,75 @@
 // Always debug.
 #define YYDEBUG 1
 %}
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* We need the parser to be reentrant, not because we want to, but because it will leak memory otherwise. */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* We need the parser to be reentrant. It will leak memory otherwise.                                                                                                                   */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
-%expect 3
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*- primitives ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
+%expect 5
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Primitives                                                                                                                                                                           */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %token<s> /* string pri. */ SYM STR OOM
 %token<n> /* number pri. */ INT HEX BIN
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*- tokens -------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Tokens                                                                                                                                                                               */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*        arithmetic.c|h */ /* '+' '/' '*' '-' */
-%token /* bitwise.c|h    */ AND BITAND BITNOT BITOR BITXOR NOT IN OR SHIFTLEFT SHIFTRIGHT XOR
 %token /* comparison.c|h */ EQ GT GTE LT LTE NEQ
 %token /* control.c|h    */ IF SELECT UNTIL WHILE TRACE RETRACE
 %token /* external.c|h   */ EXECUTE REXX RUN
 %token /* exit.c|h       */ ABORT EXIT ONERROR TRAP REBOOT
-%token /* file.c|h       */ COPYFILES COPYLIB DELETE EXISTS FILEONLY FOREACH MAKEASSIGN MAKEDIR PROTECT
-       /*                */ STARTUP TEXTFILE TOOLTYPE TRANSCRIPT RENAME
+%token /* file.c|h       */ COPYFILES COPYLIB DELETE EXISTS FILEONLY FOREACH MAKEASSIGN MAKEDIR PROTECT STARTUP TEXTFILE TOOLTYPE TRANSCRIPT RENAME
 %token /* information.c  */ COMPLETE DEBUG MESSAGE USER WELCOME WORKING
+%token /* logic.c|h      */ AND BITAND BITNOT BITOR BITXOR NOT IN OR SHIFTLEFT SHIFTRIGHT XOR
 %token /* media.c        */ CLOSEMEDIA EFFECT SETMEDIA SHOWMEDIA
-%token /* probe.c|h      */ DATABASE EARLIER GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM
-       /*                */ GETVERSION ICONINFO
+%token /* probe.c|h      */ DATABASE EARLIER GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM GETVERSION ICONINFO QUERYDISPLAY
 %token /* procedure.c|h  */ CUS DCL
 %token /* prompt.c|h     */ ASKBOOL ASKCHOICE ASKDIR ASKDISK ASKFILE ASKNUMBER ASKOPTIONS ASKSTRING
 %token /* strop.c|h      */ CAT EXPANDPATH FMT PATHONLY PATMATCH STRLEN SUBSTR TACKON
 %token /* symbol.c|h     */ SET SYMBOLSET SYMBOLVAL
 %token /* wb.c|h         */ OPENWBOBJECT SHOWWBOBJECT CLOSEWBOBJECT
-%token /* options        */ ALL APPEND ASSIGNS BACK CHOICES COMMAND COMPRESSION CONFIRM DEFAULT
-       /*                */ DELOPTS DEST DISK FILES FONTS GETDEFAULTTOOL GETPOSITION
-       /*                */ GETSTACK GETTOOLTYPE HELP INFOS INCLUDE NEWNAME NEWPATH NOGAUGE
-       /*                */ NOPOSITION NOREQ PATTERN PROMPT QUIET RANGE SAFE
-       /*                */ SETDEFAULTTOOL SETPOSITION SETSTACK SETTOOLTYPE SOURCE SWAPCOLORS OPTIONAL
+%token /* options        */ ALL APPEND ASSIGNS BACK CHOICES COMMAND COMPRESSION CONFIRM DEFAULT DELOPTS DEST DISK FILES FONTS GETDEFAULTTOOL GETPOSITION GETSTACK GETTOOLTYPE HELP INFOS
+       /*                */ INCLUDE NEWNAME NEWPATH NOGAUGE NOPOSITION NOREQ PATTERN PROMPT QUIET RANGE SAFE SETDEFAULTTOOL SETPOSITION SETSTACK SETTOOLTYPE SOURCE SWAPCOLORS OPTIONAL
        /*                */ RESIDENT OVERRIDE
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*- token type information ---------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np sps par cv cvv add sub
-       /*                */ lt lte neq gt gte eq set cus dcl fmt if while until and or xor not bitand bitor
-       /*                */ bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring
-       /*                */ asknumber askchoice askoptions askbool askdisk cat exists expandpath earlier
-       /*                */ fileonly getassign getdefaulttool getposition getstack gettooltype getdevice
-       /*                */ getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch div
-       /*                */ select symbolset symbolval tackon transcript complete user working welcome
-       /*                */ abort copyfiles copylib database debug delete execute exit foreach makeassign
-       /*                */ makedir message onerror protect rename rexx run startup textfile tooltype
-       /*                */ trap reboot all append assigns choices command compression confirm default mul
-       /*                */ delopts dest disk files fonts help infos include newname newpath optional back
-       /*                */ nogauge noposition noreq pattern prompt quiet range safe resident override
-       /*                */ setdefaulttool setposition setstack settooltype source swapcolors openwbobject
-       /*                */ showwbobject closewbobject trace retrace closemedia effect setmedia showmedia
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*- destruction --------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* Use the destructor of the start symbol to set of the execution of the program. */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Token data types                                                                                                                                                                     */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np sps par cv cvv add sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor not bitand
+       /*                */ bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath
+       /*                */ earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
+       /*                */ pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit
+       /*                */ foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all append assigns choices command compression
+       /*                */ confirm default mul delopts dest disk files fonts help infos include newname newpath optional back nogauge noposition noreq pattern prompt quiet range safe
+       /*                */ resident override setdefaulttool setposition setstack settooltype source swapcolors openwbobject showwbobject closewbobject trace retrace closemedia effect
+       /*                */ setmedia showmedia
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Destruction                                                                                                                                                                          */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Use the destructor of the start symbol to set of the execution of the program.                                                                                                       */
 %destructor { run($$);  }   start
-/* Primitive strings are freed like you would expect */
+/* Primitive strings are freed like you would expect                                                                                                                                    */
 %destructor { free($$); }   SYM STR
-/* Complex types are freed using the kill() function found in alloc.c */
-%destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np sps par cv cvv add sub div mul
-                            gt gte eq set cus dcl fmt if while until and or xor not bitand bitor bitxor bitnot
-                            shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice
-                            askoptions askbool askdisk exists expandpath earlier fileonly getassign pattern
-                            getdefaulttool getposition getstack gettooltype optional resident override source
-                            getdevice getdiskspace getenv getsize getsum getversion iconinfo pathonly patmatch
-                            select symbolset symbolval tackon transcript complete user working welcome abort
-                            copyfiles copylib database debug delete execute exit foreach makeassign makedir
-                            message onerror protect rename rexx run startup textfile tooltype trap reboot all
-                            assigns choices command compression confirm default delopts dest disk lt lte neq
-                            files fonts help infos include newname newpath nogauge noposition settooltype cat
-                            noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append
-                            openwbobject showwbobject closewbobject trace retrace back closemedia effect setmedia
-                            showmedia
+/* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
+%destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np sps par cv cvv add sub div mul gt gte eq set cus dcl fmt if while until and or xor not bitand bitor
+                            bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier
+                            fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
+                            getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
+                            database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all assigns
+                            choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
+                            noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append openwbobject showwbobject closewbobject trace retrace back closemedia
+                            effect setmedia showmedia
 %%
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*- start --------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Start                                                                                                                                                                                */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 start:          s                                { $$ = init($1); };
 s:              vps                              ;
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*- phrase types -------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Phrase types                                                                                                                                                                         */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 p:              vp                               |
                 np                               ;
 pp:             p p                              { $$ = push(push(new_contxt(), $1), $2); };
@@ -130,8 +120,9 @@ par:            par SYM                          { $$ = push($1, new_symbol($2))
                 SYM                              { $$ = push(new_contxt(), new_symbol($1)); };
 cv:             p xpb                            { $$ = push(push(new_contxt(), $1), $2); };
 cvv:            p xpb xpb                        { $$ = push(push(push(new_contxt(), $1), $2), $3); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*- modifiers ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Modifiers                                                                                                                                                                            */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 opt:            all                              |
                 append                           |
                 assigns                          |
@@ -173,13 +164,14 @@ opt:            all                              |
                 swapcolors                       |
                 dynopt                           |
                 resident                         ;
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*- functions ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Functions                                                                                                                                                                            */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 ivp:            add        /* arithmetic.c|h */  |
                 div                              |
                 mul                              |
                 sub                              |
-                and           /* bitwise.c|h */  |
+                and           /* logic.c|h */    |
                 bitand                           |
                 bitnot                           |
                 bitor                            |
@@ -244,6 +236,7 @@ ivp:            add        /* arithmetic.c|h */  |
                 getsum                           |
                 getversion                       |
                 iconinfo                         |
+                querydisplay                     |
                 cus         /* procedure.c|h */  |
                 dcl                              |
                 askbool        /* prompt.c|h */  |
@@ -268,35 +261,25 @@ ivp:            add        /* arithmetic.c|h */  |
                 openwbobject       /* wb.c|h */  |
                 showwbobject                     |
                 closewbobject                    ;
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* arithmetic.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* arithmetic.c|h                                                                                                                                                                       */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 add:            '(' '+' ps ')'                   { $$ = new_native(strdup("+"), LINE, m_add, $3, NUMBER); };
 div:            '(' '/' pp ')'                   { $$ = new_native(strdup("/"), LINE, m_div, $3, NUMBER); };
 mul:            '(' '*' ps ')'                   { $$ = new_native(strdup("*"), LINE, m_mul, $3, NUMBER); };
 sub:            '(' '-' pp ')'                   { $$ = new_native(strdup("-"), LINE, m_sub, $3, NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* bitwise.c|h ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
-and:            '(' AND ps ')'                   { $$ = new_native(strdup("AND"), LINE, m_and, $3, NUMBER); };
-bitand:         '(' BITAND pp ')'                { $$ = new_native(strdup("BITAND"), LINE, m_bitand, $3, NUMBER); };
-bitnot:         '(' BITNOT p ')'                 { $$ = new_native(strdup("BITNOT"), LINE, m_bitnot, push(new_contxt(), $3), NUMBER); };
-bitor:          '(' BITOR pp ')'                 { $$ = new_native(strdup("BITOR"), LINE, m_bitor, $3, NUMBER); };
-bitxor:         '(' BITXOR pp ')'                { $$ = new_native(strdup("BITXOR"), LINE, m_bitxor, $3, NUMBER); };
-not:            '(' NOT p ')'                    { $$ = new_native(strdup("NOT"), LINE, m_not, push(new_contxt(), $3), NUMBER); };
-in:             '(' IN p ps ')'                  { $$ = new_native(strdup("IN"), LINE, m_in, push(push(new_contxt(), $3), $4), NUMBER); };
-or:             '(' OR ps ')'                    { $$ = new_native(strdup("OR"), LINE, m_or, $3, NUMBER); };
-shiftleft:      '(' SHIFTLEFT pp ')'             { $$ = new_native(strdup("shiftleft"), LINE, m_shiftleft, $3, NUMBER); };
-shiftright:     '(' SHIFTRIGHT pp ')'            { $$ = new_native(strdup("shiftright"), LINE, m_shiftright, $3, NUMBER); };
-xor:            '(' XOR pp ')'                   { $$ = new_native(strdup("XOR"), LINE, m_xor, $3, NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* comparison.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* comparison.c|h                                                                                                                                                                       */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 eq:             '(' '=' pp ')'                   { $$ = new_native(strdup("="), LINE, m_eq, $3, NUMBER); };
 gt:             '(' '>' pp ')'                   { $$ = new_native(strdup(">"), LINE, m_gt, $3, NUMBER); };
 gte:            '(' GTE pp ')'                   { $$ = new_native(strdup(">="), LINE, m_gte, $3, NUMBER); };
 lt:             '(' '<' pp ')'                   { $$ = new_native(strdup("<"), LINE, m_lt, $3, NUMBER); };
 lte:            '(' LTE pp ')'                   { $$ = new_native(strdup("<="), LINE, m_lte, $3, NUMBER); };
 neq:            '(' NEQ pp ')'                   { $$ = new_native(strdup("<>"), LINE, m_neq, $3, NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* control.c|h ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* control.c|h                                                                                                                                                                          */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 if:             '(' IF cvv ')'                   { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); } |
                 '(' IF cv ')'                    { $$ = new_native(strdup("if"), LINE, m_if, $3, NUMBER); } |
                 '(' IF p ')'                     { $$ = new_native(strdup("if"), LINE, m_if, push(new_contxt(), $3), NUMBER); };
@@ -305,8 +288,9 @@ until:          '(' UNTIL p vps ')'              { $$ = new_native(strdup("until
 while:          '(' WHILE p vps ')'              { $$ = new_native(strdup("while"), LINE, m_while, push(push(new_contxt(), $3), $4), NUMBER); };
 trace:          '(' TRACE ')'                    { $$ = new_native(strdup("trace"), LINE, m_trace, NULL, NUMBER); };
 retrace:        '(' RETRACE ')'                  { $$ = new_native(strdup("retrace"), LINE, m_retrace, NULL, NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* external.c|h --------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* external.c|h                                                                                                                                                                         */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 execute:        '(' EXECUTE ps opts ')'          { $$ = new_native(strdup("execute"), LINE, m_execute, push($3, $4), NUMBER); } |
                 '(' EXECUTE opts ps ')'          { $$ = new_native(strdup("execute"), LINE, m_execute, push($4, $3), NUMBER); } |
                 '(' EXECUTE opts ps opts ')'     { $$ = new_native(strdup("execute"), LINE, m_execute, push($4, merge($3, $5)), NUMBER); } |
@@ -319,8 +303,9 @@ run:            '(' RUN ps opts ')'              { $$ = new_native(strdup("run")
                 '(' RUN opts ps ')'              { $$ = new_native(strdup("run"), LINE, m_run, push($4, $3), NUMBER); } |
                 '(' RUN opts ps opts ')'         { $$ = new_native(strdup("run"), LINE, m_run, push($4, merge($3, $5)), NUMBER); } |
                 '(' RUN ps ')'                   { $$ = new_native(strdup("run"), LINE, m_run, $3, NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* exit.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* exit.c|h                                                                                                                                                                             */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 abort:          '(' ABORT ps ')'                 { $$ = new_native(strdup("abort"), LINE, m_abort, $3, NUMBER); };
 exit:           '(' EXIT ps quiet ')'            { $$ = new_native(strdup("exit"), LINE, m_exit, push($3, $4), NUMBER); } |
                 '(' EXIT quiet ps ')'            { $$ = new_native(strdup("exit"), LINE, m_exit, push($4, $3), NUMBER); } |
@@ -331,8 +316,9 @@ onerror:        '(' ONERROR vps ')'              { $$ = new_native(strdup("onerr
                                                         new_custom(strdup("@onerror"), LINE, NULL, $3)), DANGLE); };
 reboot:         '(' REBOOT ')'                   { $$ = new_native(strdup("reboot"), LINE, m_reboot, NULL, NUMBER); };
 trap:           '(' TRAP p vps ')'               { $$ = new_native(strdup("trap"), LINE, m_trap, push(push(new_contxt(), $3), $4), NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* file.c|h ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* file.c|h                                                                                                                                                                             */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 copyfiles:      '(' COPYFILES opts ')'           { $$ = new_native(strdup("copyfiles"), LINE, m_copyfiles, $3, NUMBER); };
 copylib:        '(' COPYLIB opts ')'             { $$ = new_native(strdup("copylib"), LINE, m_copylib, $3, NUMBER); };
 delete:         '(' DELETE p opts')'             { $$ = new_native(strdup("delete"), LINE, m_delete, push(push(new_contxt(), $3), $4), NUMBER); } |
@@ -365,8 +351,9 @@ tooltype:       '(' TOOLTYPE opts ')'            { $$ = new_native(strdup("toolt
 transcript:     '(' TRANSCRIPT ps ')'            { $$ = new_native(strdup("transcript"), LINE, m_transcript, $3, NUMBER); };
 rename:         '(' RENAME pp opts')'            { $$ = new_native(strdup("rename"), LINE, m_rename, push($3, $4), NUMBER); } |
                 '(' RENAME pp ')'                { $$ = new_native(strdup("rename"), LINE, m_rename, $3, NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* information.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* information.c|h                                                                                                                                                                      */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 complete:       '(' COMPLETE p ')'               { $$ = new_native(strdup("complete"), LINE, m_complete, push(new_contxt(), $3), NUMBER); };
 debug:          '(' DEBUG ps ')'                 { $$ = new_native(strdup("debug"), LINE, m_debug, $3, NUMBER); } |
                 '(' DEBUG ')'                    { $$ = new_native(strdup("debug"), LINE, m_debug, NULL, NUMBER); };
@@ -378,15 +365,31 @@ user:           '(' USER p ')'                   { $$ = new_native(strdup("user"
 welcome:        '(' WELCOME ps ')'               { $$ = new_native(strdup("welcome"), LINE, m_welcome, $3, NUMBER); } |
                 '(' WELCOME ')'                  { $$ = new_native(strdup("welcome"), LINE, m_welcome, NULL, NUMBER); };
 working:        '(' WORKING ps ')'               { $$ = new_native(strdup("working"), LINE, m_working, $3, NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* media.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* logic.c|h                                                                                                                                                                            */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+and:            '(' AND ps ')'                   { $$ = new_native(strdup("AND"), LINE, m_and, $3, NUMBER); };
+bitand:         '(' BITAND pp ')'                { $$ = new_native(strdup("BITAND"), LINE, m_bitand, $3, NUMBER); };
+bitnot:         '(' BITNOT p ')'                 { $$ = new_native(strdup("BITNOT"), LINE, m_bitnot, push(new_contxt(), $3), NUMBER); };
+bitor:          '(' BITOR pp ')'                 { $$ = new_native(strdup("BITOR"), LINE, m_bitor, $3, NUMBER); };
+bitxor:         '(' BITXOR pp ')'                { $$ = new_native(strdup("BITXOR"), LINE, m_bitxor, $3, NUMBER); };
+not:            '(' NOT p ')'                    { $$ = new_native(strdup("NOT"), LINE, m_not, push(new_contxt(), $3), NUMBER); };
+in:             '(' IN p ps ')'                  { $$ = new_native(strdup("IN"), LINE, m_in, push(push(new_contxt(), $3), $4), NUMBER); };
+or:             '(' OR ps ')'                    { $$ = new_native(strdup("OR"), LINE, m_or, $3, NUMBER); };
+shiftleft:      '(' SHIFTLEFT pp ')'             { $$ = new_native(strdup("shiftleft"), LINE, m_shiftleft, $3, NUMBER); };
+shiftright:     '(' SHIFTRIGHT pp ')'            { $$ = new_native(strdup("shiftright"), LINE, m_shiftright, $3, NUMBER); };
+xor:            '(' XOR pp ')'                   { $$ = new_native(strdup("XOR"), LINE, m_xor, $3, NUMBER); };
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* media.c|h                                                                                                                                                                            */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 closemedia:     '(' CLOSEMEDIA p ')'             { $$ = new_native(strdup("closemedia"), LINE, m_closemedia, push(new_contxt(), $3), NUMBER); };
 effect:         '(' EFFECT pp pp ')'   	         { $$ = new_native(strdup("effect"), LINE, m_effect, merge($3, $4), NUMBER); };
 setmedia:       '(' SETMEDIA pp ')'              { $$ = new_native(strdup("setmedia"), LINE, m_setmedia, $3, NUMBER); } |
                 '(' SETMEDIA pp p ')'            { $$ = new_native(strdup("setmedia"), LINE, m_setmedia, push($3, $4), NUMBER); };
 showmedia:      '(' SHOWMEDIA pp pp ps ')'       { $$ = new_native(strdup("showmedia"), LINE, m_showmedia, merge(merge($3, $4), $5), NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* probe.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* probe.c|h                                                                                                                                                                            */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 database:       '(' DATABASE p ')'               { $$ = new_native(strdup("database"), LINE, m_database, push(new_contxt(), $3), STRING); } |
                 '(' DATABASE pp ')'              { $$ = new_native(strdup("database"), LINE, m_database, $3, STRING); };
 earlier:        '(' EARLIER pp ')'               { $$ = new_native(strdup("earlier"), LINE, m_earlier, $3, NUMBER); };
@@ -402,16 +405,19 @@ getversion:     '(' GETVERSION ')'               { $$ = new_native(strdup("getve
                 '(' GETVERSION p ')'             { $$ = new_native(strdup("getversion"), LINE, m_getversion, push(new_contxt(), $3), NUMBER); } |
                 '(' GETVERSION p resident ')'    { $$ = new_native(strdup("getversion"), LINE, m_getversion, push(push(new_contxt(), $3), $4), NUMBER); };
 iconinfo:       '(' ICONINFO opts ')'            { $$ = new_native(strdup("iconinfo"), LINE, m_iconinfo, $3, NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* procedure.c|h -------------------------------------------------------------------------------------------------------------------------------------------------------*/
+querydisplay:   '(' QUERYDISPLAY pp ')'          { $$ = new_native(strdup("querydisplay"), LINE, m_querydisplay, $3, NUMBER); };
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* procedure.c|h                                                                                                                                                                        */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 dcl:            '(' DCL SYM par s ')'            { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, $4, $5)), NUMBER); } |
                 '(' DCL SYM par ')'              { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, $4, NULL)), NUMBER); } |
                 '(' DCL SYM s ')'                { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, NULL, $4)), NUMBER); } |
                 '(' DCL SYM ')'                  { $$ = new_native(strdup("procedure"), LINE, m_procedure, push(new_contxt(), new_custom($3, LINE, NULL, NULL)), NUMBER); };
 cus:            '(' SYM ps ')'                   { $$ = new_cusref($2, LINE, $3); } |
                 '(' SYM ')'                      { $$ = new_cusref($2, LINE, NULL); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* prompt.c|h ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* prompt.c|h                                                                                                                                                                           */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 askbool:        '(' ASKBOOL ')'                  { $$ = new_native(strdup("askbool"), LINE, m_askbool, NULL, NUMBER); };
 askbool:        '(' ASKBOOL opts ')'             { $$ = new_native(strdup("askbool"), LINE, m_askbool, $3, NUMBER); };
 askchoice:      '(' ASKCHOICE opts ')'           { $$ = new_native(strdup("askchoice"), LINE, m_askchoice, $3, NUMBER); };
@@ -425,8 +431,9 @@ asknumber:      '(' ASKNUMBER opts ')'           { $$ = new_native(strdup("asknu
 askoptions:     '(' ASKOPTIONS opts ')'          { $$ = new_native(strdup("askoptions"), LINE, m_askoptions, $3, NUMBER); };
 askstring:      '(' ASKSTRING ')'                { $$ = new_native(strdup("askstring"), LINE, m_askstring, NULL, STRING); };
 askstring:      '(' ASKSTRING opts ')'           { $$ = new_native(strdup("askstring"), LINE, m_askstring, $3, STRING); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* strop.c|h -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* strop.c|h                                                                                                                                                                            */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 cat:            '(' CAT ps ')'                   { $$ = new_native(strdup("cat"), LINE, m_cat, $3, STRING); };
 expandpath:     '(' EXPANDPATH p ')'             { $$ = new_native(strdup("expandpath"), LINE, m_expandpath, push(new_contxt(), $3), STRING); };
 fmt:            '(' STR ps ')'                   { $$ = new_native($2, LINE, m_fmt, $3, STRING); } |
@@ -437,21 +444,24 @@ strlen:         '(' STRLEN p ')'                 { $$ = new_native(strdup("strle
 substr:         '(' SUBSTR pp ')'                { $$ = new_native(strdup("substr"), LINE, m_substr, $3, STRING); } |
                 '(' SUBSTR pp p ')'              { $$ = new_native(strdup("substr"), LINE, m_substr, push($3, $4), STRING); };
 tackon:         '(' TACKON pp ')'                { $$ = new_native(strdup("tackon"), LINE, m_tackon, $3, STRING); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* symbol.c|h ----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* symbol.c|h                                                                                                                                                                           */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 set:            '(' SET sps ')'                  { $$ = new_native(strdup("set"), LINE, m_set, $3, DANGLE); };
 symbolset:      '(' SYMBOLSET pps ')'            { $$ = new_native(strdup("symbolset"), LINE, m_symbolset, $3, DANGLE); };
 symbolval:      '(' SYMBOLVAL p ')'              { $$ = new_native(strdup("symbolval"), LINE, m_symbolval, push(new_contxt(), $3), NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* wb.c|h --------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* wb.c|h                                                                                                                                                                               */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 openwbobject:   '(' OPENWBOBJECT p ')'           { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(new_contxt(), $3), NUMBER); } |
                 '(' OPENWBOBJECT p opts ')'      { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' OPENWBOBJECT opts p ')'      { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), $4), $3), NUMBER); } |
                 '(' OPENWBOBJECT opts p opts ')' { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), $4), merge($3, $5)), NUMBER); };
 showwbobject:   '(' SHOWWBOBJECT p ')'           { $$ = new_native(strdup("showwbobject"), LINE, m_showwbobject, push(new_contxt(), $3), NUMBER); };
 closewbobject:  '(' CLOSEWBOBJECT p ')'          { $$ = new_native(strdup("closewbobject"), LINE, m_closewbobject, push(new_contxt(), $3), NUMBER); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*- options ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Options                                                                                                                                                                              */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 all:            '(' ALL ')'                      { $$ = new_option(strdup("all"), OPT_ALL, NULL); };
 append:         '(' APPEND ps ')'                { $$ = new_option(strdup("append"), OPT_APPEND, $3); };
 assigns:        '(' ASSIGNS ')'                  { $$ = new_option(strdup("assigns"), OPT_ASSIGNS, NULL); };
@@ -495,7 +505,7 @@ swapcolors:     '(' SWAPCOLORS ')'               { $$ = new_option(strdup("swapc
 optional:       '(' OPTIONAL ps ')'              { $$ = new_option(strdup("optional"), OPT_OPTIONAL, $3); };
 resident:       '(' RESIDENT ')'                 { $$ = new_option(strdup("resident"), OPT_RESIDENT, NULL); };
 override:       '(' OVERRIDE p ')'               { $$ = new_option(strdup("override"), OPT_OVERRIDE, push(new_contxt(), $3)); };
-dynopt:         '(' IF p opt opt ')'             { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(push(new_contxt(), $3), $4), $5)); } |
-                '(' IF p opt ')'                 { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(new_contxt(), $3), $4)); };
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+dynopt:         '(' IF p opts ')'                { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(new_contxt(), $3), $4)); } |
+                '(' IF p opts opts ')'           { $$ = new_option(strdup("dynopt"), OPT_DYNOPT, push(push(push(new_contxt(), $3), $4), $5)); };
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %%

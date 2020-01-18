@@ -3,7 +3,7 @@
 //
 // Misc utility functions primarily used by the 'native' methods.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -183,15 +183,15 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
         char *fop = str(cur);
 
         // Set or delete option.
-        cache[OPT_FAIL] = strcmp(fop, "fail") ?
+        cache[OPT_FAIL] = strcasecmp(fop, "fail") ?
         cache[OPT_FAIL] : (del ? NULL : cur);
-        cache[OPT_FORCE] = strcmp(fop, "force") ?
+        cache[OPT_FORCE] = strcasecmp(fop, "force") ?
         cache[OPT_FORCE] : (del ? NULL : cur);
-        cache[OPT_NOFAIL] = strcmp(fop, "nofail") ?
+        cache[OPT_NOFAIL] = strcasecmp(fop, "nofail") ?
         cache[OPT_NOFAIL] : (del ? NULL : cur);
-        cache[OPT_ASKUSER] = strcmp(fop, "askuser") ?
+        cache[OPT_ASKUSER] = strcasecmp(fop, "askuser") ?
         cache[OPT_ASKUSER] : (del ? NULL : cur);
-        cache[OPT_OKNODELETE] = strcmp(fop, "oknodelete") ?
+        cache[OPT_OKNODELETE] = strcasecmp(fop, "oknodelete") ?
         cache[OPT_OKNODELETE] : (del ? NULL : cur);
     }
 }
@@ -249,7 +249,7 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 static void opt_fill_cache(entry_p contxt, entry_p *cache)
 {
     // Iterate over all options to fill up the cache.
-    for(size_t i = 0; exists(contxt->children[i]) && i < OPT_LAST; i++)
+    for(size_t i = 0; i < OPT_LAST && exists(contxt->children[i]); i++)
     {
         entry_p entry = contxt->children[i];
 
@@ -259,23 +259,34 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
             continue;
         }
 
-        // Fake option.
+        // Cast dake options to real options.
         if(entry->id == OPT_OPTIONAL || entry->id == OPT_DELOPTS)
         {
-            // Cast to real option.
             get_fake_opt(entry, cache);
         }
         // Dynamic options must be resolved.
         else if(entry->id == OPT_DYNOPT)
         {
-            // Replace with its resolved value.
             entry_p res = resolve(entry);
+
+            if(res->type != OPTION)
+            {
+                // Non-existing conditional path.
+                continue;
+            }
+
+            // Cache all options if we're in a block.
+            if(res->parent->type == CONTXT)
+            {
+                opt_fill_cache(res->parent, cache);
+            }
+
+            // Resolved value is a real option.
             cache[res->id] = res;
         }
-        // A real option.
         else
         {
-            // Save it as is.
+            // Save real options as they are.
             cache[entry->id] = entry;
         }
     }
@@ -449,7 +460,8 @@ bool c_sane(entry_p contxt, size_t num)
 //------------------------------------------------------------------------------
 bool s_sane(entry_p contxt, size_t num)
 {
-    return contxt && x_sane(contxt, SYMBOL, num);
+    return contxt && contxt->symbols && global(contxt) &&
+           x_sane(contxt, SYMBOL, num);
 }
 
 //------------------------------------------------------------------------------
@@ -660,7 +672,7 @@ char *get_optstr(entry_p contxt, opt_t type)
 }
 
 //------------------------------------------------------------------------------
-// Name:        get_chlst
+// Name:        get_chlstr
 // Description: Concatenate the string representations of all non context
 //              children of a context.
 // Input:       entry_p contxt:  The context.
@@ -703,57 +715,60 @@ char *get_chlstr(entry_p contxt, bool pad)
     // Allocate memory to hold one string pointer per child.
     char **stv = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
 
-    if(stv)
+    if(!stv)
     {
-        // Total length.
-        size_t len = 0;
-
-        // Save all string pointers so that we don't evaluate children twice
-        // and thereby set of side effects more than once.
-        while(cnt > 0)
-        {
-            entry_p cur = *(--child);
-
-            // Ignore contexts.
-            if(cur->type == CONTXT)
-            {
-                continue;
-            }
-
-            // Go backwards, evaluate and increase total string length as
-            // we go. Also, include padding if necessary.
-            stv[--cnt] = str(cur);
-            len += strlen(stv[cnt]) + (pad ? 1 : 0);
-        }
-
-        // Memory to hold the full concatenation.
-        ret = len ? DBG_ALLOC(calloc(len + 1, 1)) : NULL;
-
-        if(ret)
-        {
-            // The concatenation, 'stv' is null terminated.
-            while(stv[cnt])
-            {
-                strncat(ret, stv[cnt], len + 1 - strlen(ret));
-                cnt++;
-
-                // Is padding applicable?
-                if(pad && stv[cnt])
-                {
-                    // Insert whitespace.
-                    strncat(ret, " ", len + 1 - strlen(ret));
-                }
-            }
-        }
-        else
-        {
-            // No data to concatenate.
-            ret = DBG_ALLOC(strdup(""));
-        }
-
-        // Free references before returning.
-        free(stv);
+        // Out of memory.
+        return NULL;
     }
+
+    // Total length.
+    size_t len = 0;
+
+    // Save all string pointers so that we don't evaluate children twice
+    // and thereby set of side effects more than once.
+    while(cnt > 0)
+    {
+        entry_p cur = *(--child);
+
+        // Ignore contexts.
+        if(cur->type == CONTXT)
+        {
+            continue;
+        }
+
+        // Go backwards, evaluate and increase total string length as
+        // we go. Also, include padding if necessary.
+        stv[--cnt] = str(cur);
+        len += strlen(stv[cnt]) + (pad ? 1 : 0);
+    }
+
+    // Memory to hold the full concatenation.
+    ret = len ? DBG_ALLOC(calloc(len + 1, 1)) : NULL;
+
+    if(ret)
+    {
+        // The concatenation, 'stv' is null terminated.
+        while(stv[cnt])
+        {
+            strncat(ret, stv[cnt], len + 1 - strlen(ret));
+            cnt++;
+
+            // Is padding applicable?
+            if(pad && stv[cnt])
+            {
+                // Insert whitespace.
+                strncat(ret, " ", len + 1 - strlen(ret));
+            }
+        }
+    }
+    else
+    {
+        // No data to concatenate.
+        ret = DBG_ALLOC(strdup(""));
+    }
+
+    // Free references before returning.
+    free(stv);
 
     // We could be in any state here, success or panic.
     return ret;
@@ -899,32 +914,90 @@ void dump(entry_p entry)
 
 #define LG_BUFSIZ (BUFSIZ + PATH_MAX + 1)
 static char buf[LG_BUFSIZ];
+static const char *buf_usr;
 
 //------------------------------------------------------------------------------
-// Name:        get_buf
-// Description: Get pointer to temporary buffer.
+// Name:        buf_raw
+// Description: Unsafe access to temporary buffer.
 // Input:       -
 // Return:      char *: Buffer pointer.
 //------------------------------------------------------------------------------
-char *get_buf(void)
+char *buf_raw(void)
 {
+    if(buf_usr)
+    {
+        // Buffer shouldn't be locked.
+        DBG("Invalid peek. Lock owned by %s\n", buf_usr ? buf_usr : "NULL");
+    }
+
+    // Return buffer no matter what.
     return buf;
 }
 
 //------------------------------------------------------------------------------
-// Name:        buf_size
-// Description: Get size of temporary buffer.
+// Name:        buf_get
+// Description: Safe access to temporary buffer. Initial call will lock buffer.
+// Input:       const char *usr: Unique string pointer used as key.
+// Return:      char *: Buffer pointer.
+//------------------------------------------------------------------------------
+char *buf_get(const char *usr)
+{
+    // Lock buffer if it's unlocked.
+    if(!buf_usr)
+    {
+        buf_usr = usr;
+        return buf;
+    }
+
+    // The lock should belong to the caller.
+    if(buf_usr != usr)
+    {
+        // The lock doesn't belong to the caller.
+        DBG("Invalid lock by %s. Lock owned by %s\n", usr ? usr : "NULL",
+            buf_usr ? buf_usr : "NULL");
+    }
+
+    // Return buffer no matter what.
+    return buf;
+}
+
+//------------------------------------------------------------------------------
+// Name:        buf_put
+// Description: Unlock temporary buffer.
+// Input:       const char *usr: Unique string pointer used as key.
+// Return:      char *: Buffer pointer.
+//------------------------------------------------------------------------------
+char *buf_put(const char *usr)
+{
+    // Unlock buffer if the lock belongs to the caller.
+    if(buf_usr == usr)
+    {
+        buf_usr = NULL;
+        return buf;
+    }
+
+    // The lock doesn't belong to the caller.
+    DBG("Invalid unlock by %s. Lock owned by %s\n", usr ? usr : "NULL",
+        buf_usr ? buf_usr : "NULL");
+
+    // Return buffer no matter what.
+    return buf;
+}
+
+//------------------------------------------------------------------------------
+// Name:        buf_len
+// Description: Get length of temporary buffer.
 // Input:       -
 // Return:      size_t: Buffer size.
 //------------------------------------------------------------------------------
-size_t buf_size(void)
+size_t buf_len(void)
 {
     return sizeof(buf) - 1;
 }
 
 //------------------------------------------------------------------------------
 // Name:        dbg_alloc
-// Description: Used by DBG_ALLOC to provide more info when failing to
+// Description: Used by DBG-ALLOC to provide more info when failing to
 //              allocate memory and to fail deliberately when testing.
 // Input:       int line: Source code line.
 //              const char *file: Source code file.
@@ -980,31 +1053,48 @@ void *dbg_alloc(int line, const char *file, const char *func, void *mem)
 //------------------------------------------------------------------------------
 entry_p native_exists(entry_p contxt, call_t func)
 {
+    if(!contxt)
+    {
+        // Not here.
+        return NULL;
+    }
+
+    // Nothing found yet.
     entry_p entry = NULL;
 
-    // NULL are valid values.
-    if(!contxt || !contxt->children)
+    if(contxt->children)
     {
-        // Doesn't exists.
-        return entry;
-    }
+        // Iterate over all children and recur if needed.
+        for(entry_p *cur = contxt->children; exists(*cur) && !entry; cur++)
+        {
+            if((*cur)->type == NATIVE && (*cur)->call == func)
+            {
+                // It exists.
+                return *cur;
+            }
 
-    // Iterate over all children and recur if needed.
-    for(entry_p *c = contxt->children; exists(*c) && !entry; c++)
-    {
-        if((*c)->type == NATIVE && (*c)->call == func)
-        {
-            // Found it.
-            entry = *c;
-        }
-        else
-        {
-            // Recur.
-            entry = native_exists(*c, func);
+            // Recur, depth first.
+            entry = native_exists(*cur, func);
         }
     }
 
-    // NULL or callback.
+    if(!entry && contxt->symbols)
+    {
+        // Iterate over all symbols and recur if needed.
+        for(entry_p *cur = contxt->symbols; exists(*cur) && !entry; cur++)
+        {
+            if((*cur)->type == NATIVE && (*cur)->call == func)
+            {
+                // It exists.
+                return *cur;
+            }
+
+            // Recur, depth first.
+            entry = native_exists(*cur, func);
+        }
+    }
+
+    // NATIVE or NULL.
     return entry;
 }
 
@@ -1017,16 +1107,16 @@ entry_p native_exists(entry_p contxt, call_t func)
 size_t num_children(entry_p *vec)
 {
     // Counter.
-    size_t num = 0;
+    size_t count = 0;
 
     // Count the number children.
-    while(vec && exists(vec[num]))
+    while(vec && exists(vec[count]))
     {
-        num++;
+        count++;
     }
 
     // Total count.
-    return num;
+    return count;
 }
 
 //------------------------------------------------------------------------------

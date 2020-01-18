@@ -3,7 +3,7 @@
 //
 // MUI based GUI
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -73,6 +73,8 @@ void gui_abort(const char *msg);
 void gui_error(int line, const char *type, const char *info);
 void gui_copyfiles_end(void);
 void gui_effect(int eff, int cl1, int cl2);
+void gui_query_screen(int *width, int *height, int *depth, int *colors);
+void gui_query_window(int *width, int *height, int *upper, int *lower, int *left, int *right);
 inp_t gui_closemedia(int mid);
 inp_t gui_setmedia(int mid, int act, const char *par);
 inp_t gui_showmedia(int *mid, const char* mda, int act);

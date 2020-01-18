@@ -3,7 +3,7 @@
 //
 // Encapsulation of resources that we might want to localize later on.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2019, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
@@ -92,7 +92,7 @@ void locale_init(void)
     {
         #if defined(AMIGA) && !defined(LG_TEST)
         loc.li_LocaleBase = OpenLibrary("locale.library", 37);
-        loc.li_Catalog = OpenCatalog(NULL, "Installer.catalog", TAG_DONE);
+        loc.li_Catalog = OpenCatalog(NULL, "InstallerLG.catalog", OC_Version, 1, TAG_DONE);
         #else
         loc.li_LocaleBase = loc.li_Catalog = (APTR) 0;
         #endif
