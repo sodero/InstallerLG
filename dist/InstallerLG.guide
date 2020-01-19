@@ -108,7 +108,6 @@ Italian translations.
 - Memory problem when using Installer as a tool without SCRIPT fixed.
 - (rename) now fails silently in non strict mode.
 - (procedure) arguments are no longer local variables (NetSurf).
-- ?
 
 @{B}0.1.0-alpha.41 (2019-12-26)@{UB}
 - (effect) in (procedure) support (AmiTradeCenter).
