@@ -103,6 +103,9 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}0.1.0-alpha.43 (2020-NOT-YET)@{UB}
+- ?
+
 @{B}0.1.0-alpha.42 (2020-01-19)@{UB}
 - Improved robustness.
 - Memory problem when using Installer as a tool without SCRIPT fixed.
