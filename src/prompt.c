@@ -148,11 +148,10 @@ entry_p m_askchoice(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    // The choice is represented by a bitmask of 32 bits, refer to
-    // Install.guide. Thus, we need room for 32 pointers + NULL.
-    const char *prt = str(prompt), *hlp = str(help);
+    // The choice is a 32 bit bitmask, refer to Installer.guide. Thus, we need
+    // room for 32 pointers + NULL.
+    const char *prt = str(prompt), *hlp = str(help), *chs[33] = { NULL };
     int add[32], ndx = 0, off = 0;
-    static const char *chs[33];
 
     // Pick up a string representation of all the options.
     for(entry_p *entry = choices->children; exists(*entry) && off < 32; entry++)
@@ -199,9 +198,6 @@ entry_p m_askchoice(entry_p contxt)
         // these as well.
         off++;
     }
-
-    // Terminate list of choices.
-    chs[ndx] = NULL;
 
     // Exit if there's nothing to show.
     if(!ndx)
