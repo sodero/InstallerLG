@@ -127,8 +127,7 @@ entry_p m_askbool(entry_p contxt)
 //
 // The installer in OS 3.9 doesn't seem to return a bitmap, which is how it is
 // supposed to work according to the Installer.guide, instead it returns a zero
-// index. We choose to ignore the guide and mimic the behaviour of the OS 3.9
-// implementation.
+// index. We ignore the guide and mimic the behaviour of the CBM implementation.
 //------------------------------------------------------------------------------
 entry_p m_askchoice(entry_p contxt)
 {
@@ -148,8 +147,7 @@ entry_p m_askchoice(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    // The choice is a 32 bit bitmask, refer to Installer.guide. Thus, we need
-    // room for 32 pointers + NULL.
+    // The choice is a 32 bit bitmask, refer to Installer.guide.
     const char *prt = str(prompt), *hlp = str(help), *chs[33] = { NULL };
     int add[32], ndx = 0, off = 0;
 
@@ -405,9 +403,9 @@ entry_p m_askdisk(entry_p contxt)
     p->pr_WindowPtr = (APTR) -1L;
 
     // Is this volume present already?
-    BPTR l = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
+    BPTR vol = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
 
-    if(!l)
+    if(!vol)
     {
         const char *msg = str(prompt), *hlp = str(help),
                    *bt1 = tr(S_RTRY), *bt2 = tr(S_SKIP);
@@ -416,14 +414,14 @@ entry_p m_askdisk(entry_p contxt)
         if(!DID_ERR)
         {
             // Retry until we can get a lock or the user aborts.
-            while(!l)
+            while(!vol)
             {
                 // Prompt user.
                 inp_t grc = gui_bool(msg, hlp, bt1, bt2, back != false);
 
                 if(grc == G_TRUE)
                 {
-                    l = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
+                    vol = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
                 }
                 else
                 {
@@ -463,7 +461,7 @@ entry_p m_askdisk(entry_p contxt)
     buf_put(B_KEY);
 
     // Did the user abort?
-    if(l)
+    if(vol)
     {
         // Are we going to create an assign aliasing 'dest'?
         if(newname)
@@ -475,28 +473,28 @@ entry_p m_askdisk(entry_p contxt)
             {
                 // On success, the lock belongs to
                 // the system. Do not UnLock().
-                ret = AssignLock(nn, l) ? LG_TRUE : LG_FALSE;
+                ret = AssignLock(nn, vol) ? LG_TRUE : LG_FALSE;
 
                 // On failure, we need to UnLock() it ourselves.
                 if(ret == LG_FALSE)
                 {
                     // Could not create 'newname' assign.
                     ERR(ERR_ASSIGN, str(C_ARG(1)));
-                    UnLock(l);
+                    UnLock(vol);
                 }
             }
             else
             {
                 // An assign must contain at least one character.
                 ERR(ERR_INVALID_ASSIGN, nn);
-                UnLock(l);
+                UnLock(vol);
             }
         }
         else
         {
             // Sucess.
             ret = LG_TRUE;
-            UnLock(l);
+            UnLock(vol);
         }
     }
 
