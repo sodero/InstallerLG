@@ -36,15 +36,11 @@ entry_p m_askbool(entry_p contxt)
     // Arguments are optional.
     C_SANE(0, contxt);
 
-    const char *yes = tr(S_AYES), *nay = tr(S_NONO);
     entry_p prompt   = opt(contxt, OPT_PROMPT),
             help     = opt(contxt, OPT_HELP),
             back     = opt(contxt, OPT_BACK),
             deflt    = opt(contxt, OPT_DEFAULT),
             choices  = opt(contxt, OPT_CHOICES);
-
-    // Default = 'no'.
-    int ans = LG_FALSE;
 
     // Do we have both prompt and help text?
     if(!prompt || !help)
@@ -54,16 +50,24 @@ entry_p m_askbool(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
+    // Default choices are 'yes' and 'no' (or translations thereof).
+    const char *yes = tr(S_AYES), *nay = tr(S_NONO);
+
     // Do we have a choice option?
     if(choices)
     {
-        // Unless the parser is broken, we will have >= one child.
-        entry_p *entry = choices->children;
+        entry_p *ans = choices->children;
 
-        // Pick up what we can, use default value if single choice.
-        yes = exists(*entry) ? str(*entry) : yes;
-        nay = exists(*(++entry)) ? str(*entry) : nay;
+        // The CBM installer needs two choices.
+        if(ans && exists(ans[0]) && exists(ans[1]))
+        {
+            yes = str(ans[0]);
+            nay = str(ans[1]);
+        }
     }
+
+    // Default = 'no'.
+    int ans = LG_FALSE;
 
     // Do we have a user specified default?
     if(deflt)
@@ -71,50 +75,48 @@ entry_p m_askbool(entry_p contxt)
         ans = num(deflt) ? LG_TRUE : LG_FALSE;
     }
 
-    // Show requester unless we're executing in 'novice' mode.
-    if(get_num(contxt, "@user-level") != LG_NOVICE)
+    // Don't show requester in 'novice' mode.
+    if(get_num(contxt, "@user-level") == LG_NOVICE)
     {
-        const char *prt = str(prompt),
-                   *hlp = str(help);
+        // Return default or false.
+        R_NUM(ans);
+    }
 
-        // Only show requester if we could resolve all options.
-        if(!DID_ERR)
+    const char *prt = str(prompt), *hlp = str(help);
+
+    // Only show requester if we could resolve all options.
+    if(DID_ERR)
+    {
+        R_NUM(LG_FALSE);
+    }
+
+    // Prompt user.
+    inp_t grc = gui_bool(prt, hlp, yes, nay, back != false);
+
+    // Is the back option available?
+    if(back)
+    {
+        // Fake input?
+        if(get_num(contxt, "@back"))
         {
-            // FIXME - Should the default value be promoted
-            // to the GUI? Probably. Check CBM Installer.
+            grc = G_ABORT;
+        }
 
-            // Prompt user.
-            inp_t grc = gui_bool(prt, hlp, yes, nay, back != false);
-
-            // Is the back option available?
-            if(back)
-            {
-                // Fake input?
-                if(get_num(contxt, "@back"))
-                {
-                    grc = G_ABORT;
-                }
-
-                // On abort execute.
-                if(grc == G_ABORT)
-                {
-                    return resolve(back);
-                }
-            }
-
-            // FIXME
-            if(grc == G_ABORT || grc == G_EXIT)
-            {
-                HALT;
-            }
-
-            // Translate return code.
-            R_NUM((grc == G_TRUE) ? LG_TRUE : LG_FALSE);
+        // On abort execute.
+        if(grc == G_ABORT)
+        {
+            return resolve(back);
         }
     }
 
-    // Return default value.
-    R_NUM(ans);
+    // FIXME
+    if(grc == G_ABORT || grc == G_EXIT)
+    {
+        HALT;
+    }
+
+    // Translate return code.
+    R_NUM((grc == G_TRUE) ? LG_TRUE : LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
