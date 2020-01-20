@@ -17,7 +17,7 @@
 (select 3 "abc" "def") ; "","Line 1: No such item '3' 0",""
 (select -1 "abc" "def") ; "","Line 1: No such item '-1' 0",""
 (set a 1) (select 0 a 2) ; "","1",""
-(select 1 "abc" (database "cpu") "def") ; "","Unknown",""
+(select 1 "abc" (database "cpu") "def") ; "","Unknown CPU",""
 (procedure f1 (+ 1 (+ 1 1))) (select 1 "abc" (f1) "def") ; "","3",""
 (select 1 3 (+ 2 2)) ; "","4",""
 (+ 1 (select 1 1 2)) ; "","3",""
