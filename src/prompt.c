@@ -36,15 +36,11 @@ entry_p m_askbool(entry_p contxt)
     // Arguments are optional.
     C_SANE(0, contxt);
 
-    const char *yes = tr(S_AYES), *nay = tr(S_NONO);
     entry_p prompt   = opt(contxt, OPT_PROMPT),
             help     = opt(contxt, OPT_HELP),
             back     = opt(contxt, OPT_BACK),
             deflt    = opt(contxt, OPT_DEFAULT),
             choices  = opt(contxt, OPT_CHOICES);
-
-    // Default = 'no'.
-    int ans = LG_FALSE;
 
     // Do we have both prompt and help text?
     if(!prompt || !help)
@@ -54,16 +50,24 @@ entry_p m_askbool(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
+    // Default choices are 'yes' and 'no' (or translations thereof).
+    const char *yes = tr(S_AYES), *nay = tr(S_NONO);
+
     // Do we have a choice option?
     if(choices)
     {
-        // Unless the parser is broken, we will have >= one child.
-        entry_p *entry = choices->children;
+        entry_p *ans = choices->children;
 
-        // Pick up what we can, use default value if single choice.
-        yes = exists(*entry) ? str(*entry) : yes;
-        nay = exists(*(++entry)) ? str(*entry) : nay;
+        // The CBM installer needs two choices.
+        if(ans && exists(ans[0]) && exists(ans[1]))
+        {
+            yes = str(ans[0]);
+            nay = str(ans[1]);
+        }
     }
+
+    // Default = 'no'.
+    int ans = LG_FALSE;
 
     // Do we have a user specified default?
     if(deflt)
@@ -71,50 +75,48 @@ entry_p m_askbool(entry_p contxt)
         ans = num(deflt) ? LG_TRUE : LG_FALSE;
     }
 
-    // Show requester unless we're executing in 'novice' mode.
-    if(get_num(contxt, "@user-level") != LG_NOVICE)
+    // Don't show requester in 'novice' mode.
+    if(get_num(contxt, "@user-level") == LG_NOVICE)
     {
-        const char *prt = str(prompt),
-                   *hlp = str(help);
+        // Return default or false.
+        R_NUM(ans);
+    }
 
-        // Only show requester if we could resolve all options.
-        if(!DID_ERR)
+    const char *prt = str(prompt), *hlp = str(help);
+
+    // Only show requester if we could resolve all options.
+    if(DID_ERR)
+    {
+        R_NUM(LG_FALSE);
+    }
+
+    // Prompt user.
+    inp_t grc = gui_bool(prt, hlp, yes, nay, back != false);
+
+    // Is the back option available?
+    if(back)
+    {
+        // Fake input?
+        if(get_num(contxt, "@back"))
         {
-            // FIXME - Should the default value be promoted
-            // to the GUI? Probably. Check CBM Installer.
+            grc = G_ABORT;
+        }
 
-            // Prompt user.
-            inp_t grc = gui_bool(prt, hlp, yes, nay, back != false);
-
-            // Is the back option available?
-            if(back)
-            {
-                // Fake input?
-                if(get_num(contxt, "@back"))
-                {
-                    grc = G_ABORT;
-                }
-
-                // On abort execute.
-                if(grc == G_ABORT)
-                {
-                    return resolve(back);
-                }
-            }
-
-            // FIXME
-            if(grc == G_ABORT || grc == G_EXIT)
-            {
-                HALT;
-            }
-
-            // Translate return code.
-            R_NUM((grc == G_TRUE) ? LG_TRUE : LG_FALSE);
+        // On abort execute.
+        if(grc == G_ABORT)
+        {
+            return resolve(back);
         }
     }
 
-    // Return default value.
-    R_NUM(ans);
+    // FIXME
+    if(grc == G_ABORT || grc == G_EXIT)
+    {
+        HALT;
+    }
+
+    // Translate return code.
+    R_NUM((grc == G_TRUE) ? LG_TRUE : LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -125,8 +127,7 @@ entry_p m_askbool(entry_p contxt)
 //
 // The installer in OS 3.9 doesn't seem to return a bitmap, which is how it is
 // supposed to work according to the Installer.guide, instead it returns a zero
-// index. We choose to ignore the guide and mimic the behaviour of the OS 3.9
-// implementation.
+// index. We ignore the guide and mimic the behaviour of the CBM implementation.
 //------------------------------------------------------------------------------
 entry_p m_askchoice(entry_p contxt)
 {
@@ -146,11 +147,9 @@ entry_p m_askchoice(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    // The choice is represented by a bitmask of 32 bits, refer to
-    // Install.guide. Thus, we need room for 32 pointers + NULL.
-    const char *prt = str(prompt), *hlp = str(help);
+    // The choice is a 32 bit bitmask, refer to Installer.guide.
+    const char *prt = str(prompt), *hlp = str(help), *chs[33] = { NULL };
     int add[32], ndx = 0, off = 0;
-    static const char *chs[33];
 
     // Pick up a string representation of all the options.
     for(entry_p *entry = choices->children; exists(*entry) && off < 32; entry++)
@@ -197,9 +196,6 @@ entry_p m_askchoice(entry_p contxt)
         // these as well.
         off++;
     }
-
-    // Terminate list of choices.
-    chs[ndx] = NULL;
 
     // Exit if there's nothing to show.
     if(!ndx)
@@ -407,9 +403,9 @@ entry_p m_askdisk(entry_p contxt)
     p->pr_WindowPtr = (APTR) -1L;
 
     // Is this volume present already?
-    BPTR l = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
+    BPTR vol = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
 
-    if(!l)
+    if(!vol)
     {
         const char *msg = str(prompt), *hlp = str(help),
                    *bt1 = tr(S_RTRY), *bt2 = tr(S_SKIP);
@@ -418,14 +414,14 @@ entry_p m_askdisk(entry_p contxt)
         if(!DID_ERR)
         {
             // Retry until we can get a lock or the user aborts.
-            while(!l)
+            while(!vol)
             {
                 // Prompt user.
                 inp_t grc = gui_bool(msg, hlp, bt1, bt2, back != false);
 
                 if(grc == G_TRUE)
                 {
-                    l = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
+                    vol = (BPTR) Lock(buf_get(B_KEY), ACCESS_READ);
                 }
                 else
                 {
@@ -465,7 +461,7 @@ entry_p m_askdisk(entry_p contxt)
     buf_put(B_KEY);
 
     // Did the user abort?
-    if(l)
+    if(vol)
     {
         // Are we going to create an assign aliasing 'dest'?
         if(newname)
@@ -477,28 +473,28 @@ entry_p m_askdisk(entry_p contxt)
             {
                 // On success, the lock belongs to
                 // the system. Do not UnLock().
-                ret = AssignLock(nn, l) ? LG_TRUE : LG_FALSE;
+                ret = AssignLock(nn, vol) ? LG_TRUE : LG_FALSE;
 
                 // On failure, we need to UnLock() it ourselves.
                 if(ret == LG_FALSE)
                 {
                     // Could not create 'newname' assign.
                     ERR(ERR_ASSIGN, str(C_ARG(1)));
-                    UnLock(l);
+                    UnLock(vol);
                 }
             }
             else
             {
                 // An assign must contain at least one character.
                 ERR(ERR_INVALID_ASSIGN, nn);
-                UnLock(l);
+                UnLock(vol);
             }
         }
         else
         {
             // Sucess.
             ret = LG_TRUE;
-            UnLock(l);
+            UnLock(vol);
         }
     }
 
