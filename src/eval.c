@@ -103,6 +103,12 @@ static entry_p h_resolve_option(entry_p opt)
         return invoke(opt);
     }
 
+    if(opt->id == OPT_DELOPTS)
+    {
+        // QUIRKY DELOPTS SPECIAL STUB.
+        // static int count_me;
+    }
+
     // A normal option.
     return opt;
 }

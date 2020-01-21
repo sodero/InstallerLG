@@ -5,6 +5,7 @@
 (set #flag 1) (set #flag (if #flag ((debug "true") 4) ((debug "false") 1))) (+ #flag) ; "","true 4",""
 (set #flag 0) (set #flag (if #flag ((debug "true") 0) ((debug "false") 7))) (+ #flag) ; "","false 7",""
 (if (+ 1) ((set a 2) (+ a a)) (+ 3 3)); "","4",""
+(if (+ 1) ( (debug "a") (debug "b") (safe))); "","a b",""
 (if (IN %00001111 0) ((set a 2) (+ a a)) (+ 3 3)); "","4",""
 (set x 1) (if (IN x 0) ((set a 2) (+ a a)) (+ 3 3)); "","4",""
 (set #flag 1) (if (= 1 #flag) ((message "very") (message "true")) ((message "very") (message "false"))) (debug "go") (exit (quiet)) (debug "off"); "","very0true0go 1",""
