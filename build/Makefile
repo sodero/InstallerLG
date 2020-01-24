@@ -1,12 +1,20 @@
 #---------------------------------------------------------------------------------#
 # Universal
 #---------------------------------------------------------------------------------#
+SHELL := /bin/bash
 VPATH := ../src
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 OS ?= $(shell uname)
 DATE := $(shell date +%d.%m.%Y || echo Unknown)
 APP := InstallerLG
 EXE := Installer
+
+INTERFACE := GUI
+ifeq ($(INTERFACE),CLI)
+OBJ := $(filter-out gui.o,$(OBJ))
+else
+OBJ := $(filter-out cli.o,$(OBJ))
+endif
 
 #---------------------------------------------------------------------------------#
 # OS
@@ -20,6 +28,12 @@ ifeq ($(OS),Darwin)
 CGEN = -g -std=c99
 CWRN += -Werror -Weverything -Wno-format-nonliteral -Wno-date-time
 else
+ifeq ($(OS),Windows_NT)
+CC = x86_64-w64-mingw32-gcc.exe
+CWRN = -Wall -Wextra -Werror
+CGEN = -g -std=c99
+CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE -D__USE_MINGW_ANSI_STDIO
+else
 CC ?= gcc
 AMIGA = true
 CWRN = -Wall -Wextra -Wno-pointer-sign
@@ -27,6 +41,7 @@ CGEN = -Os -std=gnu99 -DAMIGA
 LDLIBS = -ldebug
 ifeq ($(OS),MorphOS)
 LDLIBS += -noixemul
+endif
 endif
 endif
 endif

@@ -1,21 +1,21 @@
 VBCC?=vbcc:
 VPATH=../src/:../build/
 
-GUI= CLI
-ifeq ($(GUI),CLI)
-	GUIOBJ= cli_gui.o
-	GUIFLAGS=
+INTERFACE= CLI
+ifeq ($(INTERFACE),CLI)
+	INTERFACE_OBJ= cli.o
+	INTERFACE_FLAGS=
 else
-	GUIOBJ= gui.o
-	GUIFLAGS= -I$(VBCC)/MUI/C/include -DMUIA_Dtpic_Name=0x80423d72
+	INTERFACE_OBJ= gui.o
+	INTERFACE_FLAGS= -I$(VBCC)/MUI/C/include -DMUIA_Dtpic_Name=0x80423d72
 endif
 
 CC= vc +aos68k
 OBJS= alloc.o symbol.o init.o resource.o util.o error.o file.o control.o \
-      exit.o $(GUIOBJ) logic.o probe.o procedure.o media.o prompt.o strcasestr.o \
+      exit.o $(INTERFACE_OBJ) logic.o probe.o procedure.o media.o prompt.o strcasestr.o \
       strop.o wb.o args.o arithmetic.o comparison.o eval.o external.o \
       information.o ../build/parser.o ../build/lexer.o
-CFLAGS= -I$(VBCC)/PosixLib/include $(GUIFLAGS) -I. -I../build -I../src -O -dontwarn=153 -DAMIGA -DKPrintF=printf #-DLG_TEST
+CFLAGS= -I$(VBCC)/PosixLib/include $(INTERFACE_FLAGS) -I. -I../build -I../src -O -dontwarn=153 -DAMIGA -DKPrintF=printf #-DLG_TEST
 
 Installer: $(OBJS)
 	$(CC) -o $@68k $(OBJS) -L$(VBCC)/PosixLib/AmigaOS3 -lposix -lamiga -lauto -lmieee

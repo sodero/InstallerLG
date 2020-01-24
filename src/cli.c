@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
-// cligui.c:
+// cli.c:
 //
-// CLI GUI.
+// CLI Interface.
 //
 //------------------------------------------------------------------------------
 // Copyright (C) 2018-2019, Ola Söder. All rights reserved.
@@ -11,8 +11,8 @@
 #include "gui.h"
 
 #include <stdio.h>
-
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef __GNUC__
 #define __attribute__(a)
@@ -21,6 +21,7 @@ typedef LONG IPTR;
 
 inp_t gui_init(bool scr)
 {
+    (void)scr;
     return G_TRUE;
 }
 
@@ -31,18 +32,20 @@ void gui_exit(void)
 
 inp_t gui_message(const char *msg, bool bck)
 {
+    (void)bck;
     printf("%s\n", msg);
     return G_TRUE;
 }
 
 inp_t gui_finish(const char *msg)
 {
+    printf("Finish: %s\n", msg);
     return G_TRUE;
 }
 
 inp_t gui_working(const char *msg)
 {
-    printf("%s\n", msg);
+    printf("Working: %s\n", msg);
     return G_TRUE;
 }
 
@@ -83,6 +86,7 @@ void printList(const char** listOfStrings) {
 
 inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret)
 {
+    (void)bck;
     int max = countList(nms);
 
     printf("%s\n", msg);
@@ -133,6 +137,7 @@ void printListWithSelection(const char** listOfStrings, int selected) {
 
 inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret)
 {
+    (void)bck;
     int max = countList(nms);
     int selected = def;
 
@@ -169,6 +174,7 @@ inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def, b
 
 inp_t gui_bool(const char *msg, const char *hlp, const char *yes, const char *nay, bool bck)
 {
+    (void)bck;
     char response[5];
     printf("%s\n", msg);
     printf("Pick an option (H for help)\n");
@@ -189,6 +195,7 @@ inp_t gui_bool(const char *msg, const char *hlp, const char *yes, const char *na
 
 inp_t gui_string(const char *msg, const char *hlp, const char *def, bool bck, const char **ret)
 {
+    (void)bck;
     printf("%s\n", msg);
     printf("Enter a string (default is '%s', H for help)\n", def);
     char response[255];
@@ -202,7 +209,7 @@ inp_t gui_string(const char *msg, const char *hlp, const char *def, bool bck, co
             *ret = def;
             choseAnswer = true;
         } else  {
-            strcpy(*ret, response);
+            strcpy((char * restrict)*ret, response);
             choseAnswer = true;
         }
     } while(choseAnswer == false);
@@ -211,6 +218,7 @@ inp_t gui_string(const char *msg, const char *hlp, const char *def, bool bck, co
 
 inp_t gui_number(const char *msg, const char *hlp, int min, int max, int def, bool bck, int *ret)
 {
+    (void)bck;
     printf("%s\n", msg);
     printf("Choose a number between %d and %d (default is %d, H for help)\n", min, max, def);
     char response[12];
@@ -243,6 +251,12 @@ inp_t gui_number(const char *msg, const char *hlp, int min, int max, int def, bo
 
 inp_t gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min, bool npr, bool nlg)
 {
+    (void)lvl;
+    (void)lgf;
+    (void)prt;
+    (void)min;
+    (void)npr;
+    (void)nlg;
     printf("%s", msg);
     return G_TRUE;
 }
@@ -250,6 +264,10 @@ inp_t gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min, bool n
 inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
                 const char *def, bool bck, const char **ret)
 {
+    (void)bck;
+    (void)pth;
+    (void)dsk;
+    (void)asn;
     printf("%s\n", msg);
     printf("Enter a directory path (default is '%s', H for help)\n", def);
     char response[1024];
@@ -263,7 +281,8 @@ inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
             *ret = def;
             choseAnswer = true;
         } else  {
-            strcpy(*ret, response);
+            strcpy((char * restrict)*ret, response);
+            ret[strcspn((char * restrict)*ret, "\n")] = 0;
             choseAnswer = true;
         }
     } while(choseAnswer == false);
@@ -273,6 +292,9 @@ inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
 inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
                   const char *def, bool bck, const char **ret)
 {
+    (void)bck;
+    (void)pth;
+    (void)dsk;
     printf("%s\n", msg);
     printf("Enter a file name (default is '%s', H for help)\n", def);
     char response[1024];
@@ -286,7 +308,7 @@ inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
             *ret = def;
             choseAnswer = true;
         } else  {
-            strcpy(*ret, response);
+            strcpy((char * restrict)*ret, response);
             choseAnswer = true;
         }
     } while(choseAnswer == false);
@@ -295,11 +317,19 @@ inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
 
 inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, bool cnf, bool bck)
 {
+    (void)msg;
+    (void)hlp;
+    (void)lst;
+    (void)cnf;
+    (void)bck;
     return G_TRUE;
 }
 
 inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
 {
+    (void)cur;
+    (void)nga;
+    (void)bck;
     return G_TRUE;
 }
 
@@ -315,6 +345,7 @@ void gui_complete(int com)
 
 inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 {
+    (void)bck;
     printf("Confirm\n");
     printf("%s\n", msg);
     char response[5];
@@ -341,26 +372,41 @@ void gui_effect(int eff, int cl1, int cl2)
 
 inp_t gui_closemedia(int mid)
 {
+    (void)mid;
     return G_TRUE;
 }
 
 inp_t gui_setmedia(int mid, int act, const char *par)
 {
+    (void)mid;
+    (void)act;
+    (void)par;
     return G_TRUE;
 }
 
 inp_t gui_showmedia(int *mid, const char* mda, int act)
 {
+    (void)mid;
+    (void)mda;
+    (void)act;
     return G_TRUE;
 }
 
 void gui_query_screen(int *width, int *height, int *depth, int *colors)
 {
-
+    (void)width;
+    (void)height;
+    (void)depth;
+    (void)colors;
 }
 
 void gui_query_window(int *width, int *height, int *upper, int *lower,
                       int *left, int *right)
 {
-
+    (void)width;
+    (void)height;
+    (void)upper;
+    (void)lower;
+    (void)left;
+    (void)right;
 }
