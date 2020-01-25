@@ -19,9 +19,20 @@
 typedef LONG IPTR;
 #endif
 
+//
+// The gui_* functions are re-implementations of the gui.c functions written to use
+// standard input and standard output.  Anything related to the display is ignored
+// and the back option is also not implemented.
+//
+// Initialisation is hard coded to user level expert, no pretend.
+//
+
 inp_t gui_init(bool scr)
 {
     (void)scr;
+
+    printf("Initialising\n");
+
     return G_TRUE;
 }
 
@@ -33,19 +44,23 @@ void gui_exit(void)
 inp_t gui_message(const char *msg, bool bck)
 {
     (void)bck;
+
     printf("%s\n", msg);
+
     return G_TRUE;
 }
 
 inp_t gui_finish(const char *msg)
 {
     printf("Finish: %s\n", msg);
+
     return G_TRUE;
 }
 
 inp_t gui_working(const char *msg)
 {
     printf("Working: %s\n", msg);
+
     return G_TRUE;
 }
 
@@ -87,8 +102,8 @@ void printList(const char** listOfStrings) {
 inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret)
 {
     (void)bck;
-    int max = countList(nms);
 
+    int max = countList(nms);
     printf("%s\n", msg);
     printf("Choose a number between 0 and %d (default is %d, H for help)\n", max, def);
     char response[5];
@@ -117,6 +132,7 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def, bo
             }
         }
     } while(choseAnswer == false);
+
     return G_TRUE;
 }
 
@@ -138,6 +154,7 @@ void printListWithSelection(const char** listOfStrings, int selected) {
 inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret)
 {
     (void)bck;
+
     int max = countList(nms);
     int selected = def;
 
@@ -169,12 +186,14 @@ inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def, b
         }
     } while(finished == false);
     *ret = selected;
+
     return G_TRUE;
 }
 
 inp_t gui_bool(const char *msg, const char *hlp, const char *yes, const char *nay, bool bck)
 {
     (void)bck;
+
     char response[5];
     printf("%s\n", msg);
     printf("Pick an option (H for help)\n");
@@ -196,6 +215,7 @@ inp_t gui_bool(const char *msg, const char *hlp, const char *yes, const char *na
 inp_t gui_string(const char *msg, const char *hlp, const char *def, bool bck, const char **ret)
 {
     (void)bck;
+
     printf("%s\n", msg);
     printf("Enter a string (default is '%s', H for help)\n", def);
     char response[255];
@@ -213,12 +233,14 @@ inp_t gui_string(const char *msg, const char *hlp, const char *def, bool bck, co
             choseAnswer = true;
         }
     } while(choseAnswer == false);
+
     return G_TRUE;
 }
 
 inp_t gui_number(const char *msg, const char *hlp, int min, int max, int def, bool bck, int *ret)
 {
     (void)bck;
+
     printf("%s\n", msg);
     printf("Choose a number between %d and %d (default is %d, H for help)\n", min, max, def);
     char response[12];
@@ -246,21 +268,25 @@ inp_t gui_number(const char *msg, const char *hlp, int min, int max, int def, bo
             }
         }
     } while(choseAnswer == false);
+
     return G_TRUE;
 }
 
 inp_t gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min, bool npr, bool nlg)
 {
-    (void)lvl;
     (void)lgf;
-    (void)prt;
     (void)min;
     (void)npr;
     (void)nlg;
+
     printf("%s", msg);
+    *lvl = 2;
+    *prt = 0;
+
     return G_TRUE;
 }
 
+// The 'newpath' (pth) and 'assigns' (asn) parameters are ignored and treated as true.
 inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
                 const char *def, bool bck, const char **ret)
 {
@@ -268,6 +294,7 @@ inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
     (void)pth;
     (void)dsk;
     (void)asn;
+
     printf("%s\n", msg);
     printf("Enter a directory path (default is '%s', H for help)\n", def);
     char response[1024];
@@ -286,15 +313,18 @@ inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
             choseAnswer = true;
         }
     } while(choseAnswer == false);
+
     return G_TRUE;
 }
 
+// The 'newpath' (pth) parameter is ignored and treated as true.
 inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
                   const char *def, bool bck, const char **ret)
 {
     (void)bck;
     (void)pth;
     (void)dsk;
+
     printf("%s\n", msg);
     printf("Enter a file name (default is '%s', H for help)\n", def);
     char response[1024];
@@ -312,6 +342,7 @@ inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
             choseAnswer = true;
         }
     } while(choseAnswer == false);
+
     return G_TRUE;
 }
 
@@ -346,6 +377,7 @@ void gui_complete(int com)
 inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 {
     (void)bck;
+
     printf("Confirm\n");
     printf("%s\n", msg);
     char response[5];
@@ -356,6 +388,7 @@ inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
             printf("%s\n", hlp);
         }
     } while(strcmp(response, "Y\n") != 0 && strcmp(response, "N\n") != 0);
+
     return strcmp(response, "Y\n") == 0 ? G_TRUE : G_FALSE;
 }
 
@@ -372,26 +405,26 @@ void gui_effect(int eff, int cl1, int cl2)
 
 inp_t gui_closemedia(int mid)
 {
-    (void)mid;
+    printf("Close media with mid %d", mid);
+
     return G_TRUE;
 }
 
 inp_t gui_setmedia(int mid, int act, const char *par)
 {
-    (void)mid;
-    (void)act;
-    (void)par;
+    printf("Set media with mid %d, act %d and par %s", mid, act, par);
+
     return G_TRUE;
 }
 
 inp_t gui_showmedia(int *mid, const char* mda, int act)
 {
-    (void)mid;
-    (void)mda;
-    (void)act;
+    printf("Set media with mid %d, act %d and mda %s", *mid, act, mda);
+
     return G_TRUE;
 }
 
+// Defaulting to not set any values.  Not sure how this is used or what the effect will be.
 void gui_query_screen(int *width, int *height, int *depth, int *colors)
 {
     (void)width;
@@ -400,6 +433,7 @@ void gui_query_screen(int *width, int *height, int *depth, int *colors)
     (void)colors;
 }
 
+// Defaulting to not set any values.  Not sure how this is used or what the effect will be.
 void gui_query_window(int *width, int *height, int *upper, int *lower,
                       int *left, int *right)
 {

@@ -6,6 +6,7 @@
 build/_*
 build/Installer
 build/Installer68k
+build/Installer.exe
 build/Installer.tmp.*
 build/massif.out.*
 build/leak.tmp.*
