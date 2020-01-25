@@ -350,25 +350,29 @@ inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
 
 inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, bool cnf, bool bck)
 {
-    (void)msg;
     (void)hlp;
     (void)lst;
     (void)cnf;
     (void)bck;
-    return G_TRUE;
+
+    printf("Starting file copy %s.\n", msg);
+
+    return (IPTR) G_TRUE;
 }
 
 inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
 {
-    (void)cur;
     (void)nga;
     (void)bck;
-    return G_TRUE;
+
+    printf("Copying files Cur:%s.\n", cur);
+
+    return (IPTR) G_TRUE;
 }
 
 void gui_copyfiles_end(void)
 {
-
+    printf("Finished copying files.\n");
 }
 
 void gui_complete(int com)
