@@ -1,11 +1,11 @@
 #include <string.h>
 
-#ifndef __GNUC__
+#if !defined(__GNUC__) || defined(__MINGW32__)
 
 /* case-independent string matching, similar to strstr but
  * matching */
 char *strcasestr(char *haystack, char *needle) {
-  int i;
+  size_t i;
   size_t nlength = strlen(needle);
   size_t hlength = strlen(haystack);
 
