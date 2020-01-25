@@ -104,6 +104,7 @@ Italian translations.
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{B}0.1.0-alpha.43 (2020-NOT-YET)@{UB}
+- Predefined 'true' and 'false' symbols (MetalWeb).
 - ?
 
 @{B}0.1.0-alpha.42 (2020-01-19)@{UB}
