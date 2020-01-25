@@ -229,7 +229,8 @@ inp_t gui_string(const char *msg, const char *hlp, const char *def, bool bck, co
             *ret = def;
             choseAnswer = true;
         } else  {
-            strcpy((char * restrict)*ret, response);
+            response[strcspn((char * restrict)response, "\n")] = 0;
+            *ret = strdup(response);
             choseAnswer = true;
         }
     } while(choseAnswer == false);
@@ -308,8 +309,8 @@ inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
             *ret = def;
             choseAnswer = true;
         } else  {
-            strcpy((char * restrict)*ret, response);
-            ret[strcspn((char * restrict)*ret, "\n")] = 0;
+            response[strcspn((char * restrict)response, "\n")] = 0;
+            *ret = strdup(response);
             choseAnswer = true;
         }
     } while(choseAnswer == false);
@@ -338,7 +339,8 @@ inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
             *ret = def;
             choseAnswer = true;
         } else  {
-            strcpy((char * restrict)*ret, response);
+            response[strcspn((char * restrict)response, "\n")] = 0;
+            *ret = strdup(response);
             choseAnswer = true;
         }
     } while(choseAnswer == false);
