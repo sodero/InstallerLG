@@ -12,3 +12,9 @@ to execute the tests on other systems with a POSIX shell (e.g MacOS) but then no
 checks for memory leaks / illegal reads / writes or leaking file handles will be
 done. By running 'make test', all tests will be executed.  This is currently not
 possible on AROS or MorphOS.
+
+To build a interactive cli-based version of the installer the variable INTERFACE
+can be set to CLI.  E.g.
+
+make INTERFACE=CLI
+make -f Makefile.vbcc INTERFACE=CLI

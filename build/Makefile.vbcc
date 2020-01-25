@@ -1,7 +1,7 @@
 VBCC?=vbcc:
 VPATH=../src/:../build/
 
-INTERFACE= CLI
+INTERFACE := GUI
 ifeq ($(INTERFACE),CLI)
 	INTERFACE_OBJ= cli.o
 	INTERFACE_FLAGS=
