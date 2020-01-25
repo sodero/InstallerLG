@@ -15,7 +15,7 @@
 #include "media.h"
 #include "util.h"
 #include <string.h>
-#if defined(__MORPHOS__) || defined(__VBCC__)
+#if defined(__MORPHOS__) || defined(__VBCC__) || defined(__MINGW32__)
 char *strcasestr(const char *, const char *);
 #endif
 
