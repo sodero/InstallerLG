@@ -87,7 +87,7 @@ nfl=0
 nok=0
 
 nl='\n';
-if [ $OSTYPE = "msys" ]; then nl='\r'; fi
+if [ $OSTYPE"" = "msys" ]; then nl='\r'; fi
 
 for f in `ls -t $tst/test.*`;
 do
