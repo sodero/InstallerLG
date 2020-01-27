@@ -25,6 +25,10 @@
 #include <unistd.h>
 #include <errno.h>
 
+#if defined(__MINGW32__)
+#define mkdir(a, b) mkdir(a)
+#endif
+
 #ifdef AMIGA
 #include <dos/dos.h>
 #include <dos/dosasl.h>
