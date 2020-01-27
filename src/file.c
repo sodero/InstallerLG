@@ -1992,6 +1992,45 @@ static int h_delete_info(entry_p contxt, const char *file)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_delete_perm
+// Description: Check for file / dir delete permission.
+// Input:       const char *name:   File / dir to check.
+// Return:      bool:               'true' if deleteable, 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool h_delete_perm(const char *name)
+{
+    #if defined(AMIGA) && !defined(LG_TEST)
+    struct FileInfoBlock *fib = (struct FileInfoBlock *)
+           AllocDosObject(DOS_FIB, NULL);
+
+    if(!fib)
+    {
+        // Out of memory.
+        return false;
+    }
+
+    // Attempt to lock file or directory.
+    BPTR lock = (BPTR) Lock(name, ACCESS_READ);
+    bool perm = false;
+
+    // Get information from lock.
+    if(lock && Examine(lock, fib))
+    {
+        perm = (fib->fib_Protection & FIBF_DELETE) == 0;
+    }
+
+    // Release lock and free info block.
+    UnLock(lock);
+    FreeDosObject(DOS_FIB, fib);
+
+    return perm;
+    #else
+    // Proper delete protection doesn't exist on non Amigas.
+    return access(dst, W_OK) == 0;
+    #endif
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_delete_file
 // Description: Delete file. Helper used by m_delete.
 // Input:       entry_p contxt:     The execution context.
@@ -2013,7 +2052,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     }
     else
     {
-        if(access(file, W_OK))
+        if(!h_delete_perm(file))
         {
             if(!opt(C_ARG(2), OPT_ASKUSER))
             {
@@ -2070,22 +2109,20 @@ static int h_delete_dir(entry_p contxt, const char *name)
             askuser  = opt(C_ARG(2), OPT_ASKUSER),
             all      = opt(C_ARG(2), OPT_ALL);
 
-    if(!force && access(name, W_OK))
+    if(!force && !h_delete_perm(name))
     {
         // Do we need to ask for confirmation?
-        if(askuser)
-        {
-            // Ask for confirmation if we're not running in novice mode.
-            if(get_num(contxt, "@user-level") == LG_NOVICE ||
-               !h_confirm(C_ARG(2), "", tr(S_DWRD), name))
-            {
-                // Halt will be set by h_confirm. Skip will result in nothing.
-                return LG_FALSE;
-            }
-        }
-        else
+        if(!askuser)
         {
             // Exit silently.
+            return LG_FALSE;
+        }
+
+        // Ask for confirmation if we're not running in novice mode.
+        if(get_num(contxt, "@user-level") == LG_NOVICE ||
+           !h_confirm(C_ARG(2), "", tr(S_DWRD), name))
+        {
+            // Halt will be set by h_confirm. Skip will result in nothing.
             return LG_FALSE;
         }
     }
