@@ -2030,7 +2030,7 @@ static bool h_delete_perm(const char *name)
     return perm;
     #else
     // Proper delete protection doesn't exist on non Amigas.
-    return access(dst, W_OK) == 0;
+    return access(name, W_OK) == 0;
     #endif
 }
 
