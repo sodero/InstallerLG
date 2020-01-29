@@ -13,6 +13,7 @@
 #include "arithmetic.h"
 #include "control.h"
 #include "comparison.h"
+#include "debug.h"
 #include "exit.h"
 #include "external.h"
 #include "file.h"

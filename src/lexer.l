@@ -193,6 +193,9 @@ static char *strduptr(const char *str);
 "setposition"           { return SETPOSITION;    }
 "source"                { return SOURCE;         }
 "swapcolors"            { return SWAPCOLORS;     }
+"___astraw"             { return ASTRAW;         }
+"___asbraw"             { return ASBRAW;         }
+"___asbeval"            { return ASBEVAL;        }
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     /* Strings                                                                                                                                                                          */
