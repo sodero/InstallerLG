@@ -86,31 +86,32 @@ entry_p find_symbol(entry_p entry)
 //------------------------------------------------------------------------------
 // Name:        h_resolve_option
 // Description: Resolve all option types.
-// Input:       entry_p opt:  An OPTION.
-// Return:      entry_p:      Pointer to an entry_t primitive.
+// Input:       entry_p option:  An OPTION.
+// Return:      entry_p:         Pointer to an entry_t primitive.
 //------------------------------------------------------------------------------
-static entry_p h_resolve_option(entry_p opt)
+static entry_p h_resolve_option(entry_p option)
 {
     // Dynamic options are native function calls.
-    if(opt->id == OPT_DYNOPT)
+    if(option->id == OPT_DYNOPT)
     {
-        return opt->call(opt);
+        return option->call(option);
     }
 
     // Back options are treated like contexts.
-    if(opt->id == OPT_BACK)
+    if(option->id == OPT_BACK)
     {
-        return invoke(opt);
+        return invoke(option);
     }
 
-    if(opt->id == OPT_DELOPTS)
+    // Special handling of (delopts).
+    if(option->id == OPT_DELOPTS)
     {
-        // QUIRKY DELOPTS SPECIAL STUB.
-        // static int count_me;
+        // Initialize cache to delete options.
+        opt(option ,OPT_INIT);
     }
 
     // A normal option.
-    return opt;
+    return option;
 }
 
 //------------------------------------------------------------------------------

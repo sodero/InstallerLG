@@ -244,52 +244,108 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 }
 
 //------------------------------------------------------------------------------
-// FIXME
+// Forward declaration needed by opt_push_cache.
+static void opt_fill_cache(entry_p contxt, entry_p *cache);
+//------------------------------------------------------------------------------
+// Name:        opt_push_cache
+// Description: Push OPTION to cache.
+// Input:       entry_p *option:  OPTION to be cached.
+// Return:      -
+//------------------------------------------------------------------------------
+static void opt_push_cache(entry_p option, entry_p *cache)
+{
+    // Transform fake options to real options.
+    if(option->id == OPT_OPTIONAL || option->id == OPT_DELOPTS)
+    {
+        get_fake_opt(option, cache);
+    }
+    // Dynamic options must be resolved.
+    else if(option->id == OPT_DYNOPT)
+    {
+        entry_p res = resolve(option);
+
+        if(res->type != OPTION)
+        {
+            // Non-existing conditional path.
+            return;
+        }
+
+        // Cache all options if we're in a block.
+        if(res->parent->type == CONTXT)
+        {
+            opt_fill_cache(res->parent, cache);
+        }
+
+        // Resolved value is a real option.
+        cache[res->id] = res;
+    }
+    // Don't trust the caller.
+    else if(option->id >= 0 && option->id < OPT_LAST)
+    {
+        // Save real options as they are.
+        cache[option->id] = option;
+    }
+    else
+    {
+        // Broken caller / parser.
+        PANIC(option);
+    }
+}
+
+//------------------------------------------------------------------------------
+// Name:        opt_fill_cache
+// Description: Initialize option cache.
+// Input:       entry_p *contxt:  Execution context / naked option.
+// Return:      -
 //------------------------------------------------------------------------------
 static void opt_fill_cache(entry_p contxt, entry_p *cache)
 {
-    // Iterate over all options to fill up the cache.
+    // Naked option.
+    if(contxt->type == OPTION)
+    {
+        // Push directly to cache.
+        opt_push_cache(contxt, cache);
+        return;
+    }
+
+    // Iterate over all options in execution context.
     for(size_t i = 0; i < OPT_LAST && exists(contxt->children[i]); i++)
     {
-        entry_p entry = contxt->children[i];
-
-        // Skip non options.
-        if(entry->type != OPTION)
+        // Children could be of any type.
+        if(contxt->children[i]->type == OPTION)
         {
-            continue;
-        }
-
-        // Cast dake options to real options.
-        if(entry->id == OPT_OPTIONAL || entry->id == OPT_DELOPTS)
-        {
-            get_fake_opt(entry, cache);
-        }
-        // Dynamic options must be resolved.
-        else if(entry->id == OPT_DYNOPT)
-        {
-            entry_p res = resolve(entry);
-
-            if(res->type != OPTION)
-            {
-                // Non-existing conditional path.
-                continue;
-            }
-
-            // Cache all options if we're in a block.
-            if(res->parent->type == CONTXT)
-            {
-                opt_fill_cache(res->parent, cache);
-            }
-
-            // Resolved value is a real option.
-            cache[res->id] = res;
-        }
-        else
-        {
-            // Save real options as they are.
-            cache[entry->id] = entry;
+            // Push current option to cache.
+            opt_push_cache(contxt->children[i], cache);
         }
     }
+}
+
+//------------------------------------------------------------------------------
+// Name:        opt_clear_cache
+// Description: Clear option cache while taking (delopts) into account.
+// Input:       entry_p *cache:  Option cache.
+// Return:      -
+//------------------------------------------------------------------------------
+static void opt_clear_cache(entry_p *cache)
+{
+    // Reset all options that aren't affected by (delopts).
+    for(size_t i = 0; i < OPT_ASKUSER; i++)
+    {
+        cache[i] = NULL;
+    }
+
+    // Reset options affected by (delopts) unless they're deleted.
+    for(size_t i = OPT_ASKUSER; i < OPT_INIT; i++)
+    {
+        // Sentinel value is used if deleted by (delopts).
+        if(cache[i] != end())
+        {
+            cache[i] = NULL;
+        }
+    }
+
+    // Set final sentinel.
+    cache[OPT_INIT] = end();
 }
 
 //------------------------------------------------------------------------------
@@ -316,8 +372,7 @@ entry_p opt(entry_p contxt, opt_t type)
     }
 
     // New context, clear cache.
-    memset(cache, 0, sizeof(cache));
-    cache[OPT_INIT] = end();
+    opt_clear_cache(cache);
     last = contxt;
 
     // Populate cache.

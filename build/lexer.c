@@ -1,5 +1,5 @@
 
-#line 3 "<stdout>"
+#line 2 "<stdout>"
 
 #define  YY_INT_ALIGNED short int
 
@@ -1017,12 +1017,12 @@ static const flex_int16_t yy_chk[1513] =
 /* strduptr(const char *str) - Duplicate string and translate escape characters according to the Installer V42.6 guide                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 static char *strduptr(const char *str);
-#line 1021 "<stdout>"
+#line 1020 "<stdout>"
 #line 26 "../src/lexer.l"
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     /* We need the parser to be reentrant, not because we want to, but because it will will leak memory otherwise.                                                                      */
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-#line 1026 "<stdout>"
+#line 1025 "<stdout>"
 
 #define INITIAL 0
 
@@ -1301,7 +1301,7 @@ YY_DECL
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     /* Decimal numbers                                                                                                                                                                  */
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-#line 1305 "<stdout>"
+#line 1304 "<stdout>"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -2128,7 +2128,7 @@ YY_RULE_SETUP
 #line 223 "../src/lexer.l"
 ECHO;
 	YY_BREAK
-#line 2132 "<stdout>"
+#line 2131 "<stdout>"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
