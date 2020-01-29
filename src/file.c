@@ -369,7 +369,6 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
 }
 
 //------------------------------------------------------------------------------
-// Forward declaration needed by h_choices.
 static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                           entry_p files, entry_p fonts, entry_p choices,
                           entry_p pattern, entry_p infos);

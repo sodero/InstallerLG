@@ -201,10 +201,9 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
 //------------------------------------------------------------------------------
 static void prune_opt(entry_p contxt, entry_p *cache)
 {
-    // Sanity check.
-    if(!cache)
+    if(!cache && PANIC(contxt))
     {
-        PANIC(contxt);
+        // Bad input.
         return;
     }
 
@@ -244,7 +243,6 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 }
 
 //------------------------------------------------------------------------------
-// Forward declaration needed by opt_push_cache.
 static void opt_fill_cache(entry_p contxt, entry_p *cache);
 //------------------------------------------------------------------------------
 // Name:        opt_push_cache
