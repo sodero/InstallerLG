@@ -790,7 +790,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 
 #define PERM_AMIGA_TO_POSIX(X) (((X & 8) ? 0 : PERM_POSIX_READ) | \
                                 ((X & 4) ? 0 : PERM_POSIX_WRITE) | \
-                                ((X & 2) ? 0 : PERM_POSIX_EXEC) | 1)
+                                ((X & 2) ? 0 : PERM_POSIX_EXEC))
 
 //------------------------------------------------------------------------------
 // Name:        h_protect_get
