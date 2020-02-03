@@ -171,42 +171,63 @@ entry_p native(entry_p entry)
 }
 
 //------------------------------------------------------------------------------
-// FIXME
+// Name:        get_fake_opt
+// Description: Populate option cache using fake option.
+// Input:       entry_p fake:   OPT_OPTIONAL or OPT_DELOPTS.
+//              entry_p *cache: Option cache.
+// Return:      -
 //------------------------------------------------------------------------------
 static void get_fake_opt(entry_p fake, entry_p *cache)
 {
     // Translate strings to options.
     for(size_t i = 0; exists(fake->children[i]); i++)
     {
-        entry_p cur = fake->children[i];
-        bool del = cur->parent->id == OPT_DELOPTS;
-        char *fop = str(cur);
+        // Only evaluate string value once.
+        bool del = fake->children[i]->parent->id == OPT_DELOPTS;
+        char *name = str(fake->children[i]);
 
-        // Set or delete option.
-        cache[OPT_FAIL] = strcasecmp(fop, "fail") ?
-        cache[OPT_FAIL] : (del ? NULL : cur);
-        cache[OPT_FORCE] = strcasecmp(fop, "force") ?
-        cache[OPT_FORCE] : (del ? NULL : cur);
-        cache[OPT_NOFAIL] = strcasecmp(fop, "nofail") ?
-        cache[OPT_NOFAIL] : (del ? NULL : cur);
-        cache[OPT_ASKUSER] = strcasecmp(fop, "askuser") ?
-        cache[OPT_ASKUSER] : (del ? NULL : cur);
-        cache[OPT_OKNODELETE] = strcasecmp(fop, "oknodelete") ?
-        cache[OPT_OKNODELETE] : (del ? NULL : cur);
+        // Compare all strings unless the current option is deleted.
+        if(cache[OPT_FAIL] != end() && !strcasecmp(name, "fail"))
+        {
+            // Delete or set depending on parent.
+            cache[OPT_FAIL] = del ? end() : fake->children[i];
+        }
+        else
+        if(cache[OPT_FORCE] != end() && !strcasecmp(name, "force"))
+        {
+            // Delete or set depending on parent.
+            cache[OPT_FORCE] = del ? end() : fake->children[i];
+        }
+        else
+        if(cache[OPT_NOFAIL] != end() && !strcasecmp(name, "nofail"))
+        {
+            // Delete or set depending on parent.
+            cache[OPT_NOFAIL] = del ? end() : fake->children[i];
+        }
+        else
+        if(cache[OPT_ASKUSER] != end() && !strcasecmp(name, "askuser"))
+        {
+            // Delete or set depending on parent.
+            cache[OPT_ASKUSER] = del ? end() : fake->children[i];
+        }
+        else
+        if(cache[OPT_OKNODELETE] != end() && !strcasecmp(name, "oknodelete"))
+        {
+            // Delete or set depending on parent.
+            cache[OPT_OKNODELETE] = del ? end() : fake->children[i];
+        }
     }
 }
 
 //------------------------------------------------------------------------------
-// FIXME
+// Name:        prune_opt
+// Description: Delete non applicable options.
+// Input:       entry_p contxt: Execution context.
+//              entry_p *cache: Option cache.
+// Return:      -
 //------------------------------------------------------------------------------
 static void prune_opt(entry_p contxt, entry_p *cache)
 {
-    if(!cache && PANIC(contxt))
-    {
-        // Bad input.
-        return;
-    }
-
     if(cache[OPT_CONFIRM])
     {
         // Make sure that we a prompt and help string.
@@ -219,17 +240,15 @@ static void prune_opt(entry_p contxt, entry_p *cache)
         // The default threshold is expert.
         int level = get_num(contxt, "@user-level"), thres = LG_EXPERT;
 
-        // If the (cache[OPT_CONFIRM] ...) option contains something that can be
-        // translated into a new threshold value...
+        // Evaluate (confirm) if children exist.
         if(cache[OPT_CONFIRM]->children &&
            exists(cache[OPT_CONFIRM]->children[0]))
         {
-            // ...then do so.
+            // Set new user threshold value.
             thres = num(cache[OPT_CONFIRM]);
         }
 
-        // If we are below the threshold value, or user input has been
-        // short-circuited by @yes, skip cache[OPT_CONFIRM]ation.
+        // Clear cache[OPT_CONFIRM] if below threshold or fake 'yes' is set.
         if(level < thres || get_num(contxt, "@yes"))
         {
             cache[OPT_CONFIRM] = NULL;
@@ -238,6 +257,7 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 
     if(cache[OPT_ALL])
     {
+        // The (all) option invalidates (files).
         cache[OPT_FILES] = NULL;
     }
 }
@@ -257,6 +277,7 @@ static void opt_push_cache(entry_p option, entry_p *cache)
     {
         get_fake_opt(option, cache);
     }
+
     // Dynamic options must be resolved.
     else if(option->id == OPT_DYNOPT)
     {
@@ -360,7 +381,8 @@ entry_p opt(entry_p contxt, opt_t type)
     // We need a valid context.
     if(!contxt || !contxt->children)
     {
-        return NULL;
+        // Return cached value if permanently set (delopts).
+        return cache[type] == end() ? end() : NULL;
     }
 
     // Return cached value if cache is full.
@@ -369,7 +391,7 @@ entry_p opt(entry_p contxt, opt_t type)
         return cache[type];
     }
 
-    // New context, clear cache.
+    // Start fram scratch with new context.
     opt_clear_cache(cache);
     last = contxt;
 
