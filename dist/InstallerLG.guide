@@ -103,7 +103,7 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-@{B}0.1.0-alpha.43 (2020-NOT-YET)@{UB}
+@{B}0.1.0-alpha.43 (2020-02-04)@{UB}
 - Predefined 'true' and 'false' symbols (MetalWeb).
 - Broken handling of delete protected files / dirs fixed.
 - Global (delopts) support (WB 3.1).
