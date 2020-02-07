@@ -37,7 +37,7 @@
 /*        arithmetic.c|h */ /* '+' '/' '*' '-' */
 %token /* comparison.c|h */ EQ GT GTE LT LTE NEQ
 %token /* control.c|h    */ IF SELECT UNTIL WHILE TRACE RETRACE
-%token /* debug.c|h      */ ASTRAW ASBRAW ASBEVAL
+%token /* debug.c|h      */ ASTRAW ASBRAW ASBEVAL OPTIONS
 %token /* external.c|h   */ EXECUTE REXX RUN
 %token /* exit.c|h       */ ABORT EXIT ONERROR TRAP REBOOT
 %token /* file.c|h       */ COPYFILES COPYLIB DELETE EXISTS FILEONLY FOREACH MAKEASSIGN MAKEDIR PROTECT STARTUP TEXTFILE TOOLTYPE TRANSCRIPT RENAME
@@ -63,7 +63,7 @@
        /*                */ foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all append assigns choices command compression
        /*                */ confirm default mul delopts dest disk files fonts help infos include newname newpath optional back nogauge noposition noreq pattern prompt quiet range safe
        /*                */ resident override setdefaulttool setposition setstack settooltype source swapcolors openwbobject showwbobject closewbobject trace retrace closemedia effect
-       /*                */ setmedia showmedia astraw asbraw asbeval
+       /*                */ setmedia showmedia astraw options asbraw asbeval
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Destruction                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -79,7 +79,7 @@
                             database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all assigns
                             choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append openwbobject showwbobject closewbobject trace retrace back closemedia
-                            effect setmedia showmedia astraw asbraw asbeval
+                            effect setmedia showmedia astraw options asbraw asbeval
 %%
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Start                                                                                                                                                                                */
@@ -200,6 +200,7 @@ ivp:            add        /* arithmetic.c|h */  |
                 astraw        /* debug.c|h */    |
                 asbraw                           |
                 asbeval                          |
+                options                          |
                 execute      /* external.c|h */  |
                 rexx                             |
                 run                              |
@@ -300,6 +301,7 @@ retrace:        '(' RETRACE ')'                  { $$ = new_native(strdup("retra
 astraw:         '(' ASTRAW ')'                   { $$ = new_native(strdup("___astraw"), LINE, m_astraw, NULL, NUMBER); };
 asbraw:         '(' ASBRAW p ')'                 { $$ = new_native(strdup("___asbraw"), LINE, m_asbraw, push(new_contxt(), $3), NUMBER); };
 asbeval:        '(' ASBEVAL p ')'                { $$ = new_native(strdup("___asbeval"), LINE, m_asbeval, push(new_contxt(), $3), NUMBER); };
+options:        '(' OPTIONS ')'                  { $$ = new_native(strdup("___options"), LINE, m_options, NULL, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h                                                                                                                                                                         */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

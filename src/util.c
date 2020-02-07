@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------------
 
 #include "alloc.h"
+#include "debug.h"
 #include "error.h"
 #include "eval.h"
 #include "util.h"
@@ -15,13 +16,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-
-#ifdef AMIGA
-#include <clib/debug_protos.h>
-#define DBG(...) KPrintF((CONST_STRPTR)__VA_ARGS__)
-#else
-#define DBG(...) fprintf(stderr, __VA_ARGS__)
-#endif
 
 //------------------------------------------------------------------------------
 // Name:        ror

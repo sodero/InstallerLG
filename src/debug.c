@@ -72,3 +72,25 @@ entry_p m_asbeval(entry_p contxt)
     // Dummy value.
     R_NUM(LG_TRUE);
 }
+
+//------------------------------------------------------------------------------
+// (___options)
+//     Dump option cache.
+//
+// Please note the ___ prefix. This is not meant to be used by end users.
+//------------------------------------------------------------------------------
+entry_p m_options(entry_p contxt)
+{
+    // No arguments.
+    C_SANE(0, NULL);
+
+    // Dump all options from the global option cache.
+    for(opt_t option = OPT_ALL; option < OPT_INIT; option++)
+    {
+        entry_p cur = opt(contxt, option);
+        DBG("%d:%s\n" , option, cur ? "true" : "false");
+    }
+
+    // Dummy value.
+    R_NUM(LG_TRUE);
+}
