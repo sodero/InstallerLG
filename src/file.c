@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------------
 
 #include "alloc.h"
+#include "debug.h"
 #include "error.h"
 #include "eval.h"
 #include "file.h"
@@ -341,8 +342,13 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
     // Save type of the result, it might not be the same as the original.
     int type = h_exists(h_suffix(node->name, suffix));
 
-    // Make sure that the file / directory exists.
-    if(!type)
+    // Make sure that the file / directory exists. If copying a directory to
+    // the root of a volume, e.g 'Work:' when (info) is set and the source icon
+    // exists, the h_suffix call will attempt to append '.info' to 'Work:' which
+    // doesn't make sense, the result will be truncated to ''. If this happens
+    // don't create a new node since there is no parent directory where an icon
+    // can be put.
+    if(!type || !*h_suffix(node->copy, suffix))
     {
         return node;
     }
