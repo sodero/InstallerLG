@@ -1,22 +1,27 @@
 //------------------------------------------------------------------------------
-// version.h:
+// debug.h:
 //
-// InstallerLG version information
+// TODO
 //------------------------------------------------------------------------------
 // Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
-#ifndef VERSION_H_
-#define VERSION_H_
+#ifndef DEBUG_H_
+#define DEBUG_H_
 
-#define MAJOR 44
-#define MINOR 10
-#define BUILD 44
-#define PHASE "ALPHA"
+#include "types.h"
 
-#define STY(X) #X
-#define VER(X) STY(X)
-#define VERSION_STRING "\0$VER: InstallerLG " VER(MAJOR) "." VER(MINOR) " " __AMIGADATE__ " [" PHASE VER(BUILD) "]"
+#ifdef AMIGA
+#include <clib/debug_protos.h>
+#define DBG(...) KPrintF((CONST_STRPTR)__VA_ARGS__)
+#else
+#define DBG(...) fprintf(stderr, __VA_ARGS__)
+#endif
+
+entry_p m_astraw(entry_p contxt);
+entry_p m_asbraw(entry_p contxt);
+entry_p m_asbeval(entry_p contxt);
+entry_p m_options(entry_p contxt);
 
 #endif

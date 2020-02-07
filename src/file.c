@@ -369,7 +369,6 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
 }
 
 //------------------------------------------------------------------------------
-// Forward declaration needed by h_choices.
 static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                           entry_p files, entry_p fonts, entry_p choices,
                           entry_p pattern, entry_p infos);
@@ -780,6 +779,19 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
     return NULL;
 }
 
+#define PERM_POSIX_READ (S_IRUSR | S_IRGRP | S_IROTH)
+#define PERM_POSIX_WRITE (S_IWUSR | S_IWGRP | S_IWOTH)
+#define PERM_POSIX_EXEC (S_IXUSR | S_IXGRP | S_IXOTH)
+#define PERM_POSIX_ALL (PERM_POSIX_READ | PERM_POSIX_WRITE | PERM_POSIX_EXEC)
+
+#define PERM_POSIX_TO_AMIGA(X) (((X & PERM_POSIX_READ) ? 0 : 8) | \
+                                ((X & PERM_POSIX_WRITE) ? 0 : 4) | \
+                                ((X & PERM_POSIX_EXEC) ? 0 : 2) | 1 )
+
+#define PERM_AMIGA_TO_POSIX(X) (((X & 8) ? 0 : PERM_POSIX_READ) | \
+                                ((X & 4) ? 0 : PERM_POSIX_WRITE) | \
+                                ((X & 2) ? 0 : PERM_POSIX_EXEC))
+
 //------------------------------------------------------------------------------
 // Name:        h_protect_get
 // Description: Utility function used by m_protect and m_copyfiles to get file /
@@ -849,8 +861,18 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
     h_log(contxt, tr(S_GMSK), file, *mask);
     return done ? LG_TRUE : LG_FALSE;
     #else
-    // Always succeed on non Amiga systems.
-    return LG_TRUE;
+    struct stat fst;
+
+    // Get POSIX file / dir permission.
+    if(stat(file, &fst) == 0)
+    {
+        // Report permissions in Amiga format.
+        *mask = PERM_POSIX_TO_AMIGA(fst.st_mode);
+        return LG_TRUE;
+    }
+
+    // Could not get file / dir permission.
+    return LG_FALSE;
     #endif
 }
 
@@ -885,6 +907,8 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
             return LG_FALSE;
         }
     }
+    #else
+    chmod(file, PERM_AMIGA_TO_POSIX(mask));
     #endif
 
     // If logging is enabled, write to log.
@@ -1006,7 +1030,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
         if(opt(contxt, OPT_FORCE) && !opt(contxt, OPT_ASKUSER))
         {
             // Unprotect file.
-            chmod(dst, S_IRWXU);
+            chmod(dst, PERM_POSIX_ALL);
         }
         else
         // Confirm if (askuser) unless we're running in novice mode and (force)
@@ -1017,7 +1041,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
             if(h_confirm(contxt, "", tr(S_OWRT), dst))
             {
                 // Unprotect file.
-                chmod(dst, S_IRWXU);
+                chmod(dst, PERM_POSIX_ALL);
             }
             else
             {
@@ -1401,7 +1425,7 @@ entry_p m_copyfiles(entry_p contxt)
         // If it's not a volume, set permissions to allow overwriting.
         if(dln && dst[dln - 1] != ':')
         {
-            chmod(dst, S_IRWXU);
+            chmod(dst, PERM_POSIX_ALL);
         }
     }
 
@@ -1463,20 +1487,6 @@ entry_p m_copyfiles(entry_p contxt)
                         // Could not create directory.
                         ERR(ERR_WRITE_DIR, dst);
                         grc = G_FALSE;
-                        break;
-                    }
-
-                    // Preserve permissions in strict mode.
-                    if(get_num(contxt, "@strict"))
-                    {
-                        int32_t prm = 0;
-
-                        if(!h_protect_get(contxt, cur->name, &prm) ||
-                           !h_protect_set(contxt, cur->copy, prm))
-                        {
-                            // Could not get / set permissons.
-                            grc = G_FALSE;
-                        }
                     }
                     break;
 
@@ -1981,7 +1991,7 @@ static int h_delete_info(entry_p contxt, const char *file)
     if(h_exists(info) == LG_FILE)
     {
         // Set write permission and delete file.
-        if(chmod(info, S_IRWXU) || remove(info))
+        if(chmod(info, PERM_POSIX_ALL) || remove(info))
         {
             ERR(ERR_DELETE_FILE, info);
             return LG_FALSE;
@@ -2052,7 +2062,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     // If (force) is used, give permissions so that delete can succeed.
     if(opt(C_ARG(2), OPT_FORCE))
     {
-        chmod(file, S_IRWXU);
+        chmod(file, PERM_POSIX_ALL);
     }
     else
     {
@@ -2069,7 +2079,7 @@ static int h_delete_file(entry_p contxt, const char *file)
                h_confirm(contxt, "", tr(S_DWRT), file))
             {
                 // Give permissions so that delete can succeed.
-                chmod(file, S_IRWXU);
+                chmod(file, PERM_POSIX_ALL);
             }
             else
             {
@@ -2133,7 +2143,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
 
     // Give permissions so that delete can succeed. No need to check the return
     // value since errors will be caught below.
-    chmod(name, S_IRWXU);
+    chmod(name, PERM_POSIX_ALL);
 
     if(rmdir(name))
     {
@@ -2232,7 +2242,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
     }
 
     // Set permissions so that delete can succeed.
-    chmod(info, S_IRWXU);
+    chmod(info, PERM_POSIX_ALL);
 
     // Delete the info file.
     if(!remove(info))
@@ -2806,7 +2816,7 @@ entry_p m_protect(entry_p contxt)
     C_SANE(1, C_ARG(2));
 
     char *file = str(C_ARG(1));
-    D_NUM = LG_FALSE;
+    D_NUM = 0;//LG_FALSE;
 
     if(exists(C_ARG(2)))
     {
