@@ -26,6 +26,12 @@
 #ifdef __MORPHOS__
 char *strcasestr(const char *, const char *);
 #endif
+
+#if defined(__amigaos4__)
+static const char* __attribute__((used)) stackcookie = "$STACK: 131072";
+#elif defined(__AROS__) || defined(__MORPHOS__)
+unsigned long __stack = 131072;
+#endif
 #endif
 
 //------------------------------------------------------------------------------
