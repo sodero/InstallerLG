@@ -789,34 +789,26 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 #define PERM_POSIX_WRITE (S_IWUSR | S_IWGRP | S_IWOTH)
 #define PERM_POSIX_EXEC (S_IXUSR | S_IXGRP | S_IXOTH)
 #define PERM_POSIX_ALL (PERM_POSIX_READ | PERM_POSIX_WRITE | PERM_POSIX_EXEC)
-
 #define PERM_POSIX_TO_AMIGA(X) (((X & PERM_POSIX_READ) ? 0 : 8) | \
                                 ((X & PERM_POSIX_WRITE) ? 0 : 4) | \
                                 ((X & PERM_POSIX_EXEC) ? 0 : 2) | 1 )
-
 #define PERM_AMIGA_TO_POSIX(X) (((X & 8) ? 0 : PERM_POSIX_READ) | \
                                 ((X & 4) ? 0 : PERM_POSIX_WRITE) | \
                                 ((X & 2) ? 0 : PERM_POSIX_EXEC))
 
+#if defined(AMIGA) && !defined(LG_TEST)
+
 //------------------------------------------------------------------------------
-// Name:        h_protect_get
-// Description: Utility function used by m_protect and m_copyfiles to get file /
-//              dir protection bits.
+// Name:        h_protect_get_amiga
+// Description: Used by h_protect_get to get file / dir protection bits. Amiga
+//              implementation supporting delete protection.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
 //              int32_t *mask:      Pointer to the result.
 // Return:      int:                LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
+static int h_protect_get_amiga(entry_p contxt, char *file, int32_t *mask)
 {
-    if((!contxt || !mask || !file) && PANIC(contxt))
-    {
-        // Bad input.
-        return LG_FALSE;
-    }
-
-    // On non Amiga systems, or in test mode, this is a stub.
-    #if defined(AMIGA) && !defined(LG_TEST)
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
@@ -827,10 +819,9 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
     }
 
     // Attempt to lock file / dir.
-    bool done = false;
     BPTR lock = (BPTR) Lock(file, ACCESS_READ);
+    bool done = false;
 
-    // Did we obtain a lock?
     if(lock)
     {
         // Fill up FIB and get bits.
@@ -840,6 +831,7 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
             done = true;
         }
 
+        // Lock no longer needed.
         UnLock(lock);
     }
 
@@ -866,19 +858,56 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
     // If enabled, write to log file.
     h_log(contxt, tr(S_GMSK), file, *mask);
     return done ? LG_TRUE : LG_FALSE;
-    #else
+
+}
+#else
+//------------------------------------------------------------------------------
+// Name:        h_protect_get_posix
+// Description: Used by h_protect_get to get file / dir protection bits. POSIX
+//              implementation without delete protection support.
+// Input:       const char *file:   File / dir.
+//              int32_t *mask:      Pointer to the result.
+// Return:      int:                LG_TRUE / LG_FALSE.
+//------------------------------------------------------------------------------
+static int h_protect_get_posix(char *file, int32_t *mask)
+{
     struct stat fst;
 
     // Get POSIX file / dir permission.
-    if(stat(file, &fst) == 0)
+    if(stat(file, &fst))
     {
-        // Report permissions in Amiga format.
-        *mask = PERM_POSIX_TO_AMIGA(fst.st_mode);
-        return LG_TRUE;
+        // Could not get file / dir permission.
+        return LG_FALSE;
     }
 
-    // Could not get file / dir permission.
-    return LG_FALSE;
+    // Report permissions in Amiga format.
+    *mask = PERM_POSIX_TO_AMIGA(fst.st_mode);
+    return LG_TRUE;
+}
+#endif
+
+//------------------------------------------------------------------------------
+// Name:        h_protect_get
+// Description: Utility function used by m_protect and m_copyfiles to get file /
+//              dir protection bits.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   File / dir.
+//              int32_t *mask:      Pointer to the result.
+// Return:      int:                LG_TRUE / LG_FALSE.
+//------------------------------------------------------------------------------
+static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
+{
+    if((!contxt || !mask || !file) && PANIC(contxt))
+    {
+        // Bad input.
+        return LG_FALSE;
+    }
+
+    // Delete protection support only on Amiga.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    return h_protect_get_amiga(contxt, file, mask);
+    #else
+    return h_protect_get_posix(file, mask);
     #endif
 }
 
