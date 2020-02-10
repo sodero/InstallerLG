@@ -631,15 +631,27 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                        #endif
                       )
                     {
-                        // Get tree of subdirectory. Don't promote (choices),
-                        // dirs will be considered files and things will break.
-                        node->next = h_filetree(contxt, n_src, n_dst, files,
-                                                fonts, NULL, pattern, NULL);
+                        // Keep track of recursion depth.
+                        static int dep;
 
-                        // Fast forward to the end of the list.
-                        while(node->next)
+                        if(dep++ < LG_MAXDEP)
                         {
-                            node = node->next;
+                            // Get subdirectory tree. Don't promote (choices),
+                            // dirs will be considered files.
+                            node->next = h_filetree(contxt, n_src, n_dst, files,
+                                                    fonts, NULL, pattern, NULL);
+                            dep--;
+
+                            // Fast forward to the end of the list.
+                            while(node->next)
+                            {
+                                node = node->next;
+                            }
+                        }
+                        else
+                        {
+                            // This is not a realistic path.
+                            ERR(ERR_MAX_DEPTH, contxt->name);
                         }
                     }
 
