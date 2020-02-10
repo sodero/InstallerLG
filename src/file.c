@@ -181,30 +181,19 @@ static int h_exists_amiga_type(const char *name)
 //------------------------------------------------------------------------------
 static int h_exists_posix_type(const char *name)
 {
-    // This implementation doesn't work on MorphOS. I have no clue why, it works
-    // on AROS. Let's use the implementation above on all Amiga systems for now.
     struct stat fst;
 
-    // Does the file / dir exist?
     if(stat(name, &fst))
     {
+        // No such file or directory.
         return LG_NONE;
     }
 
-    // A file?
-    if(S_ISREG(fst.st_mode))
-    {
-        return LG_FILE;
-    }
+    // A file, a directory or something else.
+    bool file = S_ISREG(fst.st_mode), dir = S_ISDIR(fst.st_mode);
 
-    // A directory?
-    if(S_ISDIR(fst.st_mode))
-    {
-        return LG_DIR;
-    }
-
-    // It's something else. Pretend that it doesn't exist.
-    return LG_NONE;
+    // Translate to Installer return values.
+    return file ? LG_FILE : dir ? LG_DIR : LG_NONE;
 }
 #endif
 
@@ -789,34 +778,26 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 #define PERM_POSIX_WRITE (S_IWUSR | S_IWGRP | S_IWOTH)
 #define PERM_POSIX_EXEC (S_IXUSR | S_IXGRP | S_IXOTH)
 #define PERM_POSIX_ALL (PERM_POSIX_READ | PERM_POSIX_WRITE | PERM_POSIX_EXEC)
-
 #define PERM_POSIX_TO_AMIGA(X) (((X & PERM_POSIX_READ) ? 0 : 8) | \
                                 ((X & PERM_POSIX_WRITE) ? 0 : 4) | \
                                 ((X & PERM_POSIX_EXEC) ? 0 : 2) | 1 )
-
 #define PERM_AMIGA_TO_POSIX(X) (((X & 8) ? 0 : PERM_POSIX_READ) | \
                                 ((X & 4) ? 0 : PERM_POSIX_WRITE) | \
                                 ((X & 2) ? 0 : PERM_POSIX_EXEC))
 
+#if defined(AMIGA) && !defined(LG_TEST)
+
 //------------------------------------------------------------------------------
-// Name:        h_protect_get
-// Description: Utility function used by m_protect and m_copyfiles to get file /
-//              dir protection bits.
+// Name:        h_protect_get_amiga
+// Description: Used by h_protect_get to get file / dir protection bits. Amiga
+//              implementation supporting delete protection.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
 //              int32_t *mask:      Pointer to the result.
 // Return:      int:                LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
+static int h_protect_get_amiga(entry_p contxt, char *file, int32_t *mask)
 {
-    if((!contxt || !mask || !file) && PANIC(contxt))
-    {
-        // Bad input.
-        return LG_FALSE;
-    }
-
-    // On non Amiga systems, or in test mode, this is a stub.
-    #if defined(AMIGA) && !defined(LG_TEST)
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
@@ -827,10 +808,9 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
     }
 
     // Attempt to lock file / dir.
-    bool done = false;
     BPTR lock = (BPTR) Lock(file, ACCESS_READ);
+    bool done = false;
 
-    // Did we obtain a lock?
     if(lock)
     {
         // Fill up FIB and get bits.
@@ -840,6 +820,7 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
             done = true;
         }
 
+        // Lock no longer needed.
         UnLock(lock);
     }
 
@@ -866,19 +847,56 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
     // If enabled, write to log file.
     h_log(contxt, tr(S_GMSK), file, *mask);
     return done ? LG_TRUE : LG_FALSE;
-    #else
+
+}
+#else
+//------------------------------------------------------------------------------
+// Name:        h_protect_get_posix
+// Description: Used by h_protect_get to get file / dir protection bits. POSIX
+//              implementation without delete protection support.
+// Input:       const char *file:   File / dir.
+//              int32_t *mask:      Pointer to the result.
+// Return:      int:                LG_TRUE / LG_FALSE.
+//------------------------------------------------------------------------------
+static int h_protect_get_posix(char *file, int32_t *mask)
+{
     struct stat fst;
 
     // Get POSIX file / dir permission.
-    if(stat(file, &fst) == 0)
+    if(stat(file, &fst))
     {
-        // Report permissions in Amiga format.
-        *mask = PERM_POSIX_TO_AMIGA(fst.st_mode);
-        return LG_TRUE;
+        // Could not get file / dir permission.
+        return LG_FALSE;
     }
 
-    // Could not get file / dir permission.
-    return LG_FALSE;
+    // Report permissions in Amiga format.
+    *mask = PERM_POSIX_TO_AMIGA(fst.st_mode);
+    return LG_TRUE;
+}
+#endif
+
+//------------------------------------------------------------------------------
+// Name:        h_protect_get
+// Description: Utility function used by m_protect and m_copyfiles to get file /
+//              dir protection bits.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   File / dir.
+//              int32_t *mask:      Pointer to the result.
+// Return:      int:                LG_TRUE / LG_FALSE.
+//------------------------------------------------------------------------------
+static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
+{
+    if((!contxt || !mask || !file) && PANIC(contxt))
+    {
+        // Bad input.
+        return LG_FALSE;
+    }
+
+    // Delete protection support only on Amiga.
+    #if defined(AMIGA) && !defined(LG_TEST)
+    return h_protect_get_amiga(contxt, file, mask);
+    #else
+    return h_protect_get_posix(file, mask);
     #endif
 }
 
@@ -3696,15 +3714,12 @@ entry_p m_rename(entry_p contxt)
     // Two or more arguments / options.
     C_SANE(2, C_ARG(3));
 
-    entry_p help    = opt(C_ARG(3), OPT_HELP),
-            prompt  = opt(C_ARG(3), OPT_PROMPT),
-            confirm = opt(C_ARG(3), OPT_CONFIRM);
-
     // Old and new file name.
     const char *old = str(C_ARG(1)), *new = str(C_ARG(2));
 
     // Return on abort or if the user doesn't confirm when (confirm) is set.
-    if(confirm && !h_confirm(C_ARG(3), str(help), str(prompt)))
+    if(opt(C_ARG(3), OPT_CONFIRM) && !h_confirm(C_ARG(3),
+       str(opt(C_ARG(3), OPT_HELP)), str(opt(C_ARG(3), OPT_PROMPT))))
     {
         R_NUM(LG_FALSE);
     }

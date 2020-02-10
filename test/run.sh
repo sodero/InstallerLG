@@ -29,7 +29,8 @@ run()
         return 1
     else
         l=`mktemp err.tmp.XXXXXX`
-        echo "; In line $3" > $l
+        suite=`basename "$4"`
+        echo "; $suite:$3" > $l
         echo $1 >> $l
         echo "; Actual result [$o]" >> $l
         echo "; Expected result [$2]" >> $l
@@ -99,7 +100,7 @@ do
        r=`echo "$l" | sed -e 's/.*;//'`
        if [ ! -z "$p" ]; then
            tno=$(( $tno + 1 ))
-           evl "$p" "$r" "$tno"
+           evl "$p" "$r" "$tno" "$f"
            s=$?
            p=$(echo $p | tr $nl ' ')
            if [ $s -eq 2 ]; then
