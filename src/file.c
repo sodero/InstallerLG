@@ -181,30 +181,19 @@ static int h_exists_amiga_type(const char *name)
 //------------------------------------------------------------------------------
 static int h_exists_posix_type(const char *name)
 {
-    // This implementation doesn't work on MorphOS. I have no clue why, it works
-    // on AROS. Let's use the implementation above on all Amiga systems for now.
     struct stat fst;
 
-    // Does the file / dir exist?
     if(stat(name, &fst))
     {
+        // No such file or directory.
         return LG_NONE;
     }
 
-    // A file?
-    if(S_ISREG(fst.st_mode))
-    {
-        return LG_FILE;
-    }
+    // A file, a directory or something else.
+    bool file = S_ISREG(fst.st_mode), dir = S_ISDIR(fst.st_mode);
 
-    // A directory?
-    if(S_ISDIR(fst.st_mode))
-    {
-        return LG_DIR;
-    }
-
-    // It's something else. Pretend that it doesn't exist.
-    return LG_NONE;
+    // Translate to Installer return values.
+    return file ? LG_FILE : dir ? LG_DIR : LG_NONE;
 }
 #endif
 
@@ -3725,15 +3714,12 @@ entry_p m_rename(entry_p contxt)
     // Two or more arguments / options.
     C_SANE(2, C_ARG(3));
 
-    entry_p help    = opt(C_ARG(3), OPT_HELP),
-            prompt  = opt(C_ARG(3), OPT_PROMPT),
-            confirm = opt(C_ARG(3), OPT_CONFIRM);
-
     // Old and new file name.
     const char *old = str(C_ARG(1)), *new = str(C_ARG(2));
 
     // Return on abort or if the user doesn't confirm when (confirm) is set.
-    if(confirm && !h_confirm(C_ARG(3), str(help), str(prompt)))
+    if(opt(C_ARG(3), OPT_CONFIRM) && !h_confirm(C_ARG(3),
+       str(opt(C_ARG(3), OPT_HELP)), str(opt(C_ARG(3), OPT_PROMPT))))
     {
         R_NUM(LG_FALSE);
     }
