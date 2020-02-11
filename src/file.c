@@ -348,7 +348,7 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
     // doesn't make sense, the result will be truncated to ''. If this happens
     // don't create a new node since there is no parent directory where an icon
     // can be put.
-    if(!type || !*h_suffix(node->copy, suffix))
+    if(type == LG_NONE || !*h_suffix(node->copy, suffix))
     {
         return node;
     }
@@ -493,6 +493,31 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_common_suffix
+// Description: Get the common suffix of two strings.
+// Input:       char *alfa: String A.
+//              char *beta: String B.
+// Return:      char *:     The common suffix of two string.
+//------------------------------------------------------------------------------
+static char *h_common_suffix(char *src, char *dst)
+{
+    size_t sln = strlen(src), dln = strlen(dst);
+
+    // Start from the back and iterate while strings match.
+    while(sln && dln)
+    {
+        if(src[--sln] != dst[--dln] || !sln || !dln)
+        {
+            // Offset by one unless we have a full match.
+            return src + sln + (sln ? 1 : 0);
+        }
+    }
+
+    // Atleast one of the strings is empty.
+    return "";
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_filetree
 // Description: Generate a complete file / directory tree with source and
 //              destination tuples. Used by m_copyfiles.
@@ -590,7 +615,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                 {
                     // Use a static buffer, Installer.guide restricts pattern
                     // length to 64. MatchPattern can use a lot of stack if we
-                    // use long patterns, so let's not remove this limitation.
+                    // use long patterns, so let's not remove this limitation   .
                     static char pat[BUFSIZ];
                     #if defined(AMIGA) && !defined(LG_TEST)
                     LONG w = ParsePatternNoCase(str(pattern), pat,
@@ -601,8 +626,9 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     {
                         // Use pattern matching if we have any wildcards, else
                         // use plain strcmp().
-                        if((w && MatchPatternNoCase(pat, entry->d_name))
-                           || (w && !strcmp(pat, entry->d_name)))
+                        if((w && MatchPatternNoCase(pat,
+                            h_common_suffix(n_src, n_dst))) ||
+                          (!w && !strcmp(pat, entry->d_name)))
                         {
                             // Match, get proper type.
                             type = h_exists(n_src);
