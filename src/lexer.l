@@ -196,6 +196,7 @@ static char *strduptr(const char *str);
 "___astraw"             { return ASTRAW;         }
 "___asbraw"             { return ASBRAW;         }
 "___asbeval"            { return ASBEVAL;        }
+"___eval"               { return EVAL;           }
 "___options"            { return OPTIONS;        }
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
