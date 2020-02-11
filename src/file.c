@@ -602,30 +602,27 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 
                 if(pattern)
                 {
-                    // Use a static buffer, Installer.guide restricts pattern
-                    // length to 64. MatchPattern can use a lot of stack if we
-                    // use long patterns, so let's not remove this limitation   .
+                    // The CBM implementation restricts pattern length to 64.
+                    // MatchPattern() can use a lot of stack if patterns are
+                    // long. To preserve stack, keep the static pattern size
+                    // but increase it to whatever buf_len() is.
                     #if defined(AMIGA) && !defined(LG_TEST)
-                    static char pat[BUFSIZ];
-
-                    LONG w = ParsePatternNoCase(str(pattern), pat,
-                                          sizeof(pat));
-
-                    // Can we parse the pattern?
+                    LONG w = ParsePatternNoCase(str(pattern), buf_get(B_KEY),
+                                                buf_len());
                     if(w >= 0)
                     {
                         // Use pattern matching if we have any wildcards, else
                         // use plain strcmp().
-                        if((w && MatchPatternNoCase(pat,
+                        if((w && MatchPatternNoCase(buf_get(B_KEY),
                             h_common_suffix(n_src, n_dst))) ||
-                          (!w && !strcmp(pat, entry->d_name)))
+                          (!w && !strcmp(buf_get(B_KEY), entry->d_name)))
                         {
-                            // Match, get proper type.
+                            // Get proper type of match.
                             type = h_exists(n_src);
                         }
                         else
                         {
-                            // Not a match, skip this.
+                            // Skip non-matches.
                             type = LG_NONE;
                         }
                     }
@@ -638,8 +635,11 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     #else
                     // Get rid of warning and increase test coverage.
                     snprintf(buf_get(B_KEY), buf_len(), "%s", n_src);
-                    type = h_exists(h_common_suffix(buf_put(B_KEY), n_src));
+                    type = h_exists(h_common_suffix(buf_get(B_KEY), n_src));
                     #endif
+
+                    // Unlock buffer.
+                    buf_put(B_KEY);
                 }
                 else
                 {
