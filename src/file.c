@@ -605,8 +605,9 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     // Use a static buffer, Installer.guide restricts pattern
                     // length to 64. MatchPattern can use a lot of stack if we
                     // use long patterns, so let's not remove this limitation   .
-                    static char pat[BUFSIZ];
                     #if defined(AMIGA) && !defined(LG_TEST)
+                    static char pat[BUFSIZ];
+
                     LONG w = ParsePatternNoCase(str(pattern), pat,
                                           sizeof(pat));
 
@@ -635,9 +636,9 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         pattern = NULL;
                     }
                     #else
-                    // Get rid of warning.
-                    *pat = '\0';
-                    type = h_exists(n_src);
+                    // Get rid of warning and increase test coverage.
+                    snprintf(buf_get(B_KEY), buf_len(), "%s", n_src);
+                    type = h_exists(h_common_suffix(buf_put(B_KEY), n_src));
                     #endif
                 }
                 else
