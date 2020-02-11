@@ -105,6 +105,7 @@ Italian translations.
 
 @{B}0.1.0-alpha.44 (2020-NOT-YET)@{UB}
 - Fixed invalid icon creation of directories without parent.
+- Parent directory pattern matching fix (Konto).
 - ?
 
 @{B}0.1.0-alpha.43 (2020-02-04)@{UB}

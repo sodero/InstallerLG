@@ -74,6 +74,25 @@ entry_p m_asbeval(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// (___eval <statement>)
+//     Dump the evaluated <statement> AST leaf to the debug console. By doing
+//     so all side effects of <statement> will take effect before the dump.
+//
+// Please note the ___ prefix. This is not meant to be used by end users.
+//------------------------------------------------------------------------------
+entry_p m_eval(entry_p contxt)
+{
+    // One argument.
+    C_SANE(1, NULL);
+
+    // Resolve argument and dump the result.
+    dump(resolve(C_ARG(1)));
+
+    // Dummy value.
+    R_NUM(LG_TRUE);
+}
+
+//------------------------------------------------------------------------------
 // (___options)
 //     Dump option cache.
 //
