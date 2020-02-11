@@ -364,9 +364,15 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_filetree
+// Description: Decl. needed by h_choices(). See description further down.
+//------------------------------------------------------------------------------
 static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                           entry_p files, entry_p fonts, entry_p choices,
                           entry_p pattern, entry_p infos);
+
+//------------------------------------------------------------------------------
+
 //------------------------------------------------------------------------------
 // Name:        h_choices
 // Description: Helper for h_filetree handling (choices). Generating a complete
@@ -375,9 +381,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 //              entry_p choices:    * List of files.
 //              entry_p fonts:      * Include fonts.
 //              entry_p infos:      * Include icons.
-//
-//              * Refer to the Installer.guide.
-//
+//                                  * Refer to the Installer.guide.
 //              const char *src:    Source directory.
 //              const char *dst:    Destination directory.
 // Return:      entry_p:            A linked list of file and dir pairs.
@@ -488,17 +492,17 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 //              char *beta: String B.
 // Return:      char *:     The common suffix of two string.
 //------------------------------------------------------------------------------
-static char *h_common_suffix(char *src, char *dst)
+static char *h_common_suffix(char *alfa, char *beta)
 {
-    size_t sln = strlen(src), dln = strlen(dst);
+    size_t aln = strlen(alfa), bln = strlen(beta);
 
     // Start from the back and iterate while strings match.
-    while(sln && dln)
+    while(aln && bln)
     {
-        if(src[--sln] != dst[--dln] || !sln || !dln)
+        if(alfa[--aln] != beta[--bln] || !aln || !bln)
         {
             // Offset by one unless we have a full match.
-            return src + sln + (sln ? 1 : 0);
+            return alfa + aln + (aln ? 1 : 0);
         }
     }
 
@@ -518,9 +522,7 @@ static char *h_common_suffix(char *src, char *dst)
 //              entry_p choices:    * List of files.
 //              entry_p pattern:    * File / dir pattern.
 //              entry_p infos:      * Include icons (choices).
-//
-//              * Refer to the Installer.guide.
-//
+//                                  * Refer to the Installer.guide.
 // Return:      entry_p:            A linked list of file and dir pairs.
 //------------------------------------------------------------------------------
 static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
