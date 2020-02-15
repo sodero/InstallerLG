@@ -262,7 +262,6 @@ entry_p m_working(entry_p contxt)
 
     if(!msg && PANIC(contxt))
     {
-        // Out of memory.
         return end();
     }
 
@@ -282,7 +281,6 @@ entry_p m_working(entry_p contxt)
 
     if(!con && PANIC(contxt))
     {
-        // Out of memory.
         free(msg);
         return end();
     }

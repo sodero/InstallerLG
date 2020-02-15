@@ -7,5 +7,5 @@
 (strlen $f) ; "","2",""
 (strlen a) ; "","Line 1: Undefined variable 'a' 0",""
 (set @strict 0) (strlen a) ; "","0",""
-(set @strict 0) (strlen ("1%ld" a)) ; "","2",""
+(set @strict 0) (strlen ("1%ld" a)) ; "","1",""
 (strlen ("l%ld" (strlen $f))) ; "","2",""

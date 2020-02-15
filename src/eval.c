@@ -305,7 +305,6 @@ static char *h_str_opt(entry_p opt)
 
            if(!opt->name && PANIC(opt))
            {
-               // Out of memory.
                break;
            }
 
@@ -338,7 +337,6 @@ static char *h_str_num(entry_p opt)
 
     if(!opt->name && PANIC(opt))
     {
-        // Out of memory.
         return "";
     }
 

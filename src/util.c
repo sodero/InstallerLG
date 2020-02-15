@@ -691,7 +691,6 @@ char *get_optstr(entry_p contxt, opt_t type)
 
     if(!val && PANIC(contxt))
     {
-        // Out of memory.
         return NULL;
     }
 
@@ -786,7 +785,6 @@ char *get_chlstr(entry_p contxt, bool pad)
 
     if(!stv)
     {
-        // Out of memory.
         return NULL;
     }
 

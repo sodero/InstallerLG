@@ -482,7 +482,6 @@ entry_p m_getassign(entry_p contxt)
                         }
                         else
                         {
-                            // Out of memory
                             PANIC(contxt);
                             return end();
                         }
@@ -1171,7 +1170,7 @@ entry_p m_iconinfo(entry_p contxt)
 
             if(!sym)
             {
-                // Out of memory. Do not leak 'val'.
+                // Do not leak 'val'.
                 kill(val);
                 continue;
             }

@@ -222,7 +222,6 @@ static int h_create_id(entry_p contxt, int mid)
         }
     }
 
-    // Out of memory.
     kill(nid);
     kill(nsm);
     return LG_FALSE;
