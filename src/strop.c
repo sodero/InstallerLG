@@ -167,8 +167,8 @@ static void h_fmt_scan(entry_p *args, char *res, size_t len, char *fmt)
                 // Convert strings to numbers if needed.
                 char *val = num(args[cur]) ? str(args[cur]) : "0";
                 cur++;
-                pos += strlen(val);
                 strncat(res, val, len - pos);
+                pos += strlen(val);
             }
         }
         // String specifier.
@@ -181,8 +181,8 @@ static void h_fmt_scan(entry_p *args, char *res, size_t len, char *fmt)
             if(exists(args[cur]))
             {
                 char *val = str(args[cur++]);
-                pos += strlen(val);
                 strncat(res, val, len - pos);
+                pos += strlen(val);
             }
         }
         else
