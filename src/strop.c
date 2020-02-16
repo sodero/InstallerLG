@@ -240,6 +240,10 @@ static size_t m_fmt_new_buffer(entry_p contxt, entry_p **args, char **res)
     if(!(*res))
     {
         // No target buffer.
+        free(*args);
+        *res = NULL;
+        *args = NULL;
+
         return 0;
     }
 
