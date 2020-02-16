@@ -484,9 +484,12 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 
 //------------------------------------------------------------------------------
 // Name:        h_common_suffix
-// Description: Get the common suffix of two strings.
-// Input:       char *alfa: String A.
-//              char *beta: String B.
+// Description: Get the common suffix of two paths. Separators are excluded so
+//              that the common suffix of 'ram:test' and 'sys:test' is 'test'
+//              and not ':test'. The common suffix of 'pre/test' and
+//              'post/test' is 'test' and not '/test'.
+// Input:       char *alfa: First path.
+//              char *beta: Second path.
 // Return:      char *:     The common suffix of two string.
 //------------------------------------------------------------------------------
 static char *h_common_suffix(char *alfa, char *beta)
@@ -498,8 +501,13 @@ static char *h_common_suffix(char *alfa, char *beta)
     {
         if(alfa[--aln] != beta[--bln] || !aln || !bln)
         {
-            // Offset by one unless we have a full match.
-            return alfa + aln + (aln ? 1 : 0);
+            // Offset by one if we're at a separator.
+            if(alfa[aln] == ':' || alfa[aln] == '/')
+            {
+                aln++;
+            }
+
+            return alfa + aln;
         }
     }
 
