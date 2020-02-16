@@ -140,10 +140,11 @@ static inline bool h_fmt_string(char *fmt)
 // Description: Scan format string and create formated result.
 // Input:       entry_p *args:  Values to format and insert.
 //              char *res:      Target buffer.
+//              size_t len:     Target buffer size.
 //              char *fmt:      String with format specifiers.
 // Return:      bool *:         -
 //------------------------------------------------------------------------------
-static void h_fmt_scan(entry_p *args, char *res, char *fmt)
+static void h_fmt_scan(entry_p *args, char *res, size_t len, char *fmt)
 {
     for(size_t cur = 0, pos = 0, ndx = 0; fmt[ndx]; )
     {
@@ -165,9 +166,9 @@ static void h_fmt_scan(entry_p *args, char *res, char *fmt)
             {
                 // Convert strings to numbers if needed.
                 char *val = num(args[cur]) ? str(args[cur]) : "0";
-                pos += strlen(val);
-                strcat(res, val);
                 cur++;
+                pos += strlen(val);
+                strncat(res, val, len - pos);
             }
         }
         // String specifier.
@@ -181,7 +182,7 @@ static void h_fmt_scan(entry_p *args, char *res, char *fmt)
             {
                 char *val = str(args[cur++]);
                 pos += strlen(val);
-                strcat(res, val);
+                strncat(res, val, len - pos);
             }
         }
         else
@@ -199,9 +200,9 @@ static void h_fmt_scan(entry_p *args, char *res, char *fmt)
 // Input:       entry_p contxt: Execution context.
 //              entry_p *args:  Output: values to format and insert.
 //              char *res:      Output: target buffer.
-// Return:      bool *:         On success 'true', 'false' otherwise.
+// Return:      size_t:         Size of target buffer.
 //------------------------------------------------------------------------------
-static bool m_fmt_new_buffer(entry_p contxt, entry_p **args, char **res)
+static size_t m_fmt_new_buffer(entry_p contxt, entry_p **args, char **res)
 {
     // Start with one empty segment.
     size_t ndx = 1;
@@ -234,14 +235,15 @@ static bool m_fmt_new_buffer(entry_p contxt, entry_p **args, char **res)
     }
 
     // Allocate room for the concatenated result.
-    *res = DBG_ALLOC(calloc(len + 1, 1));
+    *res = DBG_ALLOC(calloc(++len, 1));
 
     if(!(*res))
     {
-        return false;
+        // No target buffer.
+        return 0;
     }
 
-    return true;
+    return len;
 }
 
 //------------------------------------------------------------------------------
@@ -255,16 +257,18 @@ entry_p m_fmt(entry_p contxt)
     // No arguments needed.
     C_SANE(0, NULL);
 
-    entry_p *args = NULL;
     char *res = NULL;
+    entry_p *args = NULL;
+    size_t len = m_fmt_new_buffer(contxt, &args, &res);
 
-    if(!m_fmt_new_buffer(contxt, &args, &res) && PANIC(contxt))
+    if(!len)
     {
+        PANIC(contxt);
         return end();
     }
 
     // The scan can never fail.
-    h_fmt_scan(args, res, contxt->name);
+    h_fmt_scan(args, res, len, contxt->name);
 
     // Owned by us.
     free(args);
