@@ -85,7 +85,6 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 
         if(!cmd && PANIC(contxt))
         {
-            // Out of memory.
             return end();
         }
 
@@ -97,7 +96,6 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 
             if(!tmp && PANIC(contxt))
             {
-                // Out of memory
                 free(cmd);
                 return end();
             }

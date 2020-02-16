@@ -47,7 +47,6 @@ entry_p new_contxt(void)
     free(symbols);
     free(children);
 
-    // Out of memory.
     PANIC(NULL);
     return NULL;
 }
@@ -71,7 +70,6 @@ entry_p new_number(int num)
         return entry;
     }
 
-    // Out of memory.
     PANIC(NULL);
     return NULL;
 }
@@ -101,7 +99,6 @@ entry_p new_string(char *name)
     free(name);
     free(entry);
 
-    // Out of memory / bad input.
     PANIC(NULL);
     return NULL;
 }
@@ -132,7 +129,6 @@ entry_p new_symbol(char *name)
     free(name);
     free(entry);
 
-    // Out of memory / bad input.
     PANIC(NULL);
     return NULL;
 }
@@ -224,7 +220,6 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
     free(name);
     free(entry);
 
-    // Out of memory / bad input.
     PANIC(NULL);
     return NULL;
 }
@@ -257,7 +252,6 @@ entry_p new_symref(char *name, int line)
     free(name);
     free(entry);
 
-    // Out of memory / bad input.
     PANIC(NULL);
     return NULL;
 }
@@ -460,7 +454,6 @@ entry_p new_cusref(char *name, int line, entry_p arg)
     free(name);
     kill(arg);
 
-    // Out of memory / bad input.
     PANIC(NULL);
     return NULL;
 }
@@ -567,7 +560,6 @@ entry_p merge(entry_p dst, entry_p src)
         }
         else
         {
-            // Out of memory.
             PANIC(NULL);
         }
     }

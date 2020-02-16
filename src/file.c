@@ -141,7 +141,6 @@ static int h_exists_amiga_type(const char *name)
 
     if(!fib && PANIC(NULL))
     {
-        // Out of memory.
         return LG_NONE;
     }
 
@@ -350,7 +349,6 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
 
     if(!tail->next && PANIC(contxt))
     {
-        // Out of memory.
         return tail;
     }
 
@@ -404,7 +402,6 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 
     if(!node && PANIC(contxt))
     {
-        // Out of memory.
         return NULL;
     }
 
@@ -695,7 +692,6 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 
                     if(!node->next && PANIC(contxt))
                     {
-                        // Out of memory.
                         free(n_src);
                         free(n_dst);
                         break;
@@ -783,7 +779,6 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                                 return head;
                             }
 
-                            // Out of memory.
                             free(font->name);
                             free(font->copy);
                             free(font);
@@ -794,18 +789,15 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     buf_put(B_KEY);
                 }
 
-                // Out of memory.
                 free(head->name);
                 free(head->copy);
             }
         }
 
-        // Out of memory.
         free(head);
         free(file);
     }
 
-    // Out of memory.
     PANIC(contxt);
 
     // These will leak if we don't free them.
@@ -844,7 +836,6 @@ static int h_protect_get_amiga(entry_p contxt, char *file, int32_t *mask)
 
     if(!fib && PANIC(contxt))
     {
-        // Out of memory.
         return LG_FALSE;
     }
 
@@ -1326,7 +1317,6 @@ static int h_makedir(entry_p contxt, char *dst, int mode)
 
     if(!dir && PANIC(contxt))
     {
-        // Out of memory.
         return LG_FALSE;
     }
 
@@ -2001,7 +1991,6 @@ entry_p m_copylib(entry_p contxt)
 
     if(!name && PANIC(contxt))
     {
-        // Out of memory.
         R_NUM(LG_FALSE);
     }
 
@@ -2084,7 +2073,6 @@ static bool h_delete_perm(const char *name)
 
     if(!fib)
     {
-        // Out of memory.
         return false;
     }
 
@@ -2342,7 +2330,6 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
 
     if(!apt && PANIC(contxt))
     {
-        // Out of memory.
         return LG_FALSE;
     }
 
@@ -2652,7 +2639,6 @@ entry_p m_foreach(entry_p contxt)
 
             if(!cur && PANIC(contxt))
             {
-                // Out of memory.
                 err = true;
             }
 
@@ -3063,7 +3049,6 @@ entry_p m_startup(entry_p contxt)
 
     if(!cmd && PANIC(contxt))
     {
-        // Out of memory.
         R_NUM(LG_FALSE);
     }
 
@@ -3163,7 +3148,6 @@ entry_p m_startup(entry_p contxt)
                 }
                 else
                 {
-                    // Out of memory
                     PANIC(contxt);
                 }
             }
@@ -3174,7 +3158,6 @@ entry_p m_startup(entry_p contxt)
     }
     else
     {
-        // Out of memory
         PANIC(contxt);
     }
 
@@ -3256,7 +3239,6 @@ entry_p m_startup(entry_p contxt)
         }
         else
         {
-            // Out of memory
             PANIC(contxt);
         }
 
@@ -3289,7 +3271,6 @@ static int h_textfile_append(entry_p contxt, FILE *file, const char *name)
 
     if(!app && PANIC(contxt))
     {
-        // Out of memory.
         return LG_FALSE;
     }
 
@@ -3559,7 +3540,6 @@ entry_p m_tooltype(entry_p contxt)
                         }
                         else
                         {
-                            // Out of memory.
                             PANIC(contxt);
                         }
                     }
@@ -3592,7 +3572,6 @@ entry_p m_tooltype(entry_p contxt)
                         }
                         else
                         {
-                            // Out of memory.
                             PANIC(contxt);
                         }
                     }
@@ -3626,7 +3605,6 @@ entry_p m_tooltype(entry_p contxt)
                         }
                         else
                         {
-                            // Out of memory.
                             PANIC(contxt);
                         }
                     }

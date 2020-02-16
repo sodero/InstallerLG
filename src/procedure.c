@@ -36,7 +36,6 @@ static entry_p h_gosub_fmt(entry_p contxt)
 
         if(!contxt->resolved)
         {
-            // Out of memory.
             return end();
         }
 
@@ -111,7 +110,6 @@ entry_p m_gosub(entry_p contxt)
 
                 if(!res && PANIC(contxt))
                 {
-                    // Out of memory
                     return end();
                 }
 

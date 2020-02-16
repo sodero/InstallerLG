@@ -51,7 +51,6 @@ static void init_num(entry_p contxt, char *sym, int num)
 
     if(!var || !val)
     {
-        // Out of memory.
         kill(var);
         kill(val);
         return;
@@ -84,7 +83,6 @@ static void init_str(entry_p contxt, char *sym, char *str)
 
     if(!var || !val)
     {
-        // Out of memory.
         kill(var);
         kill(val);
         return;

@@ -27,7 +27,6 @@ static entry_p h_copy_deep(entry_p entry)
 
     if(!copy && PANIC(entry))
     {
-        // Out of memory.
         return NULL;
     }
 
@@ -41,7 +40,6 @@ static entry_p h_copy_deep(entry_p entry)
 
         if(!copy->name && PANIC(entry))
         {
-            // Out of memory.
             free(copy);
             return NULL;
         }
@@ -202,7 +200,6 @@ entry_p m_symbolset(entry_p contxt)
 
             if(!nsm || !append(&contxt->symbols, nsm))
             {
-                // Out of memory.
                 kill(nsm);
                 kill(res);
                 return end();

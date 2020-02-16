@@ -39,7 +39,6 @@ entry_p m_cat(entry_p contxt)
 
     if(!buf && PANIC(contxt))
     {
-        // Out of memory.
         return end();
     }
 
@@ -83,8 +82,6 @@ entry_p m_cat(entry_p contxt)
             {
                 free(tmp);
                 free(buf);
-
-                // Out of memory.
                 return end();
             }
 
@@ -103,6 +100,151 @@ entry_p m_cat(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_fmt_escape
+// Description: Determine if a string begins with an escape sequence.
+//              specifier.
+// Input:       char *fmt:    Suspected format string.
+// Return:      bool *:       'true' if 'fmt' is the beginning of an escape seq.
+//------------------------------------------------------------------------------
+static inline bool h_fmt_escape(char *fmt)
+{
+    return fmt && fmt[0] == '%' && (fmt[1] == '%' || fmt[1] == '\0');
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_fmt_number
+// Description: Determine whether of not a string begins with an integer format
+//              specifier.
+// Input:       char *fmt:    Suspected format string.
+// Return:      bool *:       'true' if 'fmt' is an integer spec., else 'false'.
+//------------------------------------------------------------------------------
+static inline bool h_fmt_number(char *fmt)
+{
+    return fmt && fmt[0] == '%' && fmt[1] == 'l' && fmt[2] == 'd';
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_fmt_string
+// Description: Determine whether of not a string begins with a string format
+//              specifier.
+// Input:       char *fmt:    Suspected format string.
+// Return:      bool *:       'true' if 'fmt' is a string spec., else 'false'.
+//------------------------------------------------------------------------------
+static inline bool h_fmt_string(char *fmt)
+{
+    return fmt && fmt[0] == '%' && fmt[1] == 's';
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_fmt_scan
+// Description: Scan format string and create formated result.
+// Input:       entry_p *args:  Values to format and insert.
+//              char *res:      Target buffer.
+//              char *fmt:      String with format specifiers.
+// Return:      bool *:         -
+//------------------------------------------------------------------------------
+static void h_fmt_scan(entry_p *args, char *res, char *fmt)
+{
+    for(size_t cur = 0, pos = 0, ndx = 0; fmt[ndx]; )
+    {
+        // Escape sequence.
+        if(h_fmt_escape(fmt + ndx))
+        {
+            // Skip two characters unless we're at EOS.
+            res[pos] = fmt[ndx + 1];
+            ndx += res[pos++] ? 2 : 1;
+        }
+        // Integer specifier.
+        else if(h_fmt_number(fmt + ndx))
+        {
+            // Skip three characters.
+            ndx += 3;
+
+            // Insert formated segment if argument exists.
+            if(exists(args[cur]))
+            {
+                // Convert strings to numbers if needed.
+                char *val = num(args[cur]) ? str(args[cur]) : "0";
+                pos += strlen(val);
+                strcat(res, val);
+                cur++;
+            }
+        }
+        // String specifier.
+        else if(h_fmt_string(fmt + ndx))
+        {
+            // Skip two characters.
+            ndx += 2;
+
+            // Insert formated segment if argument exists.
+            if(exists(args[cur]))
+            {
+                char *val = str(args[cur++]);
+                pos += strlen(val);
+                strcat(res, val);
+            }
+        }
+        else
+        {
+            // No format specifier.
+            res[pos++] = fmt[ndx++];
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_fmt_new_buffer
+// Description: Allocate buffers big enough to hold formated string and the
+//              non evaluated values to insert.
+// Input:       entry_p contxt: Execution context.
+//              entry_p *args:  Output: values to format and insert.
+//              char *res:      Output: target buffer.
+// Return:      bool *:         On success 'true', 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool m_fmt_new_buffer(entry_p contxt, entry_p **args, char **res)
+{
+    // Start with one empty segment.
+    size_t ndx = 1;
+
+    if(contxt->children)
+    {
+        // Count the number of arguments.
+        while(exists(C_ARG(ndx)))
+        {
+            ndx++;
+        }
+    }
+
+    // Allocate memory to hold all arguments.
+    *args = DBG_ALLOC(calloc(ndx, sizeof(entry_p)));
+
+    if(!(*args))
+    {
+        return false;
+    }
+
+    // Start with room for the specifiers.
+    size_t len = strlen(contxt->name);
+
+    while(--ndx)
+    {
+        // Increment by the length of all strings.
+        (*args)[ndx - 1] = resolve(C_ARG(ndx));
+        len += strlen(str((*args)[ndx - 1]));
+    }
+
+    // Allocate room for the concatenated result.
+    *res = DBG_ALLOC(calloc(len + 1, 1));
+
+    if(!(*res))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
 // ("<fmt>" <expr1> <expr2>)
 //     returns a formatted string
 //
@@ -113,183 +255,21 @@ entry_p m_fmt(entry_p contxt)
     // No arguments needed.
     C_SANE(0, NULL);
 
-    // The format string is in the name with a maximum length of specifiers / 2.
-    char *ret = NULL, *fmt = contxt->name;
-    char **sct = DBG_ALLOC(calloc((strlen(fmt) >> 1) + 1, sizeof(char *)));
+    entry_p *args = NULL;
+    char *res = NULL;
 
-    if(!sct && PANIC(contxt))
+    if(!m_fmt_new_buffer(contxt, &args, &res) && PANIC(contxt))
     {
-        // Out of memory.
         return end();
     }
 
-    size_t ndx = 0, off = 0, cnt = 0, len = 0;
-    entry_p *arg = contxt->children;
+    // The scan can never fail.
+    h_fmt_scan(args, res, contxt->name);
 
-    // Scan the format string.
-    for(; fmt[ndx]; ndx++)
-    {
-        // Skip non format specifiers.
-        if(fmt[ndx] != '%')
-        {
-            continue;
-        }
+    // Owned by us.
+    free(args);
 
-        // If escape translate into fprintf escape and skip.
-        if(ndx && fmt[ndx - 1] == '\\')
-        {
-            fmt[ndx - 1] = '%';
-            continue;
-        }
-
-        // If this is a specifier, allocate a string with just this specifier.
-        if(fmt[++ndx] == 's' || (fmt[ndx++] == 'l' && fmt[ndx] == 'd'))
-        {
-            sct[cnt] = DBG_ALLOC(calloc(ndx - off + 2, 1));
-
-            if(sct[cnt])
-            {
-                memcpy(sct[cnt], fmt + off, ndx - off + 1);
-                off = ndx + 1;
-                cnt++;
-                continue;
-            }
-
-            // Out of memory
-            PANIC(contxt);
-        }
-        else
-        {
-            ERR(ERR_FMT_INVALID, contxt->name);
-            break;
-        }
-    }
-
-    // Convert and format format specifiers and arguments.
-    if(cnt)
-    {
-        for(cnt = 0; sct[cnt]; cnt++)
-        {
-            if(arg && exists(*arg))
-            {
-                // Original string length.
-                size_t oln = strlen(sct[cnt]);
-
-                // Format string.
-                if(sct[cnt][oln - 1] == 's')
-                {
-                    char *val = str(*arg);
-                    size_t nln = oln + strlen(val);
-                    char *new = DBG_ALLOC(calloc(nln + 1, 1));
-
-                    if(!new && PANIC(contxt))
-                    {
-                        // Out of memory
-                        len = 0;
-                        break;
-                    }
-
-                    // Replace format string with the formated string.
-                    int sln = snprintf(new, nln, sct[cnt], val);
-                    len += sln > 0 ? (size_t) sln : 0;
-                    free(sct[cnt]);
-                    sct[cnt] = new;
-                }
-                else
-                // Format numeric value.
-                if(sct[cnt][oln - 1] == 'd')
-                {
-                    int val = num(*arg);
-                    size_t nln = oln + LG_NUMLEN;
-                    char *new = DBG_ALLOC(calloc(nln + 1, 1));
-
-                    if(!new && PANIC(contxt))
-                    {
-                        // Out of memory
-                        len = 0;
-                        break;
-                    }
-
-                    // Replace format string with the formated string.
-                    int sln = snprintf(new, nln, sct[cnt], val);
-                    len += sln > 0 ? (size_t) sln : 0;
-                    free(sct[cnt]);
-                    sct[cnt] = new;
-                }
-                else
-                {
-                    // Argument <-> specifier mismatch.
-                    ERR(ERR_FMT_MISMATCH, contxt->name);
-                }
-
-                // Next specifier -> argument.
-                arg++;
-            }
-            else
-            {
-                // Argument count and specifier count mismatch.
-                ERR(ERR_FMT_MISSING, contxt->name);
-                len = 0;
-                break;
-            }
-        }
-    }
-
-    // Concatenate all formated strings.
-    if(cnt && len)
-    {
-        // Allocate memory to hold all of them.
-        len += strlen(fmt + off) + 1;
-        ret = DBG_ALLOC(calloc(len, 1));
-
-        if(ret)
-        {
-            // All format strings.
-            for(cnt = 0; sct[cnt]; cnt++)
-            {
-                strncat(ret, sct[cnt], len - strlen(ret));
-            }
-
-            // Suffix.
-            strncat(ret, fmt + off, len - strlen(ret));
-        }
-        else
-        {
-            // Out of memory
-            PANIC(contxt);
-        }
-    }
-
-    // Free all temporary format strings.
-    for(cnt = 0; sct[cnt]; cnt++)
-    {
-        free(sct[cnt]);
-    }
-
-    // Free scatter list.
-    free(sct);
-
-    // No format specifiers, the format string is the result.
-    if(!cnt)
-    {
-        ret = DBG_ALLOC(strdup(fmt));
-    }
-
-    // If in strict mode, fail on argument <-> specifier count mismatch.
-    if(arg && exists(*arg) && get_num(contxt, "@strict"))
-    {
-        ERR(ERR_FMT_UNUSED, contxt->name);
-    }
-    else if(ret)
-    {
-        R_STR(ret);
-    }
-
-    // No need for the formated string.
-    free(ret);
-
-    // Empty string.
-    return end();
+    R_STR(res);
 }
 
 //------------------------------------------------------------------------------
@@ -313,7 +293,6 @@ char *h_pathonly(const char *full)
 
             if(!path)
             {
-                // Out of memory.
                 return NULL;
             }
 
@@ -350,7 +329,6 @@ entry_p m_pathonly(entry_p contxt)
 
     if(!path && PANIC(contxt))
     {
-        // Out of memory.
         return end();
     }
 
@@ -438,7 +416,6 @@ entry_p m_substr(entry_p contxt)
 
         if(!ret && PANIC(contxt))
         {
-            // Out of memory.
             return end();
         }
 
@@ -463,7 +440,6 @@ entry_p m_substr(entry_p contxt)
 
         if(!ret && PANIC(contxt))
         {
-            // Out of memory.
             return end();
         }
 
@@ -546,7 +522,6 @@ char *h_tackon(entry_p contxt, const char *pre, const char *suf)
 
         if(!ret)
         {
-            // Out of memory.
             PANIC(contxt);
         }
 
@@ -559,7 +534,6 @@ char *h_tackon(entry_p contxt, const char *pre, const char *suf)
 
     if(!ret && PANIC(contxt))
     {
-        // Out of memory.
         return NULL;
     }
 

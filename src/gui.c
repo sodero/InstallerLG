@@ -952,7 +952,6 @@ static ULONG IGDirPart(Class *cls, Object *obj, ULONG Path)
         return CAST(my->Buf, ULONG);
     }
 
-    // Out of memory.
     GERR(tr(S_UNER));
     return Path;
 }
