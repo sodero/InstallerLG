@@ -122,7 +122,7 @@ quick:
 
 .PHONY: fail
 fail:
-	@LG_QUICK=yes $(MAKE) test
+	@LG_FAIL=yes $(MAKE) test
 
 .PHONY: debug
 debug:
