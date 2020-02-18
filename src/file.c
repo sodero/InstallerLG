@@ -3317,8 +3317,8 @@ static void h_copy_simple(entry_p contxt, FILE *src, FILE *dst, const char *nfo)
 //------------------------------------------------------------------------------
 static FILE *h_fopen_force(entry_p contxt, const char *name, const char *mode)
 {
-    // We can't open directories.
-    if(*name && h_exists(name) == LG_DIR)
+    // We can't open directories / "".
+    if(*name == '\0' || h_exists(name) == LG_DIR)
     {
         ERR(ERR_NOT_A_FILE, name);
         return NULL;
