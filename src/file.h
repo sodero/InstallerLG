@@ -12,6 +12,7 @@
 
 #include "types.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 entry_p m_copyfiles(entry_p contxt);
 entry_p m_copylib(entry_p contxt);
@@ -30,6 +31,7 @@ entry_p m_transcript(entry_p contxt);
 entry_p m_rename(entry_p contxt);
 
 int h_exists(const char *file);
+void h_fclose_safe(FILE **file);
 void h_log(entry_p contxt, const char *fmt, ...);
 bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...);
 
