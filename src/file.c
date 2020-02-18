@@ -3317,10 +3317,17 @@ static void h_copy_simple(entry_p contxt, FILE *src, FILE *dst, const char *nfo)
 //------------------------------------------------------------------------------
 static FILE *h_fopen_force(entry_p contxt, const char *name, const char *mode)
 {
+    // We can't open directories.
+    if(h_exists(name) == LG_DIR)
+    {
+        ERR(ERR_NOT_A_FILE, name);
+        return NULL;
+    }
+
     FILE *file = fopen(name, mode);
 
-    // We can't open directories. Set full permissions in non strict mode.
-    if(!file && h_exists(name) == LG_FILE && !get_num(contxt, "@strict"))
+    // Set full permissions in non strict mode.
+    if(!file && !get_num(contxt, "@strict"))
     {
         if(h_protect_set(contxt, name, 0) == LG_FALSE)
         {
@@ -3354,7 +3361,10 @@ static int h_textfile_append(entry_p contxt, const char *name)
         return LG_FALSE;
     }
 
-    FILE *file = h_fopen_force(contxt, name, "a");
+    // Append without include truncates / creates a new file.
+    const char *mode = opt(contxt, OPT_INCLUDE) ? "a" : "w";
+
+    FILE *file = h_fopen_force(contxt, name, mode);
 
     if(!file)
     {
