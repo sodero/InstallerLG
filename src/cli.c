@@ -174,14 +174,14 @@ inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def, b
             selected = selected ^ 1UL;
         } else {
             int res = atoi(response);
-            if(res != 0) {
+            if(res == 0) {
+                printf("Number should be between 0 and %d\n", max);
+            } else {
                 if(res >= 0 && res <= max) {
                     selected = selected ^ (1UL << res);
                 } else {
                     printf("Number should be between 0 and %d\n", max);
                 }
-            } else {
-                printf("Number should be between 0 and %d\n", max);
             }
         }
     } while(finished == false);
@@ -357,7 +357,7 @@ inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, bool cn
 
     printf("Starting file copy %s.\n", msg);
 
-    return (IPTR) G_TRUE;
+    return G_TRUE;
 }
 
 inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
@@ -367,7 +367,7 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
 
     printf("Copying files Cur:%s.\n", cur);
 
-    return (IPTR) G_TRUE;
+    return G_TRUE;
 }
 
 void gui_copyfiles_end(void)
