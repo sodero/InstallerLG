@@ -1,3 +1,5 @@
+(textfile (dest "_tf_") (append "1")) ; "rm -Rf _tf_ && cp ../test/data.textfile.1 _tf_","1","cmp _tf_ ../test/data.textfile.1 && rm -Rf _tf_"
+(textfile (dest "_tf_") (include "_tf_") (append "1")) ; "rm -Rf _tf_ && mkdir _tf_","Line 1: Not a file '_tf_' Line 1: Could not write to file '_tf_' 0","test -d _tf_ && rm -Rf _tf_"
 (textfile (dest "_tf_") (include err) (append "1")) ; "rm -Rf _tf_","Line 1: Undefined variable 'err' 0","test ! -f _tf_"
 (set @strict 0) (textfile (dest "_tf_") (include err) (append "1")) ; "rm -Rf _tf_","1","cmp _tf_ ../test/data.textfile.1 && rm -Rf _tf_"
 (textfile (dest "_tf_") (append err "12" "3a")) ; "rm -Rf _tf_","Line 1: Undefined variable 'err' 0","test ! -f _tf_"
@@ -8,7 +10,6 @@
 (set @strict 0) (textfile (dest "_tf_") (append "a") (confirm) (help "h")) ; "rm -Rf _tf_","1","cmp _tf_ ../test/data.textfile.a && rm -Rf _tf_"
 (set @strict 0) (textfile (dest "_tf_") (append "a") (confirm) (prompt "p")) ; "rm -Rf _tf_","1","cmp _tf_ ../test/data.textfile.a && rm -Rf _tf_"
 (textfile (dest "_tf_") (append "a")) ; "rm -Rf _tf_","1","cmp _tf_ ../test/data.textfile.a && rm -Rf _tf_"
-(textfile (dest "_tf_") (append "1")) ; "cp ../test/data.textfile.1 _tf_","1","cmp _tf_ ../test/data.textfile.11 && rm -Rf _tf_"
 (textfile (dest "_tf_") (include "../test/data.textfile.1") (append "1")) ; "rm -Rf _tf_","1","cmp _tf_ ../test/data.textfile.11 && rm -Rf _tf_"
 (textfile (dest "_tf_") (include "_ti_") (append "1")) ; "rm -Rf _ti_ && cp ../test/data.textfile.1 _ti_","1","cmp _tf_ ../test/data.textfile.11 && rm -Rf _tf_ _ti_"
 (textfile (dest "_tf_") (include "_ti_") (append "1")) ; "rm -Rf _ti_ _tf_ && cp ../test/data.textfile.1 _ti_ && chmod a-r _ti_","Line 1: Could not read from file '_ti_' 0","test ! -s _tf_ && echo hek && rm -Rf _tf_ _ti_"
@@ -18,9 +19,7 @@
 (set @strict 0) (textfile (dest "_tf_") (include "_ti_") (append "1")) ; "rm -Rf _ti_","1","cmp _tf_ ../test/data.textfile.1 && rm -Rf _tf_ _ti_"
 (set @strict 0) (textfile (dest "_tf_") (include "_ti_") (append "1")) ; "rm -Rf _ti_","1","cmp _tf_ ../test/data.textfile.1 && rm -Rf _tf_ _ti_"
 (textfile (dest "_tf_") (append "1")) ; "rm -Rf _ti_ && touch _tf_ && chmod a-w _tf_","Line 1: Could not write to file '_tf_' 0","rm -Rf _tf_ _ti_"
-
 (textfile (dest "_tf_") (include "_ti_") (append "1")) ; "rm -Rf _ti_ _tf_ && touch _ti_ && touch _tf_ && chmod a-w _tf_","Line 1: Could not write to file '_tf_' 0","rm -Rf _tf_ _ti_"
-
 (textfile (dest "_tf_") (include "_ti_") (append "1")) ; "rm -Rf _ti_ && touch _tf_ && chmod a-w _tf_","Line 1: Could not read from file '_ti_' 0","rm -Rf _tf_ _ti_"
 (set @strict 0) (textfile (dest "_tf_") (include "_ti_") (append "1")) ; "rm -Rf _ti_ _tf_ && touch _ti_ && touch _tf_ && chmod a-w _tf_","1","cmp _tf_ ../test/data.textfile.1 && rm -Rf _tf_ _ti_"
 (set @strict 0) (textfile (dest "_tf_") (include "_ti_") (append "1")) ; "rm -Rf _ti_ && touch _tf_ && chmod a-w _tf_","1","cmp _tf_ ../test/data.textfile.1 && rm -Rf _tf_ _ti_"
