@@ -106,7 +106,7 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def, bo
     int max = countList(nms);
     printf("%s\n", msg);
     printf("Choose a number between 0 and %d (default is %d, H for help)\n", max, def);
-    char response[5];
+    char response[12];
     bool choseAnswer = false;
     do {
         printList(nms);
@@ -159,7 +159,7 @@ inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def, b
     int selected = def;
 
     printf("%s\n", msg);
-    char response[5];
+    char response[12];
     bool finished = false;
     do {
         printListWithSelection(nms, selected);
