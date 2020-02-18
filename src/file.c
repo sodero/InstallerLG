@@ -20,7 +20,6 @@
 #include <dirent.h>
 #include <limits.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -1072,7 +1071,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
         // The source handle might be open.
         if(file)
         {
-            fclose(file);
+            h_fclose_safe(&file);
         }
 
         if(opt(contxt, OPT_NOFAIL))
@@ -1110,7 +1109,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
             else
             {
                 // Skip file or abort.
-                fclose(file);
+                h_fclose_safe(&file);
                 return DID_HALT ? G_ABORT : G_TRUE;
             }
         }
@@ -1122,7 +1121,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     if(!dest)
     {
         // The source handle is open.
-        fclose(file);
+        h_fclose_safe(&file);
 
         if(opt(contxt, OPT_NOFAIL) || opt(contxt, OPT_OKNODELETE))
         {
@@ -1165,8 +1164,8 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     }
 
     // Close input and output files.
-    fclose(file);
-    fclose(dest);
+    h_fclose_safe(&file);
+    h_fclose_safe(&dest);
 
     // The number of bytes read and not written should be zero.
     if(cnt)
@@ -1276,7 +1275,7 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
     // Free def. icon.
     FreeDiskObject(obj);
     #else
-    fclose(obj);
+    h_fclose_safe(&obj);
     #endif
 
     // Success or I/O error.
@@ -3072,14 +3071,14 @@ entry_p m_startup(entry_p contxt)
         FILE *file = fopen(fln, "r");
 
         // If the file doesn't exist, try to create it.
-        if(!file && !h_exists(fln))
+        if(!file && h_exists(fln) == LG_NONE)
         {
             file = fopen(fln, "w");
 
             // If successful, close and reopen as read only.
             if(file)
             {
-                fclose(file);
+                h_fclose_safe(&file);
                 file = fopen(fln, "r");
             }
         }
@@ -3161,7 +3160,7 @@ entry_p m_startup(entry_p contxt)
             }
 
             // Reading done.
-            fclose(file);
+            h_fclose_safe(&file);
         }
     }
     else
@@ -3196,12 +3195,12 @@ entry_p m_startup(entry_p contxt)
                 if(fputs(buf, file) == EOF)
                 {
                     // Could not write to disk. The old file is still intact.
-                    fclose(file);
+                    h_fclose_safe(&file);
                 }
                 else
                 {
                     // Close file and release buffer.
-                    fclose(file);
+                    h_fclose_safe(&file);
                     free(buf);
                     buf = NULL;
 
@@ -3213,7 +3212,7 @@ entry_p m_startup(entry_p contxt)
                     {
                         // Close it immediately, we're not going to write
                         // directly to it.
-                        fclose(file);
+                        h_fclose_safe(&file);
 
                         // Do a less un-atomic write to the real file by
                         // renaming the temporary file.
@@ -3265,34 +3264,128 @@ entry_p m_startup(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_fclose_safe
+// Description: Safe file close.
+// Input:       FILE **file:     Pointer to file handle.
+// Return:      -
+//------------------------------------------------------------------------------
+void h_fclose_safe(FILE **file)
+{
+    if(file && *file)
+    {
+        fclose(*file);
+        *file = NULL;
+    }
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_copy_simple
+// Description: Copy source file to destination file using already open file
+//              handles.
+// Input:       entry_p contxt:     The execution context.
+//              FILE *src:          Source file handle.
+//              FILE *dst:          Destination file handle.
+//              const char *nfo:    Write error message.
+// Return:      -
+//------------------------------------------------------------------------------
+static void h_copy_simple(entry_p contxt, FILE *src, FILE *dst, const char *nfo)
+{
+    // Copy source file to destination in buf_len() sized chunks.
+    for(size_t cnt = fread(buf_get(B_KEY), 1, buf_len(), src); cnt;
+        cnt = fread(buf_get(B_KEY), 1, buf_len(), src))
+    {
+        if(fwrite(buf_get(B_KEY), 1, cnt, dst) != cnt)
+        {
+            ERR(ERR_WRITE_FILE, nfo);
+            break;
+        }
+    }
+
+    // Unlock buffer.
+    buf_put(B_KEY);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_fopen_force
+// Description: Open file with force. If fopen fails, change file permissions
+//              and try again if we're executing in non-strict mode. If we're
+//              executing in strict mode, fail properly.
+// Input:       entry_p contxt:     The execution context.
+//              const char *name:   File name.
+//              const char *mode:   fopen mode string.
+// Return:      FILE *:             File handle on success, NULL otherwise.
+//------------------------------------------------------------------------------
+static FILE *h_fopen_force(entry_p contxt, const char *name, const char *mode)
+{
+    FILE *file = fopen(name, mode);
+
+    // We can't open directories. Set full permissions in non strict mode.
+    if(!file && h_exists(name) == LG_FILE && !get_num(contxt, "@strict"))
+    {
+        if(h_protect_set(contxt, name, 0) == LG_FALSE)
+        {
+            // Fail silently.
+            return file;
+        }
+
+        // Try again.
+        file = fopen(name, mode);
+    }
+
+    // Success or failure.
+    return file;
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_textfile_append
 // Description: Append h_textfile helper.
 // Input:       entry_p contxt:     The execution context.
-//              FILE *file:         Output file handle.
 //              const char *name:   Output file name.
 // Return:      int:                LG_TRUE or LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_textfile_append(entry_p contxt, FILE *file, const char *name)
+static int h_textfile_append(entry_p contxt, const char *name)
 {
     // Gather and merge all (append) strings.
     char *app = get_optstr(contxt, OPT_APPEND);
 
-    if(!app && PANIC(contxt))
+    if(DID_ERR || (!app && PANIC(contxt)))
     {
+        free(app);
         return LG_FALSE;
     }
 
-    // Log operation.
+    FILE *file = h_fopen_force(contxt, name, "a");
+
+    if(!file)
+    {
+        free(app);
+
+        if(get_num(contxt, "@strict"))
+        {
+            // Couldn't write to file.
+            ERR(ERR_WRITE_FILE, name);
+            return LG_FALSE;
+        }
+
+        // Fail silently in non-strict mode.
+        return LG_TRUE;
+    }
+
+    // Write to log if logging is enabled.
     h_log(contxt, tr(S_APND), app, file);
 
-    if(fputs(app, file) == EOF)
+    // Get length of string to append.
+    size_t len = strlen(app);
+
+    // Append to file if string is non-empty.
+    if(len && fwrite(app, 1, len, file) != len)
     {
         // Couldn't write to file.
         ERR(ERR_WRITE_FILE, name);
     }
 
-    // Free concatenation.
     free(app);
+    h_fclose_safe(&file);
 
     // Success or failure.
     return DID_ERR ? LG_FALSE : LG_TRUE;
@@ -3302,38 +3395,50 @@ static int h_textfile_append(entry_p contxt, FILE *file, const char *name)
 // Name:        h_textfile_include
 // Description: Include h_textfile helper.
 // Input:       entry_p contxt:     The execution context.
-//              FILE *file:         Output file handle.
 //              const char *name:   Output file name.
 // Return:      int:                LG_TRUE or LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_textfile_include(entry_p contxt, FILE *file, const char *name)
+static int h_textfile_include(entry_p contxt, const char *name)
 {
     const char *incl = str(opt(contxt, OPT_INCLUDE));
-    FILE *finc = fopen(incl, "r");
 
-    if(!finc)
+    if(DID_ERR)
     {
-        // Fail silently.
+        return LG_FALSE;
+    }
+
+    if(!strcasecmp(incl, name))
+    {
+        // Nothing to do.
         return LG_TRUE;
     }
 
-    // Copy the complete file in buf_len() sized chunks.
-    for(size_t cnt = fread(buf_get(B_KEY), 1, buf_len(), finc);
-          cnt; cnt = fread(buf_get(B_KEY), 1, buf_len(), finc))
+    // Try to open files, with force (non-strict mode only) if necessary.
+    FILE *finc = h_fopen_force(contxt, incl, "r"),
+         *fdst = h_fopen_force(contxt, name, "w");
+
+    if(!finc || !fdst)
     {
-        // Write to destination file.
-        if(fwrite(buf_get(B_KEY), 1, cnt, file) != cnt)
+        if(get_num(contxt, "@strict"))
         {
-            ERR(ERR_WRITE_FILE, name);
-            break;
+            // Determine whether we have a read or a write problem.
+            ERR(finc ? ERR_WRITE_FILE : ERR_READ_FILE, finc ? name : incl);
         }
+
+        h_fclose_safe(&finc);
+        h_fclose_safe(&fdst);
+
+        // Fail silently.
+        return DID_ERR? LG_FALSE : LG_TRUE;
     }
 
-    // Unlock buffer and close file.
-    buf_put(B_KEY);
-    fclose(finc);
+    // Copy include file to destination file.
+    h_copy_simple(contxt, finc, fdst, name);
 
-    // Success or failure.
+    // Close input and output files.
+    h_fclose_safe(&finc);
+    h_fclose_safe(&fdst);
+
     return DID_ERR ? LG_FALSE : LG_TRUE;
 }
 
@@ -3347,34 +3452,22 @@ static int h_textfile(entry_p contxt)
 {
     // Overwrite existing file.
     const char *name = str(opt(contxt, OPT_DEST));
-    FILE *file = fopen(name, "w");
-
-    if(!file)
-    {
-        ERR(ERR_WRITE_FILE, name);
-        return LG_FALSE;
-    }
 
     // Assume success.
     int ret = LG_TRUE;
 
-    if(opt(contxt, OPT_APPEND))
-    {
-        // Append to empty file. It's how the CBM installer works.
-        ret = h_textfile_append(contxt, file, name);
-    }
-
     if(ret == LG_TRUE && opt(contxt, OPT_INCLUDE))
     {
-        // Include a file at the end of the new file (append proper).
-        ret = h_textfile_include(contxt, file, name);
+        ret = h_textfile_include(contxt, name);
     }
 
-    // We're done writing to the newly created file.
-    fclose(file);
+    if(opt(contxt, OPT_APPEND))
+    {
+        ret = h_textfile_append(contxt, name);
+    }
 
     // Success or failure.
-    return ret; 
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -3828,7 +3921,7 @@ void h_log(entry_p contxt, const char *fmt, ...)
             va_end(arg);
         }
 
-        fclose(file);
+        h_fclose_safe(&file);
     }
 
     // Could we open the file and write all data to it?

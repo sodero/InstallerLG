@@ -687,7 +687,7 @@ entry_p m_getsize(entry_p contxt)
         int res = (int) ftell(file);
 
         // We're done.
-        fclose(file);
+        h_fclose_safe(&file);
 
         // Return position.
         R_NUM(res);
@@ -727,7 +727,7 @@ entry_p m_getsum(entry_p contxt)
         }
 
         // We're done.
-        fclose(file);
+        h_fclose_safe(&file);
 
         // Return checksum.
         R_NUM((beta << 16) | alfa);
@@ -951,7 +951,7 @@ int h_getversion_file(const char *name)
     }
 
     // We're done.
-    fclose(file);
+    h_fclose_safe(&file);
 
     // If we have a valid version return that. Otherwise the file might be a
     // library, try to get the library version and return that instead.
