@@ -3279,6 +3279,33 @@ void h_fclose_safe(FILE **file)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_copy_simple
+// Description: Copy source file to destination file using already open file
+//              handles.
+// Input:       entry_p contxt:     The execution context.
+//              FILE *src:          Source file handle.
+//              FILE *dst:          Destination file handle.
+//              const char *nfo:    Write error message.
+// Return:      -
+//------------------------------------------------------------------------------
+static void h_copy_simple(entry_p contxt, FILE *src, FILE *dst, const char *nfo)
+{
+    // Copy source file to destination in buf_len() sized chunks.
+    for(size_t cnt = fread(buf_get(B_KEY), 1, buf_len(), src); cnt;
+        cnt = fread(buf_get(B_KEY), 1, buf_len(), src))
+    {
+        if(fwrite(buf_get(B_KEY), 1, cnt, dst) != cnt)
+        {
+            ERR(ERR_WRITE_FILE, nfo);
+            break;
+        }
+    }
+
+    // Unlock buffer.
+    buf_put(B_KEY);
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_fopen_force
 // Description: Open file with force. If fopen fails, change file permissions
 //              and try again if we're executing in non-strict mode. If we're
@@ -3405,21 +3432,10 @@ static int h_textfile_include(entry_p contxt, const char *name)
         return DID_ERR? LG_FALSE : LG_TRUE;
     }
 
-    // Copy include file to destination in buf_len() sized chunks.
-    for(size_t cnt = fread(buf_get(B_KEY), 1, buf_len(), finc); cnt;
-        cnt = fread(buf_get(B_KEY), 1, buf_len(), finc))
-    {
-        if(fwrite(buf_get(B_KEY), 1, cnt, fdst) != cnt)
-        {
-            // Unknown I/O error.
-            ERR(ERR_WRITE_FILE, name);
-            break;
-        }
-    }
+    // Copy include file to destination file.
+    h_copy_simple(contxt, finc, fdst, name);
 
-    // Unlock buffer.
-    buf_put(B_KEY);
-
+    // Close input and output files.
     h_fclose_safe(&finc);
     h_fclose_safe(&fdst);
 
