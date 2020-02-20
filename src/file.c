@@ -979,14 +979,6 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
     return LG_TRUE;
 }
 
-#define CF_INFOS        (1 << 0)
-#define CF_FONTS        (1 << 1)
-#define CF_NOGAUGE      (1 << 2)
-#define CF_NOFAIL       (1 << 3)
-#define CF_OKNODELETE   (1 << 4)
-#define CF_FORCE        (1 << 5)
-#define CF_ASKUSER      (1 << 6)
-
 //------------------------------------------------------------------------------
 // Name:        h_copyfile_reset
 // Description: Reset icon position.
@@ -1244,9 +1236,8 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
 //------------------------------------------------------------------------------
 static bool h_makedir_create_icon(entry_p contxt, char *dst)
 {
-    if((!contxt || !dst) && PANIC(contxt))
+    if(!dst && PANIC(contxt))
     {
-        // Bad input.
         return false;
     }
 
@@ -1283,125 +1274,77 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_makedir
-// Description: Create directory / tree of directories.
-// Input:       entry_p contxt:     The execution context.
-//              char *dst:          The directory.
-//              int mode:           FIXME.
-// Return:      int:                LG_TRUE / LG_FALSE.
+// Name:        h_makedir_path
+// Description: Create directory and all its parent directories.
+// Input:       char *dst:          Directory to be created.
+// Return:      bool:               'true' on succes, 'false' otherwise.
 //------------------------------------------------------------------------------
-static int h_makedir(entry_p contxt, char *dst, int mode)
+static bool h_makedir_path(char *dst)
 {
-    if((!contxt || !dst) && PANIC(contxt))
-    {
-        // Bad input.
-        return LG_FALSE;
-    }
-
     if(h_exists(dst) == LG_DIR)
     {
-        // Directory already exists.
-        h_log(contxt, tr(S_EDIR), dst);
-
-        // We're done if no icon is to be created.
-        if(!opt(contxt, OPT_INFOS))
-        {
-            return LG_TRUE;
-        }
-
-        // Create icon if there's no icon already.
-        if(h_exists(h_suffix(dst, "info")) == LG_NONE)
-        {
-            h_makedir_create_icon(contxt, dst);
-        }
-
-        // Always succeed. Ignore icon problems.
-        return LG_TRUE;
+        // Nothing to do,
+        return true;
     }
 
     // Create working copy.
-    char *dir = DBG_ALLOC(strdup(dst));
+    char *buf = buf_get(B_KEY);
+    strncpy(buf, dst, buf_len());
 
-    if(!dir && PANIC(contxt))
+    // Create all directories leading up to the leaf.
+    for(size_t ndx = 0; buf[ndx]; ndx++)
     {
-        return LG_FALSE;
-    }
-
-    int depth = 1, len = (int) strlen(dir);
-
-    // Get directory depth.
-    for(int i = 0; i < len; i++)
-    {
-        if(dir[i] == '/')
+        // Find all separators except the last one.
+        if(buf[ndx] == '/' && buf[ndx + 1] != '\0')
         {
-            depth++;
+            // Terminate string.
+            buf[ndx] = '\0';
+
+            // Create directory if it doesn't exist.
+            if(h_exists(buf) == LG_NONE)
+            {
+                mkdir(buf, 0777);
+            }
+
+            // Reinstate separator.
+            buf[ndx] = '/';
         }
     }
 
-    // Maximum number of retries == depth.
-    while(depth--)
+    // Unlock buffer.
+    buf_put(B_KEY);
+
+    // Create final directory.
+    return !mkdir(dst, 0777);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_makedir
+// Description: Create directory / icon / tree of directories.
+// Input:       entry_p contxt:     The execution context.
+//              char *dst:          The directory.
+// Return:      bool:               'true' on succes, 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool h_makedir(entry_p contxt, char *dst)
+{
+    if(!dst && PANIC(contxt))
     {
-        // Shrink scope until mkdir works.
-        for(int i = len; i >= 0; i--)
-        {
-            // Skip non-delimiters.
-            if(dir[i] != '/' && dir[i] != '\0')
-            {
-                continue;
-            }
-
-            // Save delimiter and truncate.
-            char del = dir[i];
-            dir[i] = '\0';
-
-            // Attempt to create truncated path.
-            if(mkdir(dir, 0777) == 0)
-            {
-                // We're done if this is the full path.
-                if(i == len)
-                {
-                    free(dir);
-                    h_log(contxt, tr(S_CRTD), dst);
-
-                    // We're done if no icon is to be created.
-                    if(!opt(contxt, OPT_INFOS))
-                    {
-                        return LG_TRUE;
-                    }
-
-                    // Create icon if there's no icon already.
-                    if(h_exists(h_suffix(dst, "info")) == LG_NONE)
-                    {
-                        h_makedir_create_icon(contxt, dst);
-                    }
-
-                    // Always succeed. Ignore icon problems.
-                    return LG_TRUE;
-                }
-
-                // Not the full path, reinstate delimiter and start over.
-                dir[i] = del;
-                break;
-            }
-            else
-            {
-                // Reinstate delimiter and shrink scope.
-                dir[i] = del;
-            }
-        }
+        return false;
     }
 
-    // Free working copy.
-    free(dir);
-
-    if(mode)
+    // Make full path if it doesn't exist.
+    if(h_makedir_path(dst) == LG_FALSE)
     {
-        // FIXME
-        return LG_TRUE;
+        return false;
     }
 
-    // For some unknown reason, we can't create the directory.
-    return LG_FALSE;
+    // Create icon if (infos) is set. Ignore errors.
+    if(opt(contxt, OPT_INFOS))
+    {
+        h_makedir_create_icon(contxt, dst);
+    }
+
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -1430,14 +1373,11 @@ entry_p m_copyfiles(entry_p contxt)
             infos      = opt(contxt, OPT_INFOS),
             confirm    = opt(contxt, OPT_CONFIRM),
             safe       = opt(contxt, OPT_SAFE),
-            nogauge    = opt(contxt, OPT_NOGAUGE),
             fonts      = opt(contxt, OPT_FONTS),
             back       = opt(contxt, OPT_BACK),
             fail       = opt(contxt, OPT_FAIL),
             nofail     = opt(contxt, OPT_NOFAIL),
             oknodelete = opt(contxt, OPT_OKNODELETE),
-            force      = opt(contxt, OPT_FORCE),
-            askuser    = opt(contxt, OPT_ASKUSER),
             files      = opt(contxt, OPT_FILES);
 
     // The (pattern) (choices) and (all) options are mutually exclusive.
@@ -1481,7 +1421,7 @@ entry_p m_copyfiles(entry_p contxt)
     // Does the destination already exist?
     if(h_exists(dst) == LG_DIR)
     {
-        // Don't trust h_exists, this string might be empty.
+        // Path might be empty.
         size_t dln = strlen(dst);
 
         // If it's not a volume, set permissions to allow overwriting.
@@ -1523,28 +1463,19 @@ entry_p m_copyfiles(entry_p contxt)
     // Start copy unless skip / abort / back.
     if(grc == G_TRUE)
     {
-        // Set file copy mode.
-        int mode = (infos ? CF_INFOS : 0) | (fonts ? CF_FONTS : 0) |
-                   (nogauge ? CF_NOGAUGE : 0) | (nofail ? CF_NOFAIL : 0) |
-                   (oknodelete ? CF_OKNODELETE : 0) | (force ? CF_FORCE : 0) |
-                   (askuser ? CF_ASKUSER : 0);
-
         // For all files / dirs in list, copy / create.
         for(; cur && grc == G_TRUE; cur = cur->next)
         {
             // Copy file / create dir / skip if non existing.
             switch(cur->type)
             {
-                case LG_NONE:
-                    continue;
-
                 case LG_FILE:
                     grc = h_copyfile(contxt, cur->name, cur->copy,
                                      back != false, false);
                     break;
 
                 case LG_DIR:
-                    if(!h_makedir(contxt, cur->copy, mode))
+                    if(!h_makedir(contxt, cur->copy/*, mode*/))
                     {
                         // Could not create directory.
                         ERR(ERR_WRITE_DIR, dst);
@@ -1552,10 +1483,8 @@ entry_p m_copyfiles(entry_p contxt)
                     }
                     break;
 
-                // Invalid type.
                 default:
-                    PANIC(contxt);
-                    break;
+                    continue;
             }
         }
 
@@ -2836,7 +2765,7 @@ entry_p m_makedir(entry_p contxt)
     char *dir = str(C_ARG(1));
 
     // Create directory.
-    if(!h_makedir(con, dir, 0 /* FIXME */))
+    if(!h_makedir(con, dir))
     {
         // Could not create directory.
         ERR(ERR_WRITE_DIR, dir);
