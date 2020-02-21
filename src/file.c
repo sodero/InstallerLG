@@ -1291,19 +1291,20 @@ static bool h_makedir_path(char *dst)
     char *buf = buf_get(B_KEY);
     strncpy(buf, dst, buf_len());
 
-    // Create all directories leading up to the leaf.
+    // Create all directories one by one.
     for(size_t ndx = 0; buf[ndx]; ndx++)
     {
-        // Find all separators except the last one.
-        if(buf[ndx] == '/' && buf[ndx + 1] != '\0')
+        // Find separator or end of string.
+        if(buf[ndx] == '/')
         {
             // Terminate string.
             buf[ndx] = '\0';
 
             // Create directory if it doesn't exist.
-            if(h_exists(buf) == LG_NONE)
+            if(h_exists(buf) == LG_NONE && mkdir(buf, 0777))
             {
-                mkdir(buf, 0777);
+                buf_put(B_KEY);
+                return false;
             }
 
             // Reinstate separator.
@@ -1314,8 +1315,8 @@ static bool h_makedir_path(char *dst)
     // Unlock buffer.
     buf_put(B_KEY);
 
-    // Create final directory.
-    return !mkdir(dst, 0777);
+    // The path as a whole exists or the final directory needs to be created.
+    return h_exists(dst) == LG_DIR || !mkdir(dst, 0777);
 }
 
 //------------------------------------------------------------------------------
@@ -1333,7 +1334,7 @@ static bool h_makedir(entry_p contxt, char *dst)
     }
 
     // Make full path if it doesn't exist.
-    if(h_makedir_path(dst) == LG_FALSE)
+    if(!h_makedir_path(dst))
     {
         return false;
     }
