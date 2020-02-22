@@ -380,7 +380,8 @@ message:        '(' MESSAGE ps opts ')'          { $$ = new_native(strdup("messa
 user:           '(' USER p ')'                   { $$ = new_native(strdup("user"), LINE, m_user, push(new_contxt(), $3), NUMBER); };
 welcome:        '(' WELCOME ps ')'               { $$ = new_native(strdup("welcome"), LINE, m_welcome, $3, NUMBER); } |
                 '(' WELCOME ')'                  { $$ = new_native(strdup("welcome"), LINE, m_welcome, NULL, NUMBER); };
-working:        '(' WORKING ps ')'               { $$ = new_native(strdup("working"), LINE, m_working, $3, NUMBER); };
+working:        '(' WORKING ps ')'               { $$ = new_native(strdup("working"), LINE, m_working, $3, NUMBER); } |
+                '(' WORKING ')'                  { $$ = new_native(strdup("working"), LINE, m_working, NULL, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* logic.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

@@ -107,6 +107,7 @@ Italian translations.
 - Fixed invalid icon creation of directories without parent.
 - Parent directory pattern matching fix (Konto).
 - Minor string formating bug fix.
+- Naked (working) support (AutoSend).
 - ?
 
 @{B}0.1.0-alpha.43 (2020-02-04)@{UB}
