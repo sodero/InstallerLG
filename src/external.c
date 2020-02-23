@@ -32,13 +32,14 @@
 static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 {
     // One or more arguments.
-    C_SANE(1, C_ARG(2));
+    C_SANE(1, con(contxt));
 
-    entry_p prompt   = opt(C_ARG(2), OPT_PROMPT),
-            help     = opt(C_ARG(2), OPT_HELP),
-            confirm  = opt(C_ARG(2), OPT_CONFIRM),
-            safe     = opt(C_ARG(2), OPT_SAFE),
-            back     = opt(C_ARG(2), OPT_BACK);
+    entry_p otx      = con(contxt),
+            prompt   = opt(otx, OPT_PROMPT),
+            help     = opt(otx, OPT_HELP),
+            confirm  = opt(otx, OPT_CONFIRM),
+            safe     = opt(otx, OPT_SAFE),
+            back     = opt(otx, OPT_BACK);
 
     // Error status.
     int err = LG_FALSE;

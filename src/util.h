@@ -28,6 +28,7 @@ entry_p global(entry_p entry);
 entry_p custom(entry_p entry);
 entry_p native(entry_p entry);
 entry_p opt(entry_p contxt, opt_t type);
+entry_p con(entry_p contxt);
 bool c_sane(entry_p contxt, size_t num);
 bool s_sane(entry_p contxt, size_t num);
 void dump(entry_p entry);
