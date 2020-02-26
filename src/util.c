@@ -1187,6 +1187,32 @@ size_t num_children(entry_p *vec)
 }
 
 //------------------------------------------------------------------------------
+// Name:        con
+// Description: Find first sub context.
+// Input:       entry_p contxt: Execution context.
+// Return:      entry_p:        Sub context if found, NULL otherwise.
+//------------------------------------------------------------------------------
+entry_p con(entry_p contxt)
+{
+    if(!contxt || !contxt->children)
+    {
+        return NULL;
+    }
+
+    // Find first context among children.
+    for(size_t cur = 0; exists(contxt->children[cur]); cur++)
+    {
+        if(contxt->children[cur]->type == CONTXT)
+        {
+            return contxt->children[cur];
+        }
+    }
+
+    // No context found.
+    return NULL;
+}
+
+//------------------------------------------------------------------------------
 // Name:        exists
 // Description: Verify that an entry exists.
 // Input:       entry_p entry: The entry to be verified.

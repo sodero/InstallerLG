@@ -337,9 +337,9 @@ trap:           '(' TRAP p vps ')'               { $$ = new_native(strdup("trap"
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 copyfiles:      '(' COPYFILES opts ')'           { $$ = new_native(strdup("copyfiles"), LINE, m_copyfiles, $3, NUMBER); };
 copylib:        '(' COPYLIB opts ')'             { $$ = new_native(strdup("copylib"), LINE, m_copylib, $3, NUMBER); };
-delete:         '(' DELETE p opts')'             { $$ = new_native(strdup("delete"), LINE, m_delete, push(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' DELETE opts p')'             { $$ = new_native(strdup("delete"), LINE, m_delete, push(push(new_contxt(), $4), $3), NUMBER); } |
-                '(' DELETE opts p opts ')'       { $$ = new_native(strdup("delete"), LINE, m_delete, push(push(new_contxt(), $4), merge($3, $5)), NUMBER); } |
+delete:         '(' DELETE p opts')'             { $$ = new_native(strdup("delete"), LINE, m_delete, merge(push(new_contxt(), $3), $4), NUMBER); } |
+                '(' DELETE opts p')'             { $$ = new_native(strdup("delete"), LINE, m_delete, merge(push(new_contxt(), $4), $3), NUMBER); } |
+                '(' DELETE opts p opts ')'       { $$ = new_native(strdup("delete"), LINE, m_delete, merge(push(new_contxt(), $4), merge($3, $5)), NUMBER); } |
                 '(' DELETE p ')'                 { $$ = new_native(strdup("delete"), LINE, m_delete, push(new_contxt(), $3), NUMBER); };
 exists:         '(' EXISTS p ')'                 { $$ = new_native(strdup("exists"), LINE, m_exists, push(new_contxt(), $3), NUMBER); } |
                 '(' EXISTS p noreq ')'           { $$ = new_native(strdup("exists"), LINE, m_exists, push(push(new_contxt(), $3), $4), NUMBER); } |
@@ -350,22 +350,22 @@ makeassign:     '(' MAKEASSIGN pp safe ')'       { $$ = new_native(strdup("makea
                 '(' MAKEASSIGN pp ')'            { $$ = new_native(strdup("makeassign"), LINE, m_makeassign, $3, NUMBER); } |
                 '(' MAKEASSIGN p safe ')'        { $$ = new_native(strdup("makeassign"), LINE, m_makeassign, push(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' MAKEASSIGN p ')'             { $$ = new_native(strdup("makeassign"), LINE, m_makeassign, push(new_contxt(), $3), NUMBER); };
-makedir:        '(' MAKEDIR p opts')'            { $$ = new_native(strdup("makedir"), LINE, m_makedir, push(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' MAKEDIR opts p ')'           { $$ = new_native(strdup("makedir"), LINE, m_makedir, push(push(new_contxt(), $4), $3), NUMBER); } |
-                '(' MAKEDIR opts p opts ')'      { $$ = new_native(strdup("makedir"), LINE, m_makedir, push(push(new_contxt(), $4), merge($3, $5)), NUMBER); } |
+makedir:        '(' MAKEDIR p opts')'            { $$ = new_native(strdup("makedir"), LINE, m_makedir, merge(push(new_contxt(), $3), $4), NUMBER); } |
+                '(' MAKEDIR opts p ')'           { $$ = new_native(strdup("makedir"), LINE, m_makedir, merge(push(new_contxt(), $4), $3), NUMBER); } |
+                '(' MAKEDIR opts p opts ')'      { $$ = new_native(strdup("makedir"), LINE, m_makedir, merge(push(new_contxt(), $4), merge($3, $5)), NUMBER); } |
                 '(' MAKEDIR p ')'                { $$ = new_native(strdup("makedir"), LINE, m_makedir, push(new_contxt(), $3), NUMBER); };
-protect:        '(' PROTECT pp opts ')'          { $$ = new_native(strdup("protect"), LINE, m_protect, push($3, $4), NUMBER); } |
+protect:        '(' PROTECT pp opts ')'          { $$ = new_native(strdup("protect"), LINE, m_protect, merge($3, $4), NUMBER); } |
                 '(' PROTECT pp ')'               { $$ = new_native(strdup("protect"), LINE, m_protect, $3, NUMBER); } |
-                '(' PROTECT p opts ')'           { $$ = new_native(strdup("protect"), LINE, m_protect, push(push(new_contxt(), $3), $4), NUMBER); } |
+                '(' PROTECT p opts ')'           { $$ = new_native(strdup("protect"), LINE, m_protect, merge(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' PROTECT p ')'                { $$ = new_native(strdup("protect"), LINE, m_protect, push(new_contxt(), $3), NUMBER); };
-startup:        '(' STARTUP p opts ')'           { $$ = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' STARTUP opts p ')'           { $$ = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), $4), $3), NUMBER); } |
-                '(' STARTUP opts p opts ')'      { $$ = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), $4), merge($3, $5)), NUMBER); } |
-                '(' STARTUP opts ')'             { $$ = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), new_symref(strdup("@app-name"), LINE)), $3), NUMBER); };
+startup:        '(' STARTUP p opts ')'           { $$ = new_native(strdup("startup"), LINE, m_startup, merge(push(new_contxt(), $3), $4), NUMBER); } |
+                '(' STARTUP opts p ')'           { $$ = new_native(strdup("startup"), LINE, m_startup, merge(push(new_contxt(), $4), $3), NUMBER); } |
+                '(' STARTUP opts p opts ')'      { $$ = new_native(strdup("startup"), LINE, m_startup, merge(push(new_contxt(), $4), merge($3, $5)), NUMBER); } |
+                '(' STARTUP opts ')'             { $$ = new_native(strdup("startup"), LINE, m_startup, merge(push(new_contxt(), new_symref(strdup("@app-name"), LINE)), $3), NUMBER); };
 textfile:       '(' TEXTFILE opts ')'            { $$ = new_native(strdup("textfile"), LINE, m_textfile, $3, NUMBER); };
 tooltype:       '(' TOOLTYPE opts ')'            { $$ = new_native(strdup("tooltype"), LINE, m_tooltype, $3, NUMBER); };
 transcript:     '(' TRANSCRIPT ps ')'            { $$ = new_native(strdup("transcript"), LINE, m_transcript, $3, NUMBER); };
-rename:         '(' RENAME pp opts')'            { $$ = new_native(strdup("rename"), LINE, m_rename, push($3, $4), NUMBER); } |
+rename:         '(' RENAME pp opts')'            { $$ = new_native(strdup("rename"), LINE, m_rename, merge($3, $4), NUMBER); } |
                 '(' RENAME pp ')'                { $$ = new_native(strdup("rename"), LINE, m_rename, $3, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* information.c|h                                                                                                                                                                      */
@@ -380,7 +380,8 @@ message:        '(' MESSAGE ps opts ')'          { $$ = new_native(strdup("messa
 user:           '(' USER p ')'                   { $$ = new_native(strdup("user"), LINE, m_user, push(new_contxt(), $3), NUMBER); };
 welcome:        '(' WELCOME ps ')'               { $$ = new_native(strdup("welcome"), LINE, m_welcome, $3, NUMBER); } |
                 '(' WELCOME ')'                  { $$ = new_native(strdup("welcome"), LINE, m_welcome, NULL, NUMBER); };
-working:        '(' WORKING ps ')'               { $$ = new_native(strdup("working"), LINE, m_working, $3, NUMBER); };
+working:        '(' WORKING ps ')'               { $$ = new_native(strdup("working"), LINE, m_working, $3, NUMBER); } |
+                '(' WORKING ')'                  { $$ = new_native(strdup("working"), LINE, m_working, NULL, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* logic.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -470,9 +471,9 @@ symbolval:      '(' SYMBOLVAL p ')'              { $$ = new_native(strdup("symbo
 /* wb.c|h                                                                                                                                                                               */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 openwbobject:   '(' OPENWBOBJECT p ')'           { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(new_contxt(), $3), NUMBER); } |
-                '(' OPENWBOBJECT p opts ')'      { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' OPENWBOBJECT opts p ')'      { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), $4), $3), NUMBER); } |
-                '(' OPENWBOBJECT opts p opts ')' { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), $4), merge($3, $5)), NUMBER); };
+                '(' OPENWBOBJECT p opts ')'      { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, merge(push(new_contxt(), $3), $4), NUMBER); } |
+                '(' OPENWBOBJECT opts p ')'      { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, merge(push(new_contxt(), $4), $3), NUMBER); } |
+                '(' OPENWBOBJECT opts p opts ')' { $$ = new_native(strdup("openwbobject"), LINE, m_openwbobject, merge(push(new_contxt(), $4), merge($3, $5)), NUMBER); };
 showwbobject:   '(' SHOWWBOBJECT p ')'           { $$ = new_native(strdup("showwbobject"), LINE, m_showwbobject, push(new_contxt(), $3), NUMBER); };
 closewbobject:  '(' CLOSEWBOBJECT p ')'          { $$ = new_native(strdup("closewbobject"), LINE, m_closewbobject, push(new_contxt(), $3), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

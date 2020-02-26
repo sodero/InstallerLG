@@ -1,3 +1,5 @@
+("%s%s" "a" "b") ; "","ab",""
+("none"); "","none",""
 (set a "1" b 2) ("prefix-%s-%s-postfix-%ld" a b 0) ; "","prefix-1-2-postfix-0",""
 (set a "1" b 2) ("prefix-%s-%s-postfix-%ld" a b) ; "","prefix-1-2-postfix-",""
 (set a "1" b 2) ("prefix-%s-%s-postfix-%ld-" a b) ; "","prefix-1-2-postfix--",""

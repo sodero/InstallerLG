@@ -255,9 +255,9 @@ entry_p m_welcome(entry_p contxt)
 entry_p m_working(entry_p contxt)
 {
     // One or more arguments.
-    C_SANE(1, NULL);
+    C_SANE(0, NULL);
 
-    // Concatenate all children.
+    // Concatenate all children if we have any.
     char *msg = get_chlstr(contxt, false);
 
     if(!msg && PANIC(contxt))
@@ -268,12 +268,11 @@ entry_p m_working(entry_p contxt)
     // Did we fail while resolving one or more of our children?
     if(DID_ERR)
     {
-        // We own msg.
         free(msg);
         R_NUM(LG_FALSE);
     }
 
-    // Standard prefix.
+    // Standard prefix + message if it exists.
     size_t len = strlen(tr(S_WRKN)) + strlen(msg) + 1;
 
     // Memory to hold prefix and children.
