@@ -3754,19 +3754,19 @@ yyreduce:
 
   case 224:
 #line 340 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("delete"), LINE, m_delete, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("delete"), LINE, m_delete, merge(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3759 "parser.c"
     break;
 
   case 225:
 #line 341 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("delete"), LINE, m_delete, push(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("delete"), LINE, m_delete, merge(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
 #line 3765 "parser.c"
     break;
 
   case 226:
 #line 342 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("delete"), LINE, m_delete, push(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("delete"), LINE, m_delete, merge(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
 #line 3771 "parser.c"
     break;
 
@@ -3832,19 +3832,19 @@ yyreduce:
 
   case 237:
 #line 353 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("makedir"), LINE, m_makedir, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("makedir"), LINE, m_makedir, merge(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3837 "parser.c"
     break;
 
   case 238:
 #line 354 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("makedir"), LINE, m_makedir, push(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("makedir"), LINE, m_makedir, merge(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
 #line 3843 "parser.c"
     break;
 
   case 239:
 #line 355 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("makedir"), LINE, m_makedir, push(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("makedir"), LINE, m_makedir, merge(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
 #line 3849 "parser.c"
     break;
 
@@ -3856,7 +3856,7 @@ yyreduce:
 
   case 241:
 #line 357 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("protect"), LINE, m_protect, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("protect"), LINE, m_protect, merge((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3861 "parser.c"
     break;
 
@@ -3868,7 +3868,7 @@ yyreduce:
 
   case 243:
 #line 359 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("protect"), LINE, m_protect, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("protect"), LINE, m_protect, merge(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3873 "parser.c"
     break;
 
@@ -3880,25 +3880,25 @@ yyreduce:
 
   case 245:
 #line 361 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, merge(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 3885 "parser.c"
     break;
 
   case 246:
 #line 362 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, merge(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
 #line 3891 "parser.c"
     break;
 
   case 247:
 #line 363 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, merge(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
 #line 3897 "parser.c"
     break;
 
   case 248:
 #line 364 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, push(push(new_contxt(), new_symref(strdup("@app-name"), LINE)), (yyvsp[-1].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("startup"), LINE, m_startup, merge(push(new_contxt(), new_symref(strdup("@app-name"), LINE)), (yyvsp[-1].e)), NUMBER); }
 #line 3903 "parser.c"
     break;
 
@@ -3922,7 +3922,7 @@ yyreduce:
 
   case 252:
 #line 368 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("rename"), LINE, m_rename, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("rename"), LINE, m_rename, merge((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 3927 "parser.c"
     break;
 
@@ -4396,19 +4396,19 @@ yyreduce:
 
   case 331:
 #line 474 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("openwbobject"), LINE, m_openwbobject, merge(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 4401 "parser.c"
     break;
 
   case 332:
 #line 475 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("openwbobject"), LINE, m_openwbobject, merge(push(new_contxt(), (yyvsp[-1].e)), (yyvsp[-2].e)), NUMBER); }
 #line 4407 "parser.c"
     break;
 
   case 333:
 #line 476 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("openwbobject"), LINE, m_openwbobject, push(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("openwbobject"), LINE, m_openwbobject, merge(push(new_contxt(), (yyvsp[-2].e)), merge((yyvsp[-3].e), (yyvsp[-1].e))), NUMBER); }
 #line 4413 "parser.c"
     break;
 

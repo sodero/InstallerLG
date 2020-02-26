@@ -17,6 +17,7 @@
 #include "resource.h"
 #include "strop.h"
 #include "util.h"
+#include <ctype.h>
 #include <dirent.h>
 #include <limits.h>
 #include <stdarg.h>
@@ -2050,7 +2051,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     }
 
     // If (force) is used, give permissions so that delete can succeed.
-    if(opt(C_ARG(2), OPT_FORCE))
+    if(opt(contxt, OPT_FORCE))
     {
         chmod(file, PERM_POSIX_ALL);
     }
@@ -2058,7 +2059,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     {
         if(!h_delete_perm(file))
         {
-            if(!opt(C_ARG(2), OPT_ASKUSER))
+            if(!opt(contxt, OPT_ASKUSER))
             {
                 // Fail silently just like the original.
                 return LG_FALSE;
@@ -2090,7 +2091,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     h_log(contxt, tr(S_DLTD), file);
 
     // Delete .info file or LG_TRUE.
-    return opt(C_ARG(2), OPT_INFOS) ? h_delete_info(contxt, file) : LG_TRUE;
+    return opt(contxt, OPT_INFOS) ? h_delete_info(contxt, file) : LG_TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -2108,10 +2109,10 @@ static int h_delete_dir(entry_p contxt, const char *name)
         return LG_FALSE;
     }
 
-    entry_p infos    = opt(C_ARG(2), OPT_INFOS),
-            force    = opt(C_ARG(2), OPT_FORCE),
-            askuser  = opt(C_ARG(2), OPT_ASKUSER),
-            all      = opt(C_ARG(2), OPT_ALL);
+    entry_p infos    = opt(contxt, OPT_INFOS),
+            force    = opt(contxt, OPT_FORCE),
+            askuser  = opt(contxt, OPT_ASKUSER),
+            all      = opt(contxt, OPT_ALL);
 
     if(!force && !h_delete_perm(name))
     {
@@ -2124,7 +2125,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
 
         // Ask for confirmation if we're not running in novice mode.
         if(get_num(contxt, "@user-level") == LG_NOVICE ||
-           !h_confirm(C_ARG(2), "", tr(S_DWRD), name))
+           !h_confirm(contxt, "", tr(S_DWRD), name))
         {
             // Halt will be set by h_confirm. Skip will result in nothing.
             return LG_FALSE;
@@ -2355,7 +2356,7 @@ static int h_delete(entry_p contxt, const char *file)
 entry_p m_delete(entry_p contxt)
 {
     // One argument and options.
-    C_SANE(1, C_ARG(2));
+    C_SANE(1, contxt);
 
     char *file = str(C_ARG(1));
 
@@ -2374,14 +2375,14 @@ entry_p m_delete(entry_p contxt)
     }
 
     // Return on abort or if the user doesn't confirm when (confirm) is set.
-    if(opt(C_ARG(2), OPT_CONFIRM) && !h_confirm(C_ARG(2),
-       str(opt(C_ARG(2), OPT_HELP)), str(opt(C_ARG(2), OPT_PROMPT))))
+    if(opt(contxt, OPT_CONFIRM) && !h_confirm(contxt,
+       str(opt(contxt, OPT_HELP)), str(opt(contxt, OPT_PROMPT))))
     {
         R_NUM(LG_FALSE);
     }
 
     // Succeed immediately if non-safe in pretend mode.
-    if(!opt(C_ARG(2), OPT_SAFE) && get_num(contxt, "@pretend"))
+    if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
@@ -2745,28 +2746,26 @@ entry_p m_makeassign(entry_p contxt)
 entry_p m_makedir(entry_p contxt)
 {
     // One argument and options.
-    C_SANE(1, C_ARG(2));
+    C_SANE(1, contxt);
 
     // Return on abort or if the user doesn't confirm when (confirm) is set.
-    if(opt(C_ARG(2), OPT_CONFIRM) && !h_confirm(C_ARG(2),
-       str(opt(C_ARG(2), OPT_HELP)), str(opt(C_ARG(2), OPT_PROMPT))))
+    if(opt(contxt, OPT_CONFIRM) && !h_confirm(contxt,
+       str(opt(contxt, OPT_HELP)), str(opt(contxt, OPT_PROMPT))))
     {
         R_NUM(LG_FALSE);
     }
 
     // Succeed immediately if non-safe in pretend mode.
-    if(!opt(C_ARG(2), OPT_SAFE) && get_num(contxt, "@pretend"))
+    if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
     {
         R_NUM(LG_TRUE);
     }
 
-    // We need to pass a valid context to h_makedir. If we have a CONTXT with
-    // options, that's the one to pass, otherwise we should pass the default.
-    entry_p con = exists(C_ARG(2)) ? C_ARG(2) : contxt;
+    // The directory to be created.
     char *dir = str(C_ARG(1));
 
     // Create directory.
-    if(!h_makedir(con, dir))
+    if(!h_makedir(contxt, dir))
     {
         // Could not create directory.
         ERR(ERR_WRITE_DIR, dir);
@@ -2775,6 +2774,153 @@ entry_p m_makedir(entry_p contxt)
 
     // Directory created.
     R_NUM(LG_TRUE);
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_protect_arg_get
+// Description: m_protect get file pemission mask.
+// Input:       entry_p contxt: The execution context.
+// Return:      int32_t:        The resulting bitmask.
+//------------------------------------------------------------------------------
+static int32_t h_protect_arg_get(entry_p contxt)
+{
+    // Test (override) option.
+    entry_p override = opt(contxt, OPT_OVERRIDE);
+
+    if(override)
+    {
+        // Ignore file.
+        return num(override);
+    }
+
+    // ----rwed.
+    int32_t msk = 0;
+
+    // Get is considered (safe).
+    h_protect_get(contxt, str(C_ARG(1)), &msk);
+
+    return msk;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_protect_mask
+// Description: m_protect helper generating bitmasks from '+rw..' like strings.
+// Input:       entry_p contxt: The execution context.
+// Return:      int32_t:        The resulting bitmask.
+//------------------------------------------------------------------------------
+static int32_t h_protect_mask(char *flags, int32_t cms)
+{
+    // Start with current mask.
+    size_t len = strlen(flags);
+    int32_t msk = cms;
+
+    // Inverting 1-4 in the name of clarity.
+    msk ^= 0x0f;
+
+    // Parser state.
+    int mode = 0;
+
+    for(size_t i = 0; i < len; i++)
+    {
+        // Temp mask.
+        int32_t bit = 0;
+
+        // Identify protection bit.
+        switch(flags[i])
+        {
+            case '+': mode = 1; break;
+            case '-': mode = 2; break;
+            case 'h': bit = 1 << 7; break;
+            case 's': bit = 1 << 6; break;
+            case 'p': bit = 1 << 5; break;
+            case 'a': bit = 1 << 4; break;
+            case 'r': bit = 1 << 3; break;
+            case 'w': bit = 1 << 2; break;
+            case 'e': bit = 1 << 1; break;
+            case 'd': bit = 1 << 0; break;
+            default: break;
+        }
+
+        // Add or remove.
+        switch(mode)
+        {
+            case 0: msk = bit; mode = 1; break;
+            case 1: msk |= bit; break;
+            case 2: msk &= ~bit; break;
+            default: break;
+        }
+    }
+
+    // Inverting 1-4 in the name of Amiga.
+    msk ^= 0x0f;
+
+    return msk;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_protect_delta
+// Description: m_protect delta setter.
+// Input:       entry_p contxt: The execution context.
+// Return:      int32_t:        The resulting bitmask.
+//------------------------------------------------------------------------------
+static int32_t h_protect_delta(entry_p contxt, char *flags, char *file)
+{
+    // Test (override) option.
+    entry_p override = opt(contxt, OPT_OVERRIDE);
+    int32_t msk = 0;
+
+    if(override)
+    {
+        // Use override instead of file flags.
+        msk = num(override);
+    }
+    else if(!h_protect_get(contxt, file, &msk))
+    {
+        return msk;
+    }
+
+    // Apply permission string to mask.
+    msk = h_protect_mask(flags, msk);
+
+    // Apply final mask to file unless pretend mode is active.
+    if(opt(contxt, OPT_SAFE) || !get_num(contxt, "@pretend"))
+    {
+        h_protect_set(contxt, file, msk);
+    }
+
+    // Return final mask.
+    return msk;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_protect_arg_set
+// Description: m_protect setter dispatch.
+// Input:       entry_p contxt: The execution context.
+// Return:      int32_t:        The resulting bitmask.
+//------------------------------------------------------------------------------
+static int32_t h_protect_arg_set(entry_p contxt)
+{
+    // Resolve once only. Used both as number and string below.
+    entry_p val = resolve(C_ARG(2));
+
+    int32_t msk = num(val);
+    char *file = str(C_ARG(1));
+
+    // Non-strings and strings that can be treated like non-zero numbers are
+    // used as absolute permission values.
+    if(msk || val->type != STRING)
+    {
+        // Apply mask to file unless pretend mode is active.
+        if(opt(contxt, OPT_SAFE) || !get_num(contxt, "@pretend"))
+        {
+            h_protect_set(contxt, file, msk);
+        }
+
+        return msk;
+    }
+
+    // All other strings are interpreted as '+hspa-r' and so on.
+    return h_protect_delta(contxt, str(val), file);
 }
 
 //------------------------------------------------------------------------------
@@ -2801,142 +2947,31 @@ entry_p m_makedir(entry_p contxt)
 entry_p m_protect(entry_p contxt)
 {
     // One or more arguments.
-    C_SANE(1, C_ARG(2));
+    C_SANE(1, contxt);
 
-    char *file = str(C_ARG(1));
-    D_NUM = 0;//LG_FALSE;
+    size_t args = 0;
 
-    if(exists(C_ARG(2)))
+    // Get number of arguments leading up to the first option.
+    while(exists(C_ARG(args + 1)) && C_ARG(args + 1)->type != OPTION)
     {
-        // Get with option.
-        if(C_ARG(2)->type == CONTXT)
-        {
-            entry_p override = opt(C_ARG(2), OPT_OVERRIDE);
-
-            if(override)
-            {
-                // From user (script).
-                D_NUM = num(override);
-            }
-            else
-            {
-                // From file.
-                h_protect_get(contxt, file, &D_NUM);
-            }
-        }
-        // Set value.
-        else
-        {
-            // Assume string operation.
-            const char *flg = str(C_ARG(2));
-            size_t len = strlen(flg);
-
-            entry_p safe = opt(C_ARG(3), OPT_SAFE),
-                    override = opt(C_ARG(3), OPT_OVERRIDE);
-
-            // If any numbers are present in the string, treat it as an absolute
-            // mask instead.
-            for(size_t i = 0; i < len; i++)
-            {
-                if(flg[i] < 58 && flg[i] > 47)
-                {
-                    // We no longer have a string.
-                    len = 0;
-                    break;
-                }
-            }
-
-            // Do we have a string?
-            if(len)
-            {
-                // Mode (+/-).
-                int mode = 0;
-
-                // Use a real file or override?
-
-                if(override)
-                {
-                    // Get flags from user (script).
-                    D_NUM = num(override);
-                }
-                else
-                {
-                    // Get flags from file.
-                    if(!h_protect_get(contxt, file, &D_NUM))
-                    {
-                        // Helper will set proper error
-                        R_NUM(-1);
-                    }
-                }
-
-                // Invert 1-4.
-                D_NUM ^= 0x0f;
-
-                // For all flags.
-                for(size_t i = 0; i < len; i++)
-                {
-                    // Mask.
-                    int bit = 0;
-
-                    // Which protection bit?
-                    switch(flg[i])
-                    {
-                        case '+': mode = 1; break;
-                        case '-': mode = 2; break;
-                        case 'h': bit = 1 << 7; break;
-                        case 's': bit = 1 << 6; break;
-                        case 'p': bit = 1 << 5; break;
-                        case 'a': bit = 1 << 4; break;
-                        case 'r': bit = 1 << 3; break;
-                        case 'w': bit = 1 << 2; break;
-                        case 'e': bit = 1 << 1; break;
-                        case 'd': bit = 1 << 0; break;
-                        default: break;
-                    }
-
-                    // Adding or subtracting?
-                    switch(mode)
-                    {
-                        case 0: D_NUM = bit; mode = 1; break;
-                        case 1: D_NUM |= bit; break;
-                        case 2: D_NUM &= ~bit; break;
-                        default: break;
-                    }
-                }
-
-                // Invert 1-4.
-                D_NUM ^= 0x0f;
-            }
-            else
-            {
-                // Use an absolute mask.
-                D_NUM = num(C_ARG(2));
-            }
-
-            if(!override)
-            {
-                // A safe operation or are we not running in pretend mode?
-                if(safe || !get_num(contxt, "@pretend"))
-                {
-                    // Helper will set error on failure.
-                    D_NUM = h_protect_set(contxt, file, D_NUM);
-                }
-                else
-                {
-                    // A non safe operation in pretend mode always succeeds.
-                    D_NUM = LG_TRUE;
-                }
-            }
-        }
-    }
-    else
-    {
-        // Get without options.
-        h_protect_get(contxt, file, &D_NUM);
+        args++;
     }
 
-    // Success or failure.
-    R_CUR;
+    // File name only. Get file permissions.
+    if(args == 1)
+    {
+        R_NUM(h_protect_arg_get(contxt));
+    }
+
+    // File name and permission mask / delta. Set file permissions.
+    if(args == 2)
+    {
+        R_NUM(h_protect_arg_set(contxt));
+    }
+
+    // Broken parser.
+    PANIC(contxt);
+    return end();
 }
 
 //------------------------------------------------------------------------------
@@ -2948,13 +2983,13 @@ entry_p m_protect(entry_p contxt)
 entry_p m_startup(entry_p contxt)
 {
     // Two or more arguments / options.
-    C_SANE(2, C_ARG(2));
+    C_SANE(2, contxt);
 
     const char *app = str(C_ARG(1));
 
-    entry_p command  = opt(C_ARG(2), OPT_COMMAND),
-            help     = opt(C_ARG(2), OPT_HELP),
-            prompt   = opt(C_ARG(2), OPT_PROMPT);
+    entry_p command  = opt(contxt, OPT_COMMAND),
+            help     = opt(contxt, OPT_HELP),
+            prompt   = opt(contxt, OPT_PROMPT);
 
     // Expect failure.
     D_NUM = LG_FALSE;
@@ -2968,9 +3003,9 @@ entry_p m_startup(entry_p contxt)
 
     // Return on abort or if the user doesn't confirm when (confirm) is set or
     // when the user level is expert.
-    if((opt(C_ARG(2), OPT_CONFIRM) ||
+    if((opt(contxt, OPT_CONFIRM) ||
         get_num(contxt, "@user-level") == LG_EXPERT) &&
-        !h_confirm(C_ARG(2), str(help), str(prompt)))
+        !h_confirm(contxt, str(help), str(prompt)))
     {
         R_NUM(LG_FALSE);
     }
@@ -2982,7 +3017,7 @@ entry_p m_startup(entry_p contxt)
     }
 
     // Gather and merge all (command) strings.
-    char *cmd = get_optstr(C_ARG(2), OPT_COMMAND);
+    char *cmd = get_optstr(contxt, OPT_COMMAND);
 
     if(!cmd && PANIC(contxt))
     {
@@ -3772,26 +3807,26 @@ entry_p m_transcript(entry_p contxt)
 entry_p m_rename(entry_p contxt)
 {
     // Two or more arguments / options.
-    C_SANE(2, C_ARG(3));
+    C_SANE(2, contxt);
 
     // Old and new file name.
     const char *old = str(C_ARG(1)), *new = str(C_ARG(2));
 
     // Return on abort or if the user doesn't confirm when (confirm) is set.
-    if(opt(C_ARG(3), OPT_CONFIRM) && !h_confirm(C_ARG(3),
-       str(opt(C_ARG(3), OPT_HELP)), str(opt(C_ARG(3), OPT_PROMPT))))
+    if(opt(contxt, OPT_CONFIRM) && !h_confirm(contxt,
+       str(opt(contxt, OPT_HELP)), str(opt(contxt, OPT_PROMPT))))
     {
         R_NUM(LG_FALSE);
     }
 
     // Is this a safe operation or are we not running in pretend mode?
-    if(!opt(C_ARG(3), OPT_SAFE) && get_num(contxt, "@pretend"))
+    if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
     {
         R_NUM(-1);
     }
 
     // Are we going to rename a file/dir?
-    if(!opt(C_ARG(3), OPT_DISK))
+    if(!opt(contxt, OPT_DISK))
     {
         // Rename if target doesn't exist.
         if(h_exists(new) == LG_NONE && !rename(old, new))
