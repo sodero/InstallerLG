@@ -819,12 +819,12 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 #define PERM_POSIX_WRITE (S_IWUSR | S_IWGRP | S_IWOTH)
 #define PERM_POSIX_EXEC (S_IXUSR | S_IXGRP | S_IXOTH)
 #define PERM_POSIX_ALL (PERM_POSIX_READ | PERM_POSIX_WRITE | PERM_POSIX_EXEC)
-#define PERM_POSIX_TO_AMIGA(X) (((X & PERM_POSIX_READ) ? 0 : 8) | \
-                                ((X & PERM_POSIX_WRITE) ? 0 : 4) | \
-                                ((X & PERM_POSIX_EXEC) ? 0 : 2) | 1 )
-#define PERM_AMIGA_TO_POSIX(X) (((X & 8) ? 0 : PERM_POSIX_READ) | \
-                                ((X & 4) ? 0 : PERM_POSIX_WRITE) | \
-                                ((X & 2) ? 0 : PERM_POSIX_EXEC))
+#define PERM_POSIX_TO_AMIGA(X) ((((X) & PERM_POSIX_READ) ? 0 : 8) | \
+                                (((X) & PERM_POSIX_WRITE) ? 0 : 4) | \
+                                (((X) & PERM_POSIX_EXEC) ? 0 : 2) | 1 )
+#define PERM_AMIGA_TO_POSIX(X) ((((X) & 8) ? 0 : PERM_POSIX_READ) | \
+                                (((X) & 4) ? 0 : PERM_POSIX_WRITE) | \
+                                (((X) & 2) ? 0 : PERM_POSIX_EXEC))
 
 #if defined(AMIGA) && !defined(LG_TEST)
 
