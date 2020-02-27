@@ -25,6 +25,7 @@
 %define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
+%token-table
 %expect 8
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Primitives                                                                                                                                                                           */
@@ -337,10 +338,10 @@ trap:           '(' TRAP p vps ')'               { $$ = new_native(strdup("trap"
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 copyfiles:      '(' COPYFILES opts ')'           { $$ = new_native(strdup("copyfiles"), LINE, m_copyfiles, $3, NUMBER); };
 copylib:        '(' COPYLIB opts ')'             { $$ = new_native(strdup("copylib"), LINE, m_copylib, $3, NUMBER); };
-delete:         '(' DELETE p opts')'             { $$ = new_native(strdup("delete"), LINE, m_delete, merge(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' DELETE opts p')'             { $$ = new_native(strdup("delete"), LINE, m_delete, merge(push(new_contxt(), $4), $3), NUMBER); } |
-                '(' DELETE opts p opts ')'       { $$ = new_native(strdup("delete"), LINE, m_delete, merge(push(new_contxt(), $4), merge($3, $5)), NUMBER); } |
-                '(' DELETE p ')'                 { $$ = new_native(strdup("delete"), LINE, m_delete, push(new_contxt(), $3), NUMBER); };
+delete:         '(' DELETE ps opts')'            { $$ = new_native(strdup("delete"), LINE, m_delete, merge($3, $4), NUMBER); } |
+                '(' DELETE opts ps')'            { $$ = new_native(strdup("delete"), LINE, m_delete, merge($4, $3), NUMBER); } |
+                '(' DELETE opts ps opts ')'      { $$ = new_native(strdup("delete"), LINE, m_delete, merge($4, merge($3, $5)), NUMBER); } |
+                '(' DELETE ps ')'                { $$ = new_native(strdup("delete"), LINE, m_delete, $3, NUMBER); };
 exists:         '(' EXISTS p ')'                 { $$ = new_native(strdup("exists"), LINE, m_exists, push(new_contxt(), $3), NUMBER); } |
                 '(' EXISTS p noreq ')'           { $$ = new_native(strdup("exists"), LINE, m_exists, push(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' EXISTS p quiet ')'           { $$ = new_native(strdup("exists"), LINE, m_exists, push(push(new_contxt(), $3), $4), NUMBER); };

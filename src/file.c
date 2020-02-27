@@ -2357,44 +2357,47 @@ entry_p m_delete(entry_p contxt)
 {
     // One argument and options.
     C_SANE(1, contxt);
+    int32_t status = LG_TRUE;
 
-    char *file = str(C_ARG(1));
-
-    #if defined(AMIGA) && !defined(LG_TEST)
-    int wild = ParsePatternNoCase(file, buf_raw(), buf_len());
-    #else
-    int wild = get_num(contxt, "@wild");
-    #endif
-
-    // Can we parse the input string?
-    if(wild < 0)
+    // Delete all files leading up to the first option
+    for(size_t ndx = 1; !DID_ERR && exists(C_ARG(ndx)) &&
+        C_ARG(ndx)->type != OPTION; ndx++)
     {
-        // Buffer overflow.
-        ERR(ERR_OVERFLOW, file);
-        R_NUM(LG_FALSE);
+        char *file = str(C_ARG(ndx));
+
+        #if defined(AMIGA) && !defined(LG_TEST)
+        int wild = ParsePatternNoCase(file, buf_raw(), buf_len());
+        #else
+        int wild = get_num(contxt, "@wild");
+        #endif
+
+        // 0 == no pattern, 1 == pattern, -1 == buffer overflow.
+        if(wild < 0)
+        {
+            ERR(ERR_OVERFLOW, file);
+            R_NUM(LG_FALSE);
+        }
+
+        // Return on abort or if the user doesn't confirm when (confirm) is set.
+        if(opt(contxt, OPT_CONFIRM) && !h_confirm(contxt,
+           str(opt(contxt, OPT_HELP)), str(opt(contxt, OPT_PROMPT))))
+        {
+            R_NUM(LG_FALSE);
+        }
+
+        // Succeed immediately if non-safe in pretend mode.
+        if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
+        {
+            R_NUM(LG_TRUE);
+        }
+
+        // Delete verbatim or matching files.
+        status = wild ? h_delete_pattern(contxt, file) :
+                        h_delete(contxt, file);
     }
 
-    // Return on abort or if the user doesn't confirm when (confirm) is set.
-    if(opt(contxt, OPT_CONFIRM) && !h_confirm(contxt,
-       str(opt(contxt, OPT_HELP)), str(opt(contxt, OPT_PROMPT))))
-    {
-        R_NUM(LG_FALSE);
-    }
-
-    // Succeed immediately if non-safe in pretend mode.
-    if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
-    {
-        R_NUM(LG_TRUE);
-    }
-
-    // Did the input string contain any wildcards?
-    if(wild)
-    {
-        // Delete everything matching the wildcard pattern.
-        R_NUM(h_delete_pattern(contxt, file));
-    }
-
-    R_NUM(h_delete(contxt, file));
+    // Success or failure.
+    R_NUM(status);
 }
 
 //------------------------------------------------------------------------------
