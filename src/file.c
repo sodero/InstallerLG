@@ -815,19 +815,69 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
     return NULL;
 }
 
-#define PERM_POSIX_READ (S_IRUSR | S_IRGRP | S_IROTH)
-#define PERM_POSIX_WRITE (S_IWUSR | S_IWGRP | S_IWOTH)
-#define PERM_POSIX_EXEC (S_IXUSR | S_IXGRP | S_IXOTH)
-#define PERM_POSIX_ALL (PERM_POSIX_READ | PERM_POSIX_WRITE | PERM_POSIX_EXEC)
-#define PERM_POSIX_TO_AMIGA(X) ((((X) & PERM_POSIX_READ) ? 0 : 8) | \
-                                (((X) & PERM_POSIX_WRITE) ? 0 : 4) | \
-                                (((X) & PERM_POSIX_EXEC) ? 0 : 2) | 1 )
-#define PERM_AMIGA_TO_POSIX(X) ((((X) & 8) ? 0 : PERM_POSIX_READ) | \
-                                (((X) & 4) ? 0 : PERM_POSIX_WRITE) | \
-                                (((X) & 2) ? 0 : PERM_POSIX_EXEC))
+//------------------------------------------------------------------------------
+// We don't care about the distinction between root, group and user since that
+// doesn't matter on Amiga.
+//------------------------------------------------------------------------------
+#define POSIX_READ_MASK (S_IRUSR | S_IRGRP | S_IROTH)
+#define POSIX_WRITE_MASK (S_IWUSR | S_IWGRP | S_IWOTH)
+#define POSIX_EXEC_MASK (S_IXUSR | S_IXGRP | S_IXOTH)
+#define POSIX_RWX_MASK (POSIX_READ_MASK | POSIX_WRITE_MASK | POSIX_EXEC_MASK)
+
+//------------------------------------------------------------------------------
+// 8 7 6 5 4 3 2 1  <- Bit number
+// h s p a r w e d  <- corresponding protection flag
+// ^ ^ ^ ^ ^ ^ ^ ^
+// | | | | | | | |
+// | | | | | | | +- |
+// | | | | | | +--- | 0 = flag set
+// | | | | | +----- | 1 = flag clear
+// | | | | +------- |
+// | | | |
+// | | | |
+// | | | +--------- |
+// | | +----------- | 0 = flag clear
+// | +------------- | 1 = flag set
+// +--------------- |
+//------------------------------------------------------------------------------
+#define READ_MASK   (1 << 3)
+#define WRITE_MASK  (1 << 2)
+#define EXEC_MASK   (1 << 1)
+#define DELETE_MASK (1 << 0)
+
+//------------------------------------------------------------------------------
+// Name:        h_perm_amiga_to_posix
+// Description: Convert Amiga file permissions to POSIX file permissions.
+// Input:       int32_t posix:     Amiga file permission mask.
+// Return:      int32_t:           POSIX file permission mask.
+//------------------------------------------------------------------------------
+static inline int32_t h_perm_amiga_to_posix(int32_t amiga)
+{
+    bool read = (amiga & READ_MASK) == 0, write = (amiga & WRITE_MASK) == 0,
+         exec = (amiga & EXEC_MASK) == 0;
+
+    // Always reset the delete flag since that's not a POSIX feature.
+    return (read ? POSIX_READ_MASK : 0) | (write ? POSIX_WRITE_MASK : 0) |
+           (exec ?  POSIX_EXEC_MASK : 0) | DELETE_MASK;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_perm_posix_to_amiga
+// Description: Convert POSIX file permissions to Amiga file permissions.
+// Input:       int32_t posix:     POSIX file permission mask.
+// Return:      int32_t:           Amiga file permission mask.
+//------------------------------------------------------------------------------
+static inline int32_t h_perm_posix_to_amiga(int32_t posix)
+{
+    bool read = posix & POSIX_READ_MASK, write = posix & POSIX_WRITE_MASK,
+         exec = posix & POSIX_EXEC_MASK;
+
+    // On Amiga '0' == enabled, see above.
+    return (read ? 0 : READ_MASK) | (write ? 0 : WRITE_MASK) |
+           (exec ? 0 : EXEC_MASK ) | DELETE_MASK;
+}
 
 #if defined(AMIGA) && !defined(LG_TEST)
-
 //------------------------------------------------------------------------------
 // Name:        h_protect_get_amiga
 // Description: Used by h_protect_get to get file / dir protection bits. Amiga
@@ -910,7 +960,8 @@ static int h_protect_get_posix(char *file, int32_t *mask)
     }
 
     // Report permissions in Amiga format.
-    *mask = PERM_POSIX_TO_AMIGA(fst.st_mode);
+    *mask = h_perm_posix_to_amiga(fst.st_mode);
+
     return LG_TRUE;
 }
 #endif
@@ -972,7 +1023,7 @@ static int h_protect_set(entry_p contxt, const char *file, LONG mask)
         }
     }
     #else
-    chmod(file, PERM_AMIGA_TO_POSIX(mask));
+    chmod(file, h_perm_amiga_to_posix(mask));
     #endif
 
     // If logging is enabled, write to log.
@@ -1086,7 +1137,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
         if(opt(contxt, OPT_FORCE) && !opt(contxt, OPT_ASKUSER))
         {
             // Unprotect file.
-            chmod(dst, PERM_POSIX_ALL);
+            chmod(dst, POSIX_RWX_MASK);
         }
         else
         // Confirm if (askuser) unless we're running in novice mode and (force)
@@ -1097,7 +1148,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
             if(h_confirm(contxt, "", tr(S_OWRT), dst))
             {
                 // Unprotect file.
-                chmod(dst, PERM_POSIX_ALL);
+                chmod(dst, POSIX_RWX_MASK);
             }
             else
             {
@@ -1429,7 +1480,7 @@ entry_p m_copyfiles(entry_p contxt)
         // If it's not a volume, set permissions to allow overwriting.
         if(dln && dst[dln - 1] != ':')
         {
-            chmod(dst, PERM_POSIX_ALL);
+            chmod(dst, POSIX_RWX_MASK);
         }
     }
 
@@ -1469,24 +1520,15 @@ entry_p m_copyfiles(entry_p contxt)
         for(; cur && grc == G_TRUE; cur = cur->next)
         {
             // Copy file / create dir / skip if non existing.
-            switch(cur->type)
+            if(cur->type == LG_FILE)
             {
-                case LG_FILE:
-                    grc = h_copyfile(contxt, cur->name, cur->copy,
-                                     back != false, false);
-                    break;
-
-                case LG_DIR:
-                    if(!h_makedir(contxt, cur->copy/*, mode*/))
-                    {
-                        // Could not create directory.
-                        ERR(ERR_WRITE_DIR, dst);
-                        grc = G_FALSE;
-                    }
-                    break;
-
-                default:
-                    continue;
+                grc = h_copyfile(contxt, cur->name, cur->copy, back != false,
+                                 false);
+            }
+            else if(cur->type == LG_DIR && !h_makedir(contxt, cur->copy))
+            {
+                ERR(ERR_WRITE_DIR, dst);
+                grc = G_FALSE;
             }
         }
 
@@ -1983,7 +2025,7 @@ static int h_delete_info(entry_p contxt, const char *file)
     if(h_exists(info) == LG_FILE)
     {
         // Set write permission and delete file.
-        if(chmod(info, PERM_POSIX_ALL) || remove(info))
+        if(chmod(info, POSIX_RWX_MASK) || remove(info))
         {
             ERR(ERR_DELETE_FILE, info);
             return LG_FALSE;
@@ -2053,7 +2095,7 @@ static int h_delete_file(entry_p contxt, const char *file)
     // If (force) is used, give permissions so that delete can succeed.
     if(opt(contxt, OPT_FORCE))
     {
-        chmod(file, PERM_POSIX_ALL);
+        chmod(file, POSIX_RWX_MASK);
     }
     else
     {
@@ -2070,7 +2112,7 @@ static int h_delete_file(entry_p contxt, const char *file)
                h_confirm(contxt, "", tr(S_DWRT), file))
             {
                 // Give permissions so that delete can succeed.
-                chmod(file, PERM_POSIX_ALL);
+                chmod(file, POSIX_RWX_MASK);
             }
             else
             {
@@ -2134,7 +2176,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
 
     // Give permissions so that delete can succeed. No need to check the return
     // value since errors will be caught below.
-    chmod(name, PERM_POSIX_ALL);
+    chmod(name, POSIX_RWX_MASK);
 
     if(rmdir(name))
     {
@@ -2233,7 +2275,7 @@ static int h_delete_dir(entry_p contxt, const char *name)
     }
 
     // Set permissions so that delete can succeed.
-    chmod(info, PERM_POSIX_ALL);
+    chmod(info, POSIX_RWX_MASK);
 
     // Delete the info file.
     if(!remove(info))
@@ -2357,44 +2399,47 @@ entry_p m_delete(entry_p contxt)
 {
     // One argument and options.
     C_SANE(1, contxt);
+    int32_t status = LG_TRUE;
 
-    char *file = str(C_ARG(1));
-
-    #if defined(AMIGA) && !defined(LG_TEST)
-    int wild = ParsePatternNoCase(file, buf_raw(), buf_len());
-    #else
-    int wild = get_num(contxt, "@wild");
-    #endif
-
-    // Can we parse the input string?
-    if(wild < 0)
+    // Delete all files leading up to the first option
+    for(size_t ndx = 1; !DID_ERR && exists(C_ARG(ndx)) &&
+        C_ARG(ndx)->type != OPTION; ndx++)
     {
-        // Buffer overflow.
-        ERR(ERR_OVERFLOW, file);
-        R_NUM(LG_FALSE);
+        char *file = str(C_ARG(ndx));
+
+        #if defined(AMIGA) && !defined(LG_TEST)
+        int wild = ParsePatternNoCase(file, buf_raw(), buf_len());
+        #else
+        int wild = get_num(contxt, "@wild");
+        #endif
+
+        // 0 == no pattern, 1 == pattern, -1 == buffer overflow.
+        if(wild < 0)
+        {
+            ERR(ERR_OVERFLOW, file);
+            R_NUM(LG_FALSE);
+        }
+
+        // Return on abort or if the user doesn't confirm when (confirm) is set.
+        if(opt(contxt, OPT_CONFIRM) && !h_confirm(contxt,
+           str(opt(contxt, OPT_HELP)), str(opt(contxt, OPT_PROMPT))))
+        {
+            R_NUM(LG_FALSE);
+        }
+
+        // Succeed immediately if non-safe in pretend mode.
+        if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
+        {
+            R_NUM(LG_TRUE);
+        }
+
+        // Delete verbatim or matching files.
+        status = wild ? h_delete_pattern(contxt, file) :
+                        h_delete(contxt, file);
     }
 
-    // Return on abort or if the user doesn't confirm when (confirm) is set.
-    if(opt(contxt, OPT_CONFIRM) && !h_confirm(contxt,
-       str(opt(contxt, OPT_HELP)), str(opt(contxt, OPT_PROMPT))))
-    {
-        R_NUM(LG_FALSE);
-    }
-
-    // Succeed immediately if non-safe in pretend mode.
-    if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
-    {
-        R_NUM(LG_TRUE);
-    }
-
-    // Did the input string contain any wildcards?
-    if(wild)
-    {
-        // Delete everything matching the wildcard pattern.
-        R_NUM(h_delete_pattern(contxt, file));
-    }
-
-    R_NUM(h_delete(contxt, file));
+    // Success or failure.
+    R_NUM(status);
 }
 
 //------------------------------------------------------------------------------
