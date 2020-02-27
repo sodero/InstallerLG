@@ -30,7 +30,7 @@ entry_p m_complete(entry_p contxt)
     C_SANE(1, NULL);
 
     // Pass value on.
-    int val = num(C_ARG(1));
+    int32_t val = num(C_ARG(1));
 
     // Show and update.
     gui_complete(val);
@@ -56,7 +56,7 @@ static void h_debug_all(entry_p contxt)
         if((*cur)->type == SYMREF)
         {
             // Save level of strictness.
-            int mode = get_num(contxt, "@strict");
+            int32_t mode = get_num(contxt, "@strict");
 
             // Set non strict mode to supress errors.
             set_num(contxt, "@strict", 0);
@@ -188,7 +188,7 @@ entry_p m_user(entry_p contxt)
     C_SANE(1, NULL);
 
     // Save old value.
-    int old = get_num(contxt, "@user-level");
+    int32_t old = get_num(contxt, "@user-level");
 
     // Set new value of @user-level.
     set_num(contxt, "@user-level", num(C_ARG(1)));
@@ -209,8 +209,8 @@ entry_p m_welcome(entry_p contxt)
     C_SANE(0, NULL);
 
     // Current installer settings.
-    int lvl = get_num(contxt, "@user-level"), prt = get_num(contxt, "@pretend"),
-        lgf = get_num(contxt, "@log");
+    int32_t lvl = get_num(contxt, "@user-level"),
+            prt = get_num(contxt, "@pretend"), lgf = get_num(contxt, "@log");
 
     // Concatenate children, if any.
     char *msg = get_chlstr(contxt, false);

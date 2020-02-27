@@ -173,9 +173,9 @@ entry_p resolve(entry_p entry)
 //              representations of user levels to the corresponding numerical
 //              value.
 // Input:       entry_p entry:  An entry_t pointer to an OPTION object.
-// Return:      int:            An integer representation of the input.
+// Return:      int32_t:        An integer representation of the input.
 //------------------------------------------------------------------------------
-static int opt_to_int(entry_p entry)
+static int32_t opt_to_int(entry_p entry)
 {
     // Resolve once.
     char *option = str(entry);
@@ -196,9 +196,9 @@ static int opt_to_int(entry_p entry)
 // Description: Get integer representation of an entry. This implies resolving
 //              it, and, if necessary, converting it.
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
-// Return:      int:            An integer representation of the input.
+// Return:      int32_t:        An integer representation of the input.
 //------------------------------------------------------------------------------
-int num(entry_p entry)
+int32_t num(entry_p entry)
 {
     if(!entry && PANIC(entry))
     {

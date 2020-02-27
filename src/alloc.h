@@ -16,14 +16,14 @@
 // Allocation of entry_t types.
 //------------------------------------------------------------------------------
 entry_p new_contxt(void);
-entry_p new_number(int num);
+entry_p new_number(int32_t num);
 entry_p new_string(char *name);
 entry_p new_symbol(char *name);
-entry_p new_symref(char *name, int line);
-entry_p new_cusref(char *name, int line, entry_p arg);
+entry_p new_symref(char *name, int32_t line);
+entry_p new_cusref(char *name, int32_t line, entry_p arg);
 entry_p new_option(char *name, opt_t type, entry_p chl);
-entry_p new_custom(char *name, int line, entry_p sym, entry_p chl);
-entry_p new_native(char *name, int line, call_t call, entry_p chl, type_t type);
+entry_p new_custom(char *name, int32_t line, entry_p sym, entry_p chl);
+entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t type);
 
 //------------------------------------------------------------------------------
 // Utility functions.

@@ -17,7 +17,7 @@
 // Input:       err_t type:         Type of error.
 // Return:      const char *:       Error description.
 //------------------------------------------------------------------------------
-static const char * h_error_str(err_t err)
+static const char *h_error_str(err_t err)
 {
     static const char *des[] =
     {
@@ -67,14 +67,14 @@ static const char * h_error_str(err_t err)
 //------------------------------------------------------------------------------
 // Name:        error
 // Description: Function used to set / get / communicate errors.
-// Input:       int line:           Line number.
+// Input:       int32_t line:       Line number.
 //              err_t type:         Type of error to set, or ERR_NONE to get
 //                                  status.
 //              const char *info:   A message describing the problem in a way
 //                                  that makes sense to the user.
-// Return:      int:                The current state.
+// Return:      err_t:              The current state.
 //------------------------------------------------------------------------------
-int error(entry_p contxt, int line, err_t type, const char *info)
+err_t error(entry_p contxt, int32_t line, err_t type, const char *info)
 {
     // Last error.
     static err_t last;

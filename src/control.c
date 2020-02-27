@@ -14,8 +14,8 @@
 #include "util.h"
 
 // Iteration mode.
-#define LG_UNTIL 1
-#define LG_WHILE 0
+#define LG_UNTIL true
+#define LG_WHILE false
 
 //------------------------------------------------------------------------------
 // (if <condition> <then-statement> [<else-statements>])
@@ -29,7 +29,7 @@ entry_p m_if(entry_p contxt)
     C_SANE(1, NULL);
 
     // Truth value of the condition.
-    int val = tru(C_ARG(1));
+    bool val = tru(C_ARG(1));
 
     // Does the body contain anything?
     if(exists(C_ARG(2)))
@@ -61,7 +61,7 @@ entry_p m_select(entry_p contxt)
     C_SANE(2, NULL);
 
     // Index and selection.
-    int ndx = 0, sel = num(C_ARG(1));
+    int32_t ndx = 0, sel = num(C_ARG(1));
 
     // Find the n:th item, go one step at a time in case no such item exists.
     for(entry_p *items = C_ARG(2)->children; exists(items[ndx]); ndx++)
@@ -85,7 +85,7 @@ entry_p m_select(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-static entry_p h_whunt(entry_p contxt, int mode)
+static entry_p h_whunt(entry_p contxt, bool until)
 {
     // Two arguments, the condition and the body of the loop.
     C_SANE(2, NULL);
@@ -96,8 +96,8 @@ static entry_p h_whunt(entry_p contxt, int mode)
 
     // Use XOR to support both 'while' and 'until'. Break if something goes
     // wrong inside.
-    for(int cont = mode ^ tru(C_ARG(1)); cont && !DID_ERR;
-        cont = mode ^ tru(C_ARG(1)))
+    for(bool cont = until ^ tru(C_ARG(1)); cont && !DID_ERR;
+        cont = until ^ tru(C_ARG(1)))
     {
         // Save the return value of the last function in the CONTXT
         ret = invoke(C_ARG(2));

@@ -230,9 +230,9 @@ static char *h_os_name(void)
 // Name:        h_chipmem.
 // Description: Helper for m_database. Get free chipmem in bytes.
 // Input:       ---
-// Return:      int:    Free chipmem.
+// Return:      int32_t:    Free chipmem.
 //------------------------------------------------------------------------------
-static int h_chipmem(void)
+static int32_t h_chipmem(void)
 {
     return
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -249,9 +249,9 @@ static int h_chipmem(void)
 // Name:        h_totalmem.
 // Description: Helper for m_database. Get free chipmem + fastmem in bytes.
 // Input:       ---
-// Return:      int:    Free chipmem + fastmem.
+// Return:      int32_t:    Free chipmem + fastmem.
 //------------------------------------------------------------------------------
-static int h_totalmem(void)
+static int32_t h_totalmem(void)
 {
     return
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -624,7 +624,7 @@ entry_p m_getdiskspace(entry_p contxt)
             }
 
             // Cap the return value.
-            R_NUM(free > INT_MAX ? INT_MAX : (int) free);
+            R_NUM(free > INT_MAX ? INT_MAX : (int32_t) free);
         }
 
         // Info() failed. Release lock.
@@ -684,7 +684,7 @@ entry_p m_getsize(entry_p contxt)
         fseek(file, 0L, SEEK_END);
 
         // Let the result be the position.
-        int res = (int) ftell(file);
+        int32_t res = (int32_t) ftell(file);
 
         // We're done.
         h_fclose_safe(&file);
@@ -743,10 +743,10 @@ entry_p m_getsum(entry_p contxt)
 // Description: Helper for h_getversion_rsp and h_getversion_dev. Get resident
 //              version from Resident struct.
 // Input:       struct Resident *rsp:   Resident struct from FindResident.
-// Return:      int:                    Resident version.
+// Return:      int32_t:                Resident version.
 //------------------------------------------------------------------------------
 #if defined(AMIGA) && !defined(LG_TEST)
-static int h_getversion_rsp(struct Resident *rsp)
+static int32_t h_getversion_rsp(struct Resident *rsp)
 {
     if(!rsp)
     {
@@ -755,7 +755,7 @@ static int h_getversion_rsp(struct Resident *rsp)
     }
 
     // Major and revision.
-    int maj, rev;
+    int32_t maj, rev;
 
     // Version string pattern.
     const char *ids = rsp->rt_IdString;
@@ -778,9 +778,9 @@ static int h_getversion_rsp(struct Resident *rsp)
 // Name:        h_getversion_res
 // Description: Helper for m_getversion. Get resident version.
 // Input:       char *name: Resident name.
-// Return:      int:        Resident version.
+// Return:      int32_t:    Resident version.
 //------------------------------------------------------------------------------
-static int h_getversion_res(const char *name)
+static int32_t h_getversion_res(const char *name)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     return h_getversion_rsp(FindResident(name));
@@ -794,12 +794,12 @@ static int h_getversion_res(const char *name)
 // Name:        h_getversion_dev
 // Description: Helper for m_getversion. Get device version.
 // Input:       char *name: Filename.
-// Return:      int:        File version.
+// Return:      int32_t:    File version.
 //------------------------------------------------------------------------------
-static int h_getversion_dev(const char *name)
+static int32_t h_getversion_dev(const char *name)
 {
     // Failure.
-    int ver = LG_NOVER;
+    int32_t ver = LG_NOVER;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct MsgPort *port = CreateMsgPort();
@@ -851,12 +851,12 @@ static int h_getversion_dev(const char *name)
 // Name:        h_getversion_lib
 // Description: Helper for m_getversion. Get library version.
 // Input:       char *name: Library name.
-// Return:      int:        Library version.
+// Return:      int32_t:    Library version.
 //------------------------------------------------------------------------------
-static int h_getversion_lib(const char *name)
+static int32_t h_getversion_lib(const char *name)
 {
     // Assume failure.
-    int ver = LG_NOVER;
+    int32_t ver = LG_NOVER;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct Library *lib = OpenLibrary(name, 0);
@@ -881,9 +881,9 @@ static int h_getversion_lib(const char *name)
 // Name:        h_getversion_file
 // Description: Helper for m_getversion. Get file version.
 // Input:       char *name: Filename.
-// Return:      int:        File version.
+// Return:      int32_t:    File version.
 //------------------------------------------------------------------------------
-int h_getversion_file(const char *name)
+int32_t h_getversion_file(const char *name)
 {
     FILE *file = NULL;
 
@@ -905,7 +905,7 @@ int h_getversion_file(const char *name)
     #endif
 
     // Invalid version.
-    int ver = LG_NOVER;
+    int32_t ver = LG_NOVER;
 
     if(!file)
     {
@@ -914,7 +914,7 @@ int h_getversion_file(const char *name)
     }
 
     // Version key string.
-    int key[] = {'$','V','E','R',':', ' ', 0};
+    int key[] = {'$','V','E','R',':',' ', 0};
     size_t ndx = 0;
 
     // Find position of the version key.
@@ -936,7 +936,7 @@ int h_getversion_file(const char *name)
         if(data)
         {
             // Major and revision.
-            int maj = 0, rev = 0;
+            int32_t maj = 0, rev = 0;
 
             // Version string pattern.
             const char *pat = "%*[^0123456789]%d.%d%*[^\0]";
@@ -984,7 +984,7 @@ entry_p m_getversion(entry_p contxt)
         #endif
 
         // Invalid version.
-        int ver = LG_NOVER;
+        int32_t ver = LG_NOVER;
 
         // Get resident module version.
         if(opt(contxt, OPT_RESIDENT))
@@ -1097,7 +1097,7 @@ entry_p m_iconinfo(entry_p contxt)
             }
 
             // Get option type.
-            int type = types[i]->id;
+            int32_t type = types[i]->id;
             char *svl = NULL;
 
             #if defined(AMIGA) && !defined(LG_TEST)
@@ -1211,8 +1211,8 @@ entry_p m_querydisplay(entry_p contxt)
     C_SANE(2, NULL);
 
     char *obj = str(C_ARG(1)), *option = str(C_ARG(2));
-    int width = 0, height = 0, depth = 0, colors = 0, upper = 0, lower = 0,
-        left = 0, right = 0;
+    int32_t width = 0, height = 0, depth = 0, colors = 0, upper = 0, lower = 0,
+            left = 0, right = 0;
 
     // Object 'screen'
     if(strcasecmp(obj, "screen") == 0)

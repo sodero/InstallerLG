@@ -32,7 +32,7 @@ void ror(entry_p *entry)
         return;
     }
 
-    int lst = 0;
+    size_t lst = 0;
 
     // Let 'lst' be the index of the last entry.
     while(exists(entry[lst]))
@@ -232,7 +232,7 @@ static void prune_opt(entry_p contxt, entry_p *cache)
         }
 
         // The default threshold is expert.
-        int level = get_num(contxt, "@user-level"), thres = LG_EXPERT;
+        int32_t level = get_num(contxt, "@user-level"), thres = LG_EXPERT;
 
         // Evaluate (confirm) if children exist.
         if(cache[OPT_CONFIRM]->children &&
@@ -541,10 +541,10 @@ bool s_sane(entry_p contxt, size_t num)
 //              fail.
 // Input:       entry_p contxt:  The context.
 //              char *var:       The name of the variable.
-//              int val:         The new value of the variable.
+//              int32_t val:     The new value of the variable.
 // Return:      -
 //------------------------------------------------------------------------------
-void set_num(entry_p contxt, char *var, int val)
+void set_num(entry_p contxt, char *var, int32_t val)
 {
     // Dummy reference used for searching.
     static entry_t ref = { .type = SYMREF };
@@ -579,10 +579,10 @@ void set_num(entry_p contxt, char *var, int val)
 //              must be a NUMBER.
 // Input:       entry_p contxt:  The context.
 //              char *var:       The name of the variable.
-// Return:      int:             The value of the variable or zero if the
+// Return:      int32_t:         The value of the variable or zero if the
 //                               variable can't be found.
 //------------------------------------------------------------------------------
-int get_num(entry_p contxt, char *var)
+int32_t get_num(entry_p contxt, char *var)
 {
     // We need a name and a context.
     if(!contxt || !var)
@@ -886,10 +886,10 @@ void set_str(entry_p contxt, char *var, char *val)
 // Name:        dump_indent
 // Description: Refer to dump below.
 // Input:       entry_p entry:  The tree to print.
-//              int indent:     Indentation level.
+//              size_t indent:     Indentation level.
 // Return:      -
 //------------------------------------------------------------------------------
-static void dump_indent(entry_p entry, int indent)
+static void dump_indent(entry_p entry, size_t indent)
 {
     // Indentation galore.
     char ind[16] = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\0";
@@ -1066,13 +1066,13 @@ size_t buf_len(void)
 // Name:        dbg_alloc
 // Description: Used by DBG-ALLOC to provide more info when failing to
 //              allocate memory and to fail deliberately when testing.
-// Input:       int line: Source code line.
+// Input:       int32_t line: Source code line.
 //              const char *file: Source code file.
 //              const char *func: Source code function.
 //              void *mem: Pointer to allocated memory.
 // Return:      void *: Pointer to allocated memory.
 //------------------------------------------------------------------------------
-void *dbg_alloc(int line, const char *file, const char *func, void *mem)
+void *dbg_alloc(int32_t line, const char *file, const char *func, void *mem)
 {
     // Fail deliberately if file or line defines are set.
     #if defined(FAIL_LINE) || defined(FAIL_FILE)
@@ -1082,7 +1082,7 @@ void *dbg_alloc(int line, const char *file, const char *func, void *mem)
     #else
     NULL;
     #endif
-    int fail_line =
+    int32_t fail_line =
     #ifdef FAIL_LINE
     FAIL_LINE;
     #else
@@ -1227,10 +1227,10 @@ bool exists(entry_p entry)
 // Name:        str_to_userlevel
 // Description: Convert userlevel strings to numeric userlevel.
 // Input:       const char *user: Userlevel string representation.
-//              int def:          Default value used if translation fails.
-// Return:      int:              Numeric Userlevel.
+//              int32_t def:      Default value used if translation fails.
+// Return:      int32_t:              Numeric Userlevel.
 //------------------------------------------------------------------------------
-int str_to_userlevel(const char *user, int def)
+int32_t str_to_userlevel(const char *user, int32_t def)
 {
     // NULL is a valid value. Return default.
     if(!user)

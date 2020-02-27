@@ -25,7 +25,7 @@ entry_p m_add(entry_p contxt)
     C_SANE(1, NULL);
 
     // The sum.
-    int sum = 0;
+    int32_t sum = 0;
 
     // Sum up the values of all children.
     for(entry_p *cur = contxt->children; exists(*cur); cur++)
@@ -49,7 +49,7 @@ entry_p m_div(entry_p contxt)
     C_SANE(2, NULL);
 
     // Do not divide by zero.
-    int div = num(C_ARG(2));
+    int32_t div = num(C_ARG(2));
 
     if(!div)
     {
@@ -74,7 +74,7 @@ entry_p m_mul(entry_p contxt)
     C_SANE(1, NULL);
 
     // The product.
-    int pro = 1;
+    int32_t pro = 1;
 
     // Multiply the values of all children.
     for(entry_p *cur = contxt->children; exists(*cur); cur++)

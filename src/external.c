@@ -42,7 +42,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             back     = opt(otx, OPT_BACK);
 
     // Error status.
-    int err = LG_FALSE;
+    int32_t err = LG_FALSE;
 
     // Do we need confirmation?
     if(confirm)

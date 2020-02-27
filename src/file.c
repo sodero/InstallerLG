@@ -132,9 +132,9 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 // Name:        h_exists_amiga_type
 // Description: h_exists amiga implementation.
 // Input:       const char *name:   Path to file / dir.
-// Return:      int:                LG_NONE/LG_FILE/LG_DIR
+// Return:      int32_t:            LG_NONE/LG_FILE/LG_DIR
 //------------------------------------------------------------------------------
-static int h_exists_amiga_type(const char *name)
+static int32_t h_exists_amiga_type(const char *name)
 {
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
@@ -146,7 +146,7 @@ static int h_exists_amiga_type(const char *name)
 
     // Attempt to lock file or directory.
     BPTR lock = (BPTR) Lock(name, ACCESS_READ);
-    int type = LG_NONE;
+    int32_t type = LG_NONE;
 
     // Get information from lock.
     if(lock && Examine(lock, fib))
@@ -176,9 +176,9 @@ static int h_exists_amiga_type(const char *name)
 // Name:        h_exists_posix_type
 // Description: h_exists posix implementation.
 // Input:       const char *name:   Path to file / dir.
-// Return:      int:                LG_NONE/LG_FILE/LG_DIR
+// Return:      int32_t:            LG_NONE/LG_FILE/LG_DIR
 //------------------------------------------------------------------------------
-static int h_exists_posix_type(const char *name)
+static int32_t h_exists_posix_type(const char *name)
 {
     struct stat fst;
 
@@ -202,9 +202,9 @@ static int h_exists_posix_type(const char *name)
 //              documentation.
 // Input:       entry_p contxt:     The execution context.
 //              const char *name:   Path to file / dir.
-// Return:      int:                LG_NONE/LG_FILE/LG_DIR
+// Return:      int32_t:            LG_NONE/LG_FILE/LG_DIR
 //------------------------------------------------------------------------------
-int h_exists(const char *name)
+int32_t h_exists(const char *name)
 {
     // NULL is a valid argument but this 'file' doesn't exist.
     if(!name)
@@ -328,7 +328,7 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
     }
 
     // Save type of the result, it might not be the same as the original.
-    int type = h_exists(h_suffix(node->name, suffix));
+    int32_t type = h_exists(h_suffix(node->name, suffix));
 
     // Make sure that the file / directory exists. If copying a directory to
     // the root of a volume, e.g 'Work:' when (info) is set and the source icon
@@ -549,7 +549,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
         return h_choices(contxt, choices, fonts, infos, src, dst);
     }
 
-    int type = h_exists(src);
+    int32_t type = h_exists(src);
 
     if(type == LG_NONE)
     {
@@ -666,7 +666,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                       )
                     {
                         // Keep track of recursion depth.
-                        static int dep;
+                        static size_t dep;
 
                         if(dep++ < LG_MAXDEP)
                         {
@@ -885,9 +885,9 @@ static inline int32_t h_perm_posix_to_amiga(int32_t posix)
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
 //              int32_t *mask:      Pointer to the result.
-// Return:      int:                LG_TRUE / LG_FALSE.
+// Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_protect_get_amiga(entry_p contxt, char *file, int32_t *mask)
+static int32_t h_protect_get_amiga(entry_p contxt, char *file, int32_t *mask)
 {
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
@@ -946,9 +946,9 @@ static int h_protect_get_amiga(entry_p contxt, char *file, int32_t *mask)
 //              implementation without delete protection support.
 // Input:       const char *file:   File / dir.
 //              int32_t *mask:      Pointer to the result.
-// Return:      int:                LG_TRUE / LG_FALSE.
+// Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_protect_get_posix(char *file, int32_t *mask)
+static int32_t h_protect_get_posix(char *file, int32_t *mask)
 {
     struct stat fst;
 
@@ -973,9 +973,9 @@ static int h_protect_get_posix(char *file, int32_t *mask)
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
 //              int32_t *mask:      Pointer to the result.
-// Return:      int:                LG_TRUE / LG_FALSE.
+// Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
+static int32_t h_protect_get(entry_p contxt, char *file, int32_t *mask)
 {
     if((!contxt || !mask || !file) && PANIC(contxt))
     {
@@ -998,9 +998,9 @@ static int h_protect_get(entry_p contxt, char *file, int32_t *mask)
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
 //              LONG mask:          Protection bits
-// Return:      int:                LG_TRUE / LG_FALSE.
+// Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_protect_set(entry_p contxt, const char *file, LONG mask)
+static int32_t h_protect_set(entry_p contxt, const char *file, LONG mask)
 {
     if((!contxt || !file) && PANIC(contxt))
     {
@@ -1511,7 +1511,7 @@ entry_p m_copyfiles(entry_p contxt)
                                     confirm != false, back != false);
 
     // Return value.
-    int ret = LG_FALSE;
+    int32_t ret = LG_FALSE;
 
     // Start copy unless skip / abort / back.
     if(grc == G_TRUE)
@@ -1634,13 +1634,14 @@ static inp_t h_copylib_unknown_none(entry_p contxt, char *src, char *dst)
 // Input:       entry_p contxt:     The execution context.
 //              char *src:          Source file.
 //              char *dst:          Destination file.
-//              int ver:            Source version.
+//              int32_t ver:        Source version.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copylib_known_none(entry_p contxt, char *src, char *dst, int ver)
+static inp_t h_copylib_known_none(entry_p contxt, char *src, char *dst,
+                                  int32_t ver)
 {
     // Major and minor version.
-    int maj = ver >> 16, min = ver & 0xffff;
+    int32_t maj = ver >> 16, min = ver & 0xffff;
 
     if(!h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s\n\n%s: %s",
        str(opt(contxt, OPT_PROMPT)), tr(S_VINS), maj, min, tr(S_NINS),
@@ -1674,7 +1675,7 @@ static inp_t h_copylib_none(entry_p contxt, char *src, char *dst)
     }
 
     // Get source file version.
-    int ver = h_getversion_file(src);
+    int32_t ver = h_getversion_file(src);
 
     if(ver == LG_NOVER)
     {
@@ -1730,14 +1731,14 @@ static inp_t h_copylib_unknown_unknown(entry_p contxt, char *src, char *dst)
 // Input:       entry_p contxt:     The execution context.
 //              char *src:          Source file.
 //              char *dst:          Destination file.
-//              int ver:            Destination file version.
+//              int32_t ver:        Destination file version.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
 static inp_t h_copylib_unknown_known(entry_p contxt, char *src, char *dst,
-                                     int ver)
+                                     int32_t ver)
 {
     // Destination major and minor version.
-    int maj = ver >> 16, min = ver & 0xffff;
+    int32_t maj = ver >> 16, min = ver & 0xffff;
 
     if(!h_confirm(contxt, "", "%s\n\n%s: %s\n%s: %d.%d\n\n%s: %s",
        str(opt(contxt, OPT_PROMPT)), tr(S_VINS), tr(S_VUNK), tr(S_VCUR),
@@ -1765,14 +1766,14 @@ static inp_t h_copylib_unknown_known(entry_p contxt, char *src, char *dst,
 // Input:       entry_p contxt:     The execution context.
 //              char *src:          Source file.
 //              char *dst:          Destination file.
-//              int ver:            Source file version.
+//              int32_t ver:        Source file version.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
 static inp_t h_copylib_known_unknown(entry_p contxt, char *src, char *dst,
-                                     int ver)
+                                     int32_t ver)
 {
     // Source major and minor version.
-    int maj = ver >> 16, min = ver & 0xffff;
+    int32_t maj = ver >> 16, min = ver & 0xffff;
 
     if(!h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s: %s\n\n%s: %s",
        str(opt(contxt, OPT_PROMPT)), tr(S_VINS), maj, min, tr(S_VCUR),
@@ -1800,16 +1801,16 @@ static inp_t h_copylib_known_unknown(entry_p contxt, char *src, char *dst,
 // Input:       entry_p contxt:     The execution context.
 //              char *src:          Source file.
 //              char *dst:          Destination file.
-//              int old:            Source file version.
-//              int new:            Destination file version.
+//              int32_t old:        Source file version.
+//              int32_t new:        Destination file version.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
 static inp_t h_copylib_known_known(entry_p contxt, char *src, char *dst,
-                                   int old, int new)
+                                   int32_t old, int32_t new)
 {
     // Source and destination files major and minor versions.
-    int nmj = new >> 16, nmn = new & 0xffff, omj = old >> 16,
-        omn = old & 0xffff;
+    int32_t nmj = new >> 16, nmn = new & 0xffff, omj = old >> 16,
+            omn = old & 0xffff;
 
     if(!h_confirm(contxt, "", "%s\n\n%s: %d.%d\n%s: %d.%d\n\n%s: %s",
        str(opt(contxt, OPT_PROMPT)), tr(S_VINS), nmj, nmn, tr(S_VCUR), omj, omn,
@@ -1831,13 +1832,13 @@ static inp_t h_copylib_known_known(entry_p contxt, char *src, char *dst,
 // Input:       entry_p contxt:     The execution context.
 //              char *src:          Source file.
 //              char *dst:          Destination file.
-//              int ver:            Source file version.
+//              int32_t ver:        Source file version.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
 static inp_t h_copylib_file(entry_p contxt, char *src, char *dst)
 {
     // Get version of source and destination file.
-    int old = h_getversion_file(dst), new = h_getversion_file(src);
+    int32_t old = h_getversion_file(dst), new = h_getversion_file(src);
 
     if(!opt(contxt, OPT_CONFIRM))
     {
@@ -1926,7 +1927,7 @@ entry_p m_copylib(entry_p contxt)
     }
 
     // Destination type.
-    int type = h_exists(dst);
+    int32_t type = h_exists(dst);
 
     // A non safe operation in pretend mode always succeeds.
     if(!opt(contxt, OPT_SAFE) && get_num(contxt, "@pretend"))
@@ -2015,9 +2016,9 @@ entry_p m_copylib(entry_p contxt)
 // Description: Delete .info file. Helper used by h_delete_file.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File whose .info to delete.
-// Return:      int:                LG_TRUE / LG_FALSE.
+// Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_delete_info(entry_p contxt, const char *file)
+static int32_t h_delete_info(entry_p contxt, const char *file)
 {
     // Do we have an .info file?
     char *info = h_suffix(file, "info");
@@ -2025,7 +2026,9 @@ static int h_delete_info(entry_p contxt, const char *file)
     if(h_exists(info) == LG_FILE)
     {
         // Set write permission and delete file.
-        if(chmod(info, POSIX_RWX_MASK) || remove(info))
+        mode_t perm = POSIX_WRITE_MASK;
+
+        if(chmod(info, perm) || remove(info))
         {
             ERR(ERR_DELETE_FILE, info);
             return LG_FALSE;
@@ -2082,9 +2085,9 @@ static bool h_delete_perm(const char *name)
 // Description: Delete file. Helper used by m_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File to delete.
-// Return:      int:                LG_TRUE / LG_FALSE.
+// Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_delete_file(entry_p contxt, const char *file)
+static int32_t h_delete_file(entry_p contxt, const char *file)
 {
     if(!file && PANIC(contxt))
     {
@@ -2141,9 +2144,9 @@ static int h_delete_file(entry_p contxt, const char *file)
 // Description: Delete directory. Helper used by m_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *name:   Directory to delete.
-// Return:      int:                LG_TRUE / LG_FALSE.
+// Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_delete_dir(entry_p contxt, const char *name)
+static int32_t h_delete_dir(entry_p contxt, const char *name)
 {
     if(!name && PANIC(contxt))
     {
@@ -2293,9 +2296,9 @@ static int h_delete_dir(entry_p contxt, const char *name)
 // Description: Delete file / dir matching pattern. Helper used by m_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *pat:    Pattern.
-// Return:      int:                LG_TRUE / LG_FALSE.
+// Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_delete_pattern(entry_p contxt, const char *pat)
+static int32_t h_delete_pattern(entry_p contxt, const char *pat)
 {
     if((!contxt || !pat) && PANIC(contxt))
     {
@@ -2365,9 +2368,9 @@ static int h_delete_pattern(entry_p contxt, const char *pat)
 // Description: Delete file / dir.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   The file / dir.
-// Return:      int:                LG_TRUE / LG_FALSE / ERR_PANIC.
+// Return:      int32_t:            LG_TRUE / LG_FALSE / ERR_PANIC.
 //------------------------------------------------------------------------------
-static int h_delete(entry_p contxt, const char *file)
+static int32_t h_delete(entry_p contxt, const char *file)
 {
     switch(h_exists(file))
     {
@@ -2467,7 +2470,7 @@ entry_p m_exists(entry_p contxt)
         #endif
 
         // Get type (file / dir / 0)
-        int res = h_exists(str(C_ARG(1)));
+        int32_t res = h_exists(str(C_ARG(1)));
 
         #if defined(AMIGA) && !defined(LG_TEST)
         // Restore auto request.
@@ -2678,7 +2681,7 @@ entry_p m_foreach(entry_p contxt)
             #endif
 
             // We always export, for memory management reasons.
-            set_num(contxt, "@each-type", (int) top->type);
+            set_num(contxt, "@each-type", (int32_t) top->type);
             set_str(contxt, "@each-name", top->name);
 
             if(!skip)
@@ -2716,7 +2719,7 @@ entry_p m_makeassign(entry_p contxt)
 
     // The name of the assign.
     char *asn = str(C_ARG(1));
-    int res = LG_FALSE;
+    int32_t res = LG_FALSE;
 
     // Are we going to create an assign?
     if(exists(C_ARG(2)) && C_ARG(2)->type != OPTION)
@@ -3358,9 +3361,9 @@ static FILE *h_fopen_force(entry_p contxt, const char *name, const char *mode)
 // Description: Append h_textfile helper.
 // Input:       entry_p contxt:     The execution context.
 //              const char *name:   Output file name.
-// Return:      int:                LG_TRUE or LG_FALSE.
+// Return:      int32_t:            LG_TRUE or LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_textfile_append(entry_p contxt, const char *name)
+static int32_t h_textfile_append(entry_p contxt, const char *name)
 {
     // Gather and merge all (append) strings.
     char *app = get_optstr(contxt, OPT_APPEND);
@@ -3416,9 +3419,9 @@ static int h_textfile_append(entry_p contxt, const char *name)
 // Description: Include h_textfile helper.
 // Input:       entry_p contxt:     The execution context.
 //              const char *name:   Output file name.
-// Return:      int:                LG_TRUE or LG_FALSE.
+// Return:      int32_t:            LG_TRUE or LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_textfile_include(entry_p contxt, const char *name)
+static int32_t h_textfile_include(entry_p contxt, const char *name)
 {
     const char *incl = str(opt(contxt, OPT_INCLUDE));
 
@@ -3466,15 +3469,15 @@ static int h_textfile_include(entry_p contxt, const char *name)
 // Name:        h_textfile
 // Description: Include / append m_textfile helper.
 // Input:       entry_p contxt:     The execution context.
-// Return:      int:                LG_TRUE or LG_FALSE.
+// Return:      int32_t:            LG_TRUE or LG_FALSE.
 //------------------------------------------------------------------------------
-static int h_textfile(entry_p contxt)
+static int32_t h_textfile(entry_p contxt)
 {
     // Overwrite existing file.
     const char *name = str(opt(contxt, OPT_DEST));
 
     // Assume success.
-    int ret = LG_TRUE;
+    int32_t ret = LG_TRUE;
 
     if(ret == LG_TRUE && opt(contxt, OPT_INCLUDE))
     {

@@ -32,21 +32,21 @@ entry_p con(entry_p contxt);
 bool c_sane(entry_p contxt, size_t num);
 bool s_sane(entry_p contxt, size_t num);
 void dump(entry_p entry);
-int get_num(entry_p contxt, char *var);
+int32_t get_num(entry_p contxt, char *var);
 char *get_str(entry_p contxt, char *var);
 char *get_optstr(entry_p contxt, opt_t type);
 char *get_chlstr(entry_p contxt, bool pad);
-void set_num(entry_p contxt, char *var, int val);
+void set_num(entry_p contxt, char *var, int32_t val);
 void set_str(entry_p contxt, char *var, char *val);
 char *buf_get(const char *usr);
 char *buf_put(const char *usr);
 size_t buf_len(void);
 char *buf_raw(void);
-void *dbg_alloc(int line, const char *file, const char *func, void *mem);
+void *dbg_alloc(int32_t line, const char *file, const char *func, void *mem);
 entry_p native_exists(entry_p contxt, call_t func);
 size_t num_children(entry_p *vec);
 bool exists(entry_p entry);
-int str_to_userlevel(const char *user, int def);
+int32_t str_to_userlevel(const char *user, int32_t def);
 
 //------------------------------------------------------------------------------
 // Utility macros.

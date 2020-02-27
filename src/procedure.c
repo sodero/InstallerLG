@@ -132,7 +132,7 @@ entry_p m_gosub(entry_p contxt)
         }
 
         // Keep track of the recursion depth. Do not go beyond LG_MAXDEP.
-        static int dep;
+        static size_t dep;
 
         if(dep++ < LG_MAXDEP)
         {

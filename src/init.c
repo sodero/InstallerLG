@@ -41,10 +41,10 @@ unsigned long __stack = 131072;
 //              accounted for.
 // Input:       entry_p contxt: CONTXT.
 //              char *sym:      Name.
-//              int num:        Value.
+//              int32_t num:    Value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void init_num(entry_p contxt, char *sym, int num)
+static void init_num(entry_p contxt, char *sym, int32_t num)
 {
     // Create SYMBOL -> VALUE tuple.
     entry_p var = new_symbol(DBG_ALLOC(strdup(sym))), val = new_number(num);
@@ -110,8 +110,8 @@ static void init_tooltypes(entry_p contxt)
          *a_log = arg_get(ARG_LOGFILE), *a_lng = arg_get(ARG_LANGUAGE);
 
     // User levels: minimum 'NOVICE' and default 'AVERAGE'.
-    int l_def = str_to_userlevel(arg_get(ARG_DEFUSER), LG_AVERAGE),
-        l_min = str_to_userlevel(arg_get(ARG_MINUSER), LG_NOVICE);
+    int32_t l_def = str_to_userlevel(arg_get(ARG_DEFUSER), LG_AVERAGE),
+            l_min = str_to_userlevel(arg_get(ARG_MINUSER), LG_NOVICE);
 
     // Cap userlevel values, default must be >= minimum.
     init_num(contxt, "@user-level", l_def < l_min ? l_min : l_def);

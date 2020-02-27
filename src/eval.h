@@ -13,7 +13,7 @@
 #include "types.h"
 #include <stdbool.h>
 
-int num(entry_p entry);
+int32_t num(entry_p entry);
 bool tru(entry_p entry);
 void run(entry_p entry);
 char *str(entry_p entry);
