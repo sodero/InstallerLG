@@ -170,7 +170,7 @@ entry_p m_procedure(entry_p contxt)
     S_SANE(1);
 
     // The function itself and all arguments are global.
-    entry_p cus = contxt->symbols[0], dst = global(contxt);
+    entry_p cus = C_SYM(1), dst = global(contxt);
 
     // Create reference and reparent.
     push(dst, cus);

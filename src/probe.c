@@ -1142,14 +1142,14 @@ entry_p m_iconinfo(entry_p contxt)
             // the value of the old one with the new value.
             if(contxt->symbols)
             {
-                for(size_t k = 0; exists(contxt->symbols[k]); k++)
+                for(size_t k = 1; exists(C_SYM(k)); k++)
                 {
-                    if(!strcasecmp(contxt->symbols[k]->name, name))
+                    if(!strcasecmp(C_SYM(k)->name, name))
                     {
-                        kill(contxt->symbols[k]->resolved);
-                        contxt->symbols[k]->resolved = val;
-                        push(global(contxt), contxt->symbols[k]);
-                        val->parent = contxt->symbols[k];
+                        kill(C_SYM(k)->resolved);
+                        C_SYM(k)->resolved = val;
+                        push(global(contxt), C_SYM(k));
+                        val->parent = C_SYM(k);
 
                         // We no longer own 'val'.
                         val = NULL;
