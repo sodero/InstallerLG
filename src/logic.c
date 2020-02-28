@@ -127,7 +127,7 @@ entry_p m_in(entry_p contxt)
     C_SANE(2, NULL);
 
     // Bitmask.
-    int mask = 0;
+    int32_t mask = 0;
 
     // Create the bitmask of all children.
     for(entry_p *cur = C_ARG(2)->children; exists(*cur); cur++)

@@ -68,26 +68,26 @@ enum
 #define G_REPEAT (1 << G_REPEAT_BIT)
 
 void gui_exit(void);
-void gui_complete(int com);
+void gui_complete(int32_t com);
 void gui_abort(const char *msg);
-void gui_error(int line, const char *type, const char *info);
+void gui_error(int32_t line, const char *type, const char *info);
 void gui_copyfiles_end(void);
-void gui_effect(int eff, int cl1, int cl2);
-void gui_query_screen(int *width, int *height, int *depth, int *colors);
-void gui_query_window(int *width, int *height, int *upper, int *lower, int *left, int *right);
-inp_t gui_closemedia(int mid);
-inp_t gui_setmedia(int mid, int act, const char *par);
-inp_t gui_showmedia(int *mid, const char* mda, int act);
+void gui_effect(int32_t eff, int32_t cl1, int32_t cl2);
+void gui_query_screen(int32_t *width, int32_t *height, int32_t *depth, int32_t *colors);
+void gui_query_window(int32_t *width, int32_t *height, int32_t *upper, int32_t *lower, int32_t *left, int32_t *right);
+inp_t gui_closemedia(int32_t mid);
+inp_t gui_setmedia(int32_t mid, int32_t act, const char *par);
+inp_t gui_showmedia(int32_t *mid, const char* mda, int32_t act);
 inp_t gui_init(bool scr);
 inp_t gui_message(const char *msg, bool bck);
 inp_t gui_finish(const char *msg);
 inp_t gui_working(const char *msg);
 inp_t gui_bool(const char *msg, const char *hlp, const char *yes, const char *nay, bool bck);
 inp_t gui_string(const char *msg, const char *hlp, const char *def, bool bck, const char **ret);
-inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret);
-inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret);
-inp_t gui_number(const char *msg, const char *hlp, int min, int max, int def, bool bck, int *ret);
-inp_t gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min, bool npr, bool nlg);
+inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int32_t def, bool bck, int32_t *ret);
+inp_t gui_options(const char *msg, const char *hlp, const char **nms, int32_t def, bool bck, int32_t *ret);
+inp_t gui_number(const char *msg, const char *hlp, int32_t min, int32_t max, int32_t def, bool bck, int32_t *ret);
+inp_t gui_welcome(const char *msg, int32_t *lvl, int32_t *lgf, int32_t *prt, int32_t min, bool npr, bool nlg);
 inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn, const char *def, bool bck, const char **ret);
 inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk, const char *def, bool bck, const char **ret);
 inp_t gui_confirm(const char *msg, const char *hlp, bool bck);

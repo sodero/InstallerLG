@@ -133,7 +133,7 @@ fi
 echo "--------------------------------------------"
 
 which valgrind > /dev/null 2>&1
-if [ $? -eq 0 ]  && [ -z "${LG_SMOKE}" ] && [ -z "${LG_QUICK}" ]; then
+if [ $? -eq 0 ]  && [ -z "${LG_SMOKE}" ] && [ -z "${LG_QUICK}" ] && [ -z "${LG_FAIL}" ]; then
     echo Peak stack in $(grep -h mem_stacks_B massif.out.* | sort -h -k 2 -t '=' | tail -1 | sed -e 's/mem_stacks_B=//') bytes
     echo Peak heap in $(grep -h mem_heap_B massif.out.* | sort -h -k 2 -t '=' | tail -1 | sed -e 's/mem_heap_B=//') bytes
     rm -f massif.out.*

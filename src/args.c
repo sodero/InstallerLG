@@ -173,7 +173,6 @@ static bool arg_wb(char **argv)
 
     if(!arg)
     {
-        // Unkown error.
         return false;
     }
 
@@ -198,7 +197,6 @@ static bool arg_wb(char **argv)
     bool ret = arg_post();
     CurrentDir(old);
 
-    // Disk object not needed, a deep copy is done in arg_post().
     if(dob)
     {
         FreeDiskObject(dob);
@@ -206,7 +204,6 @@ static bool arg_wb(char **argv)
 
     return ret;
     #else
-    // We should never end up here.
     (void) argv;
     return false;
     #endif

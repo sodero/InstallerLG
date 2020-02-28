@@ -365,7 +365,7 @@ entry_p m_patmatch(entry_p contxt)
     if(w >= 0)
     {
         // Use pattern matching or case insensitive string comparison.
-        int r = w ? MatchPatternNoCase(buf_raw(), mat) : !strcasecmp(pat, mat);
+        bool r = w ? MatchPatternNoCase(buf_raw(), mat) : !strcasecmp(pat, mat);
         R_NUM(r ? LG_TRUE : LG_FALSE);
     }
 
@@ -390,7 +390,7 @@ entry_p m_strlen(entry_p contxt)
     C_SANE(1, NULL);
 
     // Set and return.
-    R_NUM((int) strlen(str(C_ARG(1))));
+    R_NUM((int32_t) strlen(str(C_ARG(1))));
 }
 
 //------------------------------------------------------------------------------
@@ -405,13 +405,13 @@ entry_p m_substr(entry_p contxt)
     C_SANE(2, NULL);
 
     char *arg = str(C_ARG(1));
-    int off = num(C_ARG(2)), len = (int) strlen(arg);
+    int32_t off = num(C_ARG(2)), len = (int32_t) strlen(arg);
 
     // Is there a limitation on the number of characters?
     if(exists(C_ARG(3)))
     {
         // Get the number of characters to copy.
-        int chr = num(C_ARG(3));
+        int32_t chr = num(C_ARG(3));
 
         // Use the limitations used by the CBM installer.
         if(off >= len || chr <= 0 || off < 0)

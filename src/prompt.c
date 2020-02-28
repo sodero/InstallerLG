@@ -67,7 +67,7 @@ entry_p m_askbool(entry_p contxt)
     }
 
     // Default = 'no'.
-    int ans = LG_FALSE;
+    int32_t ans = LG_FALSE;
 
     // Do we have a user specified default?
     if(deflt)
@@ -208,7 +208,7 @@ entry_p m_askchoice(entry_p contxt)
     if(deflt)
     {
         // Is there such a choice?
-        int def = num(deflt);
+        int32_t def = num(deflt);
 
         // Check for negative values as well.
         if(def < 0 || def >= off)
@@ -391,7 +391,7 @@ entry_p m_askdisk(entry_p contxt)
     }
 
     // Return code.
-    int ret = LG_FALSE;
+    int32_t ret = LG_FALSE;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct Process *p = (struct Process *) FindTask(NULL);
@@ -616,7 +616,7 @@ entry_p m_asknumber(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    int min = 0, max = 100;
+    int32_t min = 0, max = 100;
 
     if(range)
     {
@@ -644,7 +644,7 @@ entry_p m_asknumber(entry_p contxt)
         R_NUM(num(deflt));
     }
 
-    int def = num(deflt);
+    int32_t def = num(deflt);
     const char *prt = str(prompt), *hlp = str(help);
 
     // Only show requester if we could resolve all options.
@@ -761,7 +761,7 @@ entry_p m_askoptions(entry_p contxt)
     if(deflt)
     {
         // Is there such a choice?
-        int def = num(deflt);
+        int32_t def = num(deflt);
 
         if(def >= (1L << ndx))
         {

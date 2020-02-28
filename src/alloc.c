@@ -54,10 +54,10 @@ entry_p new_contxt(void)
 //------------------------------------------------------------------------------
 // Name:        new_number
 // Description: Allocate NUMBER.
-// Input:       int num:    The initial value.
-// Return:      entry_p:    A NUMBER on success, NULL otherwise.
+// Input:       int32_t num:    The initial value.
+// Return:      entry_p:        A NUMBER on success, NULL otherwise.
 //------------------------------------------------------------------------------
-entry_p new_number(int num)
+entry_p new_number(int32_t num)
 {
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
@@ -169,12 +169,12 @@ static void reparent_and_set(entry_p *chl, entry_p par, entry_p res)
 // Input:       char *name:   The name of the function. This string won't be
 //                            copied and it will be free:d by kill(...) so it
 //                            must be allocated by the calling function.
-//              int line:     The source code line number.
+//              int32_t line: The source code line number.
 //              entry_p sym:  A CONTXT with symbols or NULL.
 //              entry_p chl:  A CONTXT with children, functions.
 // Return:      entry_p:      A CUSTOM on success, NULL otherwise.
 //------------------------------------------------------------------------------
-entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
+entry_p new_custom(char *name, int32_t line, entry_p sym, entry_p chl)
 {
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
@@ -227,13 +227,13 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
 //------------------------------------------------------------------------------
 // Name:        new_symref
 // Description: Allocate SYMREF, a reference to a symbol / variable.
-// Input:       char *name: The name of the referenced symbol. This string won't
-//                          be copied and it will be free:d by kill() so it must
-//                          be allocated by the calling function.
-//              int line:   The source code line number.
-// Return:      entry_p:    A SYMREF on success, NULL otherwise.
+// Input:       char *name:     The name of the referenced symbol. This string
+//                              won't be copied and it will be free:d by kill()
+//                              so it must be allocated by the calling function.
+//              int32_t line:   The source code line number.
+// Return:      entry_p:        A SYMREF on success, NULL otherwise.
 //------------------------------------------------------------------------------
-entry_p new_symref(char *name, int line)
+entry_p new_symref(char *name, int32_t line)
 {
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
@@ -304,13 +304,13 @@ static void move_contxt(entry_p dst, entry_p src)
 //                              must be allocated by the calling function. It's
 //                              used for decoration purposes only, it doesn't
 //                              affect the execution.
-//              int line:       The source code line number.
+//              int32_t line:   The source code line number.
 //              call_t call:    A function pointer, the code to be executed.
 //              entry_p chl:    The context of the function, if any.
 //              type_t type:    Default return value data type.
 // Return:      entry_p:        A NATIVE on success, NULL otherwise.
 //------------------------------------------------------------------------------
-entry_p new_native(char *name, int line, call_t call, entry_p chl, type_t type)
+entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t type)
 {
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
@@ -382,7 +382,7 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
             entry->resolved->parent = entry;
 
             // Let the type be our ID.
-            entry->id = (int) type;
+            entry->id = (int32_t) type;
             entry->type = OPTION;
             entry->name = name;
 
@@ -422,11 +422,11 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
 //                              invoked. This string won't be copied and it will
 //                              be free:d by kill() so it must be allocated by
 //                              the calling function.
-//              int line:       The source code line number.
+//              int32_t line:   The source code line number.
 //              entry_p arg:    An optional context with function arguments.
 // Return:      entry_p:        a CUSREF on success, NULL otherwise.
 //------------------------------------------------------------------------------
-entry_p new_cusref(char *name, int line, entry_p arg)
+entry_p new_cusref(char *name, int32_t line, entry_p arg)
 {
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
