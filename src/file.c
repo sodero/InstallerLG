@@ -848,26 +848,26 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 //------------------------------------------------------------------------------
 // Name:        h_perm_amiga_to_posix
 // Description: Convert Amiga file permissions to POSIX file permissions.
-// Input:       int32_t posix:     Amiga file permission mask.
-// Return:      int32_t:           POSIX file permission mask.
+// Input:       int32_t amiga:     Amiga file permission mask.
+// Return:      mode_t:            POSIX file permission mask.
 //------------------------------------------------------------------------------
-static inline int32_t h_perm_amiga_to_posix(int32_t amiga)
+static inline mode_t h_perm_amiga_to_posix(int32_t amiga)
 {
     bool read = (amiga & READ_MASK) == 0, write = (amiga & WRITE_MASK) == 0,
          exec = (amiga & EXEC_MASK) == 0;
 
     // Always reset the delete flag since that's not a POSIX feature.
     return (read ? POSIX_READ_MASK : 0) | (write ? POSIX_WRITE_MASK : 0) |
-           (exec ?  POSIX_EXEC_MASK : 0) | DELETE_MASK;
+           (exec ? POSIX_EXEC_MASK : 0) | DELETE_MASK;
 }
 
 //------------------------------------------------------------------------------
 // Name:        h_perm_posix_to_amiga
 // Description: Convert POSIX file permissions to Amiga file permissions.
-// Input:       int32_t posix:     POSIX file permission mask.
+// Input:       mode_t posix:      POSIX file permission mask.
 // Return:      int32_t:           Amiga file permission mask.
 //------------------------------------------------------------------------------
-static inline int32_t h_perm_posix_to_amiga(int32_t posix)
+static inline int32_t h_perm_posix_to_amiga(mode_t posix)
 {
     bool read = posix & POSIX_READ_MASK, write = posix & POSIX_WRITE_MASK,
          exec = posix & POSIX_EXEC_MASK;
