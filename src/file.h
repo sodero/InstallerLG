@@ -43,7 +43,7 @@ struct pnode_t
     struct pnode_t *next;
     char *name;
     char *copy;
-    long type;
+    int32_t type;
 };
 
 typedef struct pnode_t * pnode_p;

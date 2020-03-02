@@ -14,7 +14,7 @@ CC= vc +aos68k
 OBJS= alloc.o symbol.o init.o resource.o util.o error.o file.o control.o \
       exit.o $(INTERFACE_OBJ) logic.o probe.o procedure.o media.o prompt.o strcasestr.o \
       strop.o wb.o args.o arithmetic.o comparison.o eval.o external.o \
-      information.o ../build/parser.o ../build/lexer.o
+      information.o ../build/parser.o ../build/lexer.o debug.o
 CFLAGS= -c99 -I$(VBCC)PosixLib/include $(INTERFACE_FLAGS) -I. -I../build -I../src -O -dontwarn=153 -DAMIGA -DKPrintF=printf #-DLG_TEST
 
 Installer: $(OBJS)
@@ -26,67 +26,68 @@ lexer.o: ../build/lexer.c
 parser.o: ../build/parser.c
 	$(CC) -o ../build/parser.o -c $(CFLAGS) $?
 
-alloc.o: alloc.c alloc.h error.h control.h procedure.h util.h types.h
+media.o: media.c alloc.h error.h eval.h file.h gui.h media.h util.h types.h
+
+procedure.o: procedure.c alloc.h error.h eval.h procedure.h strop.h util.h \
+             types.h
+
+strop.o: strop.c alloc.h error.h eval.h strop.h util.h types.h
 
 symbol.o: symbol.c alloc.h error.h eval.h symbol.h util.h types.h
 
-init.o: init.c alloc.h args.h control.h exit.h gui.h information.h init.h \
-        media.h procedure.h symbol.h util.h version.h types.h file.h
+probe.o: probe.c alloc.h error.h eval.h file.h gui.h probe.h util.h types.h
+
+information.o: information.c alloc.h args.h error.h eval.h gui.h \
+               information.h resource.h util.h types.h file.h
+
+external.o: external.c alloc.h error.h eval.h external.h file.h gui.h \
+            resource.h util.h types.h
+
+file.o: file.c alloc.h debug.h error.h eval.h file.h gui.h probe.h resource.h \
+        strop.h util.h types.h
+
+util.o: util.c alloc.h debug.h error.h eval.h util.h types.h
+
+wb.o: wb.c alloc.h error.h eval.h file.h util.h wb.h types.h
+
+comparison.o: comparison.c alloc.h comparison.h error.h eval.h util.h types.h
 
 resource.o: resource.c error.h resource.h types.h
 
-util.o: util.c alloc.h error.h eval.h util.h types.h
-
-error.o: error.c error.h gui.h util.h types.h file.h
-
-file.o: file.c alloc.h error.h eval.h file.h gui.h probe.h resource.h strop.h \
-        util.h types.h
+args.o: args.c args.h resource.h strop.h util.h types.h
 
 control.o: control.c alloc.h control.h error.h eval.h util.h types.h
 
 exit.o: exit.c alloc.h error.h eval.h exit.h gui.h procedure.h resource.h \
         util.h types.h file.h
 
-gui.o: gui.c gui.h version.h resource.h file.h types.h
-
-logic.o: logic.c alloc.h logic.h error.h eval.h util.h types.h
-
-probe.o: probe.c alloc.h error.h eval.h file.h gui.h probe.h util.h types.h
-
-procedure.o: procedure.c alloc.h error.h eval.h procedure.h strop.h util.h \
-             types.h
-
-media.o: media.c alloc.h error.h eval.h file.h gui.h media.h util.h types.h
-
 prompt.o: prompt.c alloc.h gui.h error.h eval.h prompt.h resource.h util.h \
           types.h file.h
 
-strcasestr.o: strcasestr.c
-
-strop.o: strop.c alloc.h error.h eval.h strop.h util.h types.h
-
-wb.o: wb.c alloc.h error.h eval.h file.h util.h wb.h types.h
-
-args.o: args.c args.h resource.h strop.h util.h types.h
-
-arithmetic.o: arithmetic.c alloc.h arithmetic.h error.h eval.h util.h types.h
-
-comparison.o: comparison.c alloc.h comparison.h error.h eval.h util.h types.h
+alloc.o: alloc.c alloc.h error.h control.h procedure.h util.h types.h
 
 eval.o: eval.c alloc.h args.h error.h eval.h exit.h gui.h media.h resource.h \
         util.h types.h file.h
 
-external.o: external.c alloc.h error.h eval.h external.h file.h gui.h \
-            resource.h util.h types.h
+debug.o: debug.c alloc.h error.h eval.h debug.h util.h types.h
 
-information.o: information.c alloc.h args.h error.h eval.h gui.h \
-               information.h resource.h util.h types.h file.h
+gui.o: gui.c gui.h version.h resource.h file.h types.h
+
+arithmetic.o: arithmetic.c alloc.h arithmetic.h error.h eval.h util.h types.h
+
+cli.o: cli.c gui.h file.h types.h
+
+error.o: error.c error.h gui.h util.h types.h file.h
+
+logic.o: logic.c alloc.h logic.h error.h eval.h util.h types.h
+
+strcasestr.o: strcasestr.c
 
 
-# 1151 test(s) failed
-# 1710 test(s) passed
+# 1255 test(s) failed
+# 1773 test(s) passed
 test:
-	cp ../Installer68k T:
+	cp Installer68k T:
 	sh ../test/run.sh T:Installer68k ../test $(REXTRA)
 
 clean:
