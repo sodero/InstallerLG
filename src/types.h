@@ -138,9 +138,4 @@ struct entry_s
 
 typedef struct entry_s entry_t;
 
-#ifndef AMIGA
-# define LONG int
-# define APTR void *
-#endif
-
 #endif

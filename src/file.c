@@ -370,8 +370,6 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                           entry_p pattern, entry_p infos);
 
 //------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
 // Name:        h_choices
 // Description: Helper for h_filetree handling (choices). Generating a complete
 //              file / directory tree with source and destination tuples.
@@ -586,7 +584,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
             // The type of the first element is known; it's a directory.
             node->name = DBG_ALLOC(strdup(src));
             node->copy = DBG_ALLOC(strdup(dst));
-            node->type = 2;
+            node->type = LG_DIR;
 
             // Create .info node if necessary. No need to check node pointer.
             // Bounce and PANIC in h_suffix_append.
@@ -887,7 +885,8 @@ static inline int32_t h_perm_posix_to_amiga(mode_t posix)
 //              int32_t *mask:      Pointer to the result.
 // Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int32_t h_protect_get_amiga(entry_p contxt, char *file, int32_t *mask)
+static int32_t h_protect_get_amiga(entry_p contxt, const char *file,
+                                   int32_t *mask)
 {
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
@@ -948,7 +947,7 @@ static int32_t h_protect_get_amiga(entry_p contxt, char *file, int32_t *mask)
 //              int32_t *mask:      Pointer to the result.
 // Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int32_t h_protect_get_posix(char *file, int32_t *mask)
+static int32_t h_protect_get_posix(const char *file, int32_t *mask)
 {
     struct stat fst;
 
@@ -975,7 +974,7 @@ static int32_t h_protect_get_posix(char *file, int32_t *mask)
 //              int32_t *mask:      Pointer to the result.
 // Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int32_t h_protect_get(entry_p contxt, char *file, int32_t *mask)
+static int32_t h_protect_get(entry_p contxt, const char *file, int32_t *mask)
 {
     if((!contxt || !mask || !file) && PANIC(contxt))
     {
@@ -997,10 +996,10 @@ static int32_t h_protect_get(entry_p contxt, char *file, int32_t *mask)
 //              dir protection bits.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
-//              LONG mask:          Protection bits
+//              int32_t mask:       Protection bits
 // Return:      int32_t:            LG_TRUE / LG_FALSE.
 //------------------------------------------------------------------------------
-static int32_t h_protect_set(entry_p contxt, const char *file, LONG mask)
+static int32_t h_protect_set(entry_p contxt, const char *file, int32_t mask)
 {
     if((!contxt || !file) && PANIC(contxt))
     {

@@ -9,9 +9,12 @@
 
 #include "error.h"
 #include "resource.h"
+#include <stddef.h>
 #ifdef AMIGA
 # include <proto/exec.h>
 # include <proto/locale.h>
+#else
+typedef void * APTR;
 #endif
 
 struct LocaleInfo
@@ -94,7 +97,7 @@ void locale_init(void)
         loc.li_LocaleBase = OpenLibrary("locale.library", 37);
         loc.li_Catalog = OpenCatalog(NULL, "InstallerLG.catalog", OC_Version, 1, TAG_DONE);
         #else
-        loc.li_LocaleBase = loc.li_Catalog = (APTR) 0;
+        loc.li_LocaleBase = loc.li_Catalog = (APTR) NULL;
         #endif
     }
 }
