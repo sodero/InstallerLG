@@ -3400,6 +3400,10 @@ int main(int argc, char **argv)
             char *name = arg_get(ARG_SCRIPT);
             FILE *script = fopen(name, "r");
 
+            // Disable stdout buffering to make sure that test output and error
+            // messages come in the same order when using gcc or vbcc.
+            setvbuf(stdout, NULL, _IONBF, 0);
+
             if(script)
             {
                 // Set input file and parse.
