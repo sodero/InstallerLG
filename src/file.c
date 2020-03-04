@@ -327,16 +327,15 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
         return node;
     }
 
-    // Save type of the result, it might not be the same as the original.
+    // Save type of the result, it might not be the same as the non suffixed
+    // entry (e.g mydir -> mydir.info).
     int32_t type = h_exists(h_suffix(node->name, suffix));
 
-    // Make sure that the file / directory exists. If copying a directory to
-    // the root of a volume, e.g 'Work:' when (info) is set and the source icon
-    // exists, the h_suffix call will attempt to append '.info' to 'Work:' which
-    // doesn't make sense, the result will be truncated to ''. If this happens
-    // don't create a new node since there is no parent directory where an icon
-    // can be put.
-    if(type == LG_NONE || !*h_suffix(node->copy, suffix))
+    // Make sure that the source file / directory exists and that both source
+    // and destination file / directories are valid as prefixes. They must be
+    // non empty strings and volume names aren't allowed (e.g Work:.info).
+    if(type == LG_NONE || !*h_suffix(node->copy, suffix) ||
+       !*h_suffix(node->name, suffix))
     {
         return node;
     }
@@ -437,7 +436,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
             return head;
         }
 
-        long type = node->type;
+        int32_t type = node->type;
         char *name = node->name, *copy = node->copy;
 
         // Create .info and .font nodes if necessary. No need to check node

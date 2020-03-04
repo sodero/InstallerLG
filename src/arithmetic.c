@@ -24,13 +24,13 @@ entry_p m_add(entry_p contxt)
     // One or more arguments.
     C_SANE(1, NULL);
 
-    // The sum.
-    int32_t sum = 0;
+    // There is at least one addend.
+    int32_t sum = num(C_ARG(1));
 
-    // Sum up the values of all children.
-    for(entry_p *cur = contxt->children; exists(*cur); cur++)
+    // Add all remaining addends.
+    for(size_t cur = 2; exists(C_ARG(cur)); cur++)
     {
-        sum += num(*cur);
+        sum += num(C_ARG(cur));
     }
 
     // Return sum.
@@ -73,13 +73,13 @@ entry_p m_mul(entry_p contxt)
     // One or more arguments.
     C_SANE(1, NULL);
 
-    // The product.
-    int32_t pro = 1;
+    // There is at least one factor.
+    int32_t pro = num(C_ARG(1));
 
-    // Multiply the values of all children.
-    for(entry_p *cur = contxt->children; exists(*cur); cur++)
+    // Multiply all remaining factors.
+    for(size_t cur = 2; exists(C_ARG(cur)); cur++)
     {
-        pro *= num(*cur);
+        pro *= num(C_ARG(cur));
     }
 
     // Return product.
@@ -91,12 +91,25 @@ entry_p m_mul(entry_p contxt)
 //     returns `<expr1>' minus `<expr2>'
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+//
+// NOTE: Despite what the documentation says, the CBM implementation supports
+//       any number of subtrahends. Mimic the implementation and ignore the
+//       documentation.
 //------------------------------------------------------------------------------
 entry_p m_sub(entry_p contxt)
 {
-    // Two arguments.
+    // At least two arguments.
     C_SANE(2, NULL);
 
+    // The minuend.
+    int32_t dif = num(C_ARG(1));
+
+    // Subtract all subtrahends.
+    for(size_t cur = 2; exists(C_ARG(cur)); cur++)
+    {
+        dif -= num(C_ARG(cur));
+    }
+
     // Return difference.
-    R_NUM(num(C_ARG(1)) - num(C_ARG(2)));
+    R_NUM(dif);
 }

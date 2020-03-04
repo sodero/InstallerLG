@@ -86,8 +86,13 @@ To be written: Fake user input.
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{B}Stefan Haubenthal@{UB}:
-Numerous improvements, fixes and ideas. Most notably locale support and
-German translations.
+Numerous improvements, fixes and ideas. Most notably locale support,
+making the thing build with VBCC, work with getting the test suite up
+and running on MorphOS, the initial AmigaGuide draft and German
+translations.
+
+@{B}Gareth Smyth@{UB}
+Console UI and Windows port.
 
 @{B}Wawrzyniec Tokarski@{UB}
 AROS build script.
@@ -103,12 +108,11 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-@{B}0.1.0-alpha.44 (2020-NOT-YET)@{UB}
+@{B}0.1.0-alpha.44 (2020-03-04)@{UB}
 - Fixed invalid icon creation of directories without parent.
 - Parent directory pattern matching fix (Konto).
 - Minor string formating bug fix.
 - Naked (working) support (AutoSend).
-- ?
 
 @{B}0.1.0-alpha.43 (2020-02-04)@{UB}
 - Predefined 'true' and 'false' symbols (MetalWeb).

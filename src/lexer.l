@@ -271,6 +271,10 @@ int main(int argc, char **argv)
             char *name = arg_get(ARG_SCRIPT);
             FILE *script = fopen(name, "r");
 
+            // Disable stderr buffering in case it's buffered, which it seems
+            // to be when VBCC is used.
+            setvbuf(stderr, NULL, _IONBF, 0);
+
             if(script)
             {
                 // Set input file and parse.
