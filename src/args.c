@@ -169,7 +169,7 @@ static bool arg_wb(char **argv)
     }
 
     // Are we being invoked using a 'tool' or a 'project'?
-    struct WBArg *arg = wb->sn_ArgList + wb->sm_NumArgs - 1;
+    struct WBArg *arg = wb->sm_ArgList + wb->sm_NumArgs - 1;
 
     if(!arg)
     {
