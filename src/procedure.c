@@ -17,7 +17,7 @@
 
 //------------------------------------------------------------------------------
 // Name:        h_gosub_fmt
-// Description: Helper for m_gosub. Handling one of those strange CBM Installer
+// Description: Helper for n_gosub. Handling one of those strange CBM Installer
 //              features / bugs. The syntax of user defined procedure calls and
 //              string formating is ambiguous, so that a function call such as
 //              (f1 a1 a2 ... ) is transformed into a format string expression
@@ -47,7 +47,7 @@ static entry_p h_gosub_fmt(entry_p contxt)
     char *old = contxt->name;
 
     // Set format, type and callback to mimic a ("%ld" ..) function call.
-    contxt->call = m_fmt;
+    contxt->call = n_fmt;
     contxt->type = NATIVE;
     contxt->name = get_str(contxt, contxt->name);
 
@@ -56,7 +56,7 @@ static entry_p h_gosub_fmt(entry_p contxt)
 
     // Restore name to be able to resolve the format string multiple times.
     contxt->name = old;
-    contxt->call = m_gosub;
+    contxt->call = n_gosub;
     contxt->type = CUSREF;
 
     return res;
@@ -69,7 +69,7 @@ static entry_p h_gosub_fmt(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_gosub(entry_p contxt)
+entry_p n_gosub(entry_p contxt)
 {
     if(!s_sane(global(contxt), 0) && PANIC(contxt))
     {
@@ -164,7 +164,7 @@ entry_p m_gosub(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_procedure(entry_p contxt)
+entry_p n_procedure(entry_p contxt)
 {
     // One argument.
     S_SANE(1);

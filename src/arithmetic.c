@@ -19,7 +19,7 @@
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_add(entry_p contxt)
+entry_p n_add(entry_p contxt)
 {
     // One or more arguments.
     C_SANE(1, NULL);
@@ -43,7 +43,7 @@ entry_p m_add(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_div(entry_p contxt)
+entry_p n_div(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -68,7 +68,7 @@ entry_p m_div(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_mul(entry_p contxt)
+entry_p n_mul(entry_p contxt)
 {
     // One or more arguments.
     C_SANE(1, NULL);
@@ -96,7 +96,7 @@ entry_p m_mul(entry_p contxt)
 //       any number of subtrahends. Mimic the implementation and ignore the
 //       documentation.
 //------------------------------------------------------------------------------
-entry_p m_sub(entry_p contxt)
+entry_p n_sub(entry_p contxt)
 {
     // At least two arguments.
     C_SANE(2, NULL);

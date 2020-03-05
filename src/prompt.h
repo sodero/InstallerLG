@@ -12,13 +12,13 @@
 
 #include "types.h"
 
-entry_p m_askbool(entry_p contxt);
-entry_p m_askchoice(entry_p contxt);
-entry_p m_askdir(entry_p contxt);
-entry_p m_askdisk(entry_p contxt);
-entry_p m_askfile(entry_p contxt);
-entry_p m_asknumber(entry_p contxt);
-entry_p m_askoptions(entry_p contxt);
-entry_p m_askstring(entry_p contxt);
+entry_p n_askbool(entry_p contxt);
+entry_p n_askchoice(entry_p contxt);
+entry_p n_askdir(entry_p contxt);
+entry_p n_askdisk(entry_p contxt);
+entry_p n_askfile(entry_p contxt);
+entry_p n_asknumber(entry_p contxt);
+entry_p n_askoptions(entry_p contxt);
+entry_p n_askstring(entry_p contxt);
 
 #endif

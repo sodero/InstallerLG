@@ -50,7 +50,7 @@ static entry_p h_copy_deep(entry_p entry)
 
 //------------------------------------------------------------------------------
 // Name:        h_set_undangle
-// Description: m_set helper. Cast entry to a non-dangling type.
+// Description: n_set helper. Cast entry to a non-dangling type.
 // Input:       entry_p entry:  The entry to be cast.
 // Return:      -
 //------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ static void h_set_undangle(entry_p entry)
 
 //------------------------------------------------------------------------------
 // Name:        h_set_find
-// Description: m_set helper. Find symbol with a given name in symbol array.
+// Description: n_set helper. Find symbol with a given name in symbol array.
 // Input:       entry_p contxt:     Execution context.
 //              const char *name:   Symbol name.
 // Return:      entry_p:            The symbol if found, NULL otherwise.
@@ -104,7 +104,7 @@ static entry_p h_set_find(entry_p contxt, const char *name)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_set(entry_p contxt)
+entry_p n_set(entry_p contxt)
 {
     // We need atleast one symbol value tuple.
     C_SANE(1, NULL); S_SANE(1);
@@ -156,7 +156,7 @@ entry_p m_set(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_symbolset(entry_p contxt)
+entry_p n_symbolset(entry_p contxt)
 {
     // We need one or more tuples of symbol name and value.
     C_SANE(2, NULL); S_SANE(0);
@@ -227,7 +227,7 @@ entry_p m_symbolset(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_symbolval(entry_p contxt)
+entry_p n_symbolval(entry_p contxt)
 {
     // We need one argument, the name of the symbol.
     C_SANE(1, NULL);

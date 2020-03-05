@@ -12,9 +12,9 @@
 
 #include "types.h"
 
-entry_p m_add(entry_p contxt);
-entry_p m_div(entry_p contxt);
-entry_p m_mul(entry_p contxt);
-entry_p m_sub(entry_p contxt);
+entry_p n_add(entry_p contxt);
+entry_p n_div(entry_p contxt);
+entry_p n_mul(entry_p contxt);
+entry_p n_sub(entry_p contxt);
 
 #endif

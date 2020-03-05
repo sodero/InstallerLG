@@ -12,11 +12,11 @@
 
 #include "types.h"
 
-entry_p m_if(entry_p contxt);
-entry_p m_select(entry_p contxt);
-entry_p m_until(entry_p contxt);
-entry_p m_while(entry_p contxt);
-entry_p m_trace(entry_p contxt);
-entry_p m_retrace(entry_p contxt);
+entry_p n_if(entry_p contxt);
+entry_p n_select(entry_p contxt);
+entry_p n_until(entry_p contxt);
+entry_p n_while(entry_p contxt);
+entry_p n_trace(entry_p contxt);
+entry_p n_retrace(entry_p contxt);
 
 #endif

@@ -243,7 +243,7 @@ static void init_error(entry_p contxt)
     // The default error handler returns '0' without doing anything.
     entry_p entry = new_native
     (
-        DBG_ALLOC(strdup("onerror")), __LINE__, m_procedure,
+        DBG_ALLOC(strdup("onerror")), __LINE__, n_procedure,
         push
         (
             new_contxt(),
@@ -255,7 +255,7 @@ static void init_error(entry_p contxt)
                     new_contxt(),
                     new_native
                     (
-                        DBG_ALLOC(strdup("select")), __LINE__, m_select,
+                        DBG_ALLOC(strdup("select")), __LINE__, n_select,
                         push(push
                         (
                             new_contxt(),
@@ -295,7 +295,7 @@ static void init_error(entry_p contxt)
 static void init_exit(entry_p contxt)
 {
     // Line numbers and naming are for debugging purposes only.
-    entry_p entry = new_native(DBG_ALLOC(strdup("exit")), __LINE__, m_exit,
+    entry_p entry = new_native(DBG_ALLOC(strdup("exit")), __LINE__, n_exit,
                                NULL, NUMBER);
 
     // Tests don't expect any default (exit).
@@ -325,7 +325,7 @@ static void init_exit(entry_p contxt)
 static void init_welcome(entry_p contxt)
 {
     // Is there a (welcome) already?
-    entry_p entry = native_exists(contxt, m_welcome);
+    entry_p entry = native_exists(contxt, n_welcome);
 
     // If not, insert a default (welcome).
     if(!entry)
@@ -333,7 +333,7 @@ static void init_welcome(entry_p contxt)
         // The line numbers and naming are for debugging purposes only.
         entry = new_native
         (
-            DBG_ALLOC(strdup("welcome")), __LINE__, m_welcome,
+            DBG_ALLOC(strdup("welcome")), __LINE__, n_welcome,
             push
             (
                 new_contxt(),

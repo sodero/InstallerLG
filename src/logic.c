@@ -22,7 +22,7 @@
 // The 3.9 implementation supports any number of arguments. Since this seems to
 // be used by several installers, we'll support it.
 //------------------------------------------------------------------------------
-entry_p m_and(entry_p contxt)
+entry_p n_and(entry_p contxt)
 {
     // Two or more arguments.
     C_SANE(2, NULL);
@@ -46,7 +46,7 @@ entry_p m_and(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_bitand(entry_p contxt)
+entry_p n_bitand(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -61,7 +61,7 @@ entry_p m_bitand(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_bitnot(entry_p contxt)
+entry_p n_bitnot(entry_p contxt)
 {
     // One argument.
     C_SANE(1, NULL);
@@ -76,7 +76,7 @@ entry_p m_bitnot(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_bitor(entry_p contxt)
+entry_p n_bitor(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -91,7 +91,7 @@ entry_p m_bitor(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_bitxor(entry_p contxt)
+entry_p n_bitxor(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -106,7 +106,7 @@ entry_p m_bitxor(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_not(entry_p contxt)
+entry_p n_not(entry_p contxt)
 {
     // One argument.
     C_SANE(1, NULL);
@@ -121,7 +121,7 @@ entry_p m_not(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_in(entry_p contxt)
+entry_p n_in(entry_p contxt)
 {
     // Two or more arguments.
     C_SANE(2, NULL);
@@ -149,7 +149,7 @@ entry_p m_in(entry_p contxt)
 // The 3.9 implementation supports any number of arguments. Since this seems to
 // be used by several installers, we'll support it.
 //------------------------------------------------------------------------------
-entry_p m_or(entry_p contxt)
+entry_p n_or(entry_p contxt)
 {
     // Two or more arguments.
     C_SANE(2, NULL);
@@ -173,7 +173,7 @@ entry_p m_or(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_shiftleft(entry_p contxt)
+entry_p n_shiftleft(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -188,7 +188,7 @@ entry_p m_shiftleft(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_shiftright(entry_p contxt)
+entry_p n_shiftright(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -203,7 +203,7 @@ entry_p m_shiftright(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_xor(entry_p contxt)
+entry_p n_xor(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);

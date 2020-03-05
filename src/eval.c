@@ -448,7 +448,7 @@ entry_p invoke(entry_p entry)
 void run(entry_p entry)
 {
     // Is there an 'effect' statement in there?
-    entry_p status = native_exists(entry, m_effect);
+    entry_p status = native_exists(entry, n_effect);
 
     // i18n setup.
     locale_init();
@@ -471,7 +471,7 @@ void run(entry_p entry)
             // Execute (onerror) on failure.
             if(DID_ERR && !DID_HALT)
             {
-                status = m_onerror(entry);
+                status = n_onerror(entry);
             }
         }
 

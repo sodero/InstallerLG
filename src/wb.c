@@ -25,7 +25,7 @@
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_openwbobject(entry_p contxt)
+entry_p n_openwbobject(entry_p contxt)
 {
     // We need a single argument.
     C_SANE(1, contxt);
@@ -61,7 +61,7 @@ entry_p m_openwbobject(entry_p contxt)
 //
 // KNOWN BUG: This doesn't seem to work on AROS and MorphOS.
 //------------------------------------------------------------------------------
-entry_p m_showwbobject(entry_p contxt)
+entry_p n_showwbobject(entry_p contxt)
 {
     // We need a single argument.
     C_SANE(1, NULL);
@@ -83,7 +83,7 @@ entry_p m_showwbobject(entry_p contxt)
 //
 // KNOWN BUG: This doesn't seem to work on AROS and MorphOS.
 //------------------------------------------------------------------------------
-entry_p m_closewbobject(entry_p contxt)
+entry_p n_closewbobject(entry_p contxt)
 {
     // We need a single argument.
     C_SANE(1, NULL);

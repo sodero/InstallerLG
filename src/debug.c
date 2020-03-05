@@ -21,7 +21,7 @@
 //
 // Please note the ___ prefix. This is not meant to be used by end users.
 //------------------------------------------------------------------------------
-entry_p m_astraw(entry_p contxt)
+entry_p n_astraw(entry_p contxt)
 {
     // No arguments.
     C_SANE(0, NULL);
@@ -39,7 +39,7 @@ entry_p m_astraw(entry_p contxt)
 //
 // Please note the ___ prefix. This is not meant to be used by end users.
 //------------------------------------------------------------------------------
-entry_p m_asbraw(entry_p contxt)
+entry_p n_asbraw(entry_p contxt)
 {
     // One argument.
     C_SANE(1, NULL);
@@ -58,7 +58,7 @@ entry_p m_asbraw(entry_p contxt)
 //
 // Please note the ___ prefix. This is not meant to be used by end users.
 //------------------------------------------------------------------------------
-entry_p m_asbeval(entry_p contxt)
+entry_p n_asbeval(entry_p contxt)
 {
     // One argument.
     C_SANE(1, NULL);
@@ -80,7 +80,7 @@ entry_p m_asbeval(entry_p contxt)
 //
 // Please note the ___ prefix. This is not meant to be used by end users.
 //------------------------------------------------------------------------------
-entry_p m_eval(entry_p contxt)
+entry_p n_eval(entry_p contxt)
 {
     // One argument.
     C_SANE(1, NULL);
@@ -98,7 +98,7 @@ entry_p m_eval(entry_p contxt)
 //
 // Please note the ___ prefix. This is not meant to be used by end users.
 //------------------------------------------------------------------------------
-entry_p m_options(entry_p contxt)
+entry_p n_options(entry_p contxt)
 {
     // No arguments.
     C_SANE(0, NULL);
