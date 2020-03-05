@@ -93,7 +93,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         if(pre)
         {
             size_t len = strlen(cmd) + strlen(pre) + 2;
-            char *tmp = DBG_ALLOC(malloc(len));
+            char *tmp = DBG_ALLOC(calloc(1, len));
 
             if(!tmp && PANIC(contxt))
             {
