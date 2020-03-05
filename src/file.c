@@ -46,7 +46,7 @@
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_expandpath(entry_p contxt)
+entry_p n_expandpath(entry_p contxt)
 {
     // One argument and no options.
     C_SANE(1, NULL);
@@ -515,7 +515,7 @@ static char *h_common_suffix(char *alfa, char *beta)
 //------------------------------------------------------------------------------
 // Name:        h_filetree
 // Description: Generate a complete file / directory tree with source and
-//              destination tuples. Used by m_copyfiles.
+//              destination tuples. Used by n_copyfiles.
 // Input:       entry_p contxt:     The execution context.
 //              const char *src:    Source directory / file.
 //              const char *dst:    Destination directory.
@@ -966,7 +966,7 @@ static int32_t h_protect_get_posix(const char *file, int32_t *mask)
 
 //------------------------------------------------------------------------------
 // Name:        h_protect_get
-// Description: Utility function used by m_protect and m_copyfiles to get file /
+// Description: Utility function used by n_protect and n_copyfiles to get file /
 //              dir protection bits.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
@@ -991,7 +991,7 @@ static int32_t h_protect_get(entry_p contxt, const char *file, int32_t *mask)
 
 //------------------------------------------------------------------------------
 // Name:        h_protect_set
-// Description: Utility function used by m_protect and m_copyfiles to set file /
+// Description: Utility function used by n_protect and n_copyfiles to set file /
 //              dir protection bits.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File / dir.
@@ -1066,7 +1066,7 @@ static inp_t h_copyfile_reset(char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_copyfile
-// Description: Copy file. Helper used by m_copyfiles and m_copylib.
+// Description: Copy file. Helper used by n_copyfiles and n_copylib.
 // Input:       entry_p contxt:     The execution context.
 //              char *src:          Source file.
 //              char *dst:          Destination file.
@@ -1408,7 +1408,7 @@ static bool h_makedir(entry_p contxt, char *dst)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_copyfiles(entry_p contxt)
+entry_p n_copyfiles(entry_p contxt)
 {
     // One or more arguments / options.
     C_SANE(1, contxt);
@@ -1824,7 +1824,7 @@ static inp_t h_copylib_known_known(entry_p contxt, char *src, char *dst,
 
 //------------------------------------------------------------------------------
 // Name:        h_copylib_file
-// Description: Copy with file overwrite. Used by m_copylib. Options must be
+// Description: Copy with file overwrite. Used by n_copylib. Options must be
 //              validated before calling this function. If necessary user will
 //              be prompted for confirmation.
 // Input:       entry_p contxt:     The execution context.
@@ -1875,7 +1875,7 @@ static inp_t h_copylib_file(entry_p contxt, char *src, char *dst)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_copylib(entry_p contxt)
+entry_p n_copylib(entry_p contxt)
 {
     // One or more arguments / options.
     C_SANE(1, contxt);
@@ -2080,7 +2080,7 @@ static bool h_delete_perm(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_delete_file
-// Description: Delete file. Helper used by m_delete.
+// Description: Delete file. Helper used by n_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *file:   File to delete.
 // Return:      int32_t:            LG_TRUE / LG_FALSE.
@@ -2139,7 +2139,7 @@ static int32_t h_delete_file(entry_p contxt, const char *file)
 
 //------------------------------------------------------------------------------
 // Name:        h_delete_dir
-// Description: Delete directory. Helper used by m_delete.
+// Description: Delete directory. Helper used by n_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *name:   Directory to delete.
 // Return:      int32_t:            LG_TRUE / LG_FALSE.
@@ -2291,7 +2291,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_delete_pattern
-// Description: Delete file / dir matching pattern. Helper used by m_delete.
+// Description: Delete file / dir matching pattern. Helper used by n_delete.
 // Input:       entry_p contxt:     The execution context.
 //              const char *pat:    Pattern.
 // Return:      int32_t:            LG_TRUE / LG_FALSE.
@@ -2396,7 +2396,7 @@ static int32_t h_delete(entry_p contxt, const char *file)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_delete(entry_p contxt)
+entry_p n_delete(entry_p contxt)
 {
     // One argument and options.
     C_SANE(1, contxt);
@@ -2449,7 +2449,7 @@ entry_p m_delete(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_exists(entry_p contxt)
+entry_p n_exists(entry_p contxt)
 {
     // One argument and option.
     C_SANE(1, contxt);
@@ -2488,7 +2488,7 @@ entry_p m_exists(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_fileonly(entry_p contxt)
+entry_p n_fileonly(entry_p contxt)
 {
     // One argument and no options.
     C_SANE(1, NULL);
@@ -2503,7 +2503,7 @@ entry_p m_fileonly(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_foreach(entry_p contxt)
+entry_p n_foreach(entry_p contxt)
 {
     // Three arguments and no options.
     C_SANE(3, NULL);
@@ -2704,7 +2704,7 @@ entry_p m_foreach(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_makeassign(entry_p contxt)
+entry_p n_makeassign(entry_p contxt)
 {
     // One or more arguments and option.
     C_SANE(1, contxt);
@@ -2789,7 +2789,7 @@ entry_p m_makeassign(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_makedir(entry_p contxt)
+entry_p n_makedir(entry_p contxt)
 {
     // One argument and options.
     C_SANE(1, contxt);
@@ -2824,7 +2824,7 @@ entry_p m_makedir(entry_p contxt)
 
 //------------------------------------------------------------------------------
 // Name:        h_protect_arg_get
-// Description: m_protect get file pemission mask.
+// Description: n_protect get file pemission mask.
 // Input:       entry_p contxt: The execution context.
 // Return:      int32_t:        The resulting bitmask.
 //------------------------------------------------------------------------------
@@ -2850,7 +2850,7 @@ static int32_t h_protect_arg_get(entry_p contxt)
 
 //------------------------------------------------------------------------------
 // Name:        h_protect_mask
-// Description: m_protect helper generating bitmasks from '+rw..' like strings.
+// Description: n_protect helper generating bitmasks from '+rw..' like strings.
 // Input:       entry_p contxt: The execution context.
 // Return:      int32_t:        The resulting bitmask.
 //------------------------------------------------------------------------------
@@ -2905,7 +2905,7 @@ static int32_t h_protect_mask(char *flags, int32_t cms)
 
 //------------------------------------------------------------------------------
 // Name:        h_protect_delta
-// Description: m_protect delta setter.
+// Description: n_protect delta setter.
 // Input:       entry_p contxt: The execution context.
 // Return:      int32_t:        The resulting bitmask.
 //------------------------------------------------------------------------------
@@ -2940,7 +2940,7 @@ static int32_t h_protect_delta(entry_p contxt, char *flags, char *file)
 
 //------------------------------------------------------------------------------
 // Name:        h_protect_arg_set
-// Description: m_protect setter dispatch.
+// Description: n_protect setter dispatch.
 // Input:       entry_p contxt: The execution context.
 // Return:      int32_t:        The resulting bitmask.
 //------------------------------------------------------------------------------
@@ -2990,7 +2990,7 @@ static int32_t h_protect_arg_set(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_protect(entry_p contxt)
+entry_p n_protect(entry_p contxt)
 {
     // One or more arguments.
     C_SANE(1, contxt);
@@ -3026,7 +3026,7 @@ entry_p m_protect(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_startup(entry_p contxt)
+entry_p n_startup(entry_p contxt)
 {
     // Two or more arguments / options.
     C_SANE(2, contxt);
@@ -3465,7 +3465,7 @@ static int32_t h_textfile_include(entry_p contxt, const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_textfile
-// Description: Include / append m_textfile helper.
+// Description: Include / append n_textfile helper.
 // Input:       entry_p contxt:     The execution context.
 // Return:      int32_t:            LG_TRUE or LG_FALSE.
 //------------------------------------------------------------------------------
@@ -3499,7 +3499,7 @@ static int32_t h_textfile(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_textfile(entry_p contxt)
+entry_p n_textfile(entry_p contxt)
 {
     // One or more arguments / options.
     C_SANE(1, contxt);
@@ -3542,7 +3542,7 @@ entry_p m_textfile(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_tooltype(entry_p contxt)
+entry_p n_tooltype(entry_p contxt)
 {
     // Zero or more arguments / options.
     C_SANE(0, contxt);
@@ -3819,7 +3819,7 @@ entry_p m_tooltype(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_transcript(entry_p contxt)
+entry_p n_transcript(entry_p contxt)
 {
     // One or more arguments.
     C_SANE(1, NULL);
@@ -3850,7 +3850,7 @@ entry_p m_transcript(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_rename(entry_p contxt)
+entry_p n_rename(entry_p contxt)
 {
     // Two or more arguments / options.
     C_SANE(2, contxt);

@@ -182,7 +182,7 @@ static cpu_t h_cpu_id(void)
 
 //------------------------------------------------------------------------------
 // Name:        h_cpu_name
-// Description: Helper for m_database. Get host CPU architecture.
+// Description: Helper for n_database. Get host CPU architecture.
 // Input:       ---
 // Return:      char *: Host CPU architecture.
 //------------------------------------------------------------------------------
@@ -198,7 +198,7 @@ static char *h_cpu_name(void)
 
 //------------------------------------------------------------------------------
 // Name:        h_os_name
-// Description: Helper for m_database. Get name of host OS.
+// Description: Helper for n_database. Get name of host OS.
 // Input:       ---
 // Return:      char *: Name of host OS.
 //------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ static char *h_os_name(void)
 
 //------------------------------------------------------------------------------
 // Name:        h_chipmem.
-// Description: Helper for m_database. Get free chipmem in bytes.
+// Description: Helper for n_database. Get free chipmem in bytes.
 // Input:       ---
 // Return:      int32_t:    Free chipmem.
 //------------------------------------------------------------------------------
@@ -247,7 +247,7 @@ static int32_t h_chipmem(void)
 
 //------------------------------------------------------------------------------
 // Name:        h_totalmem.
-// Description: Helper for m_database. Get free chipmem + fastmem in bytes.
+// Description: Helper for n_database. Get free chipmem + fastmem in bytes.
 // Input:       ---
 // Return:      int32_t:    Free chipmem + fastmem.
 //------------------------------------------------------------------------------
@@ -271,7 +271,7 @@ static int32_t h_totalmem(void)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_database(entry_p contxt)
+entry_p n_database(entry_p contxt)
 {
     // We need atleast one argument
     C_SANE(1, NULL);
@@ -327,7 +327,7 @@ entry_p m_database(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_earlier(entry_p contxt)
+entry_p n_earlier(entry_p contxt)
 {
     // We need two filenames.
     C_SANE(2, NULL);
@@ -362,7 +362,7 @@ entry_p m_earlier(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getassign(entry_p contxt)
+entry_p n_getassign(entry_p contxt)
 {
     // We need one or more arguments.
     C_SANE(1, NULL);
@@ -516,7 +516,7 @@ entry_p m_getassign(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getdevice(entry_p contxt)
+entry_p n_getdevice(entry_p contxt)
 {
     // We need a path.
     C_SANE(1, NULL);
@@ -574,7 +574,7 @@ entry_p m_getdevice(entry_p contxt)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_getdiskspace(entry_p contxt)
+entry_p n_getdiskspace(entry_p contxt)
 {
     // We need a path.
     C_SANE(1, NULL);
@@ -646,7 +646,7 @@ entry_p m_getdiskspace(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getenv(entry_p contxt)
+entry_p n_getenv(entry_p contxt)
 {
     // We need a variable name.
     C_SANE(1, NULL);
@@ -670,7 +670,7 @@ entry_p m_getenv(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getsize(entry_p contxt)
+entry_p n_getsize(entry_p contxt)
 {
     // We need a file name.
     C_SANE(1, NULL);
@@ -704,7 +704,7 @@ entry_p m_getsize(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getsum(entry_p contxt)
+entry_p n_getsum(entry_p contxt)
 {
     // We need a filename.
     C_SANE(1, NULL);
@@ -776,7 +776,7 @@ static int32_t h_getversion_rsp(struct Resident *rsp)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_res
-// Description: Helper for m_getversion. Get resident version.
+// Description: Helper for n_getversion. Get resident version.
 // Input:       char *name: Resident name.
 // Return:      int32_t:    Resident version.
 //------------------------------------------------------------------------------
@@ -792,7 +792,7 @@ static int32_t h_getversion_res(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_dev
-// Description: Helper for m_getversion. Get device version.
+// Description: Helper for n_getversion. Get device version.
 // Input:       char *name: Filename.
 // Return:      int32_t:    File version.
 //------------------------------------------------------------------------------
@@ -849,7 +849,7 @@ static int32_t h_getversion_dev(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_lib
-// Description: Helper for m_getversion. Get library version.
+// Description: Helper for n_getversion. Get library version.
 // Input:       char *name: Library name.
 // Return:      int32_t:    Library version.
 //------------------------------------------------------------------------------
@@ -879,7 +879,7 @@ static int32_t h_getversion_lib(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_file
-// Description: Helper for m_getversion. Get file version.
+// Description: Helper for n_getversion. Get file version.
 // Input:       char *name: Filename.
 // Return:      int32_t:    File version.
 //------------------------------------------------------------------------------
@@ -964,7 +964,7 @@ int32_t h_getversion_file(const char *name)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getversion(entry_p contxt)
+entry_p n_getversion(entry_p contxt)
 {
     // Arguments are optional.
     C_SANE(0, NULL);
@@ -1039,7 +1039,7 @@ entry_p m_getversion(entry_p contxt)
 // tooltypes when (gettooltype) is used. This is assumed to be a bug and
 // therefore not mimiced.
 //------------------------------------------------------------------------------
-entry_p m_iconinfo(entry_p contxt)
+entry_p n_iconinfo(entry_p contxt)
 {
     // One or more arguments.
     C_SANE(1, contxt);
@@ -1205,7 +1205,7 @@ entry_p m_iconinfo(entry_p contxt)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_querydisplay(entry_p contxt)
+entry_p n_querydisplay(entry_p contxt)
 {
     // We need 2 arguments.
     C_SANE(2, NULL);

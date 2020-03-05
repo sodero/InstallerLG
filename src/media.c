@@ -45,7 +45,7 @@ char *strcasestr(const char *, const char *);
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_closemedia(entry_p contxt)
+entry_p n_closemedia(entry_p contxt)
 {
     // We need 1 argument.
     C_SANE(1, NULL);
@@ -77,7 +77,7 @@ static int32_t h_pos(const char *atr)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_effect(entry_p contxt)
+entry_p n_effect(entry_p contxt)
 {
     // We need 4 arguments.
     C_SANE(4, NULL);
@@ -148,7 +148,7 @@ static int32_t h_action(const char *act)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_setmedia(entry_p contxt)
+entry_p n_setmedia(entry_p contxt)
 {
     // We need atleast 2 arguments.
     C_SANE(2, NULL);
@@ -183,7 +183,7 @@ entry_p m_setmedia(entry_p contxt)
 
 //------------------------------------------------------------------------------
 // Name:        h_create_id
-// Description: m_showmedia helper creating a user defined media ID variable.
+// Description: n_showmedia helper creating a user defined media ID variable.
 // Input:       entry_p contxt: Execution context.
 //              int32_t mid:    Media ID.
 // Return:      int32_t:        LG_TRUE / LG_FALSE.
@@ -266,7 +266,7 @@ static int32_t h_extra(const char *atr)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_showmedia(entry_p contxt)
+entry_p n_showmedia(entry_p contxt)
 {
     // We need atleast 5 arguments.
     C_SANE(5, NULL); S_SANE(0);

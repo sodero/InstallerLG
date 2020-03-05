@@ -23,7 +23,7 @@
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_if(entry_p contxt)
+entry_p n_if(entry_p contxt)
 {
     // Allow empty bodies. Always resolve the conditional to evoke side effects.
     C_SANE(1, NULL);
@@ -55,7 +55,7 @@ entry_p m_if(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_select(entry_p contxt)
+entry_p n_select(entry_p contxt)
 {
     // We need atleast two arguments, the index and the list of items.
     C_SANE(2, NULL);
@@ -114,7 +114,7 @@ static entry_p h_whunt(entry_p contxt, bool until)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_until(entry_p contxt)
+entry_p n_until(entry_p contxt)
 {
     // Implemented in h_whunt.
     return h_whunt(contxt, LG_UNTIL);
@@ -126,7 +126,7 @@ entry_p m_until(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_while(entry_p contxt)
+entry_p n_while(entry_p contxt)
 {
     // Implemented in h_whunt.
     return h_whunt(contxt, LG_WHILE);
@@ -138,7 +138,7 @@ entry_p m_while(entry_p contxt)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_trace(entry_p contxt)
+entry_p n_trace(entry_p contxt)
 {
     // No arguments.
     C_SANE(0, NULL);
@@ -184,7 +184,7 @@ static entry_p *h_retrace(entry_p contxt)
     while(pos--)
     {
         // Use pointer to identify (trace).
-        if(chl[pos]->call == m_trace)
+        if(chl[pos]->call == n_trace)
         {
             return chl + pos;
         }
@@ -200,7 +200,7 @@ static entry_p *h_retrace(entry_p contxt)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_retrace(entry_p contxt)
+entry_p n_retrace(entry_p contxt)
 {
     // No arguments.
     C_SANE(0, NULL);

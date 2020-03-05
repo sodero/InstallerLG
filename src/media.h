@@ -12,9 +12,9 @@
 
 #include "types.h"
 
-entry_p m_closemedia(entry_p contxt);
-entry_p m_effect(entry_p contxt);
-entry_p m_setmedia(entry_p contxt);
-entry_p m_showmedia(entry_p contxt);
+entry_p n_closemedia(entry_p contxt);
+entry_p n_effect(entry_p contxt);
+entry_p n_setmedia(entry_p contxt);
+entry_p n_showmedia(entry_p contxt);
 
 #endif

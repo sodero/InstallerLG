@@ -28,7 +28,7 @@
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_cat(entry_p contxt)
+entry_p n_cat(entry_p contxt)
 {
     // We need atleast one string.
     C_SANE(1, NULL);
@@ -202,7 +202,7 @@ static void h_fmt_scan(entry_p *args, char *res, size_t len, char *fmt)
 //              char *res:      Output: target buffer.
 // Return:      size_t:         Size of target buffer.
 //------------------------------------------------------------------------------
-static size_t m_fmt_new_buffer(entry_p contxt, entry_p **args, char **res)
+static size_t n_fmt_new_buffer(entry_p contxt, entry_p **args, char **res)
 {
     // Start with one empty segment.
     size_t ndx = 1;
@@ -256,14 +256,14 @@ static size_t m_fmt_new_buffer(entry_p contxt, entry_p **args, char **res)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_fmt(entry_p contxt)
+entry_p n_fmt(entry_p contxt)
 {
     // No arguments needed.
     C_SANE(0, NULL);
 
     char *res = NULL;
     entry_p *args = NULL;
-    size_t len = m_fmt_new_buffer(contxt, &args, &res);
+    size_t len = n_fmt_new_buffer(contxt, &args, &res);
 
     if(!len)
     {
@@ -328,7 +328,7 @@ char *h_pathonly(const char *full)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_pathonly(entry_p contxt)
+entry_p n_pathonly(entry_p contxt)
 {
     // One argument.
     C_SANE(1, NULL);
@@ -349,7 +349,7 @@ entry_p m_pathonly(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_patmatch(entry_p contxt)
+entry_p n_patmatch(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -384,7 +384,7 @@ entry_p m_patmatch(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_strlen(entry_p contxt)
+entry_p n_strlen(entry_p contxt)
 {
     // One argument.
     C_SANE(1, NULL);
@@ -399,7 +399,7 @@ entry_p m_strlen(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_substr(entry_p contxt)
+entry_p n_substr(entry_p contxt)
 {
     // We need at least two arguments.
     C_SANE(2, NULL);
@@ -466,7 +466,7 @@ entry_p m_substr(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_tackon(entry_p contxt)
+entry_p n_tackon(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);

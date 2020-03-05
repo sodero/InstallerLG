@@ -12,17 +12,17 @@
 
 #include "types.h"
 
-entry_p m_database(entry_p contxt);
-entry_p m_earlier(entry_p contxt);
-entry_p m_getassign(entry_p contxt);
-entry_p m_getdevice(entry_p contxt);
-entry_p m_getdiskspace(entry_p contxt);
-entry_p m_getenv(entry_p contxt);
-entry_p m_getsize(entry_p contxt);
-entry_p m_getsum(entry_p contxt);
-entry_p m_getversion(entry_p contxt);
-entry_p m_iconinfo(entry_p contxt);
-entry_p m_querydisplay(entry_p contxt);
+entry_p n_database(entry_p contxt);
+entry_p n_earlier(entry_p contxt);
+entry_p n_getassign(entry_p contxt);
+entry_p n_getdevice(entry_p contxt);
+entry_p n_getdiskspace(entry_p contxt);
+entry_p n_getenv(entry_p contxt);
+entry_p n_getsize(entry_p contxt);
+entry_p n_getsum(entry_p contxt);
+entry_p n_getversion(entry_p contxt);
+entry_p n_iconinfo(entry_p contxt);
+entry_p n_querydisplay(entry_p contxt);
 
 int32_t h_getversion_file(const char *name);
 

@@ -31,7 +31,7 @@
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_askbool(entry_p contxt)
+entry_p n_askbool(entry_p contxt)
 {
     // Arguments are optional.
     C_SANE(0, contxt);
@@ -129,7 +129,7 @@ entry_p m_askbool(entry_p contxt)
 // supposed to work according to the Installer.guide, instead it returns a zero
 // index. We ignore the guide and mimic the behaviour of the CBM implementation.
 //------------------------------------------------------------------------------
-entry_p m_askchoice(entry_p contxt)
+entry_p n_askchoice(entry_p contxt)
 {
     C_SANE(0, contxt);
 
@@ -288,7 +288,7 @@ entry_p m_askchoice(entry_p contxt)
 // We don't support (assigns) and (newpath), or rather, we act as if they are
 // always present.
 //------------------------------------------------------------------------------
-entry_p m_askdir(entry_p contxt)
+entry_p n_askdir(entry_p contxt)
 {
     // Zero or more arguments.
     C_SANE(0, contxt);
@@ -362,7 +362,7 @@ entry_p m_askdir(entry_p contxt)
 // Limitations: (disk) and (assigns) aren't supported. Assigns always satisfy
 // the request and (disk) is simply ignored.
 //------------------------------------------------------------------------------
-entry_p m_askdisk(entry_p contxt)
+entry_p n_askdisk(entry_p contxt)
 {
     // One or more arguments / options.
     C_SANE(1, contxt);
@@ -522,7 +522,7 @@ entry_p m_askdisk(entry_p contxt)
 // support (disk) but not (newpath), or rather we act as if (newpath) is always
 // present.
 //------------------------------------------------------------------------------
-entry_p m_askfile(entry_p contxt)
+entry_p n_askfile(entry_p contxt)
 {
     // Zero or more arguments.
     C_SANE(0, contxt);
@@ -596,7 +596,7 @@ entry_p m_askfile(entry_p contxt)
 // range. Instead of all positive values, we use 0 - 100 in order to be able to
 // use a slider instead of a string gadget. This might be a problem. Scrap it?
 //------------------------------------------------------------------------------
-entry_p m_asknumber(entry_p contxt)
+entry_p n_asknumber(entry_p contxt)
 {
     // Zero or more arguments.
     C_SANE(0, contxt);
@@ -688,7 +688,7 @@ entry_p m_asknumber(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_askoptions(entry_p contxt)
+entry_p n_askoptions(entry_p contxt)
 {
     // Zero or more arguments.
     C_SANE(0, contxt);
@@ -830,7 +830,7 @@ entry_p m_askoptions(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_askstring(entry_p contxt)
+entry_p n_askstring(entry_p contxt)
 {
     // Zero or more arguments.
     C_SANE(0, contxt);

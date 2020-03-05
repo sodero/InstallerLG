@@ -70,8 +70,8 @@ int32_t str_to_userlevel(const char *user, int32_t def);
 #define THIS(X) DBG_PRINT("%p <- %s:%s:%d\n", X, __FILE__, __func__, __LINE__)
 #ifndef __clang_analyzer__
 #define C_SANE(N,O) if(!c_sane(contxt, N)) {PANIC(contxt); return end();}\
-                    {entry_p op_ = O; if(op_ && opt(O,OPT_INIT) && DID_ERR)\
-                    {return contxt->resolved;}}
+                    {entry_p op_ = O; if(op_ != NULL && opt(O,OPT_INIT) != NULL && DID_ERR)\
+                    {return end();}}
 #else
 #define C_SANE(N,O)
 #endif

@@ -27,7 +27,7 @@
 #include <string.h>
 
 //------------------------------------------------------------------------------
-// h_run - m_run / m_execute / m_rexx helper
+// h_run - n_run / n_execute / n_rexx helper
 //------------------------------------------------------------------------------
 static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 {
@@ -93,7 +93,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         if(pre)
         {
             size_t len = strlen(cmd) + strlen(pre) + 2;
-            char *tmp = DBG_ALLOC(malloc(len));
+            char *tmp = DBG_ALLOC(calloc(1, len));
 
             if(!tmp && PANIC(contxt))
             {
@@ -205,7 +205,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_execute(entry_p contxt)
+entry_p n_execute(entry_p contxt)
 {
     return h_run(contxt, "execute", get_str(contxt, "@execute-dir"));
 }
@@ -216,7 +216,7 @@ entry_p m_execute(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_rexx(entry_p contxt)
+entry_p n_rexx(entry_p contxt)
 {
     return h_run(contxt, "rx", NULL);
 }
@@ -227,7 +227,7 @@ entry_p m_rexx(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_run(entry_p contxt)
+entry_p n_run(entry_p contxt)
 {
     return h_run(contxt, NULL, get_str(contxt, "@execute-dir"));
 }

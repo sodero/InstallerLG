@@ -24,7 +24,7 @@
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_complete(entry_p contxt)
+entry_p n_complete(entry_p contxt)
 {
     // One or more arguments.
     C_SANE(1, NULL);
@@ -41,7 +41,7 @@ entry_p m_complete(entry_p contxt)
 
 //------------------------------------------------------------------------------
 // Name:        h_debug_all
-// Description: m_debug helper printing the value of all children in a contxt.
+// Description: n_debug helper printing the value of all children in a contxt.
 // Input:       entry_p contxt: Execution context.
 // Return:      -
 //------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ static void h_debug_all(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_debug(entry_p contxt)
+entry_p n_debug(entry_p contxt)
 {
     // No arguments required. Weird, but that's how the CBM Installer works.
     C_SANE(0, NULL);
@@ -134,7 +134,7 @@ entry_p m_debug(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_message(entry_p contxt)
+entry_p n_message(entry_p contxt)
 {
     // One or more arguments.
     C_SANE(1, contxt);
@@ -182,7 +182,7 @@ entry_p m_message(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_user(entry_p contxt)
+entry_p n_user(entry_p contxt)
 {
     // We need one argument
     C_SANE(1, NULL);
@@ -203,7 +203,7 @@ entry_p m_user(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_welcome(entry_p contxt)
+entry_p n_welcome(entry_p contxt)
 {
     // Arguments are optional.
     C_SANE(0, NULL);
@@ -252,7 +252,7 @@ entry_p m_welcome(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_working(entry_p contxt)
+entry_p n_working(entry_p contxt)
 {
     // One or more arguments.
     C_SANE(0, NULL);

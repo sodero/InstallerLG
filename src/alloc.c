@@ -398,7 +398,7 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
             if(type == OPT_DYNOPT)
             {
                 // Set callback. Only (if) is allowed.
-                entry->call = m_if;
+                entry->call = n_if;
             }
 
             return entry;
@@ -434,11 +434,11 @@ entry_p new_cusref(char *name, int32_t line, entry_p arg)
     // A line number is required to produce meaningful error messages.
     if(entry && name && (line > 0))
     {
-        // The m_gosub function is used as trampoline.
+        // The n_gosub function is used as trampoline.
         entry->id = line;
         entry->name = name;
         entry->type = CUSREF;
-        entry->call = m_gosub;
+        entry->call = n_gosub;
 
         // Adopt function arguments if any.
         if(arg && arg->type == CONTXT)

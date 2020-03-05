@@ -90,7 +90,7 @@ static int h_cmp_mixed(entry_p alfa, entry_p beta)
 
 //------------------------------------------------------------------------------
 // Name:        h_cmp
-// Description: Helper function for m_eq, m_gt, m_gte, m_lt, m_lte, m_ne.
+// Description: Helper function for n_eq, n_gt, n_gte, n_lt, n_lte, n_ne.
 // Input:       entry_p lhs:    Left argument.
 //              entry_p rhs:    Right argument.
 // Return:      int:            Left - right.
@@ -123,7 +123,7 @@ static int h_cmp(entry_p lhs, entry_p rhs)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_eq(entry_p contxt)
+entry_p n_eq(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -138,7 +138,7 @@ entry_p m_eq(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_gt(entry_p contxt)
+entry_p n_gt(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -153,7 +153,7 @@ entry_p m_gt(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_gte(entry_p contxt)
+entry_p n_gte(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -168,7 +168,7 @@ entry_p m_gte(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_lt(entry_p contxt)
+entry_p n_lt(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -183,7 +183,7 @@ entry_p m_lt(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_lte(entry_p contxt)
+entry_p n_lte(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -198,7 +198,7 @@ entry_p m_lte(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_neq(entry_p contxt)
+entry_p n_neq(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
