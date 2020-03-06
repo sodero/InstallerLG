@@ -46,18 +46,18 @@ evl()
     inf=`echo "$2" | sed -e 's/.*\".*\",\"\(.*\)\",\".*\".*$/\1/'`
     pst=`echo "$2" | sed -e 's/.*\".*\",\".*\",\"\(.*\)\".*$/\1/'`
     if [ -n "$pre" ]; then
-        o=`eval "$pre" 2>&1`
+        eval "$pre"
         if [ $? -ne 0 ]; then
-            echo "ERR:$o"
+            echo "In line $3 ERR:$pre"
             return 0
         fi
     fi
     run "$1 ; [$pre ; $pst]" "$inf" "$3" "$4"
     ret=$?
     if [ -n "$pst" ]; then
-        o=`eval "$pst" 2>&1`
+        eval "$pst"
         if [ $? -ne 0 ]; then
-            echo "In line $3 FAIL/ERR:$o"
+            echo "In line $3 FAIL/ERR:$pst"
             if [ $ret -eq 1 ]; then
                 ret=0
             fi
