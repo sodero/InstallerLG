@@ -43,7 +43,7 @@ static bool arg_post(void)
     // arg_done() that is already freed by FreeDiskObject in arg_wb().
     if(args[ARG_SCRIPT])
     {
-        #if defined(AMIGA) && !defined(LG_TEST)
+        #if defined(AMIGA)
         BPTR lock = (BPTR) Lock(args[ARG_SCRIPT], ACCESS_READ);
 
         // Use script name if we fail to get the absolute path.
@@ -84,7 +84,7 @@ static bool arg_post(void)
 //------------------------------------------------------------------------------
 static bool arg_cli(int argc, char **argv)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+    #if defined(AMIGA)
     // Not used on Amiga.
     (void) argc;
     (void) argv;
@@ -124,7 +124,7 @@ static bool arg_cli(int argc, char **argv)
     #endif
 }
 
-#if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA)
 //------------------------------------------------------------------------------
 // Name:        arg_find_tts
 // Description: Find tooltypes in string list.
@@ -159,7 +159,7 @@ static void arg_find_tts(STRPTR *tts, bool tool)
 //------------------------------------------------------------------------------
 static bool arg_wb(char **argv)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+    #if defined(AMIGA)
     struct WBStartup *wb = (struct WBStartup *) argv;
 
     // We must be invoked using a tool or a project.
