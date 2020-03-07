@@ -108,6 +108,10 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}0.1.0-alpha.45 (2020-NOT-YET)@{UB}
+- (getsum) silent read error fixed.
+- ?
+
 @{B}0.1.0-alpha.44 (2020-03-04)@{UB}
 - Fixed invalid icon creation of directories without parent.
 - Parent directory pattern matching fix (Konto).
