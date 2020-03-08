@@ -12,7 +12,7 @@
 #include "version.h"
 #include "resource.h"
 
-#ifdef AMIGA
+#if defined(AMIGA) && !defined(LG_TEST)
 #include <graphics/rpattr.h>
 #include <libraries/asl.h>
 #include <libraries/mui.h>
@@ -33,7 +33,7 @@
 #include <proto/intuition.h>
 #include <proto/muimaster.h>
 #include <proto/utility.h>
-#endif /* AMIGA */
+#endif /* AMIGA && !LG_TEST */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,7 +47,7 @@
 typedef LONG IPTR;
 #endif
 
-#ifdef AMIGA
+#if defined(AMIGA) && !defined(LG_TEST)
 //------------------------------------------------------------------------------
 // MUI macros
 //------------------------------------------------------------------------------
@@ -3033,7 +3033,7 @@ DISPATCH(IG)
     // Unknown method, promote to parent.
     return DoSuperMethodA (cls, obj, msg);
 }
-#endif /* AMIGA */
+#endif /* AMIGA && !LG_TEST*/
 
 
 //.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .

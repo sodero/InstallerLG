@@ -714,8 +714,6 @@ entry_p n_getsum(entry_p contxt)
 
     if(file)
     {
-        // This will yield different results on 32 / 64 bit systems but that's
-        // hardly a problem (or?).
         int chr = getc(file), alfa = 1, beta = 0;
 
         // Adler-32 checksum.
@@ -726,11 +724,17 @@ entry_p n_getsum(entry_p contxt)
             chr = getc(file);
         }
 
-        // We're done.
-        h_fclose_safe(&file);
+        if(feof(file))
+        {
+            // File completed.
+            h_fclose_safe(&file);
 
-        // Return checksum.
-        R_NUM((beta << 16) | alfa);
+            // Return checksum.
+            R_NUM((beta << 16) | alfa);
+        }
+
+        // I/O error. Close and bail.
+        h_fclose_safe(&file);
     }
 
     // Could not read from file.

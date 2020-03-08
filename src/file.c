@@ -127,7 +127,7 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
     return (grc == G_TRUE) || ((grc == G_ABORT || grc == G_EXIT) && HALT);
 }
 
-#if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA)
 //------------------------------------------------------------------------------
 // Name:        h_exists_amiga_type
 // Description: h_exists amiga implementation.
@@ -218,7 +218,7 @@ int32_t h_exists(const char *name)
         return LG_DIR;
     }
 
-    #if defined(AMIGA) && !defined(LG_TEST)
+    #if defined(AMIGA)
     return h_exists_amiga_type(name);
     #else
     return h_exists_posix_type(name);

@@ -50,7 +50,7 @@ DD = ..
 endif
 
 CINC += -I . -I $(VPATH)
-CDEF += -D__AMIGADATE__="\"($(DATE))\""
+CDEF += -D__AMIGADATE__="\"($(DATE))\"" $(CEXT)
 CFLAGS += $(CINC) $(CGEN) $(CWRN) $(CDEF)
 YACC = bison
 LEX = flex
@@ -104,13 +104,9 @@ cat:
 #---------------------------------------------------------------------------------#
 .PHONY: test
 test: $(EXE)
-ifneq ($(AMIGA),true)
 	@chmod a+rwx _?* 2> /dev/null || true
 	@$(RM) -R $(EXE).tmp.* leak.* err.* massif.* _?*
 	@sh ../test/run.sh ./$(EXE) ../test
-else
-	@echo "[SKIPPED] @sh ../test/run.sh ./$(EXE) ../test"
-endif
 
 .PHONY: smoke
 smoke:
