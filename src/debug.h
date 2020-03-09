@@ -12,7 +12,7 @@
 
 #include "types.h"
 
-#if defined(AMIGA)
+#if defined(AMIGA) && !defined(LG_TEST)
 #include <clib/debug_protos.h>
 #define DBG(...) KPrintF((CONST_STRPTR)__VA_ARGS__)
 #else
