@@ -874,7 +874,7 @@ static inline int32_t h_perm_posix_to_amiga(mode_t posix)
            (exec ? 0 : EXEC_MASK ) | DELETE_MASK;
 }
 
-#if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA)
 //------------------------------------------------------------------------------
 // Name:        h_protect_get_amiga
 // Description: Used by h_protect_get to get file / dir protection bits. Amiga
@@ -890,7 +890,7 @@ static int32_t h_protect_get_amiga(entry_p contxt, const char *file,
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
-    if(!fib && PANIC(contxt))
+    if(*file == '\0' || (!fib && PANIC(contxt)))
     {
         return LG_FALSE;
     }
@@ -901,31 +901,34 @@ static int32_t h_protect_get_amiga(entry_p contxt, const char *file,
 
     if(lock)
     {
-        // Fill up FIB and get bits.
+        // Fill up FIB. Filter out non-POSIX flags in test mode.
         if(Examine(lock, fib))
         {
+            #ifdef LG_TEST
+            *mask = (fib->fib_Protection & 0xff) | 0x01;
+            #else
             *mask = fib->fib_Protection;
+            #endif
             done = true;
         }
 
-        // Lock no longer needed.
         UnLock(lock);
     }
 
     // Free FIB memory.
     FreeDosObject(DOS_FIB, fib);
 
-    // Did everything above succeed?
     if(!done)
     {
-        // Only fail if we're in 'strict' mode.
+        // Only fail if we're in 'strict' mode (and not in test mode).
+        #ifndef LG_TEST
         if(get_num(contxt, "@strict"))
         {
-            // Set invalid mask.
             ERR(ERR_GET_PERM, file);
             *mask = -1;
         }
         else
+        #endif
         {
             // Fallback to RWED.
             *mask = 0;
@@ -935,7 +938,6 @@ static int32_t h_protect_get_amiga(entry_p contxt, const char *file,
     // If enabled, write to log file.
     h_log(contxt, tr(S_GMSK), file, *mask);
     return done ? LG_TRUE : LG_FALSE;
-
 }
 #else
 //------------------------------------------------------------------------------
@@ -982,7 +984,7 @@ static int32_t h_protect_get(entry_p contxt, const char *file, int32_t *mask)
     }
 
     // Delete protection support only on Amiga.
-    #if defined(AMIGA) && !defined(LG_TEST)
+    #if defined(AMIGA)
     return h_protect_get_amiga(contxt, file, mask);
     #else
     return h_protect_get_posix(file, mask);
@@ -1007,18 +1009,23 @@ static int32_t h_protect_set(entry_p contxt, const char *file, int32_t mask)
     }
 
     // On non Amiga systems, or in test mode, this is a stub.
-    #if defined(AMIGA) && !defined(LG_TEST)
+    #if defined(AMIGA)
     size_t len = strlen(file);
 
     // Filter out volumes.
     if(len && file[len - 1] != ':')
     {
-        // Only fail if we're running in 'strict' mode.
+        // Only fail if we're in 'strict' mode (and not in test mode).
+        #ifndef LG_TEST
         if(!SetProtection(file, mask) && get_num(contxt, "@strict"))
         {
             ERR(ERR_SET_PERM, file);
             return LG_FALSE;
         }
+        #else
+        // Disable delete protection in test mode otherwise rm will fail.
+        (void) SetProtection(file, mask | 0x01);
+        #endif
     }
     #else
     chmod(file, h_perm_amiga_to_posix(mask));
