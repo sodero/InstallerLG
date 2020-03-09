@@ -61,7 +61,7 @@ int32_t str_to_userlevel(const char *user, int32_t def);
 #define C_SYM(X) contxt->symbols[(X) - 1]
 #define B_KEY __func__
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, __func__, M)
-#if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA)
 #define DBG_PRINT KPrintF
 #else
 #define DBG_PRINT printf
