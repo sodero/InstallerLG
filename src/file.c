@@ -1206,8 +1206,17 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
         }
         else
         {
-            ERR(ERR_WRITE_FILE, dst);
-            grc = G_FALSE;
+            if(opt(contxt, OPT_NOFAIL) || opt(contxt, OPT_OKNODELETE))
+            {
+                // Ignore failure.
+                h_log(contxt, tr(S_NCPY), src, dst);
+                grc = G_TRUE;
+            }
+            else
+            {
+                ERR(ERR_WRITE_FILE, dst);
+                grc = G_FALSE;
+            }
             break;
         }
     }
@@ -1219,7 +1228,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     // The number of bytes read and not written should be zero.
     if(cnt)
     {
-        // Error or user abort.
+        // Reported / ignored error or user abort.
         return grc;
     }
 

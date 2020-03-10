@@ -1,3 +1,5 @@
+(copylib (help "h") (prompt "p") (source "_clf_") (dest "_cld_")) ; "rm -Rf _cld_ _clf_ && touch _clf_ && mkdir _cld_","1","test -f _cld_/_clf_ && rm -Rf _clf_ _cld_"
+(set @strict 0) (copylib (help "h") (prompt "p") (source "_clf_") (dest "_cld_")) ; "rm -Rf _cld_ _clf_ && touch _clf_ && mkdir _cld_","1","test -f _cld_/_clf_ && rm -Rf _clf_ _cld_"
 (set @strict 0) (copylib (help "h") (prompt "p") (source "_cs_") (dest "_cld_")) ; "rm -Rf _cld_ _cs_ && cp ../test/data.copylib.i1.TheBar_2617_Aros_i386 _cs_ && mkdir _cld_ && mkdir _cld_/_cs_","0","test -d _cld_/_cs_ && rm -Rf _clf_ _cld_ _cs_"
 (user 0) (set @strict 0) (copylib  (confirm) (source "_clf_") (dest "_cld_")) ; "rm -Rf _cld_ _clf_","0","test ! -f _cld_/_clf_ && rm -Rf _clf_ _cld_"
 (user 0) (copylib  (source "_clf_") (dest "_cld_")) ; "rm -Rf _cld_ _clf_ && cp ../test/data.copylib.i1.TheBar_2619_Aros_i386 _clf_","Line 1: Missing option 'prompt' 0","test ! -d _cld_ && rm -Rf _clf_ _cld_"
