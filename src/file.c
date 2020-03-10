@@ -1262,16 +1262,12 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
         }
     }
 
-    // Preserve permissions in strict mode.
-    if(get_num(contxt, "@strict"))
-    {
-        int32_t prm = 0;
+    // Try to preserve file permissions.
+    int32_t prm = 0;
 
-        // Error code will be set by h_protect_x().
-        if(h_protect_get(contxt, src, &prm))
-        {
-            h_protect_set(contxt, dst, prm);
-        }
+    if(h_protect_get(contxt, src, &prm))
+    {
+        h_protect_set(contxt, dst, prm);
     }
 
     // Reset error codes if necessary.
@@ -1912,12 +1908,10 @@ entry_p n_copylib(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    // FIXME - Ignore the dox and mimic the CBM impl. instead.
     // We always need a prompt and help since trying to overwrite new files
-    // with older ones will force a confirm if we're in expert mode. The CBM
-    // Installer doesn't behave this way, but the Installer guide says so, and
-    // it makes sense, so let's do it this way until we know for sure that this
-    // will break existing scripts.
+    // with older ones will force a confirm if we're in expert mode. In sloppy
+    // mode we'll always have them, but they will be empty if not provided. This
+    // is how the CBM behaves, despite what the documentation says.
     if(!source || !dest || !prompt || !help)
     {
         ERR(ERR_MISSING_OPTION, source ? dest ? prompt ? "help" : "prompt" :
