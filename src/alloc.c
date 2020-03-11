@@ -47,7 +47,7 @@ entry_p new_contxt(void)
     free(symbols);
     free(children);
 
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -70,7 +70,7 @@ entry_p new_number(int32_t num)
         return entry;
     }
 
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -99,7 +99,7 @@ entry_p new_string(char *name)
     free(name);
     free(entry);
 
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -129,7 +129,7 @@ entry_p new_symbol(char *name)
     free(name);
     free(entry);
 
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -220,7 +220,7 @@ entry_p new_custom(char *name, int32_t line, entry_p sym, entry_p chl)
     free(name);
     free(entry);
 
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -252,7 +252,7 @@ entry_p new_symref(char *name, int32_t line)
     free(name);
     free(entry);
 
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -269,7 +269,7 @@ static void move_contxt(entry_p dst, entry_p src)
     // Sanity check.
     if(!dst || !src)
     {
-        PANIC(NULL);
+        (void) PANIC(NULL);
         return;
     }
 
@@ -349,7 +349,7 @@ entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t ty
     kill(chl);
 
     // Bad input or out of memory.
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -411,7 +411,7 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
     free(entry);
 
     // Bad input or out of memory.
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -454,7 +454,7 @@ entry_p new_cusref(char *name, int32_t line, entry_p arg)
     free(name);
     kill(arg);
 
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -470,7 +470,7 @@ entry_p append(entry_p **dst, entry_p ent)
     if(!ent || !dst || !*dst)
     {
         // Bad input.
-        PANIC(NULL);
+        (void) PANIC(NULL);
         return NULL;
     }
 
@@ -505,7 +505,7 @@ entry_p append(entry_p **dst, entry_p ent)
             kill((*dst)[0]);
             (*dst)[0] = ent;
 
-            PANIC(ent);
+            (void) PANIC(NULL);
             return ent;
         }
     }
@@ -560,13 +560,13 @@ entry_p merge(entry_p dst, entry_p src)
         }
         else
         {
-            PANIC(NULL);
+            (void) PANIC(NULL);
         }
     }
     else
     {
         // Bad input.
-        PANIC(NULL);
+        (void) PANIC(NULL);
     }
 
     // We own 'src' and need to free it.
@@ -643,7 +643,7 @@ entry_p push(entry_p dst, entry_p src)
 
     // Out of memory. Since we own 'src', we need to free it.
     kill(src);
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return dst;
 }
 

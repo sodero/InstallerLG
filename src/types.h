@@ -15,28 +15,28 @@
 //------------------------------------------------------------------------------
 // File / dir type values according to the CBM installer documentation.
 //------------------------------------------------------------------------------
-#define LG_NONE     0
-#define LG_FILE     1
-#define LG_DIR      2
+#define LG_NONE     ((int32_t) 0)
+#define LG_FILE     ((int32_t) 1)
+#define LG_DIR      ((int32_t) 2)
 
 //------------------------------------------------------------------------------
 // User levels according to the CBM installer documentation.
 //------------------------------------------------------------------------------
-#define LG_NOVICE   0
-#define LG_AVERAGE  1
-#define LG_EXPERT   2
+#define LG_NOVICE   ((int32_t) 0)
+#define LG_AVERAGE  ((int32_t) 1)
+#define LG_EXPERT   ((int32_t) 2)
 
 //------------------------------------------------------------------------------
 // Version return value according to the CBM installer documentation.
 //------------------------------------------------------------------------------
-#define LG_NOVER  -1
+#define LG_NOVER    ((int32_t) -1)
 
 //------------------------------------------------------------------------------
 // Default return values.
 //------------------------------------------------------------------------------
-#define LG_FAKE     2
-#define LG_TRUE     1
-#define LG_FALSE    0
+#define LG_FAKE     ((int32_t) 2)
+#define LG_TRUE     ((int32_t) 1)
+#define LG_FALSE    ((int32_t) 0)
 
 //------------------------------------------------------------------------------
 // Misc constants.

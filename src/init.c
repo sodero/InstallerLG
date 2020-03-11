@@ -62,7 +62,7 @@ static void init_num(entry_p contxt, char *sym, int32_t num)
     val->parent = var;
 
     // Insert result in CONTXT.
-    append(&contxt->symbols, var);
+    (void) append(&contxt->symbols, var);
 }
 
 //------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ static void init_str(entry_p contxt, char *sym, char *str)
     val->parent = var;
 
     // Insert result in CONTXT.
-    append(&contxt->symbols, var);
+    (void) append(&contxt->symbols, var);
 }
 
 //------------------------------------------------------------------------------
@@ -118,8 +118,9 @@ static void init_tooltypes(entry_p contxt)
     init_num(contxt, "@user-min", l_min);
 
     // Modus.
-    init_num(contxt, "@no-log", arg_get(ARG_NOLOG) ? 1 : 0);
-    init_num(contxt, "@no-pretend", arg_get(ARG_NOPRETEND) ? 1 : 0);
+    init_num(contxt, "@no-log", arg_get(ARG_NOLOG) ? LG_TRUE : LG_FALSE);
+    init_num(contxt, "@no-pretend", arg_get(ARG_NOPRETEND) ?
+             LG_TRUE : LG_FALSE);
 
     // File names.
     init_str(contxt, "@icon", a_scr ? a_scr : "");
@@ -158,26 +159,26 @@ static void init_tooltypes(entry_p contxt)
 static void init_misc_num(entry_p contxt)
 {
     // Set numerical values.
-    init_num(contxt, "@pretend", 0);
-    init_num(contxt, "@installer-version", (MAJOR << 16) | MINOR);
-    init_num(contxt, "@ioerr", 0);
-    init_num(contxt, "@log", 0);
-    init_num(contxt, "@yes", 0);
-    init_num(contxt, "@skip", 0);
-    init_num(contxt, "@abort", 0);
-    init_num(contxt, "@back", 0);
-    init_num(contxt, "@wild", 0);
-    init_num(contxt, "@each-type", 0);
-    init_num(contxt, "@debug", 0);
-    init_num(contxt, "@trap", 0);
-    init_num(contxt, "true", 1);
-    init_num(contxt, "false", 0);
+    init_num(contxt, "@pretend", LG_FALSE);
+    init_num(contxt, "@installer-version", (int32_t) (MAJOR << 16) | MINOR);
+    init_num(contxt, "@ioerr", LG_FALSE);
+    init_num(contxt, "@log", LG_FALSE);
+    init_num(contxt, "@yes", LG_FALSE);
+    init_num(contxt, "@skip", LG_FALSE);
+    init_num(contxt, "@abort", LG_FALSE);
+    init_num(contxt, "@back", LG_FALSE);
+    init_num(contxt, "@wild", LG_FALSE);
+    init_num(contxt, "@each-type", LG_FALSE);
+    init_num(contxt, "@debug", LG_FALSE);
+    init_num(contxt, "@trap", LG_FALSE);
+    init_num(contxt, "true", LG_TRUE);
+    init_num(contxt, "false", LG_FALSE);
     init_num(contxt, "@strict",
     // In test mode, strict is default.
     #if defined(AMIGA) && !defined(LG_TEST)
-    0
+    LG_FALSE
     #else
-    1
+    LG_TRUE
     #endif
     );
 }
@@ -278,7 +279,7 @@ static void init_error(entry_p contxt)
     if(entry)
     {
         // Add to the root and reparent.
-        append(&contxt->children, entry);
+        (void) append(&contxt->children, entry);
         entry->parent = contxt;
 
         // Rotate to put it on top.
@@ -303,7 +304,7 @@ static void init_exit(entry_p contxt)
     // Add to the root and reparent.
     if(entry)
     {
-        append(&contxt->children, entry);
+        (void) append(&contxt->children, entry);
         entry->parent = contxt;
     }
 
@@ -347,7 +348,7 @@ static void init_welcome(entry_p contxt)
         // Add to the root and reparent.
         if(entry)
         {
-            append(&contxt->children, entry);
+            (void) append(&contxt->children, entry);
             entry->parent = contxt;
         }
 

@@ -37,7 +37,7 @@ const char *tr(res_t res)
     res_t cur = res > S_GONE ? S_GONE : res;
 
     // res_t -> string mappings.
-    static const char *str[] =
+    const char *str[] =
     {
         "NONE",
         /*1*/ "Copying file(s)", /*2*/ "Overwrite existing directory '%s'?",

@@ -56,7 +56,7 @@ static bool arg_post(void)
         UnLock(lock);
         #else
         // Prepend redundant path in test mode.
-        snprintf(buf_get(B_KEY), buf_len(), "./%s", args[ARG_SCRIPT]);
+        (void) snprintf(buf_get(B_KEY), buf_len(), "./%s", args[ARG_SCRIPT]);
         #endif
 
         // Copy of the (hopefully) absolute script path and working directory.
