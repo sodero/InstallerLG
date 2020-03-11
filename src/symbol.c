@@ -243,7 +243,7 @@ entry_p n_symbolval(entry_p contxt)
     ret = resolve(&entry);
 
     // Return the resolved value if the symbol could be found.
-    if(!DID_ERR)
+    if(NOT_ERR)
     {
         return ret;
     }

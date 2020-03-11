@@ -96,7 +96,7 @@ static entry_p h_whunt(entry_p contxt, bool until)
 
     // Use XOR to support both 'while' and 'until'. Break if something goes
     // wrong inside.
-    for(bool cont = until ^ tru(C_ARG(1)); cont && !DID_ERR;
+    for(bool cont = until ^ tru(C_ARG(1)); cont && NOT_ERR;
         cont = until ^ tru(C_ARG(1)))
     {
         // Save the return value of the last function in the CONTXT
@@ -232,7 +232,7 @@ entry_p n_retrace(entry_p contxt)
     entry_p ret = end();
 
     // Resolve children and save return values.
-    while(exists(*top) && !DID_ERR)
+    while(exists(*top) && NOT_ERR)
     {
         ret = resolve(*top);
         top++;

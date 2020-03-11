@@ -2413,7 +2413,7 @@ entry_p n_delete(entry_p contxt)
     int32_t status = LG_TRUE;
 
     // Delete all files leading up to the first option
-    for(size_t ndx = 1; !DID_ERR && exists(C_ARG(ndx)) &&
+    for(size_t ndx = 1; NOT_ERR && exists(C_ARG(ndx)) &&
         C_ARG(ndx)->type != OPTION; ndx++)
     {
         char *file = str(C_ARG(ndx));
@@ -3431,7 +3431,7 @@ static int32_t h_textfile_append(entry_p contxt, const char *name)
     h_fclose(&file);
 
     // Success or failure.
-    return DID_ERR ? LG_FALSE : LG_TRUE;
+    return NOT_ERR ? LG_TRUE : LG_FALSE;
 }
 
 //------------------------------------------------------------------------------
@@ -3472,7 +3472,7 @@ static int32_t h_textfile_include(entry_p contxt, const char *name)
         h_fclose(&fdst);
 
         // Fail silently.
-        return DID_ERR? LG_FALSE : LG_TRUE;
+        return NOT_ERR ? LG_TRUE : LG_FALSE;
     }
 
     // Copy include file to destination file.
@@ -3482,7 +3482,7 @@ static int32_t h_textfile_include(entry_p contxt, const char *name)
     h_fclose(&finc);
     h_fclose(&fdst);
 
-    return DID_ERR ? LG_FALSE : LG_TRUE;
+    return NOT_ERR ? LG_TRUE : LG_FALSE;
 }
 
 //------------------------------------------------------------------------------
@@ -3863,7 +3863,7 @@ entry_p n_transcript(entry_p contxt)
     free(msg);
 
     // h_log might fail silently.
-    R_NUM(DID_ERR ? LG_FALSE : LG_TRUE);
+    R_NUM(NOT_ERR ? LG_TRUE : LG_FALSE);
 }
 
 //------------------------------------------------------------------------------
