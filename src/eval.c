@@ -266,7 +266,7 @@ bool tru(entry_p entry)
 
     // Only numerals and strings can be true.
     return (((val->type == STRING && *(val->name)) ||
-             (val->type == NUMBER && val->id)) && !DID_ERR);
+             (val->type == NUMBER && val->id)) && NOT_ERR);
 }
 
 //------------------------------------------------------------------------------
@@ -428,7 +428,7 @@ entry_p invoke(entry_p entry)
     if(cur)
     {
         // Reesolve children and save the last return value.
-        while(exists(*cur) && !DID_ERR)
+        while(exists(*cur) && NOT_ERR)
         {
             ret = resolve(*cur);
             cur++;
@@ -464,12 +464,12 @@ void run(entry_p entry)
         }
 
         // Execute the script unless 'effect' failed or halted.
-        if(!DID_ERR && !DID_HALT)
+        if(NOT_ERR && NOT_HALT)
         {
             status = invoke(entry);
 
             // Execute (onerror) on failure.
-            if(DID_ERR && !DID_HALT)
+            if(DID_ERR && NOT_HALT)
             {
                 status = n_onerror(entry);
             }

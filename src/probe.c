@@ -1079,7 +1079,7 @@ entry_p n_iconinfo(entry_p contxt)
     }
 
     // Iterate over all options.
-    for(size_t i = 0; types[i] != end() && !DID_ERR; i++)
+    for(size_t i = 0; types[i] != end() && NOT_ERR; i++)
     {
         // Is the current option not set?
         if(!types[i])

@@ -411,7 +411,7 @@ entry_p n_askdisk(entry_p contxt)
                    *bt1 = tr(S_RTRY), *bt2 = tr(S_SKIP);
 
         // Only show requester if we could resolve all options.
-        if(!DID_ERR)
+        if(NOT_ERR)
         {
             // Retry until we can get a lock or the user aborts.
             while(!vol)
