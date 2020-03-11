@@ -69,13 +69,13 @@ int32_t str_to_userlevel(const char *user, int32_t def);
 #define HERE DBG_PRINT("%s:%s:%d\n", __FILE__, __func__, __LINE__)
 #define THIS(X) DBG_PRINT("%p <- %s:%s:%d\n", X, __FILE__, __func__, __LINE__)
 #ifndef __clang_analyzer__
-#define C_SANE(N,O) if(!c_sane(contxt, N)) {PANIC(contxt); return end();}\
+#define C_SANE(N,O) if(!c_sane(contxt, N)) {(void) PANIC(contxt); return end();}\
                     {entry_p op_ = O; if(op_ != NULL && opt(O,OPT_INIT) != NULL && DID_ERR)\
                     {return end();}}
 #else
 #define C_SANE(N,O)
 #endif
-#define S_SANE(N) if(!s_sane(contxt, N)) {PANIC(contxt); return end();}
+#define S_SANE(N) if(!s_sane(contxt, N)) {(void) PANIC(contxt); return end();}
 #ifdef __AROS__
 #define B2CSTR(S) AROS_BSTR_ADDR(S)
 #else

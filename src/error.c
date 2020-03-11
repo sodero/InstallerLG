@@ -19,9 +19,9 @@
 //------------------------------------------------------------------------------
 static const char *h_error_str(err_t err)
 {
-    static const char *des[] =
+    const char *des[] =
     {
-        NULL,                                    // ERR_NONE
+        "No error",                              // ERR_NONE
         "Halt",                                  // ERR_HALT
         "Abort",                                 // ERR_ABORT
         "Reset",                                 // ERR_RESET
@@ -102,7 +102,7 @@ err_t error(entry_p contxt, int32_t line, err_t type, const char *info)
     }
 
     // Show error in window / console unless trap mode is active.
-    if(!get_num(contxt, "@trap"))
+    if(get_num(contxt, "@trap") == LG_FALSE)
     {
         gui_error(line, h_error_str(type), info);
     }

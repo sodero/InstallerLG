@@ -38,8 +38,8 @@ static bool h_cmp_numbers(entry_p alfa, entry_p beta)
 static bool h_cmp_strings(entry_p alfa, entry_p beta)
 {
     // Don't trust strings, we might be out of memory.
-    return alfa->type == STRING && alfa->name && beta->type == STRING &&
-           beta->name;
+    return alfa->type == STRING && alfa->name != NULL && beta->type == STRING &&
+           beta->name != NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ static bool h_cmp_strings(entry_p alfa, entry_p beta)
 //------------------------------------------------------------------------------
 static bool h_cmp_string_0(entry_p alfa)
 {
-    return alfa->name && alfa->name[0] == '0' && !alfa->name[1];
+    return alfa->name != NULL && alfa->name[0] == '0' && alfa->name[1] == '\0';
 }
 
 //------------------------------------------------------------------------------
@@ -58,28 +58,28 @@ static bool h_cmp_string_0(entry_p alfa)
 // Description: Compare arguments of different primitive types.
 // Input:       entry_p lhs:    Left argument.
 //              entry_p rhs:    Right argument.
-// Return:      int:            Left - right.
+// Return:      int32_t:        Left - right.
 //------------------------------------------------------------------------------
-static int h_cmp_mixed(entry_p alfa, entry_p beta)
+static int32_t h_cmp_mixed(entry_p alfa, entry_p beta)
 {
-    if(alfa->type == STRING && alfa->name)
+    if(alfa->type == STRING && alfa->name != NULL)
     {
         // Empty strings are less than all numbers.
-        if(!(*alfa->name))
+        if(*alfa->name == '\0')
         {
             // Alfa < Beta.
             return -1;
         }
 
         // Do we have a number != 0 or a '0' string?
-        if(num(alfa) || h_cmp_string_0(alfa))
+        if(num(alfa) != 0 || h_cmp_string_0(alfa))
         {
             return num(alfa) - beta->id;
         }
     }
 
     // Beta is a string. A nonzero number or a '0' string?
-    if(num(beta) || h_cmp_string_0(beta))
+    if(num(beta) != 0 || h_cmp_string_0(beta))
     {
         return alfa->id - num(beta);
     }
@@ -93,9 +93,9 @@ static int h_cmp_mixed(entry_p alfa, entry_p beta)
 // Description: Helper function for n_eq, n_gt, n_gte, n_lt, n_lte, n_ne.
 // Input:       entry_p lhs:    Left argument.
 //              entry_p rhs:    Right argument.
-// Return:      int:            Left - right.
+// Return:      int32_t:        Left - right.
 //------------------------------------------------------------------------------
-static int h_cmp(entry_p lhs, entry_p rhs)
+static int32_t h_cmp(entry_p lhs, entry_p rhs)
 {
     // Resolve both arguments. We don't need to check for failures; we will
     // always get something to compare.
@@ -110,7 +110,7 @@ static int h_cmp(entry_p lhs, entry_p rhs)
     // Use normal string comparison if both arguments are strings.
     if(h_cmp_strings(alfa, beta))
     {
-        return strcmp(alfa->name, beta->name);
+        return (int32_t) strcmp(alfa->name, beta->name);
     }
 
     // We have a string and a number / dangle.
@@ -129,7 +129,7 @@ entry_p n_eq(entry_p contxt)
     C_SANE(2, NULL);
 
     // Translate the result of h_cmp.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) ? LG_FALSE : LG_TRUE);
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) != 0 ? LG_FALSE : LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -204,5 +204,5 @@ entry_p n_neq(entry_p contxt)
     C_SANE(2, NULL);
 
     // Translate the result of h_cmp.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) ? LG_TRUE : LG_FALSE);
+    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) == 0 ? LG_FALSE : LG_TRUE);
 }

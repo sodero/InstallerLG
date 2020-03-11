@@ -241,7 +241,7 @@ static int32_t h_chipmem(void)
     // In test mode / on non Amigas we shouldn't report anything but a dummy
     // value. Doing so would create dependencies between test results and host
     // system. Pretend that we have 512 KiB free chipmem.
-    1 << 19;
+    (int32_t) 1 << 19;
     #endif
 }
 
@@ -260,7 +260,7 @@ static int32_t h_totalmem(void)
     // In test mode / on non Amigas we shouldn't report anything but a dummy
     // value. Doing so would create dependencies between test results and host
     // system. Pretend that we have 1 MiB free chipmem + fastmem.
-    1 << 20;
+    (int32_t) 1 << 20;
     #endif
 }
 
