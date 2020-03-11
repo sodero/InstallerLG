@@ -676,7 +676,7 @@ entry_p n_getsize(entry_p contxt)
     C_SANE(1, NULL);
 
     // Open the file in read only mode.
-    FILE *file = fopen(str(C_ARG(1)), "r");
+    FILE *file = h_fopen(contxt, str(C_ARG(1)), "r", false);
 
     if(file)
     {
@@ -687,7 +687,7 @@ entry_p n_getsize(entry_p contxt)
         int32_t res = (int32_t) ftell(file);
 
         // We're done.
-        h_fclose_safe(&file);
+        h_fclose(&file);
 
         // Return position.
         R_NUM(res);
@@ -710,7 +710,7 @@ entry_p n_getsum(entry_p contxt)
     C_SANE(1, NULL);
 
     const char *name = str(C_ARG(1));
-    FILE *file = fopen(name, "r");
+    FILE *file = h_fopen(contxt, name, "r", false);
 
     if(file)
     {
@@ -727,14 +727,14 @@ entry_p n_getsum(entry_p contxt)
         if(feof(file))
         {
             // File completed.
-            h_fclose_safe(&file);
+            h_fclose(&file);
 
             // Return checksum.
             R_NUM((beta << 16) | alfa);
         }
 
         // I/O error. Close and bail.
-        h_fclose_safe(&file);
+        h_fclose(&file);
     }
 
     // Could not read from file.
@@ -901,7 +901,7 @@ int32_t h_getversion_file(const char *name)
     #endif
 
     // Attempt to open file.
-    file = fopen(name, "r");
+    file = h_fopen(end(), name, "r", false);
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // Restore auto request.
@@ -955,7 +955,7 @@ int32_t h_getversion_file(const char *name)
     }
 
     // We're done.
-    h_fclose_safe(&file);
+    h_fclose(&file);
 
     // If we have a valid version return that. Otherwise the file might be a
     // library, try to get the library version and return that instead.

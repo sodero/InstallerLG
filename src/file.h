@@ -31,7 +31,8 @@ entry_p n_transcript(entry_p contxt);
 entry_p n_rename(entry_p contxt);
 
 int32_t h_exists(const char *name);
-void h_fclose_safe(FILE **file);
+FILE *h_fopen(entry_p contxt, const char *name, const char *mode, bool force);
+void h_fclose(FILE **file);
 void h_log(entry_p contxt, const char *fmt, ...);
 bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...);
 

@@ -1106,7 +1106,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     }
 
     static char buf[BUFSIZ];
-    FILE *file = fopen(src, "r");
+    FILE *file = h_fopen(contxt, src, "r", false);
     size_t cnt = file ? fread(buf, 1, BUFSIZ, file) : 0;
     int err =
         #if defined(AMIGA) && !defined(LG_TEST)
@@ -1120,7 +1120,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
         // The source handle might be open.
         if(file)
         {
-            h_fclose_safe(&file);
+            h_fclose(&file);
         }
 
         if(opt(contxt, OPT_NOFAIL))
@@ -1158,19 +1158,19 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
             else
             {
                 // Skip file or abort.
-                h_fclose_safe(&file);
+                h_fclose(&file);
                 return DID_HALT ? G_ABORT : G_TRUE;
             }
         }
     }
 
     // Create / overwrite file.
-    FILE *dest = fopen(dst, "w");
+    FILE *dest = h_fopen(contxt, dst, "w", false);
 
     if(!dest)
     {
         // The source handle is open.
-        h_fclose_safe(&file);
+        h_fclose(&file);
 
         if(opt(contxt, OPT_NOFAIL) || opt(contxt, OPT_OKNODELETE))
         {
@@ -1222,8 +1222,8 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     }
 
     // Close input and output files.
-    h_fclose_safe(&file);
-    h_fclose_safe(&dest);
+    h_fclose(&file);
+    h_fclose(&dest);
 
     // The number of bytes read and not written should be zero.
     if(cnt)
@@ -1307,7 +1307,7 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
     // Get the default drawer icon from the OS.
     struct DiskObject *obj = (struct DiskObject *) GetDefDiskObject(WBDRAWER);
     #else
-    FILE *obj = fopen(h_suffix(dst, "info"), "w");
+    FILE *obj = h_fopen(contxt, h_suffix(dst, "info"), "w", true);
     #endif
 
     // Bail out if we can't open the default icon.
@@ -1328,7 +1328,7 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
     // Free def. icon.
     FreeDiskObject(obj);
     #else
-    h_fclose_safe(&obj);
+    h_fclose(&obj);
     #endif
 
     // Success or I/O error.
@@ -3089,18 +3089,18 @@ entry_p n_startup(entry_p contxt)
     if(pre && pst)
     {
         // We don't need to write yet.
-        FILE *file = fopen(fln, "r");
+        FILE *file = h_fopen(contxt, fln, "r", false);
 
         // If the file doesn't exist, try to create it.
         if(!file && h_exists(fln) == LG_NONE)
         {
-            file = fopen(fln, "w");
+            file = h_fopen(contxt, fln, "w", false);
 
             // If successful, close and reopen as read only.
             if(file)
             {
-                h_fclose_safe(&file);
-                file = fopen(fln, "r");
+                h_fclose(&file);
+                file = h_fopen(contxt, fln, "r", false);
             }
         }
 
@@ -3181,7 +3181,7 @@ entry_p n_startup(entry_p contxt)
             }
 
             // Reading done.
-            h_fclose_safe(&file);
+            h_fclose(&file);
         }
     }
     else
@@ -3216,24 +3216,24 @@ entry_p n_startup(entry_p contxt)
                 if(fputs(buf, file) == EOF)
                 {
                     // Could not write to disk. The old file is still intact.
-                    h_fclose_safe(&file);
+                    h_fclose(&file);
                 }
                 else
                 {
                     // Close file and release buffer.
-                    h_fclose_safe(&file);
+                    h_fclose(&file);
                     free(buf);
                     buf = NULL;
 
                     // Open the target file just to make sure that we have
                     // write permissions.
-                    file = fopen(fln, "a");
+                    file = h_fopen(contxt, fln, "a", false);
 
                     if(file)
                     {
                         // Close it immediately, we're not going to write
                         // directly to it.
-                        h_fclose_safe(&file);
+                        h_fclose(&file);
 
                         // Do a less un-atomic write to the real file by
                         // renaming the temporary file.
@@ -3285,21 +3285,6 @@ entry_p n_startup(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_fclose_safe
-// Description: Safe file close.
-// Input:       FILE **file:     Pointer to file handle.
-// Return:      -
-//------------------------------------------------------------------------------
-void h_fclose_safe(FILE **file)
-{
-    if(file && *file)
-    {
-        fclose(*file);
-        *file = NULL;
-    }
-}
-
-//------------------------------------------------------------------------------
 // Name:        h_copy_simple
 // Description: Copy source file to destination file using already open file
 //              handles.
@@ -3327,41 +3312,68 @@ static void h_copy_simple(entry_p contxt, FILE *src, FILE *dst, const char *nfo)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_fopen_force
-// Description: Open file with force. If fopen fails, change file permissions
-//              and try again if we're executing in non-strict mode. If we're
-//              executing in strict mode, fail properly.
-// Input:       entry_p contxt:     The execution context.
+// Name:        h_fclose
+// Description: Safe file close.
+// Input:       FILE **file:     Pointer to file handle.
+// Return:      -
+//------------------------------------------------------------------------------
+void h_fclose(FILE **file)
+{
+    if(file && *file)
+    {
+        (void) fclose(*file);
+        *file = NULL;
+    }
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_fopen
+// Description: Open file after checking permissions. If necessary, permissions
+//              are modified to enable 'mode' if 'force' us used.
+// Input:       entry_p contxt:     Execution context.
 //              const char *name:   File name.
-//              const char *mode:   fopen mode string.
+//              const char *mode:   Mode (fopen).
+//              bool force:         Change file permissions if necessary.
 // Return:      FILE *:             File handle on success, NULL otherwise.
 //------------------------------------------------------------------------------
-static FILE *h_fopen_force(entry_p contxt, const char *name, const char *mode)
+FILE *h_fopen(entry_p contxt, const char *name, const char *mode, bool force)
 {
-    // We can't open directories / "".
-    if(*name == '\0' || h_exists(name) == LG_DIR)
+    if(h_exists(name) == LG_DIR)
     {
-        ERR(ERR_NOT_A_FILE, name);
+        // Don't open directories.
         return NULL;
     }
 
-    FILE *file = fopen(name, mode);
-
-    // Set full permissions in non strict mode.
-    if(!file && !get_num(contxt, "@strict"))
+    if(h_exists(name) == LG_NONE)
     {
-        if(h_protect_set(contxt, name, 0) == LG_FALSE)
-        {
-            // Fail silently.
-            return file;
-        }
-
-        // Try again.
-        file = fopen(name, mode);
+        // Create file if it doesn't exist.
+        return fopen(name, mode);
     }
 
-    // Success or failure.
-    return file;
+    int32_t prm = 0;
+
+    if(!h_protect_get(contxt, name, &prm))
+    {
+        // Couldn't get file permissions.
+        return NULL;
+    }
+
+    // If mode isn't 'read*', it's 'write*' or 'append*'.
+    bool perm = *mode == 'r' ? (prm & READ_MASK) == 0 :
+                (prm & WRITE_MASK) == 0 ? true : false;
+
+    // Flip permissions to enable the outcome of above.
+    prm ^= *mode == 'r' ? READ_MASK : WRITE_MASK;
+
+    // In non-strict mode; use force if needed / wanted.
+    if(perm || (force && !get_num(contxt, "@strict") &&
+       h_protect_set(contxt, name, prm)))
+    {
+        return fopen(name, mode);
+    }
+
+    // Couldn't set file permissions.
+    return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -3385,7 +3397,7 @@ static int32_t h_textfile_append(entry_p contxt, const char *name)
     // Append without include truncates / creates a new file.
     const char *mode = opt(contxt, OPT_INCLUDE) ? "a" : "w";
 
-    FILE *file = h_fopen_force(contxt, name, mode);
+    FILE *file = h_fopen(contxt, name, mode, true);
 
     if(!file)
     {
@@ -3416,7 +3428,7 @@ static int32_t h_textfile_append(entry_p contxt, const char *name)
     }
 
     free(app);
-    h_fclose_safe(&file);
+    h_fclose(&file);
 
     // Success or failure.
     return DID_ERR ? LG_FALSE : LG_TRUE;
@@ -3445,8 +3457,8 @@ static int32_t h_textfile_include(entry_p contxt, const char *name)
     }
 
     // Try to open files, with force (non-strict mode only) if necessary.
-    FILE *finc = h_fopen_force(contxt, incl, "r"),
-         *fdst = h_fopen_force(contxt, name, "w");
+    FILE *finc = h_fopen(contxt, incl, "r", true),
+         *fdst = h_fopen(contxt, name, "w", true);
 
     if(!finc || !fdst)
     {
@@ -3456,8 +3468,8 @@ static int32_t h_textfile_include(entry_p contxt, const char *name)
             ERR(finc ? ERR_WRITE_FILE : ERR_READ_FILE, finc ? name : incl);
         }
 
-        h_fclose_safe(&finc);
-        h_fclose_safe(&fdst);
+        h_fclose(&finc);
+        h_fclose(&fdst);
 
         // Fail silently.
         return DID_ERR? LG_FALSE : LG_TRUE;
@@ -3467,8 +3479,8 @@ static int32_t h_textfile_include(entry_p contxt, const char *name)
     h_copy_simple(contxt, finc, fdst, name);
 
     // Close input and output files.
-    h_fclose_safe(&finc);
-    h_fclose_safe(&fdst);
+    h_fclose(&finc);
+    h_fclose(&fdst);
 
     return DID_ERR ? LG_FALSE : LG_TRUE;
 }
@@ -3935,7 +3947,7 @@ void h_log(entry_p contxt, const char *fmt, ...)
     }
 
     // Use the log file set in init(..) or by the user.
-    FILE *file = fopen(get_str(contxt, "@log-file"), "a");
+    FILE *file = h_fopen(contxt, get_str(contxt, "@log-file"), "a", true);
     int cnt = -1;
 
     if(file)
@@ -3952,7 +3964,7 @@ void h_log(entry_p contxt, const char *fmt, ...)
             va_end(arg);
         }
 
-        h_fclose_safe(&file);
+        h_fclose(&file);
     }
 
     // Could we open the file and write all data to it?
