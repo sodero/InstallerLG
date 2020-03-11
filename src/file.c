@@ -3359,8 +3359,8 @@ FILE *h_fopen(entry_p contxt, const char *name, const char *mode, bool force)
     }
 
     // If mode isn't 'read*', it's 'write*' or 'append*'.
-    bool perm = *mode == 'r' ? (prm & READ_MASK) == 0 :
-                (prm & WRITE_MASK) == 0 ? true : false;
+    bool read = (prm & READ_MASK) == 0, write = (prm & WRITE_MASK) == 0,
+         perm = *mode == 'r' ? read : write;
 
     // Flip permissions to enable the outcome of above.
     prm ^= *mode == 'r' ? READ_MASK : WRITE_MASK;
