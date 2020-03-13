@@ -14,7 +14,7 @@
 ("%s" @default-dest) ; "","T:",""
 ("%s" @error-msg) ; "","",""
 ("%s" @execute-dir) ; "","",""
-(substr ("%s" @icon) 0 16) ; "","./Installer.tmp.",""
+(> (strlen ("%s" @icon)) 8) ; "","1",""
 ("%s" @language) ; "","english",""
 ("%s" @special-msg) ; "","",""
 ("%ld" @user-level) ; "","1",""

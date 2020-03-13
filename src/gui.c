@@ -920,7 +920,7 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
 }
 
 //------------------------------------------------------------------------------
-// IGDirPart - [PRIVATE] - Return existing dir from random path 
+// IGDirPart - [PRIVATE] - Return existing dir from random path
 // Input:      ULONG Path: Random path.
 // Return:     ULONG:      Existing dir from path.
 //------------------------------------------------------------------------------
@@ -936,6 +936,14 @@ static ULONG IGDirPart(Class *cls, Object *obj, ULONG Path)
         // Copy path string.
         strncpy(my->Buf, CAST(Path, const char *), sizeof(my->Buf));
 
+        struct Process *p = (struct Process *) FindTask(NULL);
+
+        // Save current window ptr.
+        APTR w = p->pr_WindowPtr;
+
+        // Disable auto request.
+        p->pr_WindowPtr = (APTR) -1L;
+
         // Attempt to lock file or directory.
         BPTR lock = (BPTR) Lock(my->Buf, ACCESS_READ);
 
@@ -945,16 +953,28 @@ static ULONG IGDirPart(Class *cls, Object *obj, ULONG Path)
             // Release lock to file or directory.
             UnLock(lock);
 
-            // Cut of the last part of the path.
-            *PathPart(my->Buf) = '\0';
+            // Find path tail.
+            char *tail = PathPart(my->Buf);
 
-            // Try again.
-            lock = (BPTR) Lock(my->Buf, ACCESS_READ);
+            if(*tail == '\0')
+            {
+                // We've reached the end of the road.
+                *(my->Buf) = '\0';
+            }
+            else
+            {
+                // Cut of the tail and repeat.
+                *tail = '\0';
+                lock = (BPTR) Lock(my->Buf, ACCESS_READ);
+            }
         }
 
         // Release lock to file or directory.
         FreeDosObject(DOS_FIB, fib);
         UnLock(lock);
+
+        // Restore auto request.
+        p->pr_WindowPtr = w;
 
         return CAST(my->Buf, ULONG);
     }
