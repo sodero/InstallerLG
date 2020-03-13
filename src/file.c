@@ -895,49 +895,44 @@ static int32_t h_protect_get_amiga(entry_p contxt, const char *file,
         return LG_FALSE;
     }
 
-    // Attempt to lock file / dir.
+    // Attempt to lock file / directory.
     BPTR lock = (BPTR) Lock(file, ACCESS_READ);
-    bool done = false;
 
-    if(lock)
+    // Fill up FIB. Filter out non-POSIX flags in test mode.
+    if(lock && Examine(lock, fib))
     {
-        // Fill up FIB. Filter out non-POSIX flags in test mode.
-        if(Examine(lock, fib))
-        {
-            #ifdef LG_TEST
-            *mask = (fib->fib_Protection & 0xff) | 0x01;
-            #else
-            *mask = fib->fib_Protection;
-            #endif
-            done = true;
-        }
-
-        UnLock(lock);
-    }
-
-    // Free FIB memory.
-    FreeDosObject(DOS_FIB, fib);
-
-    if(!done)
-    {
-        // Only fail if we're in 'strict' mode (and not in test mode).
-        #ifndef LG_TEST
-        if(get_num(contxt, "@strict"))
-        {
-            ERR(ERR_GET_PERM, file);
-            *mask = -1;
-        }
-        else
+        #ifdef LG_TEST
+        *mask = (fib->fib_Protection & 0xff) | 0x01;
+        #else
+        *mask = fib->fib_Protection;
         #endif
-        {
-            // Fallback to RWED.
-            *mask = 0;
-        }
+
+        // Release lock and free FIB.
+        FreeDosObject(DOS_FIB, fib);
+        UnLock(lock);
+
+        return LG_TRUE;
     }
 
-    // If enabled, write to log file.
-    h_log(contxt, tr(S_GMSK), file, *mask);
-    return done ? LG_TRUE : LG_FALSE;
+    // Release lock and free FIB.
+    FreeDosObject(DOS_FIB, fib);
+    UnLock(lock);
+
+    // Only fail if we're in 'strict' mode (and not in test mode).
+    #ifndef LG_TEST
+    if(get_num(contxt, "@strict"))
+    {
+        ERR(ERR_GET_PERM, file);
+        *mask = -1;
+    }
+    else
+    #endif
+    {
+        // Fallback to RWED.
+        *mask = 0;
+    }
+
+    return LG_FALSE;
 }
 #else
 //------------------------------------------------------------------------------
@@ -1031,8 +1026,6 @@ static int32_t h_protect_set(entry_p contxt, const char *file, int32_t mask)
     chmod(file, h_perm_amiga_to_posix(mask));
     #endif
 
-    // If logging is enabled, write to log.
-    h_log(contxt, tr(S_PTCT), file, mask);
     return LG_TRUE;
 }
 
