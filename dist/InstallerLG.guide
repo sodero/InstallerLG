@@ -110,6 +110,7 @@ Italian translations.
 
 @{B}0.1.0-alpha.45 (2020-NOT-YET)@{UB}
 - (getsum) silent read error fixed.
+- (askdir) potential deadlock fixed.
 - ?
 
 @{B}0.1.0-alpha.44 (2020-03-04)@{UB}
