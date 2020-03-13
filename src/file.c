@@ -593,8 +593,8 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
             while(entry)
             {
                 // Create the source destination tuple
-                n_src = h_tackon(contxt, src, entry->d_name),
-                n_dst = h_tackon(contxt, dst, entry->d_name);
+                n_src = DBG_ALLOC(h_tackon(contxt, src, entry->d_name)),
+                n_dst = DBG_ALLOC(h_tackon(contxt, dst, entry->d_name));
 
                 // Are we out of memory?
                 if(!n_src || !n_dst)
