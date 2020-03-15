@@ -2457,7 +2457,11 @@ entry_p n_exists(entry_p contxt)
     // One argument and option.
     C_SANE(1, contxt);
 
-    // Supress volume requester?
+    // Supress volume requester. Despite what the CBM documentation says,
+    // requesters are always supressed. The h_exists function as it is now
+    // doesn't make any requesters pop up. But let's keep the supression code
+    // here in case we decide to follow the documentation and not mimic the
+    // CBM implementation later on.
     if(opt(contxt, OPT_NOREQ) || opt(contxt, OPT_QUIET))
     {
         #if defined(AMIGA) && !defined(LG_TEST)
