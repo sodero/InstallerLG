@@ -129,18 +129,16 @@ static bool arg_cli(int argc, char **argv)
 // Name:        arg_find_tts
 // Description: Find tooltypes in string list.
 // Input:       STRPTR *tts:    List of tooltype strings.
-//              bool tool:      'true' if invoked as tool, 'false' if project.
 // Return:      -
 //------------------------------------------------------------------------------
-static void arg_find_tts(STRPTR *tts, bool tool)
+static void arg_find_tts(STRPTR *tts)
 {
-    // We need to find the script path if we're invoked as a tool.
-    if(tool)
-    {
-        args[ARG_SCRIPT] = (char *) FindToolType(tts, (STRPTR) tr(S_SCRI));
-    }
+    // Is there an explicit script path?
+    char *script = (char *) FindToolType(tts, (STRPTR) tr(S_SCRI));
 
-    // The rest of the 'tooltypes' are the same for 'projects' and 'tools'.
+    // Override current path if explicit path exists.
+    args[ARG_SCRIPT] = script ? script : args[ARG_SCRIPT];
+
     args[ARG_APPNAME] = (char *) FindToolType((STRPTR *) tts, "APPNAME");
     args[ARG_MINUSER] = (char *) FindToolType((STRPTR *) tts, "MINUSER");
     args[ARG_DEFUSER] = (char *) FindToolType((STRPTR *) tts, "DEFUSER");
@@ -190,7 +188,7 @@ static bool arg_wb(char **argv)
 
     if(dob && dob->do_ToolTypes)
     {
-        arg_find_tts(dob->do_ToolTypes, wb->sm_NumArgs == 1);
+        arg_find_tts(dob->do_ToolTypes);
     }
 
     // Postprocess WB info and go back. We'll crash if we don't.
