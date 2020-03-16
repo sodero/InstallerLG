@@ -619,7 +619,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         // use plain strcmp().
                         if((w && MatchPatternNoCase(buf_get(B_KEY),
                             h_common_suffix(n_src, n_dst))) ||
-                          (!w && !strcmp(buf_get(B_KEY), entry->d_name)))
+                          (!w && !strcasecmp(buf_get(B_KEY), entry->d_name)))
                         {
                             // Get proper type of match.
                             type = h_exists(n_src);
