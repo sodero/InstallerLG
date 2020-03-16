@@ -630,12 +630,6 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                             type = LG_NONE;
                         }
                     }
-                    else
-                    {
-                        // Buffer overflow. No more pattern matching today.
-                        ERR(ERR_OVERFLOW, str(pattern));
-                        pattern = NULL;
-                    }
                     #else
                     // Get rid of warning and increase test coverage.
                     snprintf(buf_get(B_KEY), buf_len(), "%s", n_src);
@@ -2677,9 +2671,8 @@ entry_p n_foreach(entry_p contxt)
                         skip = strcmp(top->name, pt);
                         break;
 
-                    // We probably had a buffer overflow.
+                    // Could not parse pattern.
                     default:
-                        ERR(ERR_OVERFLOW, pt);
                         err = true;
                 }
             }
