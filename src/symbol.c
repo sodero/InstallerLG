@@ -117,7 +117,7 @@ entry_p n_set(entry_p contxt)
     {
         // Resolve the RHS and do a deep copy of it.
         entry_p rhs = resolve(*val), dst = global(contxt),
-                res = DID_ERR ? NULL : h_copy_deep(rhs);
+                res = NOT_ERR ? h_copy_deep(rhs) : NULL;
 
         if(!res)
         {
@@ -150,6 +150,62 @@ entry_p n_set(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_symbolset_exists
+// Description: Update symbol in current context.
+// Input:       entry_p contxt:     Execution context.
+//              entry_p esm:        Existing symbol.
+//              entry_p res:        New resolved value.
+// Return:      entry_p:            The existing symbol.
+//------------------------------------------------------------------------------
+entry_p n_symbolset_exists(entry_p contxt, entry_p esm, entry_p res)
+{
+    // Replace resolved value of existing symbol.
+    kill(esm->resolved);
+    esm->resolved = res;
+
+    // Push cannot fail in this context.
+    push(global(contxt), esm);
+    res->parent = esm;
+
+    // Pass the result.
+    return res;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_symbolset_new
+// Description: Create new named symbol in current context.
+// Input:       entry_p contxt:     Execution context.
+//              const char *:       Symbol name.
+//              entry_p res:        Initial resolved value.
+// Return:      entry_p:            The newly created symbol.
+//------------------------------------------------------------------------------
+entry_p n_symbolset_new(entry_p contxt, const char *lhs, entry_p res)
+{
+    // Append new symbol to current context.
+    entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs)));
+
+    if(!nsm || !append(&contxt->symbols, nsm))
+    {
+        kill(nsm);
+        kill(res);
+
+        // Fallback.
+        return end();
+    }
+
+    // Reparent and create global reference.
+    nsm->resolved = res;
+    res->parent = nsm;
+
+    // Push cannot fail in this context.
+    push(global(contxt), nsm);
+    nsm->parent = contxt;
+
+    // Pass the result.
+    return res;
+}
+
+//------------------------------------------------------------------------------
 // (symbolset <symbolname> <expression>)
 //     assign a value to a variable named by the string result of
 //     `<symbolname>' (V42.9)
@@ -168,7 +224,7 @@ entry_p n_symbolset(entry_p contxt)
     {
         // Resolve LHS and RHS and do a deep copy of RHS.
         const char *lhs = str(*cur++);
-        entry_p rhs = resolve(*cur++), res = DID_ERR ? NULL : h_copy_deep(rhs);
+        entry_p rhs = resolve(*cur++), res = NOT_ERR ? h_copy_deep(rhs) : NULL;
 
         if(!res)
         {
@@ -184,35 +240,13 @@ entry_p n_symbolset(entry_p contxt)
 
         if(esm)
         {
-            // Reparent and continue with the next tuple.
-            kill(esm->resolved);
-            esm->resolved = res;
-
-            // Push cannot fail in this context.
-            push(global(contxt), esm);
-            res->parent = esm;
-            ret = res;
+            // Update existing symbol.
+            ret = n_symbolset_exists(contxt, esm, res);
         }
         else
         {
-            // Append new symbol to current context.
-            entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs)));
-
-            if(!nsm || !append(&contxt->symbols, nsm))
-            {
-                kill(nsm);
-                kill(res);
-                return end();
-            }
-
-            // Reparent and create global reference.
-            res->parent = nsm;
-            nsm->resolved = res;
-
-            // Push cannot fail in this context.
-            push(global(contxt), nsm);
-            nsm->parent = contxt;
-            ret = res;
+            // Create new symbol.
+            ret = n_symbolset_new(contxt, lhs, res);
         }
     }
 
