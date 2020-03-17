@@ -112,6 +112,8 @@ Italian translations.
 - (getsum) silent read error fixed.
 - (askdir) potential deadlock fixed.
 - Lexer allows EOF comments.
+- Explicit project SCRIPT tooltype fixed.
+- Verbatim (pattern) fixed.
 - ?
 
 @{B}0.1.0-alpha.44 (2020-03-04)@{UB}
