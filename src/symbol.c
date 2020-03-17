@@ -157,7 +157,7 @@ entry_p n_set(entry_p contxt)
 //              entry_p res:        New resolved value.
 // Return:      entry_p:            The existing symbol.
 //------------------------------------------------------------------------------
-entry_p n_symbolset_exists(entry_p contxt, entry_p esm, entry_p res)
+static entry_p n_symbolset_exists(entry_p contxt, entry_p esm, entry_p res)
 {
     // Replace resolved value of existing symbol.
     kill(esm->resolved);
@@ -179,7 +179,7 @@ entry_p n_symbolset_exists(entry_p contxt, entry_p esm, entry_p res)
 //              entry_p res:        Initial resolved value.
 // Return:      entry_p:            The newly created symbol.
 //------------------------------------------------------------------------------
-entry_p n_symbolset_new(entry_p contxt, const char *lhs, entry_p res)
+static entry_p n_symbolset_new(entry_p contxt, const char *lhs, entry_p res)
 {
     // Append new symbol to current context.
     entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs)));
