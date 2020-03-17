@@ -619,7 +619,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         // use plain strcmp().
                         if((w && MatchPatternNoCase(buf_get(B_KEY),
                             h_common_suffix(n_src, n_dst))) ||
-                          (!w && !strcmp(buf_get(B_KEY), entry->d_name)))
+                          (!w && !strcasecmp(buf_get(B_KEY), entry->d_name)))
                         {
                             // Get proper type of match.
                             type = h_exists(n_src);
@@ -629,12 +629,6 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                             // Skip non-matches.
                             type = LG_NONE;
                         }
-                    }
-                    else
-                    {
-                        // Buffer overflow. No more pattern matching today.
-                        ERR(ERR_OVERFLOW, str(pattern));
-                        pattern = NULL;
                     }
                     #else
                     // Get rid of warning and increase test coverage.
@@ -2457,7 +2451,11 @@ entry_p n_exists(entry_p contxt)
     // One argument and option.
     C_SANE(1, contxt);
 
-    // Supress volume requester?
+    // Supress volume requester. Despite what the CBM documentation says,
+    // requesters are always supressed. The h_exists function as it is now
+    // doesn't make any requesters pop up. But let's keep the supression code
+    // here in case we decide to follow the documentation and not mimic the
+    // CBM implementation later on.
     if(opt(contxt, OPT_NOREQ) || opt(contxt, OPT_QUIET))
     {
         #if defined(AMIGA) && !defined(LG_TEST)
@@ -2673,9 +2671,8 @@ entry_p n_foreach(entry_p contxt)
                         skip = strcmp(top->name, pt);
                         break;
 
-                    // We probably had a buffer overflow.
+                    // Could not parse pattern.
                     default:
-                        ERR(ERR_OVERFLOW, pt);
                         err = true;
                 }
             }

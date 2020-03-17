@@ -322,7 +322,7 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
     }
 
     // Iterate over all options in execution context.
-    for(size_t i = 0; i < OPT_LAST && exists(contxt->children[i]); i++)
+    for(size_t i = 0; exists(contxt->children[i]); i++)
     {
         // Children could be of any type.
         if(contxt->children[i]->type == OPTION)

@@ -369,8 +369,7 @@ entry_p n_patmatch(entry_p contxt)
         R_NUM(r ? LG_TRUE : LG_FALSE);
     }
 
-    // Buffer overflow.
-    ERR(ERR_OVERFLOW, pat);
+    // Could not parse pattern.
     R_NUM(LG_FALSE);
     #else
     // Testing.
