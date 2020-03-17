@@ -60,7 +60,7 @@ static bool arg_post(void)
         #endif
 
         // Copy of the (hopefully) absolute script path and working directory.
-        args[ARG_SCRIPTDIR] = DBG_ALLOC(h_pathonly(buf_get(B_KEY)));
+        args[ARG_HOMEDIR] = DBG_ALLOC(h_pathonly(buf_get(B_KEY)));
         args[ARG_SCRIPT] = DBG_ALLOC(strdup(buf_put(B_KEY)));
     }
 
@@ -72,7 +72,7 @@ static bool arg_post(void)
     }
 
     // Script and script directory aren't optional.
-    return args[ARG_SCRIPT] && args[ARG_SCRIPTDIR];
+    return args[ARG_SCRIPT] && args[ARG_HOMEDIR];
 }
 
 //------------------------------------------------------------------------------
@@ -230,7 +230,7 @@ bool arg_init(int argc, char **argv)
     bool init = argc ? arg_cli(argc, argv) : arg_wb(argv);
 
     // Go to script working directory and return.
-    return init && args[ARG_SCRIPTDIR] && !chdir(args[ARG_SCRIPTDIR]);
+    return init && args[ARG_HOMEDIR] && !chdir(args[ARG_HOMEDIR]);
 }
 
 //------------------------------------------------------------------------------
@@ -279,14 +279,14 @@ void arg_done(void)
 {
     // Go back to the directory where we started. Don't rely on the existance
     // of these strings, we might be out of memory.
-    if(args[ARG_SCRIPTDIR] && args[ARG_OLDDIR])
+    if(args[ARG_HOMEDIR] && args[ARG_OLDDIR])
     {
         chdir(args[ARG_OLDDIR]);
     }
 
-    // Free what we have allocated. Note that we stop at SCRIPTDIR since that's
+    // Free what we have allocated. Note that we stop at HOMEDIR since that's
     // the last string. NOLOG and NOPRETEND are (interpreted as) booleans.
-    for(size_t arg = ARG_SCRIPT; arg <= ARG_SCRIPTDIR; arg++)
+    for(size_t arg = ARG_SCRIPT; arg <= ARG_HOMEDIR; arg++)
     {
         free(args[arg]);
     }
