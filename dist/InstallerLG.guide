@@ -114,6 +114,7 @@ Italian translations.
 - Lexer allows EOF comments.
 - Explicit project SCRIPT tooltype fixed.
 - Verbatim (pattern) fixed.
+- Empty (delopts) and (optional) allowed.
 - ?
 
 @{B}0.1.0-alpha.44 (2020-03-04)@{UB}
