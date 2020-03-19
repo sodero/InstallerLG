@@ -346,7 +346,7 @@ entry_p n_askdir(entry_p contxt)
     if(grc == G_ABORT || grc == G_EXIT)
     {
         HALT;
-        return end();
+        R_EST;
     }
 
     // We have a directory.
@@ -579,7 +579,7 @@ entry_p n_askfile(entry_p contxt)
     if(grc == G_ABORT || grc == G_EXIT)
     {
         HALT;
-        return end();
+        R_EST;
     }
 
     // We have a file.
@@ -885,7 +885,7 @@ entry_p n_askstring(entry_p contxt)
     if(grc == G_ABORT || grc == G_EXIT)
     {
         HALT;
-        return end();
+        R_EST;
     }
 
     // We have a string.
