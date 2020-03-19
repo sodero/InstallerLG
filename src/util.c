@@ -467,7 +467,8 @@ static bool x_sane(entry_p contxt, type_t type, size_t num)
     entry_p *vec = type == NATIVE ? contxt->children : contxt->symbols;
 
     // Array of num or more, and if NATIVE, a resolved value is needed.
-    if((num && !vec) || (contxt->type == NATIVE && !contxt->resolved))
+    if((num && !vec) || (contxt->type == NATIVE && (!contxt->resolved ||
+       (contxt->resolved->type == STRING && !contxt->resolved->name))))
     {
         dump(contxt);
         return false;

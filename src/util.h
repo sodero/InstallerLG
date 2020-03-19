@@ -57,6 +57,7 @@ int32_t str_to_userlevel(const char *user, int32_t def);
 #define R_STR(X) char *r_str = X; if(r_str) {free(contxt->resolved->name);\
                  contxt->resolved->name = r_str;} else { PANIC(contxt);\
                  contxt->resolved->name[0] = '\0'; }; return contxt->resolved
+#define R_EST    contxt->resolved->name[0] = '\0'; return contxt->resolved
 #define C_ARG(X) contxt->children[(X) - 1]
 #define C_SYM(X) contxt->symbols[(X) - 1]
 #define B_KEY __func__

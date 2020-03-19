@@ -73,7 +73,7 @@ entry_p n_expandpath(entry_p contxt)
     }
 
     // Empty string fallback.
-    return end();
+    R_EST;
     #else
     // Testing only.
     R_STR(DBG_ALLOC(strdup(pth)));
