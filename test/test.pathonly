@@ -1,4 +1,6 @@
 (pathonly "") ; "","",""
+(= "" (pathonly "")) ; "","1",""
+(= 0 (pathonly "")) ; "","0",""
 (pathonly "dh0:path") ; "","dh0:",""
 (pathonly "dh0:dir/path") ; "","dh0:dir",""
 (pathonly "dh0:dir/dir/path") ; "","dh0:dir/dir",""

@@ -1,3 +1,5 @@
 (getdevice) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (getdevice "path") ; "","",""
+(= "" (getdevice "path")) ; "","1",""
+(= 0 (getdevice "path")) ; "","0",""
 (getdevice "path" err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
