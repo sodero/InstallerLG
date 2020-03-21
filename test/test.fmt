@@ -20,6 +20,8 @@
 (set i 0 @strict 0) (while (< i 5) (set f (select i "a%ld" "b%ld" "c%ld" "d%ld" "e%ld")) (debug (f i)) (set i (+ i 1))); "","a0 b1 c2 d3 e4 5",""
 (set i 0 @strict 0) (while (< i 5) ((debug ("a%%%ld" i)) (set i (+ i 1)))) ; "","a%0 a%1 a%2 a%3 a%4 5",""
 ("%s") ; "","",""
+(= "" ("%s")) ; "","1",""
+(= 0 ("%s")) ; "","0",""
 ("a%s") ; "","a",""
 (set a "X") ("a:%s" a) ; "","a:X",""
 (set i 0 a "X") (while (< i 5) ( (debug ("a:%s" a)) (set i (+ i 1)))) ; "","a:X a:X a:X a:X a:X 5",""
