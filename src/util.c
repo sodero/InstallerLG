@@ -318,7 +318,12 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
     {
         // Push directly to cache.
         opt_push_cache(contxt, cache);
-        return;
+
+        // Check for embedded options.
+        if(!contxt->children)
+        {
+            return;
+        }
     }
 
     // Iterate over all options in execution context.
@@ -327,8 +332,8 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
         // Children could be of any type.
         if(contxt->children[i]->type == OPTION)
         {
-            // Push current option to cache.
-            opt_push_cache(contxt->children[i], cache);
+            // Cache current option + embedded, if any.
+            opt_fill_cache(contxt->children[i], cache);
         }
     }
 }
