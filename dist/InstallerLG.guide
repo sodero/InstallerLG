@@ -111,10 +111,11 @@ Italian translations.
 @{B}0.1.0-alpha.45 (2020-NOT-YET)@{UB}
 - (getsum) silent read error fixed.
 - (askdir) potential deadlock fixed.
-- Lexer allows EOF comments.
+- Lexer allows EOF comments (BlitzBank).
 - Explicit project SCRIPT tooltype fixed.
 - Verbatim (pattern) fixed.
 - Empty (delopts) and (optional) allowed.
+- (source) embedded (all) whack (EasyFr).
 - ?
 
 @{B}0.1.0-alpha.44 (2020-03-04)@{UB}
