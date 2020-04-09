@@ -25,20 +25,20 @@
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_openwbobject(entry_p contxt)
+entry_p n_openwbobject(entry_p contxt)
 {
     // We need a single argument.
-    C_SANE(1, C_ARG(2));
+    C_SANE(1, contxt);
 
     // A non safe operation in pretend mode always succeeds.
-    if(get_num(contxt, "@pretend") && !opt(C_ARG(2), OPT_SAFE))
+    if(get_num(contxt, "@pretend") && !opt(contxt, OPT_SAFE))
     {
         R_NUM(LG_TRUE);
     }
 
     // Get confirmation if necessary.
-    if(!opt(C_ARG(2), OPT_CONFIRM) || h_confirm(C_ARG(2),
-        str(opt(C_ARG(2), OPT_HELP)), str(opt(C_ARG(2), OPT_PROMPT))))
+    if(!opt(contxt, OPT_CONFIRM) || h_confirm(contxt,
+        str(opt(contxt, OPT_HELP)), str(opt(contxt, OPT_PROMPT))))
     {
         #if defined(AMIGA) && !defined(LG_TEST)
         R_NUM(OpenWorkbenchObjectA(str(C_ARG(1)), NULL) ? LG_TRUE : LG_FALSE);
@@ -61,7 +61,7 @@ entry_p m_openwbobject(entry_p contxt)
 //
 // KNOWN BUG: This doesn't seem to work on AROS and MorphOS.
 //------------------------------------------------------------------------------
-entry_p m_showwbobject(entry_p contxt)
+entry_p n_showwbobject(entry_p contxt)
 {
     // We need a single argument.
     C_SANE(1, NULL);
@@ -83,7 +83,7 @@ entry_p m_showwbobject(entry_p contxt)
 //
 // KNOWN BUG: This doesn't seem to work on AROS and MorphOS.
 //------------------------------------------------------------------------------
-entry_p m_closewbobject(entry_p contxt)
+entry_p n_closewbobject(entry_p contxt)
 {
     // We need a single argument.
     C_SANE(1, NULL);

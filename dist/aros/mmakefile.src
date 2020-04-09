@@ -1,0 +1,51 @@
+# InstallerLG Makefile
+#
+
+include $(SRCDIR)/config/aros-contrib.cfg
+
+DATE := $(shell date +%d.%m.%Y)
+EXEDIR := $(AROSDIR)/C
+FILES := ../../src/alloc \
+              ../../src/args \
+              ../../src/arithmetic \
+              ../../src/comparison \
+              ../../src/control \
+              ../../src/debug \
+              ../../src/error \
+              ../../src/eval \
+              ../../src/exit \
+              ../../src/external \
+              ../../src/file \
+              ../../src/gui \
+              ../../src/information \
+              ../../src/init \
+              ../../build/lexer \
+              ../../src/logic \
+              ../../src/media \
+              ../../build/parser \
+              ../../src/probe \
+              ../../src/procedure \
+              ../../src/prompt \
+              ../../src/resource \
+              ../../src/strcasestr \
+              ../../src/strop \
+              ../../src/symbol \
+              ../../src/util \
+              ../../src/wb
+
+NOWARN_FLAGS := $(NOWARN_UNUSED_FUNCTION) $(NOWARN_ERROR)
+
+USER_CFLAGS := $(NOWARN_FLAGS) -std=gnu99
+
+USER_CPPFLAGS := -D__AMIGADATE__=\"\($(DATE)\)\"
+
+USER_INCLUDES := -idirafter $(SRCDIR)/$(CURDIR)/../../src
+
+#MM- contrib : contrib-installerlg
+#MM contrib-installerlg : includes linklibs
+
+%build_prog mmake=contrib-installerlg \
+    progname=Installer targetdir=$(EXEDIR) \
+    files=$(FILES) uselibs="debug"
+
+%common

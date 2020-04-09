@@ -86,31 +86,32 @@ entry_p find_symbol(entry_p entry)
 //------------------------------------------------------------------------------
 // Name:        h_resolve_option
 // Description: Resolve all option types.
-// Input:       entry_p opt:  An OPTION.
-// Return:      entry_p:      Pointer to an entry_t primitive.
+// Input:       entry_p option:  An OPTION.
+// Return:      entry_p:         Pointer to an entry_t primitive.
 //------------------------------------------------------------------------------
-static entry_p h_resolve_option(entry_p opt)
+static entry_p h_resolve_option(entry_p option)
 {
     // Dynamic options are native function calls.
-    if(opt->id == OPT_DYNOPT)
+    if(option->id == OPT_DYNOPT)
     {
-        return opt->call(opt);
+        return option->call(option);
     }
 
     // Back options are treated like contexts.
-    if(opt->id == OPT_BACK)
+    if(option->id == OPT_BACK)
     {
-        return invoke(opt);
+        return invoke(option);
     }
 
-    if(opt->id == OPT_DELOPTS)
+    // Special handling of (delopts).
+    if(option->id == OPT_DELOPTS)
     {
-        // QUIRKY DELOPTS SPECIAL STUB.
-        // static int count_me;
+        // Initialize cache to delete options.
+        opt(option ,OPT_INIT);
     }
 
     // A normal option.
-    return opt;
+    return option;
 }
 
 //------------------------------------------------------------------------------
@@ -172,9 +173,9 @@ entry_p resolve(entry_p entry)
 //              representations of user levels to the corresponding numerical
 //              value.
 // Input:       entry_p entry:  An entry_t pointer to an OPTION object.
-// Return:      int:            An integer representation of the input.
+// Return:      int32_t:        An integer representation of the input.
 //------------------------------------------------------------------------------
-static int opt_to_int(entry_p entry)
+static int32_t opt_to_int(entry_p entry)
 {
     // Resolve once.
     char *option = str(entry);
@@ -195,9 +196,9 @@ static int opt_to_int(entry_p entry)
 // Description: Get integer representation of an entry. This implies resolving
 //              it, and, if necessary, converting it.
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
-// Return:      int:            An integer representation of the input.
+// Return:      int32_t:        An integer representation of the input.
 //------------------------------------------------------------------------------
-int num(entry_p entry)
+int32_t num(entry_p entry)
 {
     if(!entry && PANIC(entry))
     {
@@ -265,7 +266,7 @@ bool tru(entry_p entry)
 
     // Only numerals and strings can be true.
     return (((val->type == STRING && *(val->name)) ||
-             (val->type == NUMBER && val->id)) && !DID_ERR);
+             (val->type == NUMBER && val->id)) && NOT_ERR);
 }
 
 //------------------------------------------------------------------------------
@@ -304,7 +305,6 @@ static char *h_str_opt(entry_p opt)
 
            if(!opt->name && PANIC(opt))
            {
-               // Out of memory.
                break;
            }
 
@@ -337,7 +337,6 @@ static char *h_str_num(entry_p opt)
 
     if(!opt->name && PANIC(opt))
     {
-        // Out of memory.
         return "";
     }
 
@@ -429,7 +428,7 @@ entry_p invoke(entry_p entry)
     if(cur)
     {
         // Reesolve children and save the last return value.
-        while(exists(*cur) && !DID_ERR)
+        while(exists(*cur) && NOT_ERR)
         {
             ret = resolve(*cur);
             cur++;
@@ -449,7 +448,7 @@ entry_p invoke(entry_p entry)
 void run(entry_p entry)
 {
     // Is there an 'effect' statement in there?
-    entry_p status = native_exists(entry, m_effect);
+    entry_p status = native_exists(entry, n_effect);
 
     // i18n setup.
     locale_init();
@@ -465,14 +464,14 @@ void run(entry_p entry)
         }
 
         // Execute the script unless 'effect' failed or halted.
-        if(!DID_ERR && !DID_HALT)
+        if(NOT_ERR && NOT_HALT)
         {
             status = invoke(entry);
 
             // Execute (onerror) on failure.
-            if(DID_ERR && !DID_HALT)
+            if(DID_ERR && NOT_HALT)
             {
-                status = m_onerror(entry);
+                status = n_onerror(entry);
             }
         }
 

@@ -1,4 +1,6 @@
 (getenv "_INSTALLER_LG_") ; "","yes",""
 (getenv "_ge_") ; "","",""
+(= "" (getenv "_ge_")) ; "","1",""
+(= 0 (getenv "_ge_")) ; "","0",""
 (getenv "EDITOR" (safe)) ; "","Line 1: syntax error, unexpected '(', expecting ')' '('",""
 (getenv) ; "","Line 1: syntax error, unexpected ')' ')'",""

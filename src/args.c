@@ -43,7 +43,7 @@ static bool arg_post(void)
     // arg_done() that is already freed by FreeDiskObject in arg_wb().
     if(args[ARG_SCRIPT])
     {
-        #if defined(AMIGA) && !defined(LG_TEST)
+        #if defined(AMIGA)
         BPTR lock = (BPTR) Lock(args[ARG_SCRIPT], ACCESS_READ);
 
         // Use script name if we fail to get the absolute path.
@@ -56,7 +56,7 @@ static bool arg_post(void)
         UnLock(lock);
         #else
         // Prepend redundant path in test mode.
-        snprintf(buf_get(B_KEY), buf_len(), "./%s", args[ARG_SCRIPT]);
+        (void) snprintf(buf_get(B_KEY), buf_len(), "./%s", args[ARG_SCRIPT]);
         #endif
 
         // Copy of the (hopefully) absolute script path and working directory.
@@ -84,7 +84,7 @@ static bool arg_post(void)
 //------------------------------------------------------------------------------
 static bool arg_cli(int argc, char **argv)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+    #if defined(AMIGA)
     // Not used on Amiga.
     (void) argc;
     (void) argv;
@@ -124,23 +124,21 @@ static bool arg_cli(int argc, char **argv)
     #endif
 }
 
-#if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA)
 //------------------------------------------------------------------------------
 // Name:        arg_find_tts
 // Description: Find tooltypes in string list.
 // Input:       STRPTR *tts:    List of tooltype strings.
-//              bool tool:      'true' if invoked as tool, 'false' if project.
 // Return:      -
 //------------------------------------------------------------------------------
-static void arg_find_tts(STRPTR *tts, bool tool)
+static void arg_find_tts(STRPTR *tts)
 {
-    // We need to find the script path if we're invoked as a tool.
-    if(tool)
-    {
-        args[ARG_SCRIPT] = (char *) FindToolType(tts, (STRPTR) tr(S_SCRI));
-    }
+    // Is there an explicit script path?
+    char *script = (char *) FindToolType(tts, (STRPTR) tr(S_SCRI));
 
-    // The rest of the 'tooltypes' are the same for 'projects' and 'tools'.
+    // Override current path if explicit path exists.
+    args[ARG_SCRIPT] = script ? script : args[ARG_SCRIPT];
+
     args[ARG_APPNAME] = (char *) FindToolType((STRPTR *) tts, "APPNAME");
     args[ARG_MINUSER] = (char *) FindToolType((STRPTR *) tts, "MINUSER");
     args[ARG_DEFUSER] = (char *) FindToolType((STRPTR *) tts, "DEFUSER");
@@ -159,7 +157,7 @@ static void arg_find_tts(STRPTR *tts, bool tool)
 //------------------------------------------------------------------------------
 static bool arg_wb(char **argv)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+    #if defined(AMIGA)
     struct WBStartup *wb = (struct WBStartup *) argv;
 
     // We must be invoked using a tool or a project.
@@ -173,7 +171,6 @@ static bool arg_wb(char **argv)
 
     if(!arg)
     {
-        // Unkown error.
         return false;
     }
 
@@ -191,14 +188,13 @@ static bool arg_wb(char **argv)
 
     if(dob && dob->do_ToolTypes)
     {
-        arg_find_tts(dob->do_ToolTypes, wb->sm_NumArgs == 1);
+        arg_find_tts(dob->do_ToolTypes);
     }
 
     // Postprocess WB info and go back. We'll crash if we don't.
     bool ret = arg_post();
     CurrentDir(old);
 
-    // Disk object not needed, a deep copy is done in arg_post().
     if(dob)
     {
         FreeDiskObject(dob);
@@ -206,7 +202,6 @@ static bool arg_wb(char **argv)
 
     return ret;
     #else
-    // We should never end up here.
     (void) argv;
     return false;
     #endif

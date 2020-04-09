@@ -29,7 +29,7 @@
 //------------------------------------------------------------------------------
 // Version return value according to the CBM installer documentation.
 //------------------------------------------------------------------------------
-#define LG_NOVER  -1
+#define LG_NOVER    -1
 
 //------------------------------------------------------------------------------
 // Default return values.
@@ -43,7 +43,7 @@
 //------------------------------------------------------------------------------
 #define LG_VECLEN   4        // Default array size
 #define LG_NUMLEN   16       // Max string length of numerical values
-#define LG_MAXDEP   32       // Max recursion depth
+#define LG_MAXDEP   64       // Max recursion depth
 #define LG_STRLEN   64       // Default string length.
 
 //------------------------------------------------------------------------------
@@ -108,12 +108,12 @@ typedef enum
     OPT_OPTIONAL,           // 37
     OPT_RESIDENT,           // 38
     OPT_OVERRIDE,           // 39
-    OPT_ASKUSER,            // 40
-    OPT_FAIL,               // 41
-    OPT_FORCE,              // 42
-    OPT_NOFAIL,             // 43
-    OPT_OKNODELETE,         // 44
-    OPT_DYNOPT,             // 45
+    OPT_DYNOPT,             // 40
+    OPT_ASKUSER,            // 41
+    OPT_FAIL,               // 42
+    OPT_FORCE,              // 43
+    OPT_NOFAIL,             // 44
+    OPT_OKNODELETE,         // 45
     OPT_INIT,               // 46
     OPT_LAST,               // 47
 } opt_t;
@@ -137,10 +137,5 @@ struct entry_s
 };
 
 typedef struct entry_s entry_t;
-
-#ifndef AMIGA
-# define LONG int
-# define APTR void *
-#endif
 
 #endif

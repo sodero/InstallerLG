@@ -27,21 +27,22 @@
 #include <string.h>
 
 //------------------------------------------------------------------------------
-// h_run - m_run / m_execute / m_rexx helper
+// h_run - n_run / n_execute / n_rexx helper
 //------------------------------------------------------------------------------
 static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 {
     // One or more arguments.
-    C_SANE(1, C_ARG(2));
+    C_SANE(1, con(contxt));
 
-    entry_p prompt   = opt(C_ARG(2), OPT_PROMPT),
-            help     = opt(C_ARG(2), OPT_HELP),
-            confirm  = opt(C_ARG(2), OPT_CONFIRM),
-            safe     = opt(C_ARG(2), OPT_SAFE),
-            back     = opt(C_ARG(2), OPT_BACK);
+    entry_p otx      = con(contxt),
+            prompt   = opt(otx, OPT_PROMPT),
+            help     = opt(otx, OPT_HELP),
+            confirm  = opt(otx, OPT_CONFIRM),
+            safe     = opt(otx, OPT_SAFE),
+            back     = opt(otx, OPT_BACK);
 
     // Error status.
-    int err = LG_FALSE;
+    int32_t err = LG_FALSE;
 
     // Do we need confirmation?
     if(confirm)
@@ -85,7 +86,6 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 
         if(!cmd && PANIC(contxt))
         {
-            // Out of memory.
             return end();
         }
 
@@ -97,7 +97,6 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 
             if(!tmp && PANIC(contxt))
             {
-                // Out of memory
                 free(cmd);
                 return end();
             }
@@ -206,7 +205,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_execute(entry_p contxt)
+entry_p n_execute(entry_p contxt)
 {
     return h_run(contxt, "execute", get_str(contxt, "@execute-dir"));
 }
@@ -217,7 +216,7 @@ entry_p m_execute(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_rexx(entry_p contxt)
+entry_p n_rexx(entry_p contxt)
 {
     return h_run(contxt, "rx", NULL);
 }
@@ -228,7 +227,7 @@ entry_p m_rexx(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_run(entry_p contxt)
+entry_p n_run(entry_p contxt)
 {
     return h_run(contxt, NULL, get_str(contxt, "@execute-dir"));
 }

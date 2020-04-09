@@ -26,6 +26,12 @@
 #ifdef __MORPHOS__
 char *strcasestr(const char *, const char *);
 #endif
+
+#if defined(__amigaos4__)
+static const char* __attribute__((used)) stackcookie = "$STACK: 131072";
+#elif defined(__AROS__) || defined(__MORPHOS__)
+unsigned long __stack = 131072;
+#endif
 #endif
 
 //------------------------------------------------------------------------------
@@ -35,17 +41,16 @@ char *strcasestr(const char *, const char *);
 //              accounted for.
 // Input:       entry_p contxt: CONTXT.
 //              char *sym:      Name.
-//              int num:        Value.
+//              int32_t num:    Value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void init_num(entry_p contxt, char *sym, int num)
+static void init_num(entry_p contxt, char *sym, int32_t num)
 {
     // Create SYMBOL -> VALUE tuple.
     entry_p var = new_symbol(DBG_ALLOC(strdup(sym))), val = new_number(num);
 
     if(!var || !val)
     {
-        // Out of memory.
         kill(var);
         kill(val);
         return;
@@ -57,7 +62,7 @@ static void init_num(entry_p contxt, char *sym, int num)
     val->parent = var;
 
     // Insert result in CONTXT.
-    append(&contxt->symbols, var);
+    (void) append(&contxt->symbols, var);
 }
 
 //------------------------------------------------------------------------------
@@ -78,7 +83,6 @@ static void init_str(entry_p contxt, char *sym, char *str)
 
     if(!var || !val)
     {
-        // Out of memory.
         kill(var);
         kill(val);
         return;
@@ -90,7 +94,7 @@ static void init_str(entry_p contxt, char *sym, char *str)
     val->parent = var;
 
     // Insert result in CONTXT.
-    append(&contxt->symbols, var);
+    (void) append(&contxt->symbols, var);
 }
 
 //------------------------------------------------------------------------------
@@ -106,16 +110,17 @@ static void init_tooltypes(entry_p contxt)
          *a_log = arg_get(ARG_LOGFILE), *a_lng = arg_get(ARG_LANGUAGE);
 
     // User levels: minimum 'NOVICE' and default 'AVERAGE'.
-    int l_def = str_to_userlevel(arg_get(ARG_DEFUSER), LG_AVERAGE),
-        l_min = str_to_userlevel(arg_get(ARG_MINUSER), LG_NOVICE);
+    int32_t l_def = str_to_userlevel(arg_get(ARG_DEFUSER), LG_AVERAGE),
+            l_min = str_to_userlevel(arg_get(ARG_MINUSER), LG_NOVICE);
 
     // Cap userlevel values, default must be >= minimum.
     init_num(contxt, "@user-level", l_def < l_min ? l_min : l_def);
     init_num(contxt, "@user-min", l_min);
 
     // Modus.
-    init_num(contxt, "@no-log", arg_get(ARG_NOLOG) ? 1 : 0);
-    init_num(contxt, "@no-pretend", arg_get(ARG_NOPRETEND) ? 1 : 0);
+    init_num(contxt, "@no-log", arg_get(ARG_NOLOG) ? LG_TRUE : LG_FALSE);
+    init_num(contxt, "@no-pretend", arg_get(ARG_NOPRETEND) ?
+             LG_TRUE : LG_FALSE);
 
     // File names.
     init_str(contxt, "@icon", a_scr ? a_scr : "");
@@ -154,24 +159,26 @@ static void init_tooltypes(entry_p contxt)
 static void init_misc_num(entry_p contxt)
 {
     // Set numerical values.
-    init_num(contxt, "@pretend", 0);
-    init_num(contxt, "@installer-version", (MAJOR << 16) | MINOR);
-    init_num(contxt, "@ioerr", 0);
-    init_num(contxt, "@log", 0);
-    init_num(contxt, "@yes", 0);
-    init_num(contxt, "@skip", 0);
-    init_num(contxt, "@abort", 0);
-    init_num(contxt, "@back", 0);
-    init_num(contxt, "@wild", 0);
-    init_num(contxt, "@each-type", 0);
-    init_num(contxt, "@debug", 0);
-    init_num(contxt, "@trap", 0);
+    init_num(contxt, "@pretend", LG_FALSE);
+    init_num(contxt, "@installer-version", (int32_t) (MAJOR << 16) | MINOR);
+    init_num(contxt, "@ioerr", LG_FALSE);
+    init_num(contxt, "@log", LG_FALSE);
+    init_num(contxt, "@yes", LG_FALSE);
+    init_num(contxt, "@skip", LG_FALSE);
+    init_num(contxt, "@abort", LG_FALSE);
+    init_num(contxt, "@back", LG_FALSE);
+    init_num(contxt, "@wild", LG_FALSE);
+    init_num(contxt, "@each-type", LG_FALSE);
+    init_num(contxt, "@debug", LG_FALSE);
+    init_num(contxt, "@trap", LG_FALSE);
+    init_num(contxt, "true", LG_TRUE);
+    init_num(contxt, "false", LG_FALSE);
     init_num(contxt, "@strict",
     // In test mode, strict is default.
     #if defined(AMIGA) && !defined(LG_TEST)
-    0
+    LG_FALSE
     #else
-    1
+    LG_TRUE
     #endif
     );
 }
@@ -237,7 +244,7 @@ static void init_error(entry_p contxt)
     // The default error handler returns '0' without doing anything.
     entry_p entry = new_native
     (
-        DBG_ALLOC(strdup("onerror")), __LINE__, m_procedure,
+        DBG_ALLOC(strdup("onerror")), __LINE__, n_procedure,
         push
         (
             new_contxt(),
@@ -249,7 +256,7 @@ static void init_error(entry_p contxt)
                     new_contxt(),
                     new_native
                     (
-                        DBG_ALLOC(strdup("select")), __LINE__, m_select,
+                        DBG_ALLOC(strdup("select")), __LINE__, n_select,
                         push(push
                         (
                             new_contxt(),
@@ -272,7 +279,7 @@ static void init_error(entry_p contxt)
     if(entry)
     {
         // Add to the root and reparent.
-        append(&contxt->children, entry);
+        (void) append(&contxt->children, entry);
         entry->parent = contxt;
 
         // Rotate to put it on top.
@@ -289,7 +296,7 @@ static void init_error(entry_p contxt)
 static void init_exit(entry_p contxt)
 {
     // Line numbers and naming are for debugging purposes only.
-    entry_p entry = new_native(DBG_ALLOC(strdup("exit")), __LINE__, m_exit,
+    entry_p entry = new_native(DBG_ALLOC(strdup("exit")), __LINE__, n_exit,
                                NULL, NUMBER);
 
     // Tests don't expect any default (exit).
@@ -297,7 +304,7 @@ static void init_exit(entry_p contxt)
     // Add to the root and reparent.
     if(entry)
     {
-        append(&contxt->children, entry);
+        (void) append(&contxt->children, entry);
         entry->parent = contxt;
     }
 
@@ -319,7 +326,7 @@ static void init_exit(entry_p contxt)
 static void init_welcome(entry_p contxt)
 {
     // Is there a (welcome) already?
-    entry_p entry = native_exists(contxt, m_welcome);
+    entry_p entry = native_exists(contxt, n_welcome);
 
     // If not, insert a default (welcome).
     if(!entry)
@@ -327,7 +334,7 @@ static void init_welcome(entry_p contxt)
         // The line numbers and naming are for debugging purposes only.
         entry = new_native
         (
-            DBG_ALLOC(strdup("welcome")), __LINE__, m_welcome,
+            DBG_ALLOC(strdup("welcome")), __LINE__, n_welcome,
             push
             (
                 new_contxt(),
@@ -341,7 +348,7 @@ static void init_welcome(entry_p contxt)
         // Add to the root and reparent.
         if(entry)
         {
-            append(&contxt->children, entry);
+            (void) append(&contxt->children, entry);
             entry->parent = contxt;
         }
 

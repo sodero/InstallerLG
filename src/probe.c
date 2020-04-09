@@ -182,7 +182,7 @@ static cpu_t h_cpu_id(void)
 
 //------------------------------------------------------------------------------
 // Name:        h_cpu_name
-// Description: Helper for m_database. Get host CPU architecture.
+// Description: Helper for n_database. Get host CPU architecture.
 // Input:       ---
 // Return:      char *: Host CPU architecture.
 //------------------------------------------------------------------------------
@@ -198,7 +198,7 @@ static char *h_cpu_name(void)
 
 //------------------------------------------------------------------------------
 // Name:        h_os_name
-// Description: Helper for m_database. Get name of host OS.
+// Description: Helper for n_database. Get name of host OS.
 // Input:       ---
 // Return:      char *: Name of host OS.
 //------------------------------------------------------------------------------
@@ -228,11 +228,11 @@ static char *h_os_name(void)
 
 //------------------------------------------------------------------------------
 // Name:        h_chipmem.
-// Description: Helper for m_database. Get free chipmem in bytes.
+// Description: Helper for n_database. Get free chipmem in bytes.
 // Input:       ---
-// Return:      int:    Free chipmem.
+// Return:      int32_t:    Free chipmem.
 //------------------------------------------------------------------------------
-static int h_chipmem(void)
+static int32_t h_chipmem(void)
 {
     return
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -241,17 +241,17 @@ static int h_chipmem(void)
     // In test mode / on non Amigas we shouldn't report anything but a dummy
     // value. Doing so would create dependencies between test results and host
     // system. Pretend that we have 512 KiB free chipmem.
-    1 << 19;
+    (int32_t) 1 << 19;
     #endif
 }
 
 //------------------------------------------------------------------------------
 // Name:        h_totalmem.
-// Description: Helper for m_database. Get free chipmem + fastmem in bytes.
+// Description: Helper for n_database. Get free chipmem + fastmem in bytes.
 // Input:       ---
-// Return:      int:    Free chipmem + fastmem.
+// Return:      int32_t:    Free chipmem + fastmem.
 //------------------------------------------------------------------------------
-static int h_totalmem(void)
+static int32_t h_totalmem(void)
 {
     return
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -260,7 +260,7 @@ static int h_totalmem(void)
     // In test mode / on non Amigas we shouldn't report anything but a dummy
     // value. Doing so would create dependencies between test results and host
     // system. Pretend that we have 1 MiB free chipmem + fastmem.
-    1 << 20;
+    (int32_t) 1 << 20;
     #endif
 }
 
@@ -271,7 +271,7 @@ static int h_totalmem(void)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_database(entry_p contxt)
+entry_p n_database(entry_p contxt)
 {
     // We need atleast one argument
     C_SANE(1, NULL);
@@ -327,7 +327,7 @@ entry_p m_database(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_earlier(entry_p contxt)
+entry_p n_earlier(entry_p contxt)
 {
     // We need two filenames.
     C_SANE(2, NULL);
@@ -362,7 +362,7 @@ entry_p m_earlier(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getassign(entry_p contxt)
+entry_p n_getassign(entry_p contxt)
 {
     // We need one or more arguments.
     C_SANE(1, NULL);
@@ -376,7 +376,7 @@ entry_p m_getassign(entry_p contxt)
     if(!asnl)
     {
         // Invalid assign; an empty string is how the CBM installer fails.
-        return end();
+        R_EST;
     }
 
     // The second argument is optional.
@@ -404,7 +404,7 @@ entry_p m_getassign(entry_p contxt)
         else
         {
             // The CBM installer returns an empty string if option is empty.
-            return end();
+            R_EST;
         }
     }
     else
@@ -482,7 +482,6 @@ entry_p m_getassign(entry_p contxt)
                         }
                         else
                         {
-                            // Out of memory
                             PANIC(contxt);
                             return end();
                         }
@@ -508,7 +507,7 @@ entry_p m_getassign(entry_p contxt)
     #endif
 
     // Return empty string on failure.
-    return end();
+    R_EST;
 }
 
 //------------------------------------------------------------------------------
@@ -517,7 +516,7 @@ entry_p m_getassign(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getdevice(entry_p contxt)
+entry_p n_getdevice(entry_p contxt)
 {
     // We need a path.
     C_SANE(1, NULL);
@@ -566,7 +565,7 @@ entry_p m_getdevice(entry_p contxt)
     ERR(ERR_READ, str(C_ARG(1)));
     #endif
     // Return empty string on failure.
-    return end();
+    R_EST;
 }
 
 //------------------------------------------------------------------------------
@@ -575,7 +574,7 @@ entry_p m_getdevice(entry_p contxt)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_getdiskspace(entry_p contxt)
+entry_p n_getdiskspace(entry_p contxt)
 {
     // We need a path.
     C_SANE(1, NULL);
@@ -625,7 +624,7 @@ entry_p m_getdiskspace(entry_p contxt)
             }
 
             // Cap the return value.
-            R_NUM(free > INT_MAX ? INT_MAX : (int) free);
+            R_NUM(free > INT_MAX ? INT_MAX : (int32_t) free);
         }
 
         // Info() failed. Release lock.
@@ -647,7 +646,7 @@ entry_p m_getdiskspace(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getenv(entry_p contxt)
+entry_p n_getenv(entry_p contxt)
 {
     // We need a variable name.
     C_SANE(1, NULL);
@@ -662,7 +661,7 @@ entry_p m_getenv(entry_p contxt)
     }
 
     // Nothing found, return empty string.
-    return end();
+    R_EST;
 }
 
 //------------------------------------------------------------------------------
@@ -671,13 +670,13 @@ entry_p m_getenv(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getsize(entry_p contxt)
+entry_p n_getsize(entry_p contxt)
 {
     // We need a file name.
     C_SANE(1, NULL);
 
     // Open the file in read only mode.
-    FILE *file = fopen(str(C_ARG(1)), "r");
+    FILE *file = h_fopen(contxt, str(C_ARG(1)), "r", false);
 
     if(file)
     {
@@ -685,10 +684,10 @@ entry_p m_getsize(entry_p contxt)
         fseek(file, 0L, SEEK_END);
 
         // Let the result be the position.
-        int res = (int) ftell(file);
+        int32_t res = (int32_t) ftell(file);
 
         // We're done.
-        fclose(file);
+        h_fclose(&file);
 
         // Return position.
         R_NUM(res);
@@ -705,18 +704,16 @@ entry_p m_getsize(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getsum(entry_p contxt)
+entry_p n_getsum(entry_p contxt)
 {
     // We need a filename.
     C_SANE(1, NULL);
 
     const char *name = str(C_ARG(1));
-    FILE *file = fopen(name, "r");
+    FILE *file = h_fopen(contxt, name, "r", false);
 
     if(file)
     {
-        // This will yield different results on 32 / 64 bit systems but that's
-        // hardly a problem (or?).
         int chr = getc(file), alfa = 1, beta = 0;
 
         // Adler-32 checksum.
@@ -727,11 +724,17 @@ entry_p m_getsum(entry_p contxt)
             chr = getc(file);
         }
 
-        // We're done.
-        fclose(file);
+        if(feof(file))
+        {
+            // File completed.
+            h_fclose(&file);
 
-        // Return checksum.
-        R_NUM((beta << 16) | alfa);
+            // Return checksum.
+            R_NUM((beta << 16) | alfa);
+        }
+
+        // I/O error. Close and bail.
+        h_fclose(&file);
     }
 
     // Could not read from file.
@@ -744,10 +747,10 @@ entry_p m_getsum(entry_p contxt)
 // Description: Helper for h_getversion_rsp and h_getversion_dev. Get resident
 //              version from Resident struct.
 // Input:       struct Resident *rsp:   Resident struct from FindResident.
-// Return:      int:                    Resident version.
+// Return:      int32_t:                Resident version.
 //------------------------------------------------------------------------------
 #if defined(AMIGA) && !defined(LG_TEST)
-static int h_getversion_rsp(struct Resident *rsp)
+static int32_t h_getversion_rsp(struct Resident *rsp)
 {
     if(!rsp)
     {
@@ -756,7 +759,7 @@ static int h_getversion_rsp(struct Resident *rsp)
     }
 
     // Major and revision.
-    int maj, rev;
+    int32_t maj, rev;
 
     // Version string pattern.
     const char *ids = rsp->rt_IdString;
@@ -777,11 +780,11 @@ static int h_getversion_rsp(struct Resident *rsp)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_res
-// Description: Helper for m_getversion. Get resident version.
+// Description: Helper for n_getversion. Get resident version.
 // Input:       char *name: Resident name.
-// Return:      int:        Resident version.
+// Return:      int32_t:    Resident version.
 //------------------------------------------------------------------------------
-static int h_getversion_res(const char *name)
+static int32_t h_getversion_res(const char *name)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     return h_getversion_rsp(FindResident(name));
@@ -793,14 +796,14 @@ static int h_getversion_res(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_dev
-// Description: Helper for m_getversion. Get device version.
+// Description: Helper for n_getversion. Get device version.
 // Input:       char *name: Filename.
-// Return:      int:        File version.
+// Return:      int32_t:    File version.
 //------------------------------------------------------------------------------
-static int h_getversion_dev(const char *name)
+static int32_t h_getversion_dev(const char *name)
 {
     // Failure.
-    int ver = LG_NOVER;
+    int32_t ver = LG_NOVER;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct MsgPort *port = CreateMsgPort();
@@ -850,14 +853,14 @@ static int h_getversion_dev(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_lib
-// Description: Helper for m_getversion. Get library version.
+// Description: Helper for n_getversion. Get library version.
 // Input:       char *name: Library name.
-// Return:      int:        Library version.
+// Return:      int32_t:    Library version.
 //------------------------------------------------------------------------------
-static int h_getversion_lib(const char *name)
+static int32_t h_getversion_lib(const char *name)
 {
     // Assume failure.
-    int ver = LG_NOVER;
+    int32_t ver = LG_NOVER;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct Library *lib = OpenLibrary(name, 0);
@@ -880,11 +883,11 @@ static int h_getversion_lib(const char *name)
 
 //------------------------------------------------------------------------------
 // Name:        h_getversion_file
-// Description: Helper for m_getversion. Get file version.
+// Description: Helper for n_getversion. Get file version.
 // Input:       char *name: Filename.
-// Return:      int:        File version.
+// Return:      int32_t:    File version.
 //------------------------------------------------------------------------------
-int h_getversion_file(const char *name)
+int32_t h_getversion_file(const char *name)
 {
     FILE *file = NULL;
 
@@ -898,7 +901,7 @@ int h_getversion_file(const char *name)
     #endif
 
     // Attempt to open file.
-    file = fopen(name, "r");
+    file = h_fopen(end(), name, "r", false);
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // Restore auto request.
@@ -906,7 +909,7 @@ int h_getversion_file(const char *name)
     #endif
 
     // Invalid version.
-    int ver = LG_NOVER;
+    int32_t ver = LG_NOVER;
 
     if(!file)
     {
@@ -915,7 +918,7 @@ int h_getversion_file(const char *name)
     }
 
     // Version key string.
-    int key[] = {'$','V','E','R',':', ' ', 0};
+    int key[] = {'$','V','E','R',':',' ', 0};
     size_t ndx = 0;
 
     // Find position of the version key.
@@ -937,7 +940,7 @@ int h_getversion_file(const char *name)
         if(data)
         {
             // Major and revision.
-            int maj = 0, rev = 0;
+            int32_t maj = 0, rev = 0;
 
             // Version string pattern.
             const char *pat = "%*[^0123456789]%d.%d%*[^\0]";
@@ -952,7 +955,7 @@ int h_getversion_file(const char *name)
     }
 
     // We're done.
-    fclose(file);
+    h_fclose(&file);
 
     // If we have a valid version return that. Otherwise the file might be a
     // library, try to get the library version and return that instead.
@@ -965,7 +968,7 @@ int h_getversion_file(const char *name)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_getversion(entry_p contxt)
+entry_p n_getversion(entry_p contxt)
 {
     // Arguments are optional.
     C_SANE(0, NULL);
@@ -985,7 +988,7 @@ entry_p m_getversion(entry_p contxt)
         #endif
 
         // Invalid version.
-        int ver = LG_NOVER;
+        int32_t ver = LG_NOVER;
 
         // Get resident module version.
         if(opt(contxt, OPT_RESIDENT))
@@ -1040,7 +1043,7 @@ entry_p m_getversion(entry_p contxt)
 // tooltypes when (gettooltype) is used. This is assumed to be a bug and
 // therefore not mimiced.
 //------------------------------------------------------------------------------
-entry_p m_iconinfo(entry_p contxt)
+entry_p n_iconinfo(entry_p contxt)
 {
     // One or more arguments.
     C_SANE(1, contxt);
@@ -1076,7 +1079,7 @@ entry_p m_iconinfo(entry_p contxt)
     }
 
     // Iterate over all options.
-    for(size_t i = 0; types[i] != end() && !DID_ERR; i++)
+    for(size_t i = 0; types[i] != end() && NOT_ERR; i++)
     {
         // Is the current option not set?
         if(!types[i])
@@ -1098,7 +1101,7 @@ entry_p m_iconinfo(entry_p contxt)
             }
 
             // Get option type.
-            int type = types[i]->id;
+            int32_t type = types[i]->id;
             char *svl = NULL;
 
             #if defined(AMIGA) && !defined(LG_TEST)
@@ -1143,14 +1146,14 @@ entry_p m_iconinfo(entry_p contxt)
             // the value of the old one with the new value.
             if(contxt->symbols)
             {
-                for(size_t k = 0; exists(contxt->symbols[k]); k++)
+                for(size_t k = 1; exists(C_SYM(k)); k++)
                 {
-                    if(!strcasecmp(contxt->symbols[k]->name, name))
+                    if(!strcasecmp(C_SYM(k)->name, name))
                     {
-                        kill(contxt->symbols[k]->resolved);
-                        contxt->symbols[k]->resolved = val;
-                        push(global(contxt), contxt->symbols[k]);
-                        val->parent = contxt->symbols[k];
+                        kill(C_SYM(k)->resolved);
+                        C_SYM(k)->resolved = val;
+                        push(global(contxt), C_SYM(k));
+                        val->parent = C_SYM(k);
 
                         // We no longer own 'val'.
                         val = NULL;
@@ -1171,7 +1174,7 @@ entry_p m_iconinfo(entry_p contxt)
 
             if(!sym)
             {
-                // Out of memory. Do not leak 'val'.
+                // Do not leak 'val'.
                 kill(val);
                 continue;
             }
@@ -1206,14 +1209,14 @@ entry_p m_iconinfo(entry_p contxt)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_querydisplay(entry_p contxt)
+entry_p n_querydisplay(entry_p contxt)
 {
     // We need 2 arguments.
     C_SANE(2, NULL);
 
     char *obj = str(C_ARG(1)), *option = str(C_ARG(2));
-    int width = 0, height = 0, depth = 0, colors = 0, upper = 0, lower = 0,
-        left = 0, right = 0;
+    int32_t width = 0, height = 0, depth = 0, colors = 0, upper = 0, lower = 0,
+            left = 0, right = 0;
 
     // Object 'screen'
     if(strcasecmp(obj, "screen") == 0)

@@ -1,4 +1,4 @@
-(working) ; "","Line 1: syntax error, unexpected ')' ')'",""
+(working) ; "","Working on installation... 1",""
 (working "doing") ; "","Working on installation... doing1",""
 (working "") ; "","Working on installation... 1",""
 (working "a" "b" "c") ; "","Working on installation... abc1",""

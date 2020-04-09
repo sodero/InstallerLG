@@ -47,18 +47,17 @@ entry_p new_contxt(void)
     free(symbols);
     free(children);
 
-    // Out of memory.
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
 //------------------------------------------------------------------------------
 // Name:        new_number
 // Description: Allocate NUMBER.
-// Input:       int num:    The initial value.
-// Return:      entry_p:    A NUMBER on success, NULL otherwise.
+// Input:       int32_t num:    The initial value.
+// Return:      entry_p:        A NUMBER on success, NULL otherwise.
 //------------------------------------------------------------------------------
-entry_p new_number(int num)
+entry_p new_number(int32_t num)
 {
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
@@ -71,8 +70,7 @@ entry_p new_number(int num)
         return entry;
     }
 
-    // Out of memory.
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -101,8 +99,7 @@ entry_p new_string(char *name)
     free(name);
     free(entry);
 
-    // Out of memory / bad input.
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -132,8 +129,7 @@ entry_p new_symbol(char *name)
     free(name);
     free(entry);
 
-    // Out of memory / bad input.
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -173,12 +169,12 @@ static void reparent_and_set(entry_p *chl, entry_p par, entry_p res)
 // Input:       char *name:   The name of the function. This string won't be
 //                            copied and it will be free:d by kill(...) so it
 //                            must be allocated by the calling function.
-//              int line:     The source code line number.
+//              int32_t line: The source code line number.
 //              entry_p sym:  A CONTXT with symbols or NULL.
 //              entry_p chl:  A CONTXT with children, functions.
 // Return:      entry_p:      A CUSTOM on success, NULL otherwise.
 //------------------------------------------------------------------------------
-entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
+entry_p new_custom(char *name, int32_t line, entry_p sym, entry_p chl)
 {
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
@@ -224,21 +220,20 @@ entry_p new_custom(char *name, int line, entry_p sym, entry_p chl)
     free(name);
     free(entry);
 
-    // Out of memory / bad input.
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
 //------------------------------------------------------------------------------
 // Name:        new_symref
 // Description: Allocate SYMREF, a reference to a symbol / variable.
-// Input:       char *name: The name of the referenced symbol. This string won't
-//                          be copied and it will be free:d by kill() so it must
-//                          be allocated by the calling function.
-//              int line:   The source code line number.
-// Return:      entry_p:    A SYMREF on success, NULL otherwise.
+// Input:       char *name:     The name of the referenced symbol. This string
+//                              won't be copied and it will be free:d by kill()
+//                              so it must be allocated by the calling function.
+//              int32_t line:   The source code line number.
+// Return:      entry_p:        A SYMREF on success, NULL otherwise.
 //------------------------------------------------------------------------------
-entry_p new_symref(char *name, int line)
+entry_p new_symref(char *name, int32_t line)
 {
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
@@ -257,8 +252,7 @@ entry_p new_symref(char *name, int line)
     free(name);
     free(entry);
 
-    // Out of memory / bad input.
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -275,7 +269,7 @@ static void move_contxt(entry_p dst, entry_p src)
     // Sanity check.
     if(!dst || !src)
     {
-        PANIC(NULL);
+        (void) PANIC(NULL);
         return;
     }
 
@@ -310,13 +304,13 @@ static void move_contxt(entry_p dst, entry_p src)
 //                              must be allocated by the calling function. It's
 //                              used for decoration purposes only, it doesn't
 //                              affect the execution.
-//              int line:       The source code line number.
+//              int32_t line:   The source code line number.
 //              call_t call:    A function pointer, the code to be executed.
 //              entry_p chl:    The context of the function, if any.
 //              type_t type:    Default return value data type.
 // Return:      entry_p:        A NATIVE on success, NULL otherwise.
 //------------------------------------------------------------------------------
-entry_p new_native(char *name, int line, call_t call, entry_p chl, type_t type)
+entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t type)
 {
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
@@ -355,7 +349,7 @@ entry_p new_native(char *name, int line, call_t call, entry_p chl, type_t type)
     kill(chl);
 
     // Bad input or out of memory.
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -388,7 +382,7 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
             entry->resolved->parent = entry;
 
             // Let the type be our ID.
-            entry->id = (int) type;
+            entry->id = (int32_t) type;
             entry->type = OPTION;
             entry->name = name;
 
@@ -404,7 +398,7 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
             if(type == OPT_DYNOPT)
             {
                 // Set callback. Only (if) is allowed.
-                entry->call = m_if;
+                entry->call = n_if;
             }
 
             return entry;
@@ -417,7 +411,7 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
     free(entry);
 
     // Bad input or out of memory.
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -428,11 +422,11 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
 //                              invoked. This string won't be copied and it will
 //                              be free:d by kill() so it must be allocated by
 //                              the calling function.
-//              int line:       The source code line number.
+//              int32_t line:   The source code line number.
 //              entry_p arg:    An optional context with function arguments.
 // Return:      entry_p:        a CUSREF on success, NULL otherwise.
 //------------------------------------------------------------------------------
-entry_p new_cusref(char *name, int line, entry_p arg)
+entry_p new_cusref(char *name, int32_t line, entry_p arg)
 {
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
@@ -440,11 +434,11 @@ entry_p new_cusref(char *name, int line, entry_p arg)
     // A line number is required to produce meaningful error messages.
     if(entry && name && (line > 0))
     {
-        // The m_gosub function is used as trampoline.
+        // The n_gosub function is used as trampoline.
         entry->id = line;
         entry->name = name;
         entry->type = CUSREF;
-        entry->call = m_gosub;
+        entry->call = n_gosub;
 
         // Adopt function arguments if any.
         if(arg && arg->type == CONTXT)
@@ -460,8 +454,7 @@ entry_p new_cusref(char *name, int line, entry_p arg)
     free(name);
     kill(arg);
 
-    // Out of memory / bad input.
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return NULL;
 }
 
@@ -477,7 +470,7 @@ entry_p append(entry_p **dst, entry_p ent)
     if(!ent || !dst || !*dst)
     {
         // Bad input.
-        PANIC(NULL);
+        (void) PANIC(NULL);
         return NULL;
     }
 
@@ -512,7 +505,7 @@ entry_p append(entry_p **dst, entry_p ent)
             kill((*dst)[0]);
             (*dst)[0] = ent;
 
-            PANIC(ent);
+            (void) PANIC(NULL);
             return ent;
         }
     }
@@ -567,14 +560,13 @@ entry_p merge(entry_p dst, entry_p src)
         }
         else
         {
-            // Out of memory.
-            PANIC(NULL);
+            (void) PANIC(NULL);
         }
     }
     else
     {
         // Bad input.
-        PANIC(NULL);
+        (void) PANIC(NULL);
     }
 
     // We own 'src' and need to free it.
@@ -651,7 +643,7 @@ entry_p push(entry_p dst, entry_p src)
 
     // Out of memory. Since we own 'src', we need to free it.
     kill(src);
-    PANIC(NULL);
+    (void) PANIC(NULL);
     return dst;
 }
 

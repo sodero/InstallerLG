@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // all.h:
 //
-// Protypes for all implementations m_* of (...)
+// Protypes for all implementations n_* of (...)
 //------------------------------------------------------------------------------
 // Copyright (C) 2018-2020, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
@@ -13,6 +13,7 @@
 #include "arithmetic.h"
 #include "control.h"
 #include "comparison.h"
+#include "debug.h"
 #include "exit.h"
 #include "external.h"
 #include "file.h"

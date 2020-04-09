@@ -27,7 +27,6 @@ static entry_p h_copy_deep(entry_p entry)
 
     if(!copy && PANIC(entry))
     {
-        // Out of memory.
         return NULL;
     }
 
@@ -41,7 +40,6 @@ static entry_p h_copy_deep(entry_p entry)
 
         if(!copy->name && PANIC(entry))
         {
-            // Out of memory.
             free(copy);
             return NULL;
         }
@@ -52,7 +50,7 @@ static entry_p h_copy_deep(entry_p entry)
 
 //------------------------------------------------------------------------------
 // Name:        h_set_undangle
-// Description: m_set helper. Cast entry to a non-dangling type.
+// Description: n_set helper. Cast entry to a non-dangling type.
 // Input:       entry_p entry:  The entry to be cast.
 // Return:      -
 //------------------------------------------------------------------------------
@@ -73,7 +71,7 @@ static void h_set_undangle(entry_p entry)
 
 //------------------------------------------------------------------------------
 // Name:        h_set_find
-// Description: m_set helper. Find symbol with a given name in symbol array.
+// Description: n_set helper. Find symbol with a given name in symbol array.
 // Input:       entry_p contxt:     Execution context.
 //              const char *name:   Symbol name.
 // Return:      entry_p:            The symbol if found, NULL otherwise.
@@ -106,7 +104,7 @@ static entry_p h_set_find(entry_p contxt, const char *name)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_set(entry_p contxt)
+entry_p n_set(entry_p contxt)
 {
     // We need atleast one symbol value tuple.
     C_SANE(1, NULL); S_SANE(1);
@@ -119,7 +117,7 @@ entry_p m_set(entry_p contxt)
     {
         // Resolve the RHS and do a deep copy of it.
         entry_p rhs = resolve(*val), dst = global(contxt),
-                res = DID_ERR ? NULL : h_copy_deep(rhs);
+                res = NOT_ERR ? h_copy_deep(rhs) : NULL;
 
         if(!res)
         {
@@ -152,13 +150,69 @@ entry_p m_set(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_symbolset_exists
+// Description: Update symbol in current context.
+// Input:       entry_p contxt:     Execution context.
+//              entry_p esm:        Existing symbol.
+//              entry_p res:        New resolved value.
+// Return:      entry_p:            The existing symbol.
+//------------------------------------------------------------------------------
+static entry_p n_symbolset_exists(entry_p contxt, entry_p esm, entry_p res)
+{
+    // Replace resolved value of existing symbol.
+    kill(esm->resolved);
+    esm->resolved = res;
+
+    // Push cannot fail in this context.
+    push(global(contxt), esm);
+    res->parent = esm;
+
+    // Pass the result.
+    return res;
+}
+
+//------------------------------------------------------------------------------
+// Name:        h_symbolset_new
+// Description: Create new named symbol in current context.
+// Input:       entry_p contxt:     Execution context.
+//              const char *:       Symbol name.
+//              entry_p res:        Initial resolved value.
+// Return:      entry_p:            The newly created symbol.
+//------------------------------------------------------------------------------
+static entry_p n_symbolset_new(entry_p contxt, const char *lhs, entry_p res)
+{
+    // Append new symbol to current context.
+    entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs)));
+
+    if(!nsm || !append(&contxt->symbols, nsm))
+    {
+        kill(nsm);
+        kill(res);
+
+        // Fallback.
+        return end();
+    }
+
+    // Reparent and create global reference.
+    nsm->resolved = res;
+    res->parent = nsm;
+
+    // Push cannot fail in this context.
+    push(global(contxt), nsm);
+    nsm->parent = contxt;
+
+    // Pass the result.
+    return res;
+}
+
+//------------------------------------------------------------------------------
 // (symbolset <symbolname> <expression>)
 //     assign a value to a variable named by the string result of
 //     `<symbolname>' (V42.9)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_symbolset(entry_p contxt)
+entry_p n_symbolset(entry_p contxt)
 {
     // We need one or more tuples of symbol name and value.
     C_SANE(2, NULL); S_SANE(0);
@@ -170,7 +224,7 @@ entry_p m_symbolset(entry_p contxt)
     {
         // Resolve LHS and RHS and do a deep copy of RHS.
         const char *lhs = str(*cur++);
-        entry_p rhs = resolve(*cur++), res = DID_ERR ? NULL : h_copy_deep(rhs);
+        entry_p rhs = resolve(*cur++), res = NOT_ERR ? h_copy_deep(rhs) : NULL;
 
         if(!res)
         {
@@ -186,36 +240,13 @@ entry_p m_symbolset(entry_p contxt)
 
         if(esm)
         {
-            // Reparent and continue with the next tuple.
-            kill(esm->resolved);
-            esm->resolved = res;
-
-            // Push cannot fail in this context.
-            push(global(contxt), esm);
-            res->parent = esm;
-            ret = res;
+            // Update existing symbol.
+            ret = n_symbolset_exists(contxt, esm, res);
         }
         else
         {
-            // Append new symbol to current context.
-            entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs)));
-
-            if(!nsm || !append(&contxt->symbols, nsm))
-            {
-                // Out of memory.
-                kill(nsm);
-                kill(res);
-                return end();
-            }
-
-            // Reparent and create global reference.
-            res->parent = nsm;
-            nsm->resolved = res;
-
-            // Push cannot fail in this context.
-            push(global(contxt), nsm);
-            nsm->parent = contxt;
-            ret = res;
+            // Create new symbol.
+            ret = n_symbolset_new(contxt, lhs, res);
         }
     }
 
@@ -230,7 +261,7 @@ entry_p m_symbolset(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_symbolval(entry_p contxt)
+entry_p n_symbolval(entry_p contxt)
 {
     // We need one argument, the name of the symbol.
     C_SANE(1, NULL);
@@ -246,7 +277,7 @@ entry_p m_symbolval(entry_p contxt)
     ret = resolve(&entry);
 
     // Return the resolved value if the symbol could be found.
-    if(!DID_ERR)
+    if(NOT_ERR)
     {
         return ret;
     }

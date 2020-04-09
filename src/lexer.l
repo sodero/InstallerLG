@@ -26,6 +26,7 @@ static char *strduptr(const char *str);
     /* We need the parser to be reentrant, not because we want to, but because it will will leak memory otherwise.                                                                      */
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %option noyywrap reentrant bison-bridge caseless
+%x comment
 
 %%
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -193,6 +194,11 @@ static char *strduptr(const char *str);
 "setposition"           { return SETPOSITION;    }
 "source"                { return SOURCE;         }
 "swapcolors"            { return SWAPCOLORS;     }
+"___astraw"             { return ASTRAW;         }
+"___asbraw"             { return ASBRAW;         }
+"___asbeval"            { return ASBEVAL;        }
+"___eval"               { return EVAL;           }
+"___options"            { return OPTIONS;        }
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     /* Strings                                                                                                                                                                          */
@@ -206,19 +212,23 @@ static char *strduptr(const char *str);
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     /* Symbols                                                                                                                                                                          */
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-[^"' \r\n\t\(\)\+\*/]+  {
+[^"' ;\r\n\t\(\)\+\*/]+  {
     yylval->s = strdup(yytext);
     return yylval->s ? SYM : OOM;
 }
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-    /* The bottom feeders                                                                                                                                                               */
+    /* The bottom feeders - Amiga / Unix, Windows and MacOS <= V9 support                                                                                                               */
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-\r\n                    { yylineno++;         }
-\n                      { yylineno++;         }
-\r                      { yylineno++;         }
-[\t ]+                  {                     }
-;.*$                    {                     }
+\r\n                    { yylineno++;                 }
+\n                      { yylineno++;                 }
+\r                      { yylineno++;                 }
+[\t ]+                  {                             }
+;                       { BEGIN(comment);             }
+<comment>\r\n           { BEGIN(INITIAL); yylineno++; }
+<comment>\n             { BEGIN(INITIAL); yylineno++; }
+<comment>\r             { BEGIN(INITIAL); yylineno++; }
+<comment>.              {                             }
 %%
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -265,6 +275,10 @@ int main(int argc, char **argv)
             // Get the name of the script from CLI or tooltypes / wb.
             char *name = arg_get(ARG_SCRIPT);
             FILE *script = fopen(name, "r");
+
+            // Disable stderr buffering in case it's buffered, which it seems
+            // to be when VBCC is used.
+            setvbuf(stderr, NULL, _IONBF, 0);
 
             if(script)
             {

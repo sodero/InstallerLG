@@ -24,13 +24,13 @@
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_complete(entry_p contxt)
+entry_p n_complete(entry_p contxt)
 {
     // One or more arguments.
     C_SANE(1, NULL);
 
     // Pass value on.
-    int val = num(C_ARG(1));
+    int32_t val = num(C_ARG(1));
 
     // Show and update.
     gui_complete(val);
@@ -41,7 +41,7 @@ entry_p m_complete(entry_p contxt)
 
 //------------------------------------------------------------------------------
 // Name:        h_debug_all
-// Description: m_debug helper printing the value of all children in a contxt.
+// Description: n_debug helper printing the value of all children in a contxt.
 // Input:       entry_p contxt: Execution context.
 // Return:      -
 //------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ static void h_debug_all(entry_p contxt)
         if((*cur)->type == SYMREF)
         {
             // Save level of strictness.
-            int mode = get_num(contxt, "@strict");
+            int32_t mode = get_num(contxt, "@strict");
 
             // Set non strict mode to supress errors.
             set_num(contxt, "@strict", 0);
@@ -98,7 +98,7 @@ static void h_debug_all(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_debug(entry_p contxt)
+entry_p n_debug(entry_p contxt)
 {
     // No arguments required. Weird, but that's how the CBM Installer works.
     C_SANE(0, NULL);
@@ -134,7 +134,7 @@ entry_p m_debug(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_message(entry_p contxt)
+entry_p n_message(entry_p contxt)
 {
     // One or more arguments.
     C_SANE(1, contxt);
@@ -182,13 +182,13 @@ entry_p m_message(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_user(entry_p contxt)
+entry_p n_user(entry_p contxt)
 {
     // We need one argument
     C_SANE(1, NULL);
 
     // Save old value.
-    int old = get_num(contxt, "@user-level");
+    int32_t old = get_num(contxt, "@user-level");
 
     // Set new value of @user-level.
     set_num(contxt, "@user-level", num(C_ARG(1)));
@@ -203,14 +203,14 @@ entry_p m_user(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_welcome(entry_p contxt)
+entry_p n_welcome(entry_p contxt)
 {
     // Arguments are optional.
     C_SANE(0, NULL);
 
     // Current installer settings.
-    int lvl = get_num(contxt, "@user-level"), prt = get_num(contxt, "@pretend"),
-        lgf = get_num(contxt, "@log");
+    int32_t lvl = get_num(contxt, "@user-level"),
+            prt = get_num(contxt, "@pretend"), lgf = get_num(contxt, "@log");
 
     // Concatenate children, if any.
     char *msg = get_chlstr(contxt, false);
@@ -252,29 +252,27 @@ entry_p m_welcome(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_working(entry_p contxt)
+entry_p n_working(entry_p contxt)
 {
     // One or more arguments.
-    C_SANE(1, NULL);
+    C_SANE(0, NULL);
 
-    // Concatenate all children.
+    // Concatenate all children if we have any.
     char *msg = get_chlstr(contxt, false);
 
     if(!msg && PANIC(contxt))
     {
-        // Out of memory.
         return end();
     }
 
     // Did we fail while resolving one or more of our children?
     if(DID_ERR)
     {
-        // We own msg.
         free(msg);
         R_NUM(LG_FALSE);
     }
 
-    // Standard prefix.
+    // Standard prefix + message if it exists.
     size_t len = strlen(tr(S_WRKN)) + strlen(msg) + 1;
 
     // Memory to hold prefix and children.
@@ -282,7 +280,6 @@ entry_p m_working(entry_p contxt)
 
     if(!con && PANIC(contxt))
     {
-        // Out of memory.
         free(msg);
         return end();
     }

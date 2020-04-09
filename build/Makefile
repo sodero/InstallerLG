@@ -8,6 +8,13 @@ DATE := $(shell date +%d.%m.%Y || echo Unknown)
 APP := InstallerLG
 EXE := Installer
 
+INTERFACE := GUI
+ifeq ($(INTERFACE),CLI)
+OBJ := $(filter-out gui.o,$(OBJ))
+else
+OBJ := $(filter-out cli.o,$(OBJ))
+endif
+
 #---------------------------------------------------------------------------------#
 # OS
 #---------------------------------------------------------------------------------#
@@ -18,7 +25,13 @@ CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE
 else
 ifeq ($(OS),Darwin)
 CGEN = -g -std=c99
-CWRN += -Werror -Weverything -Wno-format-nonliteral -Wno-date-time
+CWRN += -Werror -Weverything -Wno-format-nonliteral -Wno-padded
+else
+ifeq ($(OS),Windows_NT)
+CC = x86_64-w64-mingw32-gcc.exe
+CWRN = -Wall -Wextra -Werror
+CGEN = -g -std=c99
+CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE -D__USE_MINGW_ANSI_STDIO
 else
 CC ?= gcc
 AMIGA = true
@@ -30,13 +43,14 @@ LDLIBS += -noixemul
 endif
 endif
 endif
+endif
 
 ifneq ($(AMIGA),true)
 DD = ..
 endif
 
 CINC += -I . -I $(VPATH)
-CDEF += -D__AMIGADATE__="\"($(DATE))\""
+CDEF += -D__AMIGADATE__="\"($(DATE))\"" $(CEXT)
 CFLAGS += $(CINC) $(CGEN) $(CWRN) $(CDEF)
 YACC = bison
 LEX = flex
@@ -90,13 +104,9 @@ cat:
 #---------------------------------------------------------------------------------#
 .PHONY: test
 test: $(EXE)
-ifneq ($(AMIGA),true)
 	@chmod a+rwx _?* 2> /dev/null || true
 	@$(RM) -R $(EXE).tmp.* leak.* err.* massif.* _?*
 	@sh ../test/run.sh ./$(EXE) ../test
-else
-	@echo "[SKIPPED] @sh ../test/run.sh ./$(EXE) ../test"
-endif
 
 .PHONY: smoke
 smoke:
@@ -108,7 +118,7 @@ quick:
 
 .PHONY: fail
 fail:
-	@LG_QUICK=yes $(MAKE) test
+	@LG_FAIL=yes $(MAKE) test
 
 .PHONY: debug
 debug:

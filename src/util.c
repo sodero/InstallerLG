@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------------
 
 #include "alloc.h"
+#include "debug.h"
 #include "error.h"
 #include "eval.h"
 #include "util.h"
@@ -15,13 +16,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-
-#ifdef AMIGA
-#include <clib/debug_protos.h>
-#define DBG(...) KPrintF((CONST_STRPTR)__VA_ARGS__)
-#else
-#define DBG(...) fprintf(stderr, __VA_ARGS__)
-#endif
 
 //------------------------------------------------------------------------------
 // Name:        ror
@@ -38,7 +32,7 @@ void ror(entry_p *entry)
         return;
     }
 
-    int lst = 0;
+    size_t lst = 0;
 
     // Let 'lst' be the index of the last entry.
     while(exists(entry[lst]))
@@ -171,43 +165,63 @@ entry_p native(entry_p entry)
 }
 
 //------------------------------------------------------------------------------
-// FIXME
+// Name:        get_fake_opt
+// Description: Populate option cache using fake option.
+// Input:       entry_p fake:   OPT_OPTIONAL or OPT_DELOPTS.
+//              entry_p *cache: Option cache.
+// Return:      -
 //------------------------------------------------------------------------------
 static void get_fake_opt(entry_p fake, entry_p *cache)
 {
     // Translate strings to options.
     for(size_t i = 0; exists(fake->children[i]); i++)
     {
-        entry_p cur = fake->children[i];
-        bool del = cur->parent->id == OPT_DELOPTS;
-        char *fop = str(cur);
+        // Only evaluate string value once.
+        bool del = fake->children[i]->parent->id == OPT_DELOPTS;
+        char *name = str(fake->children[i]);
 
-        // Set or delete option.
-        cache[OPT_FAIL] = strcasecmp(fop, "fail") ?
-        cache[OPT_FAIL] : (del ? NULL : cur);
-        cache[OPT_FORCE] = strcasecmp(fop, "force") ?
-        cache[OPT_FORCE] : (del ? NULL : cur);
-        cache[OPT_NOFAIL] = strcasecmp(fop, "nofail") ?
-        cache[OPT_NOFAIL] : (del ? NULL : cur);
-        cache[OPT_ASKUSER] = strcasecmp(fop, "askuser") ?
-        cache[OPT_ASKUSER] : (del ? NULL : cur);
-        cache[OPT_OKNODELETE] = strcasecmp(fop, "oknodelete") ?
-        cache[OPT_OKNODELETE] : (del ? NULL : cur);
+        // Compare all strings unless the current option is deleted.
+        if(cache[OPT_FAIL] != end() && !strcasecmp(name, "fail"))
+        {
+            // Delete or set depending on parent.
+            cache[OPT_FAIL] = del ? end() : fake->children[i];
+        }
+        else
+        if(cache[OPT_FORCE] != end() && !strcasecmp(name, "force"))
+        {
+            // Delete or set depending on parent.
+            cache[OPT_FORCE] = del ? end() : fake->children[i];
+        }
+        else
+        if(cache[OPT_NOFAIL] != end() && !strcasecmp(name, "nofail"))
+        {
+            // Delete or set depending on parent.
+            cache[OPT_NOFAIL] = del ? end() : fake->children[i];
+        }
+        else
+        if(cache[OPT_ASKUSER] != end() && !strcasecmp(name, "askuser"))
+        {
+            // Delete or set depending on parent.
+            cache[OPT_ASKUSER] = del ? end() : fake->children[i];
+        }
+        else
+        if(cache[OPT_OKNODELETE] != end() && !strcasecmp(name, "oknodelete"))
+        {
+            // Delete or set depending on parent.
+            cache[OPT_OKNODELETE] = del ? end() : fake->children[i];
+        }
     }
 }
 
 //------------------------------------------------------------------------------
-// FIXME
+// Name:        prune_opt
+// Description: Delete non applicable options.
+// Input:       entry_p contxt: Execution context.
+//              entry_p *cache: Option cache.
+// Return:      -
 //------------------------------------------------------------------------------
 static void prune_opt(entry_p contxt, entry_p *cache)
 {
-    // Sanity check.
-    if(!cache)
-    {
-        PANIC(contxt);
-        return;
-    }
-
     if(cache[OPT_CONFIRM])
     {
         // Make sure that we a prompt and help string.
@@ -218,19 +232,17 @@ static void prune_opt(entry_p contxt, entry_p *cache)
         }
 
         // The default threshold is expert.
-        int level = get_num(contxt, "@user-level"), thres = LG_EXPERT;
+        int32_t level = get_num(contxt, "@user-level"), thres = LG_EXPERT;
 
-        // If the (cache[OPT_CONFIRM] ...) option contains something that can be
-        // translated into a new threshold value...
+        // Evaluate (confirm) if children exist.
         if(cache[OPT_CONFIRM]->children &&
            exists(cache[OPT_CONFIRM]->children[0]))
         {
-            // ...then do so.
+            // Set new user threshold value.
             thres = num(cache[OPT_CONFIRM]);
         }
 
-        // If we are below the threshold value, or user input has been
-        // short-circuited by @yes, skip cache[OPT_CONFIRM]ation.
+        // Clear cache[OPT_CONFIRM] if below threshold or fake 'yes' is set.
         if(level < thres || get_num(contxt, "@yes"))
         {
             cache[OPT_CONFIRM] = NULL;
@@ -239,57 +251,119 @@ static void prune_opt(entry_p contxt, entry_p *cache)
 
     if(cache[OPT_ALL])
     {
+        // The (all) option invalidates (files).
         cache[OPT_FILES] = NULL;
     }
 }
 
 //------------------------------------------------------------------------------
-// FIXME
+static void opt_fill_cache(entry_p contxt, entry_p *cache);
+//------------------------------------------------------------------------------
+// Name:        opt_push_cache
+// Description: Push OPTION to cache.
+// Input:       entry_p *option:  OPTION to be cached.
+// Return:      -
+//------------------------------------------------------------------------------
+static void opt_push_cache(entry_p option, entry_p *cache)
+{
+    // Transform fake options to real options.
+    if(option->id == OPT_OPTIONAL || option->id == OPT_DELOPTS)
+    {
+        get_fake_opt(option, cache);
+    }
+
+    // Dynamic options must be resolved.
+    else if(option->id == OPT_DYNOPT)
+    {
+        entry_p res = resolve(option);
+
+        if(res->type != OPTION)
+        {
+            // Non-existing conditional path.
+            return;
+        }
+
+        // Cache all options if we're in a block.
+        if(res->parent->type == CONTXT)
+        {
+            opt_fill_cache(res->parent, cache);
+        }
+
+        // Resolved value is a real option.
+        cache[res->id] = res;
+    }
+    // Don't trust the caller.
+    else if(option->id >= 0 && option->id < OPT_LAST)
+    {
+        // Save real options as they are.
+        cache[option->id] = option;
+    }
+    else
+    {
+        // Broken caller / parser.
+        PANIC(option);
+    }
+}
+
+//------------------------------------------------------------------------------
+// Name:        opt_fill_cache
+// Description: Initialize option cache.
+// Input:       entry_p *contxt:  Execution context / naked option.
+// Return:      -
 //------------------------------------------------------------------------------
 static void opt_fill_cache(entry_p contxt, entry_p *cache)
 {
-    // Iterate over all options to fill up the cache.
-    for(size_t i = 0; i < OPT_LAST && exists(contxt->children[i]); i++)
+    // Naked option.
+    if(contxt->type == OPTION)
     {
-        entry_p entry = contxt->children[i];
+        // Push directly to cache.
+        opt_push_cache(contxt, cache);
 
-        // Skip non options.
-        if(entry->type != OPTION)
+        // Check for embedded options.
+        if(!contxt->children)
         {
-            continue;
-        }
-
-        // Cast dake options to real options.
-        if(entry->id == OPT_OPTIONAL || entry->id == OPT_DELOPTS)
-        {
-            get_fake_opt(entry, cache);
-        }
-        // Dynamic options must be resolved.
-        else if(entry->id == OPT_DYNOPT)
-        {
-            entry_p res = resolve(entry);
-
-            if(res->type != OPTION)
-            {
-                // Non-existing conditional path.
-                continue;
-            }
-
-            // Cache all options if we're in a block.
-            if(res->parent->type == CONTXT)
-            {
-                opt_fill_cache(res->parent, cache);
-            }
-
-            // Resolved value is a real option.
-            cache[res->id] = res;
-        }
-        else
-        {
-            // Save real options as they are.
-            cache[entry->id] = entry;
+            return;
         }
     }
+
+    // Iterate over all options in execution context.
+    for(size_t i = 0; exists(contxt->children[i]); i++)
+    {
+        // Children could be of any type.
+        if(contxt->children[i]->type == OPTION)
+        {
+            // Cache current option + embedded, if any.
+            opt_fill_cache(contxt->children[i], cache);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+// Name:        opt_clear_cache
+// Description: Clear option cache while taking (delopts) into account.
+// Input:       entry_p *cache:  Option cache.
+// Return:      -
+//------------------------------------------------------------------------------
+static void opt_clear_cache(entry_p *cache)
+{
+    // Reset all options that aren't affected by (delopts).
+    for(size_t i = 0; i < OPT_ASKUSER; i++)
+    {
+        cache[i] = NULL;
+    }
+
+    // Reset options affected by (delopts) unless they're deleted.
+    for(size_t i = OPT_ASKUSER; i < OPT_INIT; i++)
+    {
+        // Sentinel value is used if deleted by (delopts).
+        if(cache[i] != end())
+        {
+            cache[i] = NULL;
+        }
+    }
+
+    // Set final sentinel.
+    cache[OPT_INIT] = end();
 }
 
 //------------------------------------------------------------------------------
@@ -306,7 +380,8 @@ entry_p opt(entry_p contxt, opt_t type)
     // We need a valid context.
     if(!contxt || !contxt->children)
     {
-        return NULL;
+        // Return cached value if permanently set (delopts).
+        return cache[type] == end() ? end() : NULL;
     }
 
     // Return cached value if cache is full.
@@ -315,9 +390,8 @@ entry_p opt(entry_p contxt, opt_t type)
         return cache[type];
     }
 
-    // New context, clear cache.
-    memset(cache, 0, sizeof(cache));
-    cache[OPT_INIT] = end();
+    // Start fram scratch with new context.
+    opt_clear_cache(cache);
     last = contxt;
 
     // Populate cache.
@@ -398,7 +472,8 @@ static bool x_sane(entry_p contxt, type_t type, size_t num)
     entry_p *vec = type == NATIVE ? contxt->children : contxt->symbols;
 
     // Array of num or more, and if NATIVE, a resolved value is needed.
-    if((num && !vec) || (contxt->type == NATIVE && !contxt->resolved))
+    if((num && !vec) || (contxt->type == NATIVE && (!contxt->resolved ||
+       (contxt->resolved->type == STRING && !contxt->resolved->name))))
     {
         dump(contxt);
         return false;
@@ -472,10 +547,10 @@ bool s_sane(entry_p contxt, size_t num)
 //              fail.
 // Input:       entry_p contxt:  The context.
 //              char *var:       The name of the variable.
-//              int val:         The new value of the variable.
+//              int32_t val:     The new value of the variable.
 // Return:      -
 //------------------------------------------------------------------------------
-void set_num(entry_p contxt, char *var, int val)
+void set_num(entry_p contxt, char *var, int32_t val)
 {
     // Dummy reference used for searching.
     static entry_t ref = { .type = SYMREF };
@@ -510,10 +585,10 @@ void set_num(entry_p contxt, char *var, int val)
 //              must be a NUMBER.
 // Input:       entry_p contxt:  The context.
 //              char *var:       The name of the variable.
-// Return:      int:             The value of the variable or zero if the
+// Return:      int32_t:         The value of the variable or zero if the
 //                               variable can't be found.
 //------------------------------------------------------------------------------
-int get_num(entry_p contxt, char *var)
+int32_t get_num(entry_p contxt, char *var)
 {
     // We need a name and a context.
     if(!contxt || !var)
@@ -622,7 +697,6 @@ char *get_optstr(entry_p contxt, opt_t type)
 
     if(!val && PANIC(contxt))
     {
-        // Out of memory.
         return NULL;
     }
 
@@ -717,7 +791,6 @@ char *get_chlstr(entry_p contxt, bool pad)
 
     if(!stv)
     {
-        // Out of memory.
         return NULL;
     }
 
@@ -819,10 +892,10 @@ void set_str(entry_p contxt, char *var, char *val)
 // Name:        dump_indent
 // Description: Refer to dump below.
 // Input:       entry_p entry:  The tree to print.
-//              int indent:     Indentation level.
+//              size_t indent:     Indentation level.
 // Return:      -
 //------------------------------------------------------------------------------
-static void dump_indent(entry_p entry, int indent)
+static void dump_indent(entry_p entry, size_t indent)
 {
     // Indentation galore.
     char ind[16] = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\0";
@@ -999,13 +1072,13 @@ size_t buf_len(void)
 // Name:        dbg_alloc
 // Description: Used by DBG-ALLOC to provide more info when failing to
 //              allocate memory and to fail deliberately when testing.
-// Input:       int line: Source code line.
+// Input:       int32_t line: Source code line.
 //              const char *file: Source code file.
 //              const char *func: Source code function.
 //              void *mem: Pointer to allocated memory.
 // Return:      void *: Pointer to allocated memory.
 //------------------------------------------------------------------------------
-void *dbg_alloc(int line, const char *file, const char *func, void *mem)
+void *dbg_alloc(int32_t line, const char *file, const char *func, void *mem)
 {
     // Fail deliberately if file or line defines are set.
     #if defined(FAIL_LINE) || defined(FAIL_FILE)
@@ -1015,7 +1088,7 @@ void *dbg_alloc(int line, const char *file, const char *func, void *mem)
     #else
     NULL;
     #endif
-    int fail_line =
+    int32_t fail_line =
     #ifdef FAIL_LINE
     FAIL_LINE;
     #else
@@ -1120,6 +1193,32 @@ size_t num_children(entry_p *vec)
 }
 
 //------------------------------------------------------------------------------
+// Name:        con
+// Description: Find first sub context.
+// Input:       entry_p contxt: Execution context.
+// Return:      entry_p:        Sub context if found, NULL otherwise.
+//------------------------------------------------------------------------------
+entry_p con(entry_p contxt)
+{
+    if(!contxt || !contxt->children)
+    {
+        return NULL;
+    }
+
+    // Find first context among children.
+    for(size_t cur = 0; exists(contxt->children[cur]); cur++)
+    {
+        if(contxt->children[cur]->type == CONTXT)
+        {
+            return contxt->children[cur];
+        }
+    }
+
+    // No context found.
+    return NULL;
+}
+
+//------------------------------------------------------------------------------
 // Name:        exists
 // Description: Verify that an entry exists.
 // Input:       entry_p entry: The entry to be verified.
@@ -1134,10 +1233,10 @@ bool exists(entry_p entry)
 // Name:        str_to_userlevel
 // Description: Convert userlevel strings to numeric userlevel.
 // Input:       const char *user: Userlevel string representation.
-//              int def:          Default value used if translation fails.
-// Return:      int:              Numeric Userlevel.
+//              int32_t def:      Default value used if translation fails.
+// Return:      int32_t:              Numeric Userlevel.
 //------------------------------------------------------------------------------
-int str_to_userlevel(const char *user, int def)
+int32_t str_to_userlevel(const char *user, int32_t def)
 {
     // NULL is a valid value. Return default.
     if(!user)

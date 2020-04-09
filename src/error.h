@@ -20,8 +20,10 @@
 #define PANIC(C) error((C), __LINE__, ERR_PANIC, __func__)
 #define ERR_C(C,T,I) error((C), (C)->id, T, I)
 #define ERR(T,I) ERR_C(contxt,T,I)
-#define DID_ERR error(NULL, 0, ERR_NONE, NULL)
-#define DID_HALT (error(NULL, 0, ERR_NONE, NULL) == ERR_HALT)
+#define DID_ERR error(NULL, 0, ERR_NONE, __func__) != ERR_NONE
+#define NOT_ERR error(NULL, 0, ERR_NONE, __func__) == ERR_NONE
+#define DID_HALT error(NULL, 0, ERR_NONE, __func__) == ERR_HALT
+#define NOT_HALT error(NULL, 0, ERR_NONE, __func__) != ERR_HALT
 
 //------------------------------------------------------------------------------
 // Error types
@@ -71,6 +73,6 @@ typedef enum
 //------------------------------------------------------------------------------
 // Don't use this function directly, use the macros above instead.
 //------------------------------------------------------------------------------
-int error(entry_p contxt, int line, err_t type, const char *info);
+err_t error(entry_p contxt, int32_t line, err_t type, const char *info);
 
 #endif

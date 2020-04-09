@@ -28,7 +28,7 @@
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_abort(entry_p contxt)
+entry_p n_abort(entry_p contxt)
 {
     // Arguments are optional.
     C_SANE(0, NULL);
@@ -101,7 +101,7 @@ static void h_exit(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_exit(entry_p contxt)
+entry_p n_exit(entry_p contxt)
 {
     // All we need is a context.
     C_SANE(0, NULL);
@@ -140,12 +140,12 @@ entry_p m_exit(entry_p contxt)
 // (onerror (<statements>))
 //     general error trap
 //
-// In part implemented using m_procedure. This function invokes the @onerror
+// In part implemented using n_procedure. This function invokes the @onerror
 // procedure inserted using (onerror), which is a special case of (procedure)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //------------------------------------------------------------------------------
-entry_p m_onerror(entry_p contxt)
+entry_p n_onerror(entry_p contxt)
 {
     // A static reference. We might be out of heap when this is invoked.
     static entry_t ref = { .type = CUSREF, .name = "@onerror" };
@@ -163,14 +163,14 @@ entry_p m_onerror(entry_p contxt)
     {
         if((*err)->type == CUSTOM && !strcasecmp((*err)->name, ref.name))
         {
-            // Clear errors otherwise m_gosub / invoke will halt.
+            // Clear errors otherwise n_gosub / invoke will halt.
             RESET;
 
             // Connect reference to the current context.
             ref.parent = contxt;
 
-            // Invoke @onerror by calling m_gosub
-            return m_gosub(&ref);
+            // Invoke @onerror by calling n_gosub
+            return n_gosub(&ref);
         }
 
         // Next function.
@@ -190,7 +190,7 @@ entry_p m_onerror(entry_p contxt)
 //
 // TODO: Currently all errors are trapped. Implement error categories.
 //------------------------------------------------------------------------------
-entry_p m_trap(entry_p contxt)
+entry_p n_trap(entry_p contxt)
 {
     // Two arguments.
     C_SANE(2, NULL);
@@ -215,7 +215,7 @@ entry_p m_trap(entry_p contxt)
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.
 //------------------------------------------------------------------------------
-entry_p m_reboot(entry_p contxt)
+entry_p n_reboot(entry_p contxt)
 {
     // All we need is a context.
     C_SANE(0, NULL);

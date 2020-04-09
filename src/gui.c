@@ -12,7 +12,7 @@
 #include "version.h"
 #include "resource.h"
 
-#ifdef AMIGA
+#if defined(AMIGA) && !defined(LG_TEST)
 #include <graphics/rpattr.h>
 #include <libraries/asl.h>
 #include <libraries/mui.h>
@@ -33,7 +33,7 @@
 #include <proto/intuition.h>
 #include <proto/muimaster.h>
 #include <proto/utility.h>
-#endif /* AMIGA */
+#endif /* AMIGA && !LG_TEST */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,7 +47,7 @@
 typedef LONG IPTR;
 #endif
 
-#ifdef AMIGA
+#if defined(AMIGA) && !defined(LG_TEST)
 //------------------------------------------------------------------------------
 // MUI macros
 //------------------------------------------------------------------------------
@@ -704,9 +704,10 @@ MUIDSP IGInit(Class *cls, Object *obj)
 
 //------------------------------------------------------------------------------
 // IGPageSet - [PRIVATE] Set page / buttons and display text
-// Input:                int top:   Top page
-//                       int btm:   Button page
-//                       ULONG msg: Top text message
+// Input:                Message - Top message
+//                       Help - Help message
+//                       Top - Top page
+//                       Bottom - Bottom page
 // Return:               TRUE on success, FALSE otherwise
 //------------------------------------------------------------------------------
 MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
@@ -793,7 +794,7 @@ MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
 
 //------------------------------------------------------------------------------
 // IGWelcome - Show welcome message. The Level, Log, and Pretend parameters are
-//             int pointers that act as both input and output.
+//             int32_t pointers that act as both input and output.
 // Input:      Message - the welcome message text
 //             Level - User level
 //             Log - Log to file
@@ -827,11 +828,12 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             set(my->ExpertLevel, MUIA_ShowMe, TRUE);
 
             // Take minimum user level into account.
-            set(my->ExpertLevel, MUIA_Radio_Active, *CAST(msg->Level, int *) - 1);
+            set(my->ExpertLevel, MUIA_Radio_Active,
+                *CAST(msg->Level, int32_t *) - 1);
         }
 
         // Set the current user level.
-        set(my->UserLevel, MUIA_Radio_Active, *CAST(msg->Level, int *));
+        set(my->UserLevel, MUIA_Radio_Active, *CAST(msg->Level, int32_t *));
 
         // Wait for proceed or abort.
         inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
@@ -844,13 +846,16 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             if(msg->MinLevel == 1)
             {
                 // Minimum user level 'average'.
-                get(my->ExpertLevel, MUIA_Radio_Active, CAST(msg->Level, int *));
-                (*CAST(msg->Level, int *))++;
+                get(my->ExpertLevel, MUIA_Radio_Active,
+                    CAST(msg->Level, int32_t *));
+
+                (*CAST(msg->Level, int32_t *))++;
             }
             else
             {
                 // Minimum user level 'novice' or 'expert'.
-                get(my->UserLevel, MUIA_Radio_Active, CAST(msg->Level, int *));
+                get(my->UserLevel, MUIA_Radio_Active,
+                    CAST(msg->Level, int32_t *));
             }
 
             // Disable the pretend choice if the NOPRETEND tooltype is used. The
@@ -859,7 +864,7 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             (
                 my->Pretend,
                 MUIA_Radio_Active,
-                msg->NoPretend ? 0 : *CAST(msg->Pretend, int *),
+                msg->NoPretend ? 0 : *CAST(msg->Pretend, int32_t *),
                 MUIA_Disabled, msg->NoPretend ? TRUE : FALSE,
                 TAG_END
             );
@@ -870,13 +875,13 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             (
                 my->Log,
                 MUIA_Radio_Active,
-                msg->NoLog ? 0 : *CAST(msg->Log, int *),
+                msg->NoLog ? 0 : *CAST(msg->Log, int32_t *),
                 MUIA_Disabled, msg->NoLog ? TRUE : FALSE,
                 TAG_END
             );
 
             // Don't show logging and pretend mode settings to 'Novice' users.
-            if(*CAST(msg->Level, int *))
+            if(*CAST(msg->Level, int32_t *))
             {
                 // Show pretend / log page.
                 if(DoMethod(obj, MUIM_IG_PageSet, NULL,
@@ -888,8 +893,10 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
                     if(rc == G_TRUE)
                     {
                         // Get pretend and log settings.
-                        get(my->Pretend, MUIA_Radio_Active, CAST(msg->Pretend, int *));
-                        get(my->Log, MUIA_Radio_Active, CAST(msg->Log, int *));
+                        get(my->Pretend, MUIA_Radio_Active,
+                            CAST(msg->Pretend, int32_t *));
+                        get(my->Log, MUIA_Radio_Active,
+                            CAST(msg->Log, int32_t *));
                     }
                 }
                 else
@@ -913,7 +920,7 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
 }
 
 //------------------------------------------------------------------------------
-// IGDirPart - [PRIVATE] - Return existing dir from random path 
+// IGDirPart - [PRIVATE] - Return existing dir from random path
 // Input:      ULONG Path: Random path.
 // Return:     ULONG:      Existing dir from path.
 //------------------------------------------------------------------------------
@@ -929,6 +936,14 @@ static ULONG IGDirPart(Class *cls, Object *obj, ULONG Path)
         // Copy path string.
         strncpy(my->Buf, CAST(Path, const char *), sizeof(my->Buf));
 
+        struct Process *p = (struct Process *) FindTask(NULL);
+
+        // Save current window ptr.
+        APTR w = p->pr_WindowPtr;
+
+        // Disable auto request.
+        p->pr_WindowPtr = (APTR) -1L;
+
         // Attempt to lock file or directory.
         BPTR lock = (BPTR) Lock(my->Buf, ACCESS_READ);
 
@@ -938,21 +953,32 @@ static ULONG IGDirPart(Class *cls, Object *obj, ULONG Path)
             // Release lock to file or directory.
             UnLock(lock);
 
-            // Cut of the last part of the path.
-            *PathPart(my->Buf) = '\0';
+            // Find path tail.
+            char *tail = PathPart(my->Buf);
 
-            // Try again.
-            lock = (BPTR) Lock(my->Buf, ACCESS_READ);
+            if(*tail == '\0')
+            {
+                // We've reached the end of the road.
+                *(my->Buf) = '\0';
+            }
+            else
+            {
+                // Cut of the tail and repeat.
+                *tail = '\0';
+                lock = (BPTR) Lock(my->Buf, ACCESS_READ);
+            }
         }
 
         // Release lock to file or directory.
         FreeDosObject(DOS_FIB, fib);
         UnLock(lock);
 
+        // Restore auto request.
+        p->pr_WindowPtr = w;
+
         return CAST(my->Buf, ULONG);
     }
 
-    // Out of memory.
     GERR(tr(S_UNER));
     return Path;
 }
@@ -1621,8 +1647,8 @@ MUIDSP IGGetScreenProp(Class *cls, Object *obj,
         return G_ERR;
     }
 
-    int *width = (int *) msg->Width, *height = (int *) msg->Height,
-        *depth = (int *) msg->Depth, *colors = (int *) msg->Colors;
+    int32_t *width = (int32_t *) msg->Width, *height = (int32_t *) msg->Height,
+            *depth = (int32_t *) msg->Depth, *colors = (int32_t *) msg->Colors;
 
     *width = scr->Width;
     *height = scr->Height;
@@ -1655,9 +1681,9 @@ MUIDSP IGGetWindowProp(Class *cls, Object *obj,
         return G_ERR;
     }
 
-    int *width = (int *) msg->Width, *height = (int *) msg->Height,
-        *upper = (int *) msg->Upper, *lower = (int *) msg->Lower,
-        *left = (int *) msg->Left, *right = (int *) msg->Right;
+    int32_t *width = (int32_t *) msg->Width, *height = (int32_t *) msg->Height,
+            *upper = (int32_t *) msg->Upper, *lower  = (int32_t *) msg->Lower,
+            *left  = (int32_t *) msg->Left, *right   = (int32_t *) msg->Right;
 
     *width = win->Width;
     *height = win->Height;
@@ -1819,7 +1845,7 @@ MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
     (void) cls;
 
     // ID counter.
-    static int mid;
+    static int32_t mid;
 
     // Test name and cap the number of open files.
     if(mid + MUIA_IG_MediaBase <= MUIA_IG_MediaMax && msg->Media)
@@ -1850,7 +1876,7 @@ MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
                              msg->Media, msg->Action);
 
                     // Return current media ID.
-                    *CAST(msg->MediaID, int *) = mid;
+                    *CAST(msg->MediaID, int32_t *) = mid;
 
                     // Next ID.
                     mid++;
@@ -1995,7 +2021,7 @@ MUIDSP IGRadio(Class *cls, Object *obj, struct MUIP_IG_Radio *msg)
         if(nms && *nms)
         {
             struct IGData *my = INST_DATA(cls, obj);
-            int def = msg->Default;
+            int32_t def = msg->Default;
 
             // Make sure that the default value is a valid choice.
             while(def && *nms)
@@ -3027,17 +3053,17 @@ DISPATCH(IG)
     // Unknown method, promote to parent.
     return DoSuperMethodA (cls, obj, msg);
 }
-#endif /* AMIGA */
+#endif /* AMIGA && !LG_TEST*/
 
 
 //.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//******************************************************************************
+//+*****************************************************************************
 //##############################################################################
 //##############################################################################
-//******************************************************************************
+//+*****************************************************************************
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 //..............................................................................
@@ -3229,13 +3255,13 @@ void gui_abort(const char *msg)
 // Input:       const char *msg:    Message shown to the user.
 //              const char *hlp:    Help text.
 //              const char **nms:   List of strings.
-//              int def:            Default choice (0-index)
+//              int32_t def:        Default choice (0-index)
 //              bool bck:           Enable back mode.
-//              int *ret:           The choice (0-index).
+//              int32_t *ret:       The choice (0-index).
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def,
-                 bool bck, int *ret)
+inp_t gui_choice(const char *msg, const char *hlp, const char **nms,
+                 int32_t def, bool bck, int32_t *ret)
 {
     inp_t grc =
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -3255,13 +3281,13 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def,
 // Input:       const char *msg:    Message shown to the user.
 //              const char *hlp:    Help text.
 //              const char **nms:   List of strings from which to choose.
-//              int def:            Default bitmap.
+//              int32_t def:        Default bitmap.
 //              bool bck:           Enable back mode.
-//              int *ret:           A bitmap representing the selection.
+//              int32_t *ret:       A bitmap representing the selection.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def,
-                  bool bck, int *ret)
+inp_t gui_options(const char *msg, const char *hlp, const char **nms,
+                  int32_t def, bool bck, int32_t *ret)
 {
     inp_t grc =
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -3325,15 +3351,15 @@ inp_t gui_string(const char *msg, const char *hlp, const char *def,
 // Description: Get numerical value from user.
 // Input:       const char *msg:    Message shown to the user.
 //              const char *hlp:    Help text.
-//              int min:            Minimum value.
-//              int max:            Maximum value.
-//              int def:            Default value.
+//              int32_t min:        Minimum value.
+//              int32_t max:        Maximum value.
+//              int32_t def:        Default value.
 //              bool bck:           Enable back mode.
-//              int *ret:           Return value.
+//              int32_t *ret:       Return value.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-inp_t gui_number(const char *msg, const char *hlp, int min, int max,
-                 int def, bool bck, int *ret)
+inp_t gui_number(const char *msg, const char *hlp, int32_t min, int32_t max,
+                 int32_t def, bool bck, int32_t *ret)
 {
     inp_t grc =
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -3352,16 +3378,16 @@ inp_t gui_number(const char *msg, const char *hlp, int min, int max,
 //              mode. Note that the 'lvl', 'lgf', and 'prt' parameters act
 //              as both input and output.
 // Input:       const char *msg:    Welcome message.
-//              int *lvl:           User level return and input value.
-//              int *lgf:           Log settings return and input value.
-//              int *prt:           Pretend mode return and input value.
-//              int min:            Minimum user level.
+//              int32_t *lvl:       User level return and input value.
+//              int32_t *lgf:       Log settings return and input value.
+//              int32_t *prt:       Pretend mode return and input value.
+//              int32_t min:        Minimum user level.
 //              bool npr:           Disable pretend mode.
 //              bool nlg:           Disable logging.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-inp_t gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min,
-                  bool npr, bool nlg)
+inp_t gui_welcome(const char *msg, int32_t *lvl, int32_t *lgf, int32_t *prt,
+                  int32_t min, bool npr, bool nlg)
 {
     return
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -3514,10 +3540,10 @@ void gui_copyfiles_end(void)
 //------------------------------------------------------------------------------
 // Name:        gui_complete
 // Description: Show progress gauge.
-// Input:       int com: Progress in percent.
+// Input:       int32_t com: Progress in percent.
 // Return:      -
 //------------------------------------------------------------------------------
-void gui_complete(int com)
+void gui_complete(int32_t com)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_Complete, com);
@@ -3549,12 +3575,12 @@ inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 //------------------------------------------------------------------------------
 // Name:        gui_error
 // Description: Show error message.
-// Input:       int line: Line number.
+// Input:       int32_t line: Line number.
 //              const char *type: Error description.
 //              const char *info: Extra info, e.g. filename.
 // Return:      -
 //------------------------------------------------------------------------------
-void gui_error(int line, const char *type, const char *info)
+void gui_error(int32_t line, const char *type, const char *info)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     static char err[BUFSIZ];
@@ -3576,12 +3602,12 @@ void gui_error(int line, const char *type, const char *info)
 //------------------------------------------------------------------------------
 // Name:        gui_effect
 // Description: Show custom screen gradient.
-// Input:       int eff:            Type and position.
-//              int cl1:            Color 1.
-//              int cl2:            Color 2.
+// Input:       int32_t eff:    Type and position.
+//              int32_t cl1:    Color 1.
+//              int32_t cl2:    Color 2.
 // Return:      -
 //------------------------------------------------------------------------------
-void gui_effect(int eff, int cl1, int cl2)
+void gui_effect(int32_t eff, int32_t cl1, int32_t cl2)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_Effect, eff, cl1, cl2);
@@ -3594,10 +3620,10 @@ void gui_effect(int eff, int cl1, int cl2)
 //------------------------------------------------------------------------------
 // Name:        gui_closemedia
 // Description: FIXME
-// Input:       int mid:    Media ID.
+// Input:       int32_t mid:    Media ID.
 // Return:      FIXME
 //------------------------------------------------------------------------------
-inp_t gui_closemedia(int mid)
+inp_t gui_closemedia(int32_t mid)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CloseMedia, mid);
@@ -3611,12 +3637,12 @@ inp_t gui_closemedia(int mid)
 //------------------------------------------------------------------------------
 // Name:        gui_setmedia
 // Description: FIXME
-// Input:       int mid:            Media ID
-//              int act:            Action
+// Input:       int32_t mid:        Media ID
+//              int32_t act:        Action
 //              const char* par:    Parameter
 // Return:      FIXME
 //------------------------------------------------------------------------------
-inp_t gui_setmedia(int mid, int act, const char *par)
+inp_t gui_setmedia(int32_t mid, int32_t act, const char *par)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_SetMedia, mid, act, par);
@@ -3633,13 +3659,13 @@ inp_t gui_setmedia(int mid, int act, const char *par)
 // Input:       FIXME
 // Return:      FIXME
 //------------------------------------------------------------------------------
-inp_t gui_showmedia(int *mid, const char* mda, int act)
+inp_t gui_showmedia(int32_t *mid, const char* mda, int32_t act)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_ShowMedia, mid, mda, act);
     #else
     // Testing purposes.
-    static int num;
+    static int32_t num;
     *mid = num++;
     printf("%d:%d:%s\n", *mid, act, mda ? mda : "_");
     #endif
@@ -3652,7 +3678,8 @@ inp_t gui_showmedia(int *mid, const char* mda, int act)
 // Input:       FIXME
 // Return:      FIXME
 //------------------------------------------------------------------------------
-void gui_query_screen(int *width, int *height, int *depth, int *colors)
+void gui_query_screen(int32_t *width, int32_t *height, int32_t *depth,
+                      int32_t *colors)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_GetScreenProp, width, height, depth, colors);
@@ -3671,8 +3698,8 @@ void gui_query_screen(int *width, int *height, int *depth, int *colors)
 // Input:       FIXME
 // Return:      FIXME
 //------------------------------------------------------------------------------
-void gui_query_window(int *width, int *height, int *upper, int *lower,
-                      int *left, int *right)
+void gui_query_window(int32_t *width, int32_t *height, int32_t *upper,
+                      int32_t *lower, int32_t *left, int32_t *right)
 {
     #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_GetWindowProp, width, height, upper, lower, left,

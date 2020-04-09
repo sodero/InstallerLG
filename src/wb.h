@@ -12,8 +12,8 @@
 
 #include "types.h"
 
-entry_p m_openwbobject(entry_p contxt);
-entry_p m_showwbobject(entry_p contxt);
-entry_p m_closewbobject(entry_p contxt);
+entry_p n_openwbobject(entry_p contxt);
+entry_p n_showwbobject(entry_p contxt);
+entry_p n_closewbobject(entry_p contxt);
 
 #endif

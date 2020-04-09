@@ -9,9 +9,12 @@
 
 #include "error.h"
 #include "resource.h"
+#include <stddef.h>
 #ifdef AMIGA
 # include <proto/exec.h>
 # include <proto/locale.h>
+#else
+typedef void * APTR;
 #endif
 
 struct LocaleInfo
@@ -34,7 +37,7 @@ const char *tr(res_t res)
     res_t cur = res > S_GONE ? S_GONE : res;
 
     // res_t -> string mappings.
-    static const char *str[] =
+    const char *str[] =
     {
         "NONE",
         /*1*/ "Copying file(s)", /*2*/ "Overwrite existing directory '%s'?",
@@ -44,17 +47,17 @@ const char *tr(res_t res)
         /*9*/ "Deleted '%s'.\n", /*10*/ "No such file '%s'.\n", /*11*/ "Renamed '%s' to '%s'.\n",
         /*12*/ "Copied '%s' to '%s'.\n", /*13*/ "Directory '%s' exists already.\n",
         /*14*/ "Created '%s'.\n", /*15*/ "Get mask '%s' %d\n", /*16*/ "Protect '%s' %d\n",
-        /*17*/ "Installer", /*18*/ "Set Installation Mode", /*19*/ "Destination drawer",
+        /*17*/ "Installer", /*18*/ "Set installation mode", /*19*/ "Destination drawer",
         /*20*/ "Copying file", /*21*/ "Files to install", /*22*/ "Installation mode and logging",
         /*23*/ "Progress", /*24*/ "Proceed", /*25*/ "Retry", /*26*/ "Abort", /*27*/ "Yes",
         /*28*/ "No", /*29*/ "Ok", /*30*/ "Next", /*31*/ "Skip", /*32*/ "Back",
         /*33*/ "Unknown error", /*34*/ "Setup failed", /*35*/ "Failed creating MUI custom class",
         /*36*/ "Failed creating MUI application", /*37*/ "Initialization failed", /*38*/ "Error",
-        /*39*/ "Success", /*40*/ "Line %d: %s '%s'\n", /*41*/ "Novice User - All Actions Automatic",
-        /*42*/ "Intermediate User - Limited Manual Control",
-        /*43*/ "Expert User - Must Confirm all actions", /*44*/ "Install for real",
+        /*39*/ "Success", /*40*/ "Line %d: %s '%s'\n", /*41*/ "Novice user - All actions automatic",
+        /*42*/ "Intermediate user - Limited manual control",
+        /*43*/ "Expert user - Must confirm all actions", /*44*/ "Install for real",
         /*45*/ "Dry run only", /*46*/ "No logging", /*47*/ "Log to file", /*48*/ "Log to printer",
-        /*49*/ "installer: required argument missing\n", /*50*/ "%s\n\n%s can be found in %s",
+        /*49*/ "Installer: required argument missing\n", /*50*/ "%s\n\n%s can be found in %s",
         /*51*/ "Installation complete", /*52*/ "Executed '%s'.\n",
         /*53*/ "Error: Could not open file '%s'\n", /*54*/ "Line %d: %s '%s'\n",
         /*55*/ "Working on installation...\n\n", /*56*/ "Select directory", /*57*/ "Select file",
@@ -94,7 +97,7 @@ void locale_init(void)
         loc.li_LocaleBase = OpenLibrary("locale.library", 37);
         loc.li_Catalog = OpenCatalog(NULL, "InstallerLG.catalog", OC_Version, 1, TAG_DONE);
         #else
-        loc.li_LocaleBase = loc.li_Catalog = (APTR) 0;
+        loc.li_LocaleBase = loc.li_Catalog = (APTR) NULL;
         #endif
     }
 }
