@@ -15,10 +15,10 @@ OBJS= alloc.o symbol.o init.o resource.o util.o error.o file.o control.o \
       exit.o $(INTERFACE_OBJ) logic.o probe.o procedure.o media.o prompt.o strcasestr.o \
       strop.o wb.o args.o arithmetic.o comparison.o eval.o external.o \
       information.o ../build/parser.o ../build/lexer.o debug.o
-CFLAGS= -c99 -I$(VBCC)PosixLib/include $(INTERFACE_FLAGS) -I. -I../build -I../src -O -dontwarn=153 -DAMIGA -DKPrintF=printf -DYYERROR_VERBOSE -DLG_TEST
+CFLAGS= -c99 -I$(VBCC)PosixLib/include $(INTERFACE_FLAGS) -I. -I../build -I../src -O -dontwarn=153 -DAMIGA -DYYERROR_VERBOSE -DLG_TEST #-DKPrintF=printf
 
 Installer: $(OBJS)
-	$(CC) -o $@68k $(OBJS) -L$(VBCC)PosixLib/AmigaOS3 -lposix -lamiga -lauto -lmieee -g
+	$(CC) -o $@68k $(OBJS) -L$(VBCC)PosixLib/AmigaOS3 -lposix -lamiga -lauto -lmieee -ldebug -g
 
 parser.o: ../build/parser.c
 	$(CC) -o ../build/parser.o -c $(CFLAGS) -DYYERROR_VERBOSE $?
@@ -85,10 +85,10 @@ strcasestr.o: strcasestr.c
 
 
 # 78 test(s) failed
-# 2962 test(s) passed
+# 2991 test(s) passed
 test:
 	cp Installer68k T:
-	sh ../test/run.sh T:Installer68k ../test $(REXTRA)
+	time sh ../test/run.sh T:Installer68k ../test $(REXTRA)
 
 clean:
 	$(RM) $(OBJS) ../build/parser.o ../build/lexer.o
