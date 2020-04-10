@@ -1,10 +1,17 @@
 language:
     - c
 
-script:
-    - make -C build quick || (cat build/err.tmp.* build/leak.tmp.* 2> /dev/null && false)
+jobs:
+    include:
+        - stage: Cppcheck
+          script: cd src && for f in *.c; do cppcheck $f; done
+        - stage: Test
+          script: make -C build smoke || (cat build/err.tmp.* 2> /dev/null && false)
+        - stage: Valgrind
+          script: make -C build quick || (cat build/err.tmp.* build/leak.tmp.* 2> /dev/null && false)
 
 addons:
   apt:
     packages:
       - valgrind
+      - cppcheck
