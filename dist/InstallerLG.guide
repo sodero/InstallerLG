@@ -118,8 +118,8 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-@{B}0.1.0-alpha.46 (2020-NOT-YET)@{UB}
-- ?
+@{B}0.1.0-alpha.46 (2020-04-10)@{UB}
+- Debug log spam removed.
 
 @{B}0.1.0-alpha.45 (2020-04-10)@{UB}
 - (getsum) silent read error fixed.
