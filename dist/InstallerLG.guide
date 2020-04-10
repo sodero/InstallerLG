@@ -80,6 +80,10 @@ Unlike the original AmigaOS implementation, the (effect) statement is
 treated like any other statement by InstallerLG. This means that it's
 possible to change effect during the installation.
 
+The (database) function supports a new attribute, 'os', that makes it
+possible for scripts to get the host OS without the guesswork used by
+many multiplatform installers.
+
 To be written: Headless.
 To be written: Fake user input.
 
