@@ -416,7 +416,7 @@ entry_p n_substr(entry_p contxt)
         if(off >= len || chr <= 0 || off < 0)
         {
             // Empty string.
-            return end();
+            R_EST;
         }
 
         char *ret = DBG_ALLOC(calloc((size_t) len + 1, 1));
@@ -437,7 +437,7 @@ entry_p n_substr(entry_p contxt)
     if(off >= len)
     {
         // Empty string.
-        return end();
+        R_EST;
     }
 
     // Min cap.
@@ -476,7 +476,7 @@ entry_p n_tackon(entry_p contxt)
     if(!ret)
     {
         // Empty string. Error set by h_tackon().
-        return end();
+        R_EST;
     }
 
     // Success.

@@ -376,7 +376,7 @@ entry_p n_getassign(entry_p contxt)
     if(!asnl)
     {
         // Invalid assign; an empty string is how the CBM installer fails.
-        return end();
+        R_EST;
     }
 
     // The second argument is optional.
@@ -404,7 +404,7 @@ entry_p n_getassign(entry_p contxt)
         else
         {
             // The CBM installer returns an empty string if option is empty.
-            return end();
+            R_EST;
         }
     }
     else
@@ -507,7 +507,7 @@ entry_p n_getassign(entry_p contxt)
     #endif
 
     // Return empty string on failure.
-    return end();
+    R_EST;
 }
 
 //------------------------------------------------------------------------------
@@ -565,7 +565,7 @@ entry_p n_getdevice(entry_p contxt)
     ERR(ERR_READ, str(C_ARG(1)));
     #endif
     // Return empty string on failure.
-    return end();
+    R_EST;
 }
 
 //------------------------------------------------------------------------------
@@ -661,7 +661,7 @@ entry_p n_getenv(entry_p contxt)
     }
 
     // Nothing found, return empty string.
-    return end();
+    R_EST;
 }
 
 //------------------------------------------------------------------------------

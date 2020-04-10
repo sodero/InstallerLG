@@ -318,7 +318,12 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
     {
         // Push directly to cache.
         opt_push_cache(contxt, cache);
-        return;
+
+        // Check for embedded options.
+        if(!contxt->children)
+        {
+            return;
+        }
     }
 
     // Iterate over all options in execution context.
@@ -327,8 +332,8 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
         // Children could be of any type.
         if(contxt->children[i]->type == OPTION)
         {
-            // Push current option to cache.
-            opt_push_cache(contxt->children[i], cache);
+            // Cache current option + embedded, if any.
+            opt_fill_cache(contxt->children[i], cache);
         }
     }
 }
@@ -467,7 +472,8 @@ static bool x_sane(entry_p contxt, type_t type, size_t num)
     entry_p *vec = type == NATIVE ? contxt->children : contxt->symbols;
 
     // Array of num or more, and if NATIVE, a resolved value is needed.
-    if((num && !vec) || (contxt->type == NATIVE && !contxt->resolved))
+    if((num && !vec) || (contxt->type == NATIVE && (!contxt->resolved ||
+       (contxt->resolved->type == STRING && !contxt->resolved->name))))
     {
         dump(contxt);
         return false;

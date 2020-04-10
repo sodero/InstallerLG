@@ -2,6 +2,8 @@
 (cat "'" "test" "'") ; "","'test'",""
 (cat "a" "") ; "","a",""
 (cat "" "") ; "","",""
+(= "" (cat "" "")) ; "","1",""
+(= 0 (cat "" "")) ; "","0",""
 (cat "a") ; "","a",""
 (cat "a" "b" "c") ; "","abc",""
 (cat (askstring (prompt "p") (help "h") (default "a")) "b" "c") ; "","pha0 abc",""
