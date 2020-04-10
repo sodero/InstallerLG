@@ -59,9 +59,14 @@ static bool arg_post(void)
         (void) snprintf(buf_get(B_KEY), buf_len(), "./%s", args[ARG_SCRIPT]);
         #endif
 
-        // Copy of the (hopefully) absolute script path and working directory.
-        args[ARG_SCRIPTDIR] = DBG_ALLOC(h_pathonly(buf_get(B_KEY)));
+        // Copy of the (hopefully) absolute script path.
         args[ARG_SCRIPT] = DBG_ALLOC(strdup(buf_put(B_KEY)));
+
+        // The home directory already exists if we're invoked as project.
+        if(!args[ARG_HOMEDIR])
+        {
+            args[ARG_HOMEDIR] = DBG_ALLOC(h_pathonly(buf_get(B_KEY)));
+        }
     }
 
     // Copy string arguments. Stop at OLDDIR since items after that are either
@@ -71,8 +76,8 @@ static bool arg_post(void)
         args[arg] = args[arg] ? DBG_ALLOC(strdup(args[arg])) : NULL;
     }
 
-    // Script and script directory aren't optional.
-    return args[ARG_SCRIPT] && args[ARG_SCRIPTDIR];
+    // Script and home directory aren't optional.
+    return args[ARG_SCRIPT] && args[ARG_HOMEDIR];
 }
 
 //------------------------------------------------------------------------------
@@ -166,7 +171,6 @@ static bool arg_wb(char **argv)
         return false;
     }
 
-    // Are we being invoked using a 'tool' or a 'project'?
     struct WBArg *arg = wb->sm_ArgList + wb->sm_NumArgs - 1;
 
     if(!arg)
@@ -174,16 +178,20 @@ static bool arg_wb(char **argv)
         return false;
     }
 
-    // Change directory to that of the icon.
-    BPTR old = CurrentDir(arg->wa_Lock);
-
-    // We have the script name if this is a 'project'.
+    // We have the script name and home directory if this is a 'project'.
     if(wb->sm_NumArgs == 2)
     {
+        if(NameFromLock(arg->wa_Lock, buf_get(B_KEY), buf_len()))
+        {
+            args[ARG_HOMEDIR] = DBG_ALLOC(strdup(buf_get(B_KEY)));
+        }
+
+        (void) buf_put(B_KEY);
         args[ARG_SCRIPT] = arg->wa_Name;
     }
 
-    // Get info from icon if we can, otherwise continue.
+    // Change to icon directory and get tool types if we can.
+    BPTR old = CurrentDir(arg->wa_Lock);
     struct DiskObject *dob = (struct DiskObject *) GetDiskObject(arg->wa_Name);
 
     if(dob && dob->do_ToolTypes)
@@ -230,7 +238,7 @@ bool arg_init(int argc, char **argv)
     bool init = argc ? arg_cli(argc, argv) : arg_wb(argv);
 
     // Go to script working directory and return.
-    return init && args[ARG_SCRIPTDIR] && !chdir(args[ARG_SCRIPTDIR]);
+    return init && args[ARG_HOMEDIR] && !chdir(args[ARG_HOMEDIR]);
 }
 
 //------------------------------------------------------------------------------
@@ -278,15 +286,16 @@ int arg_argc(int argc)
 void arg_done(void)
 {
     // Go back to the directory where we started. Don't rely on the existance
-    // of these strings, we might be out of memory.
-    if(args[ARG_SCRIPTDIR] && args[ARG_OLDDIR])
+    // of these strings, we might be out of memory. If we don't have a home dir
+    // then we've never changed directory in the first place.
+    if(args[ARG_HOMEDIR] && args[ARG_OLDDIR])
     {
         chdir(args[ARG_OLDDIR]);
     }
 
-    // Free what we have allocated. Note that we stop at SCRIPTDIR since that's
+    // Free what we have allocated. Note that we stop at HOMEDIR since that's
     // the last string. NOLOG and NOPRETEND are (interpreted as) booleans.
-    for(size_t arg = ARG_SCRIPT; arg <= ARG_SCRIPTDIR; arg++)
+    for(size_t arg = ARG_SCRIPT; arg <= ARG_HOMEDIR; arg++)
     {
         free(args[arg]);
     }

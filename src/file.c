@@ -1290,6 +1290,12 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
         return false;
     }
 
+    // Don't overwrite existing icons.
+    if(h_exists(h_suffix(dst, "info")) == LG_FILE)
+    {
+        return true;
+    }
+
     #if defined(AMIGA) && !defined(LG_TEST)
     // Get the default drawer icon from the OS.
     struct DiskObject *obj = (struct DiskObject *) GetDefDiskObject(WBDRAWER);
@@ -2452,11 +2458,10 @@ entry_p n_exists(entry_p contxt)
     C_SANE(1, contxt);
 
     // Supress volume requester. Despite what the CBM documentation says,
-    // requesters are always supressed. The h_exists function as it is now
-    // doesn't make any requesters pop up. But let's keep the supression code
-    // here in case we decide to follow the documentation and not mimic the
-    // CBM implementation later on.
-    if(opt(contxt, OPT_NOREQ) || opt(contxt, OPT_QUIET))
+    // requesters are always supressed. Let's follow the documentation in
+    // strict mode and the implementation in sloppy mode.
+    if(!get_num(contxt, "@strict") || opt(contxt, OPT_NOREQ) ||
+        opt(contxt, OPT_QUIET))
     {
         #if defined(AMIGA) && !defined(LG_TEST)
         struct Process *p = (struct Process *) FindTask(NULL);

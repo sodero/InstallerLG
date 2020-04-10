@@ -3591,7 +3591,7 @@ void gui_error(int32_t line, const char *type, const char *info)
     es.es_GadgetFormat = (UBYTE *) tr(S_OKEY);
     snprintf(err, sizeof(err), tr(S_LERR), line, type, info);
 
-    // We don't have any way of knowing whether this really works out...
+    // We don't have any way of knowing whether this really works.
     EasyRequest(NULL, &es, NULL);
     #else
     // Testing purposes.
