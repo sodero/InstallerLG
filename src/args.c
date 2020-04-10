@@ -66,6 +66,7 @@ static bool arg_post(void)
         if(!args[ARG_HOMEDIR])
         {
             args[ARG_HOMEDIR] = DBG_ALLOC(h_pathonly(buf_get(B_KEY)));
+            (void) buf_put(B_KEY);
         }
     }
 
