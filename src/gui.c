@@ -3195,7 +3195,7 @@ inp_t gui_message(const char *msg, bool bck)
     (inp_t) DoMethod(Win, MUIM_IG_Message, msg, bck);
     #else
     // Testing purposes.
-    printf("%s%d", msg, (int) bck) >= 1 ? G_TRUE : G_ERR;
+    printf("%s%d", msg, !!bck) >= 1 ? G_TRUE : G_ERR;
     #endif
 }
 
@@ -3268,7 +3268,7 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms,
     (inp_t) DoMethod(Win, MUIM_IG_Radio, msg, hlp, nms, def, bck, ret);
     #else
     // Testing purposes.
-    printf("%s%s%s%d%d\n", msg, hlp, *nms, def, (int) bck) ? G_TRUE : G_ERR;
+    printf("%s%s%s%d%d\n", msg, hlp, *nms, def, !!bck) ? G_TRUE : G_ERR;
     *ret = (grc == G_TRUE) ? def : 0;
     #endif
     return grc;
@@ -3294,7 +3294,7 @@ inp_t gui_options(const char *msg, const char *hlp, const char **nms,
     (inp_t) DoMethod(Win, MUIM_IG_CheckBoxes, msg, hlp, nms, def, bck, ret);
     #else
     // Testing purposes.
-    printf("%s%s%s%d%d%d\n", msg, hlp, *nms, def, *ret, (int) bck) ? G_TRUE : G_ERR;
+    printf("%s%s%s%d%d%d\n", msg, hlp, *nms, def, *ret, !!bck) ? G_TRUE : G_ERR;
     *ret = (grc == G_TRUE) ? def : 0;
     #endif
     return grc;
@@ -3318,7 +3318,7 @@ inp_t gui_bool(const char *msg, const char *hlp, const char *yes,
     (inp_t) DoMethod(Win, MUIM_IG_Bool, msg, hlp, yes, nay, bck);
     #else
     // Testing purposes.
-    printf("%s%s%s%s%d\n", msg, hlp, yes, nay, (int) bck) ? G_TRUE : G_ERR;
+    printf("%s%s%s%s%d\n", msg, hlp, yes, nay, !!bck) ? G_TRUE : G_ERR;
     #endif
 }
 
@@ -3340,7 +3340,7 @@ inp_t gui_string(const char *msg, const char *hlp, const char *def,
     (inp_t) DoMethod(Win, MUIM_IG_String, msg, hlp, def, bck, ret);
     #else
     // Testing purposes.
-    printf("%s%s%s%d\n", msg, hlp, def, (int) bck) ? G_TRUE : G_ERR;
+    printf("%s%s%s%d\n", msg, hlp, def, !!bck) ? G_TRUE : G_ERR;
     *ret = (grc == G_TRUE) ? def : "";
     #endif
     return grc;
@@ -3366,7 +3366,7 @@ inp_t gui_number(const char *msg, const char *hlp, int32_t min, int32_t max,
     (inp_t) DoMethod(Win, MUIM_IG_Number, msg, hlp, min, max, def, bck, ret);
     #else
     // Testing purposes.
-    printf("%s%s%d%d%d\n", msg, hlp, min, max, (int) bck) ? G_TRUE : G_ERR;
+    printf("%s%s%d%d%d\n", msg, hlp, min, max, !!bck) ? G_TRUE : G_ERR;
     *ret = (grc == G_TRUE) ? def : 0;
     #endif
     return grc;
@@ -3394,8 +3394,8 @@ inp_t gui_welcome(const char *msg, int32_t *lvl, int32_t *lgf, int32_t *prt,
     (inp_t) DoMethod(Win, MUIM_IG_Welcome, msg, lvl, lgf, prt, min, npr, nlg);
     #else
     // Testing purposes.
-    printf("%s%d%d%d%d%d%d\n", msg, *lvl, *lgf, *prt, min, (int) npr, (int) nlg ) ? G_TRUE :
-                                                                                    G_ERR;
+    printf("%s%d%d%d%d%d%d\n", msg, *lvl, *lgf, *prt, min, !!npr, !!nlg ) ? G_TRUE :
+                                                                            G_ERR;
     #endif
 }
 
@@ -3423,7 +3423,7 @@ inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
     if(msg && hlp && def && ret)
     {
         *ret = def;
-        printf("%s%s%d%d%d%s%d\n", msg, hlp, (int) pth, (int) dsk, (int) asn, def, (int) bck);
+        printf("%s%s%d%d%d%s%d\n", msg, hlp, !!pth, !!dsk, !!asn, def, !!bck);
         return G_TRUE;
     }
     return G_FALSE;
@@ -3453,7 +3453,7 @@ inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
     if(msg && hlp && def && ret)
     {
         *ret = def;
-        printf("%s%s%s%d%d%d\n", msg, hlp, def, (int) pth, (int) dsk, (int) bck);
+        printf("%s%s%s%d%d%d\n", msg, hlp, def, !!pth, !!dsk, !!bck);
         return G_TRUE;
     }
     return G_FALSE;
@@ -3485,7 +3485,7 @@ inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst,
         puts("sc");
         if(cnf)
         {
-            printf("%s%s%d\n", msg ? msg : "", hlp ? hlp : "", (int) bck);
+            printf("%s%s%d\n", msg ? msg : "", hlp ? hlp : "", !!bck);
             return G_FALSE;
         }
         return G_TRUE;
@@ -3514,7 +3514,7 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
     {
         // We can't do this more than once. If we do, tests will depend on the
         // order of files and directories on the host system.
-        printf("N%dB%d\n", (int) nga, (int) bck);
+        printf("N%dB%d\n", !!nga, !!bck);
         done = true;
     }
     return G_TRUE;
@@ -3568,7 +3568,7 @@ inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
     (inp_t) DoMethod(Win, MUIM_IG_Confirm, msg, hlp, bck);
     #else
     // Testing purposes.
-    printf("%s%s%d\n", msg, hlp, (int) bck) ? G_TRUE : G_ERR;
+    printf("%s%s%d\n", msg, hlp, !!bck) ? G_TRUE : G_ERR;
     #endif
 }
 
