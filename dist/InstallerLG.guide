@@ -51,6 +51,12 @@ AmigaOS. Instead of a string gadget, a slider is used to pick a value in
 a given range. For aesthetic reasons the default range is 0-100 which is
 less than the range used by the Commodore implementation.
 
+The CBM installer uses 68060 as a fallback when using (database 'cpu' on
+PowerPC (MorphOS) systems. InstallerLG will return the correct CPU. Some
+scripts have a problem with this. I've considered this to be an unwanted
+limitation of the CBM installer and therefore decided to report the true
+value despite this breaking some scripts.
+
 @ENDNODE
 
 @NODE "Extras" "Features beyond those of the original"
@@ -107,6 +113,9 @@ Italian translations.
 
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
+
+@{B}0.1.0-alpha.46 (2020-NOT-YET)@{UB}
+- ?
 
 @{B}0.1.0-alpha.45 (2020-04-10)@{UB}
 - (getsum) silent read error fixed.
