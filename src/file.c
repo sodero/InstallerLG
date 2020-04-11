@@ -3076,7 +3076,11 @@ entry_p n_startup(entry_p contxt)
     }
 
     const char *fln = get_str(contxt, "@user-startup");
-    const size_t len = strlen(";BEGIN ") + strlen(app), ins = strlen(cmd) + 2;
+    const size_t len = strlen(";BEGIN ") + strlen(app);
+    size_t ins = strlen(cmd);
+
+    // The CBM installer chomps one (and only one) line feed if it exists.
+    ins += (ins == 0 || cmd[ins - 1] != '\n') ? 2 : 1;
 
     char *pre = DBG_ALLOC(calloc(len + 1, 1)),
          *pst = DBG_ALLOC(calloc(len + 1, 1)), *buf = NULL;
