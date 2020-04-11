@@ -16,7 +16,7 @@
 This is a work in progress, see also @{" Original guide " LINK HELP:english/Installer.guide/MAIN}.
 
 @{B}-----------------------------------------------------------------------@{UB}
-Copyright © 2018-2019, Ola Söder. All rights reserved.
+Copyright © 2018-2020, Ola Söder. All rights reserved.
 
 @ENDNODE
 
@@ -117,6 +117,11 @@ Italian translations.
 
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
+
+@{B}0.1.0-alpha.47 (2020-NOT-YET)@{UB}
+- (askstring) and (asknumber) accept missing default in sloppy mode.
+- (startup) chomps redundant command linefeed.
+- ?
 
 @{B}0.1.0-alpha.46 (2020-04-10)@{UB}
 - Debug log spam removed.
