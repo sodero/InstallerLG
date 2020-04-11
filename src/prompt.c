@@ -609,7 +609,12 @@ entry_p n_asknumber(entry_p contxt)
 
     D_NUM = 0;
 
-    // Are all mandatory options (?) present?
+    // Accept missing default in sloppy mode.
+    if(!deflt && get_num(contxt, "@strict") == LG_FALSE)
+    {
+        deflt = end();
+    }
+
     if(!prompt || !help || !deflt)
     {
         ERR(ERR_MISSING_OPTION, prompt ? help ? "default" : "help" : "prompt");
@@ -840,7 +845,12 @@ entry_p n_askstring(entry_p contxt)
             back     = opt(contxt, OPT_BACK),
             deflt    = opt(contxt, OPT_DEFAULT);
 
-    // Are all mandatory options (?) present?
+    // Accept missing default in sloppy mode.
+    if(!deflt && get_num(contxt, "@strict") == LG_FALSE)
+    {
+        deflt = end();
+    }
+
     if(!prompt || !help || !deflt)
     {
         ERR(ERR_MISSING_OPTION, prompt ? help ? "default" : "help" : "prompt");

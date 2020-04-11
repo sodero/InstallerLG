@@ -119,6 +119,7 @@ Italian translations.
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{B}0.1.0-alpha.47 (2020-NOT-YET)@{UB}
+- (askstring) and (asknumber) accept missing default in sloppy mode.
 - ?
 
 @{B}0.1.0-alpha.46 (2020-04-10)@{UB}
