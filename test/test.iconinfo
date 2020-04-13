@@ -19,7 +19,6 @@
 (iconinfo (dest "shell.info") (safe err)) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
 (iconinfo (dest "shell.info" err)) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
 (iconinfo (dest "shell.info") (confirm msg)) ; "","Line 1: Missing option 'prompt' Line 1: Undefined variable 'msg' 0",""
-(iconinfo (dest "shell.info") (confirm msg err)) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
 (iconinfo (dest "shell.info") (confirm)) ; "","Line 1: Missing option 'prompt' 0",""
 (set @strict 0) (iconinfo (dest "shell.info") (confirm)) ; "","1",""
 (set tt "var") (iconinfo (dest "shell.info") (gettooltype "TT" tt)) ; "","1",""
