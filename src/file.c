@@ -418,7 +418,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
         char *f_nam = str(*chl);
 
         // Build source <-> dest pair.
-        node->name = h_tackon(contxt, src, f_nam);
+        node->name = DBG_ALLOC(h_tackon(contxt, src, f_nam));
         node->copy = h_tackon(contxt, dst, h_fileonly(contxt, f_nam));
         node->type = h_exists(node->name);
 
@@ -561,7 +561,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
             while(entry)
             {
                 // Create the source destination tuple
-                n_src = DBG_ALLOC(h_tackon(contxt, src, entry->d_name)),
+                n_src = h_tackon(contxt, src, entry->d_name),
                 n_dst = DBG_ALLOC(h_tackon(contxt, dst, entry->d_name));
 
                 // Out of memory?
@@ -575,7 +575,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                 if(pattern)
                 {
                     // Create full pattern temp buffer.
-                    char *pat = DBG_ALLOC(h_tackon(contxt, srt, str(pattern)));
+                    char *pat = h_tackon(contxt, srt, str(pattern));
 
                     // Out of memory?
                     if(!pat)
@@ -1950,7 +1950,7 @@ entry_p n_copylib(entry_p contxt)
     // Destination file, old name and new path or new name and new path.
     char *name = opt(contxt, OPT_NEWNAME) ?
                  h_tackon(contxt, dst, str(opt(contxt, OPT_NEWNAME))) :
-                 h_tackon(contxt, dst, h_fileonly(contxt, src));
+                 DBG_ALLOC(h_tackon(contxt, dst, h_fileonly(contxt, src)));
 
     if(!name && PANIC(contxt))
     {
