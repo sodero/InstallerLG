@@ -94,7 +94,7 @@ p:              vp                               |
 pp:             p p                              { $$ = push(push(new_contxt(), $1), $2); };
 ps:             ps p                             { $$ = push($1, $2); } |
                 p                                { $$ = push(new_contxt(), $1); };
-pps:            pps p p                          { $$ = push(push($1, $2), $3); } |
+pps:            pps pp                           { $$ = merge($1, $2); } |
                 pp                               ;
 vp:             ivp                              |
                 '(' vp ')'                       { $$ = $2; };
