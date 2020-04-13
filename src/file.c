@@ -612,6 +612,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                     #else
                     // Get rid of warning and increase test coverage.
                     snprintf(buf_get(B_KEY), buf_len(), "%s:%s", srt, n_src);
+                    type = h_exists(n_src);
                     #endif
 
                     // Unlock buffer and release full pattern temp.
