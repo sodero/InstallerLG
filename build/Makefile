@@ -39,6 +39,7 @@ CWRN = -Wall -Wextra -Wno-pointer-sign
 CGEN = -Os -std=gnu99 -DAMIGA
 LDLIBS = -ldebug
 ifeq ($(OS),MorphOS)
+CGEN += -noixemul
 LDLIBS += -noixemul
 endif
 endif

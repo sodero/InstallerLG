@@ -94,7 +94,7 @@ p:              vp                               |
 pp:             p p                              { $$ = push(push(new_contxt(), $1), $2); };
 ps:             ps p                             { $$ = push($1, $2); } |
                 p                                { $$ = push(new_contxt(), $1); };
-pps:            pps p p                          { $$ = push(push($1, $2), $3); } |
+pps:            pps pp                           { $$ = merge($1, $2); } |
                 pp                               ;
 vp:             ivp                              |
                 '(' vp ')'                       { $$ = $2; };
@@ -486,7 +486,7 @@ back:           '(' BACK vps ')'                 { $$ = new_option(strdup("back"
 choices:        '(' CHOICES ps ')'               { $$ = new_option(strdup("choices"), OPT_CHOICES, $3); };
 command:        '(' COMMAND ps ')'               { $$ = new_option(strdup("command"), OPT_COMMAND, $3); };
 compression:    '(' COMPRESSION ')'              { $$ = new_option(strdup("compression"), OPT_COMPRESSION, NULL); };
-confirm:        '(' CONFIRM p ')'                { $$ = new_option(strdup("confirm"), OPT_CONFIRM, push(new_contxt(), $3)); } |
+confirm:        '(' CONFIRM ps ')'               { $$ = new_option(strdup("confirm"), OPT_CONFIRM, $3); } |
                 '(' CONFIRM ')'                  { $$ = new_option(strdup("confirm"), OPT_CONFIRM, NULL); };
 default:        '(' DEFAULT p ')'                { $$ = new_option(strdup("default"), OPT_DEFAULT, push(new_contxt(), $3)); };
 delopts:        '(' DELOPTS ps ')'               { $$ = new_option(strdup("delopts"), OPT_DELOPTS, $3); } |
