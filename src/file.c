@@ -1934,11 +1934,10 @@ entry_p n_copylib(entry_p contxt)
     {
         // Clang scan-build dead code false positive.
 #ifndef __clang_analyzer__
-        // Directory doesn't exist, create it. One level deep only.
-        if(mkdir(dst, 0777))
+        // Create non-existing directory.
+        if(!h_makedir_path(dst))
         {
-            // Permission problems or the dir is more than 1 level deeper
-            // than the existing path.
+            // Permission problems.
             ERR(ERR_WRITE_DIR, dst);
             R_NUM(LG_FALSE);
         }
