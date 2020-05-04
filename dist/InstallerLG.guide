@@ -123,6 +123,7 @@ Italian translations.
 - (startup) chomps redundant (command) linefeed.
 - Relative path pattern matching bug fixed (Money101b).
 - (exists) sloppy acceptance of any options (MUIVideo).
+- (askdir) (newpath) dead dummy accepted.
 - ?
 
 @{B}0.1.0-alpha.46 (2020-04-10)@{UB}
