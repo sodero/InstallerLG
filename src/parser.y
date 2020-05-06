@@ -279,12 +279,18 @@ sub:            '(' '-' ps ')'                   { $$ = new_native(strdup("-"), 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* comparison.c|h                                                                                                                                                                       */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-eq:             '(' '=' pp ')'                   { $$ = new_native(strdup("="), LINE, n_eq, $3, NUMBER); };
-gt:             '(' '>' pp ')'                   { $$ = new_native(strdup(">"), LINE, n_gt, $3, NUMBER); };
-gte:            '(' GTE pp ')'                   { $$ = new_native(strdup(">="), LINE, n_gte, $3, NUMBER); };
-lt:             '(' '<' pp ')'                   { $$ = new_native(strdup("<"), LINE, n_lt, $3, NUMBER); };
-lte:            '(' LTE pp ')'                   { $$ = new_native(strdup("<="), LINE, n_lte, $3, NUMBER); };
-neq:            '(' NEQ pp ')'                   { $$ = new_native(strdup("<>"), LINE, n_neq, $3, NUMBER); };
+eq:             '(' '=' pp ')'                   { $$ = new_native(strdup("="), LINE, n_eq, $3, NUMBER); } |
+                '(' '=' p ')'                    { $$ = new_native(strdup("="), LINE, n_eq, push(new_contxt(), $3), NUMBER); };
+gt:             '(' '>' pp ')'                   { $$ = new_native(strdup(">"), LINE, n_gt, $3, NUMBER); } |
+                '(' '>' p ')'                    { $$ = new_native(strdup(">"), LINE, n_gt, push(new_contxt(), $3), NUMBER); };
+gte:            '(' GTE pp ')'                   { $$ = new_native(strdup(">="), LINE, n_gte, $3, NUMBER); } |
+                '(' GTE p ')'                    { $$ = new_native(strdup(">="), LINE, n_gte, push(new_contxt(), $3), NUMBER); };
+lt:             '(' '<' pp ')'                   { $$ = new_native(strdup("<"), LINE, n_lt, $3, NUMBER); } |
+                '(' '<' p ')'                    { $$ = new_native(strdup("<"), LINE, n_lt, push(new_contxt(), $3), NUMBER); };
+lte:            '(' LTE pp ')'                   { $$ = new_native(strdup("<="), LINE, n_lte, $3, NUMBER); } |
+                '(' LTE p ')'                    { $$ = new_native(strdup("<="), LINE, n_lte, push(new_contxt(), $3), NUMBER); };
+neq:            '(' NEQ pp ')'                   { $$ = new_native(strdup("<>"), LINE, n_neq, $3, NUMBER); } |
+                '(' NEQ p ')'                    { $$ = new_native(strdup("<>"), LINE, n_neq, push(new_contxt(), $3), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* control.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
