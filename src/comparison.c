@@ -125,11 +125,14 @@ static int32_t h_cmp(entry_p lhs, entry_p rhs)
 //------------------------------------------------------------------------------
 entry_p n_eq(entry_p contxt)
 {
-    // Two arguments.
-    C_SANE(2, NULL);
+    // Contrary to what the documentation says, the CBM implementation accepts
+    // a single argument. This is obviously a bug, but let's support it anyway
+    // since it can be found in some broken scripts.
+    C_SANE(1, NULL);
 
-    // Translate the result of h_cmp.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) != 0 ? LG_FALSE : LG_TRUE);
+    // Translate the result of h_cmp or return 'true' dummy value.
+    R_NUM(exists(C_ARG(2)) && h_cmp(C_ARG(1), C_ARG(2)) != 0 ? LG_FALSE :
+                                                               LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -140,11 +143,14 @@ entry_p n_eq(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p n_gt(entry_p contxt)
 {
-    // Two arguments.
-    C_SANE(2, NULL);
+    // Contrary to what the documentation says, the CBM implementation accepts
+    // a single argument. This is obviously a bug, but let's support it anyway
+    // since it can be found in some broken scripts.
+    C_SANE(1, NULL);
 
-    // Translate the result of h_cmp.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) > 0 ? LG_TRUE : LG_FALSE);
+    // Translate the result of h_cmp or return 'true' dummy value.
+    R_NUM(exists(C_ARG(2)) && h_cmp(C_ARG(1), C_ARG(2)) <= 0 ? LG_FALSE :
+                                                               LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -155,11 +161,14 @@ entry_p n_gt(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p n_gte(entry_p contxt)
 {
-    // Two arguments.
-    C_SANE(2, NULL);
+    // Contrary to what the documentation says, the CBM implementation accepts
+    // a single argument. This is obviously a bug, but let's support it anyway
+    // since it can be found in some broken scripts.
+    C_SANE(1, NULL);
 
-    // Translate the result of h_cmp.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) >= 0 ? LG_TRUE : LG_FALSE);
+    // Translate the result of h_cmp or return 'true' dummy value.
+    R_NUM(exists(C_ARG(2)) && h_cmp(C_ARG(1), C_ARG(2)) < 0 ? LG_FALSE :
+                                                              LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -170,11 +179,14 @@ entry_p n_gte(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p n_lt(entry_p contxt)
 {
-    // Two arguments.
-    C_SANE(2, NULL);
+    // Contrary to what the documentation says, the CBM implementation accepts
+    // a single argument. This is obviously a bug, but let's support it anyway
+    // since it can be found in some broken scripts.
+    C_SANE(1, NULL);
 
-    // Translate the result of h_cmp.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) < 0 ? LG_TRUE : LG_FALSE);
+    // Translate the result of h_cmp or return 'true' dummy value.
+    R_NUM(exists(C_ARG(2)) && h_cmp(C_ARG(1), C_ARG(2)) >= 0 ? LG_FALSE :
+                                                               LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -185,11 +197,14 @@ entry_p n_lt(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p n_lte(entry_p contxt)
 {
-    // Two arguments.
-    C_SANE(2, NULL);
+    // Contrary to what the documentation says, the CBM implementation accepts
+    // a single argument. This is obviously a bug, but let's support it anyway
+    // since it can be found in some broken scripts.
+    C_SANE(1, NULL);
 
-    // Translate the result of h_cmp.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) <= 0 ? LG_TRUE : LG_FALSE);
+    // Translate the result of h_cmp or return 'true' dummy value.
+    R_NUM(exists(C_ARG(2)) && h_cmp(C_ARG(1), C_ARG(2)) > 0 ? LG_FALSE :
+                                                              LG_TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -200,9 +215,12 @@ entry_p n_lte(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p n_neq(entry_p contxt)
 {
-    // Two arguments.
-    C_SANE(2, NULL);
+    // Contrary to what the documentation says, the CBM implementation accepts
+    // a single argument. This is obviously a bug, but let's support it anyway
+    // since it can be found in some broken scripts.
+    C_SANE(1, NULL);
 
-    // Translate the result of h_cmp.
-    R_NUM(h_cmp(C_ARG(1), C_ARG(2)) == 0 ? LG_FALSE : LG_TRUE);
+    // Translate the result of h_cmp or return 'false' dummy value.
+    R_NUM(exists(C_ARG(2)) && h_cmp(C_ARG(1), C_ARG(2)) != 0 ? LG_TRUE :
+                                                               LG_FALSE);
 }

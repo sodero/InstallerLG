@@ -2140,50 +2140,50 @@ case 146:
 /* rule 146 can match eol */
 YY_RULE_SETUP
 #line 226 "../src/lexer.l"
-{ yylineno++;                 }
+{ yylineno++;                                   }
 	YY_BREAK
 case 147:
 /* rule 147 can match eol */
 YY_RULE_SETUP
 #line 227 "../src/lexer.l"
-{ yylineno++;                 }
+{ yylineno++;                                   }
 	YY_BREAK
 case 148:
 YY_RULE_SETUP
 #line 228 "../src/lexer.l"
-{ yylineno++;                 }
+{ yylineno++;                                   }
 	YY_BREAK
 case 149:
 YY_RULE_SETUP
 #line 229 "../src/lexer.l"
-{                             }
+{                                               }
 	YY_BREAK
 case 150:
 YY_RULE_SETUP
 #line 230 "../src/lexer.l"
-{ BEGIN(comment);             }
+{ BEGIN(comment);                               }
 	YY_BREAK
 case 151:
 /* rule 151 can match eol */
 YY_RULE_SETUP
 #line 231 "../src/lexer.l"
-{ BEGIN(INITIAL); yylineno++; }
+{ BEGIN(INITIAL); yylineno++;                   }
 	YY_BREAK
 case 152:
 /* rule 152 can match eol */
 YY_RULE_SETUP
 #line 232 "../src/lexer.l"
-{ BEGIN(INITIAL); yylineno++; }
+{ BEGIN(INITIAL); yylineno++;                   }
 	YY_BREAK
 case 153:
 YY_RULE_SETUP
 #line 233 "../src/lexer.l"
-{ BEGIN(INITIAL); yylineno++; }
+{ BEGIN(INITIAL); yylineno++;                   }
 	YY_BREAK
 case 154:
 YY_RULE_SETUP
 #line 234 "../src/lexer.l"
-{                             }
+{                                               }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
@@ -3386,7 +3386,8 @@ int yyerror(yyscan_t scanner, const char *err)
     int line = yyget_lineno(scanner);
     const char *info = yyget_text(scanner);
 
-    // Print to stderr if we're executing from shell, show dialogue if we're executing from WB.
+    // Print to stderr if we're executing from shell, show dialogue if we're
+    // executing from WB.
     if(arg_argc(-1))
     {
         // All details to stderr.
@@ -3398,7 +3399,8 @@ int yyerror(yyscan_t scanner, const char *err)
         error(NULL, line, ERR_PARSE, err);
     }
 
-    // Return a bogus value, not the number of bytes printed, like the default yyerror function.
+    // Return a bogus value, not the number of bytes printed, like the default
+    // yyerror function.
     return line;
 }
 
@@ -3410,20 +3412,19 @@ int main(int argc, char **argv)
     // Assume failure.
     int ret = -1;
 
-    // Initialize the argument handling. Transparent handling of Workbench and CLI arguments.
+    // Initialize the argument handling.
     if(arg_init(argc, argv))
     {
         yyscan_t lexer;
 
-        // Allocate and initialize whatever the lexer needs. Reentrant, see comment at the top.
+        // Allocate and initialize reentrant lexer.
         if(yylex_init(&lexer) == 0)
         {
-            // Get the name of the script from CLI or tooltypes / wb.
+            // Get script name from CLI or tooltypes / WB.
             char *name = arg_get(ARG_SCRIPT);
             script = fopen(name, "r");
 
-            // Disable stderr buffering in case it's buffered, which it seems
-            // to be when VBCC is used.
+            // Disable stderr buffering (VBCC quirk).
             setvbuf(stderr, NULL, _IONBF, 0);
 
             if(script)
@@ -3431,10 +3432,14 @@ int main(int argc, char **argv)
                 // Set input file and parse.
                 yyset_in(script, lexer);
 
-                // Save parser return value, 1 on syntax error, 0 on success.
+                // 1 on syntax error, 0 on success.
                 ret = yyparse(lexer);
 
-                if(script) fclose(script);
+                // Input is still open if the parser returns before EOF.
+                if(script)
+                {
+                    fclose(script);
+                }
             }
             else
             {
@@ -3452,10 +3457,12 @@ int main(int argc, char **argv)
         }
     }
 
-    // Free all resources allocated by the argument handling routines. This must be done even if arg_init() fails.
+    // Free all resources allocated by the argument handling routines.
+    // This must be done even if arg_init() fails.
     arg_done();
 #ifdef AMIGA
-    // Translate value of ret to the appropriate Amiga DOS return value. Syntax error is an ERROR and file not found / readable a FAIL.
+    // Translate value of ret to the appropriate Amiga DOS return value. Syntax
+    // error is an ERROR and file not found / readable a FAIL.
     return (!ret ? ret : (ret == 1 ? RETURN_ERROR : RETURN_FAIL));
 #else
     // Ignore errors on non Amiga systems.
@@ -3488,12 +3495,14 @@ static char *strduptr(const char *str)
     static char chr[] = "nrthvbf\"'\\\0";
     static char raw[] = "\n\r\t\t\v\b\f\"'\\\0";
 
-    // Please note 'len - 1', delimiters are stripped from the string, str index starts at 1 and the last character is skipped.
+    // Please note 'len - 1', delimiters are stripped from the string, str index
+    // starts at 1 and the last character is skipped.
     char *out = calloc(len - 1, 1);
 
     if(!out)
     {
-        // Out of memory. This will be trapped by the OOM token and the parser will abort.
+        // Out of memory. This will be trapped by the OOM token and the parser
+        // will abort.
         return NULL;
     }
 
@@ -3510,7 +3519,8 @@ static char *strduptr(const char *str)
             // Are we within the limits of the string?
             if(i + 3 < len - 1)
             {
-                // Is this a hex number that needs to be translated into a character?
+                // Is this a hex number that needs to be translated into a
+                // character?
                 if(str[i + 1] == 'x' && (
                   ((str[i + 2] >= 48 && str[i + 2] <= 57) ||
                    (str[i + 2] >= 65 && str[i + 2] <= 70) ||
@@ -3531,7 +3541,8 @@ static char *strduptr(const char *str)
                     // Continue with the rest of the string.
                     continue;
                 }
-                // Is this a oct number that needs to be translated into a character?
+                // Is this a oct number that needs to be translated into a
+                // character?
                 if(str[i + 1] >= 48 && str[i + 1] <= 55 &&
                    str[i + 2] >= 48 && str[i + 2] <= 55 &&
                    str[i + 3] >= 48 && str[i + 3] <= 55)
@@ -3553,7 +3564,8 @@ static char *strduptr(const char *str)
             // Standard escape sequence.
             for(int j = 0; chr[j]; j++)
             {
-                // A direct mapping between the current character and the value representing the full escape sequence.
+                // A direct mapping between the current character and the value
+                // representing the full escape sequence.
                 if(str[i + 1] == chr[j])
                 {
                     i++;
@@ -3563,7 +3575,8 @@ static char *strduptr(const char *str)
             }
         }
 
-        // Copy input to ouput. The 'cr' might have been translated, maybe it's just a copy.
+        // Copy input to ouput. The 'cr' might have been translated, maybe it's
+        // just a copy.
         out[io++] = cr;
     }
 
