@@ -95,11 +95,21 @@ static bool arg_cli(int argc, char **argv)
     (void) argc;
     (void) argv;
 
+    // AxRT test --->
+    DBG_PRINT("argc:%d\n", argc);
+    DBG_PRINT("argv[0]:%s\n", *argv);
+    DBG_PRINT("template:%s\n", tr(S_ARGS));
+    // AxRT test <---
+
     // Use the builtin commandline parser.
     struct RDArgs *rda = (struct RDArgs *) ReadArgs(tr(S_ARGS), (IPTR *) args,
                                                     NULL);
     if(!rda)
     {
+        // AxRT test --->
+        HERE;
+        // AxRT test <---
+
         // Invalid or missing arguments.
         fputs(tr(S_ARGS), stderr);
         return false;
