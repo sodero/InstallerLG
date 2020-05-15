@@ -7,7 +7,7 @@ YACC = bison
 LEX = flex
 
 STARTUP_OBJ = /usr/lib/x86_64-linux-gnu/startup.o
-LDLIBS = -lworkbench -licon -lmuimaster -lintuition -ldos -llocale -lutility -lmui -lexec -ldebug
+LDLIBS = -lworkbench -licon -lmuimaster -lintuition -ldos -llocale -lutility -lmui -lexec -ldebug -lgraphics -ldatatypes
 LDFLAGS = -specs=/usr/lib/x86_64-linux-gnu/axrt.specs
 CGEN = -O0 -std=gnu99 -DAMIGA
 CINC = -I /usr/include/axrt -I . -I $(VPATH)
@@ -15,7 +15,7 @@ CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE -D__AMIGADATE__="\"($(DATE))\"" $(CEXT)
 CFLAGS = $(CINC) $(CGEN) $(CDEF) -D__AROS__ -g -O0 -I/usr/include/axrt
 
 $(EXE): $(OBJ) parser.o lexer.o $(STARTUP_OBJ) /usr/lib/x86_64-linux-gnu/axrt.ld
-	$(CC) $^ -o $@ $(LDFLAGS) $(LDLIBS)
+	$(CC)  $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS)
 
 parser.o: parser.c
 	$(CC) $(CINC) $(CDEF) $(CGEN) -c $< -DYYERROR_VERBOSE
@@ -32,7 +32,7 @@ lexer.c: lexer.l parser.h
 	$(LEX) $(LFLAGS) -t $< > $@
 
 gui.o: gui.c gui.h version.h
-	$(CC) -Os -c $< -DLLVL=2 $(CWRN) $(CDEF)
+	$(CC) $(CFLAGS) -Os -c $< -DLLVL=2
 
 .PHONY: clean
 clean:
