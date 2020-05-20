@@ -1,1 +1,7 @@
+; Using a custom screen doesn't seem to work. Uncomment to test.
+;(effect "center_left" 'horizontal' 1 254) (effect "center_left" 'horizontal' 1 255) ; "","e 36:1:254 36:1:255 1",""
+(complete 25)
 (message "Hello AxRT world!")
+(complete 75)
+(message ("File:%s" (askfile (default "No file") (prompt "Pick a file") (help "Nope, no help"))))
+(complete 100)
