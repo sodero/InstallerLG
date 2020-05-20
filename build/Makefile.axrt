@@ -12,7 +12,7 @@ LDFLAGS = -specs=/usr/lib/x86_64-linux-gnu/axrt.specs
 CGEN = -O0 -std=gnu99 -DAMIGA
 CINC = -I /usr/include/axrt -I . -I $(VPATH)
 CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE -D__AMIGADATE__="\"($(DATE))\"" $(CEXT)
-CFLAGS = $(CINC) $(CGEN) $(CDEF) -D__AROS__ -g -O0 -I/usr/include/axrt
+CFLAGS = $(CINC) $(CGEN) $(CDEF) -D__AROS__ -D__AXRT__ -g -O0 -I/usr/include/axrt
 
 $(EXE): $(OBJ) parser.o lexer.o $(STARTUP_OBJ) /usr/lib/x86_64-linux-gnu/axrt.ld
 	$(CC)  $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS)
@@ -21,7 +21,7 @@ parser.o: parser.c
 	$(CC) $(CINC) $(CDEF) $(CGEN) -c $< -DYYERROR_VERBOSE
 
 lexer.o: lexer.c
-	$(CC) $(CINC) $(CDEF) $(CGEN) -c $<
+	$(CC) $(CINC) $(CDEF) $(CGEN) -D__AXRT__ -c $<
 
 parser.c: parser.y
 	$(YACC) $(YFLAGS) -d $< -o $@

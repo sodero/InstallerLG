@@ -68,7 +68,7 @@ typedef LONG IPTR;
 # ifndef __VBCC__
 # define DoSuperNew(C,O,...) DoSuperNewTags(C,O,NULL,__VA_ARGS__)
 #else
-APTR STDARGS DoSuperNew(struct IClass *cl, APTR obj, ULONG tag1, ...)
+APTR STDARGS DoSuperNew(struct IClass *cl, APTR obj, IPTR tag1, ...)
 {
 	return (IPTR) DoSuperMethod(cl, obj, OM_NEW, &tag1, NULL);
 }
@@ -167,7 +167,7 @@ CLASS_DEF(IG)
 //------------------------------------------------------------------------------
 struct MUIP_IG_Init
 {
-    ULONG MethodID;
+    IPTR MethodID;
 };
 
 //------------------------------------------------------------------------------
@@ -175,14 +175,14 @@ struct MUIP_IG_Init
 //------------------------------------------------------------------------------
 struct MUIP_IG_Welcome
 {
-    ULONG MethodID;
-    ULONG Message;
-    ULONG Level;
-    ULONG Log;
-    ULONG Pretend;
-    ULONG MinLevel;
-    ULONG NoPretend;
-    ULONG NoLog;
+    IPTR MethodID;
+    IPTR Message;
+    IPTR Level;
+    IPTR Log;
+    IPTR Pretend;
+    IPTR MinLevel;
+    IPTR NoPretend;
+    IPTR NoLog;
 };
 
 //------------------------------------------------------------------------------
@@ -190,12 +190,12 @@ struct MUIP_IG_Welcome
 //------------------------------------------------------------------------------
 struct MUIP_IG_CopyFilesStart
 {
-    ULONG MethodID;
-    ULONG Message;
-    ULONG Help;
-    ULONG List;
-    ULONG Confirm;
-    ULONG Back;
+    IPTR MethodID;
+    IPTR Message;
+    IPTR Help;
+    IPTR List;
+    IPTR Confirm;
+    IPTR Back;
 };
 
 //------------------------------------------------------------------------------
@@ -203,10 +203,10 @@ struct MUIP_IG_CopyFilesStart
 //------------------------------------------------------------------------------
 struct MUIP_IG_CopyFilesSetCur
 {
-    ULONG MethodID;
-    ULONG File;
-    ULONG NoGauge;
-    ULONG Back;
+    IPTR MethodID;
+    IPTR File;
+    IPTR NoGauge;
+    IPTR Back;
 };
 
 //------------------------------------------------------------------------------
@@ -214,8 +214,8 @@ struct MUIP_IG_CopyFilesSetCur
 //------------------------------------------------------------------------------
 struct MUIP_IG_Exit
 {
-    ULONG MethodID;
-    ULONG Message;
+    IPTR MethodID;
+    IPTR Message;
 };
 
 //------------------------------------------------------------------------------
@@ -223,8 +223,8 @@ struct MUIP_IG_Exit
 //------------------------------------------------------------------------------
 struct MUIP_IG_Complete
 {
-    ULONG MethodID;
-    ULONG Progress;
+    IPTR MethodID;
+    IPTR Progress;
 };
 
 //------------------------------------------------------------------------------
@@ -232,8 +232,8 @@ struct MUIP_IG_Complete
 //------------------------------------------------------------------------------
 struct MUIP_IG_CopyFilesAdd
 {
-    ULONG MethodID;
-    ULONG File;
+    IPTR MethodID;
+    IPTR File;
 };
 
 //------------------------------------------------------------------------------
@@ -241,10 +241,10 @@ struct MUIP_IG_CopyFilesAdd
 //------------------------------------------------------------------------------
 struct MUIP_IG_Confirm
 {
-    ULONG MethodID;
-    ULONG Message;
-    ULONG Help;
-    ULONG Back;
+    IPTR MethodID;
+    IPTR Message;
+    IPTR Help;
+    IPTR Back;
 };
 
 //------------------------------------------------------------------------------
@@ -252,9 +252,9 @@ struct MUIP_IG_Confirm
 //------------------------------------------------------------------------------
 struct MUIP_IG_Message
 {
-    ULONG MethodID;
-    ULONG Message;
-    ULONG Back;
+    IPTR MethodID;
+    IPTR Message;
+    IPTR Back;
 };
 
 //------------------------------------------------------------------------------
@@ -262,8 +262,8 @@ struct MUIP_IG_Message
 //------------------------------------------------------------------------------
 struct MUIP_IG_Finish
 {
-    ULONG MethodID;
-    ULONG Message;
+    IPTR MethodID;
+    IPTR Message;
 };
 
 //------------------------------------------------------------------------------
@@ -271,8 +271,8 @@ struct MUIP_IG_Finish
 //------------------------------------------------------------------------------
 struct MUIP_IG_Working
 {
-    ULONG MethodID;
-    ULONG Message;
+    IPTR MethodID;
+    IPTR Message;
 };
 
 //------------------------------------------------------------------------------
@@ -280,10 +280,10 @@ struct MUIP_IG_Working
 //------------------------------------------------------------------------------
 struct MUIP_IG_Effect
 {
-    ULONG MethodID;
-    ULONG Effect;
-    ULONG ColorStart;
-    ULONG ColorEnd;
+    IPTR MethodID;
+    IPTR Effect;
+    IPTR ColorStart;
+    IPTR ColorEnd;
 };
 
 //------------------------------------------------------------------------------
@@ -291,8 +291,8 @@ struct MUIP_IG_Effect
 //------------------------------------------------------------------------------
 struct MUIP_IG_CloseMedia
 {
-    ULONG MethodID;
-    ULONG MediaID;
+    IPTR MethodID;
+    IPTR MediaID;
 };
 
 //------------------------------------------------------------------------------
@@ -300,10 +300,10 @@ struct MUIP_IG_CloseMedia
 //------------------------------------------------------------------------------
 struct MUIP_IG_SetMedia
 {
-    ULONG MethodID;
-    ULONG MediaID;
-    ULONG Action;
-    ULONG Parameter;
+    IPTR MethodID;
+    IPTR MediaID;
+    IPTR Action;
+    IPTR Parameter;
 };
 
 //------------------------------------------------------------------------------
@@ -311,10 +311,10 @@ struct MUIP_IG_SetMedia
 //------------------------------------------------------------------------------
 struct MUIP_IG_ShowMedia
 {
-    ULONG MethodID;
-    ULONG MediaID;
-    ULONG Media;
-    ULONG Action;
+    IPTR MethodID;
+    IPTR MediaID;
+    IPTR Media;
+    IPTR Action;
 };
 
 //------------------------------------------------------------------------------
@@ -322,10 +322,10 @@ struct MUIP_IG_ShowMedia
 //------------------------------------------------------------------------------
 struct MUIP_IG_ShowPicture
 {
-    ULONG MethodID;
-    ULONG MediaID;
-    ULONG Picture;
-    ULONG Action;
+    IPTR MethodID;
+    IPTR MediaID;
+    IPTR Picture;
+    IPTR Action;
 };
 
 //------------------------------------------------------------------------------
@@ -333,8 +333,8 @@ struct MUIP_IG_ShowPicture
 //------------------------------------------------------------------------------
 struct MUIP_IG_Abort
 {
-    ULONG MethodID;
-    ULONG Message;
+    IPTR MethodID;
+    IPTR Message;
 };
 
 //------------------------------------------------------------------------------
@@ -342,13 +342,13 @@ struct MUIP_IG_Abort
 //------------------------------------------------------------------------------
 struct MUIP_IG_Radio
 {
-    ULONG MethodID;
-    ULONG Message;
-    ULONG Help;
-    ULONG Names;
-    ULONG Default;
-    ULONG Back;
-    ULONG Select;
+    IPTR MethodID;
+    IPTR Message;
+    IPTR Help;
+    IPTR Names;
+    IPTR Default;
+    IPTR Back;
+    IPTR Select;
 };
 
 //------------------------------------------------------------------------------
@@ -356,12 +356,12 @@ struct MUIP_IG_Radio
 //------------------------------------------------------------------------------
 struct MUIP_IG_Bool
 {
-    ULONG MethodID;
-    ULONG Message;
-    ULONG Help;
-    ULONG Yes;
-    ULONG No;
-    ULONG Back;
+    IPTR MethodID;
+    IPTR Message;
+    IPTR Help;
+    IPTR Yes;
+    IPTR No;
+    IPTR Back;
 };
 
 //------------------------------------------------------------------------------
@@ -369,12 +369,12 @@ struct MUIP_IG_Bool
 //------------------------------------------------------------------------------
 struct MUIP_IG_String
 {
-    ULONG MethodID;
-    ULONG Message;
-    ULONG Help;
-    ULONG Default;
-    ULONG Back;
-    ULONG String;
+    IPTR MethodID;
+    IPTR Message;
+    IPTR Help;
+    IPTR Default;
+    IPTR Back;
+    IPTR String;
 };
 
 //------------------------------------------------------------------------------
@@ -382,14 +382,14 @@ struct MUIP_IG_String
 //------------------------------------------------------------------------------
 struct MUIP_IG_Number
 {
-    ULONG MethodID;
-    ULONG Message;
-    ULONG Help;
-    ULONG Min;
-    ULONG Max;
-    ULONG Default;
-    ULONG Back;
-    ULONG Number;
+    IPTR MethodID;
+    IPTR Message;
+    IPTR Help;
+    IPTR Min;
+    IPTR Max;
+    IPTR Default;
+    IPTR Back;
+    IPTR Number;
 };
 
 //------------------------------------------------------------------------------
@@ -397,13 +397,13 @@ struct MUIP_IG_Number
 //------------------------------------------------------------------------------
 struct MUIP_IG_CheckBoxes
 {
-    ULONG MethodID;
-    ULONG Message;
-    ULONG Help;
-    ULONG Names;
-    ULONG Default;
-    ULONG Back;
-    ULONG Bitmap;
+    IPTR MethodID;
+    IPTR Message;
+    IPTR Help;
+    IPTR Names;
+    IPTR Default;
+    IPTR Back;
+    IPTR Bitmap;
 };
 
 //------------------------------------------------------------------------------
@@ -411,16 +411,16 @@ struct MUIP_IG_CheckBoxes
 //------------------------------------------------------------------------------
 struct MUIP_IG_AskFile
 {
-    ULONG MethodID;
-    ULONG Message;
-    ULONG Help;
-    ULONG NewPath;
-    ULONG Disk;
-    ULONG Assign;
-    ULONG Default;
-    ULONG Dir;
-    ULONG Back;
-    ULONG File;
+    IPTR MethodID;
+    IPTR Message;
+    IPTR Help;
+    IPTR NewPath;
+    IPTR Disk;
+    IPTR Assign;
+    IPTR Default;
+    IPTR Dir;
+    IPTR Back;
+    IPTR File;
 };
 
 //------------------------------------------------------------------------------
@@ -428,11 +428,11 @@ struct MUIP_IG_AskFile
 //------------------------------------------------------------------------------
 struct MUIP_IG_PageSet
 {
-    ULONG MethodID;
-    ULONG Message;
-    ULONG Help;
-    ULONG Top;
-    ULONG Bottom;
+    IPTR MethodID;
+    IPTR Message;
+    IPTR Help;
+    IPTR Top;
+    IPTR Bottom;
 };
 
 //------------------------------------------------------------------------------
@@ -440,7 +440,7 @@ struct MUIP_IG_PageSet
 //------------------------------------------------------------------------------
 struct MUIP_IG_GetCustomScreen
 {
-    ULONG MethodID;
+    IPTR MethodID;
 };
 
 //------------------------------------------------------------------------------
@@ -448,11 +448,11 @@ struct MUIP_IG_GetCustomScreen
 //------------------------------------------------------------------------------
 struct MUIP_IG_GetScreenProp
 {
-    ULONG MethodID;
-    ULONG Width;
-    ULONG Height;
-    ULONG Depth;
-    ULONG Colors;
+    IPTR MethodID;
+    IPTR Width;
+    IPTR Height;
+    IPTR Depth;
+    IPTR Colors;
 };
 
 //------------------------------------------------------------------------------
@@ -460,13 +460,13 @@ struct MUIP_IG_GetScreenProp
 //------------------------------------------------------------------------------
 struct MUIP_IG_GetWindowProp
 {
-    ULONG MethodID;
-    ULONG Width;
-    ULONG Height;
-    ULONG Upper;
-    ULONG Lower;
-    ULONG Left;
-    ULONG Right;
+    IPTR MethodID;
+    IPTR Width;
+    IPTR Height;
+    IPTR Upper;
+    IPTR Lower;
+    IPTR Left;
+    IPTR Right;
 };
 
 //------------------------------------------------------------------------------
@@ -506,10 +506,10 @@ struct MUIP_IG_GetWindowProp
 
 //------------------------------------------------------------------------------
 // IGTrans - [PRIVATE] Translate button input to GUI response value
-// Input:    ULONG signal: -
+// Input:    IPTR signal: -
 // Return:   GUI response value
 //------------------------------------------------------------------------------
-static ULONG IGTrans(ULONG signal)
+static IPTR IGTrans(IPTR signal)
 {
     switch(signal)
     {
@@ -539,13 +539,13 @@ static ULONG IGTrans(ULONG signal)
 
 //------------------------------------------------------------------------------
 // IGWait - [PRIVATE] Wait for notification(s)
-// Input:   ULONG notif:  Start notification value
-//          ULONG range:  Number of values to check for
+// Input:   IPTR notif:  Start notification value
+//          IPTR range:  Number of values to check for
 // Return:  Notifcation val. / zero on return id quit
 //------------------------------------------------------------------------------
-static ULONG IGWait(Object *obj, ULONG notif, ULONG range)
+static IPTR IGWait(Object *obj, IPTR notif, IPTR range)
 {
-    ULONG sig = 0, ret = 0, n;
+    IPTR sig = 0, ret = 0, n;
 
     // Set cycle chain for all buttons within the notification range.
     for(n = 0; n < range; n++)
@@ -584,7 +584,7 @@ static ULONG IGWait(Object *obj, ULONG notif, ULONG range)
     ret = DoMethod(_app(obj), MUIM_Application_NewInput, &sig);
 
     // Enter the message loop.
-    while(ret != (ULONG) MUIV_Application_ReturnID_Quit)
+    while(ret != (IPTR) MUIV_Application_ReturnID_Quit)
     {
         // Iterate over all signals that we're waiting for.
         for(n = 0; n < range; n++)
@@ -645,7 +645,7 @@ static ULONG IGWait(Object *obj, ULONG notif, ULONG range)
 //------------------------------------------------------------------------------
 MUIDSP IGInit(Class *cls, Object *obj)
 {
-    static ULONG i = MUIV_IG_FirstButton;
+    static IPTR i = MUIV_IG_FirstButton;
 
     // Have we already done this?
     if(i != MUIV_IG_LastButton)
@@ -716,7 +716,7 @@ MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
 
     // Always a valid message string.
     const char *src = msg->Message ? (const char *)
-                      CAST(msg->Message, const char *) : "";
+                      msg->Message : "";
 
     // Select top and buttons.
     set(my->Top, MUIA_Group_ActivePage, msg->Top);
@@ -829,11 +829,11 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
 
             // Take minimum user level into account.
             set(my->ExpertLevel, MUIA_Radio_Active,
-                *CAST(msg->Level, int32_t *) - 1);
+                msg->Level - 1);
         }
 
         // Set the current user level.
-        set(my->UserLevel, MUIA_Radio_Active, *CAST(msg->Level, int32_t *));
+        set(my->UserLevel, MUIA_Radio_Active, msg->Level);
 
         // Wait for proceed or abort.
         inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
@@ -843,6 +843,7 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             // Get the selected user level value. If we have a minimum user
             // level of 'average' we're using a different set of radio buttons.
             // Fetch from the right object and adjust the return value.
+            //
             if(msg->MinLevel == 1)
             {
                 // Minimum user level 'average'.
@@ -855,7 +856,7 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             {
                 // Minimum user level 'novice' or 'expert'.
                 get(my->UserLevel, MUIA_Radio_Active,
-                    CAST(msg->Level, int32_t *));
+                    &msg->Level);
             }
 
             // Disable the pretend choice if the NOPRETEND tooltype is used. The
@@ -864,7 +865,7 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             (
                 my->Pretend,
                 MUIA_Radio_Active,
-                msg->NoPretend ? 0 : *CAST(msg->Pretend, int32_t *),
+                msg->NoPretend ? 0 : msg->Pretend,
                 MUIA_Disabled, msg->NoPretend ? TRUE : FALSE,
                 TAG_END
             );
@@ -875,13 +876,13 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             (
                 my->Log,
                 MUIA_Radio_Active,
-                msg->NoLog ? 0 : *CAST(msg->Log, int32_t *),
+                msg->NoLog ? 0 : msg->Log,
                 MUIA_Disabled, msg->NoLog ? TRUE : FALSE,
                 TAG_END
             );
 
             // Don't show logging and pretend mode settings to 'Novice' users.
-            if(*CAST(msg->Level, int32_t *))
+            if(msg->Level)
             {
                 // Show pretend / log page.
                 if(DoMethod(obj, MUIM_IG_PageSet, NULL,
@@ -894,9 +895,9 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
                     {
                         // Get pretend and log settings.
                         get(my->Pretend, MUIA_Radio_Active,
-                            CAST(msg->Pretend, int32_t *));
+                            &msg->Pretend);
                         get(my->Log, MUIA_Radio_Active,
-                            CAST(msg->Log, int32_t *));
+                            &msg->Log);
                     }
                 }
                 else
@@ -921,10 +922,10 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
 
 //------------------------------------------------------------------------------
 // IGDirPart - [PRIVATE] - Return existing dir from random path
-// Input:      ULONG Path: Random path.
-// Return:     ULONG:      Existing dir from path.
+// Input:      IPTR Path: Random path.
+// Return:     IPTR:      Existing dir from path.
 //------------------------------------------------------------------------------
-static ULONG IGDirPart(Class *cls, Object *obj, ULONG Path)
+static IPTR IGDirPart(Class *cls, Object *obj, IPTR Path)
 {
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
@@ -976,7 +977,7 @@ static ULONG IGDirPart(Class *cls, Object *obj, ULONG Path)
         // Restore auto request.
         p->pr_WindowPtr = w;
 
-        return CAST(my->Buf, ULONG);
+        return CAST(my->Buf, IPTR);
     }
 
     GERR(tr(S_UNER));
@@ -1284,7 +1285,7 @@ MUIDSP IGCopyFilesSetCur(Class *cls, Object *obj,
         char *file = CAST(msg->File, char *);
         size_t len = strlen(file);
         struct TextExtent ext;
-        static ULONG back;
+        static IPTR back;
 
         // Toggle 'Abort' and 'Back'?
         if(msg->Back != back)
@@ -1299,7 +1300,7 @@ MUIDSP IGCopyFilesSetCur(Class *cls, Object *obj,
 
         // Get the number of characters that can be shown given the width of
         // the gauge and the contents of the string.
-        ULONG max = TextFit(_rp(my->Progress), file, len, &ext, NULL, 1,
+        IPTR max = TextFit(_rp(my->Progress), file, len, &ext, NULL, 1,
                             _mwidth(my->Progress), _mheight(my->Progress));
 
         // Do we need to truncate the file string to not wreck the gauge?
@@ -1316,7 +1317,7 @@ MUIDSP IGCopyFilesSetCur(Class *cls, Object *obj,
         // Update progress bar. Text and number.
         if(!msg->NoGauge)
         {
-            ULONG cur = 0;
+            IPTR cur = 0;
 
             // Get current progress.
             get(my->Progress, MUIA_Gauge_Current, &cur);
@@ -1340,7 +1341,7 @@ MUIDSP IGCopyFilesSetCur(Class *cls, Object *obj,
         if(++n >> 6)
         {
             // Wait for tick / abort / exit.
-            ULONG rs = IGWait(obj, MUIV_IG_Tick, 2);
+            IPTR rs = IGWait(obj, MUIV_IG_Tick, 2);
 
             // Start over or return.
             if(rs != MUIV_IG_Tick)
@@ -1491,7 +1492,7 @@ MUIDSP IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
             if(s)
             {
                 // Allocate color vector.
-                ULONG *cv = calloc(s * 3, sizeof(ULONG));
+                IPTR *cv = calloc(s * 3, sizeof(IPTR));
 
                 // Release pen and bail on OOM.
                 if(!cv)
@@ -1509,9 +1510,9 @@ MUIDSP IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
                 // Compute gradient.
                 while(i < s * 3)
                 {
-                    cv[i++] = ((ULONG) r) << 24;
-                    cv[i++] = ((ULONG) g) << 24;
-                    cv[i++] = ((ULONG) b) << 24;
+                    cv[i++] = ((IPTR) r) << 24;
+                    cv[i++] = ((IPTR) g) << 24;
+                    cv[i++] = ((IPTR) b) << 24;
                     r += rd;
                     g += gd;
                     b += bd;
@@ -1574,7 +1575,7 @@ MUIDSP IGCloseMedia(Class *cls, Object *obj, struct MUIP_IG_CloseMedia *msg)
     (void) cls;
 
     // Compute user data value.
-    ULONG mid = msg->MediaID + MUIA_IG_MediaBase;
+    IPTR mid = msg->MediaID + MUIA_IG_MediaBase;
 
     // Is the media ID valid?
     if(mid <= MUIA_IG_MediaMax)
@@ -1713,7 +1714,7 @@ MUIDSP IGShowPicture(Class *cls, Object *obj, struct MUIP_IG_ShowPicture *msg)
     {
         // Default behaviour is to put the window in the center and leave the
         // size as is.
-        ULONG xs = 0, ys = 0, yp = MUIV_Window_TopEdge_Centered,
+        IPTR xs = 0, ys = 0, yp = MUIV_Window_TopEdge_Centered,
               xp = MUIV_Window_LeftEdge_Centered;
 
         // Set size explicitly?
@@ -1862,7 +1863,7 @@ MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
             {
                 // Get group ID of datatype.
                 struct DataTypeHeader *dth = dtp->dtn_Header;
-                ULONG gid = dth->dth_GroupID;
+                IPTR gid = dth->dth_GroupID;
 
                 // Free datatype resources and release lock.
                 ReleaseDataType(dtp);
@@ -1922,7 +1923,7 @@ MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
 MUIDSP IGMessage(Class *cls, Object *obj, struct MUIP_IG_Message *msg)
 {
     // Set correct page and button combination.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE,
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, 4/*P_MESSAGE*/,
                                                           B_PROCEED_ABORT))
     {
         struct IGData *my = INST_DATA(cls, obj);
@@ -2195,7 +2196,7 @@ MUIDSP IGString(Class *cls, Object *obj, struct MUIP_IG_String *msg)
         }
 
         // No matter what, get string.
-        get(my->String, MUIA_String_Contents, CAST(msg->String, ULONG *));
+        get(my->String, MUIA_String_Contents, CAST(msg->String, IPTR *));
 
         // Return status.
         return rc;
@@ -2252,7 +2253,7 @@ MUIDSP IGNumber(Class *cls, Object *obj, struct MUIP_IG_Number *msg)
         }
 
         // No matter what, get numerical value.
-        get(my->Number, MUIA_Numeric_Value, CAST(msg->Number, ULONG *));
+        get(my->Number, MUIA_Numeric_Value, CAST(msg->Number, IPTR *));
 
         // Success or halt.
         return rc;
@@ -2366,14 +2367,14 @@ MUIDSP IGCheckBoxes(Class *cls, Object *obj,
             if(DoMethod(my->Empty, MUIM_Group_InitChange))
             {
                 // The return value.
-                *CAST(msg->Bitmap, ULONG *) = 0;
+                *CAST(msg->Bitmap, IPTR *) = 0;
 
                 while(i--)
                 {
-                    ULONG sel = 0;
+                    IPTR sel = 0;
 
                     get(cb[i], MUIA_Selected, &sel);
-                    *CAST(msg->Bitmap, ULONG *) |= (sel ? (1 << i) : 0);
+                    *CAST(msg->Bitmap, IPTR *) |= (sel ? (1 << i) : 0);
                     DoMethod(my->Empty, OM_REMMEMBER, cb[i]);
                     MUI_DisposeObject(cb[i]);
                 }
@@ -2428,7 +2429,7 @@ MUIDSP IGComplete(Class *cls, Object *obj, struct MUIP_IG_Complete *msg)
 MUIDSP IGConfirm(Class *cls, Object *obj, struct MUIP_IG_Confirm *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
-    ULONG top = 0, btm = 0, str = 0;
+    IPTR top = 0, btm = 0, str = 0;
 
     // Save the current state of whatever we're showing before we ask for
     // confirmation.
