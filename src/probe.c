@@ -188,12 +188,11 @@ static cpu_t h_cpu_id(void)
 //------------------------------------------------------------------------------
 static char *h_cpu_name(void)
 {
-    char *cpu[] = { "Unknown CPU", "PowerPC", "ARM", "M68000", "M68010", "M68020",
-                    "M68030", "M68040", "M68060", "X86", "X86_64"};
-
+    char *cpu[X86_64 + 1] = { "Unknown CPU", "PowerPC", "ARM", "M68000",
+                              "M68010", "M68020", "M68030", "M68040", "M68060",
+                              "X86", "X86_64"};
     // Trans ID to string.
-    cpu_t cid  = h_cpu_id();
-    return cpu[(cid < (sizeof(cpu) / sizeof(cpu[NONE]))) ? cid : NONE];
+    return cpu[h_cpu_id()];
 }
 
 //------------------------------------------------------------------------------

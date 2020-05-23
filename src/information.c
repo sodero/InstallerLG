@@ -276,23 +276,23 @@ entry_p n_working(entry_p contxt)
     size_t len = strlen(tr(S_WRKN)) + strlen(msg) + 1;
 
     // Memory to hold prefix and children.
-    char *con = DBG_ALLOC(calloc(len, 1));
+    char *all = DBG_ALLOC(calloc(len, 1));
 
-    if(!con && PANIC(contxt))
+    if(!all && PANIC(contxt))
     {
         free(msg);
         return end();
     }
 
     // Concatenate and free buffer.
-    snprintf(con, len, "%s%s", tr(S_WRKN), msg);
+    snprintf(all, len, "%s%s", tr(S_WRKN), msg);
     free(msg);
 
     // Show the result.
-    gui_working(con);
+    gui_working(all);
 
     // Free the final message buffer.
-    free(con);
+    free(all);
 
     // Success.
     R_NUM(LG_TRUE);
