@@ -153,11 +153,8 @@ entry_p n_onerror(entry_p contxt)
     // Zero or more arguments. No options.
     C_SANE(0, NULL);
 
-    // Global context where the user defined procedures are found.
-    entry_p con = global(contxt);
-
     // Make sure that '@onerror' exists. On out of memory it might be missing.
-    entry_p *err = con->symbols;
+    entry_p *err = global(contxt)->symbols;
 
     while(exists(*err))
     {
