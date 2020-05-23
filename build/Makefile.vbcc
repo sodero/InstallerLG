@@ -84,10 +84,11 @@ logic.o: logic.c alloc.h logic.h error.h eval.h util.h types.h
 strcasestr.o: strcasestr.c
 
 
-# 78 test(s) failed
-# 2991 test(s) passed
+# 81 test(s) failed
+# 3035 test(s) passed
 test:
 	cp Installer68k T:
+	-ln -s T:Installer68k Installer
 	time sh ../test/run.sh T:Installer68k ../test $(REXTRA)
 
 clean:
