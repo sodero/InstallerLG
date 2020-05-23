@@ -4,7 +4,7 @@ language:
 jobs:
     include:
         - stage: Cppcheck
-          script: cd src && cppcheck --enable=all --max-ctu-depth=4096 --suppress=unusedFunction --suppress=ConfigurationNotChecked --suppress=knownConditionTrueFalse .
+          script: cd src && cppcheck --enable=all --suppress=unusedFunction --suppress=ConfigurationNotChecked --suppress=knownConditionTrueFalse .
         - stage: Test
           script: make -C build smoke || (cat build/err.tmp.* 2> /dev/null && false)
         - stage: Valgrind
