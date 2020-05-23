@@ -364,9 +364,9 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
 // Name:        h_filetree
 // Description: Decl. needed by h_choices(). See description further down.
 //------------------------------------------------------------------------------
-static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
-                          entry_p files, entry_p fonts, entry_p choices,
-                          entry_p pattern, entry_p infos);
+static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
+                          const char *dst, entry_p files, entry_p fonts,
+                          entry_p choices, entry_p pattern, entry_p infos);
 
 //------------------------------------------------------------------------------
 // Name:        h_choices
@@ -418,7 +418,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
         char *f_nam = str(*chl);
 
         // Build source <-> dest pair.
-        node->name = h_tackon(contxt, src, f_nam);
+        node->name = DBG_ALLOC(h_tackon(contxt, src, f_nam));
         node->copy = h_tackon(contxt, dst, h_fileonly(contxt, f_nam));
         node->type = h_exists(node->name);
 
@@ -454,7 +454,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
             // Get tree of subdirectory. Don't promote (choices).
             node->next = h_filetree
             (
-                contxt, name, copy, NULL, NULL, NULL, NULL, NULL
+                contxt, src, name, copy, NULL, NULL, NULL, NULL, NULL
             );
 
             // Fast forward to the end of the list.
@@ -480,43 +480,11 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_common_suffix
-// Description: Get the common suffix of two paths. Separators are excluded so
-//              that the common suffix of 'ram:test' and 'sys:test' is 'test'
-//              and not ':test'. The common suffix of 'pre/test' and
-//              'post/test' is 'test' and not '/test'.
-// Input:       char *alfa: First path.
-//              char *beta: Second path.
-// Return:      char *:     The common suffix of two string.
-//------------------------------------------------------------------------------
-static char *h_common_suffix(char *alfa, char *beta)
-{
-    size_t aln = strlen(alfa), bln = strlen(beta);
-
-    // Start from the back and iterate while strings match.
-    while(aln && bln)
-    {
-        if(alfa[--aln] != beta[--bln] || !aln || !bln)
-        {
-            // Offset by one if we're at a separator.
-            if(alfa[aln] == ':' || alfa[aln] == '/')
-            {
-                aln++;
-            }
-
-            return alfa + aln;
-        }
-    }
-
-    // Atleast one of the strings is empty.
-    return "";
-}
-
-//------------------------------------------------------------------------------
 // Name:        h_filetree
 // Description: Generate a complete file / directory tree with source and
 //              destination tuples. Used by n_copyfiles.
 // Input:       entry_p contxt:     The execution context.
+//              const char *srt:    Source root.
 //              const char *src:    Source directory / file.
 //              const char *dst:    Destination directory.
 //              entry_p files:      * Files only.
@@ -527,9 +495,9 @@ static char *h_common_suffix(char *alfa, char *beta)
 //                                  * Refer to the Installer.guide.
 // Return:      entry_p:            A linked list of file and dir pairs.
 //------------------------------------------------------------------------------
-static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
-                          entry_p files, entry_p fonts, entry_p choices,
-                          entry_p pattern, entry_p infos)
+static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
+                          const char *dst, entry_p files, entry_p fonts,
+                          entry_p choices, entry_p pattern, entry_p infos)
 {
     char *n_src = NULL, *n_dst = NULL;
 
@@ -593,10 +561,10 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
             while(entry)
             {
                 // Create the source destination tuple
-                n_src = DBG_ALLOC(h_tackon(contxt, src, entry->d_name)),
+                n_src = h_tackon(contxt, src, entry->d_name),
                 n_dst = DBG_ALLOC(h_tackon(contxt, dst, entry->d_name));
 
-                // Are we out of memory?
+                // Out of memory?
                 if(!n_src || !n_dst)
                 {
                     free(n_src);
@@ -606,38 +574,50 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
 
                 if(pattern)
                 {
+                    // Create full pattern temp buffer.
+                    char *pat = h_tackon(contxt, srt, str(pattern));
+
+                    // Out of memory?
+                    if(!pat)
+                    {
+                        free(n_src);
+                        free(n_dst);
+                        break;
+                    }
+
+                    #if defined(AMIGA) && !defined(LG_TEST)
                     // The CBM implementation restricts pattern length to 64.
                     // MatchPattern() can use a lot of stack if patterns are
                     // long. To preserve stack, keep the static pattern size
                     // but increase it to whatever buf_len() is.
-                    #if defined(AMIGA) && !defined(LG_TEST)
-                    LONG w = ParsePatternNoCase(str(pattern), buf_get(B_KEY),
-                                                buf_len());
-                    if(w >= 0)
+                    LONG w = ParsePatternNoCase(pat, buf_get(B_KEY), buf_len());
+
+                    // Use string comparison if we don't have any wildcards.
+                    if(w == 0 && strcasecmp(pat, n_src) == 0)
                     {
-                        // Use pattern matching if we have any wildcards, else
-                        // use plain strcmp().
-                        if((w && MatchPatternNoCase(buf_get(B_KEY),
-                            h_common_suffix(n_src, n_dst))) ||
-                          (!w && !strcasecmp(buf_get(B_KEY), entry->d_name)))
-                        {
-                            // Get proper type of match.
-                            type = h_exists(n_src);
-                        }
-                        else
-                        {
-                            // Skip non-matches.
-                            type = LG_NONE;
-                        }
+                        // Get type of match.
+                        type = h_exists(n_src);
+                    }
+                    // Use pattern matching if we have any wildcards.
+                    else if(w > 0 && MatchPatternNoCase(buf_get(B_KEY), n_src))
+                    {
+                        // Get type of match.
+                        type = h_exists(n_src);
+                    }
+                    else
+                    {
+                        // Not a match.
+                        type = LG_NONE;
                     }
                     #else
                     // Get rid of warning and increase test coverage.
-                    snprintf(buf_get(B_KEY), buf_len(), "%s", n_src);
-                    type = h_exists(h_common_suffix(buf_get(B_KEY), n_src));
+                    snprintf(buf_get(B_KEY), buf_len(), "%s:%s", srt, n_src);
+                    type = h_exists(n_src);
                     #endif
 
-                    // Unlock buffer.
+                    // Unlock buffer and release full pattern temp.
                     buf_put(B_KEY);
+                    free(pat);
                 }
                 else
                 {
@@ -645,7 +625,7 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                     type = h_exists(n_src);
                 }
 
-                // If we have a directory, recur.
+                // Recur if we have a directory.
                 if(type == LG_DIR)
                 {
                     // Unless the (files) option is set.
@@ -663,8 +643,9 @@ static pnode_p h_filetree(entry_p contxt, const char *src, const char *dst,
                         {
                             // Get subdirectory tree. Don't promote (choices),
                             // dirs will be considered files.
-                            node->next = h_filetree(contxt, n_src, n_dst, files,
-                                                    fonts, NULL, pattern, NULL);
+                            node->next = h_filetree(contxt, srt, n_src, n_dst,
+                                                    files, fonts, NULL, pattern,
+                                                    NULL);
                             dep--;
 
                             // Fast forward to the end of the list.
@@ -1290,6 +1271,12 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
         return false;
     }
 
+    // Don't overwrite existing icons.
+    if(h_exists(h_suffix(dst, "info")) == LG_FILE)
+    {
+        return true;
+    }
+
     #if defined(AMIGA) && !defined(LG_TEST)
     // Get the default drawer icon from the OS.
     struct DiskObject *obj = (struct DiskObject *) GetDefDiskObject(WBDRAWER);
@@ -1482,7 +1469,7 @@ entry_p n_copyfiles(entry_p contxt)
     }
 
     // Traverse source directory and create destination strings.
-    pnode_p tree = h_filetree(contxt, src, dst, files, fonts, choices,
+    pnode_p tree = h_filetree(contxt, src, src, dst, files, fonts, choices,
                               pattern, infos);
 
     if(!tree)
@@ -1947,11 +1934,10 @@ entry_p n_copylib(entry_p contxt)
     {
         // Clang scan-build dead code false positive.
 #ifndef __clang_analyzer__
-        // Directory doesn't exist, create it. One level deep only.
-        if(mkdir(dst, 0777))
+        // Create non-existing directory.
+        if(!h_makedir_path(dst))
         {
-            // Permission problems or the dir is more than 1 level deeper
-            // than the existing path.
+            // Permission problems.
             ERR(ERR_WRITE_DIR, dst);
             R_NUM(LG_FALSE);
         }
@@ -1963,7 +1949,7 @@ entry_p n_copylib(entry_p contxt)
     // Destination file, old name and new path or new name and new path.
     char *name = opt(contxt, OPT_NEWNAME) ?
                  h_tackon(contxt, dst, str(opt(contxt, OPT_NEWNAME))) :
-                 h_tackon(contxt, dst, h_fileonly(contxt, src));
+                 DBG_ALLOC(h_tackon(contxt, dst, h_fileonly(contxt, src)));
 
     if(!name && PANIC(contxt))
     {
@@ -2452,11 +2438,10 @@ entry_p n_exists(entry_p contxt)
     C_SANE(1, contxt);
 
     // Supress volume requester. Despite what the CBM documentation says,
-    // requesters are always supressed. The h_exists function as it is now
-    // doesn't make any requesters pop up. But let's keep the supression code
-    // here in case we decide to follow the documentation and not mimic the
-    // CBM implementation later on.
-    if(opt(contxt, OPT_NOREQ) || opt(contxt, OPT_QUIET))
+    // requesters are always supressed. Let's follow the documentation in
+    // strict mode and the implementation in sloppy mode.
+    if(!get_num(contxt, "@strict") || opt(contxt, OPT_NOREQ) ||
+        opt(contxt, OPT_QUIET))
     {
         #if defined(AMIGA) && !defined(LG_TEST)
         struct Process *p = (struct Process *) FindTask(NULL);
@@ -3071,7 +3056,11 @@ entry_p n_startup(entry_p contxt)
     }
 
     const char *fln = get_str(contxt, "@user-startup");
-    const size_t len = strlen(";BEGIN ") + strlen(app), ins = strlen(cmd) + 2;
+    const size_t len = strlen(";BEGIN ") + strlen(app);
+    size_t ins = strlen(cmd);
+
+    // The CBM installer chomps one (and only one) line feed if it exists.
+    ins += (ins == 0 || cmd[ins - 1] != '\n') ? 2 : 1;
 
     char *pre = DBG_ALLOC(calloc(len + 1, 1)),
          *pst = DBG_ALLOC(calloc(len + 1, 1)), *buf = NULL;

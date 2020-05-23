@@ -270,7 +270,7 @@ bool tru(entry_p entry)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_str_num
+// Name:        h_str_opt
 // Description: Convert OPTION to string.
 // Input:       entry_p entry:  An entry_t pointer to a OPTION.
 // Return:      char *:         String representation of the input.
@@ -294,7 +294,6 @@ static char *h_str_opt(entry_p opt)
         case OPT_GETDEFAULTTOOL:
         case OPT_GETSTACK:
         case OPT_GETTOOLTYPE:
-            // All the options above have a single child.
             return str(opt->children ? opt->children[0] : NULL);
 
        case OPT_HELP:

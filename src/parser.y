@@ -94,7 +94,7 @@ p:              vp                               |
 pp:             p p                              { $$ = push(push(new_contxt(), $1), $2); };
 ps:             ps p                             { $$ = push($1, $2); } |
                 p                                { $$ = push(new_contxt(), $1); };
-pps:            pps p p                          { $$ = push(push($1, $2), $3); } |
+pps:            pps pp                           { $$ = merge($1, $2); } |
                 pp                               ;
 vp:             ivp                              |
                 '(' vp ')'                       { $$ = $2; };
@@ -279,12 +279,18 @@ sub:            '(' '-' ps ')'                   { $$ = new_native(strdup("-"), 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* comparison.c|h                                                                                                                                                                       */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-eq:             '(' '=' pp ')'                   { $$ = new_native(strdup("="), LINE, n_eq, $3, NUMBER); };
-gt:             '(' '>' pp ')'                   { $$ = new_native(strdup(">"), LINE, n_gt, $3, NUMBER); };
-gte:            '(' GTE pp ')'                   { $$ = new_native(strdup(">="), LINE, n_gte, $3, NUMBER); };
-lt:             '(' '<' pp ')'                   { $$ = new_native(strdup("<"), LINE, n_lt, $3, NUMBER); };
-lte:            '(' LTE pp ')'                   { $$ = new_native(strdup("<="), LINE, n_lte, $3, NUMBER); };
-neq:            '(' NEQ pp ')'                   { $$ = new_native(strdup("<>"), LINE, n_neq, $3, NUMBER); };
+eq:             '(' '=' pp ')'                   { $$ = new_native(strdup("="), LINE, n_eq, $3, NUMBER); } |
+                '(' '=' p ')'                    { $$ = new_native(strdup("="), LINE, n_eq, push(new_contxt(), $3), NUMBER); };
+gt:             '(' '>' pp ')'                   { $$ = new_native(strdup(">"), LINE, n_gt, $3, NUMBER); } |
+                '(' '>' p ')'                    { $$ = new_native(strdup(">"), LINE, n_gt, push(new_contxt(), $3), NUMBER); };
+gte:            '(' GTE pp ')'                   { $$ = new_native(strdup(">="), LINE, n_gte, $3, NUMBER); } |
+                '(' GTE p ')'                    { $$ = new_native(strdup(">="), LINE, n_gte, push(new_contxt(), $3), NUMBER); };
+lt:             '(' '<' pp ')'                   { $$ = new_native(strdup("<"), LINE, n_lt, $3, NUMBER); } |
+                '(' '<' p ')'                    { $$ = new_native(strdup("<"), LINE, n_lt, push(new_contxt(), $3), NUMBER); };
+lte:            '(' LTE pp ')'                   { $$ = new_native(strdup("<="), LINE, n_lte, $3, NUMBER); } |
+                '(' LTE p ')'                    { $$ = new_native(strdup("<="), LINE, n_lte, push(new_contxt(), $3), NUMBER); };
+neq:            '(' NEQ pp ')'                   { $$ = new_native(strdup("<>"), LINE, n_neq, $3, NUMBER); } |
+                '(' NEQ p ')'                    { $$ = new_native(strdup("<>"), LINE, n_neq, push(new_contxt(), $3), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* control.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -342,8 +348,8 @@ delete:         '(' DELETE ps opts')'            { $$ = new_native(strdup("delet
                 '(' DELETE opts ps opts ')'      { $$ = new_native(strdup("delete"), LINE, n_delete, merge($4, merge($3, $5)), NUMBER); } |
                 '(' DELETE ps ')'                { $$ = new_native(strdup("delete"), LINE, n_delete, $3, NUMBER); };
 exists:         '(' EXISTS p ')'                 { $$ = new_native(strdup("exists"), LINE, n_exists, push(new_contxt(), $3), NUMBER); } |
-                '(' EXISTS p noreq ')'           { $$ = new_native(strdup("exists"), LINE, n_exists, push(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' EXISTS p quiet ')'           { $$ = new_native(strdup("exists"), LINE, n_exists, push(push(new_contxt(), $3), $4), NUMBER); };
+                '(' EXISTS p opts ')'            { $$ = new_native(strdup("exists"), LINE, n_exists, merge(push(new_contxt(), $3), $4), NUMBER); } |
+                '(' EXISTS opts p ')'            { $$ = new_native(strdup("exists"), LINE, n_exists, merge(push(new_contxt(), $4), $3), NUMBER); };
 fileonly:       '(' FILEONLY p ')'               { $$ = new_native(strdup("fileonly"), LINE, n_fileonly, push(new_contxt(), $3), STRING); };
 foreach:        '(' FOREACH pp vps ')'           { $$ = new_native(strdup("foreach"), LINE, n_foreach, push($3, $4), NUMBER); };
 makeassign:     '(' MAKEASSIGN pp safe ')'       { $$ = new_native(strdup("makeassign"), LINE, n_makeassign, push($3, $4), NUMBER); } |
@@ -486,7 +492,7 @@ back:           '(' BACK vps ')'                 { $$ = new_option(strdup("back"
 choices:        '(' CHOICES ps ')'               { $$ = new_option(strdup("choices"), OPT_CHOICES, $3); };
 command:        '(' COMMAND ps ')'               { $$ = new_option(strdup("command"), OPT_COMMAND, $3); };
 compression:    '(' COMPRESSION ')'              { $$ = new_option(strdup("compression"), OPT_COMPRESSION, NULL); };
-confirm:        '(' CONFIRM p ')'                { $$ = new_option(strdup("confirm"), OPT_CONFIRM, push(new_contxt(), $3)); } |
+confirm:        '(' CONFIRM ps ')'               { $$ = new_option(strdup("confirm"), OPT_CONFIRM, $3); } |
                 '(' CONFIRM ')'                  { $$ = new_option(strdup("confirm"), OPT_CONFIRM, NULL); };
 default:        '(' DEFAULT p ')'                { $$ = new_option(strdup("default"), OPT_DEFAULT, push(new_contxt(), $3)); };
 delopts:        '(' DELOPTS ps ')'               { $$ = new_option(strdup("delopts"), OPT_DELOPTS, $3); } |
@@ -504,7 +510,8 @@ help:           '(' HELP ps ')'                  { $$ = new_option(strdup("help"
 infos:          '(' INFOS ')'                    { $$ = new_option(strdup("infos"), OPT_INFOS, NULL); };
 include:        '(' INCLUDE p ')'                { $$ = new_option(strdup("include"), OPT_INCLUDE, push(new_contxt(), $3)); };
 newname:        '(' NEWNAME p ')'                { $$ = new_option(strdup("newname"), OPT_NEWNAME, push(new_contxt(), $3)); };
-newpath:        '(' NEWPATH ')'                  { $$ = new_option(strdup("newpath"), OPT_NEWPATH, NULL); };
+newpath:        '(' NEWPATH ')'                  { $$ = new_option(strdup("newpath"), OPT_NEWPATH, NULL); } |
+                '(' NEWPATH p ')'                { $$ = new_option(strdup("newpath"), OPT_NEWPATH, push(new_contxt(), $3)); };
 nogauge:        '(' NOGAUGE ')'                  { $$ = new_option(strdup("nogauge"), OPT_NOGAUGE, NULL); };
 noposition:     '(' NOPOSITION ')'               { $$ = new_option(strdup("noposition"), OPT_NOPOSITION, NULL); };
 noreq:          '(' NOREQ ')'                    { $$ = new_option(strdup("noreq"), OPT_NOREQ, NULL); };
