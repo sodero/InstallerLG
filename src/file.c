@@ -2394,7 +2394,7 @@ entry_p n_delete(entry_p contxt)
         #if defined(AMIGA) && !defined(LG_TEST)
         int wild = ParsePatternNoCase(file, buf_raw(), buf_len());
         #else
-        int wild = get_num(contxt, "@wild");
+        int wild = get_num(contxt, "@alfa");
         #endif
 
         // 0 == no pattern, 1 == pattern, -1 == buffer overflow.
@@ -2571,6 +2571,7 @@ entry_p n_foreach(entry_p contxt)
                     #else
                     cur->type = h_exists(name);
                     cur->name = DBG_ALLOC(strdup(name));
+                    err = get_num(contxt, "@alfa") == LG_TRUE;
                     #endif
 
                     // Empty name indicates a PANIC if the locking failed.
@@ -2726,16 +2727,11 @@ entry_p n_makeassign(entry_p contxt)
             }
         }
         #else
-        res = LG_TRUE;
+        res = get_num(contxt, "@beta");
         #endif
 
         // Log the outcome.
-        h_log(contxt,
-        // Clang scan-build dead code true positive.
-#ifndef __clang_analyzer__
-              res ? tr(S_ACRT) :
-#endif
-              tr(S_ACRE), asn, dst);
+        h_log(contxt, res ? tr(S_ACRT) : tr(S_ACRE), asn, dst);
     }
     else
     {
@@ -2743,22 +2739,15 @@ entry_p n_makeassign(entry_p contxt)
         // Remove assign.
         res = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? LG_TRUE : LG_FALSE;
         #else
-        res = LG_FAKE;
+        res = get_num(contxt, "@gamma");
         #endif
 
         // Log the outcome.
-        h_log(contxt,
-        // Clang scan-build dead code true positive.
-#ifndef __clang_analyzer__
-              res ? tr(S_ADEL) :
-#endif
-              tr(S_ADLE), asn);
+        h_log(contxt, res ? tr(S_ADEL) : tr(S_ADLE), asn);
     }
 
     // Clang scan-build dead code true positive.
-#ifndef __clang_analyzer__
     if(!res)
-#endif
     {
         // Could not create / rm assign / get lock.
         ERR(ERR_ASSIGN, str(C_ARG(1)));

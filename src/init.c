@@ -167,12 +167,14 @@ static void init_misc_num(entry_p contxt)
     init_num(contxt, "@skip", LG_FALSE);
     init_num(contxt, "@abort", LG_FALSE);
     init_num(contxt, "@back", LG_FALSE);
-    init_num(contxt, "@wild", LG_FALSE);
     init_num(contxt, "@each-type", LG_FALSE);
     init_num(contxt, "@debug", LG_FALSE);
     init_num(contxt, "@trap", LG_FALSE);
     init_num(contxt, "true", LG_TRUE);
     init_num(contxt, "false", LG_FALSE);
+    init_num(contxt, "@alfa", 0);
+    init_num(contxt, "@beta", 1);
+    init_num(contxt, "@gamma", 2);
     init_num(contxt, "@strict",
     // In test mode, strict is default.
     #if defined(AMIGA) && !defined(LG_TEST)
