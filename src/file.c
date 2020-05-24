@@ -1076,12 +1076,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     static char buf[BUFSIZ];
     FILE *file = h_fopen(contxt, src, "r", false);
     size_t cnt = file ? fread(buf, 1, BUFSIZ, file) : 0;
-    int err =
-        #if defined(AMIGA) && !defined(LG_TEST)
-        IoErr();
-        #else
-        file ? ferror(file) : 0;
-        #endif
+    int err = file ? ferror(file) : 0;
 
     if(!file || err)
     {
