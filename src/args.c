@@ -90,7 +90,8 @@ static bool arg_post(void)
 //------------------------------------------------------------------------------
 static bool arg_cli(int argc, char **argv)
 {
-    #if defined(AMIGA)
+    // Temp AxRT workaround until argument handling in AxRT is implemented.
+    #if defined(AMIGA) && !defined(__AXRT__)
     // Not used on Amiga.
     (void) argc;
     (void) argv;
@@ -238,8 +239,13 @@ bool arg_init(int argc, char **argv)
     // Invoked from CLI or WB.
     bool init = argc ? arg_cli(argc, argv) : arg_wb(argv);
 
-    // Go to script working directory and return.
-    return init && args[ARG_HOMEDIR] && !chdir(args[ARG_HOMEDIR]);
+    // Go to script working directory and return. Temp AxRT workaround until
+    // argument handling in AxRT is implemented.
+    return init && args[ARG_HOMEDIR]
+    #ifndef __AXRT__
+        && !chdir(args[ARG_HOMEDIR])
+    #endif
+    ;
 }
 
 //------------------------------------------------------------------------------
