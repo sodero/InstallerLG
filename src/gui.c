@@ -83,7 +83,6 @@ APTR STDARGS DoSuperNew(struct IClass *cl, APTR obj, IPTR tag1, ...)
 #define DISPATCH(C) static IPTR C ## Dispatch (DISPATCH_ARGS)
 #define CLASS_DATA(C) C ## Data
 #define TAGBASE_LG (TAG_USER | 27<<16)
-#define CAST(P,T) ((T) ((uintptr_t) P))
 #define MUIDSP static inline IPTR __attribute__((always_inline))
 
 //------------------------------------------------------------------------------
@@ -847,10 +846,8 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             if(msg->MinLevel == 1)
             {
                 // Minimum user level 'average'.
-                get(my->ExpertLevel, MUIA_Radio_Active,
-                    CAST(msg->Level, int32_t *));
-
-                (*CAST(msg->Level, int32_t *))++;
+                get(my->ExpertLevel, MUIA_Radio_Active, &msg->Level);
+                msg->Level++;
             }
             else
             {
@@ -935,7 +932,7 @@ static IPTR IGDirPart(Class *cls, Object *obj, IPTR Path)
         struct IGData *my = INST_DATA(cls, obj);
 
         // Copy path string.
-        strncpy(my->Buf, CAST(Path, const char *), sizeof(my->Buf));
+        strncpy(my->Buf, (const char *) Path, sizeof(my->Buf));
 
         struct Process *p = (struct Process *) FindTask(NULL);
 
@@ -977,7 +974,7 @@ static IPTR IGDirPart(Class *cls, Object *obj, IPTR Path)
         // Restore auto request.
         p->pr_WindowPtr = w;
 
-        return CAST(my->Buf, IPTR);
+        return (IPTR) my->Buf;
     }
 
     GERR(tr(S_UNER));
@@ -1054,24 +1051,24 @@ MUIDSP IGAskFile(Class *cls, Object *obj, struct MUIP_IG_AskFile *msg)
                 if(rc == G_TRUE)
                 {
                     // Get filename from requester.
-                    get(str, MUIA_String_Contents, CAST(msg->File, char **));
+                    get(str, MUIA_String_Contents, &msg->File);
 
-                    if(*CAST(msg->File, char **))
+                    if(*((char **) msg->File))
                     {
                         // We need to create a copy of the filename string since
                         // we're about to free the pop up requester.
                         int n = snprintf(my->Buf, sizeof(my->Buf), "%s",
-                                         *CAST(msg->File, char **));
+                                         *((char **) msg->File));
 
                         // Make sure that we succeded in creating a copy of the
                         // filename.
                         if(n >= 0 && ((size_t) n < sizeof(my->Buf)))
                         {
-                            *CAST(msg->File, char **) = my->Buf;
+                            *((char **) msg->File) = my->Buf;
                         }
                     }
 
-                    if(!*CAST(msg->File, char **))
+                    if(!*((char **) msg->File))
                     {
                         // Unknown error.
                         GERR(tr(S_UNER));
@@ -1126,7 +1123,7 @@ MUIDSP IGCopyFilesStart(Class *cls, Object *obj,
     struct IGData *my = INST_DATA(cls, obj);
 
     int n = 0;
-    pnode_p cur = CAST(msg->List, pnode_p), lst = cur;
+    pnode_p cur = (pnode_p) msg->List, lst = cur;
 
     // For all files and directories to be copied; count the files, and if
     // confirmation is needed, add them to the selection / deselection list.
@@ -1282,7 +1279,7 @@ MUIDSP IGCopyFilesSetCur(Class *cls, Object *obj,
     if(msg->File)
     {
         struct IGData *my = INST_DATA(cls, obj);
-        char *file = CAST(msg->File, char *);
+        char *file = (char *) msg->File;
         size_t len = strlen(file);
         struct TextExtent ext;
         static IPTR back;
@@ -1852,7 +1849,7 @@ MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
     if(mid + MUIA_IG_MediaBase <= MUIA_IG_MediaMax && msg->Media)
     {
         // And we need permission to read from the file.
-        BPTR flk = Lock(CAST(msg->Media, STRPTR), ACCESS_READ);
+        BPTR flk = Lock((STRPTR) msg->Media, ACCESS_READ);
 
         if(flk)
         {
@@ -1877,7 +1874,7 @@ MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
                              msg->Media, msg->Action);
 
                     // Return current media ID.
-                    *CAST(msg->MediaID, int32_t *) = mid;
+                    *((int32_t *) msg->MediaID) = mid;
 
                     // Next ID.
                     mid++;
@@ -2017,7 +2014,7 @@ MUIDSP IGRadio(Class *cls, Object *obj, struct MUIP_IG_Radio *msg)
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
                                                                B_PROCEED_ABORT))
     {
-        char **nms = CAST(msg->Names, char **);
+        char **nms = (char **) msg->Names;
 
         if(nms && *nms)
         {
@@ -2086,7 +2083,7 @@ MUIDSP IGRadio(Class *cls, Object *obj, struct MUIP_IG_Radio *msg)
                         // Get value from buttons and then kill them.
                         // A halt above will not make any difference.
 #ifndef __VBCC__
-                        GetAttr(MUIA_Radio_Active, r, CAST(msg->Select, IPTR *));
+                        GetAttr(MUIA_Radio_Active, r, (IPTR *) msg->Select);
 #endif
                         MUI_DisposeObject(r);
 
@@ -2196,7 +2193,7 @@ MUIDSP IGString(Class *cls, Object *obj, struct MUIP_IG_String *msg)
         }
 
         // No matter what, get string.
-        get(my->String, MUIA_String_Contents, CAST(msg->String, IPTR *));
+        get(my->String, MUIA_String_Contents, (IPTR *) msg->String);
 
         // Return status.
         return rc;
@@ -2253,7 +2250,7 @@ MUIDSP IGNumber(Class *cls, Object *obj, struct MUIP_IG_Number *msg)
         }
 
         // No matter what, get numerical value.
-        get(my->Number, MUIA_Numeric_Value, CAST(msg->Number, IPTR *));
+        get(my->Number, MUIA_Numeric_Value, (IPTR *) msg->Number);
 
         // Success or halt.
         return rc;
@@ -2288,7 +2285,7 @@ MUIDSP IGCheckBoxes(Class *cls, Object *obj,
         {
             size_t i = 0;
             static Object *cb[33];
-            char **cs = CAST(msg->Names, char **);
+            char **cs = (char **) msg->Names;
 
             // Use 'Abort' or 'Back'?
             if(msg->Back)
@@ -2367,14 +2364,14 @@ MUIDSP IGCheckBoxes(Class *cls, Object *obj,
             if(DoMethod(my->Empty, MUIM_Group_InitChange))
             {
                 // The return value.
-                *CAST(msg->Bitmap, IPTR *) = 0;
+                *((IPTR *) msg->Bitmap) = 0;
 
                 while(i--)
                 {
                     IPTR sel = 0;
 
                     get(cb[i], MUIA_Selected, &sel);
-                    *CAST(msg->Bitmap, IPTR *) |= (sel ? (1 << i) : 0);
+                    *((IPTR *) msg->Bitmap) |= (sel ? (1 << i) : 0);
                     DoMethod(my->Empty, OM_REMMEMBER, cb[i]);
                     MUI_DisposeObject(cb[i]);
                 }
@@ -2438,13 +2435,13 @@ MUIDSP IGConfirm(Class *cls, Object *obj, struct MUIP_IG_Confirm *msg)
        get(my->Text, MUIA_Text_Contents, &str))
     {
         // Allocate memory to hold a copy of the current message.
-        size_t osz = strlen(CAST(str, char *)) + 1;
+        size_t osz = strlen((char *) str) + 1;
         char *ost = calloc(osz, 1);
 
         if(ost)
         {
             // Copy the current message.
-            memcpy(ost, CAST(str, char *), osz);
+            memcpy(ost, (char *) str, osz);
 
             // Prompt for confirmation.
             if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help,
