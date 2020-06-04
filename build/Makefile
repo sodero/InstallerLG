@@ -63,10 +63,10 @@ $(EXE): $(OBJ) parser.o lexer.o
 	$(CC) $^ -o $@ $(LDLIBS)
 
 parser.o: parser.c
-	$(CC) $(CINC) $(CDEF) $(CGEN) -c $< -DYYERROR_VERBOSE
+	$(CC) $(CFLAGS) -c $< -DYYERROR_VERBOSE
 
 lexer.o: lexer.c
-	$(CC) $(CINC) $(CDEF) $(CGEN) -c $<
+	$(CC) $(CFLAGS) -Wno-unused-function -c $<
 
 parser.c: parser.y
 ifneq ($(AMIGA),true)
@@ -85,7 +85,7 @@ else
 endif
 
 gui.o: gui.c gui.h version.h
-	$(CC) -Os -c $< -DLLVL=2 $(CWRN) $(CDEF)
+	$(CC) $(CFLAGS) -Os -c $< -DLLVL=2
 
 #---------------------------------------------------------------------------------#
 # Catalogs
