@@ -66,7 +66,7 @@ parser.o: parser.c
 	$(CC) $(CFLAGS) -c $< -DYYERROR_VERBOSE
 
 lexer.o: lexer.c
-	$(CC) $(CFLAGS) -Wno-unused-function -c $<
+	$(CC) $(CINC) $(CDEF) $(CGEN) -c $<
 
 parser.c: parser.y
 ifneq ($(AMIGA),true)
