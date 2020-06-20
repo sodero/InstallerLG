@@ -44,7 +44,6 @@
 
 #ifndef __GNUC__
 #define __attribute__(a)
-typedef LONG IPTR;
 #endif
 
 #if defined(AMIGA) && !defined(LG_TEST)
@@ -828,11 +827,11 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
 
             // Take minimum user level into account.
             set(my->ExpertLevel, MUIA_Radio_Active,
-                msg->Level - 1);
+               *((int32_t *) msg->Level) - 1);
         }
 
         // Set the current user level.
-        set(my->UserLevel, MUIA_Radio_Active, msg->Level);
+        set(my->UserLevel, MUIA_Radio_Active, *((int32_t *) msg->Level));
 
         // Wait for proceed or abort.
         inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
@@ -846,14 +845,13 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             if(msg->MinLevel == 1)
             {
                 // Minimum user level 'average'.
-                get(my->ExpertLevel, MUIA_Radio_Active, &msg->Level);
-                msg->Level++;
+                get(my->ExpertLevel, MUIA_Radio_Active, (int32_t *) msg->Level);
+                (*((int32_t *) msg->Level))++;
             }
             else
             {
                 // Minimum user level 'novice' or 'expert'.
-                get(my->UserLevel, MUIA_Radio_Active,
-                    &msg->Level);
+                get(my->UserLevel, MUIA_Radio_Active, (int32_t *) msg->Level);
             }
 
             // Disable the pretend choice if the NOPRETEND tooltype is used. The
@@ -862,7 +860,7 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             (
                 my->Pretend,
                 MUIA_Radio_Active,
-                msg->NoPretend ? 0 : msg->Pretend,
+                msg->NoPretend ? 0 : *((int32_t *) msg->Pretend),
                 MUIA_Disabled, msg->NoPretend ? TRUE : FALSE,
                 TAG_END
             );
@@ -873,13 +871,13 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             (
                 my->Log,
                 MUIA_Radio_Active,
-                msg->NoLog ? 0 : msg->Log,
+                msg->NoLog ? 0 : *((int32_t *) msg->Log),
                 MUIA_Disabled, msg->NoLog ? TRUE : FALSE,
                 TAG_END
             );
 
             // Don't show logging and pretend mode settings to 'Novice' users.
-            if(msg->Level)
+            if(*((int32_t *) msg->Level))
             {
                 // Show pretend / log page.
                 if(DoMethod(obj, MUIM_IG_PageSet, NULL,
@@ -891,10 +889,9 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
                     if(rc == G_TRUE)
                     {
                         // Get pretend and log settings.
-                        get(my->Pretend, MUIA_Radio_Active,
-                            &msg->Pretend);
-                        get(my->Log, MUIA_Radio_Active,
-                            &msg->Log);
+                        get(my->Log, MUIA_Radio_Active, (int32_t *) msg->Log);
+                        get(my->Pretend, MUIA_Radio_Active, (int32_t *)
+                            msg->Pretend);
                     }
                 }
                 else
@@ -1051,7 +1048,7 @@ MUIDSP IGAskFile(Class *cls, Object *obj, struct MUIP_IG_AskFile *msg)
                 if(rc == G_TRUE)
                 {
                     // Get filename from requester.
-                    get(str, MUIA_String_Contents, &msg->File);
+                    get(str, MUIA_String_Contents, (char **) msg->File);
 
                     if(*((char **) msg->File))
                     {
@@ -1489,7 +1486,7 @@ MUIDSP IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
             if(s)
             {
                 // Allocate color vector.
-                IPTR *cv = calloc(s * 3, sizeof(IPTR));
+                ULONG *cv = calloc(s * 3, sizeof(ULONG));
 
                 // Release pen and bail on OOM.
                 if(!cv)
@@ -1507,9 +1504,9 @@ MUIDSP IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
                 // Compute gradient.
                 while(i < s * 3)
                 {
-                    cv[i++] = ((IPTR) r) << 24;
-                    cv[i++] = ((IPTR) g) << 24;
-                    cv[i++] = ((IPTR) b) << 24;
+                    cv[i++] = ((ULONG) r) << 24;
+                    cv[i++] = ((ULONG) g) << 24;
+                    cv[i++] = ((ULONG) b) << 24;
                     r += rd;
                     g += gd;
                     b += bd;
@@ -1860,7 +1857,7 @@ MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
             {
                 // Get group ID of datatype.
                 struct DataTypeHeader *dth = dtp->dtn_Header;
-                IPTR gid = dth->dth_GroupID;
+                ULONG gid = dth->dth_GroupID;
 
                 // Free datatype resources and release lock.
                 ReleaseDataType(dtp);
@@ -1920,7 +1917,7 @@ MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
 MUIDSP IGMessage(Class *cls, Object *obj, struct MUIP_IG_Message *msg)
 {
     // Set correct page and button combination.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, 4/*P_MESSAGE*/,
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE,
                                                           B_PROCEED_ABORT))
     {
         struct IGData *my = INST_DATA(cls, obj);
@@ -2082,9 +2079,10 @@ MUIDSP IGRadio(Class *cls, Object *obj, struct MUIP_IG_Radio *msg)
 
                         // Get value from buttons and then kill them.
                         // A halt above will not make any difference.
-#ifndef __VBCC__
+//#ifndef __VBCC__
+                        //.OS.TEST --> byt mot get?
                         GetAttr(MUIA_Radio_Active, r, (IPTR *) msg->Select);
-#endif
+//#endif
                         MUI_DisposeObject(r);
 
                         // Unknown status.
@@ -2193,7 +2191,7 @@ MUIDSP IGString(Class *cls, Object *obj, struct MUIP_IG_String *msg)
         }
 
         // No matter what, get string.
-        get(my->String, MUIA_String_Contents, (IPTR *) msg->String);
+        get(my->String, MUIA_String_Contents, (char **) msg->String);
 
         // Return status.
         return rc;
@@ -2250,7 +2248,7 @@ MUIDSP IGNumber(Class *cls, Object *obj, struct MUIP_IG_Number *msg)
         }
 
         // No matter what, get numerical value.
-        get(my->Number, MUIA_Numeric_Value, (IPTR *) msg->Number);
+        get(my->Number, MUIA_Numeric_Value, (int32_t *) msg->Number);
 
         // Success or halt.
         return rc;
@@ -2364,14 +2362,14 @@ MUIDSP IGCheckBoxes(Class *cls, Object *obj,
             if(DoMethod(my->Empty, MUIM_Group_InitChange))
             {
                 // The return value.
-                *((IPTR *) msg->Bitmap) = 0;
+                *((int32_t *) msg->Bitmap) = 0;
 
                 while(i--)
                 {
-                    IPTR sel = 0;
+                    ULONG sel = 0;
 
                     get(cb[i], MUIA_Selected, &sel);
-                    *((IPTR *) msg->Bitmap) |= (sel ? (1 << i) : 0);
+                    *((int32_t *) msg->Bitmap) |= (sel ? (1 << i) : 0);
                     DoMethod(my->Empty, OM_REMMEMBER, cb[i]);
                     MUI_DisposeObject(cb[i]);
                 }
@@ -2426,7 +2424,7 @@ MUIDSP IGComplete(Class *cls, Object *obj, struct MUIP_IG_Complete *msg)
 MUIDSP IGConfirm(Class *cls, Object *obj, struct MUIP_IG_Confirm *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
-    IPTR top = 0, btm = 0, str = 0;
+    ULONG top = 0, btm = 0, str = 0;
 
     // Save the current state of whatever we're showing before we ask for
     // confirmation.
