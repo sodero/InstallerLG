@@ -18,24 +18,22 @@ endif
 #---------------------------------------------------------------------------------#
 # OS
 #---------------------------------------------------------------------------------#
-ifeq ($(OS),Linux)
 CWRN = -Wall -Wextra -Werror
+ifeq ($(OS),Linux)
 CGEN = -g -std=c99
 CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE
 else
 ifeq ($(OS),Darwin)
 CGEN = -g -std=c99
-CWRN += -Werror -Weverything -Wno-format-nonliteral -Wno-padded
 else
 ifeq ($(OS),Windows_NT)
 CC = x86_64-w64-mingw32-gcc.exe
-CWRN = -Wall -Wextra -Werror
 CGEN = -g -std=c99
 CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE -D__USE_MINGW_ANSI_STDIO
 else
 CC ?= gcc
 AMIGA = true
-CWRN = -Wall -Wextra -Wno-pointer-sign
+CWRN += -Wno-pointer-sign
 CGEN = -Os -std=gnu99 -DAMIGA
 LDLIBS = -ldebug
 ifeq ($(OS),MorphOS)
