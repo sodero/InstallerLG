@@ -713,8 +713,7 @@ MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
     struct IGData *my = INST_DATA(cls, obj);
 
     // Always a valid message string.
-    const char *src = msg->Message ? (const char *)
-                      msg->Message : "";
+    const char *src = msg->Message ? (const char *) msg->Message : "";
 
     // Select top and buttons.
     set(my->Top, MUIA_Group_ActivePage, msg->Top);
@@ -841,7 +840,6 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
             // Get the selected user level value. If we have a minimum user
             // level of 'average' we're using a different set of radio buttons.
             // Fetch from the right object and adjust the return value.
-            //
             if(msg->MinLevel == 1)
             {
                 // Minimum user level 'average'.
@@ -2077,12 +2075,9 @@ MUIDSP IGRadio(Class *cls, Object *obj, struct MUIP_IG_Radio *msg)
                         // We're done removing things.
                         DoMethod(my->Empty, MUIM_Group_ExitChange);
 
-                        // Get value from buttons and then kill them.
-                        // A halt above will not make any difference.
-//#ifndef __VBCC__
-                        //.OS.TEST --> byt mot get?
-                        GetAttr(MUIA_Radio_Active, r, (IPTR *) msg->Select);
-//#endif
+                        // Get value from buttons and then kill them. A halt
+                        // above will not make any difference.
+                        get(r, MUIA_Radio_Active, (int32_t *) msg->Select);
                         MUI_DisposeObject(r);
 
                         // Unknown status.
@@ -2269,16 +2264,14 @@ MUIDSP IGNumber(Class *cls, Object *obj, struct MUIP_IG_Number *msg)
 //                Bitmap - A bitmask representing the selected button(s)
 // Return:        G_TRUE / G_ABORT / G_EXIT / G_ERR
 //------------------------------------------------------------------------------
-MUIDSP IGCheckBoxes(Class *cls, Object *obj,
-                                struct MUIP_IG_CheckBoxes *msg)
+MUIDSP IGCheckBoxes(Class *cls, Object *obj, struct MUIP_IG_CheckBoxes *msg)
 {
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
                                                                B_PROCEED_ABORT))
     {
         struct IGData *my = INST_DATA(cls, obj);
 
-        // Unlike most other pages, this one is partly generated on the fly, we
-        // have no choice.
+        // We have no choice but to generate this page on the fly,
         if(DoMethod(my->Empty, MUIM_Group_InitChange))
         {
             size_t i = 0;
