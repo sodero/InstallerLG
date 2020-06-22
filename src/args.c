@@ -90,14 +90,25 @@ static bool arg_post(void)
 //------------------------------------------------------------------------------
 static bool arg_cli(int argc, char **argv)
 {
-    #if defined(AMIGA)
+    // Temp AxRT workaround until argument handling in AxRT is implemented.
+    #if defined(AMIGA) && !defined(__AXRT__)
     // Not used on Amiga.
     (void) argc;
     (void) argv;
 
+    // Hack to get around ReadArgs overwriting dir names. Should be fixed.
+    char *old = args[ARG_OLDDIR], *home = args[ARG_HOMEDIR];
+    args[ARG_HOMEDIR] = args[ARG_OLDDIR] = NULL;
+
     // Use the builtin commandline parser.
-    struct RDArgs *rda = (struct RDArgs *) ReadArgs(tr(S_ARGS), (IPTR *) args,
+    struct RDArgs *rda = (struct RDArgs *) ReadArgs(tr(S_ARGS), (LONG *) args,
                                                     NULL);
+    // Copy booleans and restore dir names. See above.
+    args[ARG_NOPRETEND] = args[ARG_HOMEDIR];
+    args[ARG_NOLOG] = args[ARG_OLDDIR];
+    args[ARG_HOMEDIR] = home;
+    args[ARG_OLDDIR] = old;
+
     if(!rda)
     {
         // Invalid or missing arguments.
@@ -238,8 +249,13 @@ bool arg_init(int argc, char **argv)
     // Invoked from CLI or WB.
     bool init = argc ? arg_cli(argc, argv) : arg_wb(argv);
 
-    // Go to script working directory and return.
-    return init && args[ARG_HOMEDIR] && !chdir(args[ARG_HOMEDIR]);
+    // Go to script working directory and return. Temp AxRT workaround until
+    // argument handling in AxRT is implemented.
+    return init && args[ARG_HOMEDIR]
+    #ifndef __AXRT__
+        && !chdir(args[ARG_HOMEDIR])
+    #endif
+    ;
 }
 
 //------------------------------------------------------------------------------

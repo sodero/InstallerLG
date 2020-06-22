@@ -118,6 +118,11 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}0.1.0-alpha.48 (2020-NOT-YET)@{UB}
+- Everything is now 64-bit clean and runs on AxRT.
+- Fixed NOLOG and NOPRETEND commandline arguments.
+- ?
+
 @{B}0.1.0-alpha.47 (2020-05-17)@{UB}
 - (askstring) and (asknumber) accept missing default in sloppy mode.
 - (startup) chomps redundant (command) linefeed.

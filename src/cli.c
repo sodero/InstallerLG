@@ -355,7 +355,9 @@ inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst, bool cn
     (void)cnf;
     (void)bck;
 
-    printf("Starting file copy %s.\n", msg);
+    if(msg) {
+        printf("Starting file copy %s.\n", msg);
+    }
 
     return G_TRUE;
 }
@@ -365,7 +367,9 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
     (void)nga;
     (void)bck;
 
-    printf("Copying files Cur:%s.\n", cur);
+    if(cur) {
+        printf("Copying files Cur:%s.\n", cur);
+    }
 
     return G_TRUE;
 }
@@ -401,7 +405,10 @@ inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 void gui_error(int line, const char *type, const char *info)
 {
     printf("Error of type %s on line %d.", type, line);
-    printf("Error info: %s", info);
+
+    if(info) {
+        printf("Error info: %s", info);
+    }
 }
 
 void gui_effect(int eff, int cl1, int cl2)
@@ -418,7 +425,7 @@ inp_t gui_closemedia(int mid)
 
 inp_t gui_setmedia(int mid, int act, const char *par)
 {
-    printf("Set media with mid %d, act %d and par %s", mid, act, par);
+    printf("Set media with mid %d, act %d and par %s", mid, act, par ? par : "NONE");
 
     return G_TRUE;
 }

@@ -269,8 +269,18 @@ int main(int argc, char **argv)
     // Assume failure.
     int ret = -1;
 
+#ifdef __AXRT__
+    (void) argc;
+    (void) argv;
+
+    // Temp AxRT workaround until argument handling in AxRT is implemented.
+    char *argv_[] = {"Installer", "axrt.script", NULL};
+
+    if(arg_init(2, argv_))
+#else
     // Initialize the argument handling.
     if(arg_init(argc, argv))
+#endif
     {
         yyscan_t lexer;
 

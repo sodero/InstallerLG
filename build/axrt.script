@@ -1,1 +1,25 @@
+; Using a custom screen doesn't seem to work. Uncomment to test.
+;(effect "center_left" 'horizontal' 1 254) (effect "center_left" 'horizontal' 1 255) ; "","e 36:1:254 36:1:255 1",""
+
+; Silly experiment, smooth progress
+(procedure progress start stop delay
+    (
+        (set i start)
+        (while (<= i stop)
+            (set i (+ i 1))
+            (set j delay)
+            (while (> j 0)
+                (set j (- j 1))
+                (complete i)
+            )
+        )
+    )
+)
+
+(progress 0 25 2000)
 (message "Hello AxRT world!")
+
+(progress 25 75 2000)
+(message ("File:%s" (askfile (default "No file") (prompt "Pick a file") (help "Nope, no help"))))
+
+(progress 75 100 2000)
