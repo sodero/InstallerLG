@@ -25,7 +25,7 @@
 (askchoice (prompt "p") (help "h") (choices "a" "b" "c") (default 3)) ; "","Line 1: No such item '3' 0",""
 (askchoice (prompt "p") (help "h") (choices "a" "b" "c") (default 4)) ; "","Line 1: No such item '4' 0",""
 (askchoice (prompt "p") (help "h") (choices)) ; "","Line 1: syntax error, unexpected ')' ')'",""
-(askchoice (prompt) (help "h") (choices "a")) ; "","Line 1: syntax error, unexpected ')' ')'",""
+(askchoice (prompt) (help "h") (choices "a")) ; "","NULLha00 0",""
 (message (askchoice (prompt "p") (help "h") (choices "a" "b" "c") (default 2))) ; "","pha20 201",""
 (debug (askchoice (prompt "p") (help "h") (choices "a" "b" "c") (default 2))) ; "","pha20 2 1",""
 (askchoice (prompt "p") (help "h") (choices "a" "b" "c") (default 1)) ; "","pha10 1",""
