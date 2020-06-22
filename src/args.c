@@ -96,13 +96,10 @@ static bool arg_cli(int argc, char **argv)
     (void) argc;
     (void) argv;
 
-<<<<<<< HEAD
-=======
     // Hack to get around ReadArgs overwriting dir names. Should be fixed.
     char *old = args[ARG_OLDDIR], *home = args[ARG_HOMEDIR];
     args[ARG_HOMEDIR] = args[ARG_OLDDIR] = NULL;
 
->>>>>>> axrt_test
     // Use the builtin commandline parser.
     struct RDArgs *rda = (struct RDArgs *) ReadArgs(tr(S_ARGS), (LONG *) args,
                                                     NULL);
