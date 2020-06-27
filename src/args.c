@@ -70,11 +70,14 @@ static bool arg_post(void)
         }
     }
 
-    // Copy string arguments. Stop at OLDDIR since items after that are either
-    // already copied or (interpreted as) booleans.
+    // Copy string arguments. Note that we skip NOLOG and NOPRETEND, these are
+    // interpreted as booleans.
     for(size_t arg = ARG_APPNAME; arg < ARG_OLDDIR; arg++)
     {
-        args[arg] = args[arg] ? DBG_ALLOC(strdup(args[arg])) : NULL;
+        if(args[arg] && arg != ARG_NOLOG && arg != ARG_NOPRETEND)
+        {
+            args[arg] = DBG_ALLOC(strdup(args[arg]));
+        }
     }
 
     // Script and home directory aren't optional.
@@ -96,19 +99,9 @@ static bool arg_cli(int argc, char **argv)
     (void) argc;
     (void) argv;
 
-    // Hack to get around ReadArgs overwriting dir names. Should be fixed.
-    char *old = args[ARG_OLDDIR], *home = args[ARG_HOMEDIR];
-    args[ARG_HOMEDIR] = args[ARG_OLDDIR] = NULL;
-
     // Use the builtin commandline parser.
     struct RDArgs *rda = (struct RDArgs *) ReadArgs(tr(S_ARGS), (LONG *) args,
                                                     NULL);
-    // Copy booleans and restore dir names. See above.
-    args[ARG_NOPRETEND] = args[ARG_HOMEDIR];
-    args[ARG_NOLOG] = args[ARG_OLDDIR];
-    args[ARG_HOMEDIR] = home;
-    args[ARG_OLDDIR] = old;
-
     if(!rda)
     {
         // Invalid or missing arguments.
@@ -156,6 +149,7 @@ static void arg_find_tts(STRPTR *tts)
     // Override current path if explicit path exists.
     args[ARG_SCRIPT] = script ? script : args[ARG_SCRIPT];
 
+    // Leave the rest of the tooltypes as they are.
     args[ARG_APPNAME] = (char *) FindToolType((STRPTR *) tts, "APPNAME");
     args[ARG_MINUSER] = (char *) FindToolType((STRPTR *) tts, "MINUSER");
     args[ARG_DEFUSER] = (char *) FindToolType((STRPTR *) tts, "DEFUSER");
@@ -190,7 +184,10 @@ static bool arg_wb(char **argv)
         return false;
     }
 
-    // We have the script name and home directory if this is a 'project'.
+    // We have the script name and home directory if this is a 'project'. Save
+    // project as ICON also, in case there's a tooltype that overrides SCRIPT
+    // later on. The CBM implementation uses the project name as @icon, not
+    // the script name.
     if(wb->sm_NumArgs == 2)
     {
         if(NameFromLock(arg->wa_Lock, buf_get(B_KEY), buf_len()))
@@ -198,8 +195,14 @@ static bool arg_wb(char **argv)
             args[ARG_HOMEDIR] = DBG_ALLOC(strdup(buf_get(B_KEY)));
         }
 
-        (void) buf_put(B_KEY);
         args[ARG_SCRIPT] = arg->wa_Name;
+
+        if(arg->wa_Name && AddPart(buf_get(B_KEY), arg->wa_Name, buf_len()))
+        {
+            args[ARG_ICON] = DBG_ALLOC(strdup(buf_get(B_KEY)));
+        }
+
+        (void) buf_put(B_KEY);
     }
 
     // Change to icon directory and get tool types if we can.
@@ -310,10 +313,13 @@ void arg_done(void)
         chdir(args[ARG_OLDDIR]);
     }
 
-    // Free what we have allocated. Note that we stop at HOMEDIR since that's
-    // the last string. NOLOG and NOPRETEND are (interpreted as) booleans.
-    for(size_t arg = ARG_SCRIPT; arg <= ARG_HOMEDIR; arg++)
+    // Free what we have allocated. Note that we skip NOLOG and NOPRETEND, these
+    // are non-valid pointers interpreted as booleans.
+    for(size_t arg = ARG_SCRIPT; arg < ARG_NUMBER_OF; arg++)
     {
-        free(args[arg]);
+        if(arg != ARG_NOLOG && arg != ARG_NOPRETEND)
+        {
+            free(args[arg]);
+        }
     }
 }
