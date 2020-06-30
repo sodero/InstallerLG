@@ -521,20 +521,6 @@ char *h_tackon(entry_p contxt, const char *pre, const char *suf)
         lep = 0;
     }
 
-    // If the path is empty, the result equals the filename. If the filename is
-    // empty, the result equals the path.
-    if(!lep || !les)
-    {
-        char *ret = DBG_ALLOC(strdup(lep ? pre : suf));
-
-        if(!ret)
-        {
-            PANIC(contxt);
-        }
-
-        return ret;
-    }
-
     // Allocate memory to hold path, filename, delimiter and termination.
     size_t let = lep + les + 2;
     char *ret = DBG_ALLOC(calloc(let, 1));
@@ -547,7 +533,7 @@ char *h_tackon(entry_p contxt, const char *pre, const char *suf)
     // Copy the path and insert delimiter if it doesn't exist.
     memcpy(ret, pre, lep);
 
-    if(pre[lep - 1] != '/' && pre[lep - 1] != ':')
+    if(lep && pre[lep - 1] != '/' && pre[lep - 1] != ':')
     {
        strncat(ret, "/", let - strlen(ret));
     }

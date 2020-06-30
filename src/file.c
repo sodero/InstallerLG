@@ -3171,7 +3171,7 @@ entry_p n_startup(entry_p contxt)
         {
             // Create temporary file.
             snprintf(tmp, tln, "%s.XXXXXX", fln);
-            FILE *file = fdopen(mkstemp(tmp), "w");
+            FILE *file = fdopen(mkstemp(tmp), "w+");
 
             if(file)
             {

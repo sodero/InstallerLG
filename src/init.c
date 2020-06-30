@@ -107,7 +107,8 @@ static void init_tooltypes(entry_p contxt)
 {
     // Get tooltypes / CLI arguments.
     char *a_app = arg_get(ARG_APPNAME), *a_scr = arg_get(ARG_SCRIPT),
-         *a_log = arg_get(ARG_LOGFILE), *a_lng = arg_get(ARG_LANGUAGE);
+         *a_ico = arg_get(ARG_ICON), *a_log = arg_get(ARG_LOGFILE),
+         *a_lng = arg_get(ARG_LANGUAGE);
 
     // User levels: minimum 'NOVICE' and default 'AVERAGE'.
     int32_t l_def = str_to_userlevel(arg_get(ARG_DEFUSER), LG_AVERAGE),
@@ -123,7 +124,7 @@ static void init_tooltypes(entry_p contxt)
              LG_TRUE : LG_FALSE);
 
     // File names.
-    init_str(contxt, "@icon", a_scr ? a_scr : "");
+    init_str(contxt, "@icon", a_ico ? a_ico : (a_scr ? a_scr : ""));
     init_str(contxt, "@app-name", a_app ? a_app : "Test App");
     init_str(contxt, "@log-file", a_log ? a_log : "install_log_file");
 
