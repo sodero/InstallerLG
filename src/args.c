@@ -100,7 +100,7 @@ static bool arg_cli(int argc, char **argv)
     (void) argv;
 
     // Use the builtin commandline parser.
-    struct RDArgs *rda = (struct RDArgs *) ReadArgs(tr(S_ARGS), (LONG *) args,
+    struct RDArgs *rda = (struct RDArgs *) ReadArgs(tr(S_ARGS), (IPTR *) args,
                                                     NULL);
     if(!rda)
     {
