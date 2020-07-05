@@ -634,7 +634,7 @@ entry_p n_asknumber(entry_p contxt)
         min = num(range->children[0]);
         max = num(range->children[1]);
 
-        // Use default range when the user given range is invalid.
+        // Use default range when range is invalid.
         if(min >= max)
         {
             max = 100;
@@ -642,21 +642,25 @@ entry_p n_asknumber(entry_p contxt)
         }
     }
 
-    // Show requester only if we're not executing in 'novice' mode.
+    int32_t def = num(deflt);
+
+    // Use default value in 'novice' mode.
     if(get_num(contxt, "@user-level") == LG_NOVICE)
     {
-        // Use default value.
-        R_NUM(num(deflt));
+        R_NUM(def);
     }
 
-    int32_t def = num(deflt);
     const char *prt = str(prompt), *hlp = str(help);
 
-    // Only show requester if we could resolve all options.
+    // Bail out on error.
     if(DID_ERR)
     {
         R_NUM(LG_FALSE);
     }
+
+    // Extend range if necessary.
+    min = min < def ? min : def;
+    max = max > def ? max : def;
 
     // Prompt user.
     inp_t grc = gui_number(prt, hlp, min, max, def, back != false, &D_NUM);
