@@ -86,7 +86,7 @@ entry_p n_effect(entry_p contxt)
     char *est = str(C_ARG(2)), *eps = str(C_ARG(1));
 
     // Colors, type and position.
-    int32_t ic1 = num(C_ARG(3)), ic2 = num(C_ARG(4)),
+    int32_t ic1 = num(C_ARG(4)), ic2 = num(C_ARG(3)),
             ief = h_pos(eps) | (strcasecmp(est, "radial") == 0 ? G_RADIAL :
             strcasecmp(est, "horizontal") == 0 ? G_HORIZONTAL : 0);
 
