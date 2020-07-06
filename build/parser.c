@@ -3825,7 +3825,7 @@ yyreduce:
 
   case 228:
 #line 344 "../src/parser.y"
-                                                 { (yyval.e) = new_native(strdup("copyfiles"), LINE, n_copyfiles, (yyvsp[-1].e), NUMBER); }
+                                                 { (yyval.e) = new_native(strdup("copyfiles"), LINE, n_copyfiles, (yyvsp[-1].e), STRING); }
 #line 3830 "parser.c"
     break;
 

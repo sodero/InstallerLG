@@ -1417,7 +1417,7 @@ entry_p n_copyfiles(entry_p contxt)
        (all && (choices || pattern)))
     {
         ERR(ERR_OPTION_MUTEX, "pattern/choices/all");
-        R_NUM(LG_FALSE);
+        R_EST;
     }
 
     // The (fail) (nofail) and (oknodelete) options are mutually exclusive.
@@ -1425,14 +1425,14 @@ entry_p n_copyfiles(entry_p contxt)
        (oknodelete && (nofail || fail)))
     {
         ERR(ERR_OPTION_MUTEX, "fail/nofail/oknodelete");
-        R_NUM(LG_FALSE);
+        R_EST;
     }
 
     // We need a source and a destination dir.
     if(!source || !dest)
     {
         ERR(ERR_MISSING_OPTION, source ? "dest" : "source");
-        R_NUM(LG_FALSE);
+        R_EST;
     }
 
     const char *src = str(source), *dst = str(dest);
@@ -1441,13 +1441,13 @@ entry_p n_copyfiles(entry_p contxt)
     if(h_exists(src) == LG_DIR && !all && !choices && !pattern)
     {
         ERR(ERR_MISSING_OPTION, "all/choices/pattern");
-        R_NUM(LG_FALSE);
+        R_EST;
     }
 
     // A non safe operation in pretend mode always succeeds.
     if(get_num(contxt, "@pretend") && !safe)
     {
-        R_NUM(LG_TRUE);
+        R_STR(DBG_ALLOC(strdup(dst)));
     }
 
     // Does the destination already exist?
@@ -1456,7 +1456,7 @@ entry_p n_copyfiles(entry_p contxt)
         // Path might be empty.
         size_t dln = strlen(dst);
 
-        // If it's not a volume, set permissions to allow overwriting.
+        // Allow overwriting (ignore volumes).
         if(dln && dst[dln - 1] != ':')
         {
             chmod(dst, POSIX_RWX_MASK);
@@ -1466,14 +1466,14 @@ entry_p n_copyfiles(entry_p contxt)
     // Traverse source directory and create destination strings.
     pnode_p tree = h_filetree(contxt, src, src, dst, files, fonts, choices,
                               pattern, infos);
-
     if(!tree)
     {
-        // I/O error or out of memory. Status set by h_filetree.
-        R_NUM(LG_FALSE);
+        // I/O error or out of memory. Status set by h_filetree. The CBM
+        // installer always returns (dest).
+        R_STR(DBG_ALLOC(strdup(dst)));
     }
 
-    // Start from the top of the list.
+    // Start from the top.
     pnode_p cur = tree;
 
     // Replace file name if single file and the 'newname' option is set
@@ -1485,12 +1485,9 @@ entry_p n_copyfiles(entry_p contxt)
     }
 
     // Initialize GUI, set up file lists, events, and so on.
-    inp_t grc = gui_copyfiles_start(prompt ? str(prompt) : NULL,
-                                    confirm ? str(help) : NULL, cur,
-                                    confirm != false, back != false);
-
-    // Return value.
-    int32_t ret = LG_FALSE;
+    inp_t grc = gui_copyfiles_start(prompt ? str(prompt) : NULL, confirm ?
+                                    str(help) : NULL, cur, confirm != false,
+                                    back != false);
 
     // Start copy unless skip / abort / back.
     if(grc == G_TRUE)
@@ -1510,12 +1507,9 @@ entry_p n_copyfiles(entry_p contxt)
                 grc = G_FALSE;
             }
         }
-
-        // Translate return value.
-        ret = (grc == G_TRUE) ? LG_TRUE : LG_FALSE;
     }
 
-    // GUI teardown.
+    // GUI and event teardown.
     gui_copyfiles_end();
 
     // Back return value.
@@ -1565,8 +1559,8 @@ entry_p n_copyfiles(entry_p contxt)
         return bck;
     }
 
-    // Success or failure.
-    R_NUM(ret);
+    // Success or failure. The CBM installer always returns (dest).
+    R_STR(DBG_ALLOC(strdup(dst)));
 }
 
 //------------------------------------------------------------------------------
@@ -1880,7 +1874,7 @@ entry_p n_copylib(entry_p contxt)
     // We always need a prompt and help since trying to overwrite new files
     // with older ones will force a confirm if we're in expert mode. In sloppy
     // mode we'll always have them, but they will be empty if not provided. This
-    // is how the CBM behaves, despite what the documentation says.
+    // is how the CBM installer behaves, despite what the documentation says.
     if(!source || !dest || !prompt || !help)
     {
         ERR(ERR_MISSING_OPTION, source ? dest ? prompt ? "help" : "prompt" :
