@@ -121,6 +121,7 @@ Italian translations.
 @{B}0.1.0-alpha.49 (2020-NOT-YET)@{UB}
 - (effect) color ordering fix.
 - (asknumber) extend range when default is out of range.
+- (copyfiles) return value fix (facts).
 - ?
 
 @{B}0.1.0-alpha.48 (2020-07-01)@{UB}

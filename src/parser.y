@@ -341,7 +341,7 @@ trap:           '(' TRAP p vps ')'               { $$ = new_native(strdup("trap"
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* file.c|h                                                                                                                                                                             */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-copyfiles:      '(' COPYFILES opts ')'           { $$ = new_native(strdup("copyfiles"), LINE, n_copyfiles, $3, NUMBER); };
+copyfiles:      '(' COPYFILES opts ')'           { $$ = new_native(strdup("copyfiles"), LINE, n_copyfiles, $3, STRING); };
 copylib:        '(' COPYLIB opts ')'             { $$ = new_native(strdup("copylib"), LINE, n_copylib, $3, NUMBER); };
 delete:         '(' DELETE ps opts')'            { $$ = new_native(strdup("delete"), LINE, n_delete, merge($3, $4), NUMBER); } |
                 '(' DELETE opts ps')'            { $$ = new_native(strdup("delete"), LINE, n_delete, merge($4, $3), NUMBER); } |
