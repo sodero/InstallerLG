@@ -128,7 +128,7 @@ Italian translations.
 - Everything is now 64-bit clean and runs on AxRT.
 - NOLOG and NOPRETEND command line fix.
 - Empty (prompt) option allowed (mSQL-20101).
-- Invalid @icon fixed (ReOrg3.1).
+- Invalid \@icon fixed (ReOrg3.1).
 - Empty suffix (tackon) fix (glUAE).
 
 @{B}0.1.0-alpha.47 (2020-05-17)@{UB}
