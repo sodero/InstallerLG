@@ -117,7 +117,7 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int32_t def
             choseAnswer = true;
         } else {
             int32_t res = atoi(response);
-            if(res != 0) {r
+            if(res != 0) {
                 if(res >= 0 && res <= max) {
                     *ret = res;
                     choseAnswer = true;
