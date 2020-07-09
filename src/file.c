@@ -642,9 +642,11 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                         if(dep++ < LG_MAXDEP)
                         {
                             // Get subdirectory tree. Don't promote (choices),
-                            // dirs will be considered files.
+                            // dirs will be considered files. Don't promote
+                            // pattern, if we have a dir match, everything in
+                            // that dir should be copied.
                             node->next = h_filetree(contxt, srt, n_src, n_dst,
-                                                    files, fonts, NULL, pattern,
+                                                    files, fonts, NULL, NULL,
                                                     NULL);
                             dep--;
 
