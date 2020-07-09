@@ -118,17 +118,17 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-@{B}0.1.0-alpha.49 (2020-NOT-YET)@{UB}
+@{B}0.1.0-alpha.49 (2020-07-09)@{UB}
 - (effect) color ordering fix.
 - (asknumber) extend range when default is out of range.
 - (copyfiles) return value fix (facts).
-- ?
+- Directory pattern matching bug fixed.
 
 @{B}0.1.0-alpha.48 (2020-07-01)@{UB}
 - Everything is now 64-bit clean and runs on AxRT.
 - NOLOG and NOPRETEND command line fix.
 - Empty (prompt) option allowed (mSQL-20101).
-- Invalid @icon fixed (ReOrg3.1).
+- Invalid \@icon fixed (ReOrg3.1).
 - Empty suffix (tackon) fix (glUAE).
 
 @{B}0.1.0-alpha.47 (2020-05-17)@{UB}
