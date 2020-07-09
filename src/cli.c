@@ -14,11 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef __GNUC__
-#define __attribute__(a)
-typedef LONG IPTR;
-#endif
-
 //
 // The gui_* functions are re-implementations of the gui.c functions written to use
 // standard input and standard output.  Anything related to the display is ignored
@@ -70,7 +65,7 @@ void gui_abort(const char *msg)
 }
 
 int countList(const char** listOfStrings) {
-    int max = 0;
+    int32_t max = 0;
     const char **countingStrings = listOfStrings;
 
     if(!*countingStrings) return 0;
@@ -86,7 +81,7 @@ int countList(const char** listOfStrings) {
 }
 
 void printList(const char** listOfStrings) {
-    int opt = 0;
+    int32_t opt = 0;
     const char **printingStrings = listOfStrings;
 
     if(!*printingStrings) return;
@@ -99,11 +94,11 @@ void printList(const char** listOfStrings) {
     }
 }
 
-inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret)
+inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int32_t def, bool bck, int32_t *ret)
 {
     (void)bck;
 
-    int max = countList(nms);
+    int32_t max = countList(nms);
     printf("%s\n", msg);
     printf("Choose a number between 0 and %d (default is %d, H for help)\n", max, def);
     char response[12];
@@ -121,10 +116,10 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def, bo
             *ret = 1;
             choseAnswer = true;
         } else {
-            int res = atoi(response);
+            int32_t res = atoi(response);
             if(res != 0) {
                 if(res >= 0 && res <= max) {
-                    *ret = 1UL << res;
+                    *ret = res;
                     choseAnswer = true;
                 } else {
                     printf("Number should be between 0 and %d\n", max);
@@ -136,8 +131,8 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int def, bo
     return G_TRUE;
 }
 
-void printListWithSelection(const char** listOfStrings, int selected) {
-    int opt = 0;
+void printListWithSelection(const char** listOfStrings, int32_t selected) {
+    int32_t opt = 0;
     const char **printingStrings = listOfStrings;
 
     if(!*printingStrings) return;
@@ -151,12 +146,12 @@ void printListWithSelection(const char** listOfStrings, int selected) {
     }
 }
 
-inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def, bool bck, int *ret)
+inp_t gui_options(const char *msg, const char *hlp, const char **nms, int32_t def, bool bck, int32_t *ret)
 {
     (void)bck;
 
-    int max = countList(nms);
-    int selected = def;
+    int32_t max = countList(nms);
+    int32_t selected = def;
 
     printf("%s\n", msg);
     char response[12];
@@ -173,7 +168,7 @@ inp_t gui_options(const char *msg, const char *hlp, const char **nms, int def, b
         } else if(strcmp(response, "0\n") == 0) {
             selected = selected ^ 1UL;
         } else {
-            int res = atoi(response);
+            int32_t res = atoi(response);
             if(res == 0) {
                 printf("Number should be between 0 and %d\n", max);
             } else {
@@ -238,7 +233,7 @@ inp_t gui_string(const char *msg, const char *hlp, const char *def, bool bck, co
     return G_TRUE;
 }
 
-inp_t gui_number(const char *msg, const char *hlp, int min, int max, int def, bool bck, int *ret)
+inp_t gui_number(const char *msg, const char *hlp, int32_t min, int32_t max, int32_t def, bool bck, int32_t *ret)
 {
     (void)bck;
 
@@ -258,7 +253,7 @@ inp_t gui_number(const char *msg, const char *hlp, int min, int max, int def, bo
             *ret = 0;
             choseAnswer = true;
         } else {
-            int res = atoi(response);
+            int32_t res = atoi(response);
             if(res != 0) {
                 if(res >= min && res <= max) {
                     *ret = res;
@@ -273,7 +268,7 @@ inp_t gui_number(const char *msg, const char *hlp, int min, int max, int def, bo
     return G_TRUE;
 }
 
-inp_t gui_welcome(const char *msg, int *lvl, int *lgf, int *prt, int min, bool npr, bool nlg)
+inp_t gui_welcome(const char *msg, int32_t *lvl, int32_t *lgf, int32_t *prt, int32_t min, bool npr, bool nlg)
 {
     (void)lgf;
     (void)min;
@@ -411,7 +406,7 @@ void gui_error(int line, const char *type, const char *info)
     }
 }
 
-void gui_effect(int eff, int cl1, int cl2)
+void gui_effect(int eff, int32_t cl1, int32_t cl2)
 {
     printf("Image effect %d with colors %d and %d", eff, cl1, cl2);
 }
@@ -423,14 +418,14 @@ inp_t gui_closemedia(int mid)
     return G_TRUE;
 }
 
-inp_t gui_setmedia(int mid, int act, const char *par)
+inp_t gui_setmedia(int mid, int32_t act, const char *par)
 {
     printf("Set media with mid %d, act %d and par %s", mid, act, par ? par : "NONE");
 
     return G_TRUE;
 }
 
-inp_t gui_showmedia(int *mid, const char* mda, int act)
+inp_t gui_showmedia(int *mid, const char* mda, int32_t act)
 {
     printf("Set media with mid %d, act %d and mda %s", *mid, act, mda);
 
@@ -438,7 +433,7 @@ inp_t gui_showmedia(int *mid, const char* mda, int act)
 }
 
 // Defaulting to not set any values.  Not sure how this is used or what the effect will be.
-void gui_query_screen(int *width, int *height, int *depth, int *colors)
+void gui_query_screen(int *width, int32_t *height, int32_t *depth, int32_t *colors)
 {
     (void)width;
     (void)height;
@@ -447,8 +442,8 @@ void gui_query_screen(int *width, int *height, int *depth, int *colors)
 }
 
 // Defaulting to not set any values.  Not sure how this is used or what the effect will be.
-void gui_query_window(int *width, int *height, int *upper, int *lower,
-                      int *left, int *right)
+void gui_query_window(int *width, int32_t *height, int32_t *upper, int32_t *lower,
+                      int32_t *left, int32_t *right)
 {
     (void)width;
     (void)height;
