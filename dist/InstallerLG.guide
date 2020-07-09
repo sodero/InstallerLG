@@ -118,6 +118,9 @@ Italian translations.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}0.1.0-alpha.50 (2020-NOT-YET)@{UB}
+- ?
+
 @{B}0.1.0-alpha.49 (2020-07-09)@{UB}
 - (effect) color ordering fix.
 - (asknumber) extend range when default is out of range.
