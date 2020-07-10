@@ -215,7 +215,7 @@ entry_p n_welcome(entry_p contxt)
     // Welcome message.
     char *msg = NULL;
 
-    if(exists(C_ARG(1)))
+    if(contxt->children)
     {
         // We have a message. Concatenate children.
         msg = get_chlstr(contxt, false);
