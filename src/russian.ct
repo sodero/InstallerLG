@@ -1,230 +1,304 @@
-## version $VER: InstallerLG.catalog 0.1.0 by Eugene Sobolev, 03-Jul-2020
+## version $VER: InstallerLG.catalog 1.0 by Eugene Sobolev, 03-Jul-2020
 ## codeset 0
 ## language russian
 ;
 ; Перевод на русский язык выполнил aGGreSSor/CPU aka Евгений Соболев, в 2020 г. от р.х.
-; 
+;
 MSG_COPYINGFILES
 Копирование файла(-ов)
+; Copying file(s)
 ;
 MSG_OVERWRITEEXISTINGDIRECTORY
 Перезаписать существующую директорию '%s'?
+; Overwrite existing directory '%s'?
 ;
 MSG_ABORTCOPYTO
 Прерывание копирования '%s' в '%s'.\n
+; Abort copy '%s' to '%s'.\n
 ;
 MSG_COULDNOTCOPYTO
 Не могу скопировать '%s' в '%s'.\n
+; Could not copy '%s' to '%s'.\n
 ;
 MSG_DELETEWRITEPROTECTEDFILE
 Удалить защищённый (RW) файл '%s'?
+; Delete write protected file '%s'?
 ;
 MSG_DELETEWRITEPROTECTEDDIRECTORY
 Удалить защищённую (RW) директорию '%s'?
+; Delete write protected directory '%s'?
 ;
 MSG_OVERWRITEWRITEPROTECTEDFILE
 Перезаписать защищённый (RW) файл '%s'?
+; Overwrite write protected file '%s'?
 ;
 MSG_DELETEFILE
 Удалить файл '%s'?
+; Delete file '%s'?
 ;
 MSG_DELETED
 Удалено '%s'.\n
+; Deleted '%s'.\n
 ;
 MSG_NOSUCHFILE
 Нет такого файла '%s'.\n
+; No such file '%s'.\n
 ;
 MSG_RENAMEDTO
 Переименовано '%s' в '%s'.\n
+; Renamed '%s' to '%s'.\n
 ;
 MSG_COPIEDTO
 Скопировано '%s' в '%s'.\n
+; Copied '%s' to '%s'.\n
 ;
 MSG_DIRECTORYEXISTSALREADY
 Директория '%s' уже существует.\n
+; Directory '%s' exists already.\n
 ;
 MSG_CREATED
 Создано '%s'.\n
+; Created '%s'.\n
 ;
 MSG_GETMASK
 Получение маски для '%s' %d\n
+; Get mask '%s' %d\n
 ;
 MSG_PROTECT
 Защита от записи для '%s' %d\n
+; Protect '%s' %d\n
 ;
 MSG_INSTALLER
 Установщик
+; Installer
 ;
 MSG_SETINSTALLATIONMODE
 Выбор режима установки
+; Set Installation Mode
 ;
 MSG_DESTINATIONDRAWER
 Целевая директория
+; Destination drawer
 ;
 MSG_COPYINGFILE
 Копирование файла
+; Copying file
 ;
 MSG_FILESTOINSTALL
 Файлы для установки
+; Files to install
 ;
 MSG_INSTALLATIONMODEANDLOGGING
 Режим установки и отладка
+; Installation mode and logging
 ;
 MSG_PROGRESS
 Процесс установки
+; Progress
 ;
 MSG_PROCEED
 Продолжить
+; Proceed
 ;
 MSG_RETRY
 Повторить
+; Retry
 ;
 MSG_ABORT
 Прервать
+; Abort
 ;
 MSG_YES
 Да
+; Yes
 ;
 MSG_NO
 Нет
+; No
 ;
 MSG_OK
 Ок
+; Ok
 ;
 MSG_NEXT
 Дальше
+; Next
 ;
 MSG_SKIP
 Пропустить
+; Skip
 ;
 MSG_BACK
 Раньше
+; Back
 ;
 MSG_UNKNOWNERROR
 Неизвестная ошибка
+; Unknown error
 ;
 MSG_SETUPFAILED
 Установка провалилась
+; Setup failed
 ;
 MSG_FAILEDCREATINGMUICUSTOMCLASS
 Не удалось создать класс MUI
+; Failed creating MUI custom class
 ;
 MSG_FAILEDCREATINGMUIAPPLICATION
 Не удалось создать приложение MUI
+; Failed creating MUI application
 ;
 MSG_INITIALIZATIONFAILED
 Преднастройка провалилась
+; Initialization failed
 ;
 MSG_ERROR
 Ошибка
+; Error
 ;
 MSG_SUCCESS
 Успешно
+; Success
 ;
 MSG_LINE
 Строка %d: %s '%s'
+; Line %d: %s '%s'
 ;
 MSG_NOVICEUSERALLACTIONSAUTOMATIC
 Пользователь - автоматическая установка
+; Novice User - All Actions Automatic
 ;
 MSG_INTERMEDIATEUSERLIMITEDMANUALCONTROL
 Инженер - ограниченно-ручное управление
+; Intermediate User - Limited Manual Control
 ;
 MSG_EXPERTUSERMUSTCONFIRMALLACTIONS
 Эксперт - запросы на ВСЕ действия
+; Expert User - Must Confirm all actions
 ;
 MSG_INSTALLFORREAL
 Установка в систему
+; Install for real
 ;
 MSG_DRYRUNONLY
 Тестирование
+; Dry run only
 ;
 MSG_NOLOGGING
 Без отладки
+; No logging
 ;
 MSG_LOGTOFILE
 Отладка идёт в файл
+; Log to file
 ;
 MSG_LOGTOPRINTER
 Отладка идёт на принтер
+; Log to printer
 ;
 MSG_INSTALLERREQUIREDARGUMENTMISSING
 установщик: отсутствует необходимый параметр\n
+; installer: required argument missing\n
 ;
 MSG_NCANBEFOUNDIN
 %s\n\n%s находится в %s
+; %s\n\n%s can be found in %s
 ;
 MSG_INSTALLATIONCOMPLETE
 Установка завершена
+; Installation complete
 ;
 MSG_EXECUTED
 Выполнено '%s'.\n
+; Executed '%s'.\n
 ;
 MSG_ERRORCOULDNOTOPENFILE
 Ошибка: не могу открыть файл '%s'\n
+; Error: Could not open file '%s'\n
 ;
 MSG_LINE2
 Строка %d: %s '%s'\n
+; Line %d: %s '%s'\n
 ;
 MSG_WORKINGONINSTALLATIONN
 Процесс установки...\n\n
+; Working on installation...\n\n
 ;
 MSG_SELECTDIRECTORY
 Выбор директории
+; Select directory
 ;
 MSG_SELECTFILE
 Выбор файла
+; Select file
 ;
 MSG_ASSIGNTO
 Присвоение '%s' в '%s'\n
+; Assign '%s' to '%s'\n
 ;
 MSG_REMOVEASSIGN
 Удаление присвоения '%s'\n
+; Remove assign '%s'\n
 ;
 MSG_COULDNOTASSIGNTO
 Не могу присвоить '%s' в '%s'\n
+; Could not assign '%s' to '%s'\n
 ;
 MSG_COULDNOTREMOVEASSIGN
 Не могу удалить присвоение '%s'\n
+; Could not remove assign '%s'\n
 ;
 MSG_APPENDTO
 Добавление '%s' в '%s'\n
+; Append '%s' to '%s'\n
 ;
 MSG_INCLUDEIN
 Включение '%s' в '%s'\n
+; Include '%s' in '%s'\n
 ;
 MSG_VERSIONTOINSTALL
 Версия для установки
+; Version to install
 ;
 MSG_VERSIONCURRENTLYINSTALLED
 Установленная версия
+; Version currently installed
 ;
 MSG_UNKNOWNVERSION
 Неизвестная версия
+; Unknown version
 ;
 MSG_DESTINATIONDRAWER2
 Целевая директория
+; Destination drawer
 ;
 MSG_THEREISNOCURRENTLYINSTALLEDVERSION
 Здесь нет последней установленной версии
+; There is no currently installed version
 ;
 MSG_COMMANDLINEARGUMENTS
 SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,NOLOG/S,NOPRETEND/S
+; SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,NOLOG/S,NOPRETEND/S
 ;
 MSG_TTSCRIPT
 SCRIPT
+; SCRIPT
 ;
 MSG_TTAPPNAME
 APPNAME
+; APPNAME
 ;
 MSG_TTMINUSER
 MINUSER
+; MINUSER
 ;
 MSG_TTDEFUSER
 DEFUSER
+; DEFUSER
 ;
 MSG_TTLANGUAGE
 LANGUAGE
+; LANGUAGE
 ;
 MSG_TTLOGFILE
 LOGFILE

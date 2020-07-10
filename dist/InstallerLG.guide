@@ -102,13 +102,16 @@ and running on MorphOS, the initial AmigaGuide draft and German
 translations.
 
 @{B}Gareth Smyth@{UB}
-Console UI and Windows port.
+Console UI, Windows port and bugfixes.
 
 @{B}Wawrzyniec Tokarski@{UB}
 AROS build script.
 
 @{B}Samir Hawamdeh@{UB}
-Italian translations.
+Italian translation.
+
+@{B}Eugene Sobolev@{UB}
+Russian translation.
 
 @ENDNODE
 
@@ -120,6 +123,7 @@ Italian translations.
 
 @{B}0.1.0-alpha.50 (2020-NOT-YET)@{UB}
 - (welcome) default message added.
+- Russian translation (Eugene Sobolev).
 - ?
 
 @{B}0.1.0-alpha.49 (2020-07-09)@{UB}
