@@ -1,0 +1,243 @@
+## version $VER: InstallerLG.catalog 0.1.0 by Eugene Sobolev, 03-Jul-2020
+## codeset 0
+## language russian
+;
+; Перевод на русский язык выполнил aGGreSSor/CPU aka Евгений Соболев, в 2020 г. от р.х.
+; 
+MSG_COPYINGFILES
+Копирование файла(-ов)
+;
+MSG_OVERWRITEEXISTINGDIRECTORY
+Перезаписать существующую директорию '%s'?
+;
+MSG_ABORTCOPYTO
+Прерывание копирования '%s' в '%s'.\n
+;
+MSG_COULDNOTCOPYTO
+Не могу скопировать '%s' в '%s'.\n
+;
+MSG_DELETEWRITEPROTECTEDFILE
+Удалить защищённый (RW) файл '%s'?
+;
+MSG_DELETEWRITEPROTECTEDDIRECTORY
+Удалить защищённую (RW) директорию '%s'?
+;
+MSG_OVERWRITEWRITEPROTECTEDFILE
+Перезаписать защищённый (RW) файл '%s'?
+;
+MSG_DELETEFILE
+Удалить файл '%s'?
+;
+MSG_DELETED
+Удалено '%s'.\n
+;
+MSG_NOSUCHFILE
+Нет такого файла '%s'.\n
+;
+MSG_RENAMEDTO
+Переименовано '%s' в '%s'.\n
+;
+MSG_COPIEDTO
+Скопировано '%s' в '%s'.\n
+;
+MSG_DIRECTORYEXISTSALREADY
+Директория '%s' уже существует.\n
+;
+MSG_CREATED
+Создано '%s'.\n
+;
+MSG_GETMASK
+Получение маски для '%s' %d\n
+;
+MSG_PROTECT
+Защита от записи для '%s' %d\n
+;
+MSG_INSTALLER
+Установщик
+;
+MSG_SETINSTALLATIONMODE
+Выбор режима установки
+;
+MSG_DESTINATIONDRAWER
+Целевая директория
+;
+MSG_COPYINGFILE
+Копирование файла
+;
+MSG_FILESTOINSTALL
+Файлы для установки
+;
+MSG_INSTALLATIONMODEANDLOGGING
+Режим установки и отладка
+;
+MSG_PROGRESS
+Процесс установки
+;
+MSG_PROCEED
+Продолжить
+;
+MSG_RETRY
+Повторить
+;
+MSG_ABORT
+Прервать
+;
+MSG_YES
+Да
+;
+MSG_NO
+Нет
+;
+MSG_OK
+Ок
+;
+MSG_NEXT
+Дальше
+;
+MSG_SKIP
+Пропустить
+;
+MSG_BACK
+Раньше
+;
+MSG_UNKNOWNERROR
+Неизвестная ошибка
+;
+MSG_SETUPFAILED
+Установка провалилась
+;
+MSG_FAILEDCREATINGMUICUSTOMCLASS
+Не удалось создать класс MUI
+;
+MSG_FAILEDCREATINGMUIAPPLICATION
+Не удалось создать приложение MUI
+;
+MSG_INITIALIZATIONFAILED
+Преднастройка провалилась
+;
+MSG_ERROR
+Ошибка
+;
+MSG_SUCCESS
+Успешно
+;
+MSG_LINE
+Строка %d: %s '%s'
+;
+MSG_NOVICEUSERALLACTIONSAUTOMATIC
+Пользователь - автоматическая установка
+;
+MSG_INTERMEDIATEUSERLIMITEDMANUALCONTROL
+Инженер - ограниченно-ручное управление
+;
+MSG_EXPERTUSERMUSTCONFIRMALLACTIONS
+Эксперт - запросы на ВСЕ действия
+;
+MSG_INSTALLFORREAL
+Установка в систему
+;
+MSG_DRYRUNONLY
+Тестирование
+;
+MSG_NOLOGGING
+Без отладки
+;
+MSG_LOGTOFILE
+Отладка идёт в файл
+;
+MSG_LOGTOPRINTER
+Отладка идёт на принтер
+;
+MSG_INSTALLERREQUIREDARGUMENTMISSING
+установщик: отсутствует необходимый параметр\n
+;
+MSG_NCANBEFOUNDIN
+%s\n\n%s находится в %s
+;
+MSG_INSTALLATIONCOMPLETE
+Установка завершена
+;
+MSG_EXECUTED
+Выполнено '%s'.\n
+;
+MSG_ERRORCOULDNOTOPENFILE
+Ошибка: не могу открыть файл '%s'\n
+;
+MSG_LINE2
+Строка %d: %s '%s'\n
+;
+MSG_WORKINGONINSTALLATIONN
+Процесс установки...\n\n
+;
+MSG_SELECTDIRECTORY
+Выбор директории
+;
+MSG_SELECTFILE
+Выбор файла
+;
+MSG_ASSIGNTO
+Присвоение '%s' в '%s'\n
+;
+MSG_REMOVEASSIGN
+Удаление присвоения '%s'\n
+;
+MSG_COULDNOTASSIGNTO
+Не могу присвоить '%s' в '%s'\n
+;
+MSG_COULDNOTREMOVEASSIGN
+Не могу удалить присвоение '%s'\n
+;
+MSG_APPENDTO
+Добавление '%s' в '%s'\n
+;
+MSG_INCLUDEIN
+Включение '%s' в '%s'\n
+;
+MSG_VERSIONTOINSTALL
+Версия для установки
+;
+MSG_VERSIONCURRENTLYINSTALLED
+Установленная версия
+;
+MSG_UNKNOWNVERSION
+Неизвестная версия
+;
+MSG_DESTINATIONDRAWER2
+Целевая директория
+;
+MSG_THEREISNOCURRENTLYINSTALLEDVERSION
+Здесь нет последней установленной версии
+;
+MSG_COMMANDLINEARGUMENTS
+SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,NOLOG/S,NOPRETEND/S
+;
+MSG_TTSCRIPT
+SCRIPT
+;
+MSG_TTAPPNAME
+APPNAME
+;
+MSG_TTMINUSER
+MINUSER
+;
+MSG_TTDEFUSER
+DEFUSER
+;
+MSG_TTLANGUAGE
+LANGUAGE
+;
+MSG_TTLOGFILE
+LOGFILE
+; LOGFILE
+;
+MSG_TTNOLOG
+NOLOG
+; NOLOG
+;
+MSG_TTNOPRETEND
+NOPRETEND
+; NOPRETEND
+;
+MSG_TTWELC
+FIXME (RUS): Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).
+; Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).
