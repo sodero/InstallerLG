@@ -68,7 +68,9 @@ const char *tr(res_t res)
         /*67*/ "Destination drawer", /*68*/ "There is no currently installed version",
         /*69*/ "SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,NOLOG/S,NOPRETEND/S\n",
         /*70*/ "SCRIPT", /*71*/ "APPNAME", /*72*/ "MINUSER", /*73*/ "DEFUSER", /*74*/ "LANGUAGE",
-        /*75*/ "LOGFILE", /*76*/ "NOLOG", /*77*/ "NOPRETEND",
+        /*75*/ "LOGFILE", /*76*/ "NOLOG", /*77*/ "NOPRETEND",/*78*/ "Welcome to the %s utility. "
+        /*..*/ "Please indicate how the the installation should proceed (based upon your knowledge "
+        /*..*/ "of the Amiga computer).",
         /*S_GONE*/ "OUT OF RANGE"
     };
 

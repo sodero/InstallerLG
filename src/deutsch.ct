@@ -297,3 +297,18 @@ DEFUSER
 MSG_TTLANGUAGE
 LANGUAGE
 ; LANGUAGE
+MSG_TTLOGFILE
+LOGFILE
+; LOGFILE
+;
+MSG_TTNOLOG
+NOLOG
+; NOLOG
+;
+MSG_TTNOPRETEND
+NOPRETEND
+; NOPRETEND
+;
+MSG_TTWELC
+FIXME (D): Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).
+; Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).

@@ -297,3 +297,18 @@ DEFUSER
 MSG_TTLANGUAGE
 LANGUAGE
 ; LANGUAGE
+MSG_TTLOGFILE
+LOGFILE
+; LOGFILE
+;
+MSG_TTNOLOG
+NOLOG
+; NOLOG
+;
+MSG_TTNOPRETEND
+NOPRETEND
+; NOPRETEND
+;
+MSG_TTWELC
+Välkommen till installationsprogrammet för %s. Vänligen välj hur installationen ska genomföras (med hänsyn till din erfarenhet av Amiga-datorn).
+; Välkommen till installationsprogrammet för %s. Vänligen välj hur installationen ska genomföras (med hänsyn till din erfarenhet av Amiga-datorn).
