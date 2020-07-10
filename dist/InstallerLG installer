@@ -113,8 +113,8 @@
         ; Index to language helper.
         (procedure to_lang index native
             (if (= native 1)
-                (select index "deutsch" "italiano" "russian" "svenska")
-                (select index "german"  "italian"  "russian" "swedish")
+                (select index "deutsch" "italiano" "russian" "svenska" "")
+                (select index "german"  "italian"  "russian" "swedish" "")
             )
         )
 
