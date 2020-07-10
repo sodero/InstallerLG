@@ -212,11 +212,31 @@ entry_p n_welcome(entry_p contxt)
     int32_t lvl = get_num(contxt, "@user-level"),
             prt = get_num(contxt, "@pretend"), lgf = get_num(contxt, "@log");
 
-    // Concatenate children, if any.
-    char *msg = get_chlstr(contxt, false);
+    // Welcome message.
+    char *msg = NULL;
 
-    // Make sure that we're not out of memory and that all children are
-    // resolvable.
+    if(contxt->children)
+    {
+        // We have a message. Concatenate children.
+        msg = get_chlstr(contxt, false);
+    }
+    else
+    {
+        // Use default message.
+        const char *app = get_str(contxt, "@app-name"), *fmt = tr(S_WELC);
+        size_t len = strlen(app) + strlen(fmt);
+
+        // Total length + '\0'.
+        msg = DBG_ALLOC(calloc(len + 1, sizeof(char)));
+
+        if(msg)
+        {
+            // Insert @app-name in default message.
+            snprintf(msg, len, fmt, app);
+        }
+    }
+
+    // Make sure we're not out of memory and that all children are resolvable.
     if((!msg && PANIC(contxt)) || DID_ERR)
     {
         free(msg);

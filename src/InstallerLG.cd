@@ -220,3 +220,15 @@ DEFUSER
 ;
 MSG_TTLANGUAGE (//)
 LANGUAGE
+;
+MSG_TTLOGFILE (//)
+LOGFILE
+;
+MSG_TTNOLOG (//)
+NOLOG
+;
+MSG_TTNOPRETEND (//)
+NOPRETEND
+;
+MSG_TTWELC (//)
+Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).

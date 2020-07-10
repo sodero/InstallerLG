@@ -231,19 +231,19 @@ Välj fil
 ; Select file
 ;
 MSG_ASSIGNTO
-Skapar 'assign' av '%s' till '%s'\n
+Skapar tilldelning av '%s' till '%s'\n
 ; Assign '%s' to '%s'\n
 ;
 MSG_REMOVEASSIGN
-Tar bort 'assign' '%s'\n
+Tar bort tilldelning '%s'\n
 ; Remove assign '%s'\n
 ;
 MSG_COULDNOTASSIGNTO
-Kunde ej skapa 'assign' av '%s' till '%s'\n
+Kunde ej skapa tilldelning av '%s' till '%s'\n
 ; Could not assign '%s' to '%s'\n
 ;
 MSG_COULDNOTREMOVEASSIGN
-Kunde ej ta bort 'assign' '%s'\n
+Kunde ej ta bort tilldelning '%s'\n
 ; Could not remove assign '%s'\n
 ;
 MSG_APPENDTO
@@ -297,3 +297,19 @@ DEFUSER
 MSG_TTLANGUAGE
 LANGUAGE
 ; LANGUAGE
+;
+MSG_TTLOGFILE
+LOGFILE
+; LOGFILE
+;
+MSG_TTNOLOG
+NOLOG
+; NOLOG
+;
+MSG_TTNOPRETEND
+NOPRETEND
+; NOPRETEND
+;
+MSG_TTWELC
+Välkommen till installationsprogrammet för %s. Vänligen välj hur installationen ska genomföras (med hänsyn till din erfarenhet av Amiga-datorn).
+; Välkommen till installationsprogrammet för %s. Vänligen välj hur installationen ska genomföras (med hänsyn till din erfarenhet av Amiga-datorn).

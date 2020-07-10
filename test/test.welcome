@@ -23,4 +23,6 @@
 (welcome (askstring (prompt "p") (help "h") (default "d")) "Welcome" undef) ; "","Line 1: Undefined variable 'undef' 0",""
 (welcome (askstring (prompt undef) (help "h") (default "d")) "Welcome" "Wilkommen") ; "","Line 1: Undefined variable 'undef' 0",""
 (welcome undef) ; "","Line 1: Undefined variable 'undef' 0",""
-(welcome) ; "","100000 1",""
+(welcome) ; "","Welcome to the Test App utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).100000 1",""
+(set @app-name "InstallerLG") (welcome) ; "","Welcome to the InstallerLG utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).100000 1",""
+(set @app-name (askstring (prompt "p") (help "h") (default "X"))) (welcome) ; "","phX0 Welcome to the X utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).100000 1",""

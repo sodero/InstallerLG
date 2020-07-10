@@ -337,13 +337,7 @@ static void init_welcome(entry_p contxt)
         // The line numbers and naming are for debugging purposes only.
         entry = new_native
         (
-            DBG_ALLOC(strdup("welcome")), __LINE__, n_welcome,
-            push
-            (
-                new_contxt(),
-                new_string(DBG_ALLOC(strdup("Welcome")))
-            ),
-            NUMBER
+            DBG_ALLOC(strdup("welcome")), __LINE__, n_welcome, NULL, NUMBER
         );
 
         // Tests don't expect a default (welcome).

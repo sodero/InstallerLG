@@ -1,4 +1,4 @@
-; $VER: InstallerLG 0.1.0-alpha.49
+; $VER: InstallerLG 0.1.0-alpha.50
 ; Install script for InstallerLG
 
 (set #app-bin "Installer")
@@ -32,6 +32,18 @@
         (set #cat_str "Quale lingua si desidera installare?")
         (set #cat_hlp_str "")
     )
+(if (= @language "russian")
+    (
+        (set #welcome_str "(RUS) Welcome to the InstallerLG installer")
+        (set #dest_str "(RUS) Please choose target directory")
+        (set #dest_help_str "")
+        (set #copy_same_str "(RUS) Destination '%s'")
+        (set #copy_same_hlp_str "")
+        (set #copy_diff_str "(RUS) Copying '%s' to '%s'")
+        (set #copy_diff_hlp_str "")
+        (set #cat_str "(RUS) Which catalogs to install?")
+        (set #cat_hlp_str "")
+    )
 (if (= @language "svenska")
     (
         (set #welcome_str "Installation av InstallerLG")
@@ -55,7 +67,7 @@
         (set #copy_diff_hlp_str "")
         (set #cat_str "Which catalogs to install?")
         (set #cat_hlp_str "")
-    ))))
+    )))))
 
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 ; Welcome
@@ -101,8 +113,8 @@
         ; Index to language helper.
         (procedure to_lang index native
             (if (= native 1)
-                (select index "deutsch" "italiano" "svenska" "")
-                (select index "german"  "italian"  "swedish" "")
+                (select index "deutsch" "italiano" "russian" "svenska" "")
+                (select index "german"  "italian"  "russian" "swedish" "")
             )
         )
 
@@ -123,7 +135,7 @@
             (askoptions
                 (prompt #cat_str)
                 (help #cat_hlp_str)
-                (choices "Deutsch" "Italiano" "Svenska")
+                (choices "Deutsch" "Italiano" "Russian" "Svenska")
                 (default (shiftleft 1 i))
             )
         )

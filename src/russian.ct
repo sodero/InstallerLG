@@ -1,277 +1,279 @@
-## version $VER: InstallerLG.catalog 1.0 (20.09.2018)
+## version $VER: InstallerLG.catalog 1.0 by Eugene Sobolev, 03-Jul-2020
 ## codeset 0
-## language deutsch
+## language russian
+;
+; Перевод на русский язык выполнил aGGreSSor/CPU aka Евгений Соболев, в 2020 г. от р.х.
 ;
 MSG_COPYINGFILES
-Datei(en) kopieren
+Копирование файла(-ов)
 ; Copying file(s)
 ;
 MSG_OVERWRITEEXISTINGDIRECTORY
-Vorhandenes Verzeichnis '%s' ьberschreiben?
+Перезаписать существующую директорию '%s'?
 ; Overwrite existing directory '%s'?
 ;
 MSG_ABORTCOPYTO
-Abbruch von kopiert '%s' nach '%s'.\n
+Прерывание копирования '%s' в '%s'.\n
 ; Abort copy '%s' to '%s'.\n
 ;
 MSG_COULDNOTCOPYTO
-'%s' konnte nicht nach '%s' kopiert werden.\n
+Не могу скопировать '%s' в '%s'.\n
 ; Could not copy '%s' to '%s'.\n
 ;
 MSG_DELETEWRITEPROTECTEDFILE
-Schreibgeschьtzte Datei '%s' lцschen?
+Удалить защищённый (RW) файл '%s'?
 ; Delete write protected file '%s'?
 ;
 MSG_DELETEWRITEPROTECTEDDIRECTORY
-Schreibgeschьtztes Verzeichnis '%s' lцschen?
+Удалить защищённую (RW) директорию '%s'?
 ; Delete write protected directory '%s'?
 ;
 MSG_OVERWRITEWRITEPROTECTEDFILE
-Schreibgeschьtzte Datei '%s' ьberschreiben?
+Перезаписать защищённый (RW) файл '%s'?
 ; Overwrite write protected file '%s'?
 ;
 MSG_DELETEFILE
-Datei '%s' lцschen?
+Удалить файл '%s'?
 ; Delete file '%s'?
 ;
 MSG_DELETED
-'%s' gelцscht.\n
+Удалено '%s'.\n
 ; Deleted '%s'.\n
 ;
 MSG_NOSUCHFILE
-Keine solche Datei '%s'.\n
+Нет такого файла '%s'.\n
 ; No such file '%s'.\n
 ;
 MSG_RENAMEDTO
-Umbenannt '%s' in '%s'.\n
+Переименовано '%s' в '%s'.\n
 ; Renamed '%s' to '%s'.\n
 ;
 MSG_COPIEDTO
-Kopiert '%s' nach '%s'.\n
+Скопировано '%s' в '%s'.\n
 ; Copied '%s' to '%s'.\n
 ;
 MSG_DIRECTORYEXISTSALREADY
-Das Verzeichnis '%s' existiert bereits.\n
+Директория '%s' уже существует.\n
 ; Directory '%s' exists already.\n
 ;
 MSG_CREATED
-'%s' erstellt.\n
+Создано '%s'.\n
 ; Created '%s'.\n
 ;
 MSG_GETMASK
-Hole Maske '%s' %d\n
+Получение маски для '%s' %d\n
 ; Get mask '%s' %d\n
 ;
 MSG_PROTECT
-Schьtze '%s' %d\n
+Защита от записи для '%s' %d\n
 ; Protect '%s' %d\n
 ;
 MSG_INSTALLER
-Installer
+Установщик
 ; Installer
 ;
 MSG_SETINSTALLATIONMODE
-Installationsart festlegen
+Выбор режима установки
 ; Set Installation Mode
 ;
 MSG_DESTINATIONDRAWER
-Zielschublade
+Целевая директория
 ; Destination drawer
 ;
 MSG_COPYINGFILE
-Datei wird kopiert
+Копирование файла
 ; Copying file
 ;
 MSG_FILESTOINSTALL
-Zu installierende Dateien
+Файлы для установки
 ; Files to install
 ;
 MSG_INSTALLATIONMODEANDLOGGING
-Installationsmodus und Protokollierung
+Режим установки и отладка
 ; Installation mode and logging
 ;
 MSG_PROGRESS
-Fortschritt
+Процесс установки
 ; Progress
 ;
 MSG_PROCEED
-Fortfahren
+Продолжить
 ; Proceed
 ;
 MSG_RETRY
-Wiederholen
+Повторить
 ; Retry
 ;
 MSG_ABORT
-Abbrechen
+Прервать
 ; Abort
 ;
 MSG_YES
-Ja
+Да
 ; Yes
 ;
 MSG_NO
-Nein
+Нет
 ; No
 ;
 MSG_OK
-Ok
+Ок
 ; Ok
 ;
 MSG_NEXT
-Nдchster
+Дальше
 ; Next
 ;
 MSG_SKIP
-Ьberspringen
+Пропустить
 ; Skip
 ;
 MSG_BACK
-Zurьck
+Раньше
 ; Back
 ;
 MSG_UNKNOWNERROR
-Unbekannter Fehler
+Неизвестная ошибка
 ; Unknown error
 ;
 MSG_SETUPFAILED
-Setup fehlgeschlagen
+Установка провалилась
 ; Setup failed
 ;
 MSG_FAILEDCREATINGMUICUSTOMCLASS
-Fehler beim Erstellen der benutzerdefinierten MUI-Klasse
+Не удалось создать класс MUI
 ; Failed creating MUI custom class
 ;
 MSG_FAILEDCREATINGMUIAPPLICATION
-Fehler beim Erstellen der MUI-Anwendung
+Не удалось создать приложение MUI
 ; Failed creating MUI application
 ;
 MSG_INITIALIZATIONFAILED
-Initialisierung fehlgeschlagen
+Преднастройка провалилась
 ; Initialization failed
 ;
 MSG_ERROR
-Fehler
+Ошибка
 ; Error
 ;
 MSG_SUCCESS
-Erfolg
+Успешно
 ; Success
 ;
 MSG_LINE
-Zeile %d: %s '%s'
+Строка %d: %s '%s'
 ; Line %d: %s '%s'
 ;
 MSG_NOVICEUSERALLACTIONSAUTOMATIC
-Anfдnger - Alle Aktionen automatisch
+Пользователь - автоматическая установка
 ; Novice User - All Actions Automatic
 ;
 MSG_INTERMEDIATEUSERLIMITEDMANUALCONTROL
-Fortgeschrittener - Begrenzte manuelle Steuerung
+Инженер - ограниченно-ручное управление
 ; Intermediate User - Limited Manual Control
 ;
 MSG_EXPERTUSERMUSTCONFIRMALLACTIONS
-Experte - Muss alle Aktionen bestдtigen
+Эксперт - запросы на ВСЕ действия
 ; Expert User - Must Confirm all actions
 ;
 MSG_INSTALLFORREAL
-Tatsдchlich installieren
+Установка в систему
 ; Install for real
 ;
 MSG_DRYRUNONLY
-Trockenlauf
+Тестирование
 ; Dry run only
 ;
 MSG_NOLOGGING
-Keine Protokollierung
+Без отладки
 ; No logging
 ;
 MSG_LOGTOFILE
-In Datei speichern
+Отладка идёт в файл
 ; Log to file
 ;
 MSG_LOGTOPRINTER
-Ausdruck
+Отладка идёт на принтер
 ; Log to printer
 ;
 MSG_INSTALLERREQUIREDARGUMENTMISSING
-installer: erforderliches Argument fehlt\n
+установщик: отсутствует необходимый параметр\n
 ; installer: required argument missing\n
 ;
 MSG_NCANBEFOUNDIN
-%s\n\n%s kann in %s gefunden werden
+%s\n\n%s находится в %s
 ; %s\n\n%s can be found in %s
 ;
 MSG_INSTALLATIONCOMPLETE
-Installation abgeschlossen
+Установка завершена
 ; Installation complete
 ;
 MSG_EXECUTED
-'%s' wurde ausgefьhrt.\n
+Выполнено '%s'.\n
 ; Executed '%s'.\n
 ;
 MSG_ERRORCOULDNOTOPENFILE
-Fehler: Die Datei '%s' konnte nicht geцffnet werden\n
+Ошибка: не могу открыть файл '%s'\n
 ; Error: Could not open file '%s'\n
 ;
 MSG_LINE2
-Zeile %d: %s '%s'\n
+Строка %d: %s '%s'\n
 ; Line %d: %s '%s'\n
 ;
 MSG_WORKINGONINSTALLATIONN
-Arbeite an der Installation ...\n\n
+Процесс установки...\n\n
 ; Working on installation...\n\n
 ;
 MSG_SELECTDIRECTORY
-Verzeichnis auswдhlen
+Выбор директории
 ; Select directory
 ;
 MSG_SELECTFILE
-Datei auswдhlen
+Выбор файла
 ; Select file
 ;
 MSG_ASSIGNTO
-Weise '%s' an '%s' zu\n
+Присвоение '%s' в '%s'\n
 ; Assign '%s' to '%s'\n
 ;
 MSG_REMOVEASSIGN
-Entferne Zuweisung '%s'\n
+Удаление присвоения '%s'\n
 ; Remove assign '%s'\n
 ;
 MSG_COULDNOTASSIGNTO
-'%s' konnte nicht an '%s' zugewiesen werden\n
+Не могу присвоить '%s' в '%s'\n
 ; Could not assign '%s' to '%s'\n
 ;
 MSG_COULDNOTREMOVEASSIGN
-Konnte Zuweisung '%s' nicht entfernen\n
+Не могу удалить присвоение '%s'\n
 ; Could not remove assign '%s'\n
 ;
 MSG_APPENDTO
-Hдnge '%s' an '%s'\n
+Добавление '%s' в '%s'\n
 ; Append '%s' to '%s'\n
 ;
 MSG_INCLUDEIN
-Fьge '%s' in '%s' ein\n
+Включение '%s' в '%s'\n
 ; Include '%s' in '%s'\n
 ;
 MSG_VERSIONTOINSTALL
-Zu installierende Version
+Версия для установки
 ; Version to install
 ;
 MSG_VERSIONCURRENTLYINSTALLED
-Version ist derzeit installiert
+Установленная версия
 ; Version currently installed
 ;
 MSG_UNKNOWNVERSION
-Unbekannte Version
+Неизвестная версия
 ; Unknown version
 ;
 MSG_DESTINATIONDRAWER2
-Zielschublade
+Целевая директория
 ; Destination drawer
 ;
 MSG_THEREISNOCURRENTLYINSTALLEDVERSION
-Es gibt keine aktuell installierte Version
+Здесь нет последней установленной версии
 ; There is no currently installed version
 ;
 MSG_COMMANDLINEARGUMENTS
@@ -311,5 +313,5 @@ NOPRETEND
 ; NOPRETEND
 ;
 MSG_TTWELC
-FIXME (D): Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).
+FIXME (RUS): Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).
 ; Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).

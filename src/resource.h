@@ -95,6 +95,7 @@ typedef enum
     S_LGFL, /* "LOGFILE" */
     S_NLOG, /* "NOLOG" */
     S_NOPR, /* "NOPRETEND" */
+    S_WELC, /* "Please indicate how..." */
 
     // Out of range.
     S_GONE,
