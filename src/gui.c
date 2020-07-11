@@ -803,35 +803,34 @@ MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
 //------------------------------------------------------------------------------
 MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
 {
+    struct IGData *my = INST_DATA(cls, obj);
+
+    // If the minimum user level is set to 'expert', disable radio buttons
+    // to indicate that there is no choice to be made.
+    if(msg->MinLevel == 2)
+    {
+        set(my->UserLevel, MUIA_Disabled, TRUE);
+    }
+    // If the minimum user level is set to 'average', show 'average' and
+    // 'expert' only.
+    else if(msg->MinLevel == 1)
+    {
+        // Hide the full one.
+        set(my->UserLevel, MUIA_ShowMe, FALSE);
+        set(my->ExpertLevel, MUIA_ShowMe, TRUE);
+
+        // Take minimum user level into account.
+        set(my->ExpertLevel, MUIA_Radio_Active,
+           *((int32_t *) msg->Level) - 1);
+    }
+
+    // Set the current user level.
+    set(my->UserLevel, MUIA_Radio_Active, *((int32_t *) msg->Level));
+
     // Show welcome page.
     if(DoMethod(obj, MUIM_IG_PageSet,
        msg->Message, NULL, P_WELCOME, B_PROCEED_ABORT))
     {
-        struct IGData *my = INST_DATA(cls, obj);
-
-        // If the minimum user level is set to 'expert', disable radio buttons
-        // to indicate that there is no choice to be made.
-        if(msg->MinLevel == 2)
-        {
-            set(my->UserLevel, MUIA_Disabled, TRUE);
-        }
-
-        // If the minimum user level is set to 'average', show 'average' and
-        // 'expert' only.
-        else if(msg->MinLevel == 1)
-        {
-            // Hide the full one.
-            set(my->UserLevel, MUIA_ShowMe, FALSE);
-            set(my->ExpertLevel, MUIA_ShowMe, TRUE);
-
-            // Take minimum user level into account.
-            set(my->ExpertLevel, MUIA_Radio_Active,
-               *((int32_t *) msg->Level) - 1);
-        }
-
-        // Set the current user level.
-        set(my->UserLevel, MUIA_Radio_Active, *((int32_t *) msg->Level));
-
         // Wait for proceed or abort.
         inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
 
