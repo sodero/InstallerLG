@@ -123,6 +123,7 @@ Russian translation.
 
 @{B}0.1.0-alpha.50 (2020-NOT-YET)@{UB}
 - (welcome) default message added.
+- (welcome) resizing bug fixed.
 - Russian translation (Eugene Sobolev).
 - Italian translation updated (Samir Hawamdeh).
 - ?
