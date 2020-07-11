@@ -313,5 +313,5 @@ NOPRETEND
 ; NOPRETEND
 ;
 MSG_TTWELC
-FIXME (RUS): Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).
+Начинаем установку приложения %s. В процессе установки от вас потребуется принимать решения и делать выбор (исходя их ваших знаний платформы Амига).
 ; Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).
