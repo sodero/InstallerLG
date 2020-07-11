@@ -1,4 +1,4 @@
-## version $VER: InstallerLG.catalog 1.0 (20.09.2018)
+## version $VER: InstallerLG.catalog 1.0 (12.07.2020)
 ## codeset 0
 ## language deutsch
 ;
@@ -311,5 +311,5 @@ NOPRETEND
 ; NOPRETEND
 ;
 MSG_TTWELC
-FIXME (D): Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).
+Willkommen beim %s-Dienstprogramm. Bitte geben Sie an, wie die Installation ablaufen soll (basierend auf Ihren Kenntnissen über den Amiga-Computer).
 ; Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).
