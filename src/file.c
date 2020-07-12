@@ -1007,6 +1007,53 @@ static int32_t h_protect_set(entry_p contxt, const char *file, int32_t mask)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_copy_comment
+// Description: Copy file / directory comment.
+// Input:       entry_p contxt:    The execution context.
+//              const char *src:   File / directory comment source.
+//              const char *dst:   File / directory comment destination.
+// Return:      bool:              On success 'true', else 'false'.
+//------------------------------------------------------------------------------
+static bool h_copy_comment(entry_p contxt, const char *src, const char *dst)
+{
+    if(!src || !dst)
+    {
+        // Bad input.
+        return false;
+    }
+
+    #if defined(AMIGA) && !defined(LG_TEST)
+    struct FileInfoBlock *fib = (struct FileInfoBlock *)
+           AllocDosObject(DOS_FIB, NULL);
+
+    if(!fib && PANIC(contxt))
+    {
+        // Out of memory.
+        return false;
+    }
+
+    // Attempt to lock file or directory.
+    BPTR lock = (BPTR) Lock(src, ACCESS_READ);
+    bool done = false;
+
+    // Get comment from lock.
+    if(lock && Examine(lock, fib) && fib->fib_Comment)
+    {
+        done = SetComment(dst, fib->fib_Comment);
+    }
+
+    // Release lock and free info block.
+    UnLock(lock);
+    FreeDosObject(DOS_FIB, fib);
+
+    return done;
+    #else
+    // File comments don't exist on non Amigas.
+    return true;
+    #endif
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_copyfile_reset
 // Description: Reset icon position.
 // Input:       char *name: File / directory name.
@@ -1227,12 +1274,13 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
         }
     }
 
-    // Try to preserve file permissions.
+    // Preserve file permissions and comment.
     int32_t prm = 0;
 
     if(h_protect_get(contxt, src, &prm))
     {
-        h_protect_set(contxt, dst, prm);
+        (void) h_copy_comment(contxt, src, dst);
+        (void) h_protect_set(contxt, dst, prm);
     }
 
     // Reset error codes if necessary.
@@ -1510,9 +1558,9 @@ entry_p n_copyfiles(entry_p contxt)
             }
         }
 
-        // Preserve permissions of directories. This needs to be done after all
-        // files are copied / directories are created, otherwise we could make
-        // the copy fail by disabling write permissions on the fly.
+        // Preserve comments and permissions of directories. Permissions needs
+        // to be set after all files are copied / directories are created, or
+        // else we could make the copy fail by disabling write permissions.
         for(cur = tree; cur; cur = cur->next)
         {
             int32_t prm = 0;
@@ -1522,7 +1570,8 @@ entry_p n_copyfiles(entry_p contxt)
             if(h_exists(cur->name) == LG_DIR &&
                h_protect_get(contxt, cur->name, &prm))
             {
-                h_protect_set(contxt, cur->copy, prm);
+                (void) h_copy_comment(contxt, cur->name, cur->copy);
+                (void) h_protect_set(contxt, cur->copy, prm);
             }
         }
     }
