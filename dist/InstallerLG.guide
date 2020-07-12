@@ -127,6 +127,7 @@ Russian translation.
 - Russian translation (Eugene Sobolev).
 - Italian translation updated (Samir Hawamdeh).
 - German translation updated (Stefan Haubenthal).
+- (copyfiles) directory permissions are now preserved.
 - ?
 
 @{B}0.1.0-alpha.49 (2020-07-09)@{UB}
