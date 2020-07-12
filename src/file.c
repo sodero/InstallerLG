@@ -1509,6 +1509,22 @@ entry_p n_copyfiles(entry_p contxt)
                 grc = G_FALSE;
             }
         }
+
+        // Preserve permissions of directories. This needs to be done after all
+        // files are copied / directories are created, otherwise we could make
+        // the copy fail by disabling write permissions on the fly.
+        for(cur = tree; cur; cur = cur->next)
+        {
+            int32_t prm = 0;
+
+            // Only directories that exist (some might be skipped and the user
+            // might have aborted).
+            if(h_exists(cur->name) == LG_DIR &&
+               h_protect_get(contxt, cur->name, &prm))
+            {
+                h_protect_set(contxt, cur->copy, prm);
+            }
+        }
     }
 
     // GUI and event teardown.
