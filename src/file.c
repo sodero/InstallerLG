@@ -999,7 +999,7 @@ static bool h_protect_set(entry_p contxt, const char *file, int32_t mask)
         #endif
     }
     #else
-    chmod(file, h_perm_amiga_to_posix(mask));
+    (void) chmod(file, h_perm_amiga_to_posix(mask));
     #endif
 
     return true;
@@ -1153,7 +1153,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
         if(opt(contxt, OPT_FORCE) && !opt(contxt, OPT_ASKUSER))
         {
             // Unprotect file.
-            chmod(dst, POSIX_RWX_MASK);
+            (void) chmod(dst, POSIX_RWX_MASK);
         }
         else
         // Confirm if (askuser) unless we're running in novice mode and (force)
@@ -1164,7 +1164,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
             if(h_confirm(contxt, "", tr(S_OWRT), dst))
             {
                 // Unprotect file.
-                chmod(dst, POSIX_RWX_MASK);
+                (void) chmod(dst, POSIX_RWX_MASK);
             }
             else
             {
@@ -1422,7 +1422,7 @@ static bool h_makedir(entry_p contxt, char *dst)
     // Create icon if (infos) is set. Ignore errors.
     if(opt(contxt, OPT_INFOS))
     {
-        h_makedir_create_icon(contxt, dst);
+        (void) h_makedir_create_icon(contxt, dst);
     }
 
     return true;
@@ -1508,7 +1508,7 @@ entry_p n_copyfiles(entry_p contxt)
         // Allow overwriting (ignore volumes).
         if(dln && dst[dln - 1] != ':')
         {
-            chmod(dst, POSIX_RWX_MASK);
+            (void) chmod(dst, POSIX_RWX_MASK);
         }
     }
 
@@ -1988,7 +1988,7 @@ entry_p n_copylib(entry_p contxt)
     if(type == LG_NONE)
     {
         // Clang scan-build dead code false positive.
-#ifndef __clang_analyzer__
+        #ifndef __clang_analyzer__
         // Create non-existing directory.
         if(!h_makedir_path(dst))
         {
@@ -1996,7 +1996,7 @@ entry_p n_copylib(entry_p contxt)
             ERR(ERR_WRITE_DIR, dst);
             R_NUM(LG_FALSE);
         }
-#endif
+        #endif
         // Log the success.
         h_log(contxt, tr(S_CRTD), dst);
     }
@@ -2134,7 +2134,7 @@ static int32_t h_delete_file(entry_p contxt, const char *file)
     // If (force) is used, give permissions so that delete can succeed.
     if(opt(contxt, OPT_FORCE))
     {
-        chmod(file, POSIX_RWX_MASK);
+        (void) chmod(file, POSIX_RWX_MASK);
     }
     else
     {
@@ -2151,7 +2151,7 @@ static int32_t h_delete_file(entry_p contxt, const char *file)
                h_confirm(contxt, "", tr(S_DWRT), file))
             {
                 // Give permissions so that delete can succeed.
-                chmod(file, POSIX_RWX_MASK);
+                (void) chmod(file, POSIX_RWX_MASK);
             }
             else
             {
@@ -2215,7 +2215,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
 
     // Give permissions so that delete can succeed. No need to check the return
     // value since errors will be caught below.
-    chmod(name, POSIX_RWX_MASK);
+    (void) chmod(name, POSIX_RWX_MASK);
 
     if(rmdir(name))
     {
@@ -2238,7 +2238,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
                     if(path && h_exists(path) == LG_FILE)
                     {
                         // Delete it.
-                        h_delete_file(contxt, path);
+                        (void) h_delete_file(contxt, path);
                     }
 
                     // Free full path.
@@ -2268,7 +2268,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
                         if(path && h_exists(path) == LG_DIR)
                         {
                             // Recur into subdirectory.
-                            h_delete_dir(contxt, path);
+                            (void) h_delete_dir(contxt, path);
                         }
 
                         // Free full path.
@@ -2280,7 +2280,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
                 }
 
                 // Close the (by now, hopefully) empty dir.
-                closedir(dir);
+                (void) closedir(dir);
             }
 
             if(rmdir(name))
@@ -2314,7 +2314,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
     }
 
     // Set permissions so that delete can succeed.
-    chmod(info, POSIX_RWX_MASK);
+    (void) chmod(info, POSIX_RWX_MASK);
 
     // Delete the info file.
     if(!remove(info))
@@ -2673,7 +2673,7 @@ entry_p n_foreach(entry_p contxt)
         }
 
         // Done.
-        closedir(dir);
+        (void) closedir(dir);
     }
 
     if(err)
@@ -2726,7 +2726,7 @@ entry_p n_foreach(entry_p contxt)
             if(!skip)
             {
                 // Execute the code contained in the third argument.
-                invoke(C_ARG(3));
+                (void) invoke(C_ARG(3));
             }
         }
 
