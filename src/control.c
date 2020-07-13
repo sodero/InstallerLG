@@ -80,7 +80,7 @@ entry_p n_select(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
-// (while ...) (m = 0) and (until ...) (m = 1)
+// (while ...) (until == 'false') and (until ...) (until == 'true')
 //     helper / implementation
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
