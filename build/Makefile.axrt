@@ -18,7 +18,7 @@ $(EXE): $(OBJ) parser.o lexer.o $(STARTUP_OBJ) /usr/lib/x86_64-linux-gnu/axrt.ld
 	$(CC)  $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS)
 
 parser.o: parser.c
-	$(CC) $(CINC) $(CDEF) $(CGEN) -c $< -DYYERROR_VERBOSE
+	$(CC) $(CINC) $(CDEF) $(CGEN) -c $<
 
 lexer.o: lexer.c
 	$(CC) $(CINC) $(CDEF) $(CGEN) -D__AXRT__ -c $<
