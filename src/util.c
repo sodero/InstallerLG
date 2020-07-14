@@ -1070,53 +1070,28 @@ size_t buf_len(void)
 
 //------------------------------------------------------------------------------
 // Name:        dbg_alloc
-// Description: Used by DBG-ALLOC to provide more info when failing to
-//              allocate memory and to fail deliberately when testing.
+// Description: Used by DBG_ALLOC to provide more info when failing to allocate
+//              memory and to fail deliberately when testing.
 // Input:       int32_t line: Source code line.
 //              const char *file: Source code file.
 //              const char *func: Source code function.
 //              void *mem: Pointer to allocated memory.
 // Return:      void *: Pointer to allocated memory.
 //------------------------------------------------------------------------------
+#if defined(FAIL_LINE) && defined(FAIL_FILE)
 void *dbg_alloc(int32_t line, const char *file, const char *func, void *mem)
 {
-    // Fail deliberately if file or line defines are set.
-    #if defined(FAIL_LINE) || defined(FAIL_FILE)
-    const char *fail_file =
-    #ifdef FAIL_FILE
-    FAIL_FILE;
-    #else
-    NULL;
-    #endif
-    int32_t fail_line =
-    #ifdef FAIL_LINE
-    FAIL_LINE;
-    #else
-    0;
-    #endif
-
-    // Do we have a line number restriction?
-    if(!fail_line || line == fail_line)
+    // Fail deliberately if file and line defines match.
+    if(line == FAIL_LINE && !strcmp(file, FAIL_FILE))
     {
-        // Do we have a file restriction?
-        if(!fail_file || !strcmp(file, fail_file))
-        {
-            // Free memory and pass NULL to the calling function.
-            free(mem);
-            mem = NULL;
-        }
-    }
-    #endif
-
-    // Debug info.
-    if(!mem)
-    {
-        DBG("Out of memory in %s (%s) line %d\n", func, file, line);
+        free(mem);
+        return NULL;
     }
 
-    // Pass this on.
+    // No match. Pass this on.
     return mem;
 }
+#endif
 
 //------------------------------------------------------------------------------
 // Name:        native_exists

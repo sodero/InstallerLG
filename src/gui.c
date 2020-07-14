@@ -722,8 +722,8 @@ MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
     // NULL will disable the help bubble.
     set(my->Text, MUIA_ShortHelp, msg->Help);
 
-    // Wrap at 50 (less ad hoc?).
-    size_t cnt = strlen(src), len = 50;
+    // Wrap at 53 characters just like the CBM installer.
+    size_t cnt = strlen(src), len = 53;
 
     // Cap the size of the message.
     cnt = cnt < (sizeof(my->Buf) - 1) ? cnt : (sizeof(my->Buf) - 1);

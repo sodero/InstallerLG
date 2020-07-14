@@ -419,7 +419,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 
         // Build source <-> dest pair.
         node->name = DBG_ALLOC(h_tackon(contxt, src, f_nam));
-        node->copy = h_tackon(contxt, dst, h_fileonly(contxt, f_nam));
+        node->copy = DBG_ALLOC(h_tackon(contxt, dst, h_fileonly(contxt, f_nam)));
         node->type = h_exists(node->name);
 
         // Next file.
@@ -561,7 +561,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
             while(entry)
             {
                 // Create the source destination tuple
-                n_src = h_tackon(contxt, src, entry->d_name),
+                n_src = DBG_ALLOC(h_tackon(contxt, src, entry->d_name)),
                 n_dst = DBG_ALLOC(h_tackon(contxt, dst, entry->d_name));
 
                 // Out of memory?
@@ -575,7 +575,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                 if(pattern)
                 {
                     // Create full pattern temp buffer.
-                    char *pat = h_tackon(contxt, srt, str(pattern));
+                    char *pat = DBG_ALLOC(h_tackon(contxt, srt, str(pattern)));
 
                     // Out of memory?
                     if(!pat)
@@ -705,22 +705,23 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 
         if(head && file)
         {
-            n_src = DBG_ALLOC(strdup(src));
+            n_src = DBG_ALLOC(h_pathonly(src));
             n_dst = DBG_ALLOC(strdup(dst));
 
             if(n_src && n_dst)
             {
                 // The destination of the head element will be a directory
-                // even though the source is a file. We need somewhere to
-                // put the file.
+                // even though the source is a file (see h_pathonly() above.
+                // We need somewhere to put the file.
                 head->type = LG_DIR;
                 head->next = file;
                 head->name = n_src;
                 head->copy = n_dst;
 
                 // Create destination file path.
-                n_dst = h_tackon(contxt, dst, h_fileonly(contxt, src));
                 n_src = DBG_ALLOC(strdup(src));
+                n_dst = DBG_ALLOC(h_tackon(contxt, dst, h_fileonly(contxt,
+                                                                   src)));
 
                 if(n_src && n_dst)
                 {
@@ -745,8 +746,8 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                         if(font)
                         {
                             font->name = DBG_ALLOC(strdup(buf_get(B_KEY)));
-                            font->copy = h_tackon(contxt, dst,
-                                         h_fileonly(contxt, buf_get(B_KEY)));
+                            font->copy = DBG_ALLOC(h_tackon(contxt, dst,
+                                         h_fileonly(contxt, buf_get(B_KEY))));
 
                             // Add the font to the list.
                             if(font->name && font->copy)
@@ -999,6 +1000,8 @@ static bool h_protect_set(entry_p contxt, const char *file, int32_t mask)
         #endif
     }
     #else
+    // Please note that OWN, GRP and OTH information is lost with the Amiga
+    // format representation and that permissions will apply to all of them.
     (void) chmod(file, h_perm_amiga_to_posix(mask));
     #endif
 
@@ -1429,6 +1432,28 @@ static bool h_makedir(entry_p contxt, char *dst)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_preserve_dir_metainfo
+// Description: Attempt to preserve permissions and comments for a dir tree.
+// Input:       entry_p contxt:     The execution context.
+//              char *dst:          The directory.
+// Return:      bool:               'true' on succes, 'false' otherwise.
+//------------------------------------------------------------------------------
+static void h_preserve_metainfo(entry_p contxt, pnode_p cur)
+{
+    for(; cur; cur = cur->next)
+    {
+        int32_t prm = 0;
+
+        // Only directories. File meta info is preserved by h_copyfile().
+        if(cur->type == LG_DIR && h_protect_get(contxt, cur->name, &prm))
+        {
+            (void) h_copy_comment(contxt, cur->name, cur->copy);
+            (void) h_protect_set(contxt, cur->copy, prm);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
 // (copyfiles (prompt..) (help..) (source..) (dest..) (newname..) (choices..)
 //     (all) (pattern..) (files) (infos) (confirm..) (safe) (optional
 //     <option> <option> ...) (delopts <option> <option> ...) (nogauge))
@@ -1530,7 +1555,7 @@ entry_p n_copyfiles(entry_p contxt)
        cur->next->type == LG_FILE && !cur->next->next)
     {
         free(cur->next->copy);
-        cur->next->copy = h_tackon(contxt, dst, str(newname));
+        cur->next->copy = DBG_ALLOC(h_tackon(contxt, dst, str(newname)));
     }
 
     // Initialize GUI, set up file lists, events, and so on.
@@ -1560,19 +1585,7 @@ entry_p n_copyfiles(entry_p contxt)
         // Preserve comments and permissions of directories. Permissions needs
         // to be set after all files are copied / directories are created, or
         // else we could make the copy fail by disabling write permissions.
-        for(cur = tree; cur; cur = cur->next)
-        {
-            int32_t prm = 0;
-
-            // Only directories that exist (some might be skipped and the user
-            // might have aborted).
-            if(h_exists(cur->name) == LG_DIR &&
-               h_protect_get(contxt, cur->name, &prm))
-            {
-                (void) h_copy_comment(contxt, cur->name, cur->copy);
-                (void) h_protect_set(contxt, cur->copy, prm);
-            }
-        }
+        h_preserve_metainfo(contxt, tree);
     }
 
     // GUI and event teardown.
@@ -2002,9 +2015,9 @@ entry_p n_copylib(entry_p contxt)
     }
 
     // Destination file, old name and new path or new name and new path.
-    char *name = opt(contxt, OPT_NEWNAME) ?
-                 h_tackon(contxt, dst, str(opt(contxt, OPT_NEWNAME))) :
-                 DBG_ALLOC(h_tackon(contxt, dst, h_fileonly(contxt, src)));
+    char *name = opt(contxt, OPT_NEWNAME) ? DBG_ALLOC(h_tackon(contxt, dst,
+                 str(opt(contxt, OPT_NEWNAME)))) : DBG_ALLOC(h_tackon(contxt,
+                 dst, h_fileonly(contxt, src)));
 
     if(!name && PANIC(contxt))
     {
@@ -2232,7 +2245,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
                 while(entry)
                 {
                     // Create full path.
-                    char *path = h_tackon(contxt, name, entry->d_name);
+                    char *path = DBG_ALLOC(h_tackon(contxt, name, entry->d_name));
 
                     // Is it a file?
                     if(path && h_exists(path) == LG_FILE)
@@ -2262,7 +2275,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
                     #endif
                     {
                         // Create full path.
-                        char *path = h_tackon(contxt, name, entry->d_name);
+                        char *path = DBG_ALLOC(h_tackon(contxt, name, entry->d_name));
 
                         // Is it a directory?
                         if(path && h_exists(path) == LG_DIR)

@@ -61,7 +61,7 @@ $(EXE): $(OBJ) parser.o lexer.o
 	$(CC) $^ -o $@ $(LDLIBS)
 
 parser.o: parser.c
-	$(CC) $(CFLAGS) -c $< -DYYERROR_VERBOSE
+	$(CC) $(CFLAGS) -c $<
 
 lexer.o: lexer.c
 	$(CC) $(CINC) $(CDEF) $(CGEN) -c $<

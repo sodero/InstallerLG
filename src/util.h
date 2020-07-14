@@ -42,11 +42,13 @@ char *buf_get(const char *usr);
 char *buf_put(const char *usr);
 size_t buf_len(void);
 char *buf_raw(void);
-void *dbg_alloc(int32_t line, const char *file, const char *func, void *mem);
 entry_p native_exists(entry_p contxt, call_t func);
 size_t num_children(entry_p *vec);
 bool exists(entry_p entry);
 int32_t str_to_userlevel(const char *user, int32_t def);
+#if defined(FAIL_LINE) && defined(FAIL_FILE)
+void *dbg_alloc(int32_t line, const char *file, const char *func, void *mem);
+#endif
 
 //------------------------------------------------------------------------------
 // Utility macros.
@@ -61,7 +63,13 @@ int32_t str_to_userlevel(const char *user, int32_t def);
 #define C_ARG(X) contxt->children[(X) - 1]
 #define C_SYM(X) contxt->symbols[(X) - 1]
 #define B_KEY __func__
+
+#if defined(FAIL_LINE) && defined(FAIL_FILE)
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, __func__, M)
+#else
+#define DBG_ALLOC(M) M
+#endif
+
 #if defined(AMIGA)
 #define DBG_PRINT KPrintF
 #else
@@ -70,11 +78,11 @@ int32_t str_to_userlevel(const char *user, int32_t def);
 #define HERE DBG_PRINT("%s:%s:%d\n", __FILE__, __func__, __LINE__)
 #define THIS(X) DBG_PRINT("%p <- %s:%s:%d\n", X, __FILE__, __func__, __LINE__)
 #ifndef __clang_analyzer__
-#define C_SANE(N,O) if(!c_sane(contxt, N)) {(void) PANIC(contxt); return end();}\
-                    {entry_p op_ = O; if(op_ != NULL && opt(O,OPT_INIT) != NULL && DID_ERR)\
-                    {return end();}}
+#define C_SANE(N,O) if(!c_sane(contxt, N)) {(void) PANIC(contxt); \
+                    return end();}  {entry_p op_ = O; if(op_ != NULL &&\
+                    opt(O,OPT_INIT) != NULL && DID_ERR) {return end();}}
 #else
-#define C_SANE(N,O)
+#define C_SANE(N,O) if(O && opt(O, OPT_INIT) && DID_ERR) return end();
 #endif
 #define S_SANE(N) if(!s_sane(contxt, N)) {(void) PANIC(contxt); return end();}
 #ifdef __AROS__
