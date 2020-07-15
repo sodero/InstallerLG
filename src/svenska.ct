@@ -312,4 +312,4 @@ NOPRETEND
 ;
 MSG_TTWELC
 Välkommen till installationsprogrammet för %s. Vänligen välj hur installationen ska genomföras (med hänsyn till din erfarenhet av Amiga-datorn).
-; Välkommen till installationsprogrammet för %s. Vänligen välj hur installationen ska genomföras (med hänsyn till din erfarenhet av Amiga-datorn).
+; Welcome to the %s installation utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).

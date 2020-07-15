@@ -129,6 +129,7 @@ Russian translation.
 - German translation updated (Stefan Haubenthal).
 - (copyfiles) directory permissions are now preserved.
 - (copyfiles) directory and file comments are now preserved.
+- More relaxed symbol naming.
 - ?
 
 @{B}0.1.0-alpha.49 (2020-07-09)@{UB}

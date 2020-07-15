@@ -1435,8 +1435,8 @@ static bool h_makedir(entry_p contxt, char *dst)
 // Name:        h_preserve_dir_metainfo
 // Description: Attempt to preserve permissions and comments for a dir tree.
 // Input:       entry_p contxt:     The execution context.
-//              char *dst:          The directory.
-// Return:      bool:               'true' on succes, 'false' otherwise.
+//              pnode_p:            Head of directory tree list.
+// Return:      -
 //------------------------------------------------------------------------------
 static void h_preserve_metainfo(entry_p contxt, pnode_p cur)
 {
