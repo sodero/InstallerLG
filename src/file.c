@@ -361,6 +361,24 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_dir_special
+// Description: Determine whether 'dir' is something we should recur into when
+//              traversing directory trees.
+// Input:       const char * dir:   Name of directory. name.
+// Return:      bool:               If valid dir 'true', 'false' otherwise.
+//------------------------------------------------------------------------------
+static bool h_dir_special(const char *dir)
+{
+#ifndef AMIGA
+    // '.' and '..' aren't 'real' directories.
+    return !strcmp(dir, ".") || !strcmp(dir, "..");
+#else
+    // '.' and '..' are 'real' on Amiga.
+    return false;
+#endif
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_filetree
 // Description: Decl. needed by h_choices(). See description further down.
 //------------------------------------------------------------------------------
@@ -445,11 +463,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
         node = fonts ? h_suffix_append(contxt, node, "font") : node;
 
         // Traverse (old, if info or font) directory if applicable.
-        if(type == LG_DIR
-           #ifndef AMIGA
-           && strcmp(f_nam, ".") && strcmp(f_nam, "..")
-           #endif
-           )
+        if(type == LG_DIR && !h_dir_special(f_nam))
         {
             // Get tree of subdirectory. Don't promote (choices).
             node->next = h_filetree
@@ -629,12 +643,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                 if(type == LG_DIR)
                 {
                     // Unless the (files) option is set.
-                    if(!files
-                       #ifndef AMIGA
-                       && strcmp(entry->d_name, ".")
-                       && strcmp(entry->d_name, "..")
-                       #endif
-                      )
+                    if(!files && !h_dir_special(entry->d_name))
                     {
                         // Keep track of recursion depth.
                         static size_t dep;
@@ -1435,12 +1444,12 @@ static bool h_makedir(entry_p contxt, char *dst)
 // Name:        h_preserve_dir_metainfo
 // Description: Attempt to preserve permissions and comments for a dir tree.
 // Input:       entry_p contxt:     The execution context.
-//              pnode_p:            Head of directory tree list.
+//              pnode_p head:       Head of directory tree list.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_preserve_metainfo(entry_p contxt, pnode_p cur)
+static void h_preserve_metainfo(entry_p contxt, pnode_p head)
 {
-    for(; cur; cur = cur->next)
+    for(pnode_p cur = head; cur; cur = cur->next)
     {
         int32_t prm = 0;
 
@@ -2203,15 +2212,10 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
         return LG_FALSE;
     }
 
-    entry_p infos    = opt(contxt, OPT_INFOS),
-            force    = opt(contxt, OPT_FORCE),
-            askuser  = opt(contxt, OPT_ASKUSER),
-            all      = opt(contxt, OPT_ALL);
-
-    if(!force && !h_delete_perm(name))
+    if(!opt(contxt, OPT_FORCE) && !h_delete_perm(name))
     {
         // Do we need to ask for confirmation?
-        if(!askuser)
+        if(!opt(contxt, OPT_ASKUSER))
         {
             // Exit silently.
             return LG_FALSE;
@@ -2232,77 +2236,75 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
 
     if(rmdir(name))
     {
-        if(all)
+        if(!opt(contxt, OPT_ALL))
         {
-            DIR *dir = opendir(name);
-
-            // Permission to read?
-            if(dir)
-            {
-                struct dirent *entry = readdir(dir);
-
-                // Find all files in the directory.
-                while(entry)
-                {
-                    // Create full path.
-                    char *path = DBG_ALLOC(h_tackon(contxt, name, entry->d_name));
-
-                    // Is it a file?
-                    if(path && h_exists(path) == LG_FILE)
-                    {
-                        // Delete it.
-                        (void) h_delete_file(contxt, path);
-                    }
-
-                    // Free full path.
-                    free(path);
-
-                    // Get next entry.
-                    entry = readdir(dir);
-                }
-
-                // Restart from the beginning.
-                rewinddir(dir);
-                entry = readdir(dir);
-
-                // Find all subdirectories in the directory.
-                while(entry)
-                {
-                    #ifndef AMIGA
-                    // Filter out the magic on non-Amigas.
-                    if(strcmp(entry->d_name, ".") &&
-                       strcmp(entry->d_name, ".."))
-                    #endif
-                    {
-                        // Create full path.
-                        char *path = DBG_ALLOC(h_tackon(contxt, name, entry->d_name));
-
-                        // Is it a directory?
-                        if(path && h_exists(path) == LG_DIR)
-                        {
-                            // Recur into subdirectory.
-                            (void) h_delete_dir(contxt, path);
-                        }
-
-                        // Free full path.
-                        free(path);
-                    }
-
-                    // Get next entry.
-                    entry = readdir(dir);
-                }
-
-                // Close the (by now, hopefully) empty dir.
-                (void) closedir(dir);
-            }
-
-            if(rmdir(name))
-            {
-                // Fail silently.
-                return LG_FALSE;
-            }
+            // Fail silently.
+            return LG_FALSE;
         }
-        else
+
+        DIR *dir = opendir(name);
+
+        // Permission to read?
+        if(dir)
+        {
+            struct dirent *entry = readdir(dir);
+
+            // Find all files in the directory.
+            while(entry)
+            {
+                // Create full path.
+                char *path = DBG_ALLOC(h_tackon(contxt, name, entry->d_name));
+
+                // Is it a file?
+                if(path && h_exists(path) == LG_FILE)
+                {
+                    // Delete it.
+                    (void) h_delete_file(contxt, path);
+                }
+
+                // Free full path.
+                free(path);
+
+                // Get next entry.
+                entry = readdir(dir);
+            }
+
+            // Restart from the beginning.
+            rewinddir(dir);
+            entry = readdir(dir);
+
+            // Find all subdirectories in the directory.
+            while(entry)
+            {
+                if(h_dir_special(entry->d_name))
+                {
+                    // Get next entry.
+                    entry = readdir(dir);
+                    continue;
+                }
+
+                // Create full path.
+                char *path = DBG_ALLOC(h_tackon(contxt, name, entry->d_name));
+
+                // Is it a directory?
+                if(path && h_exists(path) == LG_DIR)
+                {
+                    // Recur into subdirectory.
+                    (void) h_delete_dir(contxt, path);
+                }
+
+                // Free full path.
+                free(path);
+
+                // Get next entry.
+                entry = readdir(dir);
+            }
+
+            // Close the (by now, hopefully) empty dir.
+            (void) closedir(dir);
+        }
+
+        if(rmdir(name))
         {
             // Fail silently.
             return LG_FALSE;
@@ -2310,7 +2312,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
     }
 
     // Delete the icon as well?
-    if(!infos)
+    if(!opt(contxt, OPT_INFOS))
     {
         // No, we're done.
         return LG_TRUE;
@@ -2609,10 +2611,7 @@ entry_p n_foreach(entry_p contxt)
                 // Name of file / dir.
                 const char *name = ent->d_name;
 
-                #ifndef AMIGA
-                // Filter out the magic on non-Amigas.
-                if(strcmp(name, ".") && strcmp(name, ".."))
-                #endif
+                if(!h_dir_special(name))
                 {
                     #if defined(AMIGA) && !defined(LG_TEST)
                     // The dir is not empty, we should be able to go all the way
@@ -3230,91 +3229,87 @@ entry_p n_startup(entry_p contxt)
     free(pst);
     free(cmd);
 
-    // If we have a buffer everything wen't fine above. Go ahead and write
-    // buffer to file.
-    if(buf)
+    // No buffer == I/O error / or OOM (then we already have a PANIC).
+    if(!buf)
     {
-        // Use a temporary file to make sure that we don't mess up the current
-        // file if disk space becomes a problem, the system crashes, the power
-        // is lost and so on and so forth.
-        size_t tln = strlen(fln) + sizeof(".XXXXXX\0");
-        char *tmp = DBG_ALLOC(calloc(tln, 1));
+        ERR(ERR_READ_FILE, fln);
+        R_NUM(LG_TRUE);
+    }
 
-        if(tmp)
+    // Use a temporary file to make sure that we don't mess up the current file
+    // if disk space becomes a problem, the system crashes, the power is lost
+    // and so on.
+    size_t tln = strlen(fln) + sizeof(".XXXXXX\0");
+    char *tmp = DBG_ALLOC(calloc(tln, 1));
+
+    if(tmp)
+    {
+        // Create temporary file.
+        snprintf(tmp, tln, "%s.XXXXXX", fln);
+        FILE *file = fdopen(mkstemp(tmp), "w+");
+
+        if(file)
         {
-            // Create temporary file.
-            snprintf(tmp, tln, "%s.XXXXXX", fln);
-            FILE *file = fdopen(mkstemp(tmp), "w+");
-
-            if(file)
+            // Write everything to the temporary file at once.
+            if(fputs(buf, file) == EOF)
             {
-                // Write everything to the temporary file at once.
-                if(fputs(buf, file) == EOF)
+                // Could not write to disk. The old file is still intact.
+                h_fclose(&file);
+            }
+            else
+            {
+                // Close file and release buffer.
+                h_fclose(&file);
+                free(buf);
+                buf = NULL;
+
+                // Open the target file just to make sure that we have write
+                // permissions.
+                file = h_fopen(contxt, fln, "a", false);
+
+                if(file)
                 {
-                    // Could not write to disk. The old file is still intact.
+                    // Close it immediately, we're not going to write directly
+                    // to it.
                     h_fclose(&file);
+
+                    // Do a less un-atomic write to the real file by renaming
+                    // the temporary file.
+                    if(!rename(tmp, fln))
+                    {
+                        // We're done.
+                        free(tmp);
+                        tmp = NULL;
+                        D_NUM = LG_TRUE;
+                    }
                 }
                 else
                 {
-                    // Close file and release buffer.
-                    h_fclose(&file);
-                    free(buf);
-                    buf = NULL;
-
-                    // Open the target file just to make sure that we have
-                    // write permissions.
-                    file = h_fopen(contxt, fln, "a", false);
-
-                    if(file)
+                    // We aren't allowed to write data to the target file so we
+                    // need to clean up temp file.
+                    if(remove(tmp))
                     {
-                        // Close it immediately, we're not going to write
-                        // directly to it.
-                        h_fclose(&file);
-
-                        // Do a less un-atomic write to the real file by
-                        // renaming the temporary file.
-                        if(!rename(tmp, fln))
-                        {
-                            // We're done.
-                            free(tmp);
-                            tmp = NULL;
-                            D_NUM = LG_TRUE;
-                        }
-                    }
-                    else
-                    {
-                        // We aren't allowed to write data to the target
-                        // file so we need to clean up temp file.
-                        if(remove(tmp))
-                        {
-                            ERR(ERR_WRITE_FILE, tmp);
-                        }
+                        ERR(ERR_WRITE_FILE, tmp);
                     }
                 }
             }
-
-            // If we haven't released tmp by now, we failed when attempting
-            // one of the write operations above.
-            if(tmp)
-            {
-                ERR(ERR_WRITE_FILE, fln);
-                free(tmp);
-            }
         }
-        else
+
+        // If we haven't released tmp by now, we failed when attempting one of
+        // the write operations above.
+        if(tmp)
         {
-            PANIC(contxt);
+            ERR(ERR_WRITE_FILE, fln);
+            free(tmp);
         }
-
-        // We no longer need the buffer holding the new file contents.
-        free(buf);
     }
     else
     {
-        // No buffer == read problem, or out of memory but then we already
-        // have a PANIC.
-        ERR(ERR_READ_FILE, fln);
+        PANIC(contxt);
     }
+
+    // We no longer need the buffer holding the new file contents.
+    free(buf);
 
     // Success, failure or out of memory.
     R_CUR;
