@@ -1074,15 +1074,14 @@ size_t buf_len(void)
 //              memory and to fail deliberately when testing.
 // Input:       int32_t line: Source code line.
 //              const char *file: Source code file.
-//              const char *func: Source code function.
 //              void *mem: Pointer to allocated memory.
-// Return:      void *: Pointer to allocated memory.
+// Return:      void *: Pointer to allocated memory or NULL.
 //------------------------------------------------------------------------------
-#if defined(FAIL_LINE) && defined(FAIL_FILE)
-void *dbg_alloc(int32_t line, const char *file, const char *func, void *mem)
+#if defined(FAIL_LINE_ALLOC) && defined(FAIL_FILE_ALLOC)
+void *dbg_alloc(int32_t line, const char *file, void *mem)
 {
     // Fail deliberately if file and line defines match.
-    if(line == FAIL_LINE && !strcmp(file, FAIL_FILE))
+    if(line == FAIL_LINE_ALLOC && !strcmp(file, FAIL_FILE_ALLOC))
     {
         free(mem);
         return NULL;
@@ -1090,6 +1089,30 @@ void *dbg_alloc(int32_t line, const char *file, const char *func, void *mem)
 
     // No match. Pass this on.
     return mem;
+}
+#endif
+
+//------------------------------------------------------------------------------
+// Name:        dbg_fopen
+// Description: Used by DBG_FOPEN to provide more info when failing to open
+//              files and to fail deliberately when testing.
+// Input:       int32_t line: Source code line.
+//              const char *file: Source code file.
+//              FILE *hand: File handle.
+// Return:      FILE *: File handle or NULL.
+//------------------------------------------------------------------------------
+#if defined(FAIL_LINE_FOPEN) && defined(FAIL_FILE_FOPEN)
+FILE *dbg_fopen(int32_t line, const char *file, FILE *hand)
+{
+    // Fail deliberately if file and line defines match.
+    if(hand && line == FAIL_LINE_FOPEN && !strcmp(file, FAIL_FILE_FOPEN))
+    {
+        fclose(hand);
+        return NULL;
+    }
+
+    // No match. Pass this on.
+    return hand;
 }
 #endif
 

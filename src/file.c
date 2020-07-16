@@ -1134,7 +1134,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     }
 
     static char buf[BUFSIZ];
-    FILE *file = h_fopen(contxt, src, "r", false);
+    FILE *file = DBG_FOPEN(h_fopen(contxt, src, "r", false));
     size_t cnt = file ? fread(buf, 1, BUFSIZ, file) : 0;
     int err = file ? ferror(file) : 0;
 
@@ -1188,7 +1188,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     }
 
     // Create / overwrite file.
-    FILE *dest = h_fopen(contxt, dst, "w", false);
+    FILE *dest = DBG_FOPEN(h_fopen(contxt, dst, "w", false));
 
     if(!dest)
     {
@@ -1337,7 +1337,7 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
     // Get the default drawer icon from the OS.
     struct DiskObject *obj = (struct DiskObject *) GetDefDiskObject(WBDRAWER);
     #else
-    FILE *obj = h_fopen(contxt, h_suffix(dst, "info"), "w", true);
+    FILE *obj = DBG_FOPEN(h_fopen(contxt, h_suffix(dst, "info"), "w", true));
     #endif
 
     // Bail out if we can't open the default icon.
@@ -3124,18 +3124,18 @@ entry_p n_startup(entry_p contxt)
     if(pre && pst)
     {
         // We don't need to write yet.
-        FILE *file = h_fopen(contxt, fln, "r", false);
+        FILE *file = DBG_FOPEN(h_fopen(contxt, fln, "r", false));
 
         // If the file doesn't exist, try to create it.
         if(!file && h_exists(fln) == LG_NONE)
         {
-            file = h_fopen(contxt, fln, "w", false);
+            file = DBG_FOPEN(h_fopen(contxt, fln, "w", false));
 
             // If successful, close and reopen as read only.
             if(file)
             {
                 h_fclose(&file);
-                file = h_fopen(contxt, fln, "r", false);
+                file = DBG_FOPEN(h_fopen(contxt, fln, "r", false));
             }
         }
 
@@ -3246,7 +3246,7 @@ entry_p n_startup(entry_p contxt)
     {
         // Create temporary file.
         snprintf(tmp, tln, "%s.XXXXXX", fln);
-        FILE *file = fdopen(mkstemp(tmp), "w+");
+        FILE *file = DBG_FOPEN(fdopen(mkstemp(tmp), "w+"));
 
         if(file)
         {
@@ -3265,7 +3265,7 @@ entry_p n_startup(entry_p contxt)
 
                 // Open the target file just to make sure that we have write
                 // permissions.
-                file = h_fopen(contxt, fln, "a", false);
+                file = DBG_FOPEN(h_fopen(contxt, fln, "a", false));
 
                 if(file)
                 {
@@ -3378,7 +3378,7 @@ FILE *h_fopen(entry_p contxt, const char *name, const char *mode, bool force)
     if(h_exists(name) == LG_NONE)
     {
         // Create file if it doesn't exist.
-        return fopen(name, mode);
+        return DBG_FOPEN(fopen(name, mode));
     }
 
     int32_t prm = 0;
@@ -3400,7 +3400,7 @@ FILE *h_fopen(entry_p contxt, const char *name, const char *mode, bool force)
     if(perm || (force && !get_num(contxt, "@strict") &&
        h_protect_set(contxt, name, prm)))
     {
-        return fopen(name, mode);
+        return DBG_FOPEN(fopen(name, mode));
     }
 
     // Couldn't set file permissions.
@@ -3428,7 +3428,7 @@ static int32_t h_textfile_append(entry_p contxt, const char *name)
     // Append without include truncates / creates a new file.
     const char *mode = opt(contxt, OPT_INCLUDE) ? "a" : "w";
 
-    FILE *file = h_fopen(contxt, name, mode, true);
+    FILE *file = DBG_FOPEN(h_fopen(contxt, name, mode, true));
 
     if(!file)
     {
@@ -3488,8 +3488,8 @@ static int32_t h_textfile_include(entry_p contxt, const char *name)
     }
 
     // Try to open files, with force (non-strict mode only) if necessary.
-    FILE *finc = h_fopen(contxt, incl, "r", true),
-         *fdst = h_fopen(contxt, name, "w", true);
+    FILE *finc = DBG_FOPEN(h_fopen(contxt, incl, "r", true)),
+         *fdst = DBG_FOPEN(h_fopen(contxt, name, "w", true));
 
     if(!finc || !fdst)
     {
@@ -3978,7 +3978,8 @@ void h_log(entry_p contxt, const char *fmt, ...)
     }
 
     // Use the log file set in init(..) or by the user.
-    FILE *file = h_fopen(contxt, get_str(contxt, "@log-file"), "a", true);
+    FILE *file = DBG_FOPEN(h_fopen(contxt, get_str(contxt, "@log-file"), "a",
+                           true));
     int cnt = -1;
 
     if(file)

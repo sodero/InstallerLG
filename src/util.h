@@ -46,8 +46,15 @@ entry_p native_exists(entry_p contxt, call_t func);
 size_t num_children(entry_p *vec);
 bool exists(entry_p entry);
 int32_t str_to_userlevel(const char *user, int32_t def);
-#if defined(FAIL_LINE) && defined(FAIL_FILE)
-void *dbg_alloc(int32_t line, const char *file, const char *func, void *mem);
+
+//------------------------------------------------------------------------------
+// Fault injection functions.
+//------------------------------------------------------------------------------
+#if defined(FAIL_LINE_ALLOC) && defined(FAIL_FILE_ALLOC)
+void *dbg_alloc(int32_t line, const char *file, void *mem);
+#endif
+#if defined(FAIL_LINE_FOPEN) && defined(FAIL_FILE_FOPEN)
+FILE *dbg_fopen(int32_t line, const char *file, FILE *hand);
 #endif
 
 //------------------------------------------------------------------------------
@@ -64,12 +71,16 @@ void *dbg_alloc(int32_t line, const char *file, const char *func, void *mem);
 #define C_SYM(X) contxt->symbols[(X) - 1]
 #define B_KEY __func__
 
-#if defined(FAIL_LINE) && defined(FAIL_FILE)
-#define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, __func__, M)
+#if defined(FAIL_LINE_ALLOC) && defined(FAIL_FILE_ALLOC)
+#define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, M)
 #else
 #define DBG_ALLOC(M) M
 #endif
-
+#if defined(FAIL_LINE_FOPEN) && defined(FAIL_FILE_FOPEN)
+#define DBG_FOPEN(F) dbg_fopen(__LINE__, __FILE__, F)
+#else
+#define DBG_FOPEN(F) F
+#endif
 #if defined(AMIGA)
 #define DBG_PRINT KPrintF
 #else
