@@ -675,7 +675,7 @@ entry_p n_getsize(entry_p contxt)
     C_SANE(1, NULL);
 
     // Open the file in read only mode.
-    FILE *file = h_fopen(contxt, str(C_ARG(1)), "r", false);
+    FILE *file = DBG_FOPEN(h_fopen(contxt, str(C_ARG(1)), "r", false));
 
     if(file)
     {
@@ -709,7 +709,7 @@ entry_p n_getsum(entry_p contxt)
     C_SANE(1, NULL);
 
     const char *name = str(C_ARG(1));
-    FILE *file = h_fopen(contxt, name, "r", false);
+    FILE *file = DBG_FOPEN(h_fopen(contxt, name, "r", false));
 
     if(file)
     {
@@ -900,7 +900,7 @@ int32_t h_getversion_file(const char *name)
     #endif
 
     // Attempt to open file.
-    file = h_fopen(end(), name, "r", false);
+    file = DBG_FOPEN(h_fopen(end(), name, "r", false));
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // Restore auto request.
