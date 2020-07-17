@@ -22,11 +22,13 @@ addr_line=$2
 shift 2
 
 echo "---------------------------------------------------------------------"
-echo "MALLOC fault injection in $alloc_file line $alloc_line"
-echo "FOPEN file fault injection in $fopen_file line $fopen_line"
-echo "DOPEN file fault injection in $dopen_file line $dopen_line"
-echo "ZERO file fault injection in $zero_file line $zero_line"
-echo "ADDR file fault injection in $addr_file line $addr_line"
+echo "Fault injection"
+echo "---------------------------------------------------------------------"
+echo "MALLOC $alloc_file:$alloc_line"
+echo "FOPEN $fopen_file:$fopen_line"
+echo "DOPEN $dopen_file:$dopen_line"
+echo "ZERO $zero_file:$zero_line"
+echo "ADDR $addr_file:$addr_line"
 echo "---------------------------------------------------------------------"
 make clean
 make CFLAGS="-I . -I ../src -g -std=c99 -D_DEFAULT_SOURCE -D_GNU_SOURCE -D__AMIGADATE__='\"23.07.1985\"' -DFAIL_LINE_ALLOC=$alloc_line -DFAIL_FILE_ALLOC='\"$alloc_file\"' -DFAIL_LINE_FOPEN=$fopen_line -DFAIL_FILE_FOPEN='\"$fopen_file\"' -DFAIL_LINE_DOPEN=$dopen_line -DFAIL_FILE_DOPEN='\"$dopen_file\"' -DFAIL_LINE_ZERO=$zero_line -DFAIL_FILE_ZERO='\"$zero_file\"' -DFAIL_LINE_ADDR=$addr_line -DFAIL_FILE_ADDR='\"$addr_file\"'"
