@@ -11,6 +11,7 @@
 #define UTIL_H_
 
 #include "types.h"
+#include <dirent.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
