@@ -3381,6 +3381,11 @@ void h_fclose(FILE **file)
 //------------------------------------------------------------------------------
 FILE *h_fopen(entry_p contxt, const char *name, const char *mode, bool force)
 {
+    if(!name || !mode)
+    {
+        return NULL;
+    }
+
     if(h_exists(name) == LG_DIR)
     {
         // Don't open directories.
