@@ -494,6 +494,21 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_dclose
+// Description: Safe directory close.
+// Input:       DIR **dir:     Pointer to directory handle.
+// Return:      -
+//------------------------------------------------------------------------------
+static void h_dclose(DIR **dir)
+{
+    if(dir && *dir)
+    {
+        (void) closedir(*dir);
+        *dir = NULL;
+    }
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_filetree
 // Description: Generate a complete file / directory tree with source and
 //              destination tuples. Used by n_copyfiles.
@@ -700,7 +715,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
         }
 
         // No more entries.
-        closedir(dir);
+        h_dclose(&dir);
 
         // The list is complete.
         return head;
@@ -1141,10 +1156,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     if(!file || err)
     {
         // The source handle might be open.
-        if(file)
-        {
-            h_fclose(&file);
-        }
+        h_fclose(&file);
 
         if(opt(contxt, OPT_NOFAIL))
         {
@@ -2301,7 +2313,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
             }
 
             // Close the (by now, hopefully) empty dir.
-            (void) closedir(dir);
+            h_dclose(&dir);
         }
 
         if(rmdir(name))
@@ -2685,7 +2697,7 @@ entry_p n_foreach(entry_p contxt)
         }
 
         // Done.
-        (void) closedir(dir);
+        h_dclose(&dir);
     }
 
     if(err)
