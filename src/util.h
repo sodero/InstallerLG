@@ -48,13 +48,43 @@ bool exists(entry_p entry);
 int32_t str_to_userlevel(const char *user, int32_t def);
 
 //------------------------------------------------------------------------------
-// Fault injection functions.
+// Fault injection functions / macros.
 //------------------------------------------------------------------------------
 #if defined(FAIL_LINE_ALLOC) && defined(FAIL_FILE_ALLOC)
 void *dbg_alloc(int32_t line, const char *file, void *mem);
 #endif
 #if defined(FAIL_LINE_FOPEN) && defined(FAIL_FILE_FOPEN)
 FILE *dbg_fopen(int32_t line, const char *file, FILE *hand);
+#endif
+#if defined(FAIL_LINE_DOPEN) && defined(FAIL_FILE_DOPEN)
+DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
+#endif
+#if defined(FAIL_LINE_ZERO) && defined(FAIL_FILE_ZERO)
+#define DBG_ZERO(W) ((__LINE__ == FAIL_LINE_ZERO && \
+                      !strcmp(__FILE__,  FAIL_FILE_ZERO)) ? 1 : (W))
+#else
+#define DBG_ZERO(W) W
+#endif
+#if defined(FAIL_LINE_ADDR) && defined(FAIL_FILE_ADDR)
+#define DBG_ADDR(W) ((__LINE__ == FAIL_LINE_ADDR && \
+                      !strcmp(__FILE__,  FAIL_FILE_ADDR)) ? NULL : (W))
+#else
+#define DBG_ADDR(W) W
+#endif
+#if defined(FAIL_LINE_ALLOC) && defined(FAIL_FILE_ALLOC)
+#define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, M)
+#else
+#define DBG_ALLOC(M) M
+#endif
+#if defined(FAIL_LINE_FOPEN) && defined(FAIL_FILE_FOPEN)
+#define DBG_FOPEN(F) dbg_fopen(__LINE__, __FILE__, F)
+#else
+#define DBG_FOPEN(F) F
+#endif
+#if defined(FAIL_LINE_DOPEN) && defined(FAIL_FILE_DOPEN)
+#define DBG_DOPEN(F) dbg_dopen(__LINE__, __FILE__, F)
+#else
+#define DBG_DOPEN(F) F
 #endif
 
 //------------------------------------------------------------------------------
@@ -70,17 +100,6 @@ FILE *dbg_fopen(int32_t line, const char *file, FILE *hand);
 #define C_ARG(X) contxt->children[(X) - 1]
 #define C_SYM(X) contxt->symbols[(X) - 1]
 #define B_KEY __func__
-
-#if defined(FAIL_LINE_ALLOC) && defined(FAIL_FILE_ALLOC)
-#define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, M)
-#else
-#define DBG_ALLOC(M) M
-#endif
-#if defined(FAIL_LINE_FOPEN) && defined(FAIL_FILE_FOPEN)
-#define DBG_FOPEN(F) dbg_fopen(__LINE__, __FILE__, F)
-#else
-#define DBG_FOPEN(F) F
-#endif
 #if defined(AMIGA)
 #define DBG_PRINT KPrintF
 #else
@@ -99,6 +118,7 @@ FILE *dbg_fopen(int32_t line, const char *file, FILE *hand);
 #ifdef __AROS__
 #define B2CSTR(S) AROS_BSTR_ADDR(S)
 #else
-#define B2CSTR(S) (*((char *) BADDR(S)) ? (((char *) BADDR(S)) + 1) : ((char *) BADDR(S)))
+#define B2CSTR(S) (*((char *) BADDR(S)) ? (((char *) BADDR(S)) + 1) : \
+                    ((char *) BADDR(S)))
 #endif
 #endif

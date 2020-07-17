@@ -182,7 +182,7 @@ static int32_t h_exists_posix_type(const char *name)
 {
     struct stat fst;
 
-    if(stat(name, &fst))
+    if(DBG_ZERO(stat(name, &fst)))
     {
         // No such file or directory.
         return LG_NONE;
@@ -494,6 +494,21 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 }
 
 //------------------------------------------------------------------------------
+// Name:        h_dclose
+// Description: Safe directory close.
+// Input:       DIR **dir:     Pointer to directory handle.
+// Return:      -
+//------------------------------------------------------------------------------
+static void h_dclose(DIR **dir)
+{
+    if(dir && *dir)
+    {
+        (void) closedir(*dir);
+        *dir = NULL;
+    }
+}
+
+//------------------------------------------------------------------------------
 // Name:        h_filetree
 // Description: Generate a complete file / directory tree with source and
 //              destination tuples. Used by n_copyfiles.
@@ -545,7 +560,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
     // Is source a directory?
     if(type == LG_DIR)
     {
-        DIR *dir = opendir(src);
+        DIR *dir = DBG_DOPEN(opendir(src));
 
         if(!dir)
         {
@@ -560,7 +575,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 
         if(node)
         {
-            struct dirent *entry = readdir(dir);
+            struct dirent *entry = DBG_ADDR(readdir(dir));
 
             // The type of the first element is known; it's a directory.
             node->name = DBG_ALLOC(strdup(src));
@@ -695,12 +710,12 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                 }
 
                 // Get next entry.
-                entry = readdir(dir);
+                entry = DBG_ADDR(readdir(dir));
             }
         }
 
         // No more entries.
-        closedir(dir);
+        h_dclose(&dir);
 
         // The list is complete.
         return head;
@@ -934,7 +949,7 @@ static bool h_protect_get_posix(const char *file, int32_t *mask)
     struct stat fst;
 
     // Get POSIX file / dir permission.
-    if(stat(file, &fst))
+    if(DBG_ZERO(stat(file, &fst)))
     {
         // Could not get file / dir permission.
         return false;
@@ -1136,15 +1151,12 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     static char buf[BUFSIZ];
     FILE *file = DBG_FOPEN(h_fopen(contxt, src, "r", false));
     size_t cnt = file ? fread(buf, 1, BUFSIZ, file) : 0;
-    int err = file ? ferror(file) : 0;
+    int err = file ? DBG_ZERO(ferror(file)) : 0;
 
     if(!file || err)
     {
         // The source handle might be open.
-        if(file)
-        {
-            h_fclose(&file);
-        }
+        h_fclose(&file);
 
         if(opt(contxt, OPT_NOFAIL))
         {
@@ -1159,7 +1171,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     }
 
     // Is there an existing destination file that is write protected?
-    if(!access(dst, F_OK) && access(dst, W_OK))
+    if(!DBG_ZERO(access(dst, F_OK)) && DBG_ZERO(access(dst, W_OK)))
     {
         // No need to ask if only (force).
         if(opt(contxt, OPT_FORCE) && !opt(contxt, OPT_ASKUSER))
@@ -1408,7 +1420,7 @@ static bool h_makedir_path(char *dst)
     buf_put(B_KEY);
 
     // The path as a whole exists or the final directory needs to be created.
-    return h_exists(dst) == LG_DIR || !mkdir(dst, 0777);
+    return h_exists(dst) == LG_DIR || !DBG_ZERO(mkdir(dst, 0777));
 }
 
 //------------------------------------------------------------------------------
@@ -2086,7 +2098,7 @@ static int32_t h_delete_info(entry_p contxt, const char *file)
         // Set write permission and delete file.
         mode_t perm = POSIX_WRITE_MASK;
 
-        if(chmod(info, perm) || remove(info))
+        if(DBG_ZERO(chmod(info, perm)) || DBG_ZERO(remove(info)))
         {
             ERR(ERR_DELETE_FILE, info);
             return LG_FALSE;
@@ -2134,7 +2146,7 @@ static bool h_delete_perm(const char *name)
     return perm;
     #else
     // Proper delete protection doesn't exist on non Amigas.
-    return access(name, W_OK) == 0;
+    return DBG_ZERO(access(name, W_OK)) == 0;
     #endif
 }
 
@@ -2234,7 +2246,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
     // value since errors will be caught below.
     (void) chmod(name, POSIX_RWX_MASK);
 
-    if(rmdir(name))
+    if(DBG_ZERO(rmdir(name)))
     {
         if(!opt(contxt, OPT_ALL))
         {
@@ -2242,12 +2254,12 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
             return LG_FALSE;
         }
 
-        DIR *dir = opendir(name);
+        DIR *dir = DBG_DOPEN(opendir(name));
 
         // Permission to read?
         if(dir)
         {
-            struct dirent *entry = readdir(dir);
+            struct dirent *entry = DBG_ADDR(readdir(dir));
 
             // Find all files in the directory.
             while(entry)
@@ -2266,12 +2278,12 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
                 free(path);
 
                 // Get next entry.
-                entry = readdir(dir);
+                entry = DBG_ADDR(readdir(dir));
             }
 
             // Restart from the beginning.
             rewinddir(dir);
-            entry = readdir(dir);
+            entry = DBG_ADDR(readdir(dir));
 
             // Find all subdirectories in the directory.
             while(entry)
@@ -2279,7 +2291,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
                 if(h_dir_special(entry->d_name))
                 {
                     // Get next entry.
-                    entry = readdir(dir);
+                    entry = DBG_ADDR(readdir(dir));
                     continue;
                 }
 
@@ -2297,14 +2309,14 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
                 free(path);
 
                 // Get next entry.
-                entry = readdir(dir);
+                entry = DBG_ADDR(readdir(dir));
             }
 
             // Close the (by now, hopefully) empty dir.
-            (void) closedir(dir);
+            h_dclose(&dir);
         }
 
-        if(rmdir(name))
+        if(DBG_ZERO(rmdir(name)))
         {
             // Fail silently.
             return LG_FALSE;
@@ -2332,7 +2344,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
     (void) chmod(info, POSIX_RWX_MASK);
 
     // Delete the info file.
-    if(!remove(info))
+    if(!DBG_ZERO(remove(info)))
     {
         h_log(contxt, tr(S_DLTD), info);
         return LG_TRUE;
@@ -2359,8 +2371,7 @@ static int32_t h_delete_pattern(entry_p contxt, const char *pat)
 
     // Pattern matching is only done on Amiga systems in non test mode.
     #if defined(AMIGA) && !defined(LG_TEST)
-    struct AnchorPath *apt =
-        DBG_ALLOC(calloc(1, sizeof(struct AnchorPath) + PATH_MAX));
+    struct AnchorPath *apt = calloc(1, sizeof(struct AnchorPath) + PATH_MAX);
 
     if(!apt && PANIC(contxt))
     {
@@ -2571,7 +2582,7 @@ entry_p n_foreach(entry_p contxt)
 
     // Open dir and assume failure.
     const char *dname = str(C_ARG(1));
-    DIR *dir = opendir(dname);
+    DIR *dir = DBG_DOPEN(opendir(dname));
     pnode_p top = NULL;
     bool err = true;
 
@@ -2580,10 +2591,10 @@ entry_p n_foreach(entry_p contxt)
     {
         // Use global buffer.
         char *cwd = buf_raw();
-        struct dirent *ent = readdir(dir);
+        struct dirent *ent = DBG_ADDR(readdir(dir));
 
         // Save current working directory and enter the directory <drawer name>
-        if(getcwd(cwd, buf_len()) == cwd && !chdir(dname))
+        if(DBG_ADDR(getcwd(cwd, buf_len())) == cwd && !DBG_ZERO(chdir(dname)))
         {
             // Allocate memory for the start node.
             pnode_p cur;
@@ -2656,7 +2667,7 @@ entry_p n_foreach(entry_p contxt)
                 }
 
                 // Get next entry.
-                ent = readdir(dir);
+                ent = DBG_ADDR(readdir(dir));
 
                 // Need to check for cur->name or else the the filtering of '.'
                 // and '..' would not work, we would get entries without names.
@@ -2681,11 +2692,11 @@ entry_p n_foreach(entry_p contxt)
             }
 
             // Go back where we started.
-            chdir(cwd);
+            (void) chdir(cwd);
         }
 
         // Done.
-        (void) closedir(dir);
+        h_dclose(&dir);
     }
 
     if(err)
@@ -3143,7 +3154,7 @@ entry_p n_startup(entry_p contxt)
         {
             // Seek to the end so that we can use ftell below to get the size of
             // the file.
-            if(!fseek(file, 0L, SEEK_END))
+            if(!DBG_ZERO(fseek(file, 0L, SEEK_END)))
             {
                 // Worst case: empty file + 3 NL + terminating 0 + BEGIN and END
                 // markers + command.
@@ -3275,7 +3286,7 @@ entry_p n_startup(entry_p contxt)
 
                     // Do a less un-atomic write to the real file by renaming
                     // the temporary file.
-                    if(!rename(tmp, fln))
+                    if(!DBG_ZERO(rename(tmp, fln)))
                     {
                         // We're done.
                         free(tmp);
@@ -3287,7 +3298,7 @@ entry_p n_startup(entry_p contxt)
                 {
                     // We aren't allowed to write data to the target file so we
                     // need to clean up temp file.
-                    if(remove(tmp))
+                    if(DBG_ZERO(remove(tmp)))
                     {
                         ERR(ERR_WRITE_FILE, tmp);
                     }
@@ -3369,6 +3380,12 @@ void h_fclose(FILE **file)
 //------------------------------------------------------------------------------
 FILE *h_fopen(entry_p contxt, const char *name, const char *mode, bool force)
 {
+    if(!name || !mode)
+    {
+        // Bad input.
+        return NULL;
+    }
+
     if(h_exists(name) == LG_DIR)
     {
         // Don't open directories.
@@ -3928,7 +3945,7 @@ entry_p n_rename(entry_p contxt)
     if(!opt(contxt, OPT_DISK))
     {
         // Rename if target doesn't exist.
-        if(h_exists(new) == LG_NONE && !rename(old, new))
+        if(h_exists(new) == LG_NONE && !DBG_ZERO(rename(old, new)))
         {
             h_log(contxt, tr(S_FRND), old, new);
             R_NUM(-1);

@@ -1117,6 +1117,30 @@ FILE *dbg_fopen(int32_t line, const char *file, FILE *hand)
 #endif
 
 //------------------------------------------------------------------------------
+// Name:        dbg_dopen
+// Description: Used by DBG_DOPEN to provide more info when failing to open
+//              directories and to fail deliberately when testing.
+// Input:       int32_t line: Source code line.
+//              const char *file: Source code file.
+//              DIR *hand: Directory handle.
+// Return:      DIR *: Directory handle or NULL.
+//------------------------------------------------------------------------------
+#if defined(FAIL_LINE_DOPEN) && defined(FAIL_FILE_DOPEN)
+DIR *dbg_dopen(int32_t line, const char *file, DIR *hand)
+{
+    // Fail deliberately if file and line defines match.
+    if(hand && line == FAIL_LINE_DOPEN && !strcmp(file, FAIL_FILE_DOPEN))
+    {
+        closedir(hand);
+        return NULL;
+    }
+
+    // No match. Pass this on.
+    return hand;
+}
+#endif
+
+//------------------------------------------------------------------------------
 // Name:        native_exists
 // Description: Find first occurence of callback in AST.
 // Input:       entry_p contxt:  CONTXT.
