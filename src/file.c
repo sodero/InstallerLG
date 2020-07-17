@@ -560,7 +560,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
     // Is source a directory?
     if(type == LG_DIR)
     {
-        DIR *dir = opendir(src);
+        DIR *dir = DBG_DOPEN(opendir(src));
 
         if(!dir)
         {
@@ -2254,7 +2254,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
             return LG_FALSE;
         }
 
-        DIR *dir = opendir(name);
+        DIR *dir = DBG_DOPEN(opendir(name));
 
         // Permission to read?
         if(dir)
@@ -2583,7 +2583,7 @@ entry_p n_foreach(entry_p contxt)
 
     // Open dir and assume failure.
     const char *dname = str(C_ARG(1));
-    DIR *dir = opendir(dname);
+    DIR *dir = DBG_DOPEN(opendir(dname));
     pnode_p top = NULL;
     bool err = true;
 
@@ -3383,6 +3383,7 @@ FILE *h_fopen(entry_p contxt, const char *name, const char *mode, bool force)
 {
     if(!name || !mode)
     {
+        // Bad input.
         return NULL;
     }
 
