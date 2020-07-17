@@ -1099,7 +1099,7 @@ entry_p n_iconinfo(entry_p contxt)
 
             // Get option type.
             int32_t type = types[i]->id;
-            char *svl = NULL; // cppcheck-suppress *
+            char *svl = NULL;
 
             #if defined(AMIGA) && !defined(LG_TEST)
             // Is this a numerical value?
@@ -1126,7 +1126,7 @@ entry_p n_iconinfo(entry_p contxt)
             #else
             // Testing purposes only.
             snprintf(buf_get(B_KEY), buf_len(), "%d:%zu", type, j);
-            svl = buf_put(B_KEY); // cppcheck-suppress *
+            svl = buf_put(B_KEY);
             #endif
 
             // Always a valid (string).

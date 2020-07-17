@@ -2536,9 +2536,8 @@ entry_p n_exists(entry_p contxt)
         // Get type (file / dir / 0)
         int32_t res = h_exists(str(C_ARG(1)));
 
-        // Restore auto request.
         #if defined(AMIGA) && !defined(LG_TEST)
-        // cppcheck-suppress style
+        // Restore auto request.
         p->pr_WindowPtr = w;
         #endif
 
