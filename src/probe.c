@@ -1099,7 +1099,7 @@ entry_p n_iconinfo(entry_p contxt)
 
             // Get option type.
             int32_t type = types[i]->id;
-            char *svl = NULL;
+            char *svl = NULL; // cppcheck-suppress *
 
             #if defined(AMIGA) && !defined(LG_TEST)
             // Is this a numerical value?
