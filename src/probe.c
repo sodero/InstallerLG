@@ -651,7 +651,7 @@ entry_p n_getenv(entry_p contxt)
     C_SANE(1, NULL);
 
     // Is there such an environment variable?
-    char *env = getenv(str(C_ARG(1)));
+    char *env = DBG_ADDR(getenv(str(C_ARG(1))));
 
     if(env)
     {
@@ -888,8 +888,6 @@ static int32_t h_getversion_lib(const char *name)
 //------------------------------------------------------------------------------
 int32_t h_getversion_file(const char *name)
 {
-    FILE *file = NULL;
-
     #if defined(AMIGA) && !defined(LG_TEST)
     struct Process *pro = (struct Process *) FindTask(NULL);
     // Save the current window ptr.
@@ -900,7 +898,7 @@ int32_t h_getversion_file(const char *name)
     #endif
 
     // Attempt to open file.
-    file = DBG_FOPEN(h_fopen(end(), name, "r", false));
+    FILE *file = DBG_FOPEN(h_fopen(end(), name, "r", false));
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // Restore auto request.

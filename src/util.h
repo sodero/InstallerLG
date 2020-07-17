@@ -65,6 +65,12 @@ DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
 #else
 #define DBG_ZERO(W) W
 #endif
+#if defined(FAIL_LINE_ADDR) && defined(FAIL_FILE_ADDR)
+#define DBG_ADDR(W) ((__LINE__ == FAIL_LINE_ADDR && \
+                      !strcmp(__FILE__,  FAIL_FILE_ADDR)) ? NULL : (W))
+#else
+#define DBG_ADDR(W) W
+#endif
 #if defined(FAIL_LINE_ALLOC) && defined(FAIL_FILE_ALLOC)
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, M)
 #else

@@ -575,7 +575,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 
         if(node)
         {
-            struct dirent *entry = readdir(dir);
+            struct dirent *entry = DBG_ADDR(readdir(dir));
 
             // The type of the first element is known; it's a directory.
             node->name = DBG_ALLOC(strdup(src));
@@ -710,7 +710,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                 }
 
                 // Get next entry.
-                entry = readdir(dir);
+                entry = DBG_ADDR(readdir(dir));
             }
         }
 
@@ -2246,7 +2246,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
     // value since errors will be caught below.
     (void) chmod(name, POSIX_RWX_MASK);
 
-    if(rmdir(name))
+    if(DBG_ZERO(rmdir(name)))
     {
         if(!opt(contxt, OPT_ALL))
         {
@@ -2259,7 +2259,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
         // Permission to read?
         if(dir)
         {
-            struct dirent *entry = readdir(dir);
+            struct dirent *entry = DBG_ADDR(readdir(dir));
 
             // Find all files in the directory.
             while(entry)
@@ -2278,12 +2278,12 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
                 free(path);
 
                 // Get next entry.
-                entry = readdir(dir);
+                entry = DBG_ADDR(readdir(dir));
             }
 
             // Restart from the beginning.
             rewinddir(dir);
-            entry = readdir(dir);
+            entry = DBG_ADDR(readdir(dir));
 
             // Find all subdirectories in the directory.
             while(entry)
@@ -2291,7 +2291,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
                 if(h_dir_special(entry->d_name))
                 {
                     // Get next entry.
-                    entry = readdir(dir);
+                    entry = DBG_ADDR(readdir(dir));
                     continue;
                 }
 
@@ -2309,14 +2309,14 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
                 free(path);
 
                 // Get next entry.
-                entry = readdir(dir);
+                entry = DBG_ADDR(readdir(dir));
             }
 
             // Close the (by now, hopefully) empty dir.
             h_dclose(&dir);
         }
 
-        if(rmdir(name))
+        if(DBG_ZERO(rmdir(name)))
         {
             // Fail silently.
             return LG_FALSE;
@@ -2344,7 +2344,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
     (void) chmod(info, POSIX_RWX_MASK);
 
     // Delete the info file.
-    if(!remove(info))
+    if(!DBG_ZERO(remove(info)))
     {
         h_log(contxt, tr(S_DLTD), info);
         return LG_TRUE;
@@ -2371,8 +2371,7 @@ static int32_t h_delete_pattern(entry_p contxt, const char *pat)
 
     // Pattern matching is only done on Amiga systems in non test mode.
     #if defined(AMIGA) && !defined(LG_TEST)
-    struct AnchorPath *apt =
-        DBG_ALLOC(calloc(1, sizeof(struct AnchorPath) + PATH_MAX));
+    struct AnchorPath *apt = calloc(1, sizeof(struct AnchorPath) + PATH_MAX);
 
     if(!apt && PANIC(contxt))
     {
@@ -2592,10 +2591,10 @@ entry_p n_foreach(entry_p contxt)
     {
         // Use global buffer.
         char *cwd = buf_raw();
-        struct dirent *ent = readdir(dir);
+        struct dirent *ent = DBG_ADDR(readdir(dir));
 
         // Save current working directory and enter the directory <drawer name>
-        if(getcwd(cwd, buf_len()) == cwd && !DBG_ZERO(chdir(dname)))
+        if(DBG_ADDR(getcwd(cwd, buf_len())) == cwd && !DBG_ZERO(chdir(dname)))
         {
             // Allocate memory for the start node.
             pnode_p cur;
@@ -2668,7 +2667,7 @@ entry_p n_foreach(entry_p contxt)
                 }
 
                 // Get next entry.
-                ent = readdir(dir);
+                ent = DBG_ADDR(readdir(dir));
 
                 // Need to check for cur->name or else the the filtering of '.'
                 // and '..' would not work, we would get entries without names.
@@ -2693,7 +2692,7 @@ entry_p n_foreach(entry_p contxt)
             }
 
             // Go back where we started.
-            chdir(cwd);
+            (void) chdir(cwd);
         }
 
         // Done.

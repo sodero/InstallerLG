@@ -244,7 +244,7 @@ bool arg_init(int argc, char **argv)
     arg_argc(argc);
 
     // Save current directory so that we can go back on exit.
-    if(getcwd(buf_get(B_KEY), buf_len()) == buf_get(B_KEY))
+    if(DBG_ADDR(getcwd(buf_get(B_KEY), buf_len())) == buf_get(B_KEY))
     {
         args[ARG_OLDDIR] = DBG_ALLOC(strdup(buf_put(B_KEY)));
     }
