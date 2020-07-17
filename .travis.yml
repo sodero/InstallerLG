@@ -6,7 +6,7 @@ language:
 jobs:
     include:
         - stage: Cppcheck
-          script: cd src && cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude --suppress=unusedFunction --suppress=ConfigurationNotChecked --suppress=knownConditionTrueFalse --suppress=unmatchedSuppression -UFAIL_FILE_ADDR -UFAIL_FILE_ALLOC -UFAIL_FILE_FOPEN -UFAIL_FILE_DOPEN -UFAIL_FILE_ZERO -UFAIL_LINE_ADDR -UFAIL_LINE_ALLOC -UFAIL_LINE_FOPEN -UFAIL_LINE_DOPEN -UFAIL_LINE_ZERO .
+          script: cd src && cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude --suppress=unusedFunction --suppress=ConfigurationNotChecked --suppress=knownConditionTrueFalse --suppress=unmatchedSuppression -UAMIGA -UFAIL_FILE_ADDR -UFAIL_FILE_ALLOC -UFAIL_FILE_FOPEN -UFAIL_FILE_DOPEN -UFAIL_FILE_ZERO -UFAIL_LINE_ADDR -UFAIL_LINE_ALLOC -UFAIL_LINE_FOPEN -UFAIL_LINE_DOPEN -UFAIL_LINE_ZERO .
         - stage: Test
           script: make -C build smoke || (cat build/err.tmp.* 2> /dev/null && false)
         - stage: Valgrind
