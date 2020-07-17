@@ -335,7 +335,7 @@ entry_p n_earlier(entry_p contxt)
     struct stat old, new;
 
     // Get information about the first file.
-    if(stat(str(C_ARG(1)), &old))
+    if(DBG_ZERO(stat(str(C_ARG(1)), &old)))
     {
         // Could not read from file / dir.
         ERR(ERR_READ, str(C_ARG(1)));
@@ -343,7 +343,7 @@ entry_p n_earlier(entry_p contxt)
     }
 
     // Get information about the second file.
-    if(stat(str(C_ARG(2)), &new))
+    if(DBG_ZERO(stat(str(C_ARG(2)), &new)))
     {
         // Could not read from file / dir.
         ERR(ERR_READ, str(C_ARG(2)));

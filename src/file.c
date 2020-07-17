@@ -182,7 +182,7 @@ static int32_t h_exists_posix_type(const char *name)
 {
     struct stat fst;
 
-    if(stat(name, &fst))
+    if(DBG_ZERO(stat(name, &fst)))
     {
         // No such file or directory.
         return LG_NONE;
@@ -949,7 +949,7 @@ static bool h_protect_get_posix(const char *file, int32_t *mask)
     struct stat fst;
 
     // Get POSIX file / dir permission.
-    if(stat(file, &fst))
+    if(DBG_ZERO(stat(file, &fst)))
     {
         // Could not get file / dir permission.
         return false;
@@ -1151,7 +1151,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     static char buf[BUFSIZ];
     FILE *file = DBG_FOPEN(h_fopen(contxt, src, "r", false));
     size_t cnt = file ? fread(buf, 1, BUFSIZ, file) : 0;
-    int err = file ? ferror(file) : 0;
+    int err = file ? DBG_ZERO(ferror(file)) : 0;
 
     if(!file || err)
     {
@@ -1171,7 +1171,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     }
 
     // Is there an existing destination file that is write protected?
-    if(!access(dst, F_OK) && access(dst, W_OK))
+    if(!DBG_ZERO(access(dst, F_OK)) && DBG_ZERO(access(dst, W_OK)))
     {
         // No need to ask if only (force).
         if(opt(contxt, OPT_FORCE) && !opt(contxt, OPT_ASKUSER))
@@ -1420,7 +1420,7 @@ static bool h_makedir_path(char *dst)
     buf_put(B_KEY);
 
     // The path as a whole exists or the final directory needs to be created.
-    return h_exists(dst) == LG_DIR || !mkdir(dst, 0777);
+    return h_exists(dst) == LG_DIR || !DBG_ZERO(mkdir(dst, 0777));
 }
 
 //------------------------------------------------------------------------------
@@ -2098,7 +2098,7 @@ static int32_t h_delete_info(entry_p contxt, const char *file)
         // Set write permission and delete file.
         mode_t perm = POSIX_WRITE_MASK;
 
-        if(chmod(info, perm) || remove(info))
+        if(DBG_ZERO(chmod(info, perm)) || DBG_ZERO(remove(info)))
         {
             ERR(ERR_DELETE_FILE, info);
             return LG_FALSE;
@@ -2146,7 +2146,7 @@ static bool h_delete_perm(const char *name)
     return perm;
     #else
     // Proper delete protection doesn't exist on non Amigas.
-    return access(name, W_OK) == 0;
+    return DBG_ZERO(access(name, W_OK)) == 0;
     #endif
 }
 
@@ -2595,7 +2595,7 @@ entry_p n_foreach(entry_p contxt)
         struct dirent *ent = readdir(dir);
 
         // Save current working directory and enter the directory <drawer name>
-        if(getcwd(cwd, buf_len()) == cwd && !chdir(dname))
+        if(getcwd(cwd, buf_len()) == cwd && !DBG_ZERO(chdir(dname)))
         {
             // Allocate memory for the start node.
             pnode_p cur;
@@ -3155,7 +3155,7 @@ entry_p n_startup(entry_p contxt)
         {
             // Seek to the end so that we can use ftell below to get the size of
             // the file.
-            if(!fseek(file, 0L, SEEK_END))
+            if(!DBG_ZERO(fseek(file, 0L, SEEK_END)))
             {
                 // Worst case: empty file + 3 NL + terminating 0 + BEGIN and END
                 // markers + command.
@@ -3287,7 +3287,7 @@ entry_p n_startup(entry_p contxt)
 
                     // Do a less un-atomic write to the real file by renaming
                     // the temporary file.
-                    if(!rename(tmp, fln))
+                    if(!DBG_ZERO(rename(tmp, fln)))
                     {
                         // We're done.
                         free(tmp);
@@ -3299,7 +3299,7 @@ entry_p n_startup(entry_p contxt)
                 {
                     // We aren't allowed to write data to the target file so we
                     // need to clean up temp file.
-                    if(remove(tmp))
+                    if(DBG_ZERO(remove(tmp)))
                     {
                         ERR(ERR_WRITE_FILE, tmp);
                     }
@@ -3946,7 +3946,7 @@ entry_p n_rename(entry_p contxt)
     if(!opt(contxt, OPT_DISK))
     {
         // Rename if target doesn't exist.
-        if(h_exists(new) == LG_NONE && !rename(old, new))
+        if(h_exists(new) == LG_NONE && !DBG_ZERO(rename(old, new)))
         {
             h_log(contxt, tr(S_FRND), old, new);
             R_NUM(-1);

@@ -48,7 +48,7 @@ bool exists(entry_p entry);
 int32_t str_to_userlevel(const char *user, int32_t def);
 
 //------------------------------------------------------------------------------
-// Fault injection functions.
+// Fault injection functions / macros.
 //------------------------------------------------------------------------------
 #if defined(FAIL_LINE_ALLOC) && defined(FAIL_FILE_ALLOC)
 void *dbg_alloc(int32_t line, const char *file, void *mem);
@@ -59,21 +59,12 @@ FILE *dbg_fopen(int32_t line, const char *file, FILE *hand);
 #if defined(FAIL_LINE_DOPEN) && defined(FAIL_FILE_DOPEN)
 DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
 #endif
-
-//------------------------------------------------------------------------------
-// Utility macros.
-//------------------------------------------------------------------------------
-#define D_NUM    contxt->resolved->id
-#define R_CUR    return contxt ? contxt->resolved : NULL
-#define R_NUM(X) contxt->resolved->id = X; return contxt->resolved
-#define R_STR(X) char *r_str = X; if(r_str) {free(contxt->resolved->name);\
-                 contxt->resolved->name = r_str;} else { PANIC(contxt);\
-                 contxt->resolved->name[0] = '\0'; }; return contxt->resolved
-#define R_EST    contxt->resolved->name[0] = '\0'; return contxt->resolved
-#define C_ARG(X) contxt->children[(X) - 1]
-#define C_SYM(X) contxt->symbols[(X) - 1]
-#define B_KEY __func__
-
+#if defined(FAIL_LINE_ZERO) && defined(FAIL_FILE_ZERO)
+#define DBG_ZERO(W) ((__LINE__ == FAIL_LINE_ZERO && \
+                      !strcmp(__FILE__,  FAIL_FILE_ZERO)) ? 1 : (W))
+#else
+#define DBG_ZERO(W) W
+#endif
 #if defined(FAIL_LINE_ALLOC) && defined(FAIL_FILE_ALLOC)
 #define DBG_ALLOC(M) dbg_alloc(__LINE__, __FILE__, M)
 #else
@@ -89,6 +80,20 @@ DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
 #else
 #define DBG_DOPEN(F) F
 #endif
+
+//------------------------------------------------------------------------------
+// Utility macros.
+//------------------------------------------------------------------------------
+#define D_NUM    contxt->resolved->id
+#define R_CUR    return contxt ? contxt->resolved : NULL
+#define R_NUM(X) contxt->resolved->id = X; return contxt->resolved
+#define R_STR(X) char *r_str = X; if(r_str) {free(contxt->resolved->name);\
+                 contxt->resolved->name = r_str;} else { PANIC(contxt);\
+                 contxt->resolved->name[0] = '\0'; }; return contxt->resolved
+#define R_EST    contxt->resolved->name[0] = '\0'; return contxt->resolved
+#define C_ARG(X) contxt->children[(X) - 1]
+#define C_SYM(X) contxt->symbols[(X) - 1]
+#define B_KEY __func__
 #if defined(AMIGA)
 #define DBG_PRINT KPrintF
 #else
@@ -107,6 +112,7 @@ DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
 #ifdef __AROS__
 #define B2CSTR(S) AROS_BSTR_ADDR(S)
 #else
-#define B2CSTR(S) (*((char *) BADDR(S)) ? (((char *) BADDR(S)) + 1) : ((char *) BADDR(S)))
+#define B2CSTR(S) (*((char *) BADDR(S)) ? (((char *) BADDR(S)) + 1) : \
+                    ((char *) BADDR(S)))
 #endif
 #endif
