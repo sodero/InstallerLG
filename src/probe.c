@@ -1126,7 +1126,7 @@ entry_p n_iconinfo(entry_p contxt)
             #else
             // Testing purposes only.
             snprintf(buf_get(B_KEY), buf_len(), "%d:%zu", type, j);
-            svl = buf_put(B_KEY);
+            svl = buf_put(B_KEY); // cppcheck-suppress *
             #endif
 
             // Always a valid (string).
