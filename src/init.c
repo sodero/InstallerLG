@@ -194,7 +194,7 @@ static void init_misc_num(entry_p contxt)
 //------------------------------------------------------------------------------
 static void init_misc_string(entry_p contxt)
 {
-    // Set strings values.
+    // Set string values.
     init_str(contxt, "@abort-button", "");
     init_str(contxt, "@askoptions-help", "");
     init_str(contxt, "@askchoice-help", "");
@@ -244,7 +244,7 @@ static void init_misc(entry_p contxt)
 //------------------------------------------------------------------------------
 static void init_error(entry_p contxt)
 {
-    // The default error handler returns '0' without doing anything.
+    // Default error handler: (procedure @onerror (select 0 0) )
     entry_p entry = new_native
     (
         DBG_ALLOC(strdup("onerror")), __LINE__, n_procedure,
