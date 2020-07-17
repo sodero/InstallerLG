@@ -90,8 +90,8 @@ entry_p new_string(char *name)
     if(name && entry)
     {
         // The value of a string equals its name.
+        entry->name = DBG_ALLOC(name);
         entry->type = STRING;
-        entry->name = name;
         return entry;
     }
 
@@ -119,9 +119,9 @@ entry_p new_symbol(char *name)
     if(name && entry)
     {
         // The value of the symbol will dangle until the first (set).
+        entry->name = DBG_ALLOC(name);
         entry->resolved = end();
         entry->type = SYMBOL;
-        entry->name = name;
         return entry;
     }
 
@@ -181,8 +181,8 @@ entry_p new_custom(char *name, int32_t line, entry_p sym, entry_p chl)
 
     if(name && entry)
     {
+        entry->name = DBG_ALLOC(name);
         entry->type = CUSTOM;
-        entry->name = name;
         entry->id = line;
 
         // Move symbols if we have any, adopt and clear the 'resolved' status.
@@ -242,8 +242,8 @@ entry_p new_symref(char *name, int32_t line)
     // in error messages when refering to non existing symbols in strict mode.
     if(entry && name && (line > 0))
     {
+        entry->name = DBG_ALLOC(name);
         entry->type = SYMREF;
-        entry->name = name;
         entry->id = line;
         return entry;
     }
@@ -326,8 +326,8 @@ entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t ty
         if(entry->resolved)
         {
             // ID and name are for debug only.
+            entry->name = DBG_ALLOC(name);
             entry->type = NATIVE;
-            entry->name = name;
             entry->call = call;
             entry->id = line;
 
@@ -382,9 +382,9 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
             entry->resolved->parent = entry;
 
             // Let the type be our ID.
+            entry->name = DBG_ALLOC(name);
             entry->id = (int32_t) type;
             entry->type = OPTION;
-            entry->name = name;
 
             // Adopt contents of CONTXT, if there is any.
             if(chl && chl->type == CONTXT)
@@ -435,10 +435,10 @@ entry_p new_cusref(char *name, int32_t line, entry_p arg)
     if(entry && name && (line > 0))
     {
         // The n_gosub function is used as trampoline.
-        entry->id = line;
-        entry->name = name;
-        entry->type = CUSREF;
+        entry->name = DBG_ALLOC(name);
         entry->call = n_gosub;
+        entry->type = CUSREF;
+        entry->id = line;
 
         // Adopt function arguments if any.
         if(arg && arg->type == CONTXT)
