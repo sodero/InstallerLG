@@ -84,6 +84,11 @@ DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
 #else
 #define DBG_FOPEN(F) F
 #endif
+#if defined(FAIL_LINE_DOPEN) && defined(FAIL_FILE_DOPEN)
+#define DBG_DOPEN(F) dbg_dopen(__LINE__, __FILE__, F)
+#else
+#define DBG_DOPEN(F) F
+#endif
 #if defined(AMIGA)
 #define DBG_PRINT KPrintF
 #else
