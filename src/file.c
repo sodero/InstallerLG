@@ -3692,7 +3692,7 @@ entry_p n_tooltype(entry_p contxt)
                     if(o)
                     {
                         // Allocate memory for a new temporary array.
-                        obj->do_ToolTypes = DBG_ALLOC(calloc(n, sizeof(char *)));
+                        obj->do_ToolTypes = calloc(n, sizeof(char *));
 
                         if(obj->do_ToolTypes)
                         {
