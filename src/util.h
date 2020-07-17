@@ -56,6 +56,9 @@ void *dbg_alloc(int32_t line, const char *file, void *mem);
 #if defined(FAIL_LINE_FOPEN) && defined(FAIL_FILE_FOPEN)
 FILE *dbg_fopen(int32_t line, const char *file, FILE *hand);
 #endif
+#if defined(FAIL_LINE_DOPEN) && defined(FAIL_FILE_DOPEN)
+DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
+#endif
 
 //------------------------------------------------------------------------------
 // Utility macros.
