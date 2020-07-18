@@ -382,9 +382,9 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
             entry->resolved->parent = entry;
 
             // Let the type be our ID.
-            entry->name = DBG_ALLOC(name);
             entry->id = (int32_t) type;
             entry->type = OPTION;
+            entry->name = name;
 
             // Adopt contents of CONTXT, if there is any.
             if(chl && chl->type == CONTXT)
@@ -435,10 +435,10 @@ entry_p new_cusref(char *name, int32_t line, entry_p arg)
     if(DBG_ADDR(name) && entry && (line > 0))
     {
         // The n_gosub function is used as trampoline.
-        entry->name = DBG_ALLOC(name);
-        entry->call = n_gosub;
-        entry->type = CUSREF;
         entry->id = line;
+        entry->name = name;
+        entry->type = CUSREF;
+        entry->call = n_gosub;
 
         // Adopt function arguments if any.
         if(arg && arg->type == CONTXT)
