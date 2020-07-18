@@ -87,11 +87,11 @@ entry_p new_string(char *name)
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
 
-    if(name && entry)
+    if(DBG_ADDR(name) && entry)
     {
         // The value of a string equals its name.
-        entry->name = DBG_ALLOC(name);
         entry->type = STRING;
+        entry->name = name;
         return entry;
     }
 
@@ -116,12 +116,12 @@ entry_p new_symbol(char *name)
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
 
-    if(name && entry)
+    if(DBG_ADDR(name) && entry)
     {
         // The value of the symbol will dangle until the first (set).
-        entry->name = DBG_ALLOC(name);
         entry->resolved = end();
         entry->type = SYMBOL;
+        entry->name = name;
         return entry;
     }
 
@@ -179,10 +179,10 @@ entry_p new_custom(char *name, int32_t line, entry_p sym, entry_p chl)
     // We rely on everything being set to '0'
     entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
 
-    if(name && entry)
+    if(DBG_ADDR(name) && entry)
     {
-        entry->name = DBG_ALLOC(name);
         entry->type = CUSTOM;
+        entry->name = name;
         entry->id = line;
 
         // Move symbols if we have any, adopt and clear the 'resolved' status.
@@ -240,10 +240,10 @@ entry_p new_symref(char *name, int32_t line)
 
     // All references must have a name and a line number. Line numbers are used
     // in error messages when refering to non existing symbols in strict mode.
-    if(entry && name && (line > 0))
+    if(DBG_ADDR(name) && entry && (line > 0))
     {
-        entry->name = DBG_ALLOC(name);
         entry->type = SYMREF;
+        entry->name = name;
         entry->id = line;
         return entry;
     }
@@ -316,7 +316,7 @@ entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t ty
     entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
 
     // We require a name and a line number.
-    if(entry && call && name && (line > 0))
+    if(DBG_ADDR(name) && DBG_ADDR(call) && entry && (line > 0))
     {
         // Allocate default return value.
         entry->resolved = type == NUMBER ? new_number(0) : type == STRING ?
@@ -326,8 +326,8 @@ entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t ty
         if(entry->resolved)
         {
             // ID and name are for debug only.
-            entry->name = DBG_ALLOC(name);
             entry->type = NATIVE;
+            entry->name = name;
             entry->call = call;
             entry->id = line;
 
@@ -371,7 +371,7 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
     entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
 
     // We required a name of the option for debugging purposes.
-    if(name && entry)
+    if(DBG_ADDR(name) && entry)
     {
         // Dynamic options need a return value.
         entry->resolved = new_number(LG_FALSE);
@@ -432,7 +432,7 @@ entry_p new_cusref(char *name, int32_t line, entry_p arg)
     entry_p entry = DBG_ALLOC(calloc(1, sizeof (entry_t)));
 
     // A line number is required to produce meaningful error messages.
-    if(entry && name && (line > 0))
+    if(DBG_ADDR(name) && entry && (line > 0))
     {
         // The n_gosub function is used as trampoline.
         entry->name = DBG_ALLOC(name);
@@ -467,7 +467,7 @@ entry_p new_cusref(char *name, int32_t line, entry_p arg)
 //------------------------------------------------------------------------------
 entry_p append(entry_p **dst, entry_p ent)
 {
-    if(!ent || !dst || !*dst)
+    if(!DBG_ADDR(ent) || !DBG_ADDR(dst) || !*DBG_ADDR(dst))
     {
         // Bad input.
         (void) PANIC(NULL);
@@ -526,7 +526,8 @@ entry_p append(entry_p **dst, entry_p ent)
 entry_p merge(entry_p dst, entry_p src)
 {
     // Sanity check.
-    if(dst && dst->children && src && src->children)
+    if(DBG_ADDR(dst) && DBG_ADDR(dst->children) &&
+       DBG_ADDR(src) && DBG_ADDR(src->children))
     {
         // Total number of children.
         size_t num = num_children(src->children) + num_children(dst->children);
@@ -599,7 +600,7 @@ static bool push_symbol(entry_p dst, entry_p src)
 //------------------------------------------------------------------------------
 entry_p push(entry_p dst, entry_p src)
 {
-    if((!dst || !src) && PANIC(NULL))
+    if((!DBG_ADDR(dst) || !DBG_ADDR(src)) && PANIC(NULL))
     {
         // We own 'src'.
         kill(src);
@@ -656,7 +657,7 @@ entry_p push(entry_p dst, entry_p src)
 //------------------------------------------------------------------------------
 static void kill_all(entry_p *chl, entry_p par)
 {
-    if(!chl)
+    if(!DBG_ADDR(chl))
     {
         // Nothing to do.
         return;

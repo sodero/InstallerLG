@@ -593,9 +593,9 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                 n_src = DBG_ALLOC(h_tackon(contxt, src, entry->d_name)),
                 n_dst = DBG_ALLOC(h_tackon(contxt, dst, entry->d_name));
 
-                // Out of memory?
                 if(!n_src || !n_dst)
                 {
+                    // Out of memory.
                     free(n_src);
                     free(n_dst);
                     break;
@@ -606,9 +606,9 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                     // Create full pattern temp buffer.
                     char *pat = DBG_ALLOC(h_tackon(contxt, srt, str(pattern)));
 
-                    // Out of memory?
                     if(!pat)
                     {
+                        // Out of memory.
                         free(n_src);
                         free(n_dst);
                         break;
@@ -807,7 +807,6 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 
     PANIC(contxt);
 
-    // These will leak if we don't free them.
     free(n_src);
     free(n_dst);
 
