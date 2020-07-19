@@ -373,6 +373,9 @@ static bool h_dir_special(const char *dir)
     // '.' and '..' aren't 'real' directories.
     return !strcmp(dir, ".") || !strcmp(dir, "..");
 #else
+    // Nothing to do.
+    (void) dir;
+
     // '.' and '..' are 'real' on Amiga.
     return false;
 #endif
