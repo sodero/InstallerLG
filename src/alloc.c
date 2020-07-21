@@ -657,7 +657,7 @@ entry_p push(entry_p dst, entry_p src)
 //------------------------------------------------------------------------------
 static void kill_all(entry_p *chl, entry_p par)
 {
-    if(!DBG_ADDR(chl))
+    if(!chl)
     {
         // Nothing to do.
         return;
