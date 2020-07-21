@@ -3382,8 +3382,8 @@ inp_t gui_welcome(const char *msg, int32_t *lvl, int32_t *lgf, int32_t *prt,
     (inp_t) DoMethod(Win, MUIM_IG_Welcome, msg, lvl, lgf, prt, min, npr, nlg);
     #else
     // Testing purposes.
-    printf("%s%d%d%d%d%d%d\n", msg, *lvl, *lgf, *prt, min, !!npr, !!nlg ) ? G_TRUE :
-                                                                            G_ERR;
+    printf("%s%d%d%d%d%d%d\n", msg, *lvl, *lgf, *prt, min, !!npr, !!nlg ) ?
+           G_TRUE : G_ERR;
     #endif
 }
 

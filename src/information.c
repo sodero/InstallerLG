@@ -280,10 +280,8 @@ entry_p n_working(entry_p contxt)
     // Concatenate all children if we have any.
     char *msg = get_chlstr(contxt, false);
 
-    if(!msg && PANIC(contxt))
-    {
-        return end();
-    }
+    // Exit on OOM.
+    ASSERT(msg, end());
 
     // Did we fail while resolving one or more of our children?
     if(DID_ERR)

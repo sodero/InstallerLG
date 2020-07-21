@@ -12,6 +12,7 @@
 #include "error.h"
 #include "parser.h"
 #include "types.h"
+#include "util.h"
 #include "resource.h"
 #include "lexer.h"
 
@@ -215,7 +216,7 @@ static char *strduptr(const char *str);
     /* Symbols                                                                                                                                                                          */
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 [^"' ;\r\n\t\(\)\+\*/]+\+?[^"' ;\r\n\t\(\)]+?  {
-    yylval->s = strdup(yytext);
+    yylval->s = DBG_ALLOC(strdup(yytext));
     return yylval->s ? SYM : OOM;
 }
 
@@ -364,7 +365,7 @@ static char *strduptr(const char *str)
 
     // Please note 'len - 1', delimiters are stripped from the string, str index
     // starts at 1 and the last character is skipped.
-    char *out = calloc(len - 1, 1);
+    char *out = DBG_ALLOC(calloc(len - 1, 1));
 
     if(!out)
     {

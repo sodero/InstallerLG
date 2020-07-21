@@ -26,7 +26,7 @@
 void ror(entry_p *entry)
 {
     // Something to rotate?
-    if(!entry)
+    if(!DBG_ADDR(entry))
     {
         // Nope.
         return;
@@ -68,7 +68,7 @@ void ror(entry_p *entry)
 entry_p local(entry_p entry)
 {
     // Go upwards until we find what we're looking for, or hit the (broken) top.
-    for(entry_p contxt = entry; contxt; contxt = contxt->parent)
+    for(entry_p contxt = DBG_ADDR(entry); contxt; contxt = contxt->parent)
     {
         if(contxt->type == CONTXT || contxt->type == CUSTOM)
         {
@@ -126,7 +126,7 @@ entry_p global(entry_p entry)
 static entry_p parent(entry_p entry, type_t type)
 {
     // Check current level then go all the way up.
-    for(entry_p cur = entry; cur; cur = cur->parent)
+    for(entry_p cur = DBG_ADDR(entry); cur; cur = cur->parent)
     {
         // Is this parent of the correct type?
         if(cur->type == type)
@@ -555,12 +555,8 @@ void set_num(entry_p contxt, char *var, int32_t val)
     // Dummy reference used for searching.
     static entry_t ref = { .type = SYMREF };
 
-    // We need a name and a context.
-    if(!contxt || !var)
-    {
-        PANIC(contxt);
-        return;
-    }
+    // Validate input.
+    ASSERT(contxt && var);
 
     // Name and reparent.
     ref.parent = contxt;
@@ -590,12 +586,8 @@ void set_num(entry_p contxt, char *var, int32_t val)
 //------------------------------------------------------------------------------
 int32_t get_num(entry_p contxt, char *var)
 {
-    // We need a name and a context.
-    if(!contxt || !var)
-    {
-        PANIC(contxt);
-        return 0;
-    }
+    // Validate input.
+    ASSERT(contxt && var, 0);
 
     // Dummy reference used for searching.
     static entry_t ref = { .type = SYMREF };
@@ -631,12 +623,8 @@ int32_t get_num(entry_p contxt, char *var)
 //------------------------------------------------------------------------------
 char *get_str(entry_p contxt, char *var)
 {
-    // We need a name and a context.
-    if(!contxt || !var)
-    {
-        PANIC(contxt);
-        return "";
-    }
+    // Validate input.
+    ASSERT(contxt && var, "");
 
     // Dummy reference used to find the variable.
     static entry_t ref = { .type = SYMREF };
@@ -695,10 +683,8 @@ char *get_optstr(entry_p contxt, opt_t type)
     // References to strings of options of the right type.
     char **val = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
 
-    if(!val && PANIC(contxt))
-    {
-        return NULL;
-    }
+    // Exit on OOM.
+    ASSERT(val, NULL);
 
     // Empty string.
     child = contxt->children;
@@ -860,12 +846,8 @@ char *get_chlstr(entry_p contxt, bool pad)
 //------------------------------------------------------------------------------
 void set_str(entry_p contxt, char *var, char *val)
 {
-    // We need a name and a context.
-    if(!contxt || !var)
-    {
-        PANIC(contxt);
-        return;
-    }
+    // Validate input.
+    ASSERT(contxt && var);
 
     // Dummy reference used for searching.
     static entry_t ref = { .type = SYMREF };

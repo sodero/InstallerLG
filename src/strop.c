@@ -34,20 +34,17 @@ entry_p n_cat(entry_p contxt)
     C_SANE(1, NULL);
 
     // Start with a string length of LG_STRLEN.
-    size_t cnt = LG_STRLEN, len = 0, cur = 0;
-    char *buf = DBG_ALLOC(calloc(cnt + 1, 1));
+    char *buf = DBG_ALLOC(calloc(LG_STRLEN + 1, 1));
 
-    if(!buf && PANIC(contxt))
-    {
-        return end();
-    }
+    // Exit on OOM.
+    ASSERT(buf, end());
 
     // Iterate over all arguments.
-    while(exists(contxt->children[cur]))
+    for(size_t cur = 0, len = 0, cnt = LG_STRLEN; exists(contxt->children[cur]);
+        cur++)
     {
         // Resolve the current argument.
-        const char *arg = str(contxt->children[cur++]);
-        size_t alen = strlen(arg);
+        const char *arg = str(contxt->children[cur]);
 
         // Return an empty string if argument couldn't be resolved.
         if(DID_ERR)
@@ -57,13 +54,15 @@ entry_p n_cat(entry_p contxt)
         }
 
         // Next argument if the current is empty.
+        size_t alen = strlen(arg);
+
         if(!alen)
         {
             continue;
         }
 
         // Increase the total string length.
-        len += strlen(arg);
+        len += alen;
 
         // Allocate a bigger buffer if necessary.
         if(len > cnt)
@@ -265,11 +264,8 @@ entry_p n_fmt(entry_p contxt)
     entry_p *args = NULL;
     size_t len = n_fmt_new_buffer(contxt, &args, &res);
 
-    if(!len)
-    {
-        PANIC(contxt);
-        return end();
-    }
+    // Exit on OOM.
+    ASSERT(len, end());
 
     // The scan can never fail.
     h_fmt_scan(args, res, len, contxt->name);
@@ -335,10 +331,8 @@ entry_p n_pathonly(entry_p contxt)
 
     char *path = h_pathonly(str(C_ARG(1)));
 
-    if(!path && PANIC(contxt))
-    {
-        return end();
-    }
+    // Exit on OOM.
+    ASSERT(path, end());
 
     R_STR(path);
 }
@@ -421,10 +415,8 @@ entry_p n_substr(entry_p contxt)
 
         char *ret = DBG_ALLOC(calloc((size_t) len + 1, 1));
 
-        if(!ret && PANIC(contxt))
-        {
-            return end();
-        }
+        // Exit on OOM.
+        ASSERT(ret, end());
 
         // Cap values, set and return.
         len -= off;
@@ -445,10 +437,8 @@ entry_p n_substr(entry_p contxt)
     {
         char *ret = DBG_ALLOC(calloc((size_t) len + 1, 1));
 
-        if(!ret && PANIC(contxt))
-        {
-            return end();
-        }
+        // Exit on OOM.
+        ASSERT(ret, end());
 
         // All values are already capped, just copy.
         memcpy(ret, arg + off, len - off);
@@ -525,10 +515,8 @@ char *h_tackon(entry_p contxt, const char *pre, const char *suf)
     size_t let = lep + les + 2;
     char *ret = DBG_ALLOC(calloc(let, 1));
 
-    if(!ret && PANIC(contxt))
-    {
-        return NULL;
-    }
+    // Exit in OOM.
+    ASSERT(ret, NULL);
 
     // Copy the path and insert delimiter if it doesn't exist.
     memcpy(ret, pre, lep);
