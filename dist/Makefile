@@ -25,7 +25,7 @@ OS := $(shell uname -s | tr A-Z a-z)
 ARCH := $(shell uname -m | tr -d ower)
 ARC := $(DIR)/$(NAME).$(ARCH)-$(OS).lha
 README := $(DIR)/$(NAME).$(ARCH)-$(OS).readme
-FILES := $(EXE) $(CAT) 'InstallerLG installer' 'InstallerLG installer.info'
+FILES := $(EXE) 'InstallerLG installer' 'InstallerLG installer.info'
 FILES += 'InstallerLG.guide' 'InstallerLG.guide.info'
 
 #-----------------------------------------------------------------------------------#
@@ -43,7 +43,8 @@ clean:
 	$(RM) -R $(NAME) Catalogs
 
 $(ARC): $(EXE)
-	lha $(LHAFLAGS) $@ $(FILES)
+	lha $(LHAFLAGS) $@ $(FILES) && \
+	lha $(LHAFLAGS) $@ $(CAT)
 
 $(CAT):
 	$(MAKE) -C $(BIN) cat && \
