@@ -348,7 +348,6 @@ entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t ty
     free(name);
     kill(chl);
 
-    // Bad input or out of memory.
     (void) PANIC(NULL);
     return NULL;
 }
@@ -410,7 +409,6 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
     free(name);
     free(entry);
 
-    // Bad input or out of memory.
     (void) PANIC(NULL);
     return NULL;
 }
@@ -467,12 +465,8 @@ entry_p new_cusref(char *name, int32_t line, entry_p arg)
 //------------------------------------------------------------------------------
 entry_p append(entry_p **dst, entry_p ent)
 {
-    if(!DBG_ADDR(ent) || !DBG_ADDR(dst) || !*DBG_ADDR(dst))
-    {
-        // Bad input.
-        (void) PANIC(NULL);
-        return NULL;
-    }
+    // Validate input.
+    ASSERT(ent && dst && *dst, NULL);
 
     // Start from the beginning.
     size_t num = 0;
@@ -566,7 +560,6 @@ entry_p merge(entry_p dst, entry_p src)
     }
     else
     {
-        // Bad input.
         (void) PANIC(NULL);
     }
 

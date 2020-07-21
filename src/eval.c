@@ -123,11 +123,8 @@ static entry_p h_resolve_option(entry_p option)
 //------------------------------------------------------------------------------
 entry_p resolve(entry_p entry)
 {
-    if(!entry && PANIC(entry))
-    {
-        // Bad input.
-        return end();
-    }
+    // Validate input.
+    ASSERT(entry, end());
 
     switch(entry->type)
     {
@@ -200,11 +197,8 @@ static int32_t opt_to_int(entry_p entry)
 //------------------------------------------------------------------------------
 int32_t num(entry_p entry)
 {
-    if(!entry && PANIC(entry))
-    {
-        // Bad input.
-        return 0;
-    }
+    // Validate input.
+    ASSERT(entry, 0);
 
     switch(entry->type)
     {
@@ -240,7 +234,6 @@ int32_t num(entry_p entry)
             break;
     }
 
-    // Bad input.
     PANIC(entry);
     return 0;
 }
@@ -255,11 +248,8 @@ int32_t num(entry_p entry)
 //------------------------------------------------------------------------------
 bool tru(entry_p entry)
 {
-    if(!entry && PANIC(entry))
-    {
-        // Bad input.
-        return false;
-    }
+    // Validate input.
+    ASSERT(entry, false);
 
     // Attempt to resolve it.
     entry_p val = resolve(entry);
@@ -353,11 +343,8 @@ static char *h_str_num(entry_p opt)
 //------------------------------------------------------------------------------
 char *str(entry_p entry)
 {
-    if(!entry && PANIC(entry))
-    {
-        // Bad input.
-        return "";
-    }
+    // Validate input.
+    ASSERT(entry, "");
 
     switch(entry->type)
     {
@@ -397,7 +384,6 @@ char *str(entry_p entry)
             break;
     }
 
-    // Bad input.
     PANIC(entry);
     return "";
 }
@@ -413,11 +399,8 @@ char *str(entry_p entry)
 //------------------------------------------------------------------------------
 entry_p invoke(entry_p entry)
 {
-    if(!entry && PANIC(entry))
-    {
-        // Bad input.
-        return end();
-    }
+    // Validate input.
+    ASSERT(entry, end());
 
     // Expect nothing.
     entry_p ret = end();

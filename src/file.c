@@ -92,11 +92,8 @@ entry_p n_expandpath(entry_p contxt)
 //------------------------------------------------------------------------------
 bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 {
-    if(!contxt && PANIC(NULL))
-    {
-        // Bad input.
-        return false;
-    }
+    // Validate input.
+    ASSERT(contxt, false);
 
     // By setting @yes, @skip or @abort user behaviour can be simulated.
     inp_t grc = get_num(contxt, "@abort") ? G_ABORT :
@@ -235,11 +232,8 @@ int32_t h_exists(const char *name)
 //------------------------------------------------------------------------------
 static const char *h_fileonly(entry_p contxt, const char *path)
 {
-    if(!path && PANIC(contxt))
-    {
-        // Bad input. Always return a valid string.
-        return "";
-    }
+    // Validate input.
+    ASSERT(path, "");
 
     size_t len = strlen(path);
 
@@ -405,12 +399,8 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
                          entry_p infos, const char *src, const char *dst)
 {
-    if(!contxt || !choices || !choices->children || !src || !dst)
-    {
-        // Bad input.
-        PANIC(contxt);
-        return NULL;
-    }
+    // Validate input.
+    ASSERT(contxt && choices && choices->children && src && dst, NULL);
 
     // Unless the parser is broken, we will have >= one child.
     entry_p *chl = choices->children;
@@ -531,13 +521,8 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                           const char *dst, entry_p files, entry_p fonts,
                           entry_p choices, entry_p pattern, entry_p infos)
 {
-    char *n_src = NULL, *n_dst = NULL;
-
-    if((!src || !dst) && PANIC(contxt))
-    {
-        // Bad input.
-        return NULL;
-    }
+    // Validate input.
+    ASSERT(src && dst, NULL);
 
     // File enumeration.
     if(choices)
@@ -559,6 +544,8 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
         // It's neither a directory or a file.
         return NULL;
     }
+
+    char *n_src = NULL, *n_dst = NULL;
 
     // Is source a directory?
     if(type == LG_DIR)
@@ -975,11 +962,8 @@ static bool h_protect_get_posix(const char *file, int32_t *mask)
 //------------------------------------------------------------------------------
 static bool h_protect_get(entry_p contxt, const char *file, int32_t *mask)
 {
-    if((!contxt || !mask || !file) && PANIC(contxt))
-    {
-        // Bad input.
-        return false;
-    }
+    // Validate input.
+    ASSERT(contxt && mask && file, false);
 
     // Delete protection support only on Amiga.
     #if defined(AMIGA)
@@ -1000,11 +984,8 @@ static bool h_protect_get(entry_p contxt, const char *file, int32_t *mask)
 //------------------------------------------------------------------------------
 static bool h_protect_set(entry_p contxt, const char *file, int32_t mask)
 {
-    if((!contxt || !file) && PANIC(contxt))
-    {
-        // Bad input.
-        return false;
-    }
+    // Validate input.
+    ASSERT(contxt && file, false);
 
     // On non Amiga systems, or in test mode, this is a stub.
     #if defined(AMIGA)
@@ -1044,11 +1025,8 @@ static bool h_protect_set(entry_p contxt, const char *file, int32_t mask)
 //------------------------------------------------------------------------------
 static bool h_copy_comment(entry_p contxt, const char *src, const char *dst)
 {
-    if(!src || !dst || !contxt)
-    {
-        // Bad input.
-        return false;
-    }
+    // Validate input.
+    ASSERT(contxt && src && dst, false);
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
@@ -1128,11 +1106,8 @@ static inp_t h_copyfile_reset(char *name)
 //------------------------------------------------------------------------------
 static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln)
 {
-    if((!contxt || !src || !dst) && PANIC(contxt))
-    {
-        // Bad input.
-        return G_ERR;
-    }
+    // Validate input.
+    ASSERT(contxt && src && dst, G_ERR);
 
     // GUI return code.
     inp_t grc = G_TRUE;
@@ -2161,11 +2136,8 @@ static bool h_delete_perm(const char *name)
 //------------------------------------------------------------------------------
 static int32_t h_delete_file(entry_p contxt, const char *file)
 {
-    if(!file && PANIC(contxt))
-    {
-        // Bad input.
-        return LG_FALSE;
-    }
+    // Validate input.
+    ASSERT(file, LG_FALSE);
 
     // If (force) is used, give permissions so that delete can succeed.
     if(opt(contxt, OPT_FORCE))
@@ -2220,11 +2192,8 @@ static int32_t h_delete_file(entry_p contxt, const char *file)
 //------------------------------------------------------------------------------
 static int32_t h_delete_dir(entry_p contxt, const char *name)
 {
-    if(!name && PANIC(contxt))
-    {
-        // Bad input.
-        return LG_FALSE;
-    }
+    // Validate input.
+    ASSERT(name, LG_FALSE);
 
     if(!opt(contxt, OPT_FORCE) && !h_delete_perm(name))
     {
@@ -2365,11 +2334,8 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
 //------------------------------------------------------------------------------
 static int32_t h_delete_pattern(entry_p contxt, const char *pat)
 {
-    if((!contxt || !pat) && PANIC(contxt))
-    {
-        // Bad input.
-        return LG_FALSE;
-    }
+    // Validate input.
+    ASSERT(contxt && pat, LG_FALSE);
 
     // Pattern matching is only done on Amiga systems in non test mode.
     #if defined(AMIGA) && !defined(LG_TEST)
@@ -3382,11 +3348,8 @@ void h_fclose(FILE **file)
 //------------------------------------------------------------------------------
 FILE *h_fopen(entry_p contxt, const char *name, const char *mode, bool force)
 {
-    if(!name || !mode)
-    {
-        // Bad input.
-        return NULL;
-    }
+    // Validate input.
+    ASSERT(contxt && name && mode, NULL);
 
     if(h_exists(name) == LG_DIR)
     {
@@ -3984,11 +3947,8 @@ entry_p n_rename(entry_p contxt)
 //------------------------------------------------------------------------------
 void h_log(entry_p contxt, const char *fmt, ...)
 {
-    if((!contxt || !fmt) && PANIC(contxt))
-    {
-        // Bad input.
-        return;
-    }
+    // Validate input.
+    ASSERT(contxt && fmt);
 
     if(!get_num(contxt, "@log"))
     {

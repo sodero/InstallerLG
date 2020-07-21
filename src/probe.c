@@ -436,54 +436,46 @@ entry_p n_getassign(entry_p contxt)
                     // Ignore case when looking for match.
                     if(!strcasecmp(asn, n))
                     {
-                        // Unlock doslist and allocate enough memory to hold any
-                        // path.
+                        // Unlock doslist and allocate memory to hold path.
                         char *r = DBG_ALLOC(calloc(PATH_MAX, 1));
                         UnLockDosList(msk);
 
-                        if(r)
+                        // Exit on OOM.
+                        ASSERT(r, end());
+
+                        // The form common to all types.
+                        snprintf(r, PATH_MAX, "%s:", n);
+
+                        // Logical assignments. Get full path from lock.
+                        if(bits[i] == LDF_ASSIGNS)
                         {
-                            // The form common to all types. Do we need to do
-                            // anything with LDF_VOLUMES?
-                            snprintf(r, PATH_MAX, "%s:", n);
+                            BPTR l = (BPTR) Lock(r, ACCESS_READ);
 
-                            // Logical assignments. Get the full path from the
-                            // lock.
-                            if(bits[i] == LDF_ASSIGNS)
+                            if(l)
                             {
-                                BPTR l = (BPTR) Lock(r, ACCESS_READ);
-
-                                if(l)
-                                {
-                                    NameFromLock(l, r, PATH_MAX);
-                                    UnLock(l);
-                                }
+                                NameFromLock(l, r, PATH_MAX);
+                                UnLock(l);
                             }
-                            // Devices. No other options than 'd' are allowed
-                            // in the options string for some reason (in the
-                            // CBM installer).
-                            else if(bits[i] == LDF_DEVICES)
-                            {
-                                if((bits[i] | LDF_READ) == msk)
-                                {
-                                    // Cut ':'.
-                                    r[asnl] = '\0';
-                                }
-                                else
-                                {
-                                    // Clear.
-                                    r[0] = '\0';
-                                }
-                            }
-
-                            // Success.
-                            R_STR(r);
                         }
-                        else
+                        // Devices. No other options than 'd' are allowed
+                        // in the options string for some reason (in the
+                        // CBM installer).
+                        else if(bits[i] == LDF_DEVICES)
                         {
-                            PANIC(contxt);
-                            return end();
+                            if((bits[i] | LDF_READ) == msk)
+                            {
+                                // Cut ':'.
+                                r[asnl] = '\0';
+                            }
+                            else
+                            {
+                                // Clear.
+                                r[0] = '\0';
+                            }
                         }
+
+                        // Success.
+                        R_STR(r);
                     }
                     else
                     {
