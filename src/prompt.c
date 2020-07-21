@@ -625,11 +625,8 @@ entry_p n_asknumber(entry_p contxt)
 
     if(range)
     {
-        if(!c_sane(range, 2) && PANIC(contxt))
-        {
-            // The parser is broken
-            return end();
-        }
+        // Assert a non-broken parser.
+        ASSERT(c_sane(range, 2), end());
 
         min = num(range->children[0]);
         max = num(range->children[1]);
