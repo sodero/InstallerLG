@@ -34,8 +34,7 @@ entry_p n_cat(entry_p contxt)
     C_SANE(1, NULL);
 
     // Start with a string length of LG_STRLEN.
-    size_t cnt = LG_STRLEN, len = 0, cur = 0;
-    char *buf = DBG_ALLOC(calloc(cnt + 1, 1));
+    char *buf = DBG_ALLOC(calloc(LG_STRLEN + 1, 1));
 
     if(!buf && PANIC(contxt))
     {
@@ -43,11 +42,11 @@ entry_p n_cat(entry_p contxt)
     }
 
     // Iterate over all arguments.
-    while(exists(contxt->children[cur]))
+    for(size_t cur = 0, len = 0, cnt = LG_STRLEN; exists(contxt->children[cur]);
+        cur++)
     {
         // Resolve the current argument.
-        const char *arg = str(contxt->children[cur++]);
-        size_t alen = strlen(arg);
+        const char *arg = str(contxt->children[cur]);
 
         // Return an empty string if argument couldn't be resolved.
         if(DID_ERR)
@@ -57,13 +56,15 @@ entry_p n_cat(entry_p contxt)
         }
 
         // Next argument if the current is empty.
+        size_t alen = strlen(arg);
+
         if(!alen)
         {
             continue;
         }
 
         // Increase the total string length.
-        len += strlen(arg);
+        len += alen;
 
         // Allocate a bigger buffer if necessary.
         if(len > cnt)

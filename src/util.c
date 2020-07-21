@@ -26,7 +26,7 @@
 void ror(entry_p *entry)
 {
     // Something to rotate?
-    if(!entry)
+    if(!DBG_ADDR(entry))
     {
         // Nope.
         return;
@@ -68,7 +68,7 @@ void ror(entry_p *entry)
 entry_p local(entry_p entry)
 {
     // Go upwards until we find what we're looking for, or hit the (broken) top.
-    for(entry_p contxt = entry; contxt; contxt = contxt->parent)
+    for(entry_p contxt = DBG_ADDR(entry); contxt; contxt = contxt->parent)
     {
         if(contxt->type == CONTXT || contxt->type == CUSTOM)
         {
@@ -126,7 +126,7 @@ entry_p global(entry_p entry)
 static entry_p parent(entry_p entry, type_t type)
 {
     // Check current level then go all the way up.
-    for(entry_p cur = entry; cur; cur = cur->parent)
+    for(entry_p cur = DBG_ADDR(entry); cur; cur = cur->parent)
     {
         // Is this parent of the correct type?
         if(cur->type == type)
