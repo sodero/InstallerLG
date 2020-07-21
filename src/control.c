@@ -163,18 +163,14 @@ static entry_p *h_retrace(entry_p contxt)
         return NULL;
     }
 
-    // We must be a child of our parent.
     entry_p *chl = contxt->parent->children;
 
-    if(!chl)
-    {
-        PANIC(contxt);
-        return NULL;
-    }
+    // Assert a non-broken parser.
+    ASSERT(chl, NULL);
 
     size_t pos = 0;
 
-    // Locate ourselves among the children.
+    // Locate ourselves among the children of our parent.
     while(chl[pos] != contxt)
     {
         pos++;

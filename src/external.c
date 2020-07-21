@@ -84,10 +84,8 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         // Command / script. Merge all and insert space between arguments.
         char *cmd = get_chlstr(contxt, true);
 
-        if(!cmd && PANIC(contxt))
-        {
-            return end();
-        }
+        // Exit on OOM.
+        ASSERT(cmd, end());
 
         // DOS / Arexx script?
         if(pre)

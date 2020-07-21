@@ -266,12 +266,8 @@ entry_p new_symref(char *name, int32_t line)
 //------------------------------------------------------------------------------
 static void move_contxt(entry_p dst, entry_p src)
 {
-    // Sanity check.
-    if(!dst || !src)
-    {
-        (void) PANIC(NULL);
-        return;
-    }
+    // Validate input.
+    ASSERT(src && dst);
 
     entry_p *sym = dst->symbols = src->symbols,
             *chl = dst->children = src->children;

@@ -324,10 +324,8 @@ static char *h_str_num(entry_p opt)
         opt->name = DBG_ALLOC(malloc(LG_NUMLEN));
     }
 
-    if(!opt->name && PANIC(opt))
-    {
-        return "";
-    }
+    // Exit on OOM.
+    ASSERT(opt->name, "");
 
     // Create formated string and return.
     snprintf(opt->name, LG_NUMLEN, "%d", opt->id);

@@ -136,10 +136,8 @@ static int32_t h_exists_amiga_type(const char *name)
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
-    if(!fib && PANIC(NULL))
-    {
-        return LG_NONE;
-    }
+    // Exit on OOM.
+    ASSERT(fib, LG_NONE);
 
     // Attempt to lock file or directory.
     BPTR lock = (BPTR) Lock(name, ACCESS_READ);
@@ -313,7 +311,7 @@ static char *h_suffix(const char *stem, const char *suffix)
 //              char *suffix:   Suffix to append.
 // Return:      entry_p:        New tail.
 //------------------------------------------------------------------------------
-static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
+static pnode_p h_suffix_append(pnode_p node, char *suffix)
 {
     // Make sure that we have a node and that it's the tail of the list.
     if(!node || node->next)
@@ -340,10 +338,8 @@ static pnode_p h_suffix_append(entry_p contxt, pnode_p node, char *suffix)
     // It's not necessary to check the return value.
     tail->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
-    if(!tail->next && PANIC(contxt))
-    {
-        return tail;
-    }
+    // Exit on OOM.
+    ASSERT(tail->next, tail);
 
     // New list tail.
     tail = tail->next;
@@ -408,10 +404,8 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
     // Create head node.
     pnode_p node = DBG_ALLOC(calloc(1, sizeof(struct pnode_t))), head = node;
 
-    if(!node && PANIC(contxt))
-    {
-        return NULL;
-    }
+    // Exit on OOM.
+    ASSERT(node, NULL);
 
     // We already know the type of the first element; it's a directory.
     node->name = DBG_ALLOC(strdup(src));
@@ -452,8 +446,8 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 
         // Create .info and .font nodes if necessary. No need to check node
         // pointer. Bounce and PANIC in h_suffix_append.
-        node = infos ? h_suffix_append(contxt, node, "info") : node;
-        node = fonts ? h_suffix_append(contxt, node, "font") : node;
+        node = infos ? h_suffix_append(node, "info") : node;
+        node = fonts ? h_suffix_append(node, "font") : node;
 
         // Traverse (old, if info or font) directory if applicable.
         if(type == LG_DIR && !h_dir_special(f_nam))
@@ -574,7 +568,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 
             // Create .info node if necessary. No need to check node pointer.
             // Bounce and PANIC in h_suffix_append.
-            node = infos ? h_suffix_append(contxt, node, "info") : node;
+            node = infos ? h_suffix_append(node, "info") : node;
 
             // Iterate over all entries in the source directory.
             while(entry)
@@ -880,7 +874,10 @@ static bool h_protect_get_amiga(entry_p contxt, const char *file, int32_t *mask)
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
-    if(*file == '\0' || (!fib && PANIC(contxt)))
+    // Exit on OOM.
+    ASSERT(fib, false);
+
+    if(*file == '\0')
     {
         return false;
     }
@@ -1032,11 +1029,8 @@ static bool h_copy_comment(entry_p contxt, const char *src, const char *dst)
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
-    if(!fib && PANIC(contxt))
-    {
-        // Out of memory.
-        return false;
-    }
+    // Exit on OOM.
+    ASSERT(fib, false);
 
     // Attempt to lock file or directory.
     BPTR lock = (BPTR) Lock(src, ACCESS_READ);
@@ -1311,10 +1305,8 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
 //------------------------------------------------------------------------------
 static bool h_makedir_create_icon(entry_p contxt, char *dst)
 {
-    if(!dst && PANIC(contxt))
-    {
-        return false;
-    }
+    // Validate input.
+    ASSERT(dst, false);
 
     // Don't overwrite existing icons.
     if(h_exists(h_suffix(dst, "info")) == LG_FILE)
@@ -1409,10 +1401,8 @@ static bool h_makedir_path(char *dst)
 //------------------------------------------------------------------------------
 static bool h_makedir(entry_p contxt, char *dst)
 {
-    if(!dst && PANIC(contxt))
-    {
-        return false;
-    }
+    // Validate input.
+    ASSERT(dst, false);
 
     // Make full path if it doesn't exist.
     if(!h_makedir_path(dst))
@@ -2341,10 +2331,8 @@ static int32_t h_delete_pattern(entry_p contxt, const char *pat)
     #if defined(AMIGA) && !defined(LG_TEST)
     struct AnchorPath *apt = calloc(1, sizeof(struct AnchorPath) + PATH_MAX);
 
-    if(!apt && PANIC(contxt))
-    {
-        return LG_FALSE;
-    }
+    // Exit on OOM.
+    ASSERT(apt, LG_FALSE);
 
     apt->ap_Strlen = PATH_MAX;
     int err;
