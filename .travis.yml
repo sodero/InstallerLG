@@ -10,3 +10,4 @@ addons:
   apt:
     packages:
       - valgrind
+      - clang-tools

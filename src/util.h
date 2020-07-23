@@ -87,7 +87,8 @@ DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
 #else
 #define DBG_DOPEN(F) F
 #endif
-#define ASSERT(S,...) if(!(S) && PANIC(NULL)) return __VA_ARGS__
+#define VOID
+#define ASSERT(S,R) if(!(S) && PANIC(NULL)) return R
 
 //------------------------------------------------------------------------------
 // Utility macros.
@@ -114,7 +115,7 @@ DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
                     return end();}  {entry_p op_ = O; if(op_ != NULL &&\
                     opt(O,OPT_INIT) != NULL && DID_ERR) {return end();}}
 #else
-#define C_SANE(N,O) if(O && opt(O, OPT_INIT) && DID_ERR) return end();
+#define C_SANE(N,O) return end();
 #endif
 #define S_SANE(N) if(!s_sane(contxt, N)) {(void) PANIC(contxt); return end();}
 #ifdef __AROS__
