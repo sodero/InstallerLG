@@ -303,6 +303,10 @@ int main(int argc, char **argv)
                 // 1 on syntax error, 0 on success.
                 ret = yyparse(lexer);
 
+                #ifndef AMIGA
+                (void) ret;
+                #endif
+
                 // Input is still open if the parser returns before EOF.
                 if(script)
                 {
