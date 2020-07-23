@@ -90,11 +90,11 @@ gui.o: gui.c gui.h version.h
 #---------------------------------------------------------------------------------#
 .PHONY: cat
 cat:
-	for CAT in $(subst .ct,,$(notdir $(wildcard $(VPATH)/*.ct))); do \
+	for CAT in $(subst .ct,,$(notdir $(wildcard ../catalogs/*.ct))); do \
 	mkdir -p Catalogs/$$CAT && \
-	catcomp $(DD)/src/$(APP).cd TRANSLATION $(DD)/src/$$CAT.ct \
+	catcomp $(DD)/catalogs/$(APP).cd TRANSLATION $(DD)/catalogs/$$CAT.ct \
             CATALOG Catalogs/$$CAT/$(APP).catalog 2> /dev/null || \
-	flexcat $(DD)/src/$(APP).cd $(DD)/src/$$CAT.ct \
+	flexcat $(DD)/catalogs/$(APP).cd $(DD)/catalogs/$$CAT.ct \
             CATALOG Catalogs/$$CAT/$(APP).catalog || \
 	rm -Rf Catalogs; done
 
