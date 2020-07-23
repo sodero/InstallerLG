@@ -267,7 +267,7 @@ entry_p new_symref(char *name, int32_t line)
 static void move_contxt(entry_p dst, entry_p src)
 {
     // Validate input.
-    ASSERT(src && dst);
+    ASSERT(src && dst, VOID);
 
     entry_p *sym = dst->symbols = src->symbols,
             *chl = dst->children = src->children;

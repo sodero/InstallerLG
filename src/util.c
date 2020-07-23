@@ -555,7 +555,7 @@ void set_num(entry_p contxt, char *var, int32_t val)
     static entry_t ref = { .type = SYMREF };
 
     // Validate input.
-    ASSERT(contxt && var);
+    ASSERT(contxt && var, VOID);
 
     // Name and reparent.
     ref.parent = contxt;
@@ -846,7 +846,7 @@ char *get_chlstr(entry_p contxt, bool pad)
 void set_str(entry_p contxt, char *var, char *val)
 {
     // Validate input.
-    ASSERT(contxt && var);
+    ASSERT(contxt && var, VOID);
 
     // Dummy reference used for searching.
     static entry_t ref = { .type = SYMREF };

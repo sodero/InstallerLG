@@ -3936,7 +3936,7 @@ entry_p n_rename(entry_p contxt)
 void h_log(entry_p contxt, const char *fmt, ...)
 {
     // Validate input.
-    ASSERT(contxt && fmt);
+    ASSERT(contxt && fmt, VOID);
 
     if(!get_num(contxt, "@log"))
     {
