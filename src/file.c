@@ -1315,6 +1315,7 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
     }
 
     #if defined(AMIGA) && !defined(LG_TEST)
+    (void) contxt;
     // Get the default drawer icon from the OS.
     struct DiskObject *obj = (struct DiskObject *) GetDefDiskObject(WBDRAWER);
     #else
