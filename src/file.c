@@ -1315,6 +1315,7 @@ static bool h_makedir_create_icon(entry_p contxt, char *dst)
     }
 
     #if defined(AMIGA) && !defined(LG_TEST)
+    (void) contxt;
     // Get the default drawer icon from the OS.
     struct DiskObject *obj = (struct DiskObject *) GetDefDiskObject(WBDRAWER);
     #else
@@ -3936,7 +3937,7 @@ entry_p n_rename(entry_p contxt)
 void h_log(entry_p contxt, const char *fmt, ...)
 {
     // Validate input.
-    ASSERT(contxt && fmt);
+    ASSERT(contxt && fmt, VOID);
 
     if(!get_num(contxt, "@log"))
     {
