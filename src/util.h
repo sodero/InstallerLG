@@ -87,8 +87,8 @@ DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
 #else
 #define DBG_DOPEN(F) F
 #endif
-#define VOID
-#define ASSERT(S,R) if(!(S) && PANIC(NULL)) return R
+#define LG_VOID
+#define LG_ASSERT(S,R) if(!(S) && PANIC(NULL)) return R
 
 //------------------------------------------------------------------------------
 // Utility macros.

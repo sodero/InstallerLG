@@ -93,7 +93,7 @@ entry_p n_expandpath(entry_p contxt)
 bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
 {
     // Validate input.
-    ASSERT(contxt, false);
+    LG_ASSERT(contxt, false);
 
     // By setting @yes, @skip or @abort user behaviour can be simulated.
     inp_t grc = get_num(contxt, "@abort") ? G_ABORT :
@@ -137,7 +137,7 @@ static int32_t h_exists_amiga_type(const char *name)
            AllocDosObject(DOS_FIB, NULL);
 
     // Exit on OOM.
-    ASSERT(fib, LG_NONE);
+    LG_ASSERT(fib, LG_NONE);
 
     // Attempt to lock file or directory.
     BPTR lock = (BPTR) Lock(name, ACCESS_READ);
@@ -231,7 +231,7 @@ int32_t h_exists(const char *name)
 static const char *h_fileonly(entry_p contxt, const char *path)
 {
     // Validate input.
-    ASSERT(path, "");
+    LG_ASSERT(path, "");
 
     size_t len = strlen(path);
 
@@ -268,7 +268,7 @@ static const char *h_fileonly(entry_p contxt, const char *path)
 static char *h_suffix(const char *stem, const char *suffix)
 {
     // Validate input.
-    ASSERT(stem && suffix, "");
+    LG_ASSERT(stem && suffix, "");
 
     // Copy file or directory stem.
     strncpy(buf_get(B_KEY), stem, buf_len());
@@ -311,7 +311,7 @@ static char *h_suffix(const char *stem, const char *suffix)
 static pnode_p h_suffix_append(pnode_p node, char *suffix)
 {
     // Node should be the tail of the list.
-    ASSERT(node && !node->next, node);
+    LG_ASSERT(node && !node->next, node);
 
     // Save type of the result, it might not be the same as the non suffixed
     // entry (e.g mydir -> mydir.info).
@@ -333,7 +333,7 @@ static pnode_p h_suffix_append(pnode_p node, char *suffix)
     tail->next = DBG_ALLOC(calloc(1, sizeof(struct pnode_t)));
 
     // Exit on OOM.
-    ASSERT(tail->next, tail);
+    LG_ASSERT(tail->next, tail);
 
     // New list tail.
     tail = tail->next;
@@ -390,7 +390,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
                          entry_p infos, const char *src, const char *dst)
 {
     // Validate input.
-    ASSERT(contxt && choices && choices->children && src && dst, NULL);
+    LG_ASSERT(contxt && choices && choices->children && src && dst, NULL);
 
     // Unless the parser is broken, we will have >= one child.
     entry_p *chl = choices->children;
@@ -399,7 +399,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
     pnode_p node = DBG_ALLOC(calloc(1, sizeof(struct pnode_t))), head = node;
 
     // Exit on OOM.
-    ASSERT(node, NULL);
+    LG_ASSERT(node, NULL);
 
     // We already know the type of the first element; it's a directory.
     node->name = DBG_ALLOC(strdup(src));
@@ -483,7 +483,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 static void h_dclose(DIR **dir)
 {
     // Validate input.
-    ASSERT(dir, VOID);
+    LG_ASSERT(dir, LG_VOID);
 
     // NULL is allowed.
     if(*dir)
@@ -514,7 +514,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
                           entry_p choices, entry_p pattern, entry_p infos)
 {
     // Validate input.
-    ASSERT(src && dst, NULL);
+    LG_ASSERT(src && dst, NULL);
 
     // File enumeration.
     if(choices)
@@ -871,7 +871,7 @@ static bool h_protect_get_amiga(entry_p contxt, const char *file, int32_t *mask)
            AllocDosObject(DOS_FIB, NULL);
 
     // Exit on OOM.
-    ASSERT(fib, false);
+    LG_ASSERT(fib, false);
 
     if(*file == '\0')
     {
@@ -956,7 +956,7 @@ static bool h_protect_get_posix(const char *file, int32_t *mask)
 static bool h_protect_get(entry_p contxt, const char *file, int32_t *mask)
 {
     // Validate input.
-    ASSERT(contxt && mask && file, false);
+    LG_ASSERT(contxt && mask && file, false);
 
     // Delete protection support only on Amiga.
     #if defined(AMIGA)
@@ -978,7 +978,7 @@ static bool h_protect_get(entry_p contxt, const char *file, int32_t *mask)
 static bool h_protect_set(entry_p contxt, const char *file, int32_t mask)
 {
     // Validate input.
-    ASSERT(contxt && file, false);
+    LG_ASSERT(contxt && file, false);
 
     // On non Amiga systems, or in test mode, this is a stub.
     #if defined(AMIGA)
@@ -1019,14 +1019,14 @@ static bool h_protect_set(entry_p contxt, const char *file, int32_t mask)
 static bool h_copy_comment(entry_p contxt, const char *src, const char *dst)
 {
     // Validate input.
-    ASSERT(contxt && src && dst, false);
+    LG_ASSERT(contxt && src && dst, false);
 
     #if defined(AMIGA) && !defined(LG_TEST)
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
     // Exit on OOM.
-    ASSERT(fib, false);
+    LG_ASSERT(fib, false);
 
     // Attempt to lock file or directory.
     BPTR lock = (BPTR) Lock(src, ACCESS_READ);
@@ -1097,7 +1097,7 @@ static inp_t h_copyfile_reset(char *name)
 static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln)
 {
     // Validate input.
-    ASSERT(contxt && src && dst, G_ERR);
+    LG_ASSERT(contxt && src && dst, G_ERR);
 
     // GUI return code.
     inp_t grc = G_TRUE;
@@ -1302,7 +1302,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
 static bool h_makedir_create_icon(entry_p contxt, char *dst)
 {
     // Validate input.
-    ASSERT(dst, false);
+    LG_ASSERT(dst, false);
 
     // Don't overwrite existing icons.
     if(h_exists(h_suffix(dst, "info")) == LG_FILE)
@@ -1399,7 +1399,7 @@ static bool h_makedir_path(char *dst)
 static bool h_makedir(entry_p contxt, char *dst)
 {
     // Validate input.
-    ASSERT(dst, false);
+    LG_ASSERT(dst, false);
 
     // Make full path if it doesn't exist.
     if(!h_makedir_path(dst))
@@ -2089,7 +2089,7 @@ static bool h_delete_perm(const char *name)
            AllocDosObject(DOS_FIB, NULL);
 
     // Exit on OOM.
-    ASSERT(fib, false);
+    LG_ASSERT(fib, false);
 
     // Attempt to lock file or directory.
     BPTR lock = (BPTR) Lock(name, ACCESS_READ);
@@ -2122,7 +2122,7 @@ static bool h_delete_perm(const char *name)
 static int32_t h_delete_file(entry_p contxt, const char *file)
 {
     // Validate input.
-    ASSERT(file, LG_FALSE);
+    LG_ASSERT(file, LG_FALSE);
 
     // If (force) is used, give permissions so that delete can succeed.
     if(opt(contxt, OPT_FORCE))
@@ -2178,7 +2178,7 @@ static int32_t h_delete_file(entry_p contxt, const char *file)
 static int32_t h_delete_dir(entry_p contxt, const char *name)
 {
     // Validate input.
-    ASSERT(name, LG_FALSE);
+    LG_ASSERT(name, LG_FALSE);
 
     if(!opt(contxt, OPT_FORCE) && !h_delete_perm(name))
     {
@@ -2320,14 +2320,14 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
 static int32_t h_delete_pattern(entry_p contxt, const char *pat)
 {
     // Validate input.
-    ASSERT(contxt && pat, LG_FALSE);
+    LG_ASSERT(contxt && pat, LG_FALSE);
 
     // Pattern matching is only done on Amiga systems in non test mode.
     #if defined(AMIGA) && !defined(LG_TEST)
     struct AnchorPath *apt = calloc(1, sizeof(struct AnchorPath) + PATH_MAX);
 
     // Exit on OOM.
-    ASSERT(apt, LG_FALSE);
+    LG_ASSERT(apt, LG_FALSE);
 
     apt->ap_Strlen = PATH_MAX;
     int err;
@@ -3013,7 +3013,7 @@ entry_p n_protect(entry_p contxt)
     }
 
     // Assert a non-broken parser
-    ASSERT(args == 2, end());
+    LG_ASSERT(args == 2, end());
 
     // File name and permission mask / delta. Set file permissions.
     R_NUM(h_protect_arg_set(contxt));
@@ -3309,7 +3309,7 @@ static void h_copy_simple(entry_p contxt, FILE *src, FILE *dst, const char *nfo)
 void h_fclose(FILE **file)
 {
     // Validate input.
-    ASSERT(file, VOID);
+    LG_ASSERT(file, LG_VOID);
 
     // NULL is allowed.
     if(*file)
@@ -3332,7 +3332,7 @@ void h_fclose(FILE **file)
 FILE *h_fopen(entry_p contxt, const char *name, const char *mode, bool force)
 {
     // Validate input.
-    ASSERT(contxt && name && mode, NULL);
+    LG_ASSERT(contxt && name && mode, NULL);
 
     if(h_exists(name) == LG_DIR)
     {
@@ -3385,7 +3385,7 @@ static int32_t h_textfile_append(entry_p contxt, const char *name)
     char *app = get_optstr(contxt, OPT_APPEND);
 
     // Exit on OOM.
-    ASSERT(app, LG_FALSE);
+    LG_ASSERT(app, LG_FALSE);
 
     if(DID_ERR)
     {
@@ -3935,7 +3935,7 @@ entry_p n_rename(entry_p contxt)
 void h_log(entry_p contxt, const char *fmt, ...)
 {
     // Validate input.
-    ASSERT(contxt && fmt, VOID);
+    LG_ASSERT(contxt && fmt, LG_VOID);
 
     if(!get_num(contxt, "@log"))
     {

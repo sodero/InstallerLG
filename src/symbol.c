@@ -26,7 +26,7 @@ static entry_p h_copy_deep(entry_p entry)
     entry_p copy = DBG_ALLOC(malloc(sizeof(entry_t)));
 
     // Exit on OOM.
-    ASSERT(copy, NULL);
+    LG_ASSERT(copy, NULL);
 
     // Do a straight copy of everything.
     memmove(copy, entry, sizeof(entry_t));

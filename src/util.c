@@ -555,7 +555,7 @@ void set_num(entry_p contxt, char *var, int32_t val)
     static entry_t ref = { .type = SYMREF };
 
     // Validate input.
-    ASSERT(contxt && var, VOID);
+    LG_ASSERT(contxt && var, LG_VOID);
 
     // Name and reparent.
     ref.parent = contxt;
@@ -586,7 +586,7 @@ void set_num(entry_p contxt, char *var, int32_t val)
 int32_t get_num(entry_p contxt, char *var)
 {
     // Validate input.
-    ASSERT(contxt && var, 0);
+    LG_ASSERT(contxt && var, 0);
 
     // Dummy reference used for searching.
     static entry_t ref = { .type = SYMREF };
@@ -623,7 +623,7 @@ int32_t get_num(entry_p contxt, char *var)
 char *get_str(entry_p contxt, char *var)
 {
     // Validate input.
-    ASSERT(contxt && var, "");
+    LG_ASSERT(contxt && var, "");
 
     // Dummy reference used to find the variable.
     static entry_t ref = { .type = SYMREF };
@@ -683,7 +683,7 @@ char *get_optstr(entry_p contxt, opt_t type)
     char **val = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
 
     // Exit on OOM.
-    ASSERT(val, NULL);
+    LG_ASSERT(val, NULL);
 
     // Empty string.
     child = contxt->children;
@@ -846,7 +846,7 @@ char *get_chlstr(entry_p contxt, bool pad)
 void set_str(entry_p contxt, char *var, char *val)
 {
     // Validate input.
-    ASSERT(contxt && var, VOID);
+    LG_ASSERT(contxt && var, LG_VOID);
 
     // Dummy reference used for searching.
     static entry_t ref = { .type = SYMREF };

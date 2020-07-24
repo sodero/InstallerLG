@@ -124,7 +124,7 @@ static entry_p h_resolve_option(entry_p option)
 entry_p resolve(entry_p entry)
 {
     // Validate input.
-    ASSERT(entry, end());
+    LG_ASSERT(entry, end());
 
     switch(entry->type)
     {
@@ -198,7 +198,7 @@ static int32_t opt_to_int(entry_p entry)
 int32_t num(entry_p entry)
 {
     // Validate input.
-    ASSERT(entry, 0);
+    LG_ASSERT(entry, 0);
 
     switch(entry->type)
     {
@@ -249,7 +249,7 @@ int32_t num(entry_p entry)
 bool tru(entry_p entry)
 {
     // Validate input.
-    ASSERT(entry, false);
+    LG_ASSERT(entry, false);
 
     // Attempt to resolve it.
     entry_p val = resolve(entry);
@@ -325,7 +325,7 @@ static char *h_str_num(entry_p opt)
     }
 
     // Exit on OOM.
-    ASSERT(opt->name, "");
+    LG_ASSERT(opt->name, "");
 
     // Create formated string and return.
     snprintf(opt->name, LG_NUMLEN, "%d", opt->id);
@@ -342,7 +342,7 @@ static char *h_str_num(entry_p opt)
 char *str(entry_p entry)
 {
     // Validate input.
-    ASSERT(entry, "");
+    LG_ASSERT(entry, "");
 
     switch(entry->type)
     {
@@ -398,7 +398,7 @@ char *str(entry_p entry)
 entry_p invoke(entry_p entry)
 {
     // Validate input.
-    ASSERT(entry, end());
+    LG_ASSERT(entry, end());
 
     // Expect nothing.
     entry_p ret = end();

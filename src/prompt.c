@@ -626,7 +626,7 @@ entry_p n_asknumber(entry_p contxt)
     if(range)
     {
         // Assert a non-broken parser.
-        ASSERT(c_sane(range, 2), end());
+        LG_ASSERT(c_sane(range, 2), end());
 
         min = num(range->children[0]);
         max = num(range->children[1]);
