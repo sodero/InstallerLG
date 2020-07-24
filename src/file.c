@@ -267,11 +267,8 @@ static const char *h_fileonly(entry_p contxt, const char *path)
 //------------------------------------------------------------------------------
 static char *h_suffix(const char *stem, const char *suffix)
 {
-    // Don't trust the input.
-    if(!stem || !suffix)
-    {
-        return "";
-    }
+    // Validate input.
+    ASSERT(stem && suffix, "");
 
     // Copy file or directory stem.
     strncpy(buf_get(B_KEY), stem, buf_len());
@@ -313,11 +310,8 @@ static char *h_suffix(const char *stem, const char *suffix)
 //------------------------------------------------------------------------------
 static pnode_p h_suffix_append(pnode_p node, char *suffix)
 {
-    // Make sure that we have a node and that it's the tail of the list.
-    if(!node || node->next)
-    {
-        return node;
-    }
+    // Node should be the tail of the list.
+    ASSERT(node && !node->next, node);
 
     // Save type of the result, it might not be the same as the non suffixed
     // entry (e.g mydir -> mydir.info).
@@ -488,7 +482,11 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
 //------------------------------------------------------------------------------
 static void h_dclose(DIR **dir)
 {
-    if(dir && *dir)
+    // Validate input.
+    ASSERT(dir, VOID);
+
+    // NULL is allowed.
+    if(*dir)
     {
         (void) closedir(*dir);
         *dir = NULL;
@@ -788,8 +786,6 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
         free(head);
         free(file);
     }
-
-    PANIC(contxt);
 
     free(n_src);
     free(n_dst);
@@ -2092,10 +2088,8 @@ static bool h_delete_perm(const char *name)
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
-    if(!fib)
-    {
-        return false;
-    }
+    // Exit on OOM.
+    ASSERT(fib, false);
 
     // Attempt to lock file or directory.
     BPTR lock = (BPTR) Lock(name, ACCESS_READ);
@@ -3018,15 +3012,11 @@ entry_p n_protect(entry_p contxt)
         R_NUM(h_protect_arg_get(contxt));
     }
 
-    // File name and permission mask / delta. Set file permissions.
-    if(args == 2)
-    {
-        R_NUM(h_protect_arg_set(contxt));
-    }
+    // Assert a non-broken parser
+    ASSERT(args == 2, end());
 
-    // Broken parser.
-    PANIC(contxt);
-    return end();
+    // File name and permission mask / delta. Set file permissions.
+    R_NUM(h_protect_arg_set(contxt));
 }
 
 //------------------------------------------------------------------------------
@@ -3318,7 +3308,11 @@ static void h_copy_simple(entry_p contxt, FILE *src, FILE *dst, const char *nfo)
 //------------------------------------------------------------------------------
 void h_fclose(FILE **file)
 {
-    if(file && *file)
+    // Validate input.
+    ASSERT(file, VOID);
+
+    // NULL is allowed.
+    if(*file)
     {
         (void) fclose(*file);
         *file = NULL;
@@ -3390,8 +3384,12 @@ static int32_t h_textfile_append(entry_p contxt, const char *name)
     // Gather and merge all (append) strings.
     char *app = get_optstr(contxt, OPT_APPEND);
 
-    if(DID_ERR || (!app && PANIC(contxt)))
+    // Exit on OOM.
+    ASSERT(app, LG_FALSE);
+
+    if(DID_ERR)
     {
+        // Could not resolve children.
         free(app);
         return LG_FALSE;
     }

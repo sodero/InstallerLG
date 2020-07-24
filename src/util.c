@@ -911,7 +911,7 @@ static void dump_indent(entry_p entry, size_t indent)
      // Natives and cusrefs have callbacks.
     if(entry->call)
     {
-        DBG("%sCall:\t%p\n", type, (void *) entry->call);
+        DBG("%sCall:\t%d\n", type, entry->call != NULL);
     }
 
     // Functions / symbols can be 'resolved'.
