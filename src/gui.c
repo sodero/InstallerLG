@@ -22,6 +22,8 @@
 # ifndef __MORPHOS__
 #  ifndef __VBCC__
 #include <proto/debug.h>
+#  else
+#include <datatypes/datatypesclass.h>
 #  endif
 # else
 #include <clib/debug_protos.h>
@@ -67,6 +69,7 @@
 # ifndef __VBCC__
 # define DoSuperNew(C,O,...) DoSuperNewTags(C,O,NULL,__VA_ARGS__)
 #else
+typedef unsigned long IPTR;
 APTR STDARGS DoSuperNew(struct IClass *cl, APTR obj, IPTR tag1, ...)
 {
 	return (IPTR) DoSuperMethod(cl, obj, OM_NEW, &tag1, NULL);
