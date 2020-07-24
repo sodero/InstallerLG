@@ -441,7 +441,7 @@ entry_p n_getassign(entry_p contxt)
                         UnLockDosList(msk);
 
                         // Exit on OOM.
-                        ASSERT(r, end());
+                        LG_ASSERT(r, end());
 
                         // The form common to all types.
                         snprintf(r, PATH_MAX, "%s:", n);

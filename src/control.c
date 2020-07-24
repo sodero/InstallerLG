@@ -166,7 +166,7 @@ static entry_p *h_retrace(entry_p contxt)
     entry_p *chl = contxt->parent->children;
 
     // Assert a non-broken parser.
-    ASSERT(chl, NULL);
+    LG_ASSERT(chl, NULL);
 
     size_t pos = 0;
 

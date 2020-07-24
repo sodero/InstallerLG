@@ -72,7 +72,7 @@ static entry_p h_gosub_fmt(entry_p contxt)
 entry_p n_gosub(entry_p contxt)
 {
     // Assert a non-broken parser.
-    ASSERT(s_sane(global(contxt), 0), end());
+    LG_ASSERT(s_sane(global(contxt), 0), end());
 
     // Search for a procedure that matches the reference name.
     for(entry_p *cus = global(contxt)->symbols; exists(*cus); cus++)
@@ -106,7 +106,7 @@ entry_p n_gosub(entry_p contxt)
                 entry_p res = DBG_ALLOC(malloc(sizeof(entry_t)));
 
                 // Exit on OOM.
-                ASSERT(res, end());
+                LG_ASSERT(res, end());
 
                 // Copy and free the resources from the last invocation, if any.
                 memmove(res, resolve(*ina), sizeof(entry_t));

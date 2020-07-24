@@ -122,6 +122,7 @@ Russian translation.
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{B}0.1.0-alpha.51 (2020-NOT-YET)@{UB}
+- Single argument bitwise operations allowed (FIXME: APP_NAME).
 - ?
 
 @{B}0.1.0-alpha.50 (2020-07-19)@{UB}

@@ -85,7 +85,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         char *cmd = get_chlstr(contxt, true);
 
         // Exit on OOM.
-        ASSERT(cmd, end());
+        LG_ASSERT(cmd, end());
 
         // DOS / Arexx script?
         if(pre)

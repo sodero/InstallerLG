@@ -406,10 +406,10 @@ working:        '(' WORKING ps ')'               { $$ = new_native(DBG_ALLOC(str
 /* logic.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 and:            '(' AND ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("AND")), LINE, n_and, $3, NUMBER); };
-bitand:         '(' BITAND pp ')'                { $$ = new_native(DBG_ALLOC(strdup("BITAND")), LINE, n_bitand, $3, NUMBER); };
+bitand:         '(' BITAND ps ')'                { $$ = new_native(DBG_ALLOC(strdup("BITAND")), LINE, n_bitand, $3, NUMBER); };
 bitnot:         '(' BITNOT p ')'                 { $$ = new_native(DBG_ALLOC(strdup("BITNOT")), LINE, n_bitnot, push(new_contxt(), $3), NUMBER); };
-bitor:          '(' BITOR pp ')'                 { $$ = new_native(DBG_ALLOC(strdup("BITOR")), LINE, n_bitor, $3, NUMBER); };
-bitxor:         '(' BITXOR pp ')'                { $$ = new_native(DBG_ALLOC(strdup("BITXOR")), LINE, n_bitxor, $3, NUMBER); };
+bitor:          '(' BITOR ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("BITOR")), LINE, n_bitor, $3, NUMBER); };
+bitxor:         '(' BITXOR ps ')'                { $$ = new_native(DBG_ALLOC(strdup("BITXOR")), LINE, n_bitxor, $3, NUMBER); };
 not:            '(' NOT p ')'                    { $$ = new_native(DBG_ALLOC(strdup("NOT")), LINE, n_not, push(new_contxt(), $3), NUMBER); };
 in:             '(' IN p ps ')'                  { $$ = new_native(DBG_ALLOC(strdup("IN")), LINE, n_in, push(push(new_contxt(), $3), $4), NUMBER); };
 or:             '(' OR ps ')'                    { $$ = new_native(DBG_ALLOC(strdup("OR")), LINE, n_or, $3, NUMBER); };

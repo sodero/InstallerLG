@@ -267,7 +267,7 @@ entry_p new_symref(char *name, int32_t line)
 static void move_contxt(entry_p dst, entry_p src)
 {
     // Validate input.
-    ASSERT(src && dst, VOID);
+    LG_ASSERT(src && dst, LG_VOID);
 
     entry_p *sym = dst->symbols = src->symbols,
             *chl = dst->children = src->children;
@@ -462,7 +462,7 @@ entry_p new_cusref(char *name, int32_t line, entry_p arg)
 entry_p append(entry_p **dst, entry_p ent)
 {
     // Validate input.
-    ASSERT(ent && dst && *dst, NULL);
+    LG_ASSERT(ent && dst && *dst, NULL);
 
     // Start from the beginning.
     size_t num = 0;

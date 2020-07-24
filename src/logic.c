@@ -45,14 +45,26 @@ entry_p n_and(entry_p contxt)
 //     returns bitwise `AND' of `<expr1>' and `<expr2>'
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+//
+// Contrary to what the documentation says, the 3.9 implementation supports any
+// number of arguments greater than 0, including 1 (which doesn't make sense).
 //------------------------------------------------------------------------------
 entry_p n_bitand(entry_p contxt)
 {
-    // Two arguments.
-    C_SANE(2, NULL);
+    // One or more arguments.
+    C_SANE(1, NULL);
+
+    // Set initial value to that of the first argument.
+    uint32_t res = num(C_ARG(1));
+
+    // AND the rest of the arguments, if any.
+    for(size_t arg = 2; exists(C_ARG(arg)); arg++)
+    {
+        res &= num(C_ARG(arg));
+    }
 
     // Set and return.
-    R_NUM(num(C_ARG(1)) & num(C_ARG(2)));
+    R_NUM(res);
 }
 
 //------------------------------------------------------------------------------
@@ -75,14 +87,27 @@ entry_p n_bitnot(entry_p contxt)
 //     returns bitwise `OR' of `<expr1>' and `<expr2>'
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+//
+// Contrary to what the documentation says, the 3.9 implementation supports any
+// number of arguments greater than 0, including 1 (which doesn't make sense).
 //------------------------------------------------------------------------------
 entry_p n_bitor(entry_p contxt)
 {
-    // Two arguments.
-    C_SANE(2, NULL);
+    // One or more arguments.
+    C_SANE(1, NULL);
+
+    // Set initial value to that of the first argument.
+    uint32_t res = num(C_ARG(1));
+
+    // Apply the mask of the rest of the arguments, if any.
+    for(size_t arg = 2; exists(C_ARG(arg)); arg++)
+    {
+        res |= num(C_ARG(arg));
+    }
 
     // Set and return.
-    R_NUM(num(C_ARG(1)) | num(C_ARG(2)));
+    R_NUM(res);
+
 }
 
 //------------------------------------------------------------------------------
@@ -90,14 +115,26 @@ entry_p n_bitor(entry_p contxt)
 //     returns bitwise `XOR' of `<expr1>' and `<expr2>'
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+//
+// Contrary to what the documentation says, the 3.9 implementation supports any
+// number of arguments greater than 0, including 1 (which doesn't make sense).
 //------------------------------------------------------------------------------
 entry_p n_bitxor(entry_p contxt)
 {
-    // Two arguments.
-    C_SANE(2, NULL);
+     // One or more arguments.
+    C_SANE(1, NULL);
+
+    // Set initial value to that of the first argument.
+    uint32_t res = num(C_ARG(1));
+
+    // XOR the rest of the arguments, if any.
+    for(size_t arg = 2; exists(C_ARG(arg)); arg++)
+    {
+        res ^= num(C_ARG(arg));
+    }
 
     // Set and return.
-    R_NUM(num(C_ARG(1)) ^ num(C_ARG(2)));
+    R_NUM(res);
 }
 
 //------------------------------------------------------------------------------

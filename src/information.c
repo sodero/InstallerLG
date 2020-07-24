@@ -281,7 +281,7 @@ entry_p n_working(entry_p contxt)
     char *msg = get_chlstr(contxt, false);
 
     // Exit on OOM.
-    ASSERT(msg, end());
+    LG_ASSERT(msg, end());
 
     // Did we fail while resolving one or more of our children?
     if(DID_ERR)

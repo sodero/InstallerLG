@@ -37,7 +37,7 @@ entry_p n_cat(entry_p contxt)
     char *buf = DBG_ALLOC(calloc(LG_STRLEN + 1, 1));
 
     // Exit on OOM.
-    ASSERT(buf, end());
+    LG_ASSERT(buf, end());
 
     // Iterate over all arguments.
     for(size_t cur = 0, len = 0, cnt = LG_STRLEN; exists(contxt->children[cur]);
@@ -265,7 +265,7 @@ entry_p n_fmt(entry_p contxt)
     size_t len = n_fmt_new_buffer(contxt, &args, &res);
 
     // Exit on OOM.
-    ASSERT(len, end());
+    LG_ASSERT(len, end());
 
     // The scan can never fail.
     h_fmt_scan(args, res, len, contxt->name);
@@ -332,7 +332,7 @@ entry_p n_pathonly(entry_p contxt)
     char *path = h_pathonly(str(C_ARG(1)));
 
     // Exit on OOM.
-    ASSERT(path, end());
+    LG_ASSERT(path, end());
 
     R_STR(path);
 }
@@ -416,7 +416,7 @@ entry_p n_substr(entry_p contxt)
         char *ret = DBG_ALLOC(calloc((size_t) len + 1, 1));
 
         // Exit on OOM.
-        ASSERT(ret, end());
+        LG_ASSERT(ret, end());
 
         // Cap values, set and return.
         len -= off;
@@ -438,7 +438,7 @@ entry_p n_substr(entry_p contxt)
         char *ret = DBG_ALLOC(calloc((size_t) len + 1, 1));
 
         // Exit on OOM.
-        ASSERT(ret, end());
+        LG_ASSERT(ret, end());
 
         // All values are already capped, just copy.
         memcpy(ret, arg + off, len - off);
@@ -516,7 +516,7 @@ char *h_tackon(entry_p contxt, const char *pre, const char *suf)
     char *ret = DBG_ALLOC(calloc(let, 1));
 
     // Exit in OOM.
-    ASSERT(ret, NULL);
+    LG_ASSERT(ret, NULL);
 
     // Copy the path and insert delimiter if it doesn't exist.
     memcpy(ret, pre, lep);
