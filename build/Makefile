@@ -83,7 +83,7 @@ else
 endif
 
 gui.o: gui.c gui.h version.h
-	$(CC) $(CFLAGS) -Os -c $< -DLLVL=2
+	$(CC) $(CFLAGS) -Wno-pedantic -Os -c $< -DLLVL=2
 
 #---------------------------------------------------------------------------------#
 # Catalogs
