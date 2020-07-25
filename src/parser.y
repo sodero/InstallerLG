@@ -39,7 +39,7 @@
 %define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
-%expect 8
+%expect 10
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Primitives                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -132,7 +132,9 @@ np:             INT                              { $$ = new_number($1); } |
                 SYM                              { $$ = new_symref($1, LINE); } |
                 OOM                              { $$ = NULL; YYFPRINTF(stderr, "Out of memory in line %d\n", LINE); YYABORT; };
 sps:            sps SYM xpb                      { $$ = push(push($1, new_symbol($2)), $3) ; } |
-                SYM xpb                          { $$ = push(push(new_contxt(), new_symbol($1)), $2); };
+                SYM xpb                          { $$ = push(push(new_contxt(), new_symbol($1)), $2); } |
+                sps SYM                          { $$ = push($1, new_symbol($2)); } |
+                SYM                              { $$ = push(new_contxt(), new_symbol($1)); };
 par:            par SYM                          { $$ = push($1, new_symbol($2)); } |
                 SYM                              { $$ = push(new_contxt(), new_symbol($1)); };
 cv:             p xpb                            { $$ = push(push(new_contxt(), $1), $2); };
@@ -415,7 +417,7 @@ in:             '(' IN p ps ')'                  { $$ = new_native(DBG_ALLOC(str
 or:             '(' OR ps ')'                    { $$ = new_native(DBG_ALLOC(strdup("OR")), LINE, n_or, $3, NUMBER); };
 shiftleft:      '(' SHIFTLEFT pp ')'             { $$ = new_native(DBG_ALLOC(strdup("shiftleft")), LINE, n_shiftleft, $3, NUMBER); };
 shiftright:     '(' SHIFTRIGHT pp ')'            { $$ = new_native(DBG_ALLOC(strdup("shiftright")), LINE, n_shiftright, $3, NUMBER); };
-xor:            '(' XOR pp ')'                   { $$ = new_native(DBG_ALLOC(strdup("XOR")), LINE, n_xor, $3, NUMBER); };
+xor:            '(' XOR ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("XOR")), LINE, n_xor, $3, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* media.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

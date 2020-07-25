@@ -19,25 +19,25 @@
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //
-// The 3.9 implementation supports any number of arguments. Since this seems to
-// be used by several installers, we'll support it.
+// Contrary to what the documentation says, the 3.9 implementation supports any
+// number of arguments greater than 0, including 1 (which doesn't make sense).
 //------------------------------------------------------------------------------
 entry_p n_and(entry_p contxt)
 {
-    // Two or more arguments.
-    C_SANE(2, NULL);
+    // One or more arguments.
+    C_SANE(1, NULL);
 
-    // Return false if any of the children are false.
-    for(entry_p *cur = contxt->children; exists(*cur); cur++)
+    // Start with the truth value of the first argument.
+    uint32_t res = num(C_ARG(1)) ? LG_TRUE : LG_FALSE;
+
+    // Repeat until there are no more arguments or one them is false.
+    for(size_t arg = 2; res == LG_TRUE && exists(C_ARG(arg)); arg++)
     {
-        if(!num(*cur))
-        {
-            R_NUM(LG_FALSE);
-        }
+        res = num(C_ARG(arg)) ? LG_TRUE : LG_FALSE;
     }
 
-    // All children are true.
-    R_NUM(LG_TRUE);
+    // Set and return.
+    R_NUM(res);
 }
 
 //------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ entry_p n_bitand(entry_p contxt)
     // Set initial value to that of the first argument.
     uint32_t res = num(C_ARG(1));
 
-    // AND the rest of the arguments, if any.
+    // Apply mask to the rest of the arguments, if any.
     for(size_t arg = 2; exists(C_ARG(arg)); arg++)
     {
         res &= num(C_ARG(arg));
@@ -99,7 +99,7 @@ entry_p n_bitor(entry_p contxt)
     // Set initial value to that of the first argument.
     uint32_t res = num(C_ARG(1));
 
-    // Apply the mask of the rest of the arguments, if any.
+    // Apply mask to the rest of the arguments, if any.
     for(size_t arg = 2; exists(C_ARG(arg)); arg++)
     {
         res |= num(C_ARG(arg));
@@ -107,7 +107,6 @@ entry_p n_bitor(entry_p contxt)
 
     // Set and return.
     R_NUM(res);
-
 }
 
 //------------------------------------------------------------------------------
@@ -183,25 +182,25 @@ entry_p n_in(entry_p contxt)
 //
 // Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
 //
-// The 3.9 implementation supports any number of arguments. Since this seems to
-// be used by several installers, we'll support it.
+// Contrary to what the documentation says, the 3.9 implementation supports any
+// number of arguments greater than 0, including 1 (which doesn't make sense).
 //------------------------------------------------------------------------------
 entry_p n_or(entry_p contxt)
 {
-    // Two or more arguments.
-    C_SANE(2, NULL);
+    // One or more arguments.
+    C_SANE(1, NULL);
 
-    // Return true if any of the children are true.
-    for(entry_p *cur = contxt->children; exists(*cur); cur++)
+    // Start with the truth value of the first argument.
+    uint32_t res = num(C_ARG(1)) ? LG_TRUE : LG_FALSE;
+
+    // Repeat until there are no more arguments or one them is true.
+    for(size_t arg = 2; res == LG_FALSE && exists(C_ARG(arg)); arg++)
     {
-        if(num(*cur))
-        {
-            R_NUM(LG_TRUE);
-        }
+        res = num(C_ARG(arg)) ? LG_TRUE : LG_FALSE;
     }
 
-    // All children were false.
-    R_NUM(LG_FALSE);
+    // Set and return.
+    R_NUM(res);
 }
 
 //------------------------------------------------------------------------------
@@ -238,17 +237,33 @@ entry_p n_shiftright(entry_p contxt)
 // (XOR <expr1> <expr2>)
 //     returns logical `XOR' of `<expr1>' and `<expr2>'
 //
-// Refer to Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
+// Contrary to what the documentation says, the 3.9 implementation supports any
+// number of arguments greater than 0, including 1 (which doesn't make sense).
 //------------------------------------------------------------------------------
 entry_p n_xor(entry_p contxt)
 {
-    // Two arguments.
-    C_SANE(2, NULL);
+    // One or more arguments.
+    C_SANE(1, NULL);
 
-    // Two possible combinations.
-    bool alfa = num(C_ARG(1)) && !num(C_ARG(2)),
-         beta = num(C_ARG(2)) && !num(C_ARG(1));
+    // Start with the truth value of the first argument.
+    uint32_t res = num(C_ARG(1)) ? LG_TRUE : LG_FALSE;
 
-    // Set and return.
-    R_NUM(alfa || beta);
+    // Repeat until there are no more arguments.
+    for(size_t arg = 2; exists(C_ARG(arg)); arg++)
+    {
+        // Translate the current value to a truth value.
+        uint32_t cur = num(C_ARG(arg)) ? LG_TRUE : LG_FALSE;
+
+        // Return false if the current value equals the last one.
+        if(cur == res)
+        {
+            R_NUM(LG_FALSE);
+        }
+
+        // Update the last value.
+        res = cur;
+    }
+
+    // No equals or fall through.
+    R_NUM(res);
 }

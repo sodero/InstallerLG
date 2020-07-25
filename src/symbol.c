@@ -104,26 +104,32 @@ static entry_p h_set_find(entry_p contxt, const char *name)
 //------------------------------------------------------------------------------
 entry_p n_set(entry_p contxt)
 {
-    // We need atleast one symbol value tuple.
-    C_SANE(1, NULL); S_SANE(1);
+    // We need atleast one symbol. The CBM installer tolerates constructs such
+    // as (set a). In that case 'a' will simply be ignored and thus undefined.
+    C_SANE(0, NULL); S_SANE(1);
 
-    // Function argument tuples.
+    // Function argument symbol value tuples.
     entry_p *sym = contxt->symbols, *val = contxt->children;
 
-    // Iterate over all symbol -> value tuples
+    // Iterate over all symbol value tuples
     while(exists(*sym) && exists(*val))
     {
-        // Resolve the RHS and do a deep copy of it.
-        entry_p rhs = resolve(*val), dst = global(contxt),
-                res = NOT_ERR ? h_copy_deep(rhs) : NULL;
+        // Resolve the RHS value.
+        entry_p rhs = resolve(*val);
 
-        if(!res)
+        if(DID_ERR)
         {
-            // Error / out of memory.
+            // Could not resolve the RHS.
             return end();
         }
 
-        // Make sure the RHS isn't dangling, we'll leak memory if it does.
+        // Do a deep copy the resolved RHS.
+        entry_p res = h_copy_deep(rhs);
+
+        // Exit on OOM.
+        LG_ASSERT(res, end());
+
+        // We'll leak memory if the RHS dangles.
         h_set_undangle(res);
 
         // Reparent and create global reference.
@@ -132,7 +138,7 @@ entry_p n_set(entry_p contxt)
         (*sym)->resolved = res;
 
         // Push cannot fail in this context.
-        push(dst, *sym);
+        push(global(contxt), *sym);
         (*sym)->parent = contxt;
 
         // We're at the end of the list when both are NULL or end().
@@ -142,8 +148,7 @@ entry_p n_set(entry_p contxt)
         }
     }
 
-    // Broken parser.
-    PANIC(contxt);
+    // Broken list of tuples.
     return end();
 }
 

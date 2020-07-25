@@ -50,32 +50,27 @@ static void h_debug_all(entry_p contxt)
     // Print string representation of all children.
     for(entry_p *cur = contxt->children; exists(*cur); cur++)
     {
-        char *val = "<NIL>";
+        entry_p res = NULL;
 
-        // Test if variable is defined, if not print <NIL>.
+        // Set non strict mode when resolving symbol references.
         if((*cur)->type == SYMREF)
         {
             // Save level of strictness.
             int32_t mode = get_num(contxt, "@strict");
 
-            // Set non strict mode to supress errors.
+            // Resolve symbolic reference.
             set_num(contxt, "@strict", 0);
-
-            // Save string if the symbol is defined.
-            if(find_symbol(*cur)->type != DANGLE)
-            {
-                // Resolve string.
-                val = str(*cur);
-            }
+            res = resolve(*cur);
 
             // Restore level of strictness.
             set_num(contxt, "@strict", mode);
         }
         else
         {
-            // Resolve string.
-            val = str(*cur);
+            res = resolve(*cur);
         }
+
+        char *val = res->type == DANGLE ? "<NIL>" : str(res);
 
         if(arg_argc(-1))
         {

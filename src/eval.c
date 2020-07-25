@@ -156,7 +156,7 @@ entry_p resolve(entry_p entry)
             return entry;
 
         case CUSTOM:
-            break;
+            return end();
     }
 
     // We should never end up here.
