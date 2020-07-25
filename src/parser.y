@@ -415,7 +415,7 @@ in:             '(' IN p ps ')'                  { $$ = new_native(DBG_ALLOC(str
 or:             '(' OR ps ')'                    { $$ = new_native(DBG_ALLOC(strdup("OR")), LINE, n_or, $3, NUMBER); };
 shiftleft:      '(' SHIFTLEFT pp ')'             { $$ = new_native(DBG_ALLOC(strdup("shiftleft")), LINE, n_shiftleft, $3, NUMBER); };
 shiftright:     '(' SHIFTRIGHT pp ')'            { $$ = new_native(DBG_ALLOC(strdup("shiftright")), LINE, n_shiftright, $3, NUMBER); };
-xor:            '(' XOR pp ')'                   { $$ = new_native(DBG_ALLOC(strdup("XOR")), LINE, n_xor, $3, NUMBER); };
+xor:            '(' XOR ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("XOR")), LINE, n_xor, $3, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* media.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
