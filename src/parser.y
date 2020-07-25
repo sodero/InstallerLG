@@ -39,7 +39,7 @@
 %define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
-%expect 8
+%expect 10
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Primitives                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -132,7 +132,9 @@ np:             INT                              { $$ = new_number($1); } |
                 SYM                              { $$ = new_symref($1, LINE); } |
                 OOM                              { $$ = NULL; YYFPRINTF(stderr, "Out of memory in line %d\n", LINE); YYABORT; };
 sps:            sps SYM xpb                      { $$ = push(push($1, new_symbol($2)), $3) ; } |
-                SYM xpb                          { $$ = push(push(new_contxt(), new_symbol($1)), $2); };
+                SYM xpb                          { $$ = push(push(new_contxt(), new_symbol($1)), $2); } |
+                sps SYM                          { $$ = push($1, new_symbol($2)); } |
+                SYM                              { $$ = push(new_contxt(), new_symbol($1)); };
 par:            par SYM                          { $$ = push($1, new_symbol($2)); } |
                 SYM                              { $$ = push(new_contxt(), new_symbol($1)); };
 cv:             p xpb                            { $$ = push(push(new_contxt(), $1), $2); };
