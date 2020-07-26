@@ -3274,33 +3274,6 @@ entry_p n_startup(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_copy_simple
-// Description: Copy source file to destination file using already open file
-//              handles.
-// Input:       entry_p contxt:     The execution context.
-//              FILE *src:          Source file handle.
-//              FILE *dst:          Destination file handle.
-//              const char *nfo:    Write error message.
-// Return:      -
-//------------------------------------------------------------------------------
-static void h_copy_simple(entry_p contxt, FILE *src, FILE *dst, const char *nfo)
-{
-    // Copy source file to destination in buf_len() sized chunks.
-    for(size_t cnt = fread(buf_get(B_KEY), 1, buf_len(), src); cnt;
-        cnt = fread(buf_get(B_KEY), 1, buf_len(), src))
-    {
-        if(fwrite(buf_get(B_KEY), 1, cnt, dst) != cnt)
-        {
-            ERR(ERR_WRITE_FILE, nfo);
-            break;
-        }
-    }
-
-    // Unlock buffer.
-    buf_put(B_KEY);
-}
-
-//------------------------------------------------------------------------------
 // Name:        h_fclose
 // Description: Safe file close.
 // Input:       FILE **file:     Pointer to file handle.
@@ -3374,115 +3347,73 @@ FILE *h_fopen(entry_p contxt, const char *name, const char *mode, bool force)
 
 //------------------------------------------------------------------------------
 // Name:        h_textfile_append
-// Description: Append h_textfile helper.
+// Description: h_textfile helper. Append strings to file.
 // Input:       entry_p contxt:     The execution context.
-//              const char *name:   Output file name.
-// Return:      int32_t:            LG_TRUE or LG_FALSE.
+//              entry_p *all:       Strings to append.
+//              FILE *dst:          Destination file.
+// Return:      -
 //------------------------------------------------------------------------------
-static int32_t h_textfile_append(entry_p contxt, const char *name)
+static void h_textfile_append(entry_p *all, FILE *dst)
 {
-    // Gather and merge all (append) strings.
-    char *app = get_optstr(contxt, OPT_APPEND);
+    // Validate input.
+    LG_ASSERT(all && dst, LG_VOID);
 
-    // Exit on OOM.
-    LG_ASSERT(app, LG_FALSE);
-
-    if(DID_ERR)
+    // Resolve all children and append string value to file.
+    for(entry_p *cur = all; NOT_ERR && exists(*cur); cur++)
     {
-        // Could not resolve children.
-        free(app);
-        return LG_FALSE;
+        fputs(str(*cur), dst);
     }
-
-    // Append without include truncates / creates a new file.
-    const char *mode = opt(contxt, OPT_INCLUDE) ? "a" : "w";
-
-    FILE *file = DBG_FOPEN(h_fopen(contxt, name, mode, true));
-
-    if(!file)
-    {
-        free(app);
-
-        if(get_num(contxt, "@strict"))
-        {
-            // Couldn't write to file.
-            ERR(ERR_WRITE_FILE, name);
-            return LG_FALSE;
-        }
-
-        // Fail silently in non-strict mode.
-        return LG_TRUE;
-    }
-
-    // Write to log if logging is enabled.
-    h_log(contxt, tr(S_APND), app, file);
-
-    // Get length of string to append.
-    size_t len = strlen(app);
-
-    // Append to file if string is non-empty.
-    if(len && fwrite(app, 1, len, file) != len)
-    {
-        // Couldn't write to file.
-        ERR(ERR_WRITE_FILE, name);
-    }
-
-    free(app);
-    h_fclose(&file);
-
-    // Success or failure.
-    return NOT_ERR ? LG_TRUE : LG_FALSE;
 }
 
 //------------------------------------------------------------------------------
 // Name:        h_textfile_include
-// Description: Include h_textfile helper.
+// Description: h_textfile helper. Append complete files.
 // Input:       entry_p contxt:     The execution context.
-//              const char *name:   Output file name.
-// Return:      int32_t:            LG_TRUE or LG_FALSE.
+//              entry_p *all:       Files to append.
+//              FILE *dst:          Destination file.
+// Return:      -
 //------------------------------------------------------------------------------
-static int32_t h_textfile_include(entry_p contxt, const char *name)
+static void h_textfile_include(entry_p contxt, entry_p *all, FILE *dst)
 {
-    const char *incl = str(opt(contxt, OPT_INCLUDE));
+    // Validate input.
+    LG_ASSERT(contxt && all && dst, LG_VOID);
 
-    if(DID_ERR)
+    // Iterate over all children of (include).
+    for(entry_p *cur = all; NOT_ERR && exists(*cur); cur++)
     {
-        return LG_FALSE;
-    }
-
-    if(!strcasecmp(incl, name))
-    {
-        // Nothing to do.
-        return LG_TRUE;
-    }
-
-    // Try to open files, with force (non-strict mode only) if necessary.
-    FILE *finc = DBG_FOPEN(h_fopen(contxt, incl, "r", true)),
-         *fdst = DBG_FOPEN(h_fopen(contxt, name, "w", true));
-
-    if(!finc || !fdst)
-    {
-        if(get_num(contxt, "@strict"))
+        // Get name of input file.
+        const char *inc = str(*cur);
+        
+        if(DID_ERR)
         {
-            // Determine whether we have a read or a write problem.
-            ERR(finc ? ERR_WRITE_FILE : ERR_READ_FILE, finc ? name : incl);
+            // Unresolvable.
+            return;
         }
 
-        h_fclose(&finc);
-        h_fclose(&fdst);
+        // Attempt to open input file.
+        FILE *src = DBG_FOPEN(h_fopen(contxt, inc, "r", true));
 
-        // Fail silently.
-        return NOT_ERR ? LG_TRUE : LG_FALSE;
+        if(src)
+        {
+            // Append source file to (temp) destination file.
+            for(int chr = fgetc(src); chr != EOF; chr = fgetc(src))
+            {
+                fputc(chr, dst);
+            }
+
+            // Close input and continue.
+            h_fclose(&src);
+        }
+        else
+        {
+            // Could not open input file.
+            if(get_num(contxt, "@strict"))
+            {
+                // Fail in strict mode only.
+                ERR(ERR_READ_FILE, inc);
+            }
+        }
     }
-
-    // Copy include file to destination file.
-    h_copy_simple(contxt, finc, fdst, name);
-
-    // Close input and output files.
-    h_fclose(&finc);
-    h_fclose(&fdst);
-
-    return NOT_ERR ? LG_TRUE : LG_FALSE;
 }
 
 //------------------------------------------------------------------------------
@@ -3493,24 +3424,56 @@ static int32_t h_textfile_include(entry_p contxt, const char *name)
 //------------------------------------------------------------------------------
 static int32_t h_textfile(entry_p contxt)
 {
-    // Overwrite existing file.
-    const char *name = str(opt(contxt, OPT_DEST));
+    // Get name of output file.
+    const char *dest = str(opt(contxt, OPT_DEST));
 
-    // Assume success.
-    int32_t ret = LG_TRUE;
-
-    if(ret == LG_TRUE && opt(contxt, OPT_INCLUDE))
+    if(DID_ERR)
     {
-        ret = h_textfile_include(contxt, name);
+        // Unresolvable.
+        return LG_FALSE;
     }
 
-    if(opt(contxt, OPT_APPEND))
+    snprintf(buf_get(B_KEY), buf_len(), "%s.XXXXXX", dest);
+    FILE *tmp = DBG_FOPEN(fdopen(mkstemp(buf_get(B_KEY)), "a"));
+
+    if(!tmp)
     {
-        ret = h_textfile_append(contxt, name);
+        // Could not create temp file.
+        ERR(ERR_WRITE_FILE, dest);
+        return LG_FALSE;
     }
 
-    // Success or failure.
-    return ret;
+    // Iterate over all (append) / (include) options.
+    for(size_t arg = 1; NOT_ERR && exists(C_ARG(arg)); arg++)
+    {
+        if(C_ARG(arg)->type != OPTION)
+        {
+            // Skip non-options.
+            continue;
+        }
+        else if(C_ARG(arg)->id == OPT_APPEND)
+        {
+            // Append strings to temp file.
+            h_textfile_append(C_ARG(arg)->children, tmp);
+        }
+        else if(C_ARG(arg)->id == OPT_INCLUDE)
+        {
+            // Append complete files to temp file.
+            h_textfile_include(contxt, C_ARG(arg)->children, tmp);
+        }
+    }
+
+    // Temp file should contain everything by now.
+    h_fclose(&tmp);
+
+    if(DID_ERR)
+    { 
+        // Something went wrong. Delete temp file.
+        return remove(buf_get(B_KEY)) ? LG_FALSE : LG_TRUE;
+    }
+
+    // Rename temp file to its proper (output) name. 
+    return rename(buf_put(B_KEY), dest) ? LG_FALSE : LG_TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -3526,20 +3489,21 @@ entry_p n_textfile(entry_p contxt)
     // One or more arguments / options.
     C_SANE(1, contxt);
 
+    // We need a file to work with.
     if(!opt(contxt, OPT_DEST))
     {
         ERR(ERR_MISSING_OPTION, "dest");
         R_NUM(LG_FALSE);
     }
 
-    // We must append and / or include, or else this doesn't make sense.
+    // We need something to append and / or include.
     if(!opt(contxt, OPT_APPEND) && !opt(contxt, OPT_INCLUDE))
     {
-        ERR(ERR_NOTHING_TO_DO, contxt->name);
+        ERR(ERR_MISSING_OPTION, "append/include");
         R_NUM(LG_FALSE);
     }
 
-    // Return on abort or if the user doesn't confirm when (confirm) is set.
+    // Return on abort or if not confirmed when (confirm) is set.
     if(opt(contxt, OPT_CONFIRM) && !h_confirm(contxt,
        str(opt(contxt, OPT_HELP)), str(opt(contxt, OPT_PROMPT))))
     {
