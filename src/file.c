@@ -3383,7 +3383,7 @@ static void h_textfile_include(entry_p contxt, entry_p *all, FILE *dst)
     {
         // Get name of input file.
         const char *inc = str(*cur);
-        
+
         if(DID_ERR)
         {
             // Unresolvable.
