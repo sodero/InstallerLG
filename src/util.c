@@ -742,10 +742,7 @@ char *get_optstr(entry_p contxt, opt_t type)
 char *get_chlstr(entry_p contxt, bool pad)
 {
     // We don't really need anything to concatenate but we expect a sane contxt.
-    if(!c_sane(contxt, 0))
-    {
-        return NULL;
-    }
+    LG_ASSERT(c_sane(contxt, 0), NULL);
 
     // Concatenation.
     entry_p *child = contxt->children;
@@ -774,10 +771,8 @@ char *get_chlstr(entry_p contxt, bool pad)
     // Allocate memory to hold one string pointer per child.
     char **stv = DBG_ALLOC(calloc(cnt + 1, sizeof(char *)));
 
-    if(!stv)
-    {
-        return NULL;
-    }
+    // Exit on OOM.
+    LG_ASSERT(stv, NULL);
 
     // Total length.
     size_t len = 0;
