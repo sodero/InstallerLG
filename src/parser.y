@@ -70,8 +70,8 @@
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Token data types                                                                                                                                                                     */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np sps par cv cvv add sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor not bitand
-       /*                */ bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath
+%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np nps sps par cv cvv add sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor bitand
+       /*                */ bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath not
        /*                */ earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
        /*                */ pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit
        /*                */ foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all append assigns choices command compression
@@ -86,8 +86,8 @@
 /* Primitive strings are freed like you would expect                                                                                                                                    */
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
-%destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np sps par cv cvv add sub div mul gt gte eq set cus dcl fmt if while until and or xor not bitand bitor
-                            bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier
+%destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np nps sps par cv cvv add sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
+                            bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier not
                             fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
                             database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all assigns
@@ -131,6 +131,8 @@ np:             INT                              { $$ = new_number($1); } |
                 STR                              { $$ = new_string($1); } |
                 SYM                              { $$ = new_symref($1, LINE); } |
                 OOM                              { $$ = NULL; YYFPRINTF(stderr, "Out of memory in line %d\n", LINE); YYABORT; };
+nps:            nps np                           { $$ = push($1, $2); } |
+                np                               { $$ = push(new_contxt(), $1); };
 sps:            sps SYM xpb                      { $$ = push(push($1, new_symbol($2)), $3) ; } |
                 SYM xpb                          { $$ = push(push(new_contxt(), new_symbol($1)), $2); } |
                 sps SYM                          { $$ = push($1, new_symbol($2)); } |
@@ -353,7 +355,7 @@ exit:           '(' EXIT ps quiet ')'            { $$ = new_native(DBG_ALLOC(str
 onerror:        '(' ONERROR vps ')'              { $$ = new_native(DBG_ALLOC(strdup("onerror")), LINE, n_procedure, push(new_contxt(),
                                                         new_custom(DBG_ALLOC(strdup("@onerror")), LINE, NULL, $3)), DANGLE); };
 reboot:         '(' REBOOT ')'                   { $$ = new_native(DBG_ALLOC(strdup("reboot")), LINE, n_reboot, NULL, NUMBER); };
-trap:           '(' TRAP p vps ')'               { $$ = new_native(DBG_ALLOC(strdup("trap")), LINE, n_trap, push(push(new_contxt(), $3), $4), NUMBER); };
+trap:           '(' TRAP nps vps ')'             { $$ = new_native(DBG_ALLOC(strdup("trap")), LINE, n_trap, push(push(new_contxt(), $3), $4), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* file.c|h                                                                                                                                                                             */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

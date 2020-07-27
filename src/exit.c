@@ -196,14 +196,14 @@ entry_p n_trap(entry_p contxt)
     set_num(contxt, "@trap", num(C_ARG(1)));
 
     // Resolve statements.
-    entry_p ret = resolve(C_ARG(2));
+    (void) resolve(C_ARG(2));
 
     // Leave trap mode and clear errors.
-    set_num(contxt, "@trap", 0);
+    set_num(contxt, "@trap", LG_FALSE);
     RESET;
 
-    // Return resolved value.
-    return ret;
+    // TODO: Everything is OK.
+    R_NUM(LG_FALSE);
 }
 
 //------------------------------------------------------------------------------

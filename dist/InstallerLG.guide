@@ -124,6 +124,7 @@ Russian translation.
 @{B}0.1.0-alpha.51 (2020-NOT-YET)@{UB}
 - Single argument logic and bitwise operations tolerated (FIXME: APP_NAME).
 - Incomplete (set) statements tolerated (FIXME: APP_NAME).
+- (trap) stub supports multiple error flags (FIXME: APP_NAME).
 - ?
 
 @{B}0.1.0-alpha.50 (2020-07-19)@{UB}
