@@ -228,10 +228,13 @@ int32_t num(entry_p entry)
         case STRING:
             return entry->name ? atoi(entry->name) : 0;
 
-        // We should never end up here.
+        // Recur.
         case CONTXT:
+            return num(resolve(entry));
+
+        // Procedure line number.
         case CUSTOM:
-            break;
+            return entry->id;
     }
 
     PANIC(entry);
@@ -377,9 +380,9 @@ char *str(entry_p entry)
         case NUMBER:
             return h_str_num(entry);
 
-        // We should never end up here.
+        // Recur.
         case CONTXT:
-            break;
+            return str(resolve(entry));
     }
 
     PANIC(entry);
