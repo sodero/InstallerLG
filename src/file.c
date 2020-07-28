@@ -3467,12 +3467,12 @@ static int32_t h_textfile(entry_p contxt)
     h_fclose(&tmp);
 
     if(DID_ERR)
-    { 
+    {
         // Something went wrong. Delete temp file.
         return remove(buf_get(B_KEY)) ? LG_FALSE : LG_TRUE;
     }
 
-    // Rename temp file to its proper (output) name. 
+    // Rename temp file to its proper (output) name.
     return rename(buf_put(B_KEY), dest) ? LG_FALSE : LG_TRUE;
 }
 
@@ -3493,13 +3493,6 @@ entry_p n_textfile(entry_p contxt)
     if(!opt(contxt, OPT_DEST))
     {
         ERR(ERR_MISSING_OPTION, "dest");
-        R_NUM(LG_FALSE);
-    }
-
-    // We need something to append and / or include.
-    if(!opt(contxt, OPT_APPEND) && !opt(contxt, OPT_INCLUDE))
-    {
-        ERR(ERR_MISSING_OPTION, "append/include");
         R_NUM(LG_FALSE);
     }
 
