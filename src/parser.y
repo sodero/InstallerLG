@@ -70,7 +70,7 @@
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Token data types                                                                                                                                                                     */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np nps sps par cv cvv add sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor bitand
+%type<e> /* all nodes    */ start s p pp ps ivp vp vps dynopt opt opts xpb xpbs np nps sps par cv cvv add sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor bitand
        /*                */ bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath not
        /*                */ earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
        /*                */ pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit
@@ -86,7 +86,7 @@
 /* Primitive strings are freed like you would expect                                                                                                                                    */
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
-%destructor { kill($$); }   s p pp ps pps ivp vp vps dynopt opt opts xpb xpbs np nps sps par cv cvv add sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
+%destructor { kill($$); }   s p pp ps ivp vp vps dynopt opt opts xpb xpbs np nps sps par cv cvv add sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
                             bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier not
                             fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
@@ -108,8 +108,6 @@ p:              vp                               |
 pp:             p p                              { $$ = push(push(new_contxt(), $1), $2); };
 ps:             ps p                             { $$ = push($1, $2); } |
                 p                                { $$ = push(new_contxt(), $1); };
-pps:            pps pp                           { $$ = merge($1, $2); } |
-                pp                               ;
 vp:             ivp                              |
                 '(' vp ')'                       { $$ = $2; };
 vps:            vps vps                          { $$ = merge($1, $2); } |
@@ -489,7 +487,7 @@ tackon:         '(' TACKON pp ')'                { $$ = new_native(DBG_ALLOC(str
 /* symbol.c|h                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 set:            '(' SET sps ')'                  { $$ = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, $3, DANGLE); };
-symbolset:      '(' SYMBOLSET pps ')'            { $$ = new_native(DBG_ALLOC(strdup("symbolset")), LINE, n_symbolset, $3, DANGLE); };
+symbolset:      '(' SYMBOLSET ps ')'             { $$ = new_native(DBG_ALLOC(strdup("symbolset")), LINE, n_symbolset, $3, DANGLE); };
 symbolval:      '(' SYMBOLVAL p ')'              { $$ = new_native(DBG_ALLOC(strdup("symbolval")), LINE, n_symbolval, push(new_contxt(), $3), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* wb.c|h                                                                                                                                                                               */

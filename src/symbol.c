@@ -47,27 +47,6 @@ static entry_p h_copy_deep(entry_p entry)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_set_undangle
-// Description: n_set helper. Cast entry to a non-dangling type.
-// Input:       entry_p entry:  The entry to be cast.
-// Return:      -
-//------------------------------------------------------------------------------
-static void h_set_undangle(entry_p entry)
-{
-    // In non strict mode we might have a DANGLE on the right hand side if a
-    // bogus resolve was done. To prevent leaks after a deep copy we need to
-    // typecast the RHS.
-    if(!entry || entry->type != DANGLE)
-    {
-        return;
-    }
-
-    // Typecast to string. The string will be empty. If evaluated as a number,
-    // it will be zero.
-    entry->type = STRING;
-}
-
-//------------------------------------------------------------------------------
 // Name:        h_set_find
 // Description: n_set helper. Find symbol with a given name in symbol array.
 // Input:       entry_p contxt:     Execution context.
@@ -105,7 +84,7 @@ static entry_p h_set_find(entry_p contxt, const char *name)
 entry_p n_set(entry_p contxt)
 {
     // We need atleast one symbol. The CBM installer tolerates constructs such
-    // as (set a). In that case 'a' will simply be ignored and thus undefined.
+    // as (set a). In that case 'a' will simply be ignored.
     C_SANE(0, NULL); S_SANE(1);
 
     // Function argument symbol value tuples.
@@ -119,27 +98,30 @@ entry_p n_set(entry_p contxt)
 
         if(DID_ERR)
         {
-            // Could not resolve the RHS.
+            // Unresolvable.
             return end();
         }
 
-        // Do a deep copy the resolved RHS.
-        entry_p res = h_copy_deep(rhs);
+        // Sloppy mode dangle.
+        entry_p res = end();
 
-        // Exit on OOM.
-        LG_ASSERT(res, end());
+        if(rhs != end())
+        {
+            // Do a deep copy the resolved RHS.
+            res = h_copy_deep(rhs);
 
-        // We'll leak memory if the RHS dangles.
-        h_set_undangle(res);
+            // Exit on OOM.
+            LG_ASSERT(res, end());
 
-        // Reparent and create global reference.
-        res->parent = *sym;
-        kill((*sym)->resolved);
-        (*sym)->resolved = res;
+            // Reparent and create global reference.
+            res->parent = *sym;
+            kill((*sym)->resolved);
+            (*sym)->resolved = res;
 
-        // Push cannot fail in this context.
-        push(global(contxt), *sym);
-        (*sym)->parent = contxt;
+            // Push cannot fail in this context.
+            push(global(contxt), *sym);
+            (*sym)->parent = contxt;
+        }
 
         // We're at the end of the list when both are NULL or end().
         if(*(++sym) == *(++val))
@@ -217,40 +199,43 @@ static entry_p n_symbolset_new(entry_p contxt, const char *lhs, entry_p res)
 //------------------------------------------------------------------------------
 entry_p n_symbolset(entry_p contxt)
 {
-    // We need one or more tuples of symbol name and value.
-    C_SANE(2, NULL); S_SANE(0);
+    // We need atleast one symbol. The CBM installer tolerates constructs such
+    // as (symbolset "a"). In that case 'a' will simply be ignored.
+    C_SANE(1, NULL); S_SANE(0);
 
     entry_p ret = end();
 
-    // Iterate over all name -> value tuples
-    for(entry_p *cur = contxt->children; exists(*cur);)
+    // Iterate over all name value tuples
+    for(size_t cur = 1; exists(C_ARG(cur)) && exists(C_ARG(cur + 1)); cur += 2)
     {
-        // Resolve LHS and RHS and do a deep copy of RHS.
-        const char *lhs = str(*cur++);
-        entry_p rhs = resolve(*cur++), res = NOT_ERR ? h_copy_deep(rhs) : NULL;
+        // Resolve LHS and RHS.
+        const char *lhs = str(C_ARG(cur));
+        entry_p rhs = resolve(C_ARG(cur + 1));
 
-        if(!res)
+        if(DID_ERR)
         {
-            // Error / out of memory.
+            // Unresolvable.
             return end();
         }
 
-        // Make sure the RHS isn't dangling, we'll leak memory if it does.
-        h_set_undangle(res);
+        if(rhs == end())
+        {
+            // Sloppy mode dangle.
+            continue;
+        }
 
-        // Do we have an existing symbol with this name?
+        // Do a deep copy the resolved RHS.
+        entry_p res = h_copy_deep(rhs);
+
+        // Exit on OOM.
+        LG_ASSERT(res, end());
+
+        // Does this symbol already exist?
         entry_p esm = h_set_find(contxt, lhs);
 
-        if(esm)
-        {
-            // Update existing symbol.
-            ret = n_symbolset_exists(contxt, esm, res);
-        }
-        else
-        {
-            // Create new symbol.
-            ret = n_symbolset_new(contxt, lhs, res);
-        }
+        // Create new or update existing symbol.
+        ret = esm ? n_symbolset_exists(contxt, esm, res) :
+                    n_symbolset_new(contxt, lhs, res);
     }
 
     // Return the last RHS.
