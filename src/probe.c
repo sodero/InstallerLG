@@ -642,13 +642,25 @@ entry_p n_getenv(entry_p contxt)
     // We need a variable name.
     C_SANE(1, NULL);
 
-    // Is there such an environment variable?
-    char *env = DBG_ADDR(getenv(str(C_ARG(1))));
+    char *var = str(C_ARG(1)), *val =
+#ifdef AMIGA
+    // GetVar doesn't seem to terminate strings for binary variables (MorphOS).
+    // This is probably why getenv() sometimes returns garbage. Using GetVar()
+    // we can check for empty files and terminate the return value ourselves.
+    // The CBM installer suffers from the same problem on MorphOS, empty files
+    // will generate strange results, typically values of a non-empty variable
+    // will show up later in the ones that are supposed to be blank.
+    GetVar(var, buf_get(B_KEY), buf_len(), 0) > 0 ? buf_get(B_KEY) : NULL;
+    (void) buf_put(B_KEY);
+#else
+    // The civilized way of doing things.
+    DBG_ADDR(getenv(var));
+#endif
 
-    if(env)
+    if(val)
     {
         // Return what we found.
-        R_STR(DBG_ALLOC(strdup(env)));
+        R_STR(DBG_ALLOC(strdup(val)));
     }
 
     // Nothing found, return empty string.
