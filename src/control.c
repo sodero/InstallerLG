@@ -87,23 +87,25 @@ entry_p n_select(entry_p contxt)
 //------------------------------------------------------------------------------
 static entry_p h_whunt(entry_p contxt, bool until)
 {
-    // Two arguments, the condition and the body of the loop.
-    C_SANE(2, NULL);
+    // One or more arguments, the condition and the (optional) body.
+    C_SANE(1, NULL);
 
-    // Prepare to return the resolved value (which is always 0) of this function
-    // if the condition is false from the start.
+    // Prepare to return the resolved value (which is always LG_FALSE) of this
+    // function if the condition is false from the start.
     entry_p ret = contxt->resolved;
 
-    // Use XOR to support both 'while' and 'until'. Break if something goes
-    // wrong inside.
+    // Use XOR to support both 'while' and 'until'. Break on error.
     for(bool cont = until ^ tru(C_ARG(1)); cont && NOT_ERR;
         cont = until ^ tru(C_ARG(1)))
     {
-        // Save the return value of the last function in the CONTXT
-        ret = invoke(C_ARG(2));
+        // Save the return value of the last function in the CONTXT or, if the
+        // body is empty, don't do anything at all. The return value will always
+        // be LG_FALSE if there's no body (since we either won't return at all,
+        // or we'll return when the condition is false).
+        ret = exists(C_ARG(2)) ? invoke(C_ARG(2)) : ret;
     }
 
-    // Return either zero, the value of the resolved value of this function,
+    // Return either LG_FALSE, the value of the resolved value of this function,
     // or the return value of the last function in the last iteration.
     return ret;
 }

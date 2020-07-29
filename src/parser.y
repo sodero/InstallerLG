@@ -314,8 +314,10 @@ if:             '(' IF cvv ')'                   { $$ = new_native(DBG_ALLOC(str
                 '(' IF cv ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, NUMBER); } |
                 '(' IF p ')'                     { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push(new_contxt(), $3), NUMBER); };
 select:         '(' SELECT p xpbs ')'            { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, push(push(new_contxt(), $3), $4), NUMBER); };
-until:          '(' UNTIL p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $3), $4), NUMBER); };
-while:          '(' WHILE p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(push(new_contxt(), $3), $4), NUMBER); };
+until:          '(' UNTIL p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $3), $4), NUMBER); } |
+                '(' UNTIL p ')'                  { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(new_contxt(), $3), NUMBER); };
+while:          '(' WHILE p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(push(new_contxt(), $3), $4), NUMBER); } |
+                '(' WHILE p ')'                  { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(new_contxt(), $3), NUMBER); };
 trace:          '(' TRACE ')'                    { $$ = new_native(DBG_ALLOC(strdup("trace")), LINE, n_trace, NULL, NUMBER); };
 retrace:        '(' RETRACE ')'                  { $$ = new_native(DBG_ALLOC(strdup("retrace")), LINE, n_retrace, NULL, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

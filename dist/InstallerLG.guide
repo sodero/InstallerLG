@@ -126,6 +126,7 @@ Russian translation.
 - Incomplete (set) statements tolerated.
 - (trap) stub supports multiple error flags.
 - (textfile) can be used to create empty files / wipe existing files.
+- (while) and (until) are allowed to have empty bodies.
 - ?
 
 @{B}0.1.0-alpha.50 (2020-07-19)@{UB}
