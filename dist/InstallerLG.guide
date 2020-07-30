@@ -127,6 +127,7 @@ Russian translation.
 - (trap) stub supports multiple error flags.
 - (textfile) can be used to create empty files / wipe existing files.
 - (while) and (until) are allowed to have empty bodies.
+- (iconinfo) fails silently in sloppy mode.
 - ?
 
 @{B}0.1.0-alpha.50 (2020-07-19)@{UB}
