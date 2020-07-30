@@ -313,7 +313,7 @@ entry_p n_database(entry_p contxt)
         }
 
         // Value <-> result mismatch.
-        R_STR(DBG_ALLOC(strdup("")));
+        R_EST;
     }
 
     // Return result as string.
