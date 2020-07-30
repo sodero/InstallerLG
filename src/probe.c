@@ -313,7 +313,7 @@ entry_p n_database(entry_p contxt)
         }
 
         // Value <-> result mismatch.
-        R_STR(DBG_ALLOC(strdup("0")));
+        R_EST;
     }
 
     // Return result as string.
@@ -1075,7 +1075,12 @@ entry_p n_iconinfo(entry_p contxt)
     // Exit if we can't read from icon.
     if(!obj)
     {
-        ERR(ERR_READ_FILE, file);
+        // Don't fail in sloppy mode.
+        if(get_num(contxt, "@strict"))
+        {
+            ERR(ERR_READ_FILE, file);
+        }
+
         R_NUM(LG_FALSE);
     }
 
