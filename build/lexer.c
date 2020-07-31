@@ -4168,116 +4168,107 @@ int main(int argc, char **argv)
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/* strduptr(const char *str) - Duplicate string and translate escape characters according to the Installer V42.6 guide                                                                  */
+/* is_hex(const char *str) - Used by strduptr() to match hexadecimal escape sequences.                                                                                                          */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+static inline bool is_hex(const char* str)
+{
+    return str[0] == 'x' &&
+        (((str[1] >= 48 && str[1] <= 57) ||
+          (str[1] >= 65 && str[1] <= 70) ||
+          (str[1] >= 97 && str[1] <= 102)) &&
+         ((str[2] >= 48 && str[2] <= 57) ||
+          (str[2] >= 65 && str[2] <= 70) ||
+          (str[2] >= 97 && str[2] <= 102)));
+}
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* is_oct(const char *str) - Used by strduptr() to match octal escape sequences.                                                                                                          */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+static inline bool is_oct(const char* str)
+{
+    return str[0] >= 48 && str[0] <= 55 &&
+           str[1] >= 48 && str[1] <= 55 &&
+           str[2] >= 48 && str[2] <= 55;
+}
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* strduptr(const char *str) - Duplicate string and translate escape sequences according to Installer.guide 1.19 (29.4.96)                                                         */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* `\n' newline character                                                                                                                                                               */
+/* `\r' return character                                                                                                                                                                */
+/* `\t' tab character                                                                                                                                                                   */
+/* `\h' horizontal tab character (V42.6)                                                                                                                                                */
+/* `\v' vertical tab character (V42.6)                                                                                                                                                  */
+/* `\b' backspace character (V42.6)                                                                                                                                                     */
+/* `\f' formfeed character (V42.6)                                                                                                                                                      */
+/* `\"' double quote                                                                                                                                                                    */
+/* `\'' single quote                                                                                                                                                                    */
+/* `\\' backslash                                                                                                                                                                       */
+/* `\ooo' some octal number `ooo' (V42.6)                                                                                                                                               */
+/* `\xXX' some hex number `XX' (V42.6)                                                                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 static char *strduptr(const char *str)
 {
-    /* Installer.guide 1.19 (29.4.96) 1995-96 by ESCOM AG
-    -----------------------------------------------------
-    `\n' newline character
-    `\r' return character
-    `\t' tab character
-    `\h' horizontal tab character (V42.6)
-    `\v' vertical tab character (V42.6)
-    `\b' backspace character (V42.6)
-    `\f' formfeed character (V42.6)
-    `\"' double quote
-    `\'' single quote
-    `\\' backslash
-    `\ooo' some octal number `ooo' (V42.6)
-    `\xXX' some hex number `XX' (V42.6) */
-    int len = strlen(str);
+    size_t len = strlen(str), io = 0;
 
-    // Translations
-    static char chr[] = "nrthvbf\"'\\\0";
-    static char raw[] = "\n\r\t\t\v\b\f\"'\\\0";
-
-    // Please note 'len - 1', delimiters are stripped from the string, str index
-    // starts at 1 and the last character is skipped.
+    // No need to allocate room for delimiters.
     char *out = DBG_ALLOC(calloc(len - 1, 1));
 
-    if(!out)
+    LG_ASSERT(out, NULL);
+
+    // Using index 1 .. n - 1 to strip delimiters.
+    for(size_t i = 1; i < len - 1; i++)
     {
-        // Out of memory. This will be trapped by the OOM token and the parser
-        // will abort.
-        return NULL;
-    }
-
-    // Current position.
-    int io = 0;
-
-    for(int i = 1; i < len - 1; i++)
-    {
-        char cr = str[i];
-
-        // Are we dealing with a control character?
-        if(str[i] == '\\' && i + 1 < len - 1)
+        // Straight copy of non-escaped characters.
+        if(str[i] != '\\' || (i + 1 >= len - 1))
         {
-            // Are we within the limits of the string?
-            if(i + 3 < len - 1)
+            out[io++] = str[i];
+            continue;
+        }
+
+        // Escape character. Skip '\'.
+        i++;
+
+        // Room for an oct or hex escape sequence?
+        if(i + 2 < len - 1)
+        {
+            if(is_hex(str + i))
             {
-                // Is this a hex number that needs to be translated into a
-                // character?
-                if(str[i + 1] == 'x' && (
-                  ((str[i + 2] >= 48 && str[i + 2] <= 57) ||
-                   (str[i + 2] >= 65 && str[i + 2] <= 70) ||
-                   (str[i + 2] >= 97 && str[i + 2] <= 102)) &&
-                  ((str[i + 3] >= 48 && str[i + 3] <= 57) ||
-                   (str[i + 3] >= 65 && str[i + 3] <= 70) ||
-                   (str[i + 3] >= 97 && str[i + 3] <= 102))))
-                {
-                    // Temporary string for conversion.
-                    char h[] = { str[i + 2], str[i + 3], '\0' };
-
-                    // Three digits, \ooo.
-                    i += 3;
-
-                    // Convert temp string to character.
-                    out[io++] = (char) strtol(h, NULL, 16);
-
-                    // Continue with the rest of the string.
-                    continue;
-                }
-                // Is this a oct number that needs to be translated into a
-                // character?
-                if(str[i + 1] >= 48 && str[i + 1] <= 55 &&
-                   str[i + 2] >= 48 && str[i + 2] <= 55 &&
-                   str[i + 3] >= 48 && str[i + 3] <= 55)
-                {
-                    // Temporary string for conversion.
-                    char h[] = { str[i + 1], str[i + 2], str[i + 3], '\0' };
-
-                    // Two digits + 'x', \xXX.
-                    i += 3;
-
-                    // Convert temp string to character.
-                    out[io++] = (char) strtol(h, NULL, 8);
-
-                    // Continue with the rest of the string.
-                    continue;
-                }
+                // Translate hexadecimal number.
+                char hex[] = { str[++i], str[++i], '\0' };
+                out[io++] = (char) strtol(hex, NULL, 16);
+                continue;
             }
 
-            // Standard escape sequence.
-            for(int j = 0; chr[j]; j++)
+            if(is_oct(str + i))
             {
-                // A direct mapping between the current character and the value
-                // representing the full escape sequence.
-                if(str[i + 1] == chr[j])
-                {
-                    i++;
-                    cr = raw[j];
-                    break;
-                }
+                // Translate octal number.
+                char oct[] = { str[i++], str[i++], str[i], '\0' };
+                out[io++] = (char) strtol(oct, NULL, 8);
+                continue;
             }
         }
 
-        // Copy input to ouput. The 'cr' might have been translated, maybe it's
-        // just a copy.
-        out[io++] = cr;
+        // Standard escape sequence mappings.
+        char chr[] = "nrthvbf\"'\\\0", raw[] = "\n\r\t\t\v\b\f\"'\\\0";
+
+        for(size_t j = 0; chr[j];)
+        {
+            if(str[i] == chr[j])
+            {
+                // Translate.
+                out[io++] = raw[j];
+                break;
+            }
+
+            if(!chr[++j])
+            {
+                // No mapping.
+                out[io++] = str[i];
+            }
+        }
     }
 
-    // Out is a copy of str but without delimiters.
     return out;
 }
 
