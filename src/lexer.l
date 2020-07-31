@@ -415,16 +415,18 @@ static char *strduptr(const char *str)
             if(is_hex(str + i))
             {
                 // Translate hexadecimal number.
-                char hex[] = { str[++i], str[++i], '\0' };
+                char hex[] = { str[i + 1], str[i + 2], '\0' };
                 out[io++] = (char) strtol(hex, NULL, 16);
+                i += 2;
                 continue;
             }
 
             if(is_oct(str + i))
             {
                 // Translate octal number.
-                char oct[] = { str[i++], str[i++], str[i], '\0' };
+                char oct[] = { str[i], str[i + 1], str[i + 2], '\0' };
                 out[io++] = (char) strtol(oct, NULL, 8);
+                i += 2;
                 continue;
             }
         }
