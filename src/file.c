@@ -3891,21 +3891,30 @@ static void h_tooltype_set_tooltype(entry_p contxt, char *file)
 
     for(size_t arg = 1; exists(C_ARG(arg)); arg++)
     {
+        // Skip non-options and options != settooltype.
         if(C_ARG(arg)->type != OPTION || C_ARG(arg)->id != OPT_SETTOOLTYPE)
         {
             continue;
         }
 
         LG_ASSERT(c_sane(C_ARG(arg), 1), LG_VOID);
-        char *type = /*strupr(*/str(C_ARG(arg)->children[0])/*)*/;
+        char *type = str(C_ARG(arg)->children[0]);
+
+        for(size_t i = 0; type[i]; i++)
+        {
+            // CBM enforces upper case.
+            type[i] = toupper(type[i]);
+        }
 
         if(exists(C_ARG(arg)->children[1]))
         {
+            // Create or update tool type.
             char *value = str(C_ARG(arg)->children[1]);
             h_tooltype_creupd_tooltype(contxt, file, type, value);
         }
         else
         {
+            // No value. Delete tool type.
             h_tooltype_delete_tooltype(contxt, file, type);
         }
     }
