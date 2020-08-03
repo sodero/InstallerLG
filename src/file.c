@@ -3736,10 +3736,10 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file, char *type,
     }
 
     char **types = obj->do_ToolTypes;
-    size_t num = 0;
+    size_t size = 0;
 
-    while(types[num++]);
-    obj->do_ToolTypes = calloc(num + 1, sizeof(char *));
+    while(types[size++]);
+    obj->do_ToolTypes = calloc(size + 1, sizeof(char *));
 
     if(!obj->do_ToolTypes && PANIC(contxt))
     {
@@ -3755,8 +3755,8 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file, char *type,
         snprintf(buf_get(B_KEY), buf_len(), "%s", type);
     }
 
-    memcpy(obj->do_ToolTypes, types, (num - 1) * sizeof(char *));
-    obj->do_ToolTypes[num - 1] = buf_put(B_KEY);
+    memcpy(obj->do_ToolTypes, types, (size - 1) * sizeof(char *));
+    obj->do_ToolTypes[size - 1] = buf_put(B_KEY);
 
     if(!PutDiskObject(file, obj) && get_num(contxt, "@strict"))
     {
