@@ -107,7 +107,7 @@ entry_p n_options(entry_p contxt)
     for(opt_t option = OPT_ALL; option < OPT_INIT; option++)
     {
         entry_p cur = opt(contxt, option);
-        DBG("%d:%s\n" , option, cur ? "true" : "false");
+        OUT("%d:%s\n" , option, cur ? "true" : "false");
     }
 
     // Dummy value.
