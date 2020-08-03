@@ -14,9 +14,11 @@
 
 #if defined(AMIGA) && !defined(LG_TEST)
 #include <clib/debug_protos.h>
-#define DBG(...) KPrintF((CONST_STRPTR)__VA_ARGS__)
+#define DBG(...) KPrintF("%s:%s:%d>", __FILE__, __func__, __LINE__);\
+                 KPrintF((CONST_STRPTR)__VA_ARGS__)
 #else
-#define DBG(...) fprintf(stderr, __VA_ARGS__)
+#define DBG(...) fprintf(stderr,"%s:%s:%d>",__FILE__,__func__,__LINE__);\
+                 fprintf(stderr,__VA_ARGS__)
 #endif
 
 entry_p n_astraw(entry_p contxt);
