@@ -3897,7 +3897,7 @@ static void h_tooltype_set_tooltype(entry_p contxt, char *file)
         }
 
         LG_ASSERT(c_sane(C_ARG(arg), 1), LG_VOID);
-        char *type = strupr(str(C_ARG(arg)->children[0]));
+        char *type = /*strupr(*/str(C_ARG(arg)->children[0])/*)*/;
 
         if(exists(C_ARG(arg)->children[1]))
         {
