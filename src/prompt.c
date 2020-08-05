@@ -207,13 +207,11 @@ entry_p n_askchoice(entry_p contxt)
     // Do we have default option?
     if(deflt)
     {
-        // Is there such a choice?
         int32_t def = num(deflt);
 
-        // Check for negative values as well.
-        if(def < 0 || def >= off)
+        if((def < 0 || def >= off) && get_num(contxt, "@strict"))
         {
-            // Nope, out of range.
+            // Out of range.
             ERR(ERR_NO_ITEM, str(deflt));
             R_NUM(LG_FALSE);
         }
@@ -766,17 +764,16 @@ entry_p n_askoptions(entry_p contxt)
     // Do we have default option?
     if(deflt)
     {
-        // Is there such a choice?
         int32_t def = num(deflt);
 
-        if(def >= (1L << ndx))
+        if((def >= (1L << ndx)) && get_num(contxt, "@strict"))
         {
-            // Nope, out of range.
+            // Out of range.
             ERR(ERR_NO_ITEM, str(deflt));
             R_NUM(LG_FALSE);
         }
 
-        // Yes, use the default value given.
+        // Use default value.
         ndx = def;
     }
     else
