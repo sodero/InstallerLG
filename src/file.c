@@ -3736,10 +3736,10 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file, char *type,
     }
 
     char **types = obj->do_ToolTypes;
-    size_t num = 0;
+    size_t size = 0;
 
-    while(types[num++]);
-    obj->do_ToolTypes = calloc(num + 1, sizeof(char *));
+    while(types[size++]);
+    obj->do_ToolTypes = calloc(size + 1, sizeof(char *));
 
     if(!obj->do_ToolTypes && PANIC(contxt))
     {
@@ -3755,8 +3755,8 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file, char *type,
         snprintf(buf_get(B_KEY), buf_len(), "%s", type);
     }
 
-    memcpy(obj->do_ToolTypes, types, (num - 1) * sizeof(char *));
-    obj->do_ToolTypes[num - 1] = buf_put(B_KEY);
+    memcpy(obj->do_ToolTypes, types, (size - 1) * sizeof(char *));
+    obj->do_ToolTypes[size - 1] = buf_put(B_KEY);
 
     if(!PutDiskObject(file, obj) && get_num(contxt, "@strict"))
     {
@@ -3891,21 +3891,30 @@ static void h_tooltype_set_tooltype(entry_p contxt, char *file)
 
     for(size_t arg = 1; exists(C_ARG(arg)); arg++)
     {
+        // Skip non-options and options != settooltype.
         if(C_ARG(arg)->type != OPTION || C_ARG(arg)->id != OPT_SETTOOLTYPE)
         {
             continue;
         }
 
         LG_ASSERT(c_sane(C_ARG(arg), 1), LG_VOID);
-        char *type = strupr(str(C_ARG(arg)->children[0]));
+        char *type = str(C_ARG(arg)->children[0]);
+
+        for(size_t i = 0; type[i]; i++)
+        {
+            // CBM enforces upper case.
+            type[i] = toupper(type[i]);
+        }
 
         if(exists(C_ARG(arg)->children[1]))
         {
+            // Create or update tool type.
             char *value = str(C_ARG(arg)->children[1]);
             h_tooltype_creupd_tooltype(contxt, file, type, value);
         }
         else
         {
+            // No value. Delete tool type.
             h_tooltype_delete_tooltype(contxt, file, type);
         }
     }
