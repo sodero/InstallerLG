@@ -176,9 +176,14 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
     // Translate strings to options.
     for(size_t i = 0; exists(fake->children[i]); i++)
     {
-        // Only evaluate string value once.
-        bool del = fake->children[i]->parent->id == OPT_DELOPTS;
+        static entry_p save[OPT_LAST];
+
+        // Cache may be invalidated by str().
+        memcpy(save, cache, sizeof(entry_p) * OPT_LAST);
         char *name = str(fake->children[i]);
+        memcpy(cache, save, sizeof(entry_p) * OPT_LAST);
+
+        bool del = fake->children[i]->parent->id == OPT_DELOPTS;
 
         // Compare all strings unless the current option is deleted.
         if(cache[OPT_FAIL] != end() && !strcasecmp(name, "fail"))
@@ -274,7 +279,12 @@ static void opt_push_cache(entry_p option, entry_p *cache)
     // Dynamic options must be resolved.
     else if(option->id == OPT_DYNOPT)
     {
+        static entry_p save[OPT_LAST];
+
+        // Cache may be invalidated by resolve().
+        memcpy(save, cache, sizeof(entry_p) * OPT_LAST);
         entry_p res = resolve(option);
+        memcpy(cache, save, sizeof(entry_p) * OPT_LAST);
 
         if(res->type != OPTION)
         {
@@ -883,7 +893,7 @@ static void dump_indent(entry_p entry, size_t indent)
     // NULL is a valid value.
     if(!entry)
     {
-        DBG("NULL\n\n");
+        OUT("NULL\n\n");
         return;
     }
 
@@ -892,27 +902,27 @@ static void dump_indent(entry_p entry, size_t indent)
                     "OPTION", "CUSTOM", "CUSREF", "CONTXT", "DANGLE" };
 
     // All entries have a type, a parent and an ID.
-    DBG("%s\n", tps[entry->type]);
-    DBG("%sThis:%p\n", type, (void *) entry);
-    DBG("%sParent:%p\n", type, (void *) entry->parent);
-    DBG("%sId:\t%d\n", type, entry->id);
+    OUT("%s\n", tps[entry->type]);
+    OUT("%sThis:%p\n", type, (void *) entry);
+    OUT("%sParent:%p\n", type, (void *) entry->parent);
+    OUT("%sId:\t%d\n", type, entry->id);
 
     // Most, but not all, have a name.
     if(entry->name)
     {
-        DBG("%sName:\t%s\n", type, entry->name);
+        OUT("%sName:\t%s\n", type, entry->name);
     }
 
      // Natives and cusrefs have callbacks.
     if(entry->call)
     {
-        DBG("%sCall:\t%d\n", type, entry->call != NULL);
+        OUT("%sCall:\t%d\n", type, entry->call != NULL);
     }
 
     // Functions / symbols can be 'resolved'.
     if(entry->resolved)
     {
-        DBG("%sRes:\t", type);
+        OUT("%sRes:\t", type);
 
         // Pretty print the 'resolved' entry, last / default return value
         // and values refered to by symbols.
@@ -924,7 +934,7 @@ static void dump_indent(entry_p entry, size_t indent)
     {
         for(entry_p *chl = entry->children; exists(*chl); chl++)
         {
-            DBG("%sChl:\t", type);
+            OUT("%sChl:\t", type);
             dump_indent(*chl, indent + 1);
         }
     }
@@ -934,7 +944,7 @@ static void dump_indent(entry_p entry, size_t indent)
     {
         for(entry_p *sym = entry->symbols; exists(*sym); sym++)
         {
-            DBG("%sSym:\t", type);
+            OUT("%sSym:\t", type);
             dump_indent(*sym, indent + 1);
         }
     }
