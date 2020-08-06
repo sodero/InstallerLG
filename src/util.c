@@ -176,9 +176,14 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
     // Translate strings to options.
     for(size_t i = 0; exists(fake->children[i]); i++)
     {
-        // Only evaluate string value once.
-        bool del = fake->children[i]->parent->id == OPT_DELOPTS;
+        static entry_p save[OPT_LAST];
+
+        // Cache may be invalidated by str().
+        memcpy(save, cache, sizeof(entry_p) * OPT_LAST);
         char *name = str(fake->children[i]);
+        memcpy(cache, save, sizeof(entry_p) * OPT_LAST);
+
+        bool del = fake->children[i]->parent->id == OPT_DELOPTS;
 
         // Compare all strings unless the current option is deleted.
         if(cache[OPT_FAIL] != end() && !strcasecmp(name, "fail"))
@@ -274,7 +279,12 @@ static void opt_push_cache(entry_p option, entry_p *cache)
     // Dynamic options must be resolved.
     else if(option->id == OPT_DYNOPT)
     {
+        static entry_p save[OPT_LAST];
+
+        // Cache may be invalidated by resolve().
+        memcpy(save, cache, sizeof(entry_p) * OPT_LAST);
         entry_p res = resolve(option);
+        memcpy(cache, save, sizeof(entry_p) * OPT_LAST);
 
         if(res->type != OPTION)
         {
