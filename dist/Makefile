@@ -40,11 +40,12 @@ clean:
 	$(RM) $(EXE)
 	$(RM) $(README)
 	$(RM) $(DIR)/*.lha
+	$(RM) $(DIR)/*.bak
 	$(RM) -R $(NAME) Catalogs
 
 $(ARC): $(EXE)
-	lha $(LHAFLAGS) $@ $(FILES) && \
-	lha $(LHAFLAGS) $@ $(CAT)
+	lha $(LHAFLAGS) $@ $(CAT) && \
+	lha $(LHAFLAGS) $@ $(FILES)
 
 $(CAT):
 	$(MAKE) -C $(BIN) cat && \

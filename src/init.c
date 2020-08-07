@@ -218,6 +218,11 @@ static void init_misc_string(entry_p contxt)
     init_str(contxt, "oknodelete", "oknodelete");
     init_str(contxt, "force", "force");
     init_str(contxt, "askuser", "askuser");
+    init_str(contxt, "<fail>", "fail");
+    init_str(contxt, "<nofail>", "nofail");
+    init_str(contxt, "<oknodelete>", "oknodelete");
+    init_str(contxt, "<force>", "force");
+    init_str(contxt, "<askuser>", "askuser");
     init_str(contxt, "@null", "NULL");
 }
 
