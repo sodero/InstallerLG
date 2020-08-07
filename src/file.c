@@ -1034,7 +1034,7 @@ static bool h_copy_comment(entry_p contxt, const char *src, const char *dst)
     bool done = false;
 
     // Get comment from lock.
-    if(lock && Examine(lock, fib) && fib->fib_Comment)
+    if(lock && Examine(lock, fib))
     {
         done = SetComment(dst, fib->fib_Comment);
     }
