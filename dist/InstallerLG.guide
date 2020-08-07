@@ -121,6 +121,9 @@ Russian translation.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}0.1.0-alpha.52 (2020-NOT-YET)@{UB}
+- ?
+
 @{B}0.1.0-alpha.51 (2020-08-07)@{UB}
 - Single argument logic and bitwise operations tolerated.
 - Incomplete (set) statements tolerated.
