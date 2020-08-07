@@ -18,7 +18,7 @@ endif
 #---------------------------------------------------------------------------------#
 # OS
 #---------------------------------------------------------------------------------#
-CWRN = -Wall -Wextra -Werror -pedantic
+CWRN = -Wall -Wextra -Werror -pedantic -Wno-gnu-statement-expression
 ifeq ($(OS),Linux)
 CGEN = -g -std=c99
 CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE
