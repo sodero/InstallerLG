@@ -3694,7 +3694,7 @@ static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
         }
     }
 
-    obj->do_ToolTypes = tmp;
+    obj->do_ToolTypes = (STRPTR *) tmp;
 
     // Don't fail in sloppy mode.
     if(!PutDiskObject(file, obj) && get_num(contxt, "@strict"))
@@ -3703,7 +3703,7 @@ static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
     }
 
     // Restore object before free. Refer to the icon.library documentation.
-    obj->do_ToolTypes = types;
+    obj->do_ToolTypes = (STRPTR *) types;
     FreeDiskObject(obj);
     free(tmp);
     #else
@@ -3735,7 +3735,7 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file, char *type,
         return;
     }
 
-    char **types = obj->do_ToolTypes;
+    char **types = (char **) obj->do_ToolTypes;
     size_t size = 0;
 
     while(types[size++]);
@@ -3764,7 +3764,7 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file, char *type,
     }
 
     free(obj->do_ToolTypes);
-    obj->do_ToolTypes = types;
+    obj->do_ToolTypes = (STRPTR *) types;
 
     // Restore object before free. Refer to the icon.library documentation.
     FreeDiskObject(obj);
@@ -3796,8 +3796,8 @@ static void h_tooltype_update_tooltype(entry_p contxt, char *file, char *type,
         return;
     }
 
-    char **types = obj->do_ToolTypes;
-    char *oval = FindToolType(types, type);
+    char **types = (char **) obj->do_ToolTypes;
+    char *oval = FindToolType((STRPTR *) types, type);
 
     if(!oval)
     {

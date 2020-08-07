@@ -18,7 +18,10 @@ endif
 #---------------------------------------------------------------------------------#
 # OS
 #---------------------------------------------------------------------------------#
-CWRN = -Wall -Wextra -Werror -pedantic -Wno-gnu-statement-expression
+CWRN = -Wall -Wextra -Werror
+ifneq ($(OS),AROS)
+CWRN += -pedantic -Wno-gnu-statement-expression
+endif
 ifeq ($(OS),Linux)
 CGEN = -g -std=c99
 CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE
