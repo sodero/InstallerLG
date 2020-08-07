@@ -121,7 +121,7 @@ Russian translation.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-@{B}0.1.0-alpha.51 (2020-NOT-YET)@{UB}
+@{B}0.1.0-alpha.51 (2020-08-07)@{UB}
 - Single argument logic and bitwise operations tolerated.
 - Incomplete (set) statements tolerated.
 - (trap) stub supports multiple error flags.
@@ -129,7 +129,6 @@ Russian translation.
 - (while) and (until) are allowed to have empty bodies.
 - (iconinfo) fails silently in sloppy mode.
 - In sloppy mode, don't check for out of range default values in (askoptions) and (askchoice).
-- ?
 
 @{B}0.1.0-alpha.50 (2020-07-19)@{UB}
 - (welcome) default message added.
