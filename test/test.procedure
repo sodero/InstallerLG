@@ -1,3 +1,8 @@
+(procedure f1 (+ 303)) (f1); "","303",""
+(procedure f1 (+ 303)) (f2); "","Line 1: Undefined function 'f2' 0",""
+(set f2 606) (procedure f1 (+ 303)) (f2); "","Line 1: Undefined function 'f2' 0",""
+(set @strict 0 f2 606) (procedure f1 (+ 303)) (f2); "","606",""
+(set @strict 0 f2 606) (procedure f1 (+ 303)) (procedure f2 (+ 808)) (f2); "","808",""
 (procedure f1 a (if (< a 32) (f1 (+ a 1)) (+ 0))) (f1 1); "","0",""
 (procedure f1 a (if (< a 33) (f1 (+ a 1)) (+ 0))) (f1 1); "","Line 1: Max recursion depth exceeded 'f1' 0",""
 (set d "X") (procedure fnc a b ((debug a b d) (set c a) (set a b) (set b c) (fnc a b))) (fnc "a" "b"); "","Line 1: Max recursion depth exceeded 'fnc' a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X a b X b a X 0",""
