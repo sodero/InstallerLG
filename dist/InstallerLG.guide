@@ -122,6 +122,7 @@ Russian translation.
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{B}0.1.0-alpha.52 (2020-NOT-YET)@{UB}
+- Ambiguous function call / variable references allowed in sloppy mode.
 - ?
 
 @{B}0.1.0-alpha.51 (2020-08-07)@{UB}

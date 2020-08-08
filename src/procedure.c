@@ -71,16 +71,28 @@ static entry_p h_gosub_fmt(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p n_gosub(entry_p contxt)
 {
-    // Assert a non-broken parser.
     LG_ASSERT(s_sane(global(contxt), 0), end());
+    bool strict = get_num(contxt, "@strict") == LG_TRUE;
 
     // Search for a procedure that matches the reference name.
     for(entry_p *cus = global(contxt)->symbols; exists(*cus); cus++)
     {
-        if((*cus)->type != CUSTOM || strcasecmp((*cus)->name, contxt->name))
+        // There should be nothing but variables and user procedures here.
+        LG_ASSERT((*cus)->type == CUSTOM || (*cus)->type == SYMBOL, end());
+
+        // Skip symbol if we don't have a match. Note that in sloppy mode the
+        // ambiguous (sym) form is allowed where 'sym' can be either a user
+        // defined procedure or a variable. This is forbidden in strict mode.
+        if((strict && (*cus)->type != CUSTOM) ||
+           strcasecmp((*cus)->name, contxt->name))
         {
-            // Skip symbol if we don't have a match.
-            continue;
+           continue;
+        }
+
+        // See above. Ambiguous form.
+        if((*cus)->type == SYMBOL)
+        {
+            break;
         }
 
         // Copy parameter values to procedure context.
@@ -142,7 +154,7 @@ entry_p n_gosub(entry_p contxt)
         return end();
     }
 
-    if(get_num(contxt, "@strict"))
+    if(strict)
     {
         // There's no such procedure.
         ERR(ERR_UNDEF_FNC, contxt->name);
