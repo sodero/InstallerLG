@@ -823,6 +823,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 #define EXEC_MASK   (1 << 1)
 #define DELETE_MASK (1 << 0)
 
+#if !defined(AMIGA)
 //------------------------------------------------------------------------------
 // Name:        h_perm_amiga_to_posix
 // Description: Convert Amiga file permissions to POSIX file permissions.
@@ -854,6 +855,7 @@ static inline int32_t h_perm_posix_to_amiga(mode_t posix)
     return (read ? 0 : READ_MASK) | (write ? 0 : WRITE_MASK) |
            (exec ? 0 : EXEC_MASK ) | DELETE_MASK;
 }
+#endif
 
 #if defined(AMIGA)
 //------------------------------------------------------------------------------
