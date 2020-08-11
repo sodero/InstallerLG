@@ -92,7 +92,7 @@ entry_p n_gosub(entry_p contxt)
         // See above. Ambiguous form.
         if((*cus)->type == SYMBOL)
         {
-            return resolve(*cus);
+            break;
         }
 
         // Copy parameter values to procedure context.
