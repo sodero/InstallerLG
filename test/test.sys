@@ -44,7 +44,7 @@
 ("%ld" false) ; "","0",""
 (set true 2) ("%ld" true) ; "","2",""
 (set false 7) ("%ld" false) ; "","7",""
-("%s" @null) ; "","NULL",""
+("%s" @null) ; "","",""
 ("%ld" @pretend) ; "","0",""
 ("%ld" @yes) ; "","0",""
 ("%ld" @skip) ; "","0",""
