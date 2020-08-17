@@ -488,7 +488,8 @@ tackon:         '(' TACKON pp ')'                { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* symbol.c|h                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-set:            '(' SET sps ')'                  { $$ = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, $3, DANGLE); };
+set:            '(' SET sps ')'                  { $$ = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, $3, DANGLE); } |
+                '(' SET DEFAULT sps ')'          { $$ = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, $4, DANGLE); };
 symbolset:      '(' SYMBOLSET ps ')'             { $$ = new_native(DBG_ALLOC(strdup("symbolset")), LINE, n_symbolset, $3, DANGLE); };
 symbolval:      '(' SYMBOLVAL p ')'              { $$ = new_native(DBG_ALLOC(strdup("symbolval")), LINE, n_symbolval, push(new_contxt(), $3), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
