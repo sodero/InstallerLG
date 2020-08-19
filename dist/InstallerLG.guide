@@ -123,6 +123,8 @@ Russian translation.
 
 @{B}0.1.0-alpha.52 (2020-NOT-YET)@{UB}
 - Ambiguous function call / variable references allowed in sloppy mode.
+- Special treatment of (set default ...) to support very old installers.
+- Option (select) support.
 - ?
 
 @{B}0.1.0-alpha.51 (2020-08-07)@{UB}
