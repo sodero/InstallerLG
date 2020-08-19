@@ -552,8 +552,9 @@ optional:       '(' OPTIONAL ps ')'              { $$ = new_option(DBG_ALLOC(str
                 '(' OPTIONAL ')'                 { $$ = new_option(DBG_ALLOC(strdup("optional")), OPT_OPTIONAL, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); };
 resident:       '(' RESIDENT ')'                 { $$ = new_option(DBG_ALLOC(strdup("resident")), OPT_RESIDENT, NULL); };
 override:       '(' OVERRIDE p ')'               { $$ = new_option(DBG_ALLOC(strdup("override")), OPT_OVERRIDE, push(new_contxt(), $3)); };
-dynopt:         '(' IF p opts ')'                { $$ = new_option(DBG_ALLOC(strdup("dynopt")), OPT_DYNOPT, push(push(new_contxt(), $3), $4)); } |
-                '(' IF p opts opts ')'           { $$ = new_option(DBG_ALLOC(strdup("dynopt")), OPT_DYNOPT, push(push(push(new_contxt(), $3), $4), $5)); };
+dynopt:         '(' IF p opts ')'                { $$ = new_option(DBG_ALLOC(strdup("ifopt")), OPT_IFOPT, push(push(new_contxt(), $3), $4)); } |
+                '(' IF p opts opts ')'           { $$ = new_option(DBG_ALLOC(strdup("ifopt")), OPT_IFOPT, push(push(push(new_contxt(), $3), $4), $5)); } |
+                '(' SELECT p opts ')'            { $$ = new_option(DBG_ALLOC(strdup("selopt")), OPT_SELOPT, push(push(new_contxt(), $3), $4)); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %%
 

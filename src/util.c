@@ -277,7 +277,7 @@ static void opt_push_cache(entry_p option, entry_p *cache)
         get_fake_opt(option, cache);
     }
     // Dynamic options must be resolved.
-    else if(option->id == OPT_DYNOPT)
+    else if(option->id == OPT_IFOPT || option->id == OPT_SELOPT)
     {
         static entry_p save[OPT_LAST];
 

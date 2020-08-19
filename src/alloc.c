@@ -389,11 +389,14 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
                 move_contxt(entry, chl);
             }
 
-            // Dynamic options must be resolved.
-            if(type == OPT_DYNOPT)
+            // Dynamic options need a callback.
+            if(type == OPT_IFOPT)
             {
-                // Set callback. Only (if) is allowed.
                 entry->call = n_if;
+            }
+            else if(type == OPT_SELOPT)
+            {
+                entry->call = n_select;
             }
 
             return entry;
