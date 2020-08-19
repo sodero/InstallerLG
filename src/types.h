@@ -107,14 +107,15 @@ typedef enum
     OPT_OPTIONAL,           // 37
     OPT_RESIDENT,           // 38
     OPT_OVERRIDE,           // 39
-    OPT_DYNOPT,             // 40
-    OPT_ASKUSER,            // 41
-    OPT_FAIL,               // 42
-    OPT_FORCE,              // 43
-    OPT_NOFAIL,             // 44
-    OPT_OKNODELETE,         // 45
-    OPT_INIT,               // 46
-    OPT_LAST,               // 47
+    OPT_IFOPT,              // 40
+    OPT_SELOPT,             // 41
+    OPT_ASKUSER,            // 42
+    OPT_FAIL,               // 43
+    OPT_FORCE,              // 44
+    OPT_NOFAIL,             // 45
+    OPT_OKNODELETE,         // 46
+    OPT_INIT,               // 47
+    OPT_LAST,               // 48
 } opt_t;
 
 //------------------------------------------------------------------------------

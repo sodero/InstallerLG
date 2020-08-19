@@ -92,7 +92,7 @@ entry_p find_symbol(entry_p entry)
 static entry_p h_resolve_option(entry_p option)
 {
     // Dynamic options are native function calls.
-    if(option->id == OPT_DYNOPT)
+    if(option->id == OPT_IFOPT || option->id == OPT_SELOPT)
     {
         return option->call(option);
     }
