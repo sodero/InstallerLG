@@ -34,10 +34,9 @@ entry_p n_if(entry_p contxt)
     // Does the body contain anything?
     if(exists(C_ARG(2)))
     {
-        // Select branch to execute.
+        // Select branch to execute (if any).
         entry_p sel = val ? C_ARG(2) : C_ARG(3);
 
-        // Is there a branch corresponding to the resolved truth value?
         if(exists(sel))
         {
             // Execute the branch by resolving it.

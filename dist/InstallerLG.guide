@@ -125,6 +125,7 @@ Russian translation.
 - Ambiguous function call / variable references allowed in sloppy mode.
 - Special treatment of (set default ...) to support very old installers.
 - Option (select) support.
+- Unorthodox (if) statements tolerated.
 - ?
 
 @{B}0.1.0-alpha.51 (2020-08-07)@{UB}
