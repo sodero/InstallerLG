@@ -311,7 +311,7 @@ neq:            '(' NEQ pp ')'                   { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* control.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-if:             '(' IF cvv ps ')'                { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, NUMBER); (void) $4; } |
+if:             '(' IF cvv ps ')'                { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push($3, $4), NUMBER); } |
                 '(' IF cvv ')'                   { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, NUMBER); } |
                 '(' IF cv ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, NUMBER); } |
                 '(' IF c ')'                     { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push(new_contxt(), $3), NUMBER); };

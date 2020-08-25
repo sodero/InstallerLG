@@ -4055,7 +4055,7 @@ yyreduce:
 
   case 197:
 #line 314 "../src/parser.y"
-                                                 { (yyval.e) = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, (yyvsp[-2].e), NUMBER); (void) (yyvsp[-1].e); }
+                                                 { (yyval.e) = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 4060 "parser.c"
     break;
 
