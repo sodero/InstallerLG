@@ -146,8 +146,8 @@ static void arg_find_tts(STRPTR *tts)
     // Is there an explicit script path?
     char *script = (char *) FindToolType(tts, (STRPTR) tr(S_SCRI));
 
-    // Override current path if explicit path exists.
-    args[ARG_SCRIPT] = script ? script : args[ARG_SCRIPT];
+    // Override current script path if explicit non empty path exists.
+    args[ARG_SCRIPT] = script && *script ? script : args[ARG_SCRIPT];
 
     // Leave the rest of the tooltypes as they are.
     args[ARG_APPNAME] = (char *) FindToolType((STRPTR *) tts, "APPNAME");
