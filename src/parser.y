@@ -348,7 +348,8 @@ run:            '(' RUN ps opts ')'              { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* exit.c|h                                                                                                                                                                             */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-abort:          '(' ABORT ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("abort")), LINE, n_abort, $3, NUMBER); };
+abort:          '(' ABORT ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("abort")), LINE, n_abort, $3, NUMBER); } |
+                '(' ABORT ')'                    { $$ = new_native(DBG_ALLOC(strdup("abort")), LINE, n_abort, NULL, NUMBER); };
 exit:           '(' EXIT ps quiet ')'            { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, push($3, $4), NUMBER); } |
                 '(' EXIT quiet ps ')'            { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, push($4, $3), NUMBER); } |
                 '(' EXIT quiet')'                { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, push(new_contxt(), $3), NUMBER); } |
