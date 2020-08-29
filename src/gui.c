@@ -1116,11 +1116,9 @@ MUIDSP IGAskFile(Class *cls, Object *obj, struct MUIP_IG_AskFile *msg)
 MUIDSP IGCopyFilesStart(Class *cls, Object *obj,
                         struct MUIP_IG_CopyFilesStart *msg)
 {
-
     struct IGData *my = INST_DATA(cls, obj);
-
-    int n = 0;
     pnode_p cur = (pnode_p) msg->List, lst = cur;
+    int n = 0;
 
     // For all files and directories to be copied; count the files, and if
     // confirmation is needed, add them to the selection / deselection list.
@@ -1143,6 +1141,9 @@ MUIDSP IGCopyFilesStart(Class *cls, Object *obj,
         // Next file / directory.
         cur = cur->next;
     }
+
+    // Install timer to give the user has a chance to abort.
+    DoMethod(_app(obj), MUIM_Application_AddInputHandler, &my->Ticker);
 
     if(msg->Confirm && n)
     {
@@ -1244,10 +1245,6 @@ MUIDSP IGCopyFilesStart(Class *cls, Object *obj,
     // Show file copy page.
     if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_COPYFILES, B_ABORT))
     {
-        // Install a timer to create a time slice where the user has a chance to
-        // abort.
-        DoMethod(_app(obj), MUIM_Application_AddInputHandler, &my->Ticker);
-
         // Configure gauge so that one tick == one file.
         SetAttrs(my->Progress, MUIA_Gauge_Max, n, MUIA_Gauge_Current, 0,
                  TAG_END);
@@ -1365,8 +1362,7 @@ MUIDSP IGCopyFilesEnd(Class *cls, Object *obj)
     struct IGData *my = INST_DATA(cls, obj);
 
     // Uninstall timer created to establish a time slice where the user has a
-    // chance to abort file copy operations. Things will continue to work even
-    // if we don't, but by doing it this way we make less noise.
+    // chance to abort file copy operations.
     DoMethod(_app (obj), MUIM_Application_RemInputHandler, &my->Ticker);
 
     // Leave the file list the way we found it (empty).
