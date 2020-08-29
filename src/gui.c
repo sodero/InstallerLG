@@ -1142,7 +1142,7 @@ MUIDSP IGCopyFilesStart(Class *cls, Object *obj,
         cur = cur->next;
     }
 
-    // Install timer to give the user has a chance to abort.
+    // Install timer to give the user a chance to abort.
     DoMethod(_app(obj), MUIM_Application_AddInputHandler, &my->Ticker);
 
     if(msg->Confirm && n)
