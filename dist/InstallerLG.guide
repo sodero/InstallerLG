@@ -127,6 +127,7 @@ Russian translation.
 - Option (select) support.
 - Unorthodox (if) statements tolerated.
 - Empty (abort) allowed.
+- Input handler bug fixed.
 - ?
 
 @{B}0.1.0-alpha.51 (2020-08-07)@{UB}

@@ -862,6 +862,14 @@ static int32_t h_getversion_dev(const char *name)
 //------------------------------------------------------------------------------
 static int32_t h_getversion_lib(const char *name)
 {
+    const char *suf = ".library", *pos = strstr(name, suf);
+
+    // A library suffix is required.
+    if(!pos || strcasecmp(suf, pos))
+    {
+        return LG_NOVER;
+    }
+
     // Assume failure.
     int32_t ver = LG_NOVER;
 
@@ -876,8 +884,6 @@ static int32_t h_getversion_lib(const char *name)
         // Library is no longer needed.
         CloseLibrary(lib);
     }
-    #else
-    (void) name;
     #endif
 
     // Success or failure.

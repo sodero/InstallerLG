@@ -9,6 +9,8 @@
 (getversion "_gv_" (resident)) ; "","0",""
 (getversion "_gv_" (resident) (safe)) ; "","Line 1: syntax error, unexpected '(', expecting ')' '('",""
 (getversion "_gv_" (safe)) ; "","Line 1: syntax error, unexpected SAFE, expecting RESIDENT 'safe'",""
+(getversion "_gv_") ; "rm -Rf _gv_ && cp ../test/data.copylib.i2.noversion _gv_","0","rm -Rf _gv_"
+(getversion "_gv_.library") ; "rm -Rf _gv_ && cp ../test/data.copylib.i2.noversion _gv_.library","0","rm -Rf _gv_.library"
 (getversion "_gv_") ; "rm -Rf _gv_ && cp ../test/data.copylib.i1.TheBar_2617_Aros_i386 _gv_","1703953","rm -Rf _gv_"
 (getversion "_gv_") ; "rm -Rf _gv_ && cp ../test/data.copylib.i1.TheBar_2619_Aros_i386 _gv_","1703955","rm -Rf _gv_"
 (getversion "_gv_") ; "rm -Rf _gv_ && cp ../test/data.copylib.i1.TheBar_2617_AmigaOS3 _gv_","1703953","rm -Rf _gv_"
