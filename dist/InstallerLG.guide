@@ -121,6 +121,9 @@ Russian translation.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}0.1.0-alpha.53 (2020-NOT-YET)@{UB}
+- ?
+
 @{B}0.1.0-alpha.52 (2020-09-02)@{UB}
 - Ambiguous function call / variable references allowed in sloppy mode.
 - Special treatment of (set default) to support very old installers.
