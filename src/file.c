@@ -3207,7 +3207,11 @@ entry_p n_startup(entry_p contxt)
     {
         // Create temporary file.
         snprintf(tmp, tln, "%s.XXXXXX", fln);
-        FILE *file = DBG_FOPEN(fdopen(mkstemp(tmp), "w+"));
+        int hnd = mkstemp(tmp);
+
+        // On some system 'w' doesn't work, but 'w+' does. Try both.
+        FILE *file = DBG_FOPEN(fdopen(hnd, "w"));
+        file = file ? file : DBG_FOPEN(fdopen(hnd, "w+"));
 
         if(file)
         {
@@ -3242,15 +3246,6 @@ entry_p n_startup(entry_p contxt)
                         free(tmp);
                         tmp = NULL;
                         D_NUM = LG_TRUE;
-                    }
-                }
-                else
-                {
-                    // We aren't allowed to write data to the target file so we
-                    // need to clean up temp file.
-                    if(DBG_ZERO(remove(tmp)))
-                    {
-                        ERR(ERR_WRITE_FILE, tmp);
                     }
                 }
             }
