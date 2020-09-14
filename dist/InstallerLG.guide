@@ -121,7 +121,10 @@ Russian translation.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-@{B}0.1.0-alpha.53 (2020-NOT-YET)@{UB}
+@{B}0.1.0-alpha.54 (2020-NOT-YET)@{UB}
+- ?
+
+@{B}0.1.0-alpha.53 (2020-09-14)@{UB}
 - AROS: (startup) temp file bug fixed.
 
 @{B}0.1.0-alpha.52 (2020-09-02)@{UB}

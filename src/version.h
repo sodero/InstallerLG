@@ -12,7 +12,7 @@
 
 #define MAJOR 44
 #define MINOR 10
-#define BUILD 53
+#define BUILD 54
 #define PHASE "ALPHA"
 
 #define STY(X) #X
