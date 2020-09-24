@@ -761,10 +761,12 @@ entry_p n_askoptions(entry_p contxt)
     // Terminate array.
     chs[ndx] = NULL;
 
-    // Do we have default option?
+    // Is there a default option?
     if(deflt)
     {
-        int32_t def = num(deflt);
+        // All bits set if symbol is missing.
+        deflt = resolve(deflt->children[0]);
+        int32_t def = (deflt != end()) ? num(deflt) : -1;
 
         if((def >= (1L << ndx)) && get_num(contxt, "@strict"))
         {
