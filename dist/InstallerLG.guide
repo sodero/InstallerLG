@@ -124,6 +124,7 @@ Russian translation.
 @{B}0.1.0-alpha.54 (2020-NOT-YET)@{UB}
 - (askoptions) undefined variable in (default) return value fix.
 - (askdir) truncate trailing '/'.
+- (copyfiles) (fonts) fix.
 - ?
 
 @{B}0.1.0-alpha.53 (2020-09-14)@{UB}
