@@ -678,8 +678,9 @@ entry_p n_getsize(entry_p contxt)
     // We need a file name.
     C_SANE(1, NULL);
 
-    // Open the file in read only mode.
-    FILE *file = DBG_FOPEN(h_fopen(contxt, str(C_ARG(1)), "r", false));
+    // Open file in read only mode.
+    const char *name = str(C_ARG(1));
+    FILE *file = DBG_FOPEN(h_fopen(contxt, name, "r", true));
 
     if(file)
     {
@@ -696,9 +697,14 @@ entry_p n_getsize(entry_p contxt)
         R_NUM(res);
     }
 
-    // Could not read from file.
-    ERR(ERR_READ_FILE, str(C_ARG(1)));
-    R_NUM(LG_FALSE);
+    // Don't fail in sloppy mode.
+    if(get_num(contxt, "@strict"))
+    {
+        ERR(ERR_READ_FILE, name);
+    }
+
+    // Unknown size.
+    R_NUM(-1);
 }
 
 //------------------------------------------------------------------------------

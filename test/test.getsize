@@ -3,4 +3,6 @@
 (getsize "_ne_") ; "","Line 1: Could not read from file '_ne_' 0",""
 (getsize "_gs_") ; "echo '123' > _gs_","4","rm -f _gs_"
 (getsize "_gs_") ; "touch _gs_","0","rm -f _gs_"
-(getsize "_ne_") ; "touch _gs_ && chmod a-r _gs_","Line 1: Could not read from file '_ne_' 0","rm -f _gs_"
+(getsize "_gs_") ; "touch _gs_ && chmod a-r _gs_","Line 1: Could not read from file '_gs_' 0","rm -f _gs_"
+(set @strict 0) (getsize "_gs_") ; "touch _gs_ && chmod a-r _gs_","0","rm -f _gs_"
+(set @strict 0) (getsize "_ne_") ; "","-1",""
