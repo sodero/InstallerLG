@@ -356,7 +356,9 @@ exit:           '(' EXIT ps quiet ')'            { $$ = new_native(DBG_ALLOC(str
                 '(' EXIT ps ')'                  { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, $3, NUMBER); } |
                 '(' EXIT ')'                     { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, NULL, NUMBER); };
 onerror:        '(' ONERROR vps ')'              { $$ = new_native(DBG_ALLOC(strdup("onerror")), LINE, n_procedure, push(new_contxt(),
-                                                        new_custom(DBG_ALLOC(strdup("@onerror")), LINE, NULL, $3)), DANGLE); };
+                                                        new_custom(DBG_ALLOC(strdup("@onerror")), LINE, NULL, $3)), DANGLE); } |
+                '(' ONERROR ')'                  { $$ = new_native(DBG_ALLOC(strdup("onerror")), LINE, n_procedure, push(new_contxt(),
+                                                        new_custom(DBG_ALLOC(strdup("@onerror")), LINE, NULL, NULL)), NUMBER); };
 reboot:         '(' REBOOT ')'                   { $$ = new_native(DBG_ALLOC(strdup("reboot")), LINE, n_reboot, NULL, NUMBER); };
 trap:           '(' TRAP nps vps ')'             { $$ = new_native(DBG_ALLOC(strdup("trap")), LINE, n_trap, push(push(new_contxt(), $3), $4), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
