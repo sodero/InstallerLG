@@ -127,6 +127,7 @@ Russian translation.
 - (copyfiles) (fonts) fix.
 - (getsize) don't fail in sloppy mode.
 - (onerror) allow empty body.
+- Undocumented lu string formating support.
 - ?
 
 @{B}0.1.0-alpha.53 (2020-09-14)@{UB}
