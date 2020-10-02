@@ -123,6 +123,10 @@ Russian translation.
 
 @{B}0.1.0-alpha.54 (2020-NOT-YET)@{UB}
 - (askoptions) undefined variable in (default) return value fix.
+- (askdir) truncate trailing '/'.
+- (copyfiles) (fonts) fix.
+- (getsize) don't fail in sloppy mode.
+- (onerror) allow empty body.
 - ?
 
 @{B}0.1.0-alpha.53 (2020-09-14)@{UB}

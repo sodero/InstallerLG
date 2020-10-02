@@ -776,6 +776,9 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 
                     // Name no longer needed.
                     buf_put(B_KEY);
+
+                    // The list is complete.
+                    return head;
                 }
 
                 free(head->name);
