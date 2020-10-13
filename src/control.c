@@ -45,7 +45,7 @@ entry_p n_if(entry_p contxt)
     }
 
     // Nothing to resolve.
-    R_NUM(LG_FALSE);
+    return end();
 }
 
 //------------------------------------------------------------------------------
@@ -89,9 +89,8 @@ static entry_p h_whunt(entry_p contxt, bool until)
     // One or more arguments, the condition and the (optional) body.
     C_SANE(1, NULL);
 
-    // Prepare to return the resolved value (which is always LG_FALSE) of this
-    // function if the condition is false from the start.
-    entry_p ret = contxt->resolved;
+    // Prepare to dangle if the condition is false from the start.
+    entry_p ret = end();
 
     // Use XOR to support both 'while' and 'until'. Break on error.
     for(bool cont = until ^ tru(C_ARG(1)); cont && NOT_ERR;
