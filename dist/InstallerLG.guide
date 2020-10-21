@@ -122,6 +122,8 @@ Russian translation.
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{B}0.1.0-alpha.55 (2020-NOT-YET)@{UB}
+- Void (if) return value fix.
+- Empty (trap) allowed.
 - ?
 
 @{B}0.1.0-alpha.54 (2020-10-06)@{UB}

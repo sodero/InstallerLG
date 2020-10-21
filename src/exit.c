@@ -190,13 +190,16 @@ entry_p n_onerror(entry_p contxt)
 entry_p n_trap(entry_p contxt)
 {
     // Two arguments.
-    C_SANE(2, NULL);
+    C_SANE(1, NULL);
 
     // Enter trap mode.
     set_num(contxt, "@trap", num(C_ARG(1)));
 
-    // Resolve statements.
-    (void) resolve(C_ARG(2));
+    // Resolve statements if there are any.
+    if(exists(C_ARG(2)))
+    {
+        (void) resolve(C_ARG(2));
+    }
 
     // Leave trap mode and clear errors.
     set_num(contxt, "@trap", LG_FALSE);
