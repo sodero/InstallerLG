@@ -6,7 +6,7 @@ language:
 jobs:
     include:
         - stage: Cppcheck
-          script: git clone https://github.com/danmar/cppcheck.git && make -j8 -C cppcheck && cd src && ../cppcheck/cppcheck --max-ctu-depth=4096 --enable=all --error-exitcode=1 --suppress=missingInclude --suppress=unusedFunction --suppress=knownConditionTrueFalse --suppress=unmatchedSuppression -U__clang_analyzer__ -UFAIL_FILE_ADDR -UFAIL_FILE_ALLOC -UFAIL_FILE_FOPEN -UFAIL_FILE_DOPEN -UFAIL_FILE_ZERO -UFAIL_LINE_ADDR -UFAIL_LINE_ALLOC -UFAIL_LINE_FOPEN -UFAIL_LINE_DOPEN -UFAIL_LINE_ZERO .
+          script: git clone --depth 1 --branch 2.2 https://github.com/danmar/cppcheck.git && make -j8 -C cppcheck && cd src && ../cppcheck/cppcheck --max-ctu-depth=4096 --enable=all --error-exitcode=1 --suppress=missingInclude --suppress=unusedFunction --suppress=knownConditionTrueFalse --suppress=unmatchedSuppression -U__clang_analyzer__ -UFAIL_FILE_ADDR -UFAIL_FILE_ALLOC -UFAIL_FILE_FOPEN -UFAIL_FILE_DOPEN -UFAIL_FILE_ZERO -UFAIL_LINE_ADDR -UFAIL_LINE_ALLOC -UFAIL_LINE_FOPEN -UFAIL_LINE_DOPEN -UFAIL_LINE_ZERO .
         - stage: Clang scan-build
           script: make -C build clean && scan-build -v -maxloop 1024 -enable-checker alpha -enable-checker nullability -enable-checker security -disable-checker alpha.deadcode make -C build
         - stage: Test
