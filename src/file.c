@@ -3426,7 +3426,8 @@ static void h_textfile_include(entry_p contxt, entry_p *all, FILE *dst)
 static int32_t h_textfile(entry_p contxt)
 {
     // Get name of output file.
-    const char *dest = str(opt(contxt, OPT_DEST));
+    entry_p dest = opt(contxt, OPT_DEST);
+    const char *dst = str(dest);
 
     if(DID_ERR)
     {
@@ -3434,33 +3435,41 @@ static int32_t h_textfile(entry_p contxt)
         return LG_FALSE;
     }
 
-    snprintf(buf_get(B_KEY), buf_len(), "%s.XXXXXX", dest);
+    snprintf(buf_get(B_KEY), buf_len(), "%s.XXXXXX", dst);
     FILE *tmp = DBG_FOPEN(fdopen(mkstemp(buf_get(B_KEY)), "a"));
 
     if(!tmp)
     {
         // Could not create temp file.
-        ERR(ERR_WRITE_FILE, dest);
+        ERR(ERR_WRITE_FILE, dst);
         return LG_FALSE;
     }
 
     // Iterate over all (append) / (include) options.
     for(size_t arg = 1; NOT_ERR && exists(C_ARG(arg)); arg++)
     {
-        if(C_ARG(arg)->type != OPTION)
+        if(C_ARG(arg) == dest)
+        {
+            // Don't resolve dest twice.
+            continue;
+        }
+
+        entry_p cur = resolve(C_ARG(arg));
+
+        if(cur->type != OPTION)
         {
             // Skip non-options.
             continue;
         }
-        else if(C_ARG(arg)->id == OPT_APPEND)
+        else if(cur->id == OPT_APPEND)
         {
             // Append strings to temp file.
-            h_textfile_append(C_ARG(arg)->children, tmp);
+            h_textfile_append(cur->children, tmp);
         }
-        else if(C_ARG(arg)->id == OPT_INCLUDE)
+        else if(cur->id == OPT_INCLUDE)
         {
             // Append complete files to temp file.
-            h_textfile_include(contxt, C_ARG(arg)->children, tmp);
+            h_textfile_include(contxt, cur->children, tmp);
         }
     }
 
@@ -3474,7 +3483,7 @@ static int32_t h_textfile(entry_p contxt)
     }
 
     // Rename temp file to its proper (output) name.
-    return rename(buf_put(B_KEY), dest) ? LG_FALSE : LG_TRUE;
+    return rename(buf_put(B_KEY), dst) ? LG_FALSE : LG_TRUE;
 }
 
 //------------------------------------------------------------------------------

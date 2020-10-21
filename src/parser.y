@@ -311,15 +311,15 @@ neq:            '(' NEQ pp ')'                   { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* control.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-if:             '(' IF cvv ps ')'                { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push($3, $4), NUMBER); } |
-                '(' IF cvv ')'                   { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, NUMBER); } |
-                '(' IF cv ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, NUMBER); } |
-                '(' IF c ')'                     { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push(new_contxt(), $3), NUMBER); };
+if:             '(' IF cvv ps ')'                { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push($3, $4), DANGLE); } |
+                '(' IF cvv ')'                   { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); } |
+                '(' IF cv ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); } |
+                '(' IF c ')'                     { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push(new_contxt(), $3), DANGLE); };
 select:         '(' SELECT p xpbs ')'            { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, push(push(new_contxt(), $3), $4), NUMBER); };
-until:          '(' UNTIL p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' UNTIL p ')'                  { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(new_contxt(), $3), NUMBER); };
-while:          '(' WHILE p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' WHILE p ')'                  { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(new_contxt(), $3), NUMBER); };
+until:          '(' UNTIL p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $3), $4), DANGLE); } |
+                '(' UNTIL p ')'                  { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(new_contxt(), $3), DANGLE); };
+while:          '(' WHILE p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(push(new_contxt(), $3), $4), DANGLE); } |
+                '(' WHILE p ')'                  { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(new_contxt(), $3), DANGLE); };
 trace:          '(' TRACE ')'                    { $$ = new_native(DBG_ALLOC(strdup("trace")), LINE, n_trace, NULL, NUMBER); };
 retrace:        '(' RETRACE ')'                  { $$ = new_native(DBG_ALLOC(strdup("retrace")), LINE, n_retrace, NULL, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -360,7 +360,8 @@ onerror:        '(' ONERROR vps ')'              { $$ = new_native(DBG_ALLOC(str
                 '(' ONERROR ')'                  { $$ = new_native(DBG_ALLOC(strdup("onerror")), LINE, n_procedure, push(new_contxt(),
                                                         new_custom(DBG_ALLOC(strdup("@onerror")), LINE, NULL, NULL)), NUMBER); };
 reboot:         '(' REBOOT ')'                   { $$ = new_native(DBG_ALLOC(strdup("reboot")), LINE, n_reboot, NULL, NUMBER); };
-trap:           '(' TRAP nps vps ')'             { $$ = new_native(DBG_ALLOC(strdup("trap")), LINE, n_trap, push(push(new_contxt(), $3), $4), NUMBER); };
+trap:           '(' TRAP nps vps ')'             { $$ = new_native(DBG_ALLOC(strdup("trap")), LINE, n_trap, push(push(new_contxt(), $3), $4), NUMBER); } |
+                '(' TRAP nps ')'                 { $$ = new_native(DBG_ALLOC(strdup("trap")), LINE, n_trap, push(new_contxt(), $3), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* file.c|h                                                                                                                                                                             */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
