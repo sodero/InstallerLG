@@ -1,5 +1,6 @@
 (complete 1) ; "","1 1",""
 (complete 100) ; "","100 100",""
+(complete 99 %) ; "","99 99",""
 (complete (+ 1 1)) ; "","2 2",""
 (complete) ; "","Line 1: syntax error, unexpected ')' ')'",""
-(complete 1 err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
+(complete 1 nada) ; "","1 1",""

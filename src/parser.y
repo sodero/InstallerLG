@@ -400,7 +400,7 @@ rename:         '(' RENAME pp opts')'            { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* information.c|h                                                                                                                                                                      */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-complete:       '(' COMPLETE p ')'               { $$ = new_native(DBG_ALLOC(strdup("complete")), LINE, n_complete, push(new_contxt(), $3), NUMBER); };
+complete:       '(' COMPLETE ps ')'              { $$ = new_native(DBG_ALLOC(strdup("complete")), LINE, n_complete, $3, NUMBER); };
 debug:          '(' DEBUG ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("debug")), LINE, n_debug, $3, NUMBER); } |
                 '(' DEBUG ')'                    { $$ = new_native(DBG_ALLOC(strdup("debug")), LINE, n_debug, NULL, NUMBER); };
 message:        '(' MESSAGE ps opts ')'          { $$ = new_native(DBG_ALLOC(strdup("message")), LINE, n_message, merge($4, $3), NUMBER); } |
