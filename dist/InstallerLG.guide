@@ -123,7 +123,8 @@ Russian translation.
 
 @{B}0.1.0-alpha.55 (2020-NOT-YET)@{UB}
 - Void (if) return value fix.
-- Empty (trap) allowed.
+- Empty (trap) body allowed.
+- Ignore (exit) return value.
 - ?
 
 @{B}0.1.0-alpha.54 (2020-10-06)@{UB}
