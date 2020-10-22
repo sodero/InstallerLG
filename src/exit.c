@@ -106,20 +106,20 @@ entry_p n_exit(entry_p contxt)
     // All we need is a context.
     C_SANE(0, NULL);
 
-    // If we have any children, display them.
-    if(contxt->children)
+    // If we have any children, display them, unless the first one is a number.
+    // This is a bit strange, but it's how the CBM installer works.
+    if(contxt->children && C_ARG(1)->type != NUMBER)
     {
         // Concatenate all children.
         char *msg = get_chlstr(contxt, false);
 
         if((!msg && PANIC(contxt)) || DID_ERR)
         {
-            // Non resolvable children or out of memory.
             free(msg);
             R_NUM(LG_FALSE);
         }
 
-        // Show the result of the concatenation unless it's empty.
+        // Show result unless it's empty.
         if(*msg)
         {
             gui_finish(msg);

@@ -3461,7 +3461,8 @@ static int32_t h_textfile(entry_p contxt)
             // Skip non-options.
             continue;
         }
-        else if(cur->id == OPT_APPEND)
+
+        if(cur->id == OPT_APPEND)
         {
             // Append strings to temp file.
             h_textfile_append(cur->children, tmp);

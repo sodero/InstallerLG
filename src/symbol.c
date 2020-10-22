@@ -90,7 +90,6 @@ entry_p n_set(entry_p contxt)
     // Function argument symbol value tuples.
     entry_p *sym = contxt->symbols, *val = contxt->children;
 
-    // Iterate over all symbol value tuples
     while(exists(*sym) && exists(*val))
     {
         // Resolve the RHS value.

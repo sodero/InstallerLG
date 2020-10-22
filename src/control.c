@@ -207,7 +207,6 @@ entry_p n_retrace(entry_p contxt)
     // Backtrack to second trace point.
     top = top ? h_retrace(*top) : NULL;
 
-    // Resolve if we have two trace points.
     if(!top)
     {
         // Exit if there's nowhere to go.
