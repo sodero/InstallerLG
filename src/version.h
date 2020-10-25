@@ -12,8 +12,8 @@
 
 #define MAJOR 44
 #define MINOR 10
-#define BUILD 55
-#define PHASE "ALPHA"
+#define BUILD 1
+#define PHASE "BETA"
 
 #define STY(X) #X
 #define VER(X) STY(X)

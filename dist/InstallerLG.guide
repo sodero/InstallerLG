@@ -121,11 +121,11 @@ Russian translation.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-@{B}0.1.0-alpha.55 (2020-NOT-YET)@{UB}
+@{B}1.0.0-beta.1 (2020-NOT-YET)@{UB}
 - Void (if) return value fix.
 - Empty (trap) body allowed.
 - Ignore (exit) return value.
-- ?
+- String NUL character escape fix.
 
 @{B}0.1.0-alpha.54 (2020-10-06)@{UB}
 - (askoptions) undefined variable in (default) return value fix.

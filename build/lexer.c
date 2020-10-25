@@ -4283,7 +4283,7 @@ static char *strduptr(const char *str)
         }
 
         // Standard escape sequence mappings.
-        char chr[] = "nrthvbf\"'\\\0", raw[] = "\n\r\t\t\v\b\f\"'\\\0";
+        char chr[] = "0nrthvbf\"'\\\0", raw[] = "\0\n\r\t\t\v\b\f\"'\\\0";
 
         for(size_t j = 0; chr[j];)
         {
