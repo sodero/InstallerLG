@@ -39,7 +39,7 @@
 %define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
-%expect 10
+%expect 0
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Primitives                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -70,14 +70,14 @@
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Token data types                                                                                                                                                                     */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start s p pp ps ivp vp vps dynopt opt opts xpb xpbs np nps sps par c cv cvv add sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor bitand
-       /*                */ bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath not
-       /*                */ earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
-       /*                */ pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit
-       /*                */ foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all append assigns choices command compression
-       /*                */ confirm default mul delopts dest disk files fonts help infos include newname newpath optional back nogauge noposition noreq pattern prompt quiet range safe
-       /*                */ resident override setdefaulttool setposition setstack settooltype source swapcolors openwbobject showwbobject closewbobject trace retrace closemedia effect
-       /*                */ setmedia showmedia astraw options asbraw asbeval eval
+%type<e> /* all nodes    */ start /*s*/ p/* pp*/ ps /*ivp*/ vp /*vps dynopt opt opts xpb xpbs*/ np /* nps sps par c cv cvv */ add /*sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor bitand
+        bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath not
+        earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
+        pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit
+        foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all append assigns choices command compression
+        confirm default mul delopts dest disk files fonts help infos include newname newpath optional back nogauge noposition noreq pattern prompt quiet range safe
+        resident override setdefaulttool setposition setstack settooltype source swapcolors openwbobject showwbobject closewbobject trace retrace closemedia effect
+        setmedia showmedia astraw options asbraw asbeval eval*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Destruction                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -86,28 +86,30 @@
 /* Primitive strings are freed like you would expect                                                                                                                                    */
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
-%destructor { kill($$); }   s p pp ps ivp vp vps dynopt opt opts xpb xpbs np nps sps par c cv cvv add sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
+%destructor { kill($$); }   /*s*/ p /*pp*/ ps /*ivp*/ vp /*vps dynopt opt opts xpb xpbs*/ np /*nps sps par c cv cvv*/ add /*sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
                             bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier not
                             fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
                             database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all assigns
                             choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append openwbobject showwbobject closewbobject trace retrace back closemedia
-                            effect setmedia showmedia astraw options asbraw asbeval eval
+                            effect setmedia showmedia astraw options asbraw asbeval eval*/
 %%
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Start                                                                                                                                                                                */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-start:          s                                { $$ = init($1); };
-s:              vps                              ;
+start:          ps                               { $$ = init($1); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Phrase types                                                                                                                                                                         */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-p:              vp                               |
-                np                               ;
+p:              np                               |
+                vp;
+ /*
 pp:             p p                              { $$ = push(push(new_contxt(), $1), $2); };
+  */
 ps:             ps p                             { $$ = push($1, $2); } |
                 p                                { $$ = push(new_contxt(), $1); };
+/*
 vp:             ivp                              |
                 '(' vp ')'                       { $$ = $2; };
 vps:            vps vps                          { $$ = merge($1, $2); } |
@@ -123,12 +125,14 @@ xpb:            '(' vps ')'                      { $$ = $2; } |
                 p                                { $$ = push(new_contxt(), $1); };
 xpbs:           xpb                              { $$ = push(new_contxt(), $1); }|
                 xpbs xpb                         { $$ = push($1, $2); };
+*/
 np:             INT                              { $$ = new_number($1); } |
                 HEX                              { $$ = new_number($1); } |
                 BIN                              { $$ = new_number($1); } |
                 STR                              { $$ = new_string($1); } |
                 SYM                              { $$ = new_symref($1, LINE); } |
                 OOM                              { $$ = NULL; YYFPRINTF(stderr, "Out of memory in line %d\n", LINE); YYABORT; };
+/*
 nps:            nps np                           { $$ = push($1, $2); } |
                 np                               { $$ = push(new_contxt(), $1); };
 sps:            sps SYM xpb                      { $$ = push(push($1, new_symbol($2)), $3) ; } |
@@ -140,9 +144,11 @@ par:            par SYM                          { $$ = push($1, new_symbol($2))
 c:              p                                { $$ = push(new_contxt(), $1); };
 cv:             p xpb                            { $$ = push(push(new_contxt(), $1), $2); };
 cvv:            p xpb xpb                        { $$ = push(push(push(new_contxt(), $1), $2), $3); };
+   */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Modifiers                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 opt:            all                              |
                 append                           |
                 assigns                          |
@@ -184,14 +190,15 @@ opt:            all                              |
                 swapcolors                       |
                 dynopt                           |
                 resident                         ;
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Functions                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-ivp:            add        /* arithmetic.c|h */  |
+vp:             add;/*         arithmetic.c|h   |
                 div                              |
                 mul                              |
                 sub                              |
-                and           /* logic.c|h */    |
+                and            logic.c|h     |
                 bitand                           |
                 bitnot                           |
                 bitor                            |
@@ -202,32 +209,32 @@ ivp:            add        /* arithmetic.c|h */  |
                 shiftleft                        |
                 shiftright                       |
                 xor                              |
-                eq         /* comparison.c|h */  |
+                eq          comparison.c|h   |
                 gt                               |
                 gte                              |
                 lt                               |
                 lte                              |
                 neq                              |
-                if            /* control.c|h */  |
+                if             control.c|h   |
                 select                           |
                 until                            |
                 while                            |
                 trace                            |
                 retrace                          |
-                astraw        /* debug.c|h */    |
+                astraw         debug.c|h     |
                 asbraw                           |
                 asbeval                          |
                 eval                             |
                 options                          |
-                execute      /* external.c|h */  |
+                execute       external.c|h  |
                 rexx                             |
                 run                              |
-                abort            /* exit.c|h */  |
+                abort             exit.c|h   |
                 exit                             |
                 onerror                          |
                 trap                             |
                 reboot                           |
-                copyfiles        /* file.c|h */  |
+                copyfiles         file.c|h   |
                 copylib                          |
                 delete                           |
                 exists                           |
@@ -241,17 +248,17 @@ ivp:            add        /* arithmetic.c|h */  |
                 tooltype                         |
                 transcript                       |
                 rename                           |
-                complete  /* information.c|h */  |
+                complete   information.c|h   |
                 debug                            |
                 message                          |
                 user                             |
                 welcome                          |
                 working                          |
-                closemedia      /* media.c|h */  |
+                closemedia       media.c|h   |
                 effect                           |
                 setmedia                         |
                 showmedia                        |
-                database        /* probe.c|h */  |
+                database         probe.c|h   |
                 earlier                          |
                 getassign                        |
                 getdevice                        |
@@ -262,9 +269,9 @@ ivp:            add        /* arithmetic.c|h */  |
                 getversion                       |
                 iconinfo                         |
                 querydisplay                     |
-                cus         /* procedure.c|h */  |
+                cus          procedure.c|h   |
                 dcl                              |
-                askbool        /* prompt.c|h */  |
+                askbool         prompt.c|h   |
                 askchoice                        |
                 askdir                           |
                 askdisk                          |
@@ -272,7 +279,7 @@ ivp:            add        /* arithmetic.c|h */  |
                 asknumber                        |
                 askoptions                       |
                 askstring                        |
-                cat             /* strop.c|h */  |
+                cat              strop.c|h   |
                 expandpath                       |
                 fmt                              |
                 pathonly                         |
@@ -280,22 +287,25 @@ ivp:            add        /* arithmetic.c|h */  |
                 strlen                           |
                 substr                           |
                 tackon                           |
-                set            /* symbol.c|h */  |
+                set             symbol.c|h   |
                 symbolset                        |
                 symbolval                        |
-                openwbobject       /* wb.c|h */  |
+                openwbobject        wb.c|h   |
                 showwbobject                     |
-                closewbobject                    ;
+                closewbobject                    ;*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* arithmetic.c|h                                                                                                                                                                       */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 add:            '(' '+' ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("+")), LINE, n_add, $3, NUMBER); };
+   /*
 div:            '(' '/' pp ')'                   { $$ = new_native(DBG_ALLOC(strdup("/")), LINE, n_div, $3, NUMBER); };
 mul:            '(' '*' ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("*")), LINE, n_mul, $3, NUMBER); };
 sub:            '(' '-' ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("-")), LINE, n_sub, $3, NUMBER); };
+   *7
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* comparison.c|h                                                                                                                                                                       */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 eq:             '(' '=' pp ')'                   { $$ = new_native(DBG_ALLOC(strdup("=")), LINE, n_eq, $3, NUMBER); } |
                 '(' '=' p ')'                    { $$ = new_native(DBG_ALLOC(strdup("=")), LINE, n_eq, push(new_contxt(), $3), NUMBER); };
 gt:             '(' '>' pp ')'                   { $$ = new_native(DBG_ALLOC(strdup(">")), LINE, n_gt, $3, NUMBER); } |
@@ -308,9 +318,11 @@ lte:            '(' LTE pp ')'                   { $$ = new_native(DBG_ALLOC(str
                 '(' LTE p ')'                    { $$ = new_native(DBG_ALLOC(strdup("<=")), LINE, n_lte, push(new_contxt(), $3), NUMBER); };
 neq:            '(' NEQ pp ')'                   { $$ = new_native(DBG_ALLOC(strdup("<>")), LINE, n_neq, $3, NUMBER); } |
                 '(' NEQ p ')'                    { $$ = new_native(DBG_ALLOC(strdup("<>")), LINE, n_neq, push(new_contxt(), $3), NUMBER); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* control.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 if:             '(' IF cvv ps ')'                { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push($3, $4), DANGLE); } |
                 '(' IF cvv ')'                   { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); } |
                 '(' IF cv ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); } |
@@ -322,17 +334,21 @@ while:          '(' WHILE p vps ')'              { $$ = new_native(DBG_ALLOC(str
                 '(' WHILE p ')'                  { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(new_contxt(), $3), DANGLE); };
 trace:          '(' TRACE ')'                    { $$ = new_native(DBG_ALLOC(strdup("trace")), LINE, n_trace, NULL, NUMBER); };
 retrace:        '(' RETRACE ')'                  { $$ = new_native(DBG_ALLOC(strdup("retrace")), LINE, n_retrace, NULL, NUMBER); };
+       */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* debug.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 astraw:         '(' ASTRAW ')'                   { $$ = new_native(DBG_ALLOC(strdup("___astraw")), LINE, n_astraw, NULL, NUMBER); };
 asbraw:         '(' ASBRAW p ')'                 { $$ = new_native(DBG_ALLOC(strdup("___asbraw")), LINE, n_asbraw, push(new_contxt(), $3), NUMBER); };
 asbeval:        '(' ASBEVAL p ')'                { $$ = new_native(DBG_ALLOC(strdup("___asbeval")), LINE, n_asbeval, push(new_contxt(), $3), NUMBER); };
 eval:           '(' EVAL p ')'                   { $$ = new_native(DBG_ALLOC(strdup("___eval")), LINE, n_eval, push(new_contxt(), $3), NUMBER); };
 options:        '(' OPTIONS ')'                  { $$ = new_native(DBG_ALLOC(strdup("___options")), LINE, n_options, NULL, NUMBER); };
+       */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h                                                                                                                                                                         */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 execute:        '(' EXECUTE ps opts ')'          { $$ = new_native(DBG_ALLOC(strdup("execute")), LINE, n_execute, push($3, $4), NUMBER); } |
                 '(' EXECUTE opts ps ')'          { $$ = new_native(DBG_ALLOC(strdup("execute")), LINE, n_execute, push($4, $3), NUMBER); } |
                 '(' EXECUTE opts ps opts ')'     { $$ = new_native(DBG_ALLOC(strdup("execute")), LINE, n_execute, push($4, merge($3, $5)), NUMBER); } |
@@ -345,9 +361,11 @@ run:            '(' RUN ps opts ')'              { $$ = new_native(DBG_ALLOC(str
                 '(' RUN opts ps ')'              { $$ = new_native(DBG_ALLOC(strdup("run")), LINE, n_run, push($4, $3), NUMBER); } |
                 '(' RUN opts ps opts ')'         { $$ = new_native(DBG_ALLOC(strdup("run")), LINE, n_run, push($4, merge($3, $5)), NUMBER); } |
                 '(' RUN ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("run")), LINE, n_run, $3, NUMBER); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* exit.c|h                                                                                                                                                                             */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 abort:          '(' ABORT ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("abort")), LINE, n_abort, $3, NUMBER); } |
                 '(' ABORT ')'                    { $$ = new_native(DBG_ALLOC(strdup("abort")), LINE, n_abort, NULL, NUMBER); };
 exit:           '(' EXIT ps quiet ')'            { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, push($3, $4), NUMBER); } |
@@ -362,9 +380,11 @@ onerror:        '(' ONERROR vps ')'              { $$ = new_native(DBG_ALLOC(str
 reboot:         '(' REBOOT ')'                   { $$ = new_native(DBG_ALLOC(strdup("reboot")), LINE, n_reboot, NULL, NUMBER); };
 trap:           '(' TRAP nps vps ')'             { $$ = new_native(DBG_ALLOC(strdup("trap")), LINE, n_trap, push(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' TRAP nps ')'                 { $$ = new_native(DBG_ALLOC(strdup("trap")), LINE, n_trap, push(new_contxt(), $3), NUMBER); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* file.c|h                                                                                                                                                                             */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 copyfiles:      '(' COPYFILES opts ')'           { $$ = new_native(DBG_ALLOC(strdup("copyfiles")), LINE, n_copyfiles, $3, STRING); };
 copylib:        '(' COPYLIB opts ')'             { $$ = new_native(DBG_ALLOC(strdup("copylib")), LINE, n_copylib, $3, NUMBER); };
 delete:         '(' DELETE ps opts')'            { $$ = new_native(DBG_ALLOC(strdup("delete")), LINE, n_delete, merge($3, $4), NUMBER); } |
@@ -397,9 +417,11 @@ tooltype:       '(' TOOLTYPE opts ')'            { $$ = new_native(DBG_ALLOC(str
 transcript:     '(' TRANSCRIPT ps ')'            { $$ = new_native(DBG_ALLOC(strdup("transcript")), LINE, n_transcript, $3, NUMBER); };
 rename:         '(' RENAME pp opts')'            { $$ = new_native(DBG_ALLOC(strdup("rename")), LINE, n_rename, merge($3, $4), NUMBER); } |
                 '(' RENAME pp ')'                { $$ = new_native(DBG_ALLOC(strdup("rename")), LINE, n_rename, $3, NUMBER); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* information.c|h                                                                                                                                                                      */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 complete:       '(' COMPLETE ps ')'              { $$ = new_native(DBG_ALLOC(strdup("complete")), LINE, n_complete, $3, NUMBER); };
 debug:          '(' DEBUG ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("debug")), LINE, n_debug, $3, NUMBER); } |
                 '(' DEBUG ')'                    { $$ = new_native(DBG_ALLOC(strdup("debug")), LINE, n_debug, NULL, NUMBER); };
@@ -412,9 +434,11 @@ welcome:        '(' WELCOME ps ')'               { $$ = new_native(DBG_ALLOC(str
                 '(' WELCOME ')'                  { $$ = new_native(DBG_ALLOC(strdup("welcome")), LINE, n_welcome, NULL, NUMBER); };
 working:        '(' WORKING ps ')'               { $$ = new_native(DBG_ALLOC(strdup("working")), LINE, n_working, $3, NUMBER); } |
                 '(' WORKING ')'                  { $$ = new_native(DBG_ALLOC(strdup("working")), LINE, n_working, NULL, NUMBER); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* logic.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 and:            '(' AND ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("AND")), LINE, n_and, $3, NUMBER); };
 bitand:         '(' BITAND ps ')'                { $$ = new_native(DBG_ALLOC(strdup("BITAND")), LINE, n_bitand, $3, NUMBER); };
 bitnot:         '(' BITNOT p ')'                 { $$ = new_native(DBG_ALLOC(strdup("BITNOT")), LINE, n_bitnot, push(new_contxt(), $3), NUMBER); };
@@ -426,17 +450,21 @@ or:             '(' OR ps ')'                    { $$ = new_native(DBG_ALLOC(str
 shiftleft:      '(' SHIFTLEFT pp ')'             { $$ = new_native(DBG_ALLOC(strdup("shiftleft")), LINE, n_shiftleft, $3, NUMBER); };
 shiftright:     '(' SHIFTRIGHT pp ')'            { $$ = new_native(DBG_ALLOC(strdup("shiftright")), LINE, n_shiftright, $3, NUMBER); };
 xor:            '(' XOR ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("XOR")), LINE, n_xor, $3, NUMBER); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* media.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 closemedia:     '(' CLOSEMEDIA p ')'             { $$ = new_native(DBG_ALLOC(strdup("closemedia")), LINE, n_closemedia, push(new_contxt(), $3), NUMBER); };
 effect:         '(' EFFECT pp pp ')'   	         { $$ = new_native(DBG_ALLOC(strdup("effect")), LINE, n_effect, merge($3, $4), NUMBER); };
 setmedia:       '(' SETMEDIA pp ')'              { $$ = new_native(DBG_ALLOC(strdup("setmedia")), LINE, n_setmedia, $3, NUMBER); } |
                 '(' SETMEDIA pp p ')'            { $$ = new_native(DBG_ALLOC(strdup("setmedia")), LINE, n_setmedia, push($3, $4), NUMBER); };
 showmedia:      '(' SHOWMEDIA pp pp ps ')'       { $$ = new_native(DBG_ALLOC(strdup("showmedia")), LINE, n_showmedia, merge(merge($3, $4), $5), NUMBER); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* probe.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 database:       '(' DATABASE p ')'               { $$ = new_native(DBG_ALLOC(strdup("database")), LINE, n_database, push(new_contxt(), $3), STRING); } |
                 '(' DATABASE pp ')'              { $$ = new_native(DBG_ALLOC(strdup("database")), LINE, n_database, $3, STRING); };
 earlier:        '(' EARLIER pp ')'               { $$ = new_native(DBG_ALLOC(strdup("earlier")), LINE, n_earlier, $3, NUMBER); };
@@ -453,18 +481,22 @@ getversion:     '(' GETVERSION ')'               { $$ = new_native(DBG_ALLOC(str
                 '(' GETVERSION p resident ')'    { $$ = new_native(DBG_ALLOC(strdup("getversion")), LINE, n_getversion, push(push(new_contxt(), $3), $4), NUMBER); };
 iconinfo:       '(' ICONINFO opts ')'            { $$ = new_native(DBG_ALLOC(strdup("iconinfo")), LINE, n_iconinfo, $3, NUMBER); };
 querydisplay:   '(' QUERYDISPLAY pp ')'          { $$ = new_native(DBG_ALLOC(strdup("querydisplay")), LINE, n_querydisplay, $3, NUMBER); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* procedure.c|h                                                                                                                                                                        */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 dcl:            '(' DCL SYM par s ')'            { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, $4, $5)), NUMBER); } |
                 '(' DCL SYM par ')'              { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, $4, NULL)), NUMBER); } |
                 '(' DCL SYM s ')'                { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, NULL, $4)), NUMBER); } |
                 '(' DCL SYM ')'                  { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, NULL, NULL)), NUMBER); };
 cus:            '(' SYM ps ')'                   { $$ = new_cusref($2, LINE, $3); } |
                 '(' SYM ')'                      { $$ = new_cusref($2, LINE, NULL); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* prompt.c|h                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 askbool:        '(' ASKBOOL ')'                  { $$ = new_native(DBG_ALLOC(strdup("askbool")), LINE, n_askbool, NULL, NUMBER); };
 askbool:        '(' ASKBOOL opts ')'             { $$ = new_native(DBG_ALLOC(strdup("askbool")), LINE, n_askbool, $3, NUMBER); };
 askchoice:      '(' ASKCHOICE opts ')'           { $$ = new_native(DBG_ALLOC(strdup("askchoice")), LINE, n_askchoice, $3, NUMBER); };
@@ -478,9 +510,11 @@ asknumber:      '(' ASKNUMBER opts ')'           { $$ = new_native(DBG_ALLOC(str
 askoptions:     '(' ASKOPTIONS opts ')'          { $$ = new_native(DBG_ALLOC(strdup("askoptions")), LINE, n_askoptions, $3, NUMBER); };
 askstring:      '(' ASKSTRING ')'                { $$ = new_native(DBG_ALLOC(strdup("askstring")), LINE, n_askstring, NULL, STRING); };
 askstring:      '(' ASKSTRING opts ')'           { $$ = new_native(DBG_ALLOC(strdup("askstring")), LINE, n_askstring, $3, STRING); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* strop.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 cat:            '(' CAT ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("cat")), LINE, n_cat, $3, STRING); };
 expandpath:     '(' EXPANDPATH p ')'             { $$ = new_native(DBG_ALLOC(strdup("expandpath")), LINE, n_expandpath, push(new_contxt(), $3), STRING); };
 fmt:            '(' STR ps ')'                   { $$ = new_native($2, LINE, n_fmt, $3, STRING); } |
@@ -491,25 +525,31 @@ strlen:         '(' STRLEN p ')'                 { $$ = new_native(DBG_ALLOC(str
 substr:         '(' SUBSTR pp ')'                { $$ = new_native(DBG_ALLOC(strdup("substr")), LINE, n_substr, $3, STRING); } |
                 '(' SUBSTR pp p ')'              { $$ = new_native(DBG_ALLOC(strdup("substr")), LINE, n_substr, push($3, $4), STRING); };
 tackon:         '(' TACKON pp ')'                { $$ = new_native(DBG_ALLOC(strdup("tackon")), LINE, n_tackon, $3, STRING); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* symbol.c|h                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 set:            '(' SET sps ')'                  { $$ = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, $3, DANGLE); } |
                 '(' SET DEFAULT sps ')'          { $$ = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, $4, DANGLE); };
 symbolset:      '(' SYMBOLSET ps ')'             { $$ = new_native(DBG_ALLOC(strdup("symbolset")), LINE, n_symbolset, $3, DANGLE); };
 symbolval:      '(' SYMBOLVAL p ')'              { $$ = new_native(DBG_ALLOC(strdup("symbolval")), LINE, n_symbolval, push(new_contxt(), $3), NUMBER); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* wb.c|h                                                                                                                                                                               */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 openwbobject:   '(' OPENWBOBJECT p ')'           { $$ = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, push(new_contxt(), $3), NUMBER); } |
                 '(' OPENWBOBJECT p opts ')'      { $$ = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, merge(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' OPENWBOBJECT opts p ')'      { $$ = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, merge(push(new_contxt(), $4), $3), NUMBER); } |
                 '(' OPENWBOBJECT opts p opts ')' { $$ = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, merge(push(new_contxt(), $4), merge($3, $5)), NUMBER); };
 showwbobject:   '(' SHOWWBOBJECT p ')'           { $$ = new_native(DBG_ALLOC(strdup("showwbobject")), LINE, n_showwbobject, push(new_contxt(), $3), NUMBER); };
 closewbobject:  '(' CLOSEWBOBJECT p ')'          { $$ = new_native(DBG_ALLOC(strdup("closewbobject")), LINE, n_closewbobject, push(new_contxt(), $3), NUMBER); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Options                                                                                                                                                                              */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*
 all:            '(' ALL ')'                      { $$ = new_option(DBG_ALLOC(strdup("all")), OPT_ALL, NULL); };
 append:         '(' APPEND ps ')'                { $$ = new_option(DBG_ALLOC(strdup("append")), OPT_APPEND, $3); };
 assigns:        '(' ASSIGNS ')'                  { $$ = new_option(DBG_ALLOC(strdup("assigns")), OPT_ASSIGNS, NULL); };
@@ -561,6 +601,7 @@ override:       '(' OVERRIDE p ')'               { $$ = new_option(DBG_ALLOC(str
 dynopt:         '(' IF p opts ')'                { $$ = new_option(DBG_ALLOC(strdup("ifopt")), OPT_IFOPT, push(push(new_contxt(), $3), $4)); } |
                 '(' IF p opts opts ')'           { $$ = new_option(DBG_ALLOC(strdup("ifopt")), OPT_IFOPT, push(push(push(new_contxt(), $3), $4), $5)); } |
                 '(' SELECT p opts ')'            { $$ = new_option(DBG_ALLOC(strdup("selopt")), OPT_SELOPT, push(push(new_contxt(), $3), $4)); };
+*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %%
 
