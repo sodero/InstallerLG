@@ -39,7 +39,7 @@
 %define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
-%expect 0
+/*%expect 1*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Primitives                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -70,11 +70,11 @@
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Token data types                                                                                                                                                                     */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start /*s*/ p/* pp*/ ps /*ivp*/ vp /*vps dynopt opt opts xpb xpbs*/ np /* nps sps par c cv cvv */ add /*sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor bitand
+%type<e> /* all nodes    */ start /*s*/ p/* pp*/ ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np /* nps sps par c cv cvv */ add /*sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor bitand
         bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath not
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
         pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit
-        foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all append assigns choices command compression
+        foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot*/ all /*append assigns choices command compression
         confirm default mul delopts dest disk files fonts help infos include newname newpath optional back nogauge noposition noreq pattern prompt quiet range safe
         resident override setdefaulttool setposition setstack settooltype source swapcolors openwbobject showwbobject closewbobject trace retrace closemedia effect
         setmedia showmedia astraw options asbraw asbeval eval*/
@@ -86,11 +86,11 @@
 /* Primitive strings are freed like you would expect                                                                                                                                    */
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
-%destructor { kill($$); }   /*s*/ p /*pp*/ ps /*ivp*/ vp /*vps dynopt opt opts xpb xpbs*/ np /*nps sps par c cv cvv*/ add /*sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
+%destructor { kill($$); }   /*s*/ p /*pp*/ ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np /*nps sps par c cv cvv*/ add /*sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
                             bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier not
                             fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
-                            database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all assigns
+                            database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot*/ all /*assigns
                             choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append openwbobject showwbobject closewbobject trace retrace back closemedia
                             effect setmedia showmedia astraw options asbraw asbeval eval*/
@@ -102,13 +102,18 @@ start:          ps                               { $$ = init($1); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Phrase types                                                                                                                                                                         */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+ps:             ps p                             { $$ = push($1, $2); } |
+                p                                { $$ = push(new_contxt(), $1); } |
+                '(' ps ')'                       { $$ = $2; };
+
 p:              np                               |
-                vp;
+                vp                               |
+                ap                               |
+                '(' p ')'                        { $$ = $2; };
+
  /*
 pp:             p p                              { $$ = push(push(new_contxt(), $1), $2); };
   */
-ps:             ps p                             { $$ = push($1, $2); } |
-                p                                { $$ = push(new_contxt(), $1); };
 /*
 vp:             ivp                              |
                 '(' vp ')'                       { $$ = $2; };
@@ -148,8 +153,7 @@ cvv:            p xpb xpb                        { $$ = push(push(push(new_contx
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Modifiers                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*
-opt:            all                              |
+ap:            all       ; /*                       |
                 append                           |
                 assigns                          |
                 back                             |
@@ -549,8 +553,8 @@ closewbobject:  '(' CLOSEWBOBJECT p ')'          { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Options                                                                                                                                                                              */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*
 all:            '(' ALL ')'                      { $$ = new_option(DBG_ALLOC(strdup("all")), OPT_ALL, NULL); };
+/*
 append:         '(' APPEND ps ')'                { $$ = new_option(DBG_ALLOC(strdup("append")), OPT_APPEND, $3); };
 assigns:        '(' ASSIGNS ')'                  { $$ = new_option(DBG_ALLOC(strdup("assigns")), OPT_ASSIGNS, NULL); };
 back:           '(' BACK vps ')'                 { $$ = new_option(DBG_ALLOC(strdup("back")), OPT_BACK, $3); };
