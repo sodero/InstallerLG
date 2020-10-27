@@ -523,7 +523,7 @@ entry_p merge(entry_p dst, entry_p src)
        DBG_ADDR(src) && DBG_ADDR(src->children))
     {
         // Total number of children.
-        size_t num = num_children(src->children) + num_children(dst->children);
+        size_t num = num_entries(src->children) + num_entries(dst->children);
 
         // Make the new array big enough to hold both source and destination.
         entry_p *new = DBG_ALLOC(calloc(num + 1, sizeof(entry_p)));
@@ -561,6 +561,52 @@ entry_p merge(entry_p dst, entry_p src)
     {
         (void) PANIC(NULL);
     }
+
+
+// Sanity check. FIXME
+    if(DBG_ADDR(dst) && DBG_ADDR(dst->symbols) &&
+       DBG_ADDR(src) && DBG_ADDR(src->symbols))
+    {
+        // Total number of symbols.
+        size_t num = num_entries(src->symbols) + num_entries(dst->symbols);
+
+        // Make the new array big enough to hold both source and destination.
+        entry_p *new = DBG_ALLOC(calloc(num + 1, sizeof(entry_p)));
+
+        if(new)
+        {
+            // Start all over.
+            num = 0;
+
+            // Copy current destination symbols.
+            for(size_t i = 0; exists(dst->symbols[i]); i++)
+            {
+                new[num] = dst->symbols[i];
+                new[num++]->parent = dst;
+            }
+
+            // Append symbols of the source.
+            for(size_t i = 0; exists(src->symbols[i]); i++)
+            {
+                new[num] = src->symbols[i];
+                new[num++]->parent = dst;
+            }
+
+            // Replace the old with the new and add array sentinel.
+            free(dst->symbols);
+            dst->symbols = new;
+            new[num] = end();
+        }
+        else
+        {
+            (void) PANIC(NULL);
+        }
+    }
+    else
+    {
+        (void) PANIC(NULL);
+    }
+
 
     // We own 'src' and need to free it.
     kill(src);

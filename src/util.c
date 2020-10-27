@@ -1180,17 +1180,16 @@ entry_p native_exists(entry_p contxt, call_t func)
 }
 
 //------------------------------------------------------------------------------
-// Name:        num_children
-// Description: Get number of children in vector.
+// Name:        num_entries
+// Description: Get number of entries in vector.
 // Input:       entry_p *vec: Vector containing children.
 // Return:      size_t:       The number of children in vector.
 //------------------------------------------------------------------------------
-size_t num_children(entry_p *vec)
+size_t num_entries(entry_p *vec)
 {
     // Counter.
     size_t count = 0;
 
-    // Count the number children.
     while(vec && exists(vec[count]))
     {
         count++;

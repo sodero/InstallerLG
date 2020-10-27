@@ -44,7 +44,7 @@ char *buf_put(const char *usr);
 size_t buf_len(void);
 char *buf_raw(void);
 entry_p native_exists(entry_p contxt, call_t func);
-size_t num_children(entry_p *vec);
+size_t num_entries(entry_p *vec);
 bool exists(entry_p entry);
 int32_t str_to_userlevel(const char *user, int32_t def);
 
