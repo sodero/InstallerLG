@@ -70,7 +70,7 @@
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Token data types                                                                                                                                                                     */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /* nps*/ sps /*par c cv cvv */ add sub lt lte neq gt gte eq set cus /*dcl*/ fmt /*if while until*/ and or xor bitand
+%type<e> /* all nodes    */ start /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /* nps*/ sps /*par c cv cvv */ add sub lt lte neq gt gte eq set cus /*dcl*/ fmt if /*while until*/ and or xor bitand
         bitor bitxor bitnot shiftleft shiftright in strlen substr /*askdir askfile askstring asknumber askchoice askoptions askbool askdisk*/ cat /*exists*/ expandpath not
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum /*getversion iconinfo*/ querydisplay
         pathonly patmatch div /*select symbolset symbolval*/ tackon /*transcript*/ complete user working welcome /*abort copyfiles copylib*/ database debug /*delete execute exit
@@ -86,7 +86,7 @@
 /* Primitive strings are freed like you would expect                                                                                                                                    */
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
-%destructor { kill($$); }   /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /*nps*/ sps /*par c cv cvv*/ add sub div mul gt gte eq set cus /*dcl*/ fmt /*if while until*/ and or xor bitand bitor
+%destructor { kill($$); }   /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /*nps*/ sps /*par c cv cvv*/ add sub div mul gt gte eq set cus /*dcl*/ fmt if /*while until*/ and or xor bitand bitor
                             bitxor bitnot shiftleft shiftright in strlen substr /*askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists*/ expandpath earlier not /*
                             */fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum /*
                             getversion iconinfo*/ querydisplay pathonly patmatch /*select symbolset symbolval*/ tackon /*transcript*/ complete user working welcome /*abort copyfiles copylib */
@@ -104,12 +104,11 @@ start:          ps                               { $$ = init($1); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 p:              np                               |
                 vp                               |
-                ap                               |
-                '(' p ')'                        { $$ = $2; };
+                ap                               ;
 pp:             p p                              { $$ = push(push(new_contxt(), $1), $2); };
-ps:             ps p                             { $$ = push($1, $2); } |
-                p                                { $$ = push(new_contxt(), $1); } |
-                '(' ps ')'                       { $$ = $2; };
+ps:             p                                { $$ = push(new_contxt(), $1); } |
+                ps ps                            { $$ = merge($1, $2); } |
+                '(' ps ')'                       { $$ = push(new_contxt(), $2); };
 sp:             SYM p                            { $$ = push(push(new_contxt(), new_symbol($1)), $2); } |
                 SYM '(' ps ')'                   { $$ = push(push(new_contxt(), new_symbol($1)), $3); } |
                 SYM                              { $$ = push(new_contxt(), new_symbol($1)); } |
@@ -225,8 +224,8 @@ vp:             add  /*       arithmetic.c|h */  |
                 lt                               |
                 lte                              |
                 neq                              |
+                if          /*   control.c|h */  |
 /*
-                if             control.c|h   |
                 select                           |
                 until                            |
                 while                            |
@@ -343,6 +342,11 @@ neq:            '(' NEQ pp ')'                   { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* control.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+
+if:             '(' IF ps ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); };
+
+
 /*
 if:             '(' IF cvv ps ')'                { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push($3, $4), DANGLE); } |
                 '(' IF cvv ')'                   { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); } |
@@ -360,9 +364,9 @@ retrace:        '(' RETRACE ')'                  { $$ = new_native(DBG_ALLOC(str
 /* debug.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 astraw:         '(' ASTRAW ')'                   { $$ = new_native(DBG_ALLOC(strdup("___astraw")), LINE, n_astraw, NULL, NUMBER); };
-asbraw:         '(' ASBRAW p ')'                 { $$ = new_native(DBG_ALLOC(strdup("___asbraw")), LINE, n_asbraw, push(new_contxt(), $3), NUMBER); };
-asbeval:        '(' ASBEVAL p ')'                { $$ = new_native(DBG_ALLOC(strdup("___asbeval")), LINE, n_asbeval, push(new_contxt(), $3), NUMBER); };
-eval:           '(' EVAL p ')'                   { $$ = new_native(DBG_ALLOC(strdup("___eval")), LINE, n_eval, push(new_contxt(), $3), NUMBER); };
+asbraw:         '(' ASBRAW ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("___asbraw")), LINE, n_asbraw, push(new_contxt(), $3), NUMBER); };
+asbeval:        '(' ASBEVAL ps ')'                { $$ = new_native(DBG_ALLOC(strdup("___asbeval")), LINE, n_asbeval, push(new_contxt(), $3), NUMBER); };
+eval:           '(' EVAL ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("___eval")), LINE, n_eval, push(new_contxt(), $3), NUMBER); };
 options:        '(' OPTIONS ')'                  { $$ = new_native(DBG_ALLOC(strdup("___options")), LINE, n_options, NULL, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h                                                                                                                                                                         */
