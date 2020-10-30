@@ -73,7 +73,7 @@
 %type<e> /* all nodes    */ start /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /* nps*/ sps /*par c cv cvv */ add sub lt lte neq gt gte eq set cus /*dcl*/ fmt if /*while until*/ and or xor bitand
         bitor bitxor bitnot shiftleft shiftright in strlen substr /*askdir askfile askstring asknumber askchoice askoptions askbool askdisk*/ cat /*exists*/ expandpath not
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum /*getversion iconinfo*/ querydisplay
-        pathonly patmatch div /*select symbolset symbolval*/ tackon /*transcript*/ complete user working welcome /*abort copyfiles copylib*/ database debug /*delete execute*/ exit /*
+        pathonly patmatch div select /*symbolset symbolval*/ tackon /*transcript*/ complete user working welcome /*abort copyfiles copylib*/ database debug /*delete execute*/ exit /*
         foreach makeassign makedir*/ message /*onerror protect rename rexx run startup textfile tooltype trap*/ reboot all append assigns choices command compression
         confirm default mul delopts dest disk files fonts help infos include newname newpath optional/* back*/ nogauge noposition noreq pattern prompt quiet range safe
         resident override setdefaulttool setposition setstack settooltype source swapcolors /*openwbobject showwbobject closewbobject*/ trace retrace closemedia effect
@@ -89,7 +89,7 @@
 %destructor { kill($$); }   /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /*nps*/ sps /*par c cv cvv*/ add sub div mul gt gte eq set cus /*dcl*/ fmt if /*while until*/ and or xor bitand bitor
                             bitxor bitnot shiftleft shiftright in strlen substr /*askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists*/ expandpath earlier not /*
                             */fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum /*
-                            getversion iconinfo*/ querydisplay pathonly patmatch /*select symbolset symbolval*/ tackon /*transcript*/ complete user working welcome /*abort copyfiles copylib */
+                            getversion iconinfo*/ querydisplay pathonly patmatch select /*symbolset symbolval*/ tackon /*transcript*/ complete user working welcome /*abort copyfiles copylib */
                             database debug /*delete execute*/ exit /*foreach makeassign makedir*/ message /*onerror protect rename rexx run startup textfile tooltype trap */reboot all assigns
                             choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append /*openwbobject showwbobject closewbobject*/ trace retrace /*back*/ closemedia
@@ -225,8 +225,8 @@ vp:             add  /*       arithmetic.c|h */  |
                 lte                              |
                 neq                              |
                 if          /*   control.c|h */  |
-/*
                 select                           |
+/*
                 until                            |
                 while                            |
 */
@@ -345,14 +345,9 @@ neq:            '(' NEQ pp ')'                   { $$ = new_native(DBG_ALLOC(str
 
 
 if:             '(' IF ps ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); };
-
-
+select:         '(' SELECT p ps ')'              { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, push(push(new_contxt(), $3), $4), NUMBER); } |
+                '(' SELECT '(' ps ')' ps ')'     { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, push(push(new_contxt(), $4), $6), NUMBER); };
 /*
-if:             '(' IF cvv ps ')'                { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push($3, $4), DANGLE); } |
-                '(' IF cvv ')'                   { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); } |
-                '(' IF cv ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); } |
-                '(' IF c ')'                     { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, push(new_contxt(), $3), DANGLE); };
-select:         '(' SELECT p xpbs ')'            { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, push(push(new_contxt(), $3), $4), NUMBER); };
 until:          '(' UNTIL p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $3), $4), DANGLE); } |
                 '(' UNTIL p ')'                  { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(new_contxt(), $3), DANGLE); };
 while:          '(' WHILE p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(push(new_contxt(), $3), $4), DANGLE); } |
