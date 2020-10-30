@@ -70,7 +70,7 @@
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Token data types                                                                                                                                                                     */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /* nps*/ sps /*par c cv cvv */ add sub lt lte neq gt gte eq set cus /*dcl*/ fmt if /*while until*/ and or xor bitand
+%type<e> /* all nodes    */ start /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /* nps*/ sps /*par c cv cvv */ add sub lt lte neq gt gte eq set cus /*dcl*/ fmt if /*while*/ until and or xor bitand
         bitor bitxor bitnot shiftleft shiftright in strlen substr /*askdir askfile askstring asknumber askchoice askoptions askbool askdisk*/ cat /*exists*/ expandpath not
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum /*getversion iconinfo*/ querydisplay
         pathonly patmatch div select /*symbolset symbolval*/ tackon /*transcript*/ complete user working welcome /*abort copyfiles copylib*/ database debug /*delete execute*/ exit /*
@@ -86,7 +86,7 @@
 /* Primitive strings are freed like you would expect                                                                                                                                    */
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
-%destructor { kill($$); }   /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /*nps*/ sps /*par c cv cvv*/ add sub div mul gt gte eq set cus /*dcl*/ fmt if /*while until*/ and or xor bitand bitor
+%destructor { kill($$); }   /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /*nps*/ sps /*par c cv cvv*/ add sub div mul gt gte eq set cus /*dcl*/ fmt if /*while*/ until and or xor bitand bitor
                             bitxor bitnot shiftleft shiftright in strlen substr /*askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists*/ expandpath earlier not /*
                             */fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum /*
                             getversion iconinfo*/ querydisplay pathonly patmatch select /*symbolset symbolval*/ tackon /*transcript*/ complete user working welcome /*abort copyfiles copylib */
@@ -226,8 +226,8 @@ vp:             add  /*       arithmetic.c|h */  |
                 neq                              |
                 if          /*   control.c|h */  |
                 select                           |
-/*
                 until                            |
+/*
                 while                            |
 */
                 trace                            |
@@ -342,11 +342,15 @@ neq:            '(' NEQ pp ')'                   { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* control.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-
 if:             '(' IF ps ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); };
 select:         '(' SELECT p ps ')'              { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, push(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' SELECT '(' ps ')' ps ')'     { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, push(push(new_contxt(), $4), $6), NUMBER); };
+
+until:          '(' UNTIL p ps ')'               { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $3), $4), DANGLE); } |
+                '(' UNTIL '(' ps ')' ps ')'      { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $4), $6), DANGLE); } |
+                '(' UNTIL p ')'                  { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(new_contxt(), $3), DANGLE); } |
+                '(' UNTIL '(' ps ')' ')'         { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(new_contxt(), $4), DANGLE); };
+
 /*
 until:          '(' UNTIL p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $3), $4), DANGLE); } |
                 '(' UNTIL p ')'                  { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(new_contxt(), $3), DANGLE); };
