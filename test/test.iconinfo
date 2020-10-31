@@ -6,7 +6,7 @@
 (iconinfo (dest "shell.info") (gettooltype "tt" "var")) (iconinfo (dest "shell.info") (gettooltype "tt2" "var")) (message tt tt2) ; "","17:017:001",""
 (iconinfo (dest "shell.info") (gettooltype "tt" "var")) (iconinfo (dest "shell.info") (gettooltype "tt" "var")) (message tt) ; "","17:001",""
 (set a 0) (while (<= a 10) ((iconinfo (dest "shell.info") (gettooltype "tt" "var")) (set a (+ a 1)))) (message tt) ; "","17:001",""
-(iconinfo) ; "","Line 1: syntax error, unexpected ')', expecting '(' ')'",""
+(iconinfo) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (iconinfo (safe)) ; "","Line 1: Missing option 'dest' 0",""
 (iconinfo (dest) (safe)) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (iconinfo (dest "shell.info") (help)) ; "","1",""
