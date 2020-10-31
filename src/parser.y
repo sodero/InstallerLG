@@ -71,7 +71,7 @@
 /* Token data types                                                                                                                                                                     */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %type<e> /* all nodes    */ start /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /* nps*/ sps /*par c cv cvv */ add sub lt lte neq gt gte eq set cus /*dcl*/ fmt if while until and or xor bitand
-        bitor bitxor bitnot shiftleft shiftright in strlen substr /*askdir askfile askstring asknumber askchoice askoptions askbool askdisk*/ cat /*exists*/ expandpath not
+        bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat /*exists*/ expandpath not
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum /*getversion*/ iconinfo querydisplay
         pathonly patmatch div select /*symbolset symbolval*/ tackon /*transcript*/ complete user working welcome abort /*copyfiles copylib*/ database debug /*delete execute*/ exit /*
         foreach makeassign makedir*/ message /*onerror protect rename rexx run startup*/ textfile tooltype /*trap*/ reboot all append assigns choices command compression
@@ -87,7 +87,7 @@
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
 %destructor { kill($$); }   /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /*nps*/ sps /*par c cv cvv*/ add sub div mul gt gte eq set cus /*dcl*/ fmt if while until and or xor bitand bitor
-                            bitxor bitnot shiftleft shiftright in strlen substr /*askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists*/ expandpath earlier not /*
+                            bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk /* exists*/ expandpath earlier not /*
                             */fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum /*
                             getversion*/ iconinfo querydisplay pathonly patmatch select /*symbolset symbolval*/ tackon /*transcript*/ complete user working welcome abort /*copyfiles copylib */
                             database debug /*delete execute*/ exit /*foreach makeassign makedir*/ message /*onerror protect rename rexx run startup*/ textfile tooltype /*trap */reboot all assigns
@@ -293,7 +293,8 @@ vp:             add  /*       arithmetic.c|h */  |
                 cus        /*  procedure.c|h */  |
 /*
                 dcl                              |
-                askbool         prompt.c|h   |
+*/
+                askbool        /* prompt.c|h */  |
                 askchoice                        |
                 askdir                           |
                 askdisk                          |
@@ -301,7 +302,6 @@ vp:             add  /*       arithmetic.c|h */  |
                 asknumber                        |
                 askoptions                       |
                 askstring                        |
-*/
                 cat          /*    strop.c|h */  |
                 expandpath                       |
                 fmt                              |
@@ -515,21 +515,19 @@ cus:            '(' SYM ps ')'                   { $$ = new_cusref($2, LINE, $3)
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* prompt.c|h                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*
 askbool:        '(' ASKBOOL ')'                  { $$ = new_native(DBG_ALLOC(strdup("askbool")), LINE, n_askbool, NULL, NUMBER); };
-askbool:        '(' ASKBOOL opts ')'             { $$ = new_native(DBG_ALLOC(strdup("askbool")), LINE, n_askbool, $3, NUMBER); };
-askchoice:      '(' ASKCHOICE opts ')'           { $$ = new_native(DBG_ALLOC(strdup("askchoice")), LINE, n_askchoice, $3, NUMBER); };
+askbool:        '(' ASKBOOL ps ')'             { $$ = new_native(DBG_ALLOC(strdup("askbool")), LINE, n_askbool, $3, NUMBER); };
+askchoice:      '(' ASKCHOICE ps ')'           { $$ = new_native(DBG_ALLOC(strdup("askchoice")), LINE, n_askchoice, $3, NUMBER); };
 askdir:         '(' ASKDIR ')'                   { $$ = new_native(DBG_ALLOC(strdup("askdir")), LINE, n_askdir, NULL, STRING); };
-askdir:         '(' ASKDIR opts ')'              { $$ = new_native(DBG_ALLOC(strdup("askdir")), LINE, n_askdir, $3, STRING); };
-askdisk:        '(' ASKDISK opts ')'             { $$ = new_native(DBG_ALLOC(strdup("askdisk")), LINE, n_askdisk, $3, NUMBER); };
+askdir:         '(' ASKDIR ps ')'              { $$ = new_native(DBG_ALLOC(strdup("askdir")), LINE, n_askdir, $3, STRING); };
+askdisk:        '(' ASKDISK ps ')'             { $$ = new_native(DBG_ALLOC(strdup("askdisk")), LINE, n_askdisk, $3, NUMBER); };
 askfile:        '(' ASKFILE ')'                  { $$ = new_native(DBG_ALLOC(strdup("askfile")), LINE, n_askfile, NULL, STRING); };
-askfile:        '(' ASKFILE opts ')'             { $$ = new_native(DBG_ALLOC(strdup("askfile")), LINE, n_askfile, $3, STRING); };
+askfile:        '(' ASKFILE ps ')'             { $$ = new_native(DBG_ALLOC(strdup("askfile")), LINE, n_askfile, $3, STRING); };
 asknumber:      '(' ASKNUMBER ')'                { $$ = new_native(DBG_ALLOC(strdup("asknumber")), LINE, n_asknumber, NULL, NUMBER); };
-asknumber:      '(' ASKNUMBER opts ')'           { $$ = new_native(DBG_ALLOC(strdup("asknumber")), LINE, n_asknumber, $3, NUMBER); };
-askoptions:     '(' ASKOPTIONS opts ')'          { $$ = new_native(DBG_ALLOC(strdup("askoptions")), LINE, n_askoptions, $3, NUMBER); };
+asknumber:      '(' ASKNUMBER ps ')'           { $$ = new_native(DBG_ALLOC(strdup("asknumber")), LINE, n_asknumber, $3, NUMBER); };
+askoptions:     '(' ASKOPTIONS ps ')'          { $$ = new_native(DBG_ALLOC(strdup("askoptions")), LINE, n_askoptions, $3, NUMBER); };
 askstring:      '(' ASKSTRING ')'                { $$ = new_native(DBG_ALLOC(strdup("askstring")), LINE, n_askstring, NULL, STRING); };
-askstring:      '(' ASKSTRING opts ')'           { $$ = new_native(DBG_ALLOC(strdup("askstring")), LINE, n_askstring, $3, STRING); };
-*/
+askstring:      '(' ASKSTRING ps ')'           { $$ = new_native(DBG_ALLOC(strdup("askstring")), LINE, n_askstring, $3, STRING); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* strop.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
