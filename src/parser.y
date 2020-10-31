@@ -73,7 +73,7 @@
 %type<e> /* all nodes    */ start /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /* nps*/ sps /*par c cv cvv */ add sub lt lte neq gt gte eq set cus /*dcl*/ fmt if while until and or xor bitand
         bitor bitxor bitnot shiftleft shiftright in strlen substr /*askdir askfile askstring asknumber askchoice askoptions askbool askdisk*/ cat /*exists*/ expandpath not
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum /*getversion iconinfo*/ querydisplay
-        pathonly patmatch div select /*symbolset symbolval*/ tackon /*transcript*/ complete user working welcome /*abort copyfiles copylib*/ database debug /*delete execute*/ exit /*
+        pathonly patmatch div select /*symbolset symbolval*/ tackon /*transcript*/ complete user working welcome abort /*copyfiles copylib*/ database debug /*delete execute*/ exit /*
         foreach makeassign makedir*/ message /*onerror protect rename rexx run startup textfile tooltype trap*/ reboot all append assigns choices command compression
         confirm default mul delopts dest disk files fonts help infos include newname newpath optional/* back*/ nogauge noposition noreq pattern prompt quiet range safe
         resident override setdefaulttool setposition setstack settooltype source swapcolors /*openwbobject showwbobject closewbobject*/ trace retrace closemedia effect
@@ -89,7 +89,7 @@
 %destructor { kill($$); }   /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /*nps*/ sps /*par c cv cvv*/ add sub div mul gt gte eq set cus /*dcl*/ fmt if while until and or xor bitand bitor
                             bitxor bitnot shiftleft shiftright in strlen substr /*askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists*/ expandpath earlier not /*
                             */fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum /*
-                            getversion iconinfo*/ querydisplay pathonly patmatch select /*symbolset symbolval*/ tackon /*transcript*/ complete user working welcome /*abort copyfiles copylib */
+                            getversion iconinfo*/ querydisplay pathonly patmatch select /*symbolset symbolval*/ tackon /*transcript*/ complete user working welcome abort /*copyfiles copylib */
                             database debug /*delete execute*/ exit /*foreach makeassign makedir*/ message /*onerror protect rename rexx run startup textfile tooltype trap */reboot all assigns
                             choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append /*openwbobject showwbobject closewbobject*/ trace retrace /*back*/ closemedia
@@ -239,8 +239,8 @@ vp:             add  /*       arithmetic.c|h */  |
                 execute       external.c|h  |
                 rexx                             |
                 run                              |
-                abort             exit.c|h   |
 */
+                abort           /*  exit.c|h */  |
                 exit                             |
 /*
                 onerror                          |
@@ -343,7 +343,6 @@ neq:            '(' NEQ pp ')'                   { $$ = new_native(DBG_ALLOC(str
 if:             '(' IF ps ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); };
 select:         '(' SELECT p ps ')'              { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, push(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' SELECT '(' ps ')' ps ')'     { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, push(push(new_contxt(), $4), $6), NUMBER); };
-
 until:          '(' UNTIL p ps ')'               { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $3), $4), DANGLE); } |
                 '(' UNTIL '(' ps ')' ps ')'      { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $4), $6), DANGLE); } |
                 '(' UNTIL p ')'                  { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(new_contxt(), $3), DANGLE); } |
@@ -352,10 +351,6 @@ while:          '(' WHILE p ps ')'               { $$ = new_native(DBG_ALLOC(str
                 '(' WHILE '(' ps ')' ps ')'      { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(push(new_contxt(), $4), $6), DANGLE); } |
                 '(' WHILE p ')'                  { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(new_contxt(), $3), DANGLE); } |
                 '(' WHILE '(' ps ')' ')'         { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(new_contxt(), $4), DANGLE); };
-/*
-while:          '(' WHILE p vps ')'              { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(push(new_contxt(), $3), $4), DANGLE); } |
-                '(' WHILE p ')'                  { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(new_contxt(), $3), DANGLE); };
-       */
 trace:          '(' TRACE ')'                    { $$ = new_native(DBG_ALLOC(strdup("trace")), LINE, n_trace, NULL, NUMBER); };
 retrace:        '(' RETRACE ')'                  { $$ = new_native(DBG_ALLOC(strdup("retrace")), LINE, n_retrace, NULL, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -386,19 +381,11 @@ run:            '(' RUN ps opts ')'              { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* exit.c|h                                                                                                                                                                             */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*
 abort:          '(' ABORT ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("abort")), LINE, n_abort, $3, NUMBER); } |
                 '(' ABORT ')'                    { $$ = new_native(DBG_ALLOC(strdup("abort")), LINE, n_abort, NULL, NUMBER); };
-*/
-
 exit:           '(' EXIT ps ')'                  { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, $3, NUMBER); } |
                 '(' EXIT ')'                     { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, NULL, NUMBER); };
 /*
-exit:           '(' EXIT ps quiet ')'            { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, push($3, $4), NUMBER); } |
-                '(' EXIT quiet ps ')'            { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, push($4, $3), NUMBER); } |
-                '(' EXIT quiet')'                { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, push(new_contxt(), $3), NUMBER); } |
-                '(' EXIT ps ')'                  { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, $3, NUMBER); } |
-                '(' EXIT ')'                     { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, NULL, NUMBER); };
 onerror:        '(' ONERROR vps ')'              { $$ = new_native(DBG_ALLOC(strdup("onerror")), LINE, n_procedure, push(new_contxt(),
                                                         new_custom(DBG_ALLOC(strdup("@onerror")), LINE, NULL, $3)), DANGLE); } |
                 '(' ONERROR ')'                  { $$ = new_native(DBG_ALLOC(strdup("onerror")), LINE, n_procedure, push(new_contxt(),
