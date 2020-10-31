@@ -75,7 +75,7 @@
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
         pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug /*delete execute*/ exit /*
         foreach makeassign makedir*/ message onerror /*protect rename rexx run startup*/ textfile tooltype /*trap*/ reboot all append assigns choices command compression
-        confirm default mul delopts dest disk files fonts help infos include newname newpath optional/* back*/ nogauge noposition noreq pattern prompt quiet range safe
+        confirm default mul delopts dest disk files fonts help infos include newname newpath optional back nogauge noposition noreq pattern prompt quiet range safe
         resident override setdefaulttool setposition setstack settooltype source swapcolors /*openwbobject*/ showwbobject closewbobject trace retrace closemedia effect
         setmedia showmedia astraw options asbraw asbeval eval
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -92,7 +92,7 @@
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
                             database debug /*delete execute*/ exit /*foreach makeassign makedir*/ message onerror /*protect rename rexx run startup*/ textfile tooltype /*trap */reboot all assigns
                             choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
-                            noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append /*openwbobject*/ showwbobject closewbobject trace retrace /*back*/ closemedia
+                            noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append /*openwbobject*/ showwbobject closewbobject trace retrace back closemedia
                             effect setmedia showmedia astraw options asbraw asbeval eval
 %%
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -162,7 +162,7 @@ cvv:            p xpb xpb                        { $$ = push(push(push(new_contx
 ap:             all                              |
                 append                           |
                 assigns                          |
-         /*       back                             |*/
+                back                             |
                 choices                          |
                 command                          |
                 compression                      |
@@ -391,12 +391,6 @@ onerror:        '(' ONERROR ps ')'              { $$ = new_native(DBG_ALLOC(strd
                                                         new_custom(DBG_ALLOC(strdup("@onerror")), LINE, NULL, $3)), DANGLE); } |
                 '(' ONERROR ')'                  { $$ = new_native(DBG_ALLOC(strdup("onerror")), LINE, n_procedure, push(new_contxt(),
                                                         new_custom(DBG_ALLOC(strdup("@onerror")), LINE, NULL, NULL)), NUMBER); };
-/*
-onerror:        '(' ONERROR vps ')'              { $$ = new_native(DBG_ALLOC(strdup("onerror")), LINE, n_procedure, push(new_contxt(),
-                                                        new_custom(DBG_ALLOC(strdup("@onerror")), LINE, NULL, $3)), DANGLE); } |
-                '(' ONERROR ')'                  { $$ = new_native(DBG_ALLOC(strdup("onerror")), LINE, n_procedure, push(new_contxt(),
-                                                        new_custom(DBG_ALLOC(strdup("@onerror")), LINE, NULL, NULL)), NUMBER); };
-*/
 reboot:         '(' REBOOT ')'                   { $$ = new_native(DBG_ALLOC(strdup("reboot")), LINE, n_reboot, NULL, NUMBER); };
       /*
 trap:           '(' TRAP nps vps ')'             { $$ = new_native(DBG_ALLOC(strdup("trap")), LINE, n_trap, push(push(new_contxt(), $3), $4), NUMBER); } |
@@ -566,9 +560,7 @@ closewbobject:  '(' CLOSEWBOBJECT p ')'          { $$ = new_native(DBG_ALLOC(str
 all:            '(' ALL ')'                      { $$ = new_option(DBG_ALLOC(strdup("all")), OPT_ALL, NULL); };
 append:         '(' APPEND ps ')'                { $$ = new_option(DBG_ALLOC(strdup("append")), OPT_APPEND, $3); };
 assigns:        '(' ASSIGNS ')'                  { $$ = new_option(DBG_ALLOC(strdup("assigns")), OPT_ASSIGNS, NULL); };
-       /*
-back:           '(' BACK vps ')'                 { $$ = new_option(DBG_ALLOC(strdup("back")), OPT_BACK, $3); };
-    */
+back:           '(' BACK ps ')'                  { $$ = new_option(DBG_ALLOC(strdup("back")), OPT_BACK, $3); };
 choices:        '(' CHOICES ps ')'               { $$ = new_option(DBG_ALLOC(strdup("choices")), OPT_CHOICES, $3); };
 command:        '(' COMMAND ps ')'               { $$ = new_option(DBG_ALLOC(strdup("command")), OPT_COMMAND, $3); };
 compression:    '(' COMPRESSION ')'              { $$ = new_option(DBG_ALLOC(strdup("compression")), OPT_COMPRESSION, NULL); };
