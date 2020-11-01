@@ -25,11 +25,14 @@
 //------------------------------------------------------------------------------
 entry_p n_if(entry_p contxt)
 {
-    // Allow empty bodies. Always resolve the conditional to evoke side effects.
+    // Allow empty bodies.
     C_SANE(1, NULL);
 
-    // Truth value of the condition.
+    // Always resolve the conditional to evoke side effects.
     bool val = tru(C_ARG(1));
+
+    // Prepare to dangle if the condition is false from the start.
+    contxt->resolved = end();
 
     // Does the body contain anything?
     if(exists(C_ARG(2)))
@@ -40,12 +43,12 @@ entry_p n_if(entry_p contxt)
         if(exists(sel))
         {
             // Execute the branch by resolving it.
-            return resolve(sel);
+            contxt->resolved = resolve(sel);
         }
     }
 
-    // Nothing to resolve.
-    return end();
+    // Dangle or resolved branch.
+    return contxt->resolved; 
 }
 
 //------------------------------------------------------------------------------

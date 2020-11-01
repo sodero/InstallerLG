@@ -651,14 +651,14 @@ static void kill_all(entry_p *chl, entry_p par)
 {
     if(!chl)
     {
-        // Nothing to do.
         return;
     }
 
     // Free the entries we own. References can be anywhere.
     for(entry_p *cur = chl; exists(*cur); cur++)
     {
-        if((*cur)->parent == par)
+        // The resolved value of a function can refer to one of its children.
+        if((*cur)->parent == par && *cur != par->resolved)
         {
             kill(*cur);
         }
