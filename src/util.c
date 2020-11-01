@@ -335,14 +335,16 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
         }
     }
 
-    // Iterate over all options in execution context.
+    // Iterate over all children in execution context.
     for(size_t i = 0; exists(contxt->children[i]); i++)
     {
-        // Children could be of any type.
-        if(contxt->children[i]->type == OPTION)
+        // Resolve to find both naked and dynamic options.
+        entry_p cur = resolve(contxt->children[i]);
+
+        if(cur->type == OPTION)
         {
-            // Cache current option + embedded, if any.
-            opt_fill_cache(contxt->children[i], cache);
+            // Cache option + embedded, if any.
+            opt_fill_cache(cur, cache);
         }
     }
 }
