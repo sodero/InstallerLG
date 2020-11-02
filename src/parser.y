@@ -344,8 +344,7 @@ neq:            '(' NEQ pp ')'                   { $$ = new_native(DBG_ALLOC(str
 /* control.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 if:             '(' IF ps ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); };
-select:         '(' SELECT p ps ')'              { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, push(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' SELECT '(' ps ')' ps ')'     { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, push(push(new_contxt(), $4), $6), NUMBER); };
+select:         '(' SELECT ps ')'                { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, $3, DANGLE); };
 until:          '(' UNTIL p ps ')'               { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $3), $4), DANGLE); } |
                 '(' UNTIL '(' ps ')' ps ')'      { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(push(new_contxt(), $4), $6), DANGLE); } |
                 '(' UNTIL p ')'                  { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, push(new_contxt(), $3), DANGLE); } |
@@ -354,8 +353,8 @@ while:          '(' WHILE p ps ')'               { $$ = new_native(DBG_ALLOC(str
                 '(' WHILE '(' ps ')' ps ')'      { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(push(new_contxt(), $4), $6), DANGLE); } |
                 '(' WHILE p ')'                  { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(new_contxt(), $3), DANGLE); } |
                 '(' WHILE '(' ps ')' ')'         { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, push(new_contxt(), $4), DANGLE); };
-trace:          '(' TRACE ')'                    { $$ = new_native(DBG_ALLOC(strdup("trace")), LINE, n_trace, NULL, NUMBER); };
-retrace:        '(' RETRACE ')'                  { $$ = new_native(DBG_ALLOC(strdup("retrace")), LINE, n_retrace, NULL, NUMBER); };
+trace:          '(' TRACE ')'                    { $$ = new_native(DBG_ALLOC(strdup("trace")), LINE, n_trace, NULL, DANGLE); };
+retrace:        '(' RETRACE ')'                  { $$ = new_native(DBG_ALLOC(strdup("retrace")), LINE, n_retrace, NULL, DANGLE); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* debug.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

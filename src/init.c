@@ -276,7 +276,7 @@ static void init_error(entry_p contxt)
                                 new_number(0)
                             )
                         ),
-                        NUMBER
+                        DANGLE
                     )
                 )
             )

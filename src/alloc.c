@@ -657,12 +657,20 @@ static void kill_all(entry_p *chl, entry_p par)
     // Free the entries we own. References can be anywhere.
     for(entry_p *cur = chl; exists(*cur); cur++)
     {
-        // The resolved value of a function can refer to one of its children.
-        if((*cur)->parent == par && *cur != par->resolved)
+        if((*cur)->parent == par)
         {
             kill(*cur);
         }
     }
+}
+
+static bool own_res(entry_p entry)
+{
+    // (if), (while) and (until) never own anything. They just contain
+    // references to subordinate branches / nodes.
+    return entry && entry->call != n_if && entry->call != n_while &&
+           entry->call != n_select && entry->call != n_until &&
+           entry->resolved && entry->resolved->parent == entry;
 }
 
 //------------------------------------------------------------------------------
@@ -676,6 +684,12 @@ void kill(entry_p entry)
     // DANGLE entries are static, no need to free them.
     if(entry && entry->type != DANGLE)
     {
+        // If we own any resolved entries, free them.
+        if(own_res(entry))
+        {
+            kill(entry->resolved);
+        }
+
         // All entries might have a name.
         free(entry->name);
 
@@ -686,12 +700,6 @@ void kill(entry_p entry)
         // Free children, if any.
         kill_all(entry->children, entry);
         free(entry->children);
-
-        // If we own any resolved entries, free them.
-        if(entry->resolved && entry->resolved->parent == entry)
-        {
-            kill(entry->resolved);
-        }
 
         // Nothing but this entry left.
         free(entry);

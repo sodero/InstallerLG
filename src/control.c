@@ -48,7 +48,7 @@ entry_p n_if(entry_p contxt)
     }
 
     // Dangle or resolved branch.
-    return contxt->resolved; 
+    return contxt->resolved;
 }
 
 //------------------------------------------------------------------------------
@@ -59,26 +59,29 @@ entry_p n_if(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p n_select(entry_p contxt)
 {
-    // We need atleast two arguments, the index and the list of items.
-    C_SANE(2, NULL);
+    // We need an index.
+    C_SANE(1, NULL);
 
-    // Index and selection.
-    int32_t ndx = 0, sel = num(C_ARG(1));
+    // Selected item.
+    int32_t sel = num(C_ARG(1));
 
-    // Find the n:th item, go one step at a time in case no such item exists.
-    for(entry_p *items = C_ARG(2)->children; exists(items[ndx]); ndx++)
+    // Prepare to dangle if there's no such item.
+    contxt->resolved = end();
+
+    // One step at a time in case no item exists.
+    for(int32_t cur = 2; exists(C_ARG(cur)); cur++)
     {
-        // Are we there yet?
-        if(ndx == sel)
+        if((cur - 2) == sel)
         {
-            // Return resolved value.
-            return resolve(items[ndx]);
+            // Set and return resolved value.
+            contxt->resolved = resolve(C_ARG(cur));
+            return contxt->resolved;
         }
     }
 
-    // No such item, n + 1 > the number of items.
+    // No such item, n + 1 > number of items.
     ERR(ERR_NO_ITEM, str(C_ARG(1)));
-    R_NUM(LG_FALSE);
+    return end();
 }
 
 //------------------------------------------------------------------------------
@@ -93,22 +96,23 @@ static entry_p h_whunt(entry_p contxt, bool until)
     C_SANE(1, NULL);
 
     // Prepare to dangle if the condition is false from the start.
-    entry_p ret = end();
+    contxt->resolved = end();
 
     // Use XOR to support both 'while' and 'until'. Break on error.
     for(bool cont = until ^ tru(C_ARG(1)); cont && NOT_ERR;
         cont = until ^ tru(C_ARG(1)))
     {
         // Save the return value of the last function in the CONTXT or, if the
-        // body is empty, don't do anything at all. The return value will always
-        // be LG_FALSE if there's no body (since we either won't return at all,
-        // or we'll return when the condition is false).
-        ret = exists(C_ARG(2)) ? invoke(C_ARG(2)) : ret;
+        // body is empty, don't do anything at all.
+        if(exists(C_ARG(2)))
+        {
+            contxt->resolved = resolve(C_ARG(2));
+        }
     }
 
     // Return either LG_FALSE, the value of the resolved value of this function,
     // or the return value of the last function in the last iteration.
-    return ret;
+    return contxt->resolved;
 }
 
 //------------------------------------------------------------------------------

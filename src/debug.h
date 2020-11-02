@@ -18,9 +18,9 @@
                  KPrintF((CONST_STRPTR)__VA_ARGS__)
 #define OUT(...) KPrintF((CONST_STRPTR)__VA_ARGS__)
 #else
-#define DBG(...) fprintf(stderr,"%s:%s:%d>",__FILE__,__func__,__LINE__);\
-                 fprintf(stderr,__VA_ARGS__)
-#define OUT(...) fprintf(stderr,__VA_ARGS__)
+#define DBG(...) fprintf(stdout,"%s:%s:%d>",__FILE__,__func__,__LINE__);\
+                 fprintf(stdout,__VA_ARGS__)
+#define OUT(...) fprintf(stdout,__VA_ARGS__)
 #endif
 
 entry_p n_astraw(entry_p contxt);
