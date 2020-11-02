@@ -102,11 +102,10 @@ static entry_p h_whunt(entry_p contxt, bool until)
     for(bool cont = until ^ tru(C_ARG(1)); cont && NOT_ERR;
         cont = until ^ tru(C_ARG(1)))
     {
-        // Save the return value of the last function in the CONTXT or, if the
-        // body is empty, don't do anything at all.
-        if(exists(C_ARG(2)))
+        // Save the resolved value of the last function.
+        for(size_t cur = 2; exists(C_ARG(cur)); cur++)
         {
-            contxt->resolved = resolve(C_ARG(2));
+            contxt->resolved = resolve(C_ARG(cur));
         }
     }
 
@@ -216,27 +215,27 @@ entry_p n_retrace(entry_p contxt)
 
     if(!top)
     {
-        // Exit if there's nowhere to go.
-        R_NUM(HALT);
+        // Nowhere to go.
+        return end();
     }
 
     // Stack frame counter.
-    static int dep = 0;
+    static size_t dep = 0;
 
     // Keep track of the recursion depth.
     if(++dep > LG_MAXDEP)
     {
         ERR(ERR_MAX_DEPTH, contxt->name);
-        R_NUM(LG_FALSE);
+        return end();
     }
 
-    // Expect failure.
-    entry_p ret = end();
+    // Expect no children.
+    contxt->resolved = end();
 
     // Resolve children and save return values.
     while(exists(*top) && NOT_ERR)
     {
-        ret = resolve(*top);
+        contxt->resolved = resolve(*top);
         top++;
     }
 
@@ -244,5 +243,5 @@ entry_p n_retrace(entry_p contxt)
     dep--;
 
     // Return the last value.
-    return ret;
+    return contxt->resolved;
 }

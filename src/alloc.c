@@ -670,6 +670,7 @@ static bool own_res(entry_p entry)
     // references to subordinate branches / nodes.
     return entry && entry->call != n_if && entry->call != n_while &&
            entry->call != n_select && entry->call != n_until &&
+           entry->call != n_retrace &&
            entry->resolved && entry->resolved->parent == entry;
 }
 
