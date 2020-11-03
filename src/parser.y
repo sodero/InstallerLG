@@ -75,7 +75,7 @@
         bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat /*exists*/ expandpath not
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
         pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug /*delete*/ execute exit /*
-        foreach makeassign makedir*/ message onerror /*protect rename*/ rexx run /*startup*/ textfile tooltype trap reboot all append assigns choices command compression
+        foreach makeassign makedir*/ message onerror /*protect*/ rename rexx run /*startup*/ textfile tooltype trap reboot all append assigns choices command compression
         confirm default mul delopts dest disk files fonts help infos include newname newpath optional back nogauge noposition noreq pattern prompt quiet range safe
         resident override setdefaulttool setposition setstack settooltype source swapcolors /*openwbobject*/ showwbobject closewbobject trace retrace closemedia effect
         setmedia showmedia astraw options asbraw asbeval eval
@@ -91,7 +91,7 @@
                             bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk /* exists*/ expandpath earlier not /*
                             */fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
-                            database debug /*delete*/ execute exit /*foreach makeassign makedir*/ message onerror /*protect rename*/ rexx run /*startup*/ textfile tooltype trap reboot all assigns
+                            database debug /*delete*/ execute exit /*foreach makeassign makedir*/ message onerror /*protect*/ rename rexx run /*startup*/ textfile tooltype trap reboot all assigns
                             choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append /*openwbobject*/ showwbobject closewbobject trace retrace back closemedia
                             effect setmedia showmedia astraw options asbraw asbeval eval
@@ -262,9 +262,7 @@ vp:             add  /*       arithmetic.c|h */  |
                 textfile                         |
                 tooltype                         |
                 transcript                       |
-/*
                 rename                           |
-*/
                 complete   /*information.c|h*/   |
                 debug                            |
                 message                          |
@@ -407,13 +405,10 @@ startup:        '(' STARTUP p opts ')'           { $$ = new_native(DBG_ALLOC(str
                 '(' STARTUP opts p opts ')'      { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), $4), merge($3, $5)), NUMBER); } |
                 '(' STARTUP opts ')'             { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), new_symref(DBG_ALLOC(strdup("@app-name")), LINE)), $3), NUMBER); };
 */
-textfile:       '(' TEXTFILE ps ')'            { $$ = new_native(DBG_ALLOC(strdup("textfile")), LINE, n_textfile, $3, NUMBER); };
-tooltype:       '(' TOOLTYPE ps ')'            { $$ = new_native(DBG_ALLOC(strdup("tooltype")), LINE, n_tooltype, $3, NUMBER); };
+textfile:       '(' TEXTFILE ps ')'              { $$ = new_native(DBG_ALLOC(strdup("textfile")), LINE, n_textfile, $3, NUMBER); };
+tooltype:       '(' TOOLTYPE ps ')'              { $$ = new_native(DBG_ALLOC(strdup("tooltype")), LINE, n_tooltype, $3, NUMBER); };
 transcript:     '(' TRANSCRIPT ps ')'            { $$ = new_native(DBG_ALLOC(strdup("transcript")), LINE, n_transcript, $3, NUMBER); };
-        /*
-rename:         '(' RENAME pp opts')'            { $$ = new_native(DBG_ALLOC(strdup("rename")), LINE, n_rename, merge($3, $4), NUMBER); } |
-                '(' RENAME pp ')'                { $$ = new_native(DBG_ALLOC(strdup("rename")), LINE, n_rename, $3, NUMBER); };
-*/
+rename:         '(' RENAME p ps ')'                { $$ = new_native(DBG_ALLOC(strdup("rename")), LINE, n_rename, merge(push(new_contxt(), $3), $4), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* information.c|h                                                                                                                                                                      */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
