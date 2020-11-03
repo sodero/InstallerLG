@@ -743,6 +743,21 @@ char *get_optstr(entry_p contxt, opt_t type)
 }
 
 //------------------------------------------------------------------------------
+// Name:        is_mergeable
+// Description: Helper used by get_chlstr to determinet whether to concatenate
+//              the string representation of a child or not.
+// Input:       entry_p contxt: The context.
+// Return:      bool:           If it's possible to cancatenate 'true', 'false'
+//                              otherwise.
+//------------------------------------------------------------------------------
+static bool is_mergeable(entry_p entry)
+{
+    return entry != end() && entry->type != OPTION &&
+           (!entry->resolved || (entry->resolved != end() &&
+           entry->resolved->type != OPTION));
+}
+
+//------------------------------------------------------------------------------
 // Name:        get_chlstr
 // Description: Concatenate the string representations of all non context
 //              children of a context.
@@ -766,7 +781,7 @@ char *get_chlstr(entry_p contxt, bool pad)
         // Count non context children.
         while(child && exists(*child))
         {
-            cnt += ((*child)->type != CONTXT) ? 1 : 0;
+            cnt += is_mergeable(*child) ? 1 : 0;
             child++;
         }
     }
@@ -795,8 +810,7 @@ char *get_chlstr(entry_p contxt, bool pad)
     {
         entry_p cur = *(--child);
 
-        // Ignore contexts.
-        if(cur->type == CONTXT)
+        if(!is_mergeable(cur))
         {
             continue;
         }
@@ -806,7 +820,6 @@ char *get_chlstr(entry_p contxt, bool pad)
         stv[--cnt] = str(cur);
         len += strlen(stv[cnt]) + (pad ? 1 : 0);
     }
-
     // Memory to hold the full concatenation.
     ret = len ? DBG_ALLOC(calloc(len + 1, 1)) : NULL;
 

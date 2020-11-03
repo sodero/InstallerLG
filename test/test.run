@@ -21,7 +21,7 @@
 (run "script" (confirm)); "","Line 1: Missing option 'prompt' 0",""
 (run "script" (safe) (quiet)) ; "","script0",""
 (run "script" (safe)) ; "","script0",""
-(run "script" x) ; "","Line 1: Undefined variable 'x' script 0",""
+(run "script" x) ; "","Line 1: Undefined variable 'x' 0",""
 (run (confirm) (help "h") "script" (prompt "p")); "","script0",""
 (run (confirm) (prompt "p") (help "h") "script"); "","script0",""
 (run) ; "","Line 1: syntax error, unexpected ')' ')'",""

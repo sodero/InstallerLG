@@ -196,9 +196,9 @@ entry_p n_trap(entry_p contxt)
     set_num(contxt, "@trap", num(C_ARG(1)));
 
     // Resolve statements if there are any.
-    if(exists(C_ARG(2)))
+    for(size_t cur = 2; exists(C_ARG(cur)); cur++)
     {
-        (void) resolve(C_ARG(2));
+        (void) resolve(C_ARG(cur));
     }
 
     // Leave trap mode and clear errors.
