@@ -77,7 +77,7 @@
         pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit /*
         foreach*/ makeassign makedir message onerror protect rename rexx run /*startup*/ textfile tooltype trap reboot all append assigns choices command compression
         confirm default mul delopts dest disk files fonts help infos include newname newpath optional back nogauge noposition noreq pattern prompt quiet range safe
-        resident override setdefaulttool setposition setstack settooltype source swapcolors /*openwbobject*/ showwbobject closewbobject trace retrace closemedia effect
+        resident override setdefaulttool setposition setstack settooltype source swapcolors openwbobject showwbobject closewbobject trace retrace closemedia effect
         setmedia showmedia astraw options asbraw asbeval eval
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Destruction                                                                                                                                                                          */
@@ -93,7 +93,7 @@
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
                             database debug delete execute exit /*foreach*/ makeassign makedir message onerror protect rename rexx run /*startup*/ textfile tooltype trap reboot all assigns
                             choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
-                            noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append /*openwbobject*/ showwbobject closewbobject trace retrace back closemedia
+                            noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append openwbobject showwbobject closewbobject trace retrace back closemedia
                             effect setmedia showmedia astraw options asbraw asbeval eval
 %%
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -307,9 +307,7 @@ vp:             add  /*       arithmetic.c|h */  |
                 set           /*  symbol.c|h */  |
                 symbolset                        |
                 symbolval                        |
-/*
-                openwbobject        wb.c|h   |
-*/
+                openwbobject       /* wb.c|h */  |
                 showwbobject                     |
                 closewbobject                    ;
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -386,10 +384,6 @@ makeassign:     '(' MAKEASSIGN ps ')'            { $$ = new_native(DBG_ALLOC(str
 makedir:        '(' MAKEDIR ps')'                { $$ = new_native(DBG_ALLOC(strdup("makedir")), LINE, n_makedir, $3, NUMBER); };
 protect:        '(' PROTECT ps ')'               { $$ = new_native(DBG_ALLOC(strdup("protect")), LINE, n_protect, $3, NUMBER); };
 /*
-protect:        '(' PROTECT pp opts ')'          { $$ = new_native(DBG_ALLOC(strdup("protect")), LINE, n_protect, merge($3, $4), NUMBER); } |
-                '(' PROTECT pp ')'               { $$ = new_native(DBG_ALLOC(strdup("protect")), LINE, n_protect, $3, NUMBER); } |
-                '(' PROTECT p opts ')'           { $$ = new_native(DBG_ALLOC(strdup("protect")), LINE, n_protect, merge(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' PROTECT p ')'                { $$ = new_native(DBG_ALLOC(strdup("protect")), LINE, n_protect, push(new_contxt(), $3), NUMBER); };
 startup:        '(' STARTUP p opts ')'           { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' STARTUP opts p ')'           { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), $4), $3), NUMBER); } |
                 '(' STARTUP opts p opts ')'      { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), $4), merge($3, $5)), NUMBER); } |
@@ -407,12 +401,6 @@ debug:          '(' DEBUG ps ')'                 { $$ = new_native(DBG_ALLOC(str
                 '(' DEBUG ')'                    { $$ = new_native(DBG_ALLOC(strdup("debug")), LINE, n_debug, NULL, NUMBER); };
 
 message:        '(' MESSAGE ps ')'               { $$ = new_native(DBG_ALLOC(strdup("message")), LINE, n_message, $3, NUMBER); } ;
-/*
-message:        '(' MESSAGE ps opts ')'          { $$ = new_native(DBG_ALLOC(strdup("message")), LINE, n_message, merge($4, $3), NUMBER); } |
-                '(' MESSAGE opts ps')'           { $$ = new_native(DBG_ALLOC(strdup("message")), LINE, n_message, merge($3, $4), NUMBER); } |
-                '(' MESSAGE opts ps opts ')'     { $$ = new_native(DBG_ALLOC(strdup("message")), LINE, n_message, push(merge($3, $5), $4), NUMBER); } |
-                '(' MESSAGE ps ')'               { $$ = new_native(DBG_ALLOC(strdup("message")), LINE, n_message, $3, NUMBER); };
-*/
 user:           '(' USER p ')'                   { $$ = new_native(DBG_ALLOC(strdup("user")), LINE, n_user, push(new_contxt(), $3), NUMBER); };
 welcome:        '(' WELCOME ps ')'               { $$ = new_native(DBG_ALLOC(strdup("welcome")), LINE, n_welcome, $3, NUMBER); } |
                 '(' WELCOME ')'                  { $$ = new_native(DBG_ALLOC(strdup("welcome")), LINE, n_welcome, NULL, NUMBER); };
@@ -508,12 +496,7 @@ symbolval:      '(' SYMBOLVAL p ')'              { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* wb.c|h                                                                                                                                                                               */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*
-openwbobject:   '(' OPENWBOBJECT p ')'           { $$ = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, push(new_contxt(), $3), NUMBER); } |
-                '(' OPENWBOBJECT p opts ')'      { $$ = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, merge(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' OPENWBOBJECT opts p ')'      { $$ = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, merge(push(new_contxt(), $4), $3), NUMBER); } |
-                '(' OPENWBOBJECT opts p opts ')' { $$ = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, merge(push(new_contxt(), $4), merge($3, $5)), NUMBER); };
-*/
+openwbobject:   '(' OPENWBOBJECT ps ')'          { $$ = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, $3, NUMBER); };
 showwbobject:   '(' SHOWWBOBJECT p ')'           { $$ = new_native(DBG_ALLOC(strdup("showwbobject")), LINE, n_showwbobject, push(new_contxt(), $3), NUMBER); };
 closewbobject:  '(' CLOSEWBOBJECT p ')'          { $$ = new_native(DBG_ALLOC(strdup("closewbobject")), LINE, n_closewbobject, push(new_contxt(), $3), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

@@ -1,6 +1,7 @@
 (openwbobject) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (openwbobject "RAM:") ; "","-1",""
-(openwbobject "RAM:" err) ; "","Line 1: syntax error, unexpected SYM, expecting '(' or ')' 'err'",""
+(openwbobject "RAM:" err) ; "","Line 1: Undefined variable 'err' 0",""
+(set @strict 0) (openwbobject "RAM:" err) ; "","-1",""
 (openwbobject "RAM:" (prompt "p") (help "h") (confirm)) ; "","-1",""
 (openwbobject "RAM:" (prompt "p") (help "h") (confirm 0)) ; "","ph0 -1",""
 (openwbobject (prompt "p") "RAM:" (help "h") (confirm 0)) ; "","ph0 -1",""
