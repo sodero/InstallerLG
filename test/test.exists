@@ -20,4 +20,4 @@
 (exists "_ex_" (noreq)) ; "mkdir _ex_","2","rmdir _ex_"
 (exists "_ex_" (quiet)) ; "mkdir _ex_","2","rmdir _ex_"
 (exists) ; "","Line 1: syntax error, unexpected ')' ')'",""
-(exists file err) ; "","Line 1: syntax error, unexpected SYM, expecting '(' or ')' 'err'",""
+(exists file err) ; "","Line 1: Undefined variable 'file' Line 1: Undefined variable 'err' 0",""
