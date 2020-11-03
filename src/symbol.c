@@ -86,7 +86,7 @@ entry_p n_set(entry_p contxt)
     // We need atleast one symbol. The CBM installer tolerates constructs such
     // as (set a). In that case 'a' will simply be ignored.
     C_SANE(0, NULL); S_SANE(1);
-//dump(contxt);
+
     // Function argument symbol value tuples.
     entry_p *sym = contxt->symbols, *val = contxt->children;
 

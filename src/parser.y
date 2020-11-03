@@ -26,7 +26,7 @@
 /* Always debug.                                                                                                                                                                        */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 #define YYDEBUG 1
-#define YYMAXDEPTH 1000000
+#define YYMAXDEPTH (1 << 20)
 %}
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -71,7 +71,7 @@
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Token data types                                                                                                                                                                     */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /* nps*/ sps /*par c cv cvv */ add sub lt lte neq gt gte eq set cus /*dcl*/ fmt if while until and or xor bitand
+%type<e> /* all nodes    */ start p pp ps /*ivp*/ vp ap /*vps opt opts xpb xpbs*/ np sp /* nps sps par c cv cvv */ add sub lt lte neq gt gte eq set cus /*dcl*/ fmt if while until and or xor bitand
         bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath not
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
         pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit /*
@@ -87,7 +87,7 @@
 /* Primitive strings are freed like you would expect                                                                                                                                    */
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
-%destructor { kill($$); }   /*s*/ p pp ps /*ivp*/ vp ap /*vps dynopt opt opts xpb xpbs*/ np sp /*nps*/ sps /*par c cv cvv*/ add sub div mul gt gte eq set cus /*dcl*/ fmt if while until and or xor bitand bitor
+%destructor { kill($$); }   p pp ps /*ivp*/ vp ap /*vps opt opts xpb xpbs*/ np sp /*nps sps par c cv cvv*/ add sub div mul gt gte eq set cus /*dcl*/ fmt if while until and or xor bitand bitor
                             bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier not /*
                             */fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
@@ -111,53 +111,19 @@ pp:             p p                              { $$ = push(push(new_contxt(), 
 ps:             p                                { $$ = push(new_contxt(), $1); } |
                 ps ps                            { $$ = merge($1, $2); } |
                 '(' ps ')'                       { $$ = push(new_contxt(), $2); };
-sp:             SYM p                            { $$ = push(push(new_contxt(), new_symbol($1)), $2); } |
+sp:             SYM                              { $$ = push(new_contxt(), new_symbol($1)); } |
+                SYM p                            { $$ = push(push(new_contxt(), new_symbol($1)), $2); } |
                 SYM '(' ps ')'                   { $$ = push(push(new_contxt(), new_symbol($1)), $3); } |
-                SYM                              { $$ = push(new_contxt(), new_symbol($1)); } |
+                sp SYM                           { $$ = push($1, new_symbol($2)); } |
+                sp SYM p                         { $$ = push(push($1, new_symbol($2)), $3); } |
+                sp SYM '(' ps ')'                { $$ = push(push($1, new_symbol($2)), $4); } |
                 '(' sp ')'                       { $$ = $2; };
-sps:            sps sp                           { $$ = merge($1, $2); } |
-                sp                               { $$ = $1; } |
-                '(' sps ')'                      { $$ = $2; };
-
- /*
-pp:             p p                              { $$ = push(push(new_contxt(), $1), $2); };
-  */
-/*
-vp:             ivp                              |
-                '(' vp ')'                       { $$ = $2; };
-vps:            vps vps                          { $$ = merge($1, $2); } |
-                vps opts                         { $$ = merge($1, $2);  } |
-                opts vps                         { $$ = merge($1, $2);  } |
-                vp                               { $$ = push(new_contxt(), $1); } |
-                '(' vps ')'                      { $$ = $2; };
-opts:           opts opts                        { $$ = merge($1, $2); } |
-                opt                              { $$ = push(new_contxt(), $1); } |
-                '(' opts ')'                     { $$ = $2; };
-xpb:            '(' vps ')'                      { $$ = $2; } |
-                '(' vps np ')'                   { $$ = push($2, $3); } |
-                p                                { $$ = push(new_contxt(), $1); };
-xpbs:           xpb                              { $$ = push(new_contxt(), $1); }|
-                xpbs xpb                         { $$ = push($1, $2); };
-*/
 np:             INT                              { $$ = new_number($1); } |
                 HEX                              { $$ = new_number($1); } |
                 BIN                              { $$ = new_number($1); } |
                 STR                              { $$ = new_string($1); } |
                 SYM                              { $$ = new_symref($1, LINE); } |
                 OOM                              { $$ = NULL; YYFPRINTF(stderr, "Out of memory in line %d\n", LINE); YYABORT; };
-/*
-nps:            nps np                           { $$ = push($1, $2); } |
-                np                               { $$ = push(new_contxt(), $1); };
-sps:            sps SYM xpb                      { $$ = push(push($1, new_symbol($2)), $3) ; } |
-                SYM xpb                          { $$ = push(push(new_contxt(), new_symbol($1)), $2); } |
-                sps SYM                          { $$ = push($1, new_symbol($2)); } |
-                SYM                              { $$ = push(new_contxt(), new_symbol($1)); };
-par:            par SYM                          { $$ = push($1, new_symbol($2)); } |
-                SYM                              { $$ = push(new_contxt(), new_symbol($1)); };
-c:              p                                { $$ = push(new_contxt(), $1); };
-cv:             p xpb                            { $$ = push(push(new_contxt(), $1), $2); };
-cvv:            p xpb xpb                        { $$ = push(push(push(new_contxt(), $1), $2), $3); };
-   */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Modifiers                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -200,7 +166,6 @@ ap:             all                              |
                 settooltype                      |
                 source                           |
                 swapcolors                       |
-/*                dynopt                           |*/
                 resident                         ;
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Functions                                                                                                                                                                            */
@@ -489,8 +454,8 @@ tackon:         '(' TACKON pp ')'                { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* symbol.c|h                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-set:            '(' SET sps ')'                  { $$ = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, $3, DANGLE); } |
-                '(' SET DEFAULT sps ')'          { $$ = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, $4, DANGLE); };
+set:            '(' SET sp ')'                   { $$ = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, $3, DANGLE); } |
+                '(' SET DEFAULT sp ')'           { $$ = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, $4, DANGLE); };
 symbolset:      '(' SYMBOLSET ps ')'             { $$ = new_native(DBG_ALLOC(strdup("symbolset")), LINE, n_symbolset, $3, DANGLE); };
 symbolval:      '(' SYMBOLVAL p ')'              { $$ = new_native(DBG_ALLOC(strdup("symbolval")), LINE, n_symbolval, push(new_contxt(), $3), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -550,11 +515,6 @@ optional:       '(' OPTIONAL ps ')'              { $$ = new_option(DBG_ALLOC(str
                 '(' OPTIONAL ')'                 { $$ = new_option(DBG_ALLOC(strdup("optional")), OPT_OPTIONAL, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); };
 resident:       '(' RESIDENT ')'                 { $$ = new_option(DBG_ALLOC(strdup("resident")), OPT_RESIDENT, NULL); };
 override:       '(' OVERRIDE p ')'               { $$ = new_option(DBG_ALLOC(strdup("override")), OPT_OVERRIDE, push(new_contxt(), $3)); };
-        /*
-dynopt:         '(' IF p opts ')'                { $$ = new_option(DBG_ALLOC(strdup("ifopt")), OPT_IFOPT, push(push(new_contxt(), $3), $4)); } |
-                '(' IF p opts opts ')'           { $$ = new_option(DBG_ALLOC(strdup("ifopt")), OPT_IFOPT, push(push(push(new_contxt(), $3), $4), $5)); } |
-                '(' SELECT p opts ')'            { $$ = new_option(DBG_ALLOC(strdup("selopt")), OPT_SELOPT, push(push(new_contxt(), $3), $4)); };
-*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %%
 
