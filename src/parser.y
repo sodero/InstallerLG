@@ -71,7 +71,7 @@
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Token data types                                                                                                                                                                     */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start p pp ps /*ivp*/ vp ap /*vps opt opts xpb xpbs*/ np sp /* nps sps par c cv cvv */ add sub lt lte neq gt gte eq set cus /*dcl*/ fmt if while until and or xor bitand
+%type<e> /* all nodes    */ start p pp ps /*ivp*/ vp ap /*vps opt opts xpb xpbs*/ np sp /* nps sps*/ pa pb /* c cv cvv */ add sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor bitand
         bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath not
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
         pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit /*
@@ -87,7 +87,7 @@
 /* Primitive strings are freed like you would expect                                                                                                                                    */
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
-%destructor { kill($$); }   p pp ps /*ivp*/ vp ap /*vps opt opts xpb xpbs*/ np sp /*nps sps par c cv cvv*/ add sub div mul gt gte eq set cus /*dcl*/ fmt if while until and or xor bitand bitor
+%destructor { kill($$); }   p pp ps /*ivp*/ vp ap /*vps opt opts xpb xpbs*/ np sp /*nps sps*/ pa pb /* c cv cvv*/ add sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
                             bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier not /*
                             */fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
@@ -118,6 +118,11 @@ sp:             SYM                              { $$ = push(new_contxt(), new_s
                 sp SYM p                         { $$ = push(push($1, new_symbol($2)), $3); } |
                 sp SYM '(' ps ')'                { $$ = push(push($1, new_symbol($2)), $4); } |
                 '(' sp ')'                       { $$ = $2; };
+pa:             pa SYM                           { $$ = push($1, new_symbol($2)); } |
+                SYM                              { $$ = push(new_contxt(), new_symbol($1)); };
+pb:             vp                               { $$ = push(new_contxt(), $1); } |
+                ap                               { $$ = push(new_contxt(), $1); } |
+                pb ps                            { $$ = merge($1, $2); };
 np:             INT                              { $$ = new_number($1); } |
                 HEX                              { $$ = new_number($1); } |
                 BIN                              { $$ = new_number($1); } |
@@ -250,9 +255,7 @@ vp:             add  /*       arithmetic.c|h */  |
                 iconinfo                         |
                 querydisplay                     |
                 cus        /*  procedure.c|h */  |
-/*
                 dcl                              |
-*/
                 askbool        /* prompt.c|h */  |
                 askchoice                        |
                 askdir                           |
@@ -302,17 +305,17 @@ neq:            '(' NEQ pp ')'                   { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 if:             '(' IF ps ')'                    { $$ = new_native(DBG_ALLOC(strdup("if")), LINE, n_if, $3, DANGLE); };
 select:         '(' SELECT ps ')'                { $$ = new_native(DBG_ALLOC(strdup("select")), LINE, n_select, $3, DANGLE); };
-until:          '(' UNTIL ps ')'               { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, $3, DANGLE); };
-while:          '(' WHILE ps ')'               { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, $3, DANGLE); };
+until:          '(' UNTIL ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("until")), LINE, n_until, $3, DANGLE); };
+while:          '(' WHILE ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("while")), LINE, n_while, $3, DANGLE); };
 trace:          '(' TRACE ')'                    { $$ = new_native(DBG_ALLOC(strdup("trace")), LINE, n_trace, NULL, DANGLE); };
 retrace:        '(' RETRACE ')'                  { $$ = new_native(DBG_ALLOC(strdup("retrace")), LINE, n_retrace, NULL, DANGLE); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* debug.c|h                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 astraw:         '(' ASTRAW ')'                   { $$ = new_native(DBG_ALLOC(strdup("___astraw")), LINE, n_astraw, NULL, NUMBER); };
-asbraw:         '(' ASBRAW ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("___asbraw")), LINE, n_asbraw, push(new_contxt(), $3), NUMBER); };
-asbeval:        '(' ASBEVAL ps ')'                { $$ = new_native(DBG_ALLOC(strdup("___asbeval")), LINE, n_asbeval, push(new_contxt(), $3), NUMBER); };
-eval:           '(' EVAL ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("___eval")), LINE, n_eval, push(new_contxt(), $3), NUMBER); };
+asbraw:         '(' ASBRAW ps ')'                { $$ = new_native(DBG_ALLOC(strdup("___asbraw")), LINE, n_asbraw, push(new_contxt(), $3), NUMBER); };
+asbeval:        '(' ASBEVAL ps ')'               { $$ = new_native(DBG_ALLOC(strdup("___asbeval")), LINE, n_asbeval, push(new_contxt(), $3), NUMBER); };
+eval:           '(' EVAL ps ')'                  { $$ = new_native(DBG_ALLOC(strdup("___eval")), LINE, n_eval, push(new_contxt(), $3), NUMBER); };
 options:        '(' OPTIONS ')'                  { $$ = new_native(DBG_ALLOC(strdup("___options")), LINE, n_options, NULL, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h                                                                                                                                                                         */
@@ -408,36 +411,36 @@ getenv:         '(' GETENV p ')'                 { $$ = new_native(DBG_ALLOC(str
 getsize:        '(' GETSIZE p ')'                { $$ = new_native(DBG_ALLOC(strdup("getsize")), LINE, n_getsize, push(new_contxt(), $3), NUMBER); };
 getsum:         '(' GETSUM p ')'                 { $$ = new_native(DBG_ALLOC(strdup("getsum")), LINE, n_getsum, push(new_contxt(), $3), NUMBER); };
 getversion:     '(' GETVERSION ')'               { $$ = new_native(DBG_ALLOC(strdup("getversion")), LINE, n_getversion, NULL, NUMBER); } |
-                '(' GETVERSION ps ')'             { $$ = new_native(DBG_ALLOC(strdup("getversion")), LINE, n_getversion, $3, NUMBER); };
+                '(' GETVERSION ps ')'            { $$ = new_native(DBG_ALLOC(strdup("getversion")), LINE, n_getversion, $3, NUMBER); };
 iconinfo:       '(' ICONINFO ps ')'              { $$ = new_native(DBG_ALLOC(strdup("iconinfo")), LINE, n_iconinfo, $3, NUMBER); };
 querydisplay:   '(' QUERYDISPLAY pp ')'          { $$ = new_native(DBG_ALLOC(strdup("querydisplay")), LINE, n_querydisplay, $3, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* procedure.c|h                                                                                                                                                                        */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*
-dcl:            '(' DCL SYM par s ')'            { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, $4, $5)), NUMBER); } |
-                '(' DCL SYM par ')'              { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, $4, NULL)), NUMBER); } |
-                '(' DCL SYM s ')'                { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, NULL, $4)), NUMBER); } |
+dcl:            '(' DCL SYM pa ')'               { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, $4, NULL)), NUMBER); } |
+                '(' DCL SYM pa pb ')'            { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, $4, $5)), NUMBER); } |
+                '(' DCL SYM pa '(' ps ')' ')'    { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, $4, $6)), NUMBER); } |
+                '(' DCL SYM pb ')'               { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, NULL, $4)), NUMBER); } |
+                '(' DCL SYM '(' ps ')' ')'       { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, NULL, $5)), NUMBER); } |
                 '(' DCL SYM ')'                  { $$ = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom($3, LINE, NULL, NULL)), NUMBER); };
-*/
 cus:            '(' SYM ps ')'                   { $$ = new_cusref($2, LINE, $3); } |
                 '(' SYM ')'                      { $$ = new_cusref($2, LINE, NULL); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* prompt.c|h                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 askbool:        '(' ASKBOOL ')'                  { $$ = new_native(DBG_ALLOC(strdup("askbool")), LINE, n_askbool, NULL, NUMBER); };
-askbool:        '(' ASKBOOL ps ')'             { $$ = new_native(DBG_ALLOC(strdup("askbool")), LINE, n_askbool, $3, NUMBER); };
-askchoice:      '(' ASKCHOICE ps ')'           { $$ = new_native(DBG_ALLOC(strdup("askchoice")), LINE, n_askchoice, $3, NUMBER); };
+askbool:        '(' ASKBOOL ps ')'               { $$ = new_native(DBG_ALLOC(strdup("askbool")), LINE, n_askbool, $3, NUMBER); };
+askchoice:      '(' ASKCHOICE ps ')'             { $$ = new_native(DBG_ALLOC(strdup("askchoice")), LINE, n_askchoice, $3, NUMBER); };
 askdir:         '(' ASKDIR ')'                   { $$ = new_native(DBG_ALLOC(strdup("askdir")), LINE, n_askdir, NULL, STRING); };
-askdir:         '(' ASKDIR ps ')'              { $$ = new_native(DBG_ALLOC(strdup("askdir")), LINE, n_askdir, $3, STRING); };
-askdisk:        '(' ASKDISK ps ')'             { $$ = new_native(DBG_ALLOC(strdup("askdisk")), LINE, n_askdisk, $3, NUMBER); };
+askdir:         '(' ASKDIR ps ')'                { $$ = new_native(DBG_ALLOC(strdup("askdir")), LINE, n_askdir, $3, STRING); };
+askdisk:        '(' ASKDISK ps ')'               { $$ = new_native(DBG_ALLOC(strdup("askdisk")), LINE, n_askdisk, $3, NUMBER); };
 askfile:        '(' ASKFILE ')'                  { $$ = new_native(DBG_ALLOC(strdup("askfile")), LINE, n_askfile, NULL, STRING); };
-askfile:        '(' ASKFILE ps ')'             { $$ = new_native(DBG_ALLOC(strdup("askfile")), LINE, n_askfile, $3, STRING); };
+askfile:        '(' ASKFILE ps ')'               { $$ = new_native(DBG_ALLOC(strdup("askfile")), LINE, n_askfile, $3, STRING); };
 asknumber:      '(' ASKNUMBER ')'                { $$ = new_native(DBG_ALLOC(strdup("asknumber")), LINE, n_asknumber, NULL, NUMBER); };
-asknumber:      '(' ASKNUMBER ps ')'           { $$ = new_native(DBG_ALLOC(strdup("asknumber")), LINE, n_asknumber, $3, NUMBER); };
-askoptions:     '(' ASKOPTIONS ps ')'          { $$ = new_native(DBG_ALLOC(strdup("askoptions")), LINE, n_askoptions, $3, NUMBER); };
+asknumber:      '(' ASKNUMBER ps ')'             { $$ = new_native(DBG_ALLOC(strdup("asknumber")), LINE, n_asknumber, $3, NUMBER); };
+askoptions:     '(' ASKOPTIONS ps ')'            { $$ = new_native(DBG_ALLOC(strdup("askoptions")), LINE, n_askoptions, $3, NUMBER); };
 askstring:      '(' ASKSTRING ')'                { $$ = new_native(DBG_ALLOC(strdup("askstring")), LINE, n_askstring, NULL, STRING); };
-askstring:      '(' ASKSTRING ps ')'           { $$ = new_native(DBG_ALLOC(strdup("askstring")), LINE, n_askstring, $3, STRING); };
+askstring:      '(' ASKSTRING ps ')'             { $$ = new_native(DBG_ALLOC(strdup("askstring")), LINE, n_askstring, $3, STRING); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* strop.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
