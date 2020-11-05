@@ -1,3 +1,7 @@
+(rename (prompt "p") "_rn_" "_rm_") ; "rm -Rf _rm_ && touch _rn_","-1","test -e _rm_ && test ! -e _rn_ && rm -Rf _rm_ _rn_"
+(rename "_rn_" (prompt "p") "_rm_") ; "rm -Rf _rm_ && touch _rn_","-1","test -e _rm_ && test ! -e _rn_ && rm -Rf _rm_ _rn_"
+(rename "_rn_" (prompt "p") "_rm_" (help "h")) ; "rm -Rf _rm_ && touch _rn_","-1","test -e _rm_ && test ! -e _rn_ && rm -Rf _rm_ _rn_"
+(set @strict 0) (rename "_rn_" (prompt "p") "_rm_" ignore (help "h")) ; "rm -Rf _rm_ && touch _rn_","-1","test -e _rm_ && test ! -e _rn_ && rm -Rf _rm_ _rn_"
 (set @strict 0) (rename "_rn_" "_rm_" (safe) (confirm 1)) ; "rm -Rf _rm_ && touch _rn_","0 -1","rm -Rf _rm_"
 (set @strict 0) (rename "_rn_" "_rm_" (safe) (confirm 1) (prompt "p")) ; "rm -Rf _rm_ && touch _rn_","p0 -1","rm -Rf _rm_"
 (set @strict 0) (rename "_rn_" "_rm_" (safe) (confirm 1) (help "h")) ; "rm -Rf _rm_ && touch _rn_","h0 -1","rm -Rf _rm_"

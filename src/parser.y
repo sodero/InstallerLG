@@ -318,15 +318,15 @@ options:        '(' OPTIONS ')'                  { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h                                                                                                                                                                         */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-execute:        '(' EXECUTE ps ')'               { $$ = new_native(DBG_ALLOC(strdup("execute")), LINE, n_execute, $3, NUMBER); };
-rexx:           '(' REXX ps ')'                  { $$ = new_native(DBG_ALLOC(strdup("rexx")), LINE, n_rexx, $3, NUMBER); };
-run:            '(' RUN ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("run")), LINE, n_run, $3, NUMBER); };
+execute:        '(' EXECUTE ps ')'               { $$ = new_native(DBG_ALLOC(strdup("execute")), LINE, n_execute, ordo($3), NUMBER); };
+rexx:           '(' REXX ps ')'                  { $$ = new_native(DBG_ALLOC(strdup("rexx")), LINE, n_rexx, ordo($3), NUMBER); };
+run:            '(' RUN ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("run")), LINE, n_run, ordo($3), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* exit.c|h                                                                                                                                                                             */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 abort:          '(' ABORT ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("abort")), LINE, n_abort, $3, NUMBER); } |
                 '(' ABORT ')'                    { $$ = new_native(DBG_ALLOC(strdup("abort")), LINE, n_abort, NULL, NUMBER); };
-exit:           '(' EXIT ps ')'                  { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, $3, NUMBER); } |
+exit:           '(' EXIT ps ')'                  { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, ordo($3), NUMBER); } |
                 '(' EXIT ')'                     { $$ = new_native(DBG_ALLOC(strdup("exit")), LINE, n_exit, NULL, NUMBER); };
 onerror:        '(' ONERROR ps ')'               { $$ = new_native(DBG_ALLOC(strdup("onerror")), LINE, n_procedure, push(new_contxt(),
                                                         new_custom(DBG_ALLOC(strdup("@onerror")), LINE, NULL, $3)), DANGLE); } |
@@ -339,13 +339,13 @@ trap:           '(' TRAP ps ')'                  { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 copyfiles:      '(' COPYFILES ps ')'             { $$ = new_native(DBG_ALLOC(strdup("copyfiles")), LINE, n_copyfiles, $3, STRING); };
 copylib:        '(' COPYLIB ps ')'               { $$ = new_native(DBG_ALLOC(strdup("copylib")), LINE, n_copylib, $3, NUMBER); };
-delete:         '(' DELETE ps ')'                { $$ = new_native(DBG_ALLOC(strdup("delete")), LINE, n_delete, $3, NUMBER); };
-exists:         '(' EXISTS ps ')'                { $$ = new_native(DBG_ALLOC(strdup("exists")), LINE, n_exists, $3, NUMBER); };
+delete:         '(' DELETE ps ')'                { $$ = new_native(DBG_ALLOC(strdup("delete")), LINE, n_delete, ordo($3), NUMBER); };
+exists:         '(' EXISTS ps ')'                { $$ = new_native(DBG_ALLOC(strdup("exists")), LINE, n_exists, ordo($3), NUMBER); };
 fileonly:       '(' FILEONLY p ')'               { $$ = new_native(DBG_ALLOC(strdup("fileonly")), LINE, n_fileonly, push(new_contxt(), $3), STRING); };
 foreach:        '(' FOREACH pp ps ')'            { $$ = new_native(DBG_ALLOC(strdup("foreach")), LINE, n_foreach, push($3, $4), NUMBER); };
-makeassign:     '(' MAKEASSIGN ps ')'            { $$ = new_native(DBG_ALLOC(strdup("makeassign")), LINE, n_makeassign, $3, NUMBER); };
-makedir:        '(' MAKEDIR ps')'                { $$ = new_native(DBG_ALLOC(strdup("makedir")), LINE, n_makedir, $3, NUMBER); };
-protect:        '(' PROTECT ps ')'               { $$ = new_native(DBG_ALLOC(strdup("protect")), LINE, n_protect, $3, NUMBER); };
+makeassign:     '(' MAKEASSIGN ps ')'            { $$ = new_native(DBG_ALLOC(strdup("makeassign")), LINE, n_makeassign, ordo($3), NUMBER); };
+makedir:        '(' MAKEDIR ps')'                { $$ = new_native(DBG_ALLOC(strdup("makedir")), LINE, n_makedir, ordo($3), NUMBER); };
+protect:        '(' PROTECT ps ')'               { $$ = new_native(DBG_ALLOC(strdup("protect")), LINE, n_protect, ordo($3), NUMBER); };
 /*
 startup:        '(' STARTUP p opts ')'           { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' STARTUP opts p ')'           { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), $4), $3), NUMBER); } |
@@ -355,15 +355,14 @@ startup:        '(' STARTUP p opts ')'           { $$ = new_native(DBG_ALLOC(str
 textfile:       '(' TEXTFILE ps ')'              { $$ = new_native(DBG_ALLOC(strdup("textfile")), LINE, n_textfile, $3, NUMBER); };
 tooltype:       '(' TOOLTYPE ps ')'              { $$ = new_native(DBG_ALLOC(strdup("tooltype")), LINE, n_tooltype, $3, NUMBER); };
 transcript:     '(' TRANSCRIPT ps ')'            { $$ = new_native(DBG_ALLOC(strdup("transcript")), LINE, n_transcript, $3, NUMBER); };
-rename:         '(' RENAME p ps ')'              { $$ = new_native(DBG_ALLOC(strdup("rename")), LINE, n_rename, merge(push(new_contxt(), $3), $4), NUMBER); };
+rename:         '(' RENAME p ps ')'              { $$ = new_native(DBG_ALLOC(strdup("rename")), LINE, n_rename, ordo(merge(push(new_contxt(), $3), $4)), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* information.c|h                                                                                                                                                                      */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 complete:       '(' COMPLETE ps ')'              { $$ = new_native(DBG_ALLOC(strdup("complete")), LINE, n_complete, $3, NUMBER); };
 debug:          '(' DEBUG ps ')'                 { $$ = new_native(DBG_ALLOC(strdup("debug")), LINE, n_debug, $3, NUMBER); } |
                 '(' DEBUG ')'                    { $$ = new_native(DBG_ALLOC(strdup("debug")), LINE, n_debug, NULL, NUMBER); };
-
-message:        '(' MESSAGE ps ')'               { $$ = new_native(DBG_ALLOC(strdup("message")), LINE, n_message, $3, NUMBER); } ;
+message:        '(' MESSAGE ps ')'               { $$ = new_native(DBG_ALLOC(strdup("message")), LINE, n_message, ordo($3), NUMBER); } ;
 user:           '(' USER p ')'                   { $$ = new_native(DBG_ALLOC(strdup("user")), LINE, n_user, push(new_contxt(), $3), NUMBER); };
 welcome:        '(' WELCOME ps ')'               { $$ = new_native(DBG_ALLOC(strdup("welcome")), LINE, n_welcome, $3, NUMBER); } |
                 '(' WELCOME ')'                  { $$ = new_native(DBG_ALLOC(strdup("welcome")), LINE, n_welcome, NULL, NUMBER); };
@@ -406,7 +405,7 @@ getenv:         '(' GETENV p ')'                 { $$ = new_native(DBG_ALLOC(str
 getsize:        '(' GETSIZE p ')'                { $$ = new_native(DBG_ALLOC(strdup("getsize")), LINE, n_getsize, push(new_contxt(), $3), NUMBER); };
 getsum:         '(' GETSUM p ')'                 { $$ = new_native(DBG_ALLOC(strdup("getsum")), LINE, n_getsum, push(new_contxt(), $3), NUMBER); };
 getversion:     '(' GETVERSION ')'               { $$ = new_native(DBG_ALLOC(strdup("getversion")), LINE, n_getversion, NULL, NUMBER); } |
-                '(' GETVERSION ps ')'            { $$ = new_native(DBG_ALLOC(strdup("getversion")), LINE, n_getversion, $3, NUMBER); };
+                '(' GETVERSION ps ')'            { $$ = new_native(DBG_ALLOC(strdup("getversion")), LINE, n_getversion, ordo($3), NUMBER); };
 iconinfo:       '(' ICONINFO ps ')'              { $$ = new_native(DBG_ALLOC(strdup("iconinfo")), LINE, n_iconinfo, $3, NUMBER); };
 querydisplay:   '(' QUERYDISPLAY pp ')'          { $$ = new_native(DBG_ALLOC(strdup("querydisplay")), LINE, n_querydisplay, $3, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -459,7 +458,7 @@ symbolval:      '(' SYMBOLVAL p ')'              { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* wb.c|h                                                                                                                                                                               */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-openwbobject:   '(' OPENWBOBJECT ps ')'          { $$ = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, $3, NUMBER); };
+openwbobject:   '(' OPENWBOBJECT ps ')'          { $$ = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, ordo($3), NUMBER); };
 showwbobject:   '(' SHOWWBOBJECT p ')'           { $$ = new_native(DBG_ALLOC(strdup("showwbobject")), LINE, n_showwbobject, push(new_contxt(), $3), NUMBER); };
 closewbobject:  '(' CLOSEWBOBJECT p ')'          { $$ = new_native(DBG_ALLOC(strdup("closewbobject")), LINE, n_closewbobject, push(new_contxt(), $3), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

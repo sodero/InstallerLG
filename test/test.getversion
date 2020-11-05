@@ -1,3 +1,4 @@
+(shiftright (getversion (resident) "Installer") 16) ; "","44",""
 (getversion) ; "","0",""
 (BITAND (getversion "Installer") $ffff) ; "","10",""
 (shiftright (getversion "Installer") 16) ; "","44",""

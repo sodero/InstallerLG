@@ -1,3 +1,6 @@
+(protect (safe) "_pt_" %1110) ; "rm -f _pt_ && touch _pt_ && chmod a+rwx _pt_","14","test ! -x _pt_ && test ! -w _pt_ && test ! -r _pt_ && chmod a+rwx _pt_ && rm -f _pt_"
+(protect "_pt_" (safe) %1110) ; "rm -f _pt_ && touch _pt_ && chmod a+rwx _pt_","14","test ! -x _pt_ && test ! -w _pt_ && test ! -r _pt_ && chmod a+rwx _pt_ && rm -f _pt_"
+(protect (safe) "_pt_" (safe) %1110) ; "rm -f _pt_ && touch _pt_ && chmod a+rwx _pt_","14","test ! -x _pt_ && test ! -w _pt_ && test ! -r _pt_ && chmod a+rwx _pt_ && rm -f _pt_"
 (set @pretend 1) (protect "_pt_" %1110 (safe)) ; "rm -f _pt_ && touch _pt_ && chmod a+rwx _pt_","14","test ! -x _pt_ && test ! -w _pt_ && test ! -r _pt_ && chmod a+rwx _pt_ && rm -f _pt_"
 (protect "_pt_" "" (override $ff)) ; "rm -f _pt_","255",""
 (set @pretend 1) (protect "_pt_" %1110 (safe)) ; "rm -f _pt_ && touch _pt_ && chmod a+rwx _pt_","14","test ! -x _pt_ && test ! -w _pt_ && test ! -r _pt_ && chmod a+rwx _pt_ && rm -f _pt_"

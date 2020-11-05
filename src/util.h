@@ -29,7 +29,6 @@ entry_p global(entry_p entry);
 entry_p custom(entry_p entry);
 entry_p native(entry_p entry);
 entry_p opt(entry_p contxt, opt_t type);
-entry_p con(entry_p contxt);
 bool c_sane(entry_p contxt, size_t num);
 bool s_sane(entry_p contxt, size_t num);
 void dump(entry_p entry);
@@ -45,6 +44,7 @@ size_t buf_len(void);
 char *buf_raw(void);
 entry_p native_exists(entry_p contxt, call_t func);
 size_t num_entries(entry_p *vec);
+entry_p ordo(entry_p contxt);
 bool exists(entry_p entry);
 int32_t str_to_userlevel(const char *user, int32_t def);
 

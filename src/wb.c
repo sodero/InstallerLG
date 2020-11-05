@@ -43,6 +43,8 @@ entry_p n_openwbobject(entry_p contxt)
         #if defined(AMIGA) && !defined(LG_TEST)
         R_NUM(OpenWorkbenchObjectA(str(C_ARG(1)), NULL) ? LG_TRUE : LG_FALSE);
         #else
+        // Test output.
+        printf("%s\n", str(C_ARG(1)));
         // If not supported by workbench.library -1 is to be returned.
         R_NUM(-1);
         #endif
@@ -69,6 +71,8 @@ entry_p n_showwbobject(entry_p contxt)
     #if defined(AMIGA) && !defined(LG_TEST)
     R_NUM(MakeWorkbenchObjectVisibleA(str(C_ARG(1)), NULL)? LG_TRUE : LG_FALSE);
     #else
+    // Test output.
+    printf("%s\n", str(C_ARG(1)));
     // If not supported by workbench.library -1 is to be returned.
     R_NUM(-1);
     #endif
@@ -91,6 +95,8 @@ entry_p n_closewbobject(entry_p contxt)
     #if defined(AMIGA) && !defined(LG_TEST)
     R_NUM(CloseWorkbenchObjectA(str(C_ARG(1)), NULL) ? LG_TRUE : LG_FALSE);
     #else
+    // Test output.
+    printf("%s\n", str(C_ARG(1)));
     // If not supported by workbench.library -1 is to be returned.
     R_NUM(-1);
     #endif

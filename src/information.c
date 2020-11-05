@@ -26,6 +26,11 @@
 //------------------------------------------------------------------------------
 entry_p n_complete(entry_p contxt)
 {
+    //dump(contxt);
+
+    ordo(contxt);
+    dump(contxt);
+
     // One or more arguments.
     C_SANE(1, NULL);
 

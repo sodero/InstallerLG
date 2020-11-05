@@ -1215,29 +1215,37 @@ size_t num_entries(entry_p *vec)
 }
 
 //------------------------------------------------------------------------------
-// Name:        con
-// Description: Find first sub context.
-// Input:       entry_p contxt: Execution context.
-// Return:      entry_p:        Sub context if found, NULL otherwise.
+// Name:        ordo
+// Description: Order positional children of context by moving non-positional
+//              children (options) to the back.
+// Input:       entry_p contxt: The execution context.
+// Return:      context:        The same context with ordered children.
 //------------------------------------------------------------------------------
-entry_p con(entry_p contxt)
+entry_p ordo(entry_p contxt)
 {
-    if(!contxt || !contxt->children)
+    for(size_t cur = 1; exists(C_ARG(cur)); cur++)
     {
-        return NULL;
-    }
-
-    // Find first context among children.
-    for(size_t cur = 0; exists(contxt->children[cur]); cur++)
-    {
-        if(contxt->children[cur]->type == CONTXT)
+        // Find the next option (if any).
+        if(C_ARG(cur)->type == OPTION)
         {
-            return contxt->children[cur];
+            // Find the next non-option.
+            for(size_t swp = cur + 1; exists(C_ARG(swp)); swp++)
+            {
+                if(C_ARG(swp)->type != OPTION)
+                {
+                    // Swap children and continue.
+                    entry_p mov = C_ARG(cur);
+                    C_ARG(cur) = C_ARG(swp);
+                    C_ARG(swp) = mov;
+                    cur = swp - 1;
+                    break;
+                }
+            }
         }
     }
 
-    // No context found.
-    return NULL;
+    // Fall through.
+    return contxt;
 }
 
 //------------------------------------------------------------------------------
