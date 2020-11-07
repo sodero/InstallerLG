@@ -75,7 +75,7 @@
         bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath not
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
         pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit
-        foreach makeassign makedir message onerror protect rename rexx run /*startup*/ textfile tooltype trap reboot all append assigns choices command compression
+        foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all append assigns choices command compression
         confirm default mul delopts dest disk files fonts help infos include newname newpath optional back nogauge noposition noreq pattern prompt quiet range safe
         resident override setdefaulttool setposition setstack settooltype source swapcolors openwbobject showwbobject closewbobject trace retrace closemedia effect
         setmedia showmedia astraw options asbraw asbeval eval
@@ -91,7 +91,7 @@
                             bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier not /*
                             */fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
-                            database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run /*startup*/ textfile tooltype trap reboot all assigns
+                            database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all assigns
                             choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append openwbobject showwbobject closewbobject trace retrace back closemedia
                             effect setmedia showmedia astraw options asbraw asbeval eval
@@ -224,9 +224,7 @@ vp:             add  /*       arithmetic.c|h */  |
                 makeassign                       |
                 makedir                          |
                 protect                          |
-/*
                 startup                          |
-*/
                 textfile                         |
                 tooltype                         |
                 transcript                       |
@@ -347,6 +345,7 @@ foreach:        '(' FOREACH pp ps ')'            { $$ = new_native(DBG_ALLOC(str
 makeassign:     '(' MAKEASSIGN ps ')'            { $$ = new_native(DBG_ALLOC(strdup("makeassign")), LINE, n_makeassign, ordo($3), NUMBER); };
 makedir:        '(' MAKEDIR ps')'                { $$ = new_native(DBG_ALLOC(strdup("makedir")), LINE, n_makedir, ordo($3), NUMBER); };
 protect:        '(' PROTECT ps ')'               { $$ = new_native(DBG_ALLOC(strdup("protect")), LINE, n_protect, ordo($3), NUMBER); };
+startup:        '(' STARTUP ps ')'               { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, ordo($3), NUMBER); };
 /*
 startup:        '(' STARTUP p opts ')'           { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' STARTUP opts p ')'           { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), $4), $3), NUMBER); } |

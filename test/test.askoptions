@@ -3,7 +3,7 @@
 (askoptions (prompt "p") (help "h")) ; "","Line 1: Missing option 'choices' 0",""
 (set c 1) (askoptions (prompt "p") (help "h") (choices "a" "b" "c") (if c (default 3) (default 2))) ; "","pha3-10 3",""
 (set c 0) (askoptions (prompt "p") (help "h") (choices "a" "b" "c") (if c (default 3) (default 2))) ; "","pha2-10 2",""
-(askoptions) ; "","Line 1: syntax error, unexpected ')', expecting '(' ')'",""
+(askoptions) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (askoptions (prompt "p") (help "h") (choices "a" "b" "c")) ; "","pha-1-10 -1",""
 (askoptions (prompt "p") (help "h") (choices "a" "b" "c") (default 1)) ; "","pha1-10 1",""
 (askoptions (prompt "p") (help "h") (choices "a" "b" "c") (default 3)) ; "","pha3-10 3",""

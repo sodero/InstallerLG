@@ -119,7 +119,7 @@
 (user 0) (copyfiles (confirm) (prompt "p") (help "h") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","sc N0B0 ec _cfd_","test -f _cfd_/_cfs_ && rm -Rf _cfs_ _cfd_"
 (user 1) (copyfiles (confirm) (prompt "p") (help "h") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","sc N0B0 ec _cfd_","test -f _cfd_/_cfs_ && rm -Rf _cfs_ _cfd_"
 (user 2) (copyfiles (confirm) (prompt "p") (help "h") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","sc ph0 ec _cfd_","test ! -f _cfd_/_cfs_ && rm -Rf _cfs_ _cfd_"
-(copyfiles) ; "","Line 1: syntax error, unexpected ')', expecting '(' ')'",""
+(copyfiles) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (copyfiles (safe)) ; "","Line 1: Missing option 'source' 0",""
 (copyfiles (source)) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (copyfiles (source "src")) ; "","Line 1: Missing option 'dest' 0",""

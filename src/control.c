@@ -150,7 +150,7 @@ entry_p n_trace(entry_p contxt)
     C_SANE(0, NULL);
 
     // We're not doing anything except occupying space.
-    R_NUM(LG_TRUE);
+    return end();
 }
 
 //------------------------------------------------------------------------------
