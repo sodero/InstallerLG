@@ -1002,20 +1002,20 @@ static const yytype_int16 yyrline[] =
      295,   296,   297,   298,   302,   303,   304,   305,   306,   307,
      311,   312,   313,   314,   315,   316,   320,   321,   322,   326,
      327,   328,   329,   330,   332,   334,   335,   339,   340,   341,
-     342,   343,   344,   345,   346,   347,   348,   355,   356,   357,
-     358,   362,   363,   364,   365,   366,   367,   368,   369,   370,
-     374,   375,   376,   377,   378,   379,   380,   381,   382,   383,
-     384,   388,   389,   390,   391,   392,   396,   397,   398,   399,
-     400,   401,   402,   403,   404,   405,   406,   407,   408,   409,
-     410,   414,   415,   416,   417,   418,   419,   420,   421,   425,
-     426,   427,   428,   429,   430,   431,   432,   433,   434,   435,
-     436,   437,   441,   442,   443,   444,   445,   446,   447,   448,
-     449,   450,   454,   455,   456,   457,   461,   462,   463,   467,
-     468,   469,   470,   471,   472,   473,   474,   475,   476,   477,
-     478,   479,   480,   481,   482,   483,   484,   485,   486,   487,
-     488,   489,   490,   491,   492,   493,   494,   495,   496,   497,
-     498,   499,   500,   501,   502,   503,   504,   505,   506,   507,
-     508,   509,   510,   511,   512,   513,   514
+     342,   343,   344,   345,   346,   347,   348,   349,   350,   351,
+     352,   356,   357,   358,   359,   360,   361,   362,   363,   364,
+     368,   369,   370,   371,   372,   373,   374,   375,   376,   377,
+     378,   382,   383,   384,   385,   386,   390,   391,   392,   393,
+     394,   395,   396,   397,   398,   399,   400,   401,   402,   403,
+     404,   408,   409,   410,   411,   412,   413,   414,   415,   419,
+     420,   421,   422,   423,   424,   425,   426,   427,   428,   429,
+     430,   431,   435,   436,   437,   438,   439,   440,   441,   442,
+     443,   444,   448,   449,   450,   451,   455,   456,   457,   461,
+     462,   463,   464,   465,   466,   467,   468,   469,   470,   471,
+     472,   473,   474,   475,   476,   477,   478,   479,   480,   481,
+     482,   483,   484,   485,   486,   487,   488,   489,   490,   491,
+     492,   493,   494,   495,   496,   497,   498,   499,   500,   501,
+     502,   503,   504,   505,   506,   507,   508
 };
 #endif
 
@@ -3995,781 +3995,781 @@ yyreduce:
     break;
 
   case 217:
-#line 355 "../src/parser.y"
+#line 349 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("textfile")), LINE, n_textfile, (yyvsp[-1].e), NUMBER); }
 #line 4001 "parser.c"
     break;
 
   case 218:
-#line 356 "../src/parser.y"
+#line 350 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("tooltype")), LINE, n_tooltype, (yyvsp[-1].e), NUMBER); }
 #line 4007 "parser.c"
     break;
 
   case 219:
-#line 357 "../src/parser.y"
+#line 351 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("transcript")), LINE, n_transcript, (yyvsp[-1].e), NUMBER); }
 #line 4013 "parser.c"
     break;
 
   case 220:
-#line 358 "../src/parser.y"
+#line 352 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("rename")), LINE, n_rename, ordo(merge(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e))), NUMBER); }
 #line 4019 "parser.c"
     break;
 
   case 221:
-#line 362 "../src/parser.y"
+#line 356 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("complete")), LINE, n_complete, (yyvsp[-1].e), NUMBER); }
 #line 4025 "parser.c"
     break;
 
   case 222:
-#line 363 "../src/parser.y"
+#line 357 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("debug")), LINE, n_debug, (yyvsp[-1].e), NUMBER); }
 #line 4031 "parser.c"
     break;
 
   case 223:
-#line 364 "../src/parser.y"
+#line 358 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("debug")), LINE, n_debug, NULL, NUMBER); }
 #line 4037 "parser.c"
     break;
 
   case 224:
-#line 365 "../src/parser.y"
+#line 359 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("message")), LINE, n_message, ordo((yyvsp[-1].e)), NUMBER); }
 #line 4043 "parser.c"
     break;
 
   case 225:
-#line 366 "../src/parser.y"
+#line 360 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("user")), LINE, n_user, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4049 "parser.c"
     break;
 
   case 226:
-#line 367 "../src/parser.y"
+#line 361 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("welcome")), LINE, n_welcome, (yyvsp[-1].e), NUMBER); }
 #line 4055 "parser.c"
     break;
 
   case 227:
-#line 368 "../src/parser.y"
+#line 362 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("welcome")), LINE, n_welcome, NULL, NUMBER); }
 #line 4061 "parser.c"
     break;
 
   case 228:
-#line 369 "../src/parser.y"
+#line 363 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("working")), LINE, n_working, (yyvsp[-1].e), NUMBER); }
 #line 4067 "parser.c"
     break;
 
   case 229:
-#line 370 "../src/parser.y"
+#line 364 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("working")), LINE, n_working, NULL, NUMBER); }
 #line 4073 "parser.c"
     break;
 
   case 230:
-#line 374 "../src/parser.y"
+#line 368 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("AND")), LINE, n_and, (yyvsp[-1].e), NUMBER); }
 #line 4079 "parser.c"
     break;
 
   case 231:
-#line 375 "../src/parser.y"
+#line 369 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("BITAND")), LINE, n_bitand, (yyvsp[-1].e), NUMBER); }
 #line 4085 "parser.c"
     break;
 
   case 232:
-#line 376 "../src/parser.y"
+#line 370 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("BITNOT")), LINE, n_bitnot, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4091 "parser.c"
     break;
 
   case 233:
-#line 377 "../src/parser.y"
+#line 371 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("BITOR")), LINE, n_bitor, (yyvsp[-1].e), NUMBER); }
 #line 4097 "parser.c"
     break;
 
   case 234:
-#line 378 "../src/parser.y"
+#line 372 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("BITXOR")), LINE, n_bitxor, (yyvsp[-1].e), NUMBER); }
 #line 4103 "parser.c"
     break;
 
   case 235:
-#line 379 "../src/parser.y"
+#line 373 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("NOT")), LINE, n_not, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4109 "parser.c"
     break;
 
   case 236:
-#line 380 "../src/parser.y"
+#line 374 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("IN")), LINE, n_in, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 4115 "parser.c"
     break;
 
   case 237:
-#line 381 "../src/parser.y"
+#line 375 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("OR")), LINE, n_or, (yyvsp[-1].e), NUMBER); }
 #line 4121 "parser.c"
     break;
 
   case 238:
-#line 382 "../src/parser.y"
+#line 376 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("shiftleft")), LINE, n_shiftleft, (yyvsp[-1].e), NUMBER); }
 #line 4127 "parser.c"
     break;
 
   case 239:
-#line 383 "../src/parser.y"
+#line 377 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("shiftright")), LINE, n_shiftright, (yyvsp[-1].e), NUMBER); }
 #line 4133 "parser.c"
     break;
 
   case 240:
-#line 384 "../src/parser.y"
+#line 378 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("XOR")), LINE, n_xor, (yyvsp[-1].e), NUMBER); }
 #line 4139 "parser.c"
     break;
 
   case 241:
-#line 388 "../src/parser.y"
+#line 382 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("closemedia")), LINE, n_closemedia, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4145 "parser.c"
     break;
 
   case 242:
-#line 389 "../src/parser.y"
+#line 383 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("effect")), LINE, n_effect, merge((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 4151 "parser.c"
     break;
 
   case 243:
-#line 390 "../src/parser.y"
+#line 384 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("setmedia")), LINE, n_setmedia, (yyvsp[-1].e), NUMBER); }
 #line 4157 "parser.c"
     break;
 
   case 244:
-#line 391 "../src/parser.y"
+#line 385 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("setmedia")), LINE, n_setmedia, push((yyvsp[-2].e), (yyvsp[-1].e)), NUMBER); }
 #line 4163 "parser.c"
     break;
 
   case 245:
-#line 392 "../src/parser.y"
+#line 386 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("showmedia")), LINE, n_showmedia, merge(merge((yyvsp[-3].e), (yyvsp[-2].e)), (yyvsp[-1].e)), NUMBER); }
 #line 4169 "parser.c"
     break;
 
   case 246:
-#line 396 "../src/parser.y"
+#line 390 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("database")), LINE, n_database, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 4175 "parser.c"
     break;
 
   case 247:
-#line 397 "../src/parser.y"
+#line 391 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("database")), LINE, n_database, (yyvsp[-1].e), STRING); }
 #line 4181 "parser.c"
     break;
 
   case 248:
-#line 398 "../src/parser.y"
+#line 392 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("earlier")), LINE, n_earlier, (yyvsp[-1].e), NUMBER); }
 #line 4187 "parser.c"
     break;
 
   case 249:
-#line 399 "../src/parser.y"
+#line 393 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("getassign")), LINE, n_getassign, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 4193 "parser.c"
     break;
 
   case 250:
-#line 400 "../src/parser.y"
+#line 394 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("getassign")), LINE, n_getassign, (yyvsp[-1].e), STRING); }
 #line 4199 "parser.c"
     break;
 
   case 251:
-#line 401 "../src/parser.y"
+#line 395 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("getdevice")), LINE, n_getdevice, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 4205 "parser.c"
     break;
 
   case 252:
-#line 402 "../src/parser.y"
+#line 396 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("getdiskspace")), LINE, n_getdiskspace, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4211 "parser.c"
     break;
 
   case 253:
-#line 403 "../src/parser.y"
+#line 397 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("getdiskspace")), LINE, n_getdiskspace, (yyvsp[-1].e), NUMBER); }
 #line 4217 "parser.c"
     break;
 
   case 254:
-#line 404 "../src/parser.y"
+#line 398 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("getenv")), LINE, n_getenv, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 4223 "parser.c"
     break;
 
   case 255:
-#line 405 "../src/parser.y"
+#line 399 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("getsize")), LINE, n_getsize, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4229 "parser.c"
     break;
 
   case 256:
-#line 406 "../src/parser.y"
+#line 400 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("getsum")), LINE, n_getsum, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4235 "parser.c"
     break;
 
   case 257:
-#line 407 "../src/parser.y"
+#line 401 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("getversion")), LINE, n_getversion, NULL, NUMBER); }
 #line 4241 "parser.c"
     break;
 
   case 258:
-#line 408 "../src/parser.y"
+#line 402 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("getversion")), LINE, n_getversion, ordo((yyvsp[-1].e)), NUMBER); }
 #line 4247 "parser.c"
     break;
 
   case 259:
-#line 409 "../src/parser.y"
+#line 403 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("iconinfo")), LINE, n_iconinfo, (yyvsp[-1].e), NUMBER); }
 #line 4253 "parser.c"
     break;
 
   case 260:
-#line 410 "../src/parser.y"
+#line 404 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("querydisplay")), LINE, n_querydisplay, (yyvsp[-1].e), NUMBER); }
 #line 4259 "parser.c"
     break;
 
   case 261:
-#line 414 "../src/parser.y"
+#line 408 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom((yyvsp[-2].s), LINE, (yyvsp[-1].e), NULL)), NUMBER); }
 #line 4265 "parser.c"
     break;
 
   case 262:
-#line 415 "../src/parser.y"
+#line 409 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom((yyvsp[-3].s), LINE, (yyvsp[-2].e), (yyvsp[-1].e))), NUMBER); }
 #line 4271 "parser.c"
     break;
 
   case 263:
-#line 416 "../src/parser.y"
+#line 410 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom((yyvsp[-5].s), LINE, (yyvsp[-4].e), (yyvsp[-2].e))), NUMBER); }
 #line 4277 "parser.c"
     break;
 
   case 264:
-#line 417 "../src/parser.y"
+#line 411 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom((yyvsp[-2].s), LINE, NULL, (yyvsp[-1].e))), NUMBER); }
 #line 4283 "parser.c"
     break;
 
   case 265:
-#line 418 "../src/parser.y"
+#line 412 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom((yyvsp[-4].s), LINE, NULL, (yyvsp[-2].e))), NUMBER); }
 #line 4289 "parser.c"
     break;
 
   case 266:
-#line 419 "../src/parser.y"
+#line 413 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("procedure")), LINE, n_procedure, push(new_contxt(), new_custom((yyvsp[-1].s), LINE, NULL, NULL)), NUMBER); }
 #line 4295 "parser.c"
     break;
 
   case 267:
-#line 420 "../src/parser.y"
+#line 414 "../src/parser.y"
                                                  { (yyval.e) = new_cusref((yyvsp[-2].s), LINE, (yyvsp[-1].e)); }
 #line 4301 "parser.c"
     break;
 
   case 268:
-#line 421 "../src/parser.y"
+#line 415 "../src/parser.y"
                                                  { (yyval.e) = new_cusref((yyvsp[-1].s), LINE, NULL); }
 #line 4307 "parser.c"
     break;
 
   case 269:
-#line 425 "../src/parser.y"
+#line 419 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("askbool")), LINE, n_askbool, NULL, NUMBER); }
 #line 4313 "parser.c"
     break;
 
   case 270:
-#line 426 "../src/parser.y"
+#line 420 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("askbool")), LINE, n_askbool, (yyvsp[-1].e), NUMBER); }
 #line 4319 "parser.c"
     break;
 
   case 271:
-#line 427 "../src/parser.y"
+#line 421 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("askchoice")), LINE, n_askchoice, (yyvsp[-1].e), NUMBER); }
 #line 4325 "parser.c"
     break;
 
   case 272:
-#line 428 "../src/parser.y"
+#line 422 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("askdir")), LINE, n_askdir, NULL, STRING); }
 #line 4331 "parser.c"
     break;
 
   case 273:
-#line 429 "../src/parser.y"
+#line 423 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("askdir")), LINE, n_askdir, (yyvsp[-1].e), STRING); }
 #line 4337 "parser.c"
     break;
 
   case 274:
-#line 430 "../src/parser.y"
+#line 424 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("askdisk")), LINE, n_askdisk, (yyvsp[-1].e), NUMBER); }
 #line 4343 "parser.c"
     break;
 
   case 275:
-#line 431 "../src/parser.y"
+#line 425 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("askfile")), LINE, n_askfile, NULL, STRING); }
 #line 4349 "parser.c"
     break;
 
   case 276:
-#line 432 "../src/parser.y"
+#line 426 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("askfile")), LINE, n_askfile, (yyvsp[-1].e), STRING); }
 #line 4355 "parser.c"
     break;
 
   case 277:
-#line 433 "../src/parser.y"
+#line 427 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("asknumber")), LINE, n_asknumber, NULL, NUMBER); }
 #line 4361 "parser.c"
     break;
 
   case 278:
-#line 434 "../src/parser.y"
+#line 428 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("asknumber")), LINE, n_asknumber, (yyvsp[-1].e), NUMBER); }
 #line 4367 "parser.c"
     break;
 
   case 279:
-#line 435 "../src/parser.y"
+#line 429 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("askoptions")), LINE, n_askoptions, (yyvsp[-1].e), NUMBER); }
 #line 4373 "parser.c"
     break;
 
   case 280:
-#line 436 "../src/parser.y"
+#line 430 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("askstring")), LINE, n_askstring, NULL, STRING); }
 #line 4379 "parser.c"
     break;
 
   case 281:
-#line 437 "../src/parser.y"
+#line 431 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("askstring")), LINE, n_askstring, (yyvsp[-1].e), STRING); }
 #line 4385 "parser.c"
     break;
 
   case 282:
-#line 441 "../src/parser.y"
+#line 435 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("cat")), LINE, n_cat, (yyvsp[-1].e), STRING); }
 #line 4391 "parser.c"
     break;
 
   case 283:
-#line 442 "../src/parser.y"
+#line 436 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("expandpath")), LINE, n_expandpath, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 4397 "parser.c"
     break;
 
   case 284:
-#line 443 "../src/parser.y"
+#line 437 "../src/parser.y"
                                                  { (yyval.e) = new_native((yyvsp[-2].s), LINE, n_fmt, (yyvsp[-1].e), STRING); }
 #line 4403 "parser.c"
     break;
 
   case 285:
-#line 444 "../src/parser.y"
+#line 438 "../src/parser.y"
                                                  { (yyval.e) = new_native((yyvsp[-1].s), LINE, n_fmt, NULL, STRING); }
 #line 4409 "parser.c"
     break;
 
   case 286:
-#line 445 "../src/parser.y"
+#line 439 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("pathonly")), LINE, n_pathonly, push(new_contxt(), (yyvsp[-1].e)), STRING); }
 #line 4415 "parser.c"
     break;
 
   case 287:
-#line 446 "../src/parser.y"
+#line 440 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("patmatch")), LINE, n_patmatch, (yyvsp[-1].e), NUMBER); }
 #line 4421 "parser.c"
     break;
 
   case 288:
-#line 447 "../src/parser.y"
+#line 441 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("strlen")), LINE, n_strlen, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4427 "parser.c"
     break;
 
   case 289:
-#line 448 "../src/parser.y"
+#line 442 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("substr")), LINE, n_substr, (yyvsp[-1].e), STRING); }
 #line 4433 "parser.c"
     break;
 
   case 290:
-#line 449 "../src/parser.y"
+#line 443 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("substr")), LINE, n_substr, push((yyvsp[-2].e), (yyvsp[-1].e)), STRING); }
 #line 4439 "parser.c"
     break;
 
   case 291:
-#line 450 "../src/parser.y"
+#line 444 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("tackon")), LINE, n_tackon, (yyvsp[-1].e), STRING); }
 #line 4445 "parser.c"
     break;
 
   case 292:
-#line 454 "../src/parser.y"
+#line 448 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, (yyvsp[-1].e), DANGLE); }
 #line 4451 "parser.c"
     break;
 
   case 293:
-#line 455 "../src/parser.y"
+#line 449 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("set")), LINE, n_set, (yyvsp[-1].e), DANGLE); }
 #line 4457 "parser.c"
     break;
 
   case 294:
-#line 456 "../src/parser.y"
+#line 450 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("symbolset")), LINE, n_symbolset, (yyvsp[-1].e), DANGLE); }
 #line 4463 "parser.c"
     break;
 
   case 295:
-#line 457 "../src/parser.y"
+#line 451 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("symbolval")), LINE, n_symbolval, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4469 "parser.c"
     break;
 
   case 296:
-#line 461 "../src/parser.y"
+#line 455 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("openwbobject")), LINE, n_openwbobject, ordo((yyvsp[-1].e)), NUMBER); }
 #line 4475 "parser.c"
     break;
 
   case 297:
-#line 462 "../src/parser.y"
+#line 456 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("showwbobject")), LINE, n_showwbobject, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4481 "parser.c"
     break;
 
   case 298:
-#line 463 "../src/parser.y"
+#line 457 "../src/parser.y"
                                                  { (yyval.e) = new_native(DBG_ALLOC(strdup("closewbobject")), LINE, n_closewbobject, push(new_contxt(), (yyvsp[-1].e)), NUMBER); }
 #line 4487 "parser.c"
     break;
 
   case 299:
-#line 467 "../src/parser.y"
+#line 461 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("all")), OPT_ALL, NULL); }
 #line 4493 "parser.c"
     break;
 
   case 300:
-#line 468 "../src/parser.y"
+#line 462 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("append")), OPT_APPEND, (yyvsp[-1].e)); }
 #line 4499 "parser.c"
     break;
 
   case 301:
-#line 469 "../src/parser.y"
+#line 463 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("assigns")), OPT_ASSIGNS, NULL); }
 #line 4505 "parser.c"
     break;
 
   case 302:
-#line 470 "../src/parser.y"
+#line 464 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("back")), OPT_BACK, (yyvsp[-1].e)); }
 #line 4511 "parser.c"
     break;
 
   case 303:
-#line 471 "../src/parser.y"
+#line 465 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("choices")), OPT_CHOICES, (yyvsp[-1].e)); }
 #line 4517 "parser.c"
     break;
 
   case 304:
-#line 472 "../src/parser.y"
+#line 466 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("command")), OPT_COMMAND, (yyvsp[-1].e)); }
 #line 4523 "parser.c"
     break;
 
   case 305:
-#line 473 "../src/parser.y"
+#line 467 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("compression")), OPT_COMPRESSION, NULL); }
 #line 4529 "parser.c"
     break;
 
   case 306:
-#line 474 "../src/parser.y"
+#line 468 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("confirm")), OPT_CONFIRM, (yyvsp[-1].e)); }
 #line 4535 "parser.c"
     break;
 
   case 307:
-#line 475 "../src/parser.y"
+#line 469 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("confirm")), OPT_CONFIRM, NULL); }
 #line 4541 "parser.c"
     break;
 
   case 308:
-#line 476 "../src/parser.y"
+#line 470 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("default")), OPT_DEFAULT, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4547 "parser.c"
     break;
 
   case 309:
-#line 477 "../src/parser.y"
+#line 471 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("delopts")), OPT_DELOPTS, (yyvsp[-1].e)); }
 #line 4553 "parser.c"
     break;
 
   case 310:
-#line 478 "../src/parser.y"
+#line 472 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("delopts")), OPT_DELOPTS, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); }
 #line 4559 "parser.c"
     break;
 
   case 311:
-#line 479 "../src/parser.y"
+#line 473 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("dest")), OPT_DEST, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4565 "parser.c"
     break;
 
   case 312:
-#line 480 "../src/parser.y"
+#line 474 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("disk")), OPT_DISK, NULL); }
 #line 4571 "parser.c"
     break;
 
   case 313:
-#line 481 "../src/parser.y"
+#line 475 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("files")), OPT_FILES, NULL); }
 #line 4577 "parser.c"
     break;
 
   case 314:
-#line 482 "../src/parser.y"
+#line 476 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("fonts")), OPT_FONTS, NULL); }
 #line 4583 "parser.c"
     break;
 
   case 315:
-#line 483 "../src/parser.y"
+#line 477 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("getdefaulttool")), OPT_GETDEFAULTTOOL, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4589 "parser.c"
     break;
 
   case 316:
-#line 484 "../src/parser.y"
+#line 478 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("getposition")), OPT_GETPOSITION, (yyvsp[-1].e)); }
 #line 4595 "parser.c"
     break;
 
   case 317:
-#line 485 "../src/parser.y"
+#line 479 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("getstack")), OPT_GETSTACK, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4601 "parser.c"
     break;
 
   case 318:
-#line 486 "../src/parser.y"
+#line 480 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("gettooltype")), OPT_GETTOOLTYPE, (yyvsp[-1].e)); }
 #line 4607 "parser.c"
     break;
 
   case 319:
-#line 487 "../src/parser.y"
+#line 481 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("help")), OPT_HELP, (yyvsp[-1].e)); }
 #line 4613 "parser.c"
     break;
 
   case 320:
-#line 488 "../src/parser.y"
+#line 482 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("help")), OPT_HELP, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); }
 #line 4619 "parser.c"
     break;
 
   case 321:
-#line 489 "../src/parser.y"
+#line 483 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("infos")), OPT_INFOS, NULL); }
 #line 4625 "parser.c"
     break;
 
   case 322:
-#line 490 "../src/parser.y"
+#line 484 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("include")), OPT_INCLUDE, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4631 "parser.c"
     break;
 
   case 323:
-#line 491 "../src/parser.y"
+#line 485 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("newname")), OPT_NEWNAME, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4637 "parser.c"
     break;
 
   case 324:
-#line 492 "../src/parser.y"
+#line 486 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("newpath")), OPT_NEWPATH, NULL); }
 #line 4643 "parser.c"
     break;
 
   case 325:
-#line 493 "../src/parser.y"
+#line 487 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("newpath")), OPT_NEWPATH, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4649 "parser.c"
     break;
 
   case 326:
-#line 494 "../src/parser.y"
+#line 488 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("nogauge")), OPT_NOGAUGE, NULL); }
 #line 4655 "parser.c"
     break;
 
   case 327:
-#line 495 "../src/parser.y"
+#line 489 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("noposition")), OPT_NOPOSITION, NULL); }
 #line 4661 "parser.c"
     break;
 
   case 328:
-#line 496 "../src/parser.y"
+#line 490 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("noreq")), OPT_NOREQ, NULL); }
 #line 4667 "parser.c"
     break;
 
   case 329:
-#line 497 "../src/parser.y"
+#line 491 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("pattern")), OPT_PATTERN, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4673 "parser.c"
     break;
 
   case 330:
-#line 498 "../src/parser.y"
+#line 492 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("prompt")), OPT_PROMPT, (yyvsp[-1].e)); }
 #line 4679 "parser.c"
     break;
 
   case 331:
-#line 499 "../src/parser.y"
+#line 493 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("prompt")), OPT_PROMPT, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); }
 #line 4685 "parser.c"
     break;
 
   case 332:
-#line 500 "../src/parser.y"
+#line 494 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("quiet")), OPT_QUIET, NULL); }
 #line 4691 "parser.c"
     break;
 
   case 333:
-#line 501 "../src/parser.y"
+#line 495 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("range")), OPT_RANGE, (yyvsp[-1].e)); }
 #line 4697 "parser.c"
     break;
 
   case 334:
-#line 502 "../src/parser.y"
+#line 496 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("safe")), OPT_SAFE, NULL); }
 #line 4703 "parser.c"
     break;
 
   case 335:
-#line 503 "../src/parser.y"
+#line 497 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("setdefaulttool")), OPT_SETDEFAULTTOOL, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4709 "parser.c"
     break;
 
   case 336:
-#line 504 "../src/parser.y"
+#line 498 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("setposition")), OPT_SETPOSITION, (yyvsp[-1].e)); }
 #line 4715 "parser.c"
     break;
 
   case 337:
-#line 505 "../src/parser.y"
+#line 499 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("setstack")), OPT_SETSTACK, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4721 "parser.c"
     break;
 
   case 338:
-#line 506 "../src/parser.y"
+#line 500 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("settooltype")), OPT_SETTOOLTYPE, (yyvsp[-1].e)); }
 #line 4727 "parser.c"
     break;
 
   case 339:
-#line 507 "../src/parser.y"
+#line 501 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("settooltype")), OPT_SETTOOLTYPE, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4733 "parser.c"
     break;
 
   case 340:
-#line 508 "../src/parser.y"
+#line 502 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("source")), OPT_SOURCE, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4739 "parser.c"
     break;
 
   case 341:
-#line 509 "../src/parser.y"
+#line 503 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("source")), OPT_SOURCE, push(push(new_contxt(), (yyvsp[-2].e)), (yyvsp[-1].e))); }
 #line 4745 "parser.c"
     break;
 
   case 342:
-#line 510 "../src/parser.y"
+#line 504 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("swapcolors")), OPT_SWAPCOLORS, NULL); }
 #line 4751 "parser.c"
     break;
 
   case 343:
-#line 511 "../src/parser.y"
+#line 505 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("optional")), OPT_OPTIONAL, (yyvsp[-1].e)); }
 #line 4757 "parser.c"
     break;
 
   case 344:
-#line 512 "../src/parser.y"
+#line 506 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("optional")), OPT_OPTIONAL, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); }
 #line 4763 "parser.c"
     break;
 
   case 345:
-#line 513 "../src/parser.y"
+#line 507 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("resident")), OPT_RESIDENT, NULL); }
 #line 4769 "parser.c"
     break;
 
   case 346:
-#line 514 "../src/parser.y"
+#line 508 "../src/parser.y"
                                                  { (yyval.e) = new_option(DBG_ALLOC(strdup("override")), OPT_OVERRIDE, push(new_contxt(), (yyvsp[-1].e))); }
 #line 4775 "parser.c"
     break;
@@ -5000,7 +5000,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 516 "../src/parser.y"
+#line 510 "../src/parser.y"
 
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

@@ -49,7 +49,7 @@
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Tokens                                                                                                                                                                               */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-/*        arithmetic.c|h */ /* '+' '/' '*' '-' */
+       /* arithmetic.c|h */ /* '+' '/' '*' '-' */
 %token /* comparison.c|h */ EQ GT GTE LT LTE NEQ
 %token /* control.c|h    */ IF SELECT UNTIL WHILE TRACE RETRACE
 %token /* debug.c|h      */ ASTRAW ASBRAW ASBEVAL EVAL OPTIONS
@@ -71,7 +71,7 @@
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Token data types                                                                                                                                                                     */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-%type<e> /* all nodes    */ start p pp ps /*ivp*/ vp ap /*vps opt opts xpb xpbs*/ np sp /* nps sps*/ pa pb /* c cv cvv */ add sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor bitand
+%type<e> start p pp ps vp ap np sp pa pb add sub lt lte neq gt gte eq set cus dcl fmt if while until and or xor bitand
         bitor bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk cat exists expandpath not
         earlier fileonly getassign getdefaulttool getposition getstack gettooltype getdevice getdiskspace getenv getsize getsum getversion iconinfo querydisplay
         pathonly patmatch div select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib database debug delete execute exit
@@ -87,9 +87,9 @@
 /* Primitive strings are freed like you would expect                                                                                                                                    */
 %destructor { free($$); }   SYM STR
 /* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
-%destructor { kill($$); }   p pp ps /*ivp*/ vp ap /*vps opt opts xpb xpbs*/ np sp /*nps sps*/ pa pb /* c cv cvv*/ add sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
-                            bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier not /*
-                            */fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
+%destructor { kill($$); }   p pp ps vp ap np sp pa pb add sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
+                            bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier not
+                            fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib
                             database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all assigns
                             choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
@@ -175,11 +175,11 @@ ap:             all                              |
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Functions                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-vp:             add  /*       arithmetic.c|h */  |
+vp:             add         /* arithmetic.c|h */ |
                 div                              |
                 mul                              |
                 sub                              |
-                and           /* logic.c|h */    |
+                and              /* logic.c|h */ |
                 bitand                           |
                 bitnot                           |
                 bitor                            |
@@ -190,19 +190,19 @@ vp:             add  /*       arithmetic.c|h */  |
                 shiftleft                        |
                 shiftright                       |
                 xor                              |
-                eq         /* comparison.c|h */  |
+                eq          /* comparison.c|h */ |
                 gt                               |
                 gte                              |
                 lt                               |
                 lte                              |
                 neq                              |
-                if          /*   control.c|h */  |
+                if             /* control.c|h */ |
                 select                           |
                 until                            |
                 while                            |
                 trace                            |
                 retrace                          |
-                astraw       /*  debug.c|h */    |
+                astraw           /* debug.c|h */ |
                 asbraw                           |
                 asbeval                          |
                 eval                             |
@@ -210,12 +210,12 @@ vp:             add  /*       arithmetic.c|h */  |
                 execute       /* external.c|h */ |
                 rexx                             |
                 run                              |
-                abort           /*  exit.c|h */  |
+                abort             /* exit.c|h */ |
                 exit                             |
                 onerror                          |
                 trap                             |
                 reboot                           |
-                copyfiles        /* file.c|h */  |
+                copyfiles         /* file.c|h */ |
                 copylib                          |
                 delete                           |
                 exists                           |
@@ -229,17 +229,17 @@ vp:             add  /*       arithmetic.c|h */  |
                 tooltype                         |
                 transcript                       |
                 rename                           |
-                complete   /*information.c|h*/   |
+                complete   /* information.c|h */ |
                 debug                            |
                 message                          |
                 user                             |
                 welcome                          |
                 working                          |
-                closemedia       /*media.c|h */  |
+                closemedia       /* media.c|h */ |
                 effect                           |
                 setmedia                         |
                 showmedia                        |
-                database      /*   probe.c|h  */ |
+                database         /* probe.c|h */ |
                 earlier                          |
                 getassign                        |
                 getdevice                        |
@@ -250,9 +250,9 @@ vp:             add  /*       arithmetic.c|h */  |
                 getversion                       |
                 iconinfo                         |
                 querydisplay                     |
-                cus        /*  procedure.c|h */  |
+                cus          /* procedure.c|h */ |
                 dcl                              |
-                askbool        /* prompt.c|h */  |
+                askbool         /* prompt.c|h */ |
                 askchoice                        |
                 askdir                           |
                 askdisk                          |
@@ -260,7 +260,7 @@ vp:             add  /*       arithmetic.c|h */  |
                 asknumber                        |
                 askoptions                       |
                 askstring                        |
-                cat          /*    strop.c|h */  |
+                cat              /* strop.c|h */ |
                 expandpath                       |
                 fmt                              |
                 pathonly                         |
@@ -268,10 +268,10 @@ vp:             add  /*       arithmetic.c|h */  |
                 strlen                           |
                 substr                           |
                 tackon                           |
-                set           /*  symbol.c|h */  |
+                set             /* symbol.c|h */ |
                 symbolset                        |
                 symbolval                        |
-                openwbobject       /* wb.c|h */  |
+                openwbobject        /* wb.c|h */ |
                 showwbobject                     |
                 closewbobject                    ;
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -346,12 +346,6 @@ makeassign:     '(' MAKEASSIGN ps ')'            { $$ = new_native(DBG_ALLOC(str
 makedir:        '(' MAKEDIR ps')'                { $$ = new_native(DBG_ALLOC(strdup("makedir")), LINE, n_makedir, ordo($3), NUMBER); };
 protect:        '(' PROTECT ps ')'               { $$ = new_native(DBG_ALLOC(strdup("protect")), LINE, n_protect, ordo($3), NUMBER); };
 startup:        '(' STARTUP ps ')'               { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, ordo($3), NUMBER); };
-/*
-startup:        '(' STARTUP p opts ')'           { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), $3), $4), NUMBER); } |
-                '(' STARTUP opts p ')'           { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), $4), $3), NUMBER); } |
-                '(' STARTUP opts p opts ')'      { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), $4), merge($3, $5)), NUMBER); } |
-                '(' STARTUP opts ')'             { $$ = new_native(DBG_ALLOC(strdup("startup")), LINE, n_startup, merge(push(new_contxt(), new_symref(DBG_ALLOC(strdup("@app-name")), LINE)), $3), NUMBER); };
-*/
 textfile:       '(' TEXTFILE ps ')'              { $$ = new_native(DBG_ALLOC(strdup("textfile")), LINE, n_textfile, $3, NUMBER); };
 tooltype:       '(' TOOLTYPE ps ')'              { $$ = new_native(DBG_ALLOC(strdup("tooltype")), LINE, n_tooltype, $3, NUMBER); };
 transcript:     '(' TRANSCRIPT ps ')'            { $$ = new_native(DBG_ALLOC(strdup("transcript")), LINE, n_transcript, $3, NUMBER); };
