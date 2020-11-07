@@ -188,30 +188,35 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
         // Compare all strings unless the current option is deleted.
         if(cache[OPT_FAIL] != end() && !strcasecmp(name, "fail"))
         {
+//dump(fake->children[i]);
             // Delete or set depending on parent.
             cache[OPT_FAIL] = del ? end() : fake->children[i];
         }
         else
         if(cache[OPT_FORCE] != end() && !strcasecmp(name, "force"))
         {
+//dump(fake->children[i]);
             // Delete or set depending on parent.
             cache[OPT_FORCE] = del ? end() : fake->children[i];
         }
         else
         if(cache[OPT_NOFAIL] != end() && !strcasecmp(name, "nofail"))
         {
+//dump(fake->children[i]);
             // Delete or set depending on parent.
             cache[OPT_NOFAIL] = del ? end() : fake->children[i];
         }
         else
         if(cache[OPT_ASKUSER] != end() && !strcasecmp(name, "askuser"))
         {
+//dump(fake->children[i]);
             // Delete or set depending on parent.
             cache[OPT_ASKUSER] = del ? end() : fake->children[i];
         }
         else
         if(cache[OPT_OKNODELETE] != end() && !strcasecmp(name, "oknodelete"))
         {
+//dump(fake->children[i]);
             // Delete or set depending on parent.
             cache[OPT_OKNODELETE] = del ? end() : fake->children[i];
         }
@@ -277,7 +282,7 @@ static void opt_push_cache(entry_p option, entry_p *cache)
         get_fake_opt(option, cache);
     }
     // Dynamic options must be resolved.
-    else if(option->id == OPT_IFOPT || option->id == OPT_SELOPT)
+/*    else if(option->id == OPT_IFOPT || option->id == OPT_SELOPT)
     {
         static entry_p save[OPT_LAST];
 
@@ -300,9 +305,9 @@ static void opt_push_cache(entry_p option, entry_p *cache)
 
         // Resolved value is a real option.
         cache[res->id] = res;
-    }
+    }*/
     // Don't trust the caller.
-    else if(option->id >= 0 && option->id < OPT_LAST)
+    else if(option->id >= OPT_ALL && option->id < OPT_ASKUSER)
     {
         // Save real options as they are.
         cache[option->id] = option;
@@ -314,40 +319,6 @@ static void opt_push_cache(entry_p option, entry_p *cache)
     }
 }
 
-//------------------------------------------------------------------------------
-// Name:        opt_fill_cache
-// Description: Initialize option cache.
-// Input:       entry_p *contxt:  Execution context / naked option.
-// Return:      -
-//------------------------------------------------------------------------------
-static void opt_fill_cache(entry_p contxt, entry_p *cache)
-{
-    // Naked option.
-    if(contxt->type == OPTION)
-    {
-        // Push directly to cache.
-        opt_push_cache(contxt, cache);
-
-        // Check for embedded options.
-        if(!contxt->children)
-        {
-            return;
-        }
-    }
-
-    // Iterate over all children in execution context.
-    for(size_t i = 0; exists(contxt->children[i]); i++)
-    {
-        // Resolve to find both naked and dynamic options.
-        entry_p cur = resolve(contxt->children[i]);
-
-        if(cur->type == OPTION)
-        {
-            // Cache option + embedded, if any.
-            opt_fill_cache(cur, cache);
-        }
-    }
-}
 
 //------------------------------------------------------------------------------
 // Name:        opt_clear_cache
@@ -357,8 +328,9 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
 //------------------------------------------------------------------------------
 static void opt_clear_cache(entry_p *cache)
 {
+//    printf("clearing opt cache!\n");
     // Reset all options that aren't affected by (delopts).
-    for(size_t i = 0; i < OPT_ASKUSER; i++)
+    for(size_t i = OPT_ALL; i < OPT_ASKUSER; i++)
     {
         cache[i] = NULL;
     }
@@ -377,6 +349,73 @@ static void opt_clear_cache(entry_p *cache)
     cache[OPT_INIT] = end();
 }
 
+//------------------------------------------------------------------------------
+// Name:        opt_fill_cache
+// Description: Initialize option cache.
+// Input:       entry_p *contxt:  Execution context.
+// Return:      -
+//------------------------------------------------------------------------------
+static void opt_fill_cache(entry_p contxt, entry_p *cache)
+{
+    // Iterate over all children in execution context.
+    //for(size_t i = 0; exists(contxt->children[i]); i++)
+
+//    entry_p draft[OPT_LAST];
+//    opt_clear_cache(draft);
+
+ // Naked option.
+     if(contxt->type == OPTION)
+     {
+          // Push directly to cache.
+           opt_push_cache(contxt, cache);
+  
+         // Check for embedded options.
+          if(!contxt->children)
+          {
+              return;
+          }
+    }
+   // Cache all options if we're in a block.
+   //  296         if(res->parent->type == CONTXT)
+   //   297         {
+   //    298             opt_fill_cache(res->parent, cache);
+   //     299         }
+
+        //static entry_p save[OPT_LAST];
+    for(size_t i = 1; exists(C_ARG(i)); i++)
+    {
+        entry_p cur = C_ARG(i);
+
+        if(cur->type == CONTXT && cur->children)
+        {
+            for(size_t j = 0; exists(cur->children[j]); j++)
+            {
+                opt_fill_cache(cur->children[j], cache);
+            }
+        }
+
+        if(cur->type == NATIVE)
+        {
+            entry_p save[OPT_ASKUSER];
+            memcpy(save, cache, sizeof(entry_p) * OPT_ASKUSER);
+            cur = resolve(C_ARG(i));
+            memcpy(cache, save, sizeof(entry_p) * OPT_ASKUSER);
+        }
+
+        if(cur->type != OPTION)
+        {
+            continue;
+        }
+
+    //    LG_ASSERT(cur->id >= OPT_ALL && cur->id < OPT_LAST, LG_VOID);
+    //    draft[cur->id] = cur;
+        opt_fill_cache(cur, cache);
+    }
+
+   // Cache may be invalidated by resolve().
+//        memcpy(cache, draft, sizeof(entry_p) * OPT_LAST);
+
+}
 //------------------------------------------------------------------------------
 // Name:        opt
 // Description: Find option of a given type in a context.
