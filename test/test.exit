@@ -26,8 +26,7 @@
 (exit "1" "2" "3") (+ 4); "","123Installation complete Test App can be found in T:1",""
 (exit "1" "2" "3" (quiet)) (+ 4); "","1231",""
 (exit "1" "2" "3" (quiet) (safe)) (+ 4); "","1231",""
-
-(exit "1" "2" "3" (safe)) (+ 4); "","Line 1: syntax error, unexpected SAFE 'safe'",""
+(exit "1" "2" "3" (safe)) (+ €); "","123Installation complete Test App can be found in T:1",""
 (procedure die (die)) (onerror (die)) (exit); "","Installation complete Test App can be found in T:1",""
 (procedure die (die)) (onerror (die)) (exit) (+ 4); "","Installation complete Test App can be found in T:1",""
 (exit (askstring (prompt "p") (help "h") (default "d")) "1" "2" "3") ; "","phd0 d123Installation complete Test App can be found in T:1",""

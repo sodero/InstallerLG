@@ -1,4 +1,4 @@
-(askdisk) ; "","Line 1: syntax error, unexpected ')', expecting '(' ')'",""
+(askdisk) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (askdisk (disk)) ; "","Line 1: Missing option 'prompt' 0",""
 (askdisk (prompt "p")) ; "","Line 1: Missing option 'help' 0",""
 (askdisk (prompt "p" ok)) ; "","Line 1: Missing option 'help' 0",""
@@ -21,5 +21,5 @@
 (askdisk (prompt "p") (help "h") (dest "")) ; "","Line 1: Invalid name of volume ':' 0",""
 (set a (askdisk (prompt "p") (help "h") (dest "d"))) (+ a 5) ; "","d:06",""
 (askdisk (prompt "p") (help "h" ok) (dest "d" err)) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
-(askdisk (prompt "p") (help "h") (dest "d") (back) ; "","Line 1: syntax error, unexpected ')', expecting '(' ')'",""
+(askdisk (prompt "p") (help "h") (dest "d") (back) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (askdisk (prompt "p") (help "h") (dest "d") (back (+ 2))) ; "","d:11",""

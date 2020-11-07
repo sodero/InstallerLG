@@ -127,7 +127,7 @@
 (copylib (source) (dest "dst")) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (copylib (source) (dest)) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (copylib (source)) ; "","Line 1: syntax error, unexpected ')' ')'",""
-(copylib) ; "","Line 1: syntax error, unexpected ')', expecting '(' ')'",""
+(copylib) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (set @skip 1 @strict 0) (copylib (help "h") (prompt "p") (source "_clf_") (dest "_cld_") (optional "askuser")) ; "rm -Rf _cld_ _clf_ && cp ../test/data.copylib.i1.TheBar_2617_Aros_i386 _clf_ && mkdir _cld_ && cp ../test/data.copylib.i1.TheBar_2619_Aros_i386 _cld_/_clf_ && chmod a-w _cld_/_clf_","0","chmod a+w _cld_/_clf_ && cmp ../test/data.copylib.i1.TheBar_2619_Aros_i386 _cld_/_clf_  && rm -Rf _clf_ _cld_"
 (set @skip 1) (copylib (help "h") (prompt "p") (source "_clf_") (dest "_cld_") (optional "askuser")) ; "rm -Rf _cld_ _clf_ && cp ../test/data.copylib.i1.TheBar_2617_Aros_i386 _clf_ && mkdir _cld_ && cp ../test/data.copylib.i1.TheBar_2619_Aros_i386 _cld_/_clf_ && chmod a-w _cld_/_clf_","0","chmod a+w _cld_/_clf_ && cmp ../test/data.copylib.i1.TheBar_2619_Aros_i386 _cld_/_clf_  && rm -Rf _clf_ _cld_"
 (set @skip 1) (copylib (help "h") (prompt "p") (source "_clf_") (dest "_cld_")) ; "rm -Rf _cld_ && mkdir _cld_ && cp ../test/data.copylib.i1.TheBar_2617_Aros_i386 _clf_ && cp ../test/data.copylib.i1.TheBar_2619_Aros_i386 _cld_/_clf_","0","cmp _cld_/_clf_ ../test/data.copylib.i1.TheBar_2619_Aros_i386 && rm -Rf _clf_ _cld_"

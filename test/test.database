@@ -1,5 +1,5 @@
 (database) ; "","Line 1: syntax error, unexpected ')' ')'",""
-(database (safe)) ; "","Line 1: syntax error, unexpected SAFE 'safe'",""
+(database (safe)) ; "","Unknown",""
 (database "cpu" "68000" err) ; "","Line 1: syntax error, unexpected SYM, expecting ')' 'err'",""
 (database "cpu" (safe)) ; "","Line 1: syntax error, unexpected SAFE 'safe'",""
 (database "cpu") ; "","Unknown CPU",""
