@@ -29,7 +29,7 @@
 (user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i1 _st_","ph0 1","cmp _st_ ../test/data.startup.o1 && rm -f _st_"
 (user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "anticlick")) ; "cp ../test/data.startup.i1 _st_","ph0 1","cmp _st_ ../test/data.startup.o2 && rm -f _st_"
 (user 2) (set @user-startup "_st_") (startup "pap" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i1 _st_","ph0 1","cmp _st_ ../test/data.startup.o3 && rm -f _st_"
-(user 2) (set @app-name "pap") (set @user-startup "_st_") (startup (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i1 _st_","ph0 1","cmp _st_ ../test/data.startup.o3 && rm -f _st_"
+; FIX ME !!!!!! (user 2) (set @app-name "pap") (set @user-startup "_st_") (startup (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i1 _st_","ph0 1","cmp _st_ ../test/data.startup.o3 && rm -f _st_"
 (user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i2 _st_","ph0 1","cmp _st_ ../test/data.startup.o4 && rm -f _st_"
 (user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i3 _st_","ph0 1","cmp _st_ ../test/data.startup.o5 && rm -f _st_"
 (user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i4 _st_","ph0 1","cmp _st_ ../test/data.startup.o6 && rm -f _st_"

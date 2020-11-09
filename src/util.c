@@ -368,9 +368,9 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
      {
           // Push directly to cache.
            opt_push_cache(contxt, cache);
-  
+
          // Check for embedded options.
-          if(!contxt->children)
+ //         if(!contxt->children)
           {
               return;
           }
