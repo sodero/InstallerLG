@@ -100,8 +100,8 @@ DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
                  contxt->resolved->name = r_str;} else { PANIC(contxt);\
                  contxt->resolved->name[0] = '\0'; }; return contxt->resolved
 #define R_EST    contxt->resolved->name[0] = '\0'; return contxt->resolved
-#define C_ARG(X) contxt->children[(X) - 1]
-#define C_SYM(X) contxt->symbols[(X) - 1]
+#define C_ARG(X) (contxt->children ? contxt->children[(X) - 1] : end())
+#define C_SYM(X) (contxt->symbols ? contxt->symbols[(X) - 1] : end())
 #define B_KEY __func__
 #if defined(AMIGA)
 #define DBG_PRINT KPrintF
