@@ -328,7 +328,6 @@ static void opt_push_cache(entry_p option, entry_p *cache)
 //------------------------------------------------------------------------------
 static void opt_clear_cache(entry_p *cache)
 {
-//    printf("clearing opt cache!\n");
     // Reset all options that aren't affected by (delopts).
     for(size_t i = OPT_ALL; i < OPT_ASKUSER; i++)
     {
@@ -357,49 +356,34 @@ static void opt_clear_cache(entry_p *cache)
 //------------------------------------------------------------------------------
 static void opt_fill_cache(entry_p contxt, entry_p *cache)
 {
-    // Iterate over all children in execution context.
-    //for(size_t i = 0; exists(contxt->children[i]); i++)
-
-//    entry_p draft[OPT_LAST];
-//    opt_clear_cache(draft);
-
- // Naked option.
+     // Naked option.
      if(contxt->type == OPTION)
      {
-          // Push directly to cache.
-           opt_push_cache(contxt, cache);
+         // Push directly to cache.
+         opt_push_cache(contxt, cache);
 
          // Check for embedded options.
- //         if(!contxt->children)
-          {
+ //      if(!contxt->children)
+ //      {
               return;
-          }
+  //     }
     }
-   // Cache all options if we're in a block.
-   //  296         if(res->parent->type == CONTXT)
-   //   297         {
-   //    298             opt_fill_cache(res->parent, cache);
-   //     299         }
 
-        //static entry_p save[OPT_LAST];
     for(size_t i = 1; exists(C_ARG(i)); i++)
     {
         entry_p cur = C_ARG(i);
 
-        if(cur->type == CONTXT && cur->children)
+        if(cur->type == NATIVE || cur->type == CONTXT)
         {
-            for(size_t j = 0; exists(cur->children[j]); j++)
-            {
-                opt_fill_cache(cur->children[j], cache);
-            }
-        }
-
-        if(cur->type == NATIVE)
-        {
+            // Save context.
             entry_p save[OPT_ASKUSER];
             memcpy(save, cache, sizeof(entry_p) * OPT_ASKUSER);
-            cur = resolve(C_ARG(i));
+
+            cur = resolve(cur);
+
+            // Restore context.
             memcpy(cache, save, sizeof(entry_p) * OPT_ASKUSER);
+            opt(contxt, OPT_LAST);
         }
 
         if(cur->type != OPTION)
@@ -411,10 +395,6 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
     //    draft[cur->id] = cur;
         opt_fill_cache(cur, cache);
     }
-
-   // Cache may be invalidated by resolve().
-//        memcpy(cache, draft, sizeof(entry_p) * OPT_LAST);
-
 }
 //------------------------------------------------------------------------------
 // Name:        opt
@@ -432,6 +412,13 @@ entry_p opt(entry_p contxt, opt_t type)
     {
         // Return cached value if permanently set (delopts).
         return cache[type] == end() ? end() : NULL;
+    }
+
+    // Restore context.
+    if(type == OPT_LAST)
+    {
+        last = contxt;
+        return end();
     }
 
     // Return cached value if cache is full.
@@ -859,6 +846,7 @@ char *get_chlstr(entry_p contxt, bool pad)
         stv[--cnt] = str(cur);
         len += strlen(stv[cnt]) + (pad ? 1 : 0);
     }
+
     // Memory to hold the full concatenation.
     ret = len ? DBG_ALLOC(calloc(len + 1, 1)) : NULL;
 
