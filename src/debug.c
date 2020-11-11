@@ -106,7 +106,7 @@ entry_p n_options(entry_p contxt)
     // If we have children, use that as cache context.
     entry_p optcon = contxt;
 
-    if(exists(C_ARG(1)))
+    if(contxt->children && exists(C_ARG(1)))
     {
         // Resolve children to fill cache.
         (void) resolve(C_ARG(1));
