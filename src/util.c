@@ -373,7 +373,7 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
     {
         entry_p cur = C_ARG(i);
 
-        if(cur->type == NATIVE || cur->type == CONTXT)
+        if(cur->type == NATIVE)
         {
             // Save context.
             entry_p save[OPT_ASKUSER];
