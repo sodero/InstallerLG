@@ -28,6 +28,7 @@ entry_p local(entry_p entry);
 entry_p global(entry_p entry);
 entry_p custom(entry_p entry);
 entry_p native(entry_p entry);
+bool opt_init(entry_p contxt);
 entry_p opt(entry_p contxt, opt_t type);
 bool c_sane(entry_p contxt, size_t num);
 bool s_sane(entry_p contxt, size_t num);
@@ -113,7 +114,7 @@ DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
 #ifndef __clang_analyzer__
 #define C_SANE(N,O) if(!c_sane(contxt, N)) {(void) PANIC(contxt); \
                     return end();}  {entry_p op_ = O; if(op_ != NULL &&\
-                    opt(O,OPT_INIT) != NULL && DID_ERR) {return end();}}
+                    opt_init(O) && DID_ERR) {return end();}}
 #else
 #define C_SANE(N,O) return end();
 #endif

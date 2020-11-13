@@ -402,6 +402,19 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
         opt_fill_cache(cur, cache);
     }
 }*/
+
+bool opt_init(entry_p contxt)
+{
+
+    for(size_t cur = 1; exists(C_ARG(cur)); cur++)
+    {
+        C_SYM(cur) = C_ARG(cur)->type == OPTION ?
+        C_ARG(cur) : resolve(C_ARG(cur));
+    }
+    
+    return NOT_ERR;
+}
+
 //------------------------------------------------------------------------------
 // Name:        opt
 // Description: Find option of a given type in a context.
@@ -411,8 +424,13 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
 //------------------------------------------------------------------------------
 entry_p opt(entry_p contxt, opt_t type)
 {
-    (void) contxt;
-    (void) type;
+    for(size_t cur = 1; exists(C_SYM(cur)); cur++)
+    {
+        if(C_SYM(cur)->type == OPTION && C_SYM(cur)->id == (int32_t) type)
+        {
+            return C_SYM(cur);
+        }
+    }
 
     return NULL;
     /*

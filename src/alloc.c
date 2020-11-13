@@ -721,7 +721,7 @@ void kill(entry_p entry)
         free(entry->name);
 
         // Free symbols, if any.
-        kill_all(entry->symbols, entry);
+//        kill_all(entry->symbols, entry);
         free(entry->symbols);
 
         // Free children, if any.
