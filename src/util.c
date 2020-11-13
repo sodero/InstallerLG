@@ -171,6 +171,7 @@ entry_p native(entry_p entry)
 //              entry_p *cache: Option cache.
 // Return:      -
 //------------------------------------------------------------------------------
+/*
 static void get_fake_opt(entry_p fake, entry_p *cache)
 {
     // Translate strings to options.
@@ -265,7 +266,8 @@ static void prune_opt(entry_p contxt, entry_p *cache)
         cache[OPT_FILES] = NULL;
     }
 }
-
+*/
+/*
 //------------------------------------------------------------------------------
 static void opt_fill_cache(entry_p contxt, entry_p *cache);
 //------------------------------------------------------------------------------
@@ -281,6 +283,7 @@ static void opt_push_cache(entry_p option, entry_p *cache)
     {
         get_fake_opt(option, cache);
     }
+    */
     // Dynamic options must be resolved.
 /*    else if(option->id == OPT_IFOPT || option->id == OPT_SELOPT)
     {
@@ -307,6 +310,7 @@ static void opt_push_cache(entry_p option, entry_p *cache)
         cache[res->id] = res;
     }*/
     // Don't trust the caller.
+   /*
     else if(option->id >= OPT_ALL && option->id < OPT_ASKUSER)
     {
         // Save real options as they are.
@@ -318,7 +322,7 @@ static void opt_push_cache(entry_p option, entry_p *cache)
         PANIC(option);
     }
 }
-
+*/
 
 //------------------------------------------------------------------------------
 // Name:        opt_clear_cache
@@ -326,6 +330,7 @@ static void opt_push_cache(entry_p option, entry_p *cache)
 // Input:       entry_p *cache:  Option cache.
 // Return:      -
 //------------------------------------------------------------------------------
+/*
 static void opt_clear_cache(entry_p *cache)
 {
     // Reset all options that aren't affected by (delopts).
@@ -347,13 +352,14 @@ static void opt_clear_cache(entry_p *cache)
     // Set final sentinel.
     cache[OPT_INIT] = end();
 }
-
+*/
 //------------------------------------------------------------------------------
 // Name:        opt_fill_cache
 // Description: Initialize option cache.
 // Input:       entry_p *contxt:  Execution context.
 // Return:      -
 //------------------------------------------------------------------------------
+/*
 static void opt_fill_cache(entry_p contxt, entry_p *cache)
 {
      // Naked option.
@@ -395,7 +401,7 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
     //    draft[cur->id] = cur;
         opt_fill_cache(cur, cache);
     }
-}
+}*/
 //------------------------------------------------------------------------------
 // Name:        opt
 // Description: Find option of a given type in a context.
@@ -405,6 +411,11 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
 //------------------------------------------------------------------------------
 entry_p opt(entry_p contxt, opt_t type)
 {
+    (void) contxt;
+    (void) type;
+
+    return NULL;
+    /*
     static entry_p cache[OPT_LAST], last;
 
     // We need a valid context.
@@ -455,6 +466,7 @@ entry_p opt(entry_p contxt, opt_t type)
 
     // Use the (full) cache.
     return cache[type];
+    */
 }
 
 //------------------------------------------------------------------------------

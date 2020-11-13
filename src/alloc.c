@@ -264,32 +264,58 @@ entry_p new_symref(char *name, int32_t line)
 //              entry_p src:    The source context.
 // Return:      -
 //------------------------------------------------------------------------------
-static void move_contxt(entry_p dst, entry_p src)
+static bool move_contxt(entry_p dst, entry_p src)
 {
-    // Validate input.
-    LG_ASSERT(src && dst, LG_VOID);
-
-    entry_p *sym = dst->symbols = src->symbols,
-            *chl = dst->children = src->children;
-
-    // Reparent children.
-    while(exists(*chl))
+    if(!src)
     {
-        (*chl)->parent = dst;
-        chl++;
+        // Nothing to move.
+        return true;
     }
 
-    // Reparent symbols.
-    while(exists(*sym))
-    {
-        (*sym)->parent = dst;
-        sym++;
-    }
+    // Move children and symbols.
+    dst->children = src->children;
+    dst->symbols = src->symbols;
 
     // Free the source.
     src->children = NULL;
     src->symbols = NULL;
     kill(src);
+
+    size_t chl = 0, sym = 0;
+
+    // Reparent children.
+    while(exists(dst->children[chl]))
+    {
+        dst->children[chl++]->parent = dst;
+    }
+
+    // Reparent symbols.
+    while(exists(dst->symbols[sym]))
+    {
+        dst->symbols[sym++]->parent = dst;
+    }
+
+    if(sym)
+    {
+        // No cache.
+        return true;
+    }
+
+    // New cache.
+    entry_p *cache = DBG_ALLOC(calloc(sym + 1, sizeof(entry_p)));
+
+    if(!cache)
+    {
+        // Out of memory.
+        return false;
+    }
+
+    // Set cache / sentinel.
+    free(dst->symbols);
+    cache[sym] = end();
+    dst->symbols = cache;
+
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -318,24 +344,24 @@ entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t ty
         entry->resolved = type == NUMBER ? new_number(0) : type == STRING ?
                           new_string(DBG_ALLOC(strdup(""))) : end();
 
-        // Make sure that we have a valid default return value.
+        // Check return value and move context if any.
         if(entry->resolved)
         {
-            // ID and name are for debug only.
-            entry->type = NATIVE;
-            entry->name = name;
-            entry->call = call;
-            entry->id = line;
-
-            // Adopt children and symbols if any.
-            if(chl && chl->type == CONTXT)
+            if(move_contxt(entry, chl))
             {
-                move_contxt(entry, chl);
+                // Set parent of return value.
+                entry->resolved->parent = entry;
+
+                // ID and name are for debug only.
+                entry->type = NATIVE;
+                entry->name = name;
+                entry->call = call;
+                entry->id = line;
+    //dump(entry);
+                return entry;
             }
 
-            // Set parent of return value.
-            entry->resolved->parent = entry;
-            return entry;
+            kill(entry->resolved);
         }
     }
 
