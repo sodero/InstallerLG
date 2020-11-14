@@ -171,13 +171,24 @@ static void init_misc_num(entry_p contxt)
     init_num(contxt, "@each-type", LG_FALSE);
     init_num(contxt, "@debug", LG_FALSE);
     init_num(contxt, "@trap", LG_FALSE);
+    init_num(contxt, "@fail", LG_FALSE);
+    init_num(contxt, "@delfail", LG_FALSE);
+    init_num(contxt, "@force", LG_FALSE);
+    init_num(contxt, "@delforce", LG_FALSE);
+    init_num(contxt, "@nofail", LG_FALSE);
+    init_num(contxt, "@delnofail", LG_FALSE);
+    init_num(contxt, "@askuser", LG_FALSE);
+    init_num(contxt, "@delaskuser", LG_FALSE);
+    init_num(contxt, "@oknodelete", LG_FALSE);
+    init_num(contxt, "@deloknodelete", LG_FALSE);
     init_num(contxt, "true", LG_TRUE);
     init_num(contxt, "false", LG_FALSE);
     init_num(contxt, "@alfa", 0);
     init_num(contxt, "@beta", 1);
     init_num(contxt, "@gamma", 2);
     init_num(contxt, "@strict",
-    // In test mode, strict is default.
+    // Sloppy mode is default on Amiga unless we're in test mode. On other
+    // systems strict is the default.
     #if defined(AMIGA) && !defined(LG_TEST)
     LG_FALSE
     #else
