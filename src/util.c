@@ -405,13 +405,12 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
 
 bool opt_init(entry_p contxt)
 {
-
     for(size_t cur = 1; exists(C_ARG(cur)); cur++)
     {
         C_SYM(cur) = C_ARG(cur)->type == OPTION ?
         C_ARG(cur) : resolve(C_ARG(cur));
     }
-    
+
     return NOT_ERR;
 }
 
@@ -424,11 +423,13 @@ bool opt_init(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p opt(entry_p contxt, opt_t type)
 {
-    for(size_t cur = 1; exists(C_SYM(cur)); cur++)
+    LG_ASSERT(contxt->symbols, NULL);
+
+    for(entry_p *cur = contxt->symbols; *cur; cur++)
     {
-        if(C_SYM(cur)->type == OPTION && C_SYM(cur)->id == (int32_t) type)
+        if((*cur)->type == OPTION && (*cur)->id == (int32_t) type)
         {
-            return C_SYM(cur);
+            return *cur;
         }
     }
 

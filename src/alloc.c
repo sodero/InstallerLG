@@ -7,6 +7,7 @@
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
+#include "all.h"
 #include "alloc.h"
 #include "error.h"
 #include "control.h"
@@ -301,8 +302,9 @@ static bool move_contxt(entry_p dst, entry_p src)
         return true;
     }
 
-    // New cache.
-    entry_p *cache = DBG_ALLOC(calloc(sym + 1, sizeof(entry_p)));
+    // Allocate cache. Note that we can't use end() as a sentinel in the cache
+    // since resolved entries could DANGLE. Terminate array with NULL instead.
+    entry_p *cache = DBG_ALLOC(calloc(chl + 1, sizeof(entry_p)));
 
     if(!cache)
     {
@@ -310,9 +312,8 @@ static bool move_contxt(entry_p dst, entry_p src)
         return false;
     }
 
-    // Set cache / sentinel.
+    // Set new cache.
     free(dst->symbols);
-    cache[sym] = end();
     dst->symbols = cache;
 
     return true;
@@ -690,14 +691,22 @@ static void kill_all(entry_p *chl, entry_p par)
     }
 }
 
-static bool own_res(entry_p entry)
+//FIXME
+static bool owns_res(entry_p entry)
 {
-    // (if), (while) and (until) never own anything. They just contain
-    // references to subordinate branches / nodes.
+    // (if), (while) and (until) don't own their return values..
     return entry && entry->call != n_if && entry->call != n_while &&
            entry->call != n_select && entry->call != n_until &&
-           entry->call != n_retrace &&
-           entry->resolved && entry->resolved->parent == entry;
+           entry->call != n_retrace && entry->resolved &&
+           entry->resolved->parent == entry;
+}
+
+//FIXME
+static bool owns_sym(entry_p entry)
+{
+    // The only NATIVE:s that own symbols are (set) and (procedure).
+    return entry && (entry->type != NATIVE || (entry->call == n_set ||
+           entry->call == n_procedure));
 }
 
 //------------------------------------------------------------------------------
@@ -708,11 +717,11 @@ static bool own_res(entry_p entry)
 //------------------------------------------------------------------------------
 void kill(entry_p entry)
 {
-    // DANGLE entries are static, no need to free them.
+    // DANGLE entries are static.
     if(entry && entry->type != DANGLE)
     {
-        // If we own any resolved entries, free them.
-        if(own_res(entry))
+        // Free return value if we own it.
+        if(owns_res(entry))
         {
             kill(entry->resolved);
         }
@@ -720,15 +729,20 @@ void kill(entry_p entry)
         // All entries might have a name.
         free(entry->name);
 
-        // Free symbols, if any.
-//        kill_all(entry->symbols, entry);
+        // Free symbols if we own them.
+        if(owns_sym(entry))
+        {
+            kill_all(entry->symbols, entry);
+        }
+
+        // Free symbol references.
         free(entry->symbols);
 
-        // Free children, if any.
+        // Free our own children.
         kill_all(entry->children, entry);
         free(entry->children);
 
-        // Nothing but this entry left.
+        // Kill ourselves.
         free(entry);
     }
 }
