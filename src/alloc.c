@@ -7,11 +7,11 @@
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
-#include "all.h"
 #include "alloc.h"
 #include "error.h"
 #include "control.h"
 #include "procedure.h"
+#include "symbol.h"
 #include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -706,7 +706,7 @@ static bool owns_sym(entry_p entry)
 {
     // The only NATIVE:s that own symbols are (set) and (procedure).
     return entry && (entry->type != NATIVE || (entry->call == n_set ||
-           entry->call == n_procedure));
+           entry->call == n_procedure || entry->call == n_symbolset));
 }
 
 //------------------------------------------------------------------------------

@@ -425,6 +425,8 @@ entry_p opt(entry_p contxt, opt_t type)
 {
     LG_ASSERT(contxt->symbols, NULL);
 
+    // Note that we're not using use end() as a sentinel in the cache since
+    // resolved entries could DANGLE, instead, array is NULL terminated.
     for(entry_p *cur = contxt->symbols; *cur; cur++)
     {
         if((*cur)->type == OPTION && (*cur)->id == (int32_t) type)
@@ -433,59 +435,8 @@ entry_p opt(entry_p contxt, opt_t type)
         }
     }
 
+    // Option not found.
     return NULL;
-    /*
-    static entry_p cache[OPT_LAST], last;
-
-    // We need a valid context.
-    if(!contxt || !contxt->children)
-    {
-        // Return cached value if permanently set (delopts).
-        return cache[type] == end() ? end() : NULL;
-    }
-
-    // Restore context.
-    if(type == OPT_LAST)
-    {
-        last = contxt;
-        return end();
-    }
-
-    // Return cached value if cache is full.
-    if(contxt == last)
-    {
-        return cache[type];
-    }
-
-    // Start fram scratch with new context.
-    opt_clear_cache(cache);
-    last = contxt;
-
-    // Populate cache.
-    opt_fill_cache(contxt, cache);
-
-    // If in non strict mode, allow the absense of (prompt) and (help).
-    if(!get_num(contxt, "@strict"))
-    {
-        if(!cache[OPT_HELP])
-        {
-            // Will be resolved as "".
-            cache[OPT_HELP] = end();
-        }
-
-        if(!cache[OPT_PROMPT])
-        {
-            // Will be resolved as "".
-            cache[OPT_PROMPT] = end();
-        }
-    }
-
-    // Prune options.
-    prune_opt(contxt, cache);
-
-    // Use the (full) cache.
-    return cache[type];
-    */
 }
 
 //------------------------------------------------------------------------------
