@@ -40,7 +40,7 @@
 %define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
-/*%expect 1*/
+%expect 33
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Primitives                                                                                                                                                                           */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -141,7 +141,6 @@ ap:             all                              |
                 compression                      |
                 confirm                          |
                 default                          |
-                delopts                          |
                 dest                             |
                 disk                             |
                 files                            |
@@ -158,7 +157,6 @@ ap:             all                              |
                 nogauge                          |
                 noposition                       |
                 noreq                            |
-                optional                         |
                 override                         |
                 pattern                          |
                 prompt                           |
@@ -239,6 +237,8 @@ vp:             add         /* arithmetic.c|h */ |
                 effect                           |
                 setmedia                         |
                 showmedia                        |
+                optional      /* optional.c|h */ |
+                delopts                          |
                 database         /* probe.c|h */ |
                 earlier                          |
                 getassign                        |
@@ -385,6 +385,11 @@ setmedia:       '(' SETMEDIA pp ')'              { $$ = new_native(DBG_ALLOC(str
                 '(' SETMEDIA pp p ')'            { $$ = new_native(DBG_ALLOC(strdup("setmedia")), LINE, n_setmedia, push($3, $4), NUMBER); };
 showmedia:      '(' SHOWMEDIA pp pp ps ')'       { $$ = new_native(DBG_ALLOC(strdup("showmedia")), LINE, n_showmedia, merge(merge($3, $4), $5), NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* optional.c|h                                                                                                                                                                            */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+optional:       '(' OPTIONAL ps ')'              { $$ = new_native(DBG_ALLOC(strdup("optional")), LINE, n_optional, $3, DANGLE); };
+delopts:        '(' DELOPTS ps ')'               { $$ = new_native(DBG_ALLOC(strdup("delopts")), LINE, n_delopts, $3, DANGLE); };
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* probe.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 database:       '(' DATABASE p ')'               { $$ = new_native(DBG_ALLOC(strdup("database")), LINE, n_database, push(new_contxt(), $3), STRING); } |
@@ -468,8 +473,6 @@ compression:    '(' COMPRESSION ')'              { $$ = new_option(DBG_ALLOC(str
 confirm:        '(' CONFIRM ps ')'               { $$ = new_option(DBG_ALLOC(strdup("confirm")), OPT_CONFIRM, $3); } |
                 '(' CONFIRM ')'                  { $$ = new_option(DBG_ALLOC(strdup("confirm")), OPT_CONFIRM, NULL); };
 default:        '(' DEFAULT p ')'                { $$ = new_option(DBG_ALLOC(strdup("default")), OPT_DEFAULT, push(new_contxt(), $3)); };
-delopts:        '(' DELOPTS ps ')'               { $$ = new_option(DBG_ALLOC(strdup("delopts")), OPT_DELOPTS, $3); } |
-                '(' DELOPTS ')'                  { $$ = new_option(DBG_ALLOC(strdup("delopts")), OPT_DELOPTS, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); };
 dest:           '(' DEST p ')'                   { $$ = new_option(DBG_ALLOC(strdup("dest")), OPT_DEST, push(new_contxt(), $3)); };
 disk:           '(' DISK ')'                     { $$ = new_option(DBG_ALLOC(strdup("disk")), OPT_DISK, NULL); };
 files:          '(' FILES ')'                    { $$ = new_option(DBG_ALLOC(strdup("files")), OPT_FILES, NULL); };
@@ -502,8 +505,6 @@ settooltype:    '(' SETTOOLTYPE pp ')'           { $$ = new_option(DBG_ALLOC(str
 source:         '(' SOURCE p ')'                 { $$ = new_option(DBG_ALLOC(strdup("source")), OPT_SOURCE, push(new_contxt(), $3)); } |
                 '(' SOURCE p all ')'             { $$ = new_option(DBG_ALLOC(strdup("source")), OPT_SOURCE, push(push(new_contxt(), $3), $4)); };
 swapcolors:     '(' SWAPCOLORS ')'               { $$ = new_option(DBG_ALLOC(strdup("swapcolors")), OPT_SWAPCOLORS, NULL); };
-optional:       '(' OPTIONAL ps ')'              { $$ = new_option(DBG_ALLOC(strdup("optional")), OPT_OPTIONAL, $3); } |
-                '(' OPTIONAL ')'                 { $$ = new_option(DBG_ALLOC(strdup("optional")), OPT_OPTIONAL, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); };
 resident:       '(' RESIDENT ')'                 { $$ = new_option(DBG_ALLOC(strdup("resident")), OPT_RESIDENT, NULL); };
 override:       '(' OVERRIDE p ')'               { $$ = new_option(DBG_ALLOC(strdup("override")), OPT_OVERRIDE, push(new_contxt(), $3)); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

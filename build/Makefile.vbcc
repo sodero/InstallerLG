@@ -12,7 +12,7 @@ endif
 
 CC= vc +aos68k
 OBJS= alloc.o symbol.o init.o resource.o util.o error.o file.o control.o \
-      exit.o $(INTERFACE_OBJ) logic.o probe.o procedure.o media.o prompt.o strcasestr.o \
+      exit.o $(INTERFACE_OBJ) logic.o probe.o procedure.o media.o optional.o prompt.o strcasestr.o \
       strop.o wb.o args.o arithmetic.o comparison.o eval.o external.o \
       information.o ../build/parser.o ../build/lexer.o debug.o
 CFLAGS= -c99 -I$(VBCC)PosixLib/include $(INTERFACE_FLAGS) -I. -I../build -I../src -O -dontwarn=153 -DAMIGA -DAFF_68060=0x80 #-DLG_TEST
@@ -27,6 +27,8 @@ lexer.o: ../build/lexer.c
 	$(CC) -o ../build/lexer.o -c $(CFLAGS) $?
 
 media.o: media.c alloc.h error.h eval.h file.h gui.h media.h util.h types.h
+
+optional.o: optional.c alloc.h error.h eval.h optional.h util.h
 
 procedure.o: procedure.c alloc.h error.h eval.h procedure.h strop.h util.h \
              types.h

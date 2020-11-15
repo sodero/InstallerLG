@@ -20,6 +20,7 @@
 #include "information.h"
 #include "logic.h"
 #include "media.h"
+#include "optional.h"
 #include "probe.h"
 #include "procedure.h"
 #include "prompt.h"

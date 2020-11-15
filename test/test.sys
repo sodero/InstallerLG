@@ -68,3 +68,4 @@
 ("%ld" @delaskuser) ; "","0",""
 ("%ld" @oknodelete) ; "","0",""
 ("%ld" @deloknodelete) ; "","0",""
+("%ld" @invalid) ; "","0",""

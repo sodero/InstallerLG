@@ -181,6 +181,7 @@ static void init_misc_num(entry_p contxt)
     init_num(contxt, "@delaskuser", LG_FALSE);
     init_num(contxt, "@oknodelete", LG_FALSE);
     init_num(contxt, "@deloknodelete", LG_FALSE);
+    init_num(contxt, "@invalid", LG_FALSE);
     init_num(contxt, "true", LG_TRUE);
     init_num(contxt, "false", LG_FALSE);
     init_num(contxt, "@alfa", 0);
