@@ -47,6 +47,42 @@ static void h_optional_reset(entry_p contxt)
 //------------------------------------------------------------------------------
 // FIXME
 //------------------------------------------------------------------------------
+entry_p h_optional_get(entry_p contxt, opt_t type)
+{
+    int32_t val;
+
+    switch(type)
+    {
+        case OPT_FAIL:
+            val = get_num(contxt, h_optional_t2v(FAIL));
+            break;
+
+        case OPT_FORCE:
+            val = get_num(contxt, h_optional_t2v(FORCE));
+            break;
+
+        case OPT_NOFAIL:
+            val = get_num(contxt, h_optional_t2v(NOFAIL));
+            break;
+
+        case OPT_ASKUSER:
+            val = get_num(contxt, h_optional_t2v(ASKUSER));
+            break;
+
+        case OPT_OKNODELETE:
+            val = get_num(contxt, h_optional_t2v(OKNODELETE));
+            break;
+
+        default:
+            val = LG_FALSE;
+    }
+
+    return val == LG_TRUE ? end() : NULL;
+}
+
+//------------------------------------------------------------------------------
+// FIXME
+//------------------------------------------------------------------------------
 static void h_optional_modify(entry_p contxt, bool delete)
 {
     // Set variable prefix length and option range depending on the operation.

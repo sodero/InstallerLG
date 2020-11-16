@@ -11,6 +11,7 @@
 #include "debug.h"
 #include "error.h"
 #include "eval.h"
+#include "optional.h"
 #include "util.h"
 #include <limits.h>
 #include <stdarg.h>
@@ -433,6 +434,11 @@ entry_p opt(entry_p contxt, opt_t type)
         {
             return *cur;
         }
+    }
+
+    if(type >= OPT_ASKUSER && type <= OPT_OKNODELETE)
+    {
+        return h_optional_get(contxt, type);
     }
 
     // Option not found.

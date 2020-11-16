@@ -15,4 +15,6 @@
 entry_p n_optional(entry_p contxt);
 entry_p n_delopts(entry_p contxt);
 
+entry_p h_optional_get(entry_p contxt, opt_t type);
+
 #endif
