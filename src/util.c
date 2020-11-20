@@ -406,7 +406,12 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
 
 bool opt_init(entry_p contxt)
 {
-    for(size_t cur = 1; exists(C_ARG(cur)); cur++)
+    if(!contxt->children)
+    {
+        return true;
+    }
+
+    for(size_t cur = 1; exists(C_ARG(cur)) && NOT_ERR; cur++)
     {
         C_SYM(cur) = C_ARG(cur)->type == OPTION ?
         C_ARG(cur) : resolve(C_ARG(cur));
