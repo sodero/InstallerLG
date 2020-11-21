@@ -265,6 +265,33 @@ entry_p new_symref(char *name, int32_t line)
 //              entry_p src:    The source context.
 // Return:      -
 //------------------------------------------------------------------------------
+static size_t num_chl(entry_p entry)
+{
+    if((entry->type != CONTXT && entry->type != OPTION) || !entry->children)
+    {
+        return 1;
+    }
+
+    size_t cnt = 1;
+
+    for(size_t chl = 0; exists(entry->children[chl]); chl++)
+    {
+        entry_p cur = entry->children[chl];
+
+        if(cur->type == OPTION)
+        {
+            cnt += num_chl(cur);
+        }
+
+        if(cur->type == CONTXT)
+        {
+            cnt += num_chl(cur) - 1;
+        }
+    }
+
+    return cnt;
+}
+
 static bool move_contxt(entry_p dst, entry_p src)
 {
     if(!src)
@@ -285,9 +312,14 @@ static bool move_contxt(entry_p dst, entry_p src)
     size_t chl = 0, sym = 0;
 
     // Reparent children.
-    while(exists(dst->children[chl]))
+/*    while(exists(dst->children[chl]))
     {
         dst->children[chl++]->parent = dst;
+    }*/
+    for(size_t cur = 0; exists(dst->children[cur]); cur++)
+    {
+        chl += num_chl(dst->children[cur]);
+        dst->children[cur]->parent = dst;
     }
 
     // Reparent symbols.
@@ -296,7 +328,7 @@ static bool move_contxt(entry_p dst, entry_p src)
         dst->symbols[sym++]->parent = dst;
     }
 
-    if(sym)
+    if(sym || dst->type != NATIVE)
     {
         // No cache.
         return true;
@@ -315,6 +347,8 @@ static bool move_contxt(entry_p dst, entry_p src)
     // Set new cache.
     free(dst->symbols);
     dst->symbols = cache;
+
+printf("tot opt:%d\n", (int) chl);
 
     return true;
 }
@@ -348,17 +382,17 @@ entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t ty
         // Check return value and move context if any.
         if(entry->resolved)
         {
+            // Set parent of return value.
+            entry->resolved->parent = entry;
+
+            // ID and name are for debug only.
+            entry->type = NATIVE;
+            entry->name = name;
+            entry->call = call;
+            entry->id = line;
+
             if(move_contxt(entry, chl))
             {
-                // Set parent of return value.
-                entry->resolved->parent = entry;
-
-                // ID and name are for debug only.
-                entry->type = NATIVE;
-                entry->name = name;
-                entry->call = call;
-                entry->id = line;
-    //dump(entry);
                 return entry;
             }
 
