@@ -420,6 +420,28 @@ bool opt_init(entry_p contxt)
     return NOT_ERR;
 }
 
+static entry_p find_opt(entry_p entry, opt_t type)
+{
+    if(entry->type == OPTION && entry->id == (int32_t) type)
+    {
+        return entry;
+    }
+
+    if(!entry->children || (entry->type != CONTXT && entry->type != OPTION))
+    {
+        return NULL;
+    }
+
+    entry_p ret = NULL;
+
+    for(entry_p *chl = entry->children; exists(*chl) && !ret; chl++)
+    {
+        ret = find_opt(*chl, type);
+    }
+
+    return ret;
+}
+
 //------------------------------------------------------------------------------
 // Name:        opt
 // Description: Find option of a given type in a context.
@@ -429,7 +451,12 @@ bool opt_init(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p opt(entry_p contxt, opt_t type)
 {
-    LG_ASSERT(contxt->symbols, NULL);
+    LG_ASSERT(contxt->symbols && contxt->children, NULL);
+
+    if(type >= OPT_ASKUSER && type <= OPT_OKNODELETE)
+    {
+        return h_optional_get(contxt, type);
+    }
 
     // Note that we're not using use end() as a sentinel in the cache since
     // resolved entries could DANGLE, instead, array is NULL terminated.
@@ -441,13 +468,14 @@ entry_p opt(entry_p contxt, opt_t type)
         }
     }
 
-    if(type >= OPT_ASKUSER && type <= OPT_OKNODELETE)
+    entry_p ret = NULL;
+
+    for(entry_p *cur = contxt->children; exists(*cur) && !ret; cur++)
     {
-        return h_optional_get(contxt, type);
+        ret = find_opt(*cur, type);
     }
 
-    // Option not found.
-    return NULL;
+    return ret; 
 }
 
 //------------------------------------------------------------------------------
