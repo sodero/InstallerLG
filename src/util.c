@@ -468,14 +468,24 @@ entry_p opt(entry_p contxt, opt_t type)
         }
     }
 
-    entry_p ret = NULL;
-
-    for(entry_p *cur = contxt->children; exists(*cur) && !ret; cur++)
+    for(entry_p *cur = contxt->children; exists(*cur); cur++)
     {
-        ret = find_opt(*cur, type);
+        entry_p ret = find_opt(*cur, type);
+
+        if(ret)
+        {
+            return ret;
+        }
     }
 
-    return ret; 
+    // If in non strict mode, allow the absense of (prompt) and (help).
+    if((type == OPT_PROMPT || type == OPT_HELP) && !get_num(contxt, "@strict"))
+    {
+        // Will be resolved as "".
+        return end();
+    }
+
+    return NULL;
 }
 
 //------------------------------------------------------------------------------
