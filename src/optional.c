@@ -39,8 +39,10 @@ static void h_optional_reset(entry_p contxt)
 {
     for(stropt_t type = DELFAIL; type < INVALID; type++)
     {
-        set_num(contxt, h_optional_t2v(type - 5),
-        get_num(contxt, h_optional_t2v(type)) == LG_TRUE ? LG_TRUE: LG_FALSE);
+        int32_t cur = get_num(contxt, h_optional_t2v(type - 5)),
+                new = get_num(contxt, h_optional_t2v(type)) ? LG_TRUE : cur;
+
+        set_num(contxt, h_optional_t2v(type - 5), new);
     }
 }
 
@@ -99,7 +101,6 @@ static void h_optional_modify(entry_p contxt, bool delete)
         {   
             // Get name of option variable.
             char *var = h_optional_t2v(type);
-
             // Compare argument with suffix.
             if(!strcasecmp(arg, var + off))
             {

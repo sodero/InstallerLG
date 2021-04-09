@@ -411,10 +411,11 @@ bool opt_init(entry_p contxt)
         return true;
     }
 
-    for(size_t cur = 1; exists(C_ARG(cur)) && NOT_ERR; cur++)
+    for(size_t arg = 1, sym = 1; exists(C_ARG(arg)) && NOT_ERR; arg++)
     {
-        C_SYM(cur) = C_ARG(cur)->type == OPTION ?
-        C_ARG(cur) : resolve(C_ARG(cur));
+        C_SYM(sym) = C_ARG(arg)->type == OPTION ?
+        C_ARG(arg) : resolve(C_ARG(arg));
+        sym += C_SYM(sym) != end() ? 1 : 0;
     }
 
     return NOT_ERR;
@@ -442,6 +443,44 @@ static entry_p find_opt(entry_p entry, opt_t type)
     return ret;
 }
 
+static entry_p prune_opt(entry_p contxt, entry_p entry)
+{
+    if(entry->id == OPT_CONFIRM)
+    {
+        // Make sure that we have a prompt and a help string.
+        entry_p help = opt(contxt, OPT_HELP), prompt = opt(contxt, OPT_PROMPT);
+
+        if(!help || !prompt)
+        {
+            char * msg = prompt ? "help" : "prompt";
+            ERR_C(native(contxt), ERR_MISSING_OPTION, msg);
+        }
+
+        // The default threshold is expert.
+        int32_t level = get_num(contxt, "@user-level"), thres = LG_EXPERT;
+
+        // Evaluate (confirm) if children exist.
+        if(entry->children && exists(entry->children[0]))
+        {
+            // Set new threshold.
+            thres = num(entry);
+        }
+
+        // Clear cache[OPT_CONFIRM] if below threshold or fake 'yes' is set.
+        if(level < thres || get_num(contxt, "@yes"))
+        {
+            return NULL;
+        }
+    }
+    else
+    if(entry->id == OPT_FILES && opt(contxt, OPT_ALL))
+    {
+        return NULL;
+    }
+
+    return entry;
+}
+
 //------------------------------------------------------------------------------
 // Name:        opt
 // Description: Find option of a given type in a context.
@@ -458,23 +497,26 @@ entry_p opt(entry_p contxt, opt_t type)
         return h_optional_get(contxt, type);
     }
 
+    // FIXME: Gäller väl inte? Se opt_init.
+    //
     // Note that we're not using use end() as a sentinel in the cache since
     // resolved entries could DANGLE, instead, array is NULL terminated.
     for(entry_p *cur = contxt->symbols; *cur; cur++)
     {
         if((*cur)->type == OPTION && (*cur)->id == (int32_t) type)
         {
-            return *cur;
+            return prune_opt(contxt, *cur);
         }
     }
 
+    // FIXME: Varför children och inte symbols?
     for(entry_p *cur = contxt->children; exists(*cur); cur++)
     {
         entry_p ret = find_opt(*cur, type);
 
         if(ret)
         {
-            return ret;
+            return prune_opt(contxt, ret);
         }
     }
 
@@ -675,7 +717,6 @@ int32_t get_num(entry_p contxt, char *var)
         return sym->resolved->id;
     }
 
-    // Failure.
     return 0;
 }
 
@@ -801,7 +842,7 @@ char *get_optstr(entry_p contxt, opt_t type)
 
 //------------------------------------------------------------------------------
 // Name:        is_mergeable
-// Description: Helper used by get_chlstr to determinet whether to concatenate
+// Description: Helper used by get_chlstr to determine whether to concatenate
 //              the string representation of a child or not.
 // Input:       entry_p contxt: The context.
 // Return:      bool:           If it's possible to cancatenate 'true', 'false'
