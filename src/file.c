@@ -2422,7 +2422,7 @@ entry_p n_delete(entry_p contxt)
     // One argument and options.
     C_SANE(1, contxt);
     int32_t status = LG_TRUE;
-//dump(contxt);
+
     // Delete all files leading up to the first option
     for(size_t ndx = 1; NOT_ERR && exists(C_SYM(ndx)) &&
         C_SYM(ndx)->type != OPTION; ndx++)

@@ -338,7 +338,7 @@ trap:           '(' TRAP ps ')'                  { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 copyfiles:      '(' COPYFILES ps ')'             { $$ = new_native(DBG_ALLOC(strdup("copyfiles")), LINE, n_copyfiles, $3, STRING); };
 copylib:        '(' COPYLIB ps ')'               { $$ = new_native(DBG_ALLOC(strdup("copylib")), LINE, n_copylib, $3, NUMBER); };
-delete:         '(' DELETE ps ')'                { $$ = new_native(DBG_ALLOC(strdup("delete")), LINE, n_delete, ordo($3), NUMBER); };
+delete:         '(' DELETE ps ')'                { $$ = new_native(DBG_ALLOC(strdup("delete")), LINE, n_delete, $3, NUMBER); };
 exists:         '(' EXISTS ps ')'                { $$ = new_native(DBG_ALLOC(strdup("exists")), LINE, n_exists, ordo($3), NUMBER); };
 fileonly:       '(' FILEONLY p ')'               { $$ = new_native(DBG_ALLOC(strdup("fileonly")), LINE, n_fileonly, push(new_contxt(), $3), STRING); };
 foreach:        '(' FOREACH pp ps ')'            { $$ = new_native(DBG_ALLOC(strdup("foreach")), LINE, n_foreach, push($3, $4), NUMBER); };
@@ -387,8 +387,10 @@ showmedia:      '(' SHOWMEDIA pp pp ps ')'       { $$ = new_native(DBG_ALLOC(str
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* optional.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-optional:       '(' OPTIONAL ps ')'              { $$ = new_native(DBG_ALLOC(strdup("optional")), LINE, n_optional, $3, DANGLE); };
-delopts:        '(' DELOPTS ps ')'               { $$ = new_native(DBG_ALLOC(strdup("delopts")), LINE, n_delopts, $3, DANGLE); };
+optional:       '(' OPTIONAL ps ')'              { $$ = new_native(DBG_ALLOC(strdup("optional")), LINE, n_optional, $3, DANGLE); } |
+                '(' OPTIONAL ')'                 { $$ = new_option(DBG_ALLOC(strdup("optional")), OPT_OPTIONAL, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); };
+delopts:        '(' DELOPTS ps ')'               { $$ = new_native(DBG_ALLOC(strdup("delopts")), LINE, n_delopts, $3, DANGLE); } |
+                '(' DELOPTS ')'                  { $$ = new_option(DBG_ALLOC(strdup("delopts")), OPT_DELOPTS, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* probe.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

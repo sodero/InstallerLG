@@ -404,6 +404,12 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
     }
 }*/
 
+static bool opt_ok(entry_p contxt)
+{
+    return NOT_ERR && (!opt(contxt, OPT_CONFIRM) || 
+           (opt(contxt, OPT_PROMPT) && opt(contxt, OPT_HELP)));
+}
+
 bool opt_init(entry_p contxt)
 {
     if(!contxt->children)
@@ -415,10 +421,22 @@ bool opt_init(entry_p contxt)
     {
         C_SYM(sym) = C_ARG(arg)->type == OPTION ?
         C_ARG(arg) : resolve(C_ARG(arg));
+
+        if(C_SYM(sym) != end() && C_SYM(sym)->type != OPTION && sym > 1 && 
+           C_SYM(sym - 1)->type == OPTION)
+        {
+            for(size_t cur = sym; cur > 1; cur--)
+            {
+                entry_p old = C_SYM(cur - 1);
+                C_SYM(cur - 1) = C_SYM(cur);
+                C_SYM(cur) = old;
+            }
+        }
+
         sym += C_SYM(sym) != end() ? 1 : 0;
     }
 
-    return NOT_ERR;
+    return opt_ok(contxt);
 }
 
 static entry_p find_opt(entry_p entry, opt_t type)
@@ -463,7 +481,7 @@ static entry_p prune_opt(entry_p contxt, entry_p entry)
         if(entry->children && exists(entry->children[0]))
         {
             // Set new threshold.
-            thres = num(entry);
+            thres = num(entry->children[0]);
         }
 
         // Clear cache[OPT_CONFIRM] if below threshold or fake 'yes' is set.
