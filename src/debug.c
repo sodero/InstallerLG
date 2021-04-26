@@ -93,7 +93,7 @@ entry_p n_eval(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
-// (___options <statement>)
+// (___options)
 //     Dump option cache.
 //
 // Please note the ___ prefix. This is not meant to be used by end users.
@@ -103,20 +103,10 @@ entry_p n_options(entry_p contxt)
     // No arguments.
     C_SANE(0, NULL);
 
-    // If we have children, use that as cache context.
-    entry_p optcon = contxt;
-
-    if(contxt->children && exists(C_ARG(1)))
-    {
-        // Resolve children to fill cache.
-        (void) resolve(C_ARG(1));
-        optcon = C_ARG(1);
-    }
-
     // Dump all options from the global option cache.
     for(opt_t option = OPT_ALL; option < OPT_INIT; option++)
     {
-        entry_p cur = opt(optcon, option);
+        entry_p cur = opt(contxt, option);
         OUT("%d:%s\n" , option, cur ? "true" : "false");
     }
 

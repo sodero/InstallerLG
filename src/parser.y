@@ -312,7 +312,7 @@ astraw:         '(' ASTRAW ')'                   { $$ = new_native(DBG_ALLOC(str
 asbraw:         '(' ASBRAW ps ')'                { $$ = new_native(DBG_ALLOC(strdup("___asbraw")), LINE, n_asbraw, push(new_contxt(), $3), NUMBER); };
 asbeval:        '(' ASBEVAL ps ')'               { $$ = new_native(DBG_ALLOC(strdup("___asbeval")), LINE, n_asbeval, push(new_contxt(), $3), NUMBER); };
 eval:           '(' EVAL ps ')'                  { $$ = new_native(DBG_ALLOC(strdup("___eval")), LINE, n_eval, push(new_contxt(), $3), NUMBER); };
-options:        '(' OPTIONS ')'                  { $$ = new_native(DBG_ALLOC(strdup("___options")), LINE, n_options, NULL, NUMBER); } |
+options:        '(' OPTIONS ')'                  { $$ = new_native(DBG_ALLOC(strdup("___options")), LINE, n_options, new_contxt(), NUMBER); } |
                 '(' OPTIONS ps ')'               { $$ = new_native(DBG_ALLOC(strdup("___options")), LINE, n_options, $3, NUMBER); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* external.c|h                                                                                                                                                                         */

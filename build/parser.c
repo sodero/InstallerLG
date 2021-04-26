@@ -3855,7 +3855,7 @@ yyreduce:
 
   case 194:
 #line 315 "../src/parser.y"
-                                                 { (yyval.e) = new_native(DBG_ALLOC(strdup("___options")), LINE, n_options, NULL, NUMBER); }
+                                                 { (yyval.e) = new_native(DBG_ALLOC(strdup("___options")), LINE, n_options, new_contxt(), NUMBER); }
 #line 3860 "parser.c"
     break;
 

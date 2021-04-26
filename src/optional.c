@@ -98,9 +98,10 @@ static void h_optional_modify(entry_p contxt, bool delete)
 
         // Iterate over all option set / delete types.
         for(stropt_t type = start; type < stop; type++)
-        {   
+        {
             // Get name of option variable.
             char *var = h_optional_t2v(type);
+
             // Compare argument with suffix.
             if(!strcasecmp(arg, var + off))
             {
