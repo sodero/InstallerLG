@@ -33,5 +33,6 @@ entry_p append(entry_p **dst, entry_p ent);
 entry_p merge(entry_p dst, entry_p src);
 entry_p push(entry_p dst, entry_p src);
 entry_p end(void);
+entry_p skip(void);
 
 #endif

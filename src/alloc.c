@@ -788,3 +788,17 @@ entry_p end(void)
 
     return &entry;
 }
+
+//------------------------------------------------------------------------------
+// Name:        skip
+// Description: Get entry_p skip entry.
+// Input:       -
+// Return:      entry_p:    An entry_p which can be used to skip arguments.
+//------------------------------------------------------------------------------
+entry_p skip(void)
+{
+    // Zero / empty string.
+    static entry_t entry = { .type = DANGLE, .id = 0, .name = "" };
+
+    return &entry;
+}

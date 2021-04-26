@@ -403,41 +403,12 @@ static void opt_fill_cache(entry_p contxt, entry_p *cache)
         opt_fill_cache(cur, cache);
     }
 }*/
-
+/*
 static bool opt_ok(entry_p contxt)
 {
-    return NOT_ERR && (!opt(contxt, OPT_CONFIRM) || 
+    return NOT_ERR && (!opt(contxt, OPT_CONFIRM) ||
            (opt(contxt, OPT_PROMPT) && opt(contxt, OPT_HELP)));
-}
-
-bool opt_init(entry_p contxt)
-{
-    if(!contxt->children)
-    {
-        return true;
-    }
-
-    for(size_t arg = 1, sym = 1; exists(C_ARG(arg)) && NOT_ERR; arg++)
-    {
-        C_SYM(sym) = C_ARG(arg)->type == OPTION ?
-        C_ARG(arg) : resolve(C_ARG(arg));
-
-        if(C_SYM(sym) != end() && C_SYM(sym)->type != OPTION && sym > 1 && 
-           C_SYM(sym - 1)->type == OPTION)
-        {
-            for(size_t cur = sym; cur > 1; cur--)
-            {
-                entry_p old = C_SYM(cur - 1);
-                C_SYM(cur - 1) = C_SYM(cur);
-                C_SYM(cur) = old;
-            }
-        }
-
-        sym += C_SYM(sym) != end() ? 1 : 0;
-    }
-
-    return opt_ok(contxt);
-}
+}*/
 
 static entry_p find_opt(entry_p entry, opt_t type)
 {
@@ -481,7 +452,13 @@ static entry_p prune_opt(entry_p contxt, entry_p entry)
         if(entry->children && exists(entry->children[0]))
         {
             // Set new threshold.
-            thres = num(entry->children[0]);
+        //    thres = num(entry->children[0]);
+
+            // Set new user threshold value.
+            thres = num(entry);
+
+ //           printf("conf level:%d\n", thres);
+//            printf("conf level str:%s\n", str(entry->children[0]));
         }
 
         // Clear cache[OPT_CONFIRM] if below threshold or fake 'yes' is set.
@@ -498,6 +475,51 @@ static entry_p prune_opt(entry_p contxt, entry_p entry)
 
     return entry;
 }
+
+bool opt_init(entry_p contxt)
+{
+    if(!contxt->children)
+    {
+        return true;
+    }
+
+    for(size_t arg = 1, sym = 1; exists(C_ARG(arg)) && NOT_ERR; arg++)
+    {
+        C_SYM(sym) = C_ARG(arg)->type == OPTION ? C_ARG(arg) :
+                     resolve(C_ARG(arg));
+
+        if(C_SYM(sym) != end() && C_SYM(sym)->type != OPTION && sym > 1 && 
+           C_SYM(sym - 1)->type == OPTION)
+        {
+            for(size_t cur = sym; cur > 1; cur--)
+            {
+                entry_p old = C_SYM(cur - 1);
+                C_SYM(cur - 1) = C_SYM(cur);
+                C_SYM(cur) = old;
+            }
+        }
+
+        sym += C_SYM(sym) != end() ? 1 : 0;
+    }
+
+    for(size_t sym = 1; exists(C_SYM(sym)) && NOT_ERR; sym++)
+    {
+        entry_p cur = prune_opt(contxt, C_SYM(sym));
+        C_SYM(sym) = cur ? C_SYM(sym) : skip();
+    }
+
+//dump(contxt);
+
+
+
+
+    return NOT_ERR;
+//HERE;
+//printf("opt_ok:%d\n", opt_ok(contxt));
+//    return opt_ok(contxt);
+}
+
+
 
 //------------------------------------------------------------------------------
 // Name:        opt

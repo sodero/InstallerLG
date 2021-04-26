@@ -114,7 +114,7 @@ DIR *dbg_dopen(int32_t line, const char *file, DIR *hand);
 #ifndef __clang_analyzer__
 #define C_SANE(N,O) if(!c_sane(contxt, N)) {(void) PANIC(contxt); \
                     return end();}  {entry_p op_ = O; if(op_ != NULL &&\
-                    opt_init(O) && DID_ERR) {return end();}}
+                    !opt_init(O)) {return end();}}
 #else
 #define C_SANE(N,O) return end();
 #endif
