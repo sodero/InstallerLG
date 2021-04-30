@@ -93,7 +93,7 @@ entry_p n_eval(entry_p contxt)
 }
 
 //------------------------------------------------------------------------------
-// (___options)
+// (___options <statement>)
 //     Dump option cache.
 //
 // Please note the ___ prefix. This is not meant to be used by end users.

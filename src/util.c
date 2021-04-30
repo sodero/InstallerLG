@@ -845,7 +845,7 @@ char *get_optstr(entry_p contxt, opt_t type)
         if((*child)->id == (int32_t) type && (*child)->type == OPTION)
         {
             // Sum up the length.
-            char *cur = get_chlstr(*child, false);
+            char *cur = get_chlstr(*child, false, false);
 
             if(cur)
             {
@@ -898,19 +898,20 @@ static bool is_mergeable(entry_p entry)
 //------------------------------------------------------------------------------
 // Name:        get_chlstr
 // Description: Concatenate the string representations of all non context
-//              children of a context.
+//              children or resolved symbols of a context.
 // Input:       entry_p contxt:  The context.
 //              bool pad:        Whitespace padding.
+//              bool sym:        Use resolved symbols.
 // Return:      char *:          The concatenation of the string representations
 //                               of all non context children of 'contxt'.
 //------------------------------------------------------------------------------
-char *get_chlstr(entry_p contxt, bool pad)
+char *get_chlstr(entry_p contxt, bool pad, bool sym)
 {
     // We don't really need anything to concatenate but we expect a sane contxt.
     LG_ASSERT(c_sane(contxt, 0), NULL);
 
     // Concatenation.
-    entry_p *child = contxt->children;
+    entry_p *child = sym ? contxt->symbols : contxt->children;
     size_t cnt = 0;
 
     // We might not have any children.

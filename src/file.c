@@ -3033,10 +3033,8 @@ entry_p n_protect(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p n_startup(entry_p contxt)
 {
-    // Two or more arguments / options.
-    C_SANE(2, contxt);
-
-    const char *app = str(C_ARG(1));
+    // One more arguments / options.
+    C_SANE(1, contxt);
 
     entry_p command  = opt(contxt, OPT_COMMAND),
             help     = opt(contxt, OPT_HELP),
@@ -3044,6 +3042,10 @@ entry_p n_startup(entry_p contxt)
 
     // Expect failure.
     D_NUM = LG_FALSE;
+
+    // Use @app-name as fallback.
+    const char *app = C_SYM(1)->type != OPTION ? str(C_SYM(1)) :
+                get_str(contxt, "@app-name");
 
     // We need a command and somewhere to put it.
     if((!*app && ERR(ERR_INVALID_APP, app)) ||
@@ -4008,7 +4010,7 @@ entry_p n_transcript(entry_p contxt)
     C_SANE(1, NULL);
 
     // Concatenate all children.
-    char *msg = get_chlstr(contxt, false);
+    char *msg = get_chlstr(contxt, false, false);
 
     // Make sure that we're not out of memory and that all children are valid.
     if((!msg && PANIC(contxt)) || DID_ERR)

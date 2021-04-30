@@ -81,7 +81,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
     if(safe || !get_num(contxt, "@pretend"))
     {
         // Command / script. Merge all and insert space between arguments.
-        char *cmd = get_chlstr(contxt, true);
+        char *cmd = get_chlstr(contxt, true, false);
 
         // Exit on OOM.
         LG_ASSERT(cmd, end());

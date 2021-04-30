@@ -25,7 +25,6 @@
 (set @user-level 2) (message ("%ld" 2) 1) ; "","2101",""
 (message "1" "2" (all) (safe)) ; "","1201",""
 (message (all) "1" "2") ; "","1201",""
-(message (all)) ; "","Line 1: syntax error, unexpected ')' ')'",""
 (message "1" (safe)) ; "","101",""
 (set @strict 0) (message undef (all)) ; "","01",""
 (set @strict 0) (set def "1") (message def "" "" undef (all)) ; "","101",""

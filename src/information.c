@@ -141,7 +141,7 @@ entry_p n_message(entry_p contxt)
     }
 
     // Concatenate all children.
-    char *msg = get_chlstr(contxt, false);
+    char *msg = get_chlstr(contxt, false, true);
 
     // Make sure that we're not out of memory and that all children are
     // resolvable.
@@ -213,7 +213,7 @@ entry_p n_welcome(entry_p contxt)
     if(contxt->children)
     {
         // We have a message. Concatenate children.
-        msg = get_chlstr(contxt, false);
+        msg = get_chlstr(contxt, false, false);
     }
     else
     {
@@ -273,7 +273,7 @@ entry_p n_working(entry_p contxt)
     C_SANE(0, NULL);
 
     // Concatenate all children if we have any.
-    char *msg = get_chlstr(contxt, false);
+    char *msg = get_chlstr(contxt, false, false);
 
     // Exit on OOM.
     LG_ASSERT(msg, end());

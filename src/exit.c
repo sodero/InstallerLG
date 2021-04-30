@@ -34,7 +34,7 @@ entry_p n_abort(entry_p contxt)
     C_SANE(0, NULL);
 
     // Concatenate all children.
-    char *msg = get_chlstr(contxt, false);
+    char *msg = get_chlstr(contxt, false, false);
 
     // Bail out on out of memory or if we have unresolvable children.
     if((!msg && PANIC(contxt)) || DID_ERR)
@@ -111,7 +111,7 @@ entry_p n_exit(entry_p contxt)
     if(contxt->children && C_ARG(1)->type != NUMBER)
     {
         // Concatenate all children.
-        char *msg = get_chlstr(contxt, false);
+        char *msg = get_chlstr(contxt, false, false);
 
         if((!msg && PANIC(contxt)) || DID_ERR)
         {

@@ -36,7 +36,7 @@ void dump(entry_p entry);
 int32_t get_num(entry_p contxt, char *var);
 char *get_str(entry_p contxt, char *var);
 char *get_optstr(entry_p contxt, opt_t type);
-char *get_chlstr(entry_p contxt, bool pad);
+char *get_chlstr(entry_p contxt, bool pad, bool sym);
 void set_num(entry_p contxt, char *var, int32_t val);
 void set_str(entry_p contxt, char *var, char *val);
 char *buf_get(const char *usr);

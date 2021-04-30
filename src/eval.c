@@ -293,7 +293,7 @@ static char *h_str_opt(entry_p opt)
        case OPT_PROMPT:
            // Concatenate children of (help) and (prompt).
            free(opt->name);
-           opt->name = get_chlstr(opt, false);
+           opt->name = get_chlstr(opt, false, false);
 
            if(!opt->name && PANIC(opt))
            {
