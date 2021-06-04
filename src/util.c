@@ -508,15 +508,7 @@ bool opt_init(entry_p contxt)
         C_SYM(sym) = cur ? C_SYM(sym) : skip();
     }
 
-//dump(contxt);
-
-
-
-
     return NOT_ERR;
-//HERE;
-//printf("opt_ok:%d\n", opt_ok(contxt));
-//    return opt_ok(contxt);
 }
 
 
@@ -1113,6 +1105,8 @@ static void dump_indent(entry_p entry, size_t indent)
 //------------------------------------------------------------------------------
 void dump(entry_p entry)
 {
+    // Start with no indentation.
+    dump_indent(entry, 0);
     static entry_p last;
 
     // Don't duplicate.

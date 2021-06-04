@@ -47,13 +47,14 @@ static entry_p h_copy_deep(entry_p entry)
 }
 
 //------------------------------------------------------------------------------
-// Name:        h_set_find
-// Description: n_set helper. Find symbol with a given name in symbol array.
+// Name:        h_symbolset_find
+// Description: n_symbolset helper. Find symbol with a given name in symbol
+//                                  array.
 // Input:       entry_p contxt:     Execution context.
 //              const char *name:   Symbol name.
 // Return:      entry_p:            The symbol if found, NULL otherwise.
 //------------------------------------------------------------------------------
-static entry_p h_set_find(entry_p contxt, const char *name)
+static entry_p h_symbolset_find(entry_p contxt, const char *name)
 {
     if(!contxt || !contxt->symbols || !name)
     {
@@ -141,7 +142,7 @@ entry_p n_set(entry_p contxt)
 //              entry_p res:        New resolved value.
 // Return:      entry_p:            The existing symbol.
 //------------------------------------------------------------------------------
-static entry_p n_symbolset_exists(entry_p contxt, entry_p esm, entry_p res)
+static entry_p h_symbolset_exists(entry_p contxt, entry_p esm, entry_p res)
 {
     // Replace resolved value of existing symbol.
     kill(esm->resolved);
@@ -163,26 +164,35 @@ static entry_p n_symbolset_exists(entry_p contxt, entry_p esm, entry_p res)
 //              entry_p res:        Initial resolved value.
 // Return:      entry_p:            The newly created symbol.
 //------------------------------------------------------------------------------
-static entry_p n_symbolset_new(entry_p contxt, const char *lhs, entry_p res)
+static entry_p h_symbolset_new(entry_p contxt, const char *lhs, entry_p res)
 {
-    // Append new symbol to current context.
-    entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs)));
+    // Allocate memory to hold both current symbols and the new symbol.
+    size_t num = num_entries(contxt->symbols);
+    entry_p nsm = new_symbol(DBG_ALLOC(strdup(lhs))), glb = global(contxt);
+    entry_p *sym = DBG_ALLOC(calloc(num + 2, sizeof(entry_p)));
 
-    if(!nsm || !append(&contxt->symbols, nsm))
+    // Append new symbol to current context.
+    if(!sym || !nsm || !glb || !append(&contxt->symbols, nsm))
     {
         kill(nsm);
         kill(res);
+        free(sym);
 
         // Fallback.
         return end();
     }
+
+    // Replace current symbol set.
+    memcpy(sym, contxt->symbols, (num + 1)* sizeof(entry_p));
+    free(contxt->symbols);
+    contxt->symbols = sym;
 
     // Reparent and create global reference.
     nsm->resolved = res;
     res->parent = nsm;
 
     // Push cannot fail in this context.
-    push(global(contxt), nsm);
+    push(glb, nsm);
     nsm->parent = contxt;
 
     // Pass the result.
@@ -200,8 +210,7 @@ entry_p n_symbolset(entry_p contxt)
 {
     // We need atleast one symbol. The CBM installer tolerates constructs such
     // as (symbolset "a"). In that case 'a' will simply be ignored.
-    C_SANE(1, NULL); S_SANE(0);
-
+    C_SANE(1, NULL);
     entry_p ret = end();
 
     // Iterate over all name value tuples
@@ -230,11 +239,11 @@ entry_p n_symbolset(entry_p contxt)
         LG_ASSERT(res, end());
 
         // Does this symbol already exist?
-        entry_p esm = h_set_find(contxt, lhs);
+        entry_p esm = h_symbolset_find(contxt, lhs);
 
         // Create new or update existing symbol.
-        ret = esm ? n_symbolset_exists(contxt, esm, res) :
-                    n_symbolset_new(contxt, lhs, res);
+        ret = esm ? h_symbolset_exists(contxt, esm, res) :
+                    h_symbolset_new(contxt, lhs, res);
     }
 
     // Return the last RHS.

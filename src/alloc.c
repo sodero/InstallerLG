@@ -732,7 +732,7 @@ static bool owns_res(entry_p entry)
 //FIXME
 static bool owns_sym(entry_p entry)
 {
-    // The only NATIVE:s that own symbols are (set) and (procedure).
+    // The only NATIVE that owns symbols are (set), (procedure) and (symbolset).
     return entry && (entry->type != NATIVE || (entry->call == n_set ||
            entry->call == n_procedure || entry->call == n_symbolset));
 }
@@ -765,10 +765,12 @@ void kill(entry_p entry)
 
         // Free symbol references.
         free(entry->symbols);
+        entry->symbols = NULL;
 
         // Free our own children.
         kill_all(entry->children, entry);
         free(entry->children);
+        entry->children = NULL;
 
         // Kill ourselves.
         free(entry);

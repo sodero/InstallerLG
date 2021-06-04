@@ -23,7 +23,7 @@ ifneq ($(OS),AROS)
 CWRN += -pedantic -Wno-gnu-statement-expression
 endif
 ifeq ($(OS),Linux)
-CGEN = -g -std=c99
+CGEN = -ggdb -std=c99
 CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE
 else
 ifeq ($(OS),Darwin)
