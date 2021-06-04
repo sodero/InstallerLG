@@ -1081,7 +1081,7 @@ entry_p n_iconinfo(entry_p contxt)
     // Get icon information.
     struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
     #else
-    char *obj = file;
+    char *obj = DBG_ADDR(file);
     #endif
 
     // Exit if we can't read from icon.
