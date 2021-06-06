@@ -11,7 +11,7 @@
 ("%s" @copyfiles-help) ; "","",""
 ("%s" @makedir-help) ; "","",""
 ("%s" @startup-help) ; "","",""
-("%s" @default-dest) ; "","T:",""
+("%s" @default-dest) ; "","Work:",""
 ("%s" @error-msg) ; "","",""
 ("%s" @execute-dir) ; "","",""
 (> (strlen ("%s" @icon)) 8) ; "","1",""

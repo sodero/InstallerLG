@@ -207,7 +207,7 @@ static void init_misc_string(entry_p contxt)
     init_str(contxt, "@copyfiles-help", "");
     init_str(contxt, "@makedir-help", "");
     init_str(contxt, "@startup-help", "");
-    init_str(contxt, "@default-dest", "T:");
+    init_str(contxt, "@default-dest", "Work:");
     init_str(contxt, "@error-msg", "");
     init_str(contxt, "@execute-dir", "");
     init_str(contxt, "@special-msg", "");

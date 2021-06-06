@@ -121,6 +121,10 @@ Russian translation.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}1.0.0-beta.2 (2021-NOT-YET)@{UB}
+- Initial value of @default-dest set to Work: like the CBM Installer.
+- ?
+
 @{B}1.0.0-beta.1 (2020-10-31)@{UB}
 - Void (if) return value fix.
 - Empty (trap) body allowed.
