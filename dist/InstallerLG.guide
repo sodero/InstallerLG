@@ -123,6 +123,7 @@ Russian translation.
 
 @{B}1.0.0-beta.2 (2021-NOT-YET)@{UB}
 - Initial value of @default-dest set to Work: like the CBM Installer.
+- Bubble help wrapping fixed.
 - ?
 
 @{B}1.0.0-beta.1 (2020-10-31)@{UB}

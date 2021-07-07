@@ -85,7 +85,7 @@ APTR STDARGS DoSuperNew(struct IClass *cl, APTR obj, IPTR tag1, ...)
 #define DISPATCH(C) static IPTR C ## Dispatch (DISPATCH_ARGS)
 #define CLASS_DATA(C) C ## Data
 #define TAGBASE_LG (TAG_USER | 27<<16)
-#define MUIDSP static inline IPTR __attribute__((always_inline))
+#define MUIDSP static IPTR
 
 //------------------------------------------------------------------------------
 // Debug and logging macros
@@ -704,35 +704,30 @@ MUIDSP IGInit(Class *cls, Object *obj)
 }
 
 //------------------------------------------------------------------------------
-// IGPageSet - [PRIVATE] Set page / buttons and display text
-// Input:                Message - Top message
-//                       Help - Help message
-//                       Top - Top page
-//                       Bottom - Bottom page
-// Return:               TRUE on success, FALSE otherwise
+// IGWrapString - Wrap and chomp strings. Please note this function uses its
+//                own static buffer. Care (and possibly copies) needs to be
+//                taken when used by multiple callers.
+// Input:         const char * src:     String to be wrapped.
+//                size_t len:           Line length.
+//                bool chomp:           Chomp trailing whitespace when true.
+// Return:        A wrapped and chomped copy of src.
 //------------------------------------------------------------------------------
-MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
+MUIDSP IGWrapString(const char *src, size_t len, bool chomp)
 {
-    struct IGData *my = INST_DATA(cls, obj);
+    // Create capped copy.
+    static char buf[1 << 12];
+    size_t cnt = strlen(src);
+    cnt = cnt < (sizeof(buf) - 1) ? cnt : (sizeof(buf) - 1);
+    memcpy(buf, src, cnt);
+    buf[cnt] = '\0';
 
-    // Always a valid message string.
-    const char *src = msg->Message ? (const char *) msg->Message : "";
-
-    // Select top and buttons.
-    set(my->Top, MUIA_Group_ActivePage, msg->Top);
-    set(my->Bottom, MUIA_Group_ActivePage, msg->Bottom);
-
-    // NULL will disable the help bubble.
-    set(my->Text, MUIA_ShortHelp, msg->Help);
-
-    // Wrap at 53 characters just like the CBM installer.
-    size_t cnt = strlen(src), len = 53;
-
-    // Cap the size of the message.
-    cnt = cnt < (sizeof(my->Buf) - 1) ? cnt : (sizeof(my->Buf) - 1);
-
-    // Copy for wrapping.
-    memcpy(my->Buf, src, cnt);
+    if(chomp)
+    {
+        while(cnt && buf[--cnt] < '!')
+        {
+            buf[cnt] = '\0';
+        }
+    }
 
     // Do we need to word wrap?
     if(cnt > len)
@@ -747,7 +742,7 @@ MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
             size_t ref = cur - len;
 
             // Go backwards from where we are to a point where we can wrap.
-            while(cur > ref && my->Buf[cur] > 33)
+            while(cur > ref && buf[cur] > '!')
             {
                 cur--;
             }
@@ -765,7 +760,7 @@ MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
                 // exists before this point but after the previous point.
                 while(++ref < cur)
                 {
-                    if(my->Buf[ref] == '\n')
+                    if(buf[ref] == '\n')
                     {
                         // Skip wrap.
                         cur = ref;
@@ -775,18 +770,48 @@ MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
             }
 
             // Wrap and continue.
-            my->Buf[cur] = '\n';
+            buf[cur] = '\n';
             cur += len;
         }
     }
 
-    // Terminate string.
-    my->Buf[cnt] = '\0';
+    // Always.
+    return (IPTR) buf;
+}
 
-    // Show the message.
+//------------------------------------------------------------------------------
+// IGPageSet - [PRIVATE] Set page / buttons and display text
+// Input:                Message - Top message
+//                       Help - Help message
+//                       Top - Top page
+//                       Bottom - Bottom page
+// Return:               TRUE on success, FALSE otherwise
+//------------------------------------------------------------------------------
+MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
+{
+    struct IGData *my = INST_DATA(cls, obj);
+
+    // Select top and buttons.
+    set(my->Top, MUIA_Group_ActivePage, msg->Top);
+    set(my->Bottom, MUIA_Group_ActivePage, msg->Bottom);
+
+    // Show message. Wrap at 53 characters like the CBM installer.
     set(my->Text, MUIA_ShowMe, FALSE);
-    set(my->Text, MUIA_Text_Contents, my->Buf);
+    set(my->Text, MUIA_Text_Contents, IGWrapString(msg->Message ? (const char *)
+        msg->Message : "", 53, false));
     set(my->Text, MUIA_ShowMe, TRUE);
+
+    // On AROS/Zune no line wrapping is done in help bubbles. We need to take
+    // care of that ourselves. Use 53 characters as limit.
+#ifdef __AROS__
+    set(my->Text, MUIA_ShortHelp, msg->Help ? IGWrapString((const char *)
+        msg->Help, 53, true) : msg->Help);
+#else
+    // On MorphOS line wrapping is done in help bubbles, but it doesn't work if
+    // the string ends with newlines, so chomping is needed.
+    set(my->Text, MUIA_ShortHelp, msg->Help ? IGWrapString((const char *)
+        msg->Help, INT_MAX, true) : msg->Help);
+#endif
 
     // Always.
     return TRUE;
