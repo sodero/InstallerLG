@@ -4,7 +4,7 @@ Uploader:     rolfkopman@gmail.com (Ola Söder)
 Type:         util/sys
 Architecture: __ARCH__
 Requires:     MUI 3.8
-Version:      1.0.0-beta.1
+Version:      1.0.0-beta.2
 Distribution: Aminet
 
 InstallerLG
