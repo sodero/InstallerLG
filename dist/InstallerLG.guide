@@ -121,6 +121,9 @@ Russian translation.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}1.0.0-beta.3 (2021-NOT-YET)@{UB}
+- (askdir) directory name truncation now works like the CBM Installer.
+
 @{B}1.0.0-beta.2 (2021-07-17)@{UB}
 - Initial value of @default-dest set to 'Work:' like the CBM Installer.
 - Bubble help wrapping fixed.

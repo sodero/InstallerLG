@@ -1090,7 +1090,7 @@ MUIDSP IGAskFile(Class *cls, Object *obj, struct MUIP_IG_AskFile *msg)
 
                             // The ASL appends '/' to dirs. This is not how the
                             // CBM installer works, no trailing '/' allowed.
-                            if(msg->Dir && len && my->Buf[len - 1] == '/')
+                            if(msg->Dir && len > 1 && my->Buf[len - 1] == '/')
                             {
                                 my->Buf[len - 1] = '\0';
                             }
