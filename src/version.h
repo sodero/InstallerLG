@@ -12,11 +12,15 @@
 
 #define MAJOR 44
 #define MINOR 10
-#define BUILD 2
-#define PHASE "BETA"
+#define BUILD 1
+#define PHASE "FINAL"
 
 #define STY(X) #X
 #define VER(X) STY(X)
+#if 1
+#define VERSION_STRING "\0$VER: InstallerLG " VER(MAJOR) "." VER(MINOR) " " __AMIGADATE__
+#else
 #define VERSION_STRING "\0$VER: InstallerLG " VER(MAJOR) "." VER(MINOR) " " __AMIGADATE__ " [" PHASE VER(BUILD) "]"
+#endif
 
 #endif
