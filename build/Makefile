@@ -58,7 +58,11 @@ DD = ..
 endif
 
 CINC += -I . -I $(VPATH)
+ifeq ($(OS),AmigaOS)
 CDEF += -D__AMIGADATE__=\"($(DATE))\" $(CEXT)
+else
+CDEF += -D__AMIGADATE__="\"($(DATE))\"" $(CEXT)
+endif
 CFLAGS += $(CINC) $(CGEN) $(CWRN) $(CDEF)
 YACC = bison
 LEX = flex
