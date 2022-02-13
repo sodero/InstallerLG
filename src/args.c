@@ -17,16 +17,19 @@
 #include <proto/icon.h>
 #include <workbench/startup.h>
 #include <workbench/workbench.h>
+#ifdef __VBCC__
+typedef LONG IPTR;
+#endif
+#ifdef __amigaos4__
+typedef unsigned long IPTR;
+#include <dos/obsolete.h>
+#endif
 #endif
 
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-
-#ifdef __VBCC__
-typedef LONG IPTR;
-#endif
 
 static char *args[ARG_NUMBER_OF];
 
@@ -216,7 +219,7 @@ static bool arg_wb(char **argv)
 
     // Postprocess WB info and go back. We'll crash if we don't.
     bool ret = arg_post();
-    CurrentDir(old);
+    (void) CurrentDir(old);
 
     if(dob)
     {

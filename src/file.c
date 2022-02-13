@@ -38,6 +38,9 @@
 #include <proto/exec.h>
 #include <proto/icon.h>
 #include <workbench/workbench.h>
+#ifdef __amigaos4__
+#include <dos/obsolete.h>
+#endif
 #endif
 
 //------------------------------------------------------------------------------

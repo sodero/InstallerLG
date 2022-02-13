@@ -4,7 +4,7 @@
 VPATH := ../src
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 OS ?= $(shell uname)
-DATE := $(shell date +%d.%m.%Y || echo Unknown)
+DATE := $(shell date +%d.%m.%Y || gdate +%d.%m.%Y)
 APP := InstallerLG
 EXE := Installer
 
@@ -43,6 +43,12 @@ ifeq ($(OS),MorphOS)
 CGEN += -noixemul
 LDLIBS += -noixemul
 endif
+ifeq ($(OS),AmigaOS)
+CGEN += -mcrt=clib2
+CDEF = -D__USE_INLINE__ -DUSE_OLD_ANCHORPATH
+CWRN += -Wno-deprecated-declarations
+LDLIBS += -mcrt=clib2 -lauto -lm -lnet
+endif
 endif
 endif
 endif
@@ -52,7 +58,7 @@ DD = ..
 endif
 
 CINC += -I . -I $(VPATH)
-CDEF += -D__AMIGADATE__="\"($(DATE))\"" $(CEXT)
+CDEF += -D__AMIGADATE__=\"($(DATE))\" $(CEXT)
 CFLAGS += $(CINC) $(CGEN) $(CWRN) $(CDEF)
 YACC = bison
 LEX = flex

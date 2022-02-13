@@ -1,6 +1,6 @@
 #include <string.h>
 
-#if !defined(__GNUC__) || defined(__MINGW32__)
+#if !defined(__GNUC__) || defined(__MINGW32__) || defined (__amigaos4__)
 
 /* case-independent string matching, similar to strstr but
  * matching */

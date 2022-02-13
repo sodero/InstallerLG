@@ -41,8 +41,8 @@
 //------------------------------------------------------------------------------
 // CPU ID:s
 //------------------------------------------------------------------------------
-typedef enum {NONE, PPC, ARM, M68000, M68010, M68020, M68030, M68040, M68060,
-              X86, X86_64} cpu_t;
+typedef enum {NONE, POWERPC, ARM, M68000, M68010, M68020, M68030, M68040,
+              M68060, X86, X86_64} cpu_t;
 
 #if defined(__MORPHOS__) && !defined(LG_TEST)
 //------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ static cpu_t h_cpu_id(void)
     NewGetSystemAttrs(&arc, sizeof(arc), SYSTEMINFOTYPE_MACHINE);
 
     // On MorphOS, there is only PPC (and no define).
-    return arc == 1 ? PPC : NONE;
+    return arc == 1 ? POWERPC : NONE;
 }
 
 #elif defined(__AROS__) && !defined(LG_TEST)
@@ -88,7 +88,7 @@ static cpu_t h_cpu_id(void)
         case CPUFAMILY_7X0:
         case CPUFAMILY_74XX:
         case CPUFAMILY_4XX:
-           return PPC;
+           return POWERPC;
 
         case CPUFAMILY_ARM_3:
         case CPUFAMILY_ARM_4:
@@ -501,6 +501,12 @@ entry_p n_getassign(entry_p contxt)
     R_EST;
 }
 
+#ifdef __amigaos4__
+#  define __DMP(L) ((L)->dol_Port)
+#else
+#  define __DMP(L) ((L)->dol_Task)
+#endif
+
 //------------------------------------------------------------------------------
 // (getdevice <path>)
 //     returns name of device upon which <path> resides
@@ -527,13 +533,13 @@ entry_p n_getdevice(entry_p contxt)
         UnLock(lock);
         struct DosList *dl = (struct DosList *) BADDR(id.id_VolumeNode);
 
-        if(dl && dl->dol_Task)
+        if(dl && __DMP(dl))
         {
-            struct MsgPort *mp = dl->dol_Task;
+            struct MsgPort *mp = __DMP(dl);
             ULONG msk = LDF_READ | LDF_DEVICES;
             dl = (struct DosList *) LockDosList(msk);
 
-            while(dl && mp != dl->dol_Task)
+            while(dl && mp != __DMP(dl))
             {
                 // Search for <path> handler in the list of devices.
                 dl = (struct DosList *) NextDosEntry(dl, LDF_DEVICES);
@@ -827,14 +833,14 @@ static int32_t h_getversion_dev(const char *name)
     size_t size = sizeof(struct IOStdReq) + 128;
 
     // Allocate and initialize standard request.
-    struct IOStdReq *req = CreateIORequest(port, size);
+    struct IORequest *req = CreateIORequest(port, size);
 
     if(req)
     {
         // We don't know what unit to use. Try something.
         for(int unit = -1; unit < 16; unit++)
         {
-            if(OpenDevice(name, unit, (struct IORequest *) req, 0) == 0)
+            if(OpenDevice(name, unit, req, 0) == 0)
             {
                 // Translate version and revision to Installer format.
                 if(req->io_Device)
@@ -1037,8 +1043,8 @@ entry_p n_getversion(entry_p contxt)
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // No arguments, return version of Exec.
-    extern struct ExecBase *SysBase;
-    R_NUM((SysBase->LibNode.lib_Version << 16) | SysBase->SoftVer);
+    struct ExecBase *base = (struct ExecBase *) SysBase;
+    R_NUM((base->LibNode.lib_Version << 16) | base->SoftVer);
     #else
     R_NUM(LG_FALSE);
     #endif

@@ -16,11 +16,11 @@
 #include <graphics/rpattr.h>
 #include <libraries/asl.h>
 #include <libraries/mui.h>
-# ifndef __VBCC__
+# if !defined(__VBCC__) && !defined(__amigaos4__)
 #include <proto/alib.h>
 # endif
 # ifndef __MORPHOS__
-#  ifndef __VBCC__
+#  if !defined(__VBCC__) && !defined(__amigaos4__)
 #include <proto/debug.h>
 #  else
 #include <datatypes/datatypesclass.h>
@@ -35,6 +35,14 @@
 #include <proto/intuition.h>
 #include <proto/muimaster.h>
 #include <proto/utility.h>
+#ifdef __amigaos4__
+#include <dos/obsolete.h>
+#endif
+#ifdef __amigaos4__
+typedef unsigned long IPTR;
+struct Library *MUIMasterBase;
+struct MUIMasterIFace *IMUIMaster;
+#endif
 #endif /* AMIGA && !LG_TEST */
 
 #include <stdio.h>
@@ -66,13 +74,23 @@
   { TRAP_LIB, 0, (void (*) (void)) C ## Dispatch }; \
   struct C ## Data
 #else
-# ifndef __VBCC__
-# define DoSuperNew(C,O,...) DoSuperNewTags(C,O,NULL,__VA_ARGS__)
-#else
-typedef unsigned long IPTR;
-APTR STDARGS DoSuperNew(struct IClass *cl, APTR obj, IPTR tag1, ...)
+# if !defined(__VBCC__) && !defined(__amigaos4__)
+#  define DoSuperNew(C,O,...) DoSuperNewTags(C,O,NULL,__VA_ARGS__)
+# else
+Object *STDARGS VARARGS68K DoSuperNew(struct IClass *cl, Object *obj, ...)
 {
-	return (IPTR) DoSuperMethod(cl, obj, OM_NEW, &tag1, NULL);
+    Object *rc;
+    va_list args;
+    struct opSet msg;
+
+    va_start(args, obj);
+    msg.MethodID = OM_NEW;
+    msg.ops_AttrList = va_getlinearva(args, struct TagItem *);
+    msg.ops_GInfo = NULL;
+    rc = (Object *) DoSuperMethodA(cl, obj, (Msg)&msg);
+    va_end(args);
+
+    return rc;
 }
 # endif
 # define DISPATCH_HEAD
@@ -90,7 +108,11 @@ APTR STDARGS DoSuperNew(struct IClass *cl, APTR obj, IPTR tag1, ...)
 //------------------------------------------------------------------------------
 // Debug and logging macros
 //------------------------------------------------------------------------------
-#define GPUT(E,S) KPrintF((CONST_STRPTR)"%s:\t%s\t(%s)\n",E,S,__func__)
+#ifdef __amigaos4__
+# define KPrintF DebugPrintF
+#endif
+#define GPUT(E,S) KPrintF((CONST_STRPTR)"%s:\t%s\t(%s:%d)\n",E,S,__func__,\
+    __LINE__)
 #define GERR(S) GPUT("ERR",S)
 
 //------------------------------------------------------------------------------
@@ -3107,6 +3129,26 @@ inp_t gui_init(bool scr)
     static char version[] __attribute__((used)) = VERSION_STRING;
 
     #if defined(AMIGA) && !defined(LG_TEST)
+
+    #ifdef __amigaos4__
+    struct Library *MUIMasterBase = OpenLibrary("muimaster.library", 19);
+
+    if(!MUIMasterBase)
+    {
+        GERR(tr(S_FMCC));
+        return G_ERR;
+    }
+
+    IMUIMaster = (struct MUIMasterIFace *)
+        GetInterface(MUIMasterBase, "main", 1, NULL);
+
+    if(!IMUIMaster)
+    {
+        GERR(tr(S_FMCC));
+        return G_ERR;
+    }
+    #endif
+
     Object *App;
 
     // Create our GUI class.
@@ -3199,6 +3241,14 @@ void gui_exit(void)
             CloseScreen(scr);
         }
     }
+
+    #ifdef __amigaos4__
+    if(IMUIMaster)
+    {
+        DropInterface((struct Interface *) IMUIMaster);
+        CloseLibrary((struct Library *) MUIMasterBase);
+    }
+    #endif
     #endif
 }
 
