@@ -13,52 +13,48 @@
 #include "resource.h"
 
 #if defined(AMIGA) && !defined(LG_TEST)
-#include <graphics/rpattr.h>
-#include <libraries/asl.h>
-#include <libraries/mui.h>
+# include <graphics/rpattr.h>
+# include <libraries/asl.h>
+# include <libraries/mui.h>
 # if !defined(__VBCC__) && !defined(__amigaos4__)
-#include <proto/alib.h>
+#  include <proto/alib.h>
 # endif
 # ifndef __MORPHOS__
 #  if !defined(__VBCC__) && !defined(__amigaos4__)
-#include <proto/debug.h>
+#   include <proto/debug.h>
 #  else
-#include <datatypes/datatypesclass.h>
+#   include <datatypes/datatypesclass.h>
 #  endif
 # else
-#include <clib/debug_protos.h>
+#  include <clib/debug_protos.h>
 # endif
-#include <proto/exec.h>
-#include <proto/datatypes.h>
-#include <proto/dos.h>
-#include <proto/graphics.h>
-#include <proto/intuition.h>
-#include <proto/muimaster.h>
-#include <proto/utility.h>
-#ifdef __amigaos4__
-#include <dos/obsolete.h>
+# include <proto/exec.h>
+# include <proto/datatypes.h>
+# include <proto/dos.h>
+# include <proto/graphics.h>
+# include <proto/intuition.h>
+# include <proto/muimaster.h>
+# include <proto/utility.h>
+# ifdef __amigaos4__
+#  include <dos/obsolete.h>
+   typedef unsigned long IPTR;
+   struct Library *MUIMasterBase;
+   struct MUIMasterIFace *IMUIMaster;
+# endif
 #endif
-#ifdef __amigaos4__
-typedef unsigned long IPTR;
-struct Library *MUIMasterBase;
-struct MUIMasterIFace *IMUIMaster;
-#endif
-#endif /* AMIGA && !LG_TEST */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
 #include <sys/time.h>
-
 #ifndef __GNUC__
-#define __attribute__(a)
+# define __attribute__(a)
 #endif
 
 #if defined(AMIGA) && !defined(LG_TEST)
 //------------------------------------------------------------------------------
-// MUI macros
+// MUI
 //------------------------------------------------------------------------------
 #ifdef __MORPHOS__
 # define DISPATCH_GATE(C) &C ## Gate
@@ -134,8 +130,8 @@ CLASS_DEF(IG)
 
     // Widgets.
     Object *ExpertLevel, *UserLevel, *Progress, *Complete, *Pretend, *Bottom,
-           *String, *Number, *Empty, *Text, *List, *Log, *Top, *Ask, *Yes, *No,
-           *AbortYes, *Abort, *AbortOnly, *AbortRun;
+        *String, *Number, *Empty, *Text, *List, *Log, *Top, *Ask, *Yes, *No,
+        *AbortYes, *Abort, *AbortOnly, *AbortRun;
 
     // String buffer.
     char Buf[1 << 10];
@@ -671,58 +667,56 @@ MUIDSP IGInit(Class *cls, Object *obj)
     static IPTR i = MUIV_IG_FirstButton;
 
     // Have we already done this?
-    if(i != MUIV_IG_LastButton)
-    {
-        struct IGData *my = INST_DATA(cls, obj);
-
-        // Set notifications on all buttons.
-        while(i <= MUIV_IG_LastButton)
-        {
-            // Find current button.
-            Object *but = (Object *) DoMethod(obj, MUIM_FindUData, i);
-
-            // Set notification if it exists.
-            if(but)
-            {
-                DoMethod
-                (
-                    but, MUIM_Notify,
-                    MUIA_Pressed, FALSE, _app(obj), 2,
-                    MUIM_Application_ReturnID, i
-                );
-            }
-
-            // Next button.
-            i++;
-        }
-
-        // Enter in string gadget = proceed.
-        DoMethod
-        (
-            my->String, MUIM_Notify,
-            MUIA_String_Acknowledge,
-            MUIV_EveryTime, _app(obj), 2,
-            MUIM_Application_ReturnID,
-            MUIV_IG_Proceed
-        );
-
-        // Exit upon close request.
-        DoMethod
-        (
-            obj, MUIM_Notify, MUIA_Window_CloseRequest,
-            TRUE, _app(obj), 2, MUIM_Application_ReturnID,
-            MUIV_Application_ReturnID_Quit
-        );
-
-        // All done.
-        return TRUE;
-    }
-    else
+    if(i == MUIV_IG_LastButton)
     {
         // Unknown error.
         GERR(tr(S_UNER));
         return FALSE;
     }
+
+    struct IGData *my = INST_DATA(cls, obj);
+
+    // Set notifications on all buttons.
+    while(i <= MUIV_IG_LastButton)
+    {
+        // Find current button.
+        Object *but = (Object *) DoMethod(obj, MUIM_FindUData, i);
+
+        // Set notification if it exists.
+        if(but)
+        {
+            DoMethod
+            (
+                but, MUIM_Notify,
+                MUIA_Pressed, FALSE, _app(obj), 2,
+                MUIM_Application_ReturnID, i
+            );
+        }
+
+        // Next button.
+        i++;
+    }
+
+    // Enter in string gadget = proceed.
+    DoMethod
+    (
+        my->String, MUIM_Notify,
+        MUIA_String_Acknowledge,
+        MUIV_EveryTime, _app(obj), 2,
+        MUIM_Application_ReturnID,
+        MUIV_IG_Proceed
+    );
+
+    // Exit upon close request.
+    DoMethod
+    (
+        obj, MUIM_Notify, MUIA_Window_CloseRequest,
+        TRUE, _app(obj), 2, MUIM_Application_ReturnID,
+        MUIV_Application_ReturnID_Quit
+    );
+
+    // All done.
+    return TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -833,7 +827,7 @@ MUIDSP IGPageSet(Class *cls, Object *obj, struct MUIP_IG_PageSet *msg)
     // the string ends with newlines, so chomping is needed.
     set(my->Text, MUIA_ShortHelp, msg->Help ? IGWrapString((const char *)
         msg->Help, INT_MAX, true) : msg->Help);
-#endif
+#endif /* __AROS__ */
 
     // Always.
     return TRUE;
@@ -877,88 +871,87 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
     // Set the current user level.
     set(my->UserLevel, MUIA_Radio_Active, *((int32_t *) msg->Level));
 
+
     // Show welcome page.
-    if(DoMethod(obj, MUIM_IG_PageSet,
-       msg->Message, NULL, P_WELCOME, B_PROCEED_ABORT))
-    {
-        // Wait for proceed or abort.
-        inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
-
-        if(rc == G_TRUE)
-        {
-            // Get the selected user level value. If we have a minimum user
-            // level of 'average' we're using a different set of radio buttons.
-            // Fetch from the right object and adjust the return value.
-            if(msg->MinLevel == 1)
-            {
-                // Minimum user level 'average'.
-                get(my->ExpertLevel, MUIA_Radio_Active, (int32_t *) msg->Level);
-                (*((int32_t *) msg->Level))++;
-            }
-            else
-            {
-                // Minimum user level 'novice' or 'expert'.
-                get(my->UserLevel, MUIA_Radio_Active, (int32_t *) msg->Level);
-            }
-
-            // Disable the pretend choice if the NOPRETEND tooltype is used. The
-            // default behaviour is to install for real, not to pretend.
-            SetAttrs
-            (
-                my->Pretend,
-                MUIA_Radio_Active,
-                msg->NoPretend ? 0 : *((int32_t *) msg->Pretend),
-                MUIA_Disabled, msg->NoPretend ? TRUE : FALSE,
-                TAG_END
-            );
-
-            // Disable the 'log to file' choice if the NOLOG tooltype is used.
-            // The default behaviour is to not write to a log file.
-            SetAttrs
-            (
-                my->Log,
-                MUIA_Radio_Active,
-                msg->NoLog ? 0 : *((int32_t *) msg->Log),
-                MUIA_Disabled, msg->NoLog ? TRUE : FALSE,
-                TAG_END
-            );
-
-            // Don't show logging and pretend mode settings to 'Novice' users.
-            if(*((int32_t *) msg->Level))
-            {
-                // Show pretend / log page.
-                if(DoMethod(obj, MUIM_IG_PageSet, NULL,
-                   NULL, P_PRETEND_LOG, B_PROCEED_ABORT))
-                {
-                    // Wait for proceed or abort.
-                    rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
-
-                    if(rc == G_TRUE)
-                    {
-                        // Get pretend and log settings.
-                        get(my->Log, MUIA_Radio_Active, (int32_t *) msg->Log);
-                        get(my->Pretend, MUIA_Radio_Active, (int32_t *)
-                            msg->Pretend);
-                    }
-                }
-                else
-                {
-                    // Unknown error.
-                    GERR(tr(S_UNER));
-                    return G_ERR;
-                }
-            }
-        }
-
-        // 'Proceed', 'Abort' or 'Exit'.
-        return rc;
-    }
-    else
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_WELCOME,
+       B_PROCEED_ABORT))
     {
         // Unknown error.
         GERR(tr(S_UNER));
         return G_ERR;
     }
+
+    // Wait for proceed or abort.
+    inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
+
+    if(rc != G_TRUE)
+    {
+        return rc;
+    }
+
+    // Get the selected user level value. If we have a minimum user
+    // level of 'average' we're using a different set of radio buttons.
+    // Fetch from the right object and adjust the return value.
+    if(msg->MinLevel == 1)
+    {
+        // Minimum user level 'average'.
+        get(my->ExpertLevel, MUIA_Radio_Active, (int32_t *) msg->Level);
+        (*((int32_t *) msg->Level))++;
+    }
+    else
+    {
+        // Minimum user level 'novice' or 'expert'.
+        get(my->UserLevel, MUIA_Radio_Active, (int32_t *) msg->Level);
+    }
+
+    // Disable the pretend choice if the NOPRETEND tooltype is used. The
+    // default behaviour is to install for real, not to pretend.
+    SetAttrs
+    (
+        my->Pretend,
+        MUIA_Radio_Active,
+        msg->NoPretend ? 0 : *((int32_t *) msg->Pretend),
+        MUIA_Disabled, msg->NoPretend ? TRUE : FALSE,
+        TAG_END
+    );
+
+    // Disable the 'log to file' choice if the NOLOG tooltype is used.
+    // The default behaviour is to not write to a log file.
+    SetAttrs
+    (
+        my->Log,
+        MUIA_Radio_Active,
+        msg->NoLog ? 0 : *((int32_t *) msg->Log),
+        MUIA_Disabled, msg->NoLog ? TRUE : FALSE,
+        TAG_END
+    );
+
+    // Don't show logging and pretend mode settings to 'Novice' users.
+    if(*((int32_t *) msg->Level))
+    {
+        // Show pretend / log page.
+        if(!DoMethod(obj, MUIM_IG_PageSet, NULL, NULL, P_PRETEND_LOG,
+           B_PROCEED_ABORT))
+        {
+            // Unknown error.
+            GERR(tr(S_UNER));
+            return G_ERR;
+        }
+
+        // Wait for proceed or abort.
+        rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
+
+        if(rc == G_TRUE)
+        {
+            // Get pretend and log settings.
+            get(my->Log, MUIA_Radio_Active, (int32_t *) msg->Log);
+            get(my->Pretend, MUIA_Radio_Active, (int32_t *)
+                msg->Pretend);
+        }
+    }
+
+    // 'Proceed', 'Abort' or 'Exit'.
+    return rc;
 }
 
 //------------------------------------------------------------------------------
@@ -969,60 +962,59 @@ MUIDSP IGWelcome(Class *cls, Object *obj, struct MUIP_IG_Welcome *msg)
 static IPTR IGDirPart(Class *cls, Object *obj, IPTR Path)
 {
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
-           AllocDosObject(DOS_FIB, NULL);
+        AllocDosObject(DOS_FIB, NULL);
 
-    if(fib)
+    if(!fib)
     {
-        struct IGData *my = INST_DATA(cls, obj);
-
-        // Copy path string.
-        strncpy(my->Buf, (const char *) Path, sizeof(my->Buf));
-
-        struct Process *p = (struct Process *) FindTask(NULL);
-
-        // Save current window ptr.
-        APTR w = p->pr_WindowPtr;
-
-        // Disable auto request.
-        p->pr_WindowPtr = (APTR) -1L;
-
-        // Attempt to lock file or directory.
-        BPTR lock = (BPTR) Lock(my->Buf, ACCESS_READ);
-
-        while(*(my->Buf) && (!lock || (Examine(lock, fib) &&
-              fib->fib_DirEntryType <= 0)))
-        {
-            // Release lock to file or directory.
-            UnLock(lock);
-
-            // Find path tail.
-            char *tail = PathPart(my->Buf);
-
-            if(*tail == '\0')
-            {
-                // We've reached the end of the road.
-                *(my->Buf) = '\0';
-            }
-            else
-            {
-                // Cut of the tail and repeat.
-                *tail = '\0';
-                lock = (BPTR) Lock(my->Buf, ACCESS_READ);
-            }
-        }
-
-        // Release lock to file or directory.
-        FreeDosObject(DOS_FIB, fib);
-        UnLock(lock);
-
-        // Restore auto request.
-        p->pr_WindowPtr = w;
-
-        return (IPTR) my->Buf;
+        GERR(tr(S_UNER));
+        return Path;
     }
 
-    GERR(tr(S_UNER));
-    return Path;
+    struct IGData *my = INST_DATA(cls, obj);
+
+    // Copy path string.
+    strncpy(my->Buf, (const char *) Path, sizeof(my->Buf));
+
+    struct Process *p = (struct Process *) FindTask(NULL);
+
+    // Save current window ptr.
+    APTR w = p->pr_WindowPtr;
+
+    // Disable auto request.
+    p->pr_WindowPtr = (APTR) -1L;
+
+    // Attempt to lock file or directory.
+    BPTR lock = (BPTR) Lock(my->Buf, ACCESS_READ);
+
+    while(*(my->Buf) && (!lock || (Examine(lock, fib) &&
+          fib->fib_DirEntryType <= 0)))
+    {
+        // Release lock to file or directory.
+        UnLock(lock);
+
+        // Find path tail.
+        char *tail = PathPart(my->Buf);
+
+        if(*tail == '\0')
+        {
+            // We've reached the end of the road.
+            *(my->Buf) = '\0';
+        }
+        else
+        {
+            // Cut of the tail and repeat.
+            *tail = '\0';
+            lock = (BPTR) Lock(my->Buf, ACCESS_READ);
+        }
+    }
+
+    // Release lock to file or directory.
+    FreeDosObject(DOS_FIB, fib);
+    UnLock(lock);
+
+    // Restore auto request.
+    p->pr_WindowPtr = w;
+    return (IPTR) my->Buf;
 }
 
 //------------------------------------------------------------------------------
@@ -1041,120 +1033,124 @@ static IPTR IGDirPart(Class *cls, Object *obj, IPTR Path)
 MUIDSP IGAskFile(Class *cls, Object *obj, struct MUIP_IG_AskFile *msg)
 {
     // Show file requester page.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message,
-       msg->Help, P_ASKFILE, B_PROCEED_ABORT))
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_ASKFILE,
+       B_PROCEED_ABORT))
     {
-        if(!msg->NewPath)
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
+    }
+
+    if(!msg->NewPath)
+    {
+        // Make sure that the default dir exists.
+        msg->Default = IGDirPart(cls, obj, msg->Default);
+    }
+
+    // Create ASL file requester
+    Object *str, *pop = (Object *) MUI_NewObject
+    (
+        MUIC_Popasl,
+        MUIA_Popasl_Type, ASL_FileRequest,
+        ASLFR_DrawersOnly, msg->Dir,
+        ASLFR_InitialShowVolumes, msg->Disk,
+        ASLFR_TitleText, msg->Dir ? tr(S_SDIR) : tr(S_SFLE),
+        MUIA_Popstring_String, str = (Object *)
+            MUI_MakeObject(MUIO_String, NULL, PATH_MAX),
+        MUIA_Popstring_Button, (Object *)
+            MUI_MakeObject(MUIO_PopButton, MUII_PopDrawer),
+        TAG_END
+    );
+
+    // Open the requester after adding it to the current group.
+    if(pop)
+    {
+        struct IGData *my = INST_DATA(cls, obj);
+
+        // Set default file / dir.
+        set(str, MUIA_String_Contents, msg->Default);
+
+        // Prepare before adding requester.
+        if(DoMethod(my->Ask, MUIM_Group_InitChange))
         {
-            // Make sure that the default dir exists.
-            msg->Default = IGDirPart(cls, obj, msg->Default);
-        }
+            // Add pop up requester.
+            DoMethod(my->Ask, OM_ADDMEMBER, pop);
 
-        // Create ASL file requester
-        Object *str, *pop = (Object *) MUI_NewObject
-        (
-            MUIC_Popasl,
-            MUIA_Popasl_Type, ASL_FileRequest,
-            ASLFR_DrawersOnly, msg->Dir,
-            ASLFR_InitialShowVolumes, msg->Disk,
-            ASLFR_TitleText, msg->Dir ? tr(S_SDIR) : tr(S_SFLE),
-            MUIA_Popstring_String, str = (Object *)
-                MUI_MakeObject(MUIO_String, NULL, PATH_MAX),
-            MUIA_Popstring_Button, (Object *)
-                MUI_MakeObject(MUIO_PopButton, MUII_PopDrawer),
-            TAG_END
-        );
-
-        // Open the requester after adding it to the current group.
-        if(pop)
-        {
-            struct IGData *my = INST_DATA(cls, obj);
-
-            // Set default file / dir.
-            set(str, MUIA_String_Contents, msg->Default);
-
-            // Prepare before adding requester.
-            if(DoMethod(my->Ask, MUIM_Group_InitChange))
+            // Use 'Abort' or 'Back'?
+            if(msg->Back)
             {
-                // Add pop up requester.
-                DoMethod(my->Ask, OM_ADDMEMBER, pop);
+                // Set 'Back' button.
+                set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
+            }
 
-                // Use 'Abort' or 'Back'?
-                if(msg->Back)
+            // We're done adding things.
+            DoMethod(my->Ask, MUIM_Group_ExitChange);
+
+            // Wait for proceed or abort.
+            inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
+
+            if(rc == G_TRUE)
+            {
+                // Get filename from requester.
+                get(str, MUIA_String_Contents, (char **) msg->File);
+
+                if(*((char **) msg->File))
                 {
-                    // Set 'Back' button.
-                    set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
-                }
+                    // We need to create a copy of the filename string since
+                    // we're about to free the pop up requester.
+                    int n = snprintf(my->Buf, sizeof(my->Buf), "%s",
+                                     *((char **) msg->File));
 
-                // We're done adding things.
-                DoMethod(my->Ask, MUIM_Group_ExitChange);
-
-                // Wait for proceed or abort.
-                inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
-
-                if(rc == G_TRUE)
-                {
-                    // Get filename from requester.
-                    get(str, MUIA_String_Contents, (char **) msg->File);
-
-                    if(*((char **) msg->File))
+                    // Make sure that we succeded in creating a copy of the
+                    // filename.
+                    if(n >= 0 && ((size_t) n < sizeof(my->Buf)))
                     {
-                        // We need to create a copy of the filename string since
-                        // we're about to free the pop up requester.
-                        int n = snprintf(my->Buf, sizeof(my->Buf), "%s",
-                                         *((char **) msg->File));
+                        size_t len = strlen(my->Buf);
 
-                        // Make sure that we succeded in creating a copy of the
-                        // filename.
-                        if(n >= 0 && ((size_t) n < sizeof(my->Buf)))
+                        // The ASL appends '/' to dirs. This is not how the
+                        // CBM installer works, no trailing '/' allowed.
+                        if(msg->Dir && len > 1 && my->Buf[len - 1] == '/')
                         {
-                            size_t len = strlen(my->Buf);
-
-                            // The ASL appends '/' to dirs. This is not how the
-                            // CBM installer works, no trailing '/' allowed.
-                            if(msg->Dir && len > 1 && my->Buf[len - 1] == '/')
-                            {
-                                my->Buf[len - 1] = '\0';
-                            }
-
-                            *((char **) msg->File) = my->Buf;
+                            my->Buf[len - 1] = '\0';
                         }
-                    }
 
-                    if(!*((char **) msg->File))
-                    {
-                        // Unknown error.
-                        GERR(tr(S_UNER));
-                        rc = G_ERR;
+                        *((char **) msg->File) = my->Buf;
                     }
                 }
 
-                // Prepare before removing requester.
-                if(DoMethod(my->Ask, MUIM_Group_InitChange))
+                if(!*((char **) msg->File))
                 {
-                    // Remove pop up requester.
-                    DoMethod(my->Ask, OM_REMMEMBER, pop);
-
-                    if(msg->Back)
-                    {
-                        // Restore 'Abort' if needed.
-                        set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
-                    }
-
-                    // We're done removing things.
-                    DoMethod(my->Ask, MUIM_Group_ExitChange);
-
-                    // Free ASL requester.
-                    MUI_DisposeObject(pop);
-
-                    // Return filename.
-                    return rc;
+                    // Unknown error.
+                    GERR(tr(S_UNER));
+                    rc = G_ERR;
                 }
             }
 
-            // Free ASL requester.
-            MUI_DisposeObject(pop);
+            // Prepare before removing requester.
+            if(DoMethod(my->Ask, MUIM_Group_InitChange))
+            {
+                // Remove pop up requester.
+                DoMethod(my->Ask, OM_REMMEMBER, pop);
+
+                if(msg->Back)
+                {
+                    // Restore 'Abort' if needed.
+                    set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
+                }
+
+                // We're done removing things.
+                DoMethod(my->Ask, MUIM_Group_ExitChange);
+
+                // Free ASL requester.
+                MUI_DisposeObject(pop);
+
+                // Return filename.
+                return rc;
+            }
         }
+
+        // Free ASL requester.
+        MUI_DisposeObject(pop);
     }
 
     // Unknown error.
@@ -1298,22 +1294,21 @@ MUIDSP IGCopyFilesStart(Class *cls, Object *obj,
         }
     }
 
-    // Show file copy page.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_COPYFILES, B_ABORT))
-    {
-        // Configure gauge so that one tick == one file.
-        SetAttrs(my->Progress, MUIA_Gauge_Max, n, MUIA_Gauge_Current, 0,
-                 TAG_END);
 
-        // Always true.
-        return (IPTR) G_TRUE;
-    }
-    else
+    // Show file copy page.
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_COPYFILES,
+       B_ABORT))
     {
         // Unknown error.
         GERR(tr(S_UNER));
         return (IPTR) G_ERR;
     }
+
+    // Configure gauge so that one tick == one file.
+    SetAttrs(my->Progress, MUIA_Gauge_Max, n, MUIA_Gauge_Current, 0, TAG_END);
+
+    // Always true.
+    return (IPTR) G_TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -1440,11 +1435,11 @@ MUIDSP IGCopyFilesAdd(Class *cls, Object *obj,
 
     // Insert filename.
     DoMethod(my->List, MUIM_List_Insert, &(msg->File), 1,
-             MUIV_List_Insert_Bottom);
+        MUIV_List_Insert_Bottom);
 
     // All files are selected by default.
     DoMethod(my->List, MUIM_List_Select, MUIV_List_Select_All,
-             MUIV_List_Select_On, NULL);
+        MUIV_List_Select_On, NULL);
 
     // The lister must be visible.
     set(my->List, MUIA_ShowMe, TRUE);
@@ -1481,15 +1476,15 @@ MUIDSP IGWorking(Class *cls, Object *obj, struct MUIP_IG_Working *msg)
     (void) cls;
 
     // Set correct page and button combination.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE, B_NONE))
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE, B_NONE))
     {
-        // The message is already shown.
-        return G_TRUE;
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
     }
 
-    // Unknown error.
-    GERR(tr(S_UNER));
-    return G_ERR;
+    // The message is already shown.
+    return G_TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -1623,22 +1618,25 @@ MUIDSP IGCloseMedia(Class *cls, Object *obj, struct MUIP_IG_CloseMedia *msg)
     // Compute user data value.
     IPTR mid = msg->MediaID + MUIA_IG_MediaBase;
 
-    // Is the media ID valid?
-    if(mid <= MUIA_IG_MediaMax)
-    {
-        // Is the ID in use?
-        Object *win = (Object *) DoMethod(_app(obj), MUIM_FindUData, mid);
 
-        // If it's in use, close the window.
-        if(win)
-        {
-            set(win, MUIA_Window_Open, FALSE);
-            return G_TRUE;
-        }
+    // Is the media ID valid?
+    if(mid > MUIA_IG_MediaMax)
+    {
+        // Invalid / non existing ID.
+        return G_FALSE;
     }
 
-    // Invalid / non existing ID.
-    return G_FALSE;
+    // Is the ID in use?
+    Object *win = (Object *) DoMethod(_app(obj), MUIM_FindUData, mid);
+
+    if(!win)
+    {
+        // Invalid / non existing ID.
+        return G_FALSE;
+    }
+
+    set(win, MUIA_Window_Open, FALSE);
+    return G_TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -1653,14 +1651,14 @@ MUIDSP IGSetMedia(Class *cls, Object *obj, struct MUIP_IG_SetMedia *msg)
     (void) obj;
 
     // Do we have anything to do?
-    if(msg->MediaID)
+    if(!msg->MediaID)
     {
-        // Dummy.
-        return G_TRUE;
+        // Invalid ID.
+        return G_FALSE;
     }
 
-    // Invalid ID.
-    return G_FALSE;
+    // Dummy.
+    return G_TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -1729,8 +1727,8 @@ MUIDSP IGGetWindowProp(Class *cls, Object *obj,
     }
 
     int32_t *width = (int32_t *) msg->Width, *height = (int32_t *) msg->Height,
-            *upper = (int32_t *) msg->Upper, *lower  = (int32_t *) msg->Lower,
-            *left  = (int32_t *) msg->Left, *right   = (int32_t *) msg->Right;
+        *upper = (int32_t *) msg->Upper, *lower  = (int32_t *) msg->Lower,
+        *left  = (int32_t *) msg->Left, *right   = (int32_t *) msg->Right;
 
     *width = win->Width;
     *height = win->Height;
@@ -1791,24 +1789,24 @@ MUIDSP IGShowPicture(Class *cls, Object *obj, struct MUIP_IG_ShowPicture *msg)
         if(msg->Action & G_HORIZ)
         {
             xp = (msg->Action & G_LEFT) ? 0 :
-            #if !defined(__AROS__) && !defined(__VBCC__)
+#if !defined(__AROS__) && !defined(__VBCC__)
                 // This doesn't work on AROS.
                 MUIV_Window_LeftEdge_Right(0);
-            #else
+#else
                 MUIV_Window_LeftEdge_Centered;
-            #endif
+#endif /* !defined(__AROS__) && !defined(__VBCC__) */
         }
 
         // Explicit vertical placement?
         if(msg->Action & G_VERT)
         {
             yp = (msg->Action & G_UPPER) ? 0 :
-            #if !defined(__AROS__) && !defined(__VBCC__)
+#if !defined(__AROS__) && !defined(__VBCC__)
                 // This doesn't work on AROS.
-                 MUIV_Window_TopEdge_Bottom(0);
-            #else
+                MUIV_Window_TopEdge_Bottom(0);
+#else
                 MUIV_Window_TopEdge_Centered;
-            #endif
+#endif /* !defined(__AROS__) && !defined(__VBCC__) */
         }
 
         // Proper window unless borderless is set.
@@ -1969,39 +1967,39 @@ MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
 MUIDSP IGMessage(Class *cls, Object *obj, struct MUIP_IG_Message *msg)
 {
     // Set correct page and button combination.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE,
-                                                          B_PROCEED_ABORT))
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE,
+       B_PROCEED_ABORT))
     {
-        struct IGData *my = INST_DATA(cls, obj);
-
-        // Return code.
-        inp_t rc;
-
-        // Use 'Abort' or 'Back'?
-        if(msg->Back)
-        {
-            // Set 'Back' button.
-            set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
-
-            // Wait for 'Proceed' or 'Back'.
-            rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
-
-            // Restore 'Abort' button.
-            set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
-        }
-        else
-        {
-            // Wait for 'Proceed' or 'Abort'.
-            rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
-        }
-
-        // G_TRUE / G_ABORT / G_EXIT
-        return rc;
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
     }
 
-    // Unknown error.
-    GERR(tr(S_UNER));
-    return G_ERR;
+    struct IGData *my = INST_DATA(cls, obj);
+
+    // Return code.
+    inp_t rc;
+
+    // Use 'Abort' or 'Back'?
+    if(msg->Back)
+    {
+        // Set 'Back' button.
+        set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
+
+        // Wait for 'Proceed' or 'Back'.
+        rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
+
+        // Restore 'Abort' button.
+        set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
+    }
+    else
+    {
+        // Wait for 'Proceed' or 'Abort'.
+        rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
+    }
+
+    // G_TRUE / G_ABORT / G_EXIT
+    return rc;
 }
 
 //------------------------------------------------------------------------------
@@ -2015,15 +2013,15 @@ MUIDSP IGFinish(Class *cls, Object *obj, struct MUIP_IG_Finish *msg)
     (void) cls;
 
     // Set correct page and button combination.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE, B_OK))
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE, B_OK))
     {
-        // No need to wait for anything specific.
-        return IGTrans(IGWait(obj, MUIV_IG_Ok, 1));
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
     }
 
-    // Unknown error.
-    GERR(tr(S_UNER));
-    return G_ERR;
+    // No need to wait for anything specific.
+    return IGTrans(IGWait(obj, MUIV_IG_Ok, 1));
 }
 
 //------------------------------------------------------------------------------
@@ -2037,15 +2035,15 @@ MUIDSP IGAbort(Class *cls, Object *obj, struct MUIP_IG_Abort *msg)
     (void) cls;
 
     // Set correct page and button combination.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE, B_ABORT))
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, NULL, P_MESSAGE, B_ABORT))
     {
-        // Wait for abort.
-        return IGTrans(IGWait(obj, MUIV_IG_AbortOnly, 1));
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
     }
 
-    // Unknown error.
-    GERR(tr(S_UNER));
-    return G_ERR;
+    // Wait for abort.
+    return IGTrans(IGWait(obj, MUIV_IG_AbortOnly, 1));
 }
 
 //------------------------------------------------------------------------------
@@ -2060,94 +2058,99 @@ MUIDSP IGAbort(Class *cls, Object *obj, struct MUIP_IG_Abort *msg)
 //------------------------------------------------------------------------------
 MUIDSP IGRadio(Class *cls, Object *obj, struct MUIP_IG_Radio *msg)
 {
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
-                                                               B_PROCEED_ABORT))
+
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
+       B_PROCEED_ABORT))
     {
-        char **nms = (char **) msg->Names;
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
+    }
 
-        if(nms && *nms)
+    char **nms = (char **) msg->Names;
+
+    if(nms && *nms)
+    {
+        struct IGData *my = INST_DATA(cls, obj);
+        int32_t def = msg->Default;
+
+        // Make sure that the default value is a valid choice.
+        while(def && *nms)
         {
-            struct IGData *my = INST_DATA(cls, obj);
-            int32_t def = msg->Default;
+            def--;
+            nms++;
+        }
 
-            // Make sure that the default value is a valid choice.
-            while(def && *nms)
+        // Don't fail if it isn't, use a fallback of 0 instead.
+        def = !def ? msg->Default : 0;
+
+        // Unlike most other pages, this one is partly generated on the fly,
+        // we have no choice.
+        Object *r = (Object *) MUI_NewObject
+        (
+            MUIC_Radio,
+            MUIA_Radio_Active, def,
+            MUIA_Radio_Entries, msg->Names,
+            TAG_END
+        );
+
+        if(r)
+        {
+            // Prepare before adding radio buttons.
+            if(DoMethod(my->Empty, MUIM_Group_InitChange))
             {
-                def--;
-                nms++;
-            }
+                // Return code.
+                inp_t rc;
 
-            // Don't fail if it isn't, use a fallback of 0 instead.
-            def = !def ? msg->Default : 0;
-
-            // Unlike most other pages, this one is partly generated on the fly,
-            // we have no choice.
-            Object *r = (Object *) MUI_NewObject
-            (
-                MUIC_Radio,
-                MUIA_Radio_Active, def,
-                MUIA_Radio_Entries, msg->Names,
-                TAG_END
-            );
-
-            if(r)
-            {
-                // Prepare before adding radio buttons.
-                if(DoMethod(my->Empty, MUIM_Group_InitChange))
+                // Use 'Abort' or 'Back'?
+                if(msg->Back)
                 {
-                    // Return code.
-                    inp_t rc;
-
-                    // Use 'Abort' or 'Back'?
-                    if(msg->Back)
-                    {
-                        // Set 'Back' button.
-                        set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
-                    }
-
-                    // Add radio buttons.
-                    DoMethod(my->Empty, OM_ADDMEMBER, r);
-
-                    // We're done adding things.
-                    DoMethod(my->Empty, MUIM_Group_ExitChange);
-
-                    // Wait for 'Proceed' or 'Back'.
-                    rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
-
-                    if(msg->Back)
-                    {
-                        // Restore 'Abort' if needed.
-                        set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
-                    }
-
-                    // Prepare before removing radio buttons.
-                    if(DoMethod(my->Empty, MUIM_Group_InitChange))
-                    {
-                        // Remove radio buttons.
-                        DoMethod(my->Empty, OM_REMMEMBER, r);
-
-                        // We're done removing things.
-                        DoMethod(my->Empty, MUIM_Group_ExitChange);
-
-                        // Get value from buttons and then kill them. A halt
-                        // above will not make any difference.
-                        get(r, MUIA_Radio_Active, (int32_t *) msg->Select);
-                        MUI_DisposeObject(r);
-
-                        // Unknown status.
-                        return rc;
-                    }
+                    // Set 'Back' button.
+                    set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
                 }
 
-                // The GUI is broken.
-                MUI_DisposeObject(r);
+                // Add radio buttons.
+                DoMethod(my->Empty, OM_ADDMEMBER, r);
+
+                // We're done adding things.
+                DoMethod(my->Empty, MUIM_Group_ExitChange);
+
+                // Wait for 'Proceed' or 'Back'.
+                rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
+
+                if(msg->Back)
+                {
+                    // Restore 'Abort' if needed.
+                    set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
+                }
+
+                // Prepare before removing radio buttons.
+                if(DoMethod(my->Empty, MUIM_Group_InitChange))
+                {
+                    // Remove radio buttons.
+                    DoMethod(my->Empty, OM_REMMEMBER, r);
+
+                    // We're done removing things.
+                    DoMethod(my->Empty, MUIM_Group_ExitChange);
+
+                    // Get value from buttons and then kill them. A halt
+                    // above will not make any difference.
+                    get(r, MUIA_Radio_Active, (int32_t *) msg->Select);
+                    MUI_DisposeObject(r);
+
+                    // Unknown status.
+                    return rc;
+                }
             }
+
+            // The GUI is broken.
+            MUI_DisposeObject(r);
         }
     }
 
     // Unknown error.
     GERR(tr(S_UNER));
-    return 0;
+    return G_ERR;
 }
 
 //------------------------------------------------------------------------------
@@ -2161,41 +2164,41 @@ MUIDSP IGRadio(Class *cls, Object *obj, struct MUIP_IG_Radio *msg)
 //------------------------------------------------------------------------------
 MUIDSP IGBool(Class *cls, Object *obj, struct MUIP_IG_Bool *msg)
 {
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
-                                                               B_YES_NO_ABORT))
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
+       B_YES_NO_ABORT))
     {
-        struct IGData *my = INST_DATA(cls, obj);
-
-        // Return code.
-        inp_t rc;
-
-        // Set values of true and false.
-        set(my->No, MUIA_Text_Contents, msg->No);
-        set(my->Yes, MUIA_Text_Contents, msg->Yes);
-
-        if(msg->Back)
-        {
-            // Set back.
-            set(my->AbortYes, MUIA_Text_Contents, tr(S_BACK));
-
-            // Wait for yes, no or back.
-            rc = IGTrans(IGWait(obj, MUIV_IG_Yes, 3));
-
-            // Restore abort.
-            set(my->AbortYes, MUIA_Text_Contents, tr(S_ABRT));
-        }
-        else
-        {
-            // Wait for yes, no or abort.
-            rc = IGTrans(IGWait(obj, MUIV_IG_Yes, 3));
-        }
-
-        return rc;
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
     }
 
-    // Unknown error.
-    GERR(tr(S_UNER));
-    return G_ERR;
+    struct IGData *my = INST_DATA(cls, obj);
+
+    // Return code.
+    inp_t rc;
+
+    // Set values of true and false.
+    set(my->No, MUIA_Text_Contents, msg->No);
+    set(my->Yes, MUIA_Text_Contents, msg->Yes);
+
+    if(msg->Back)
+    {
+        // Set back.
+        set(my->AbortYes, MUIA_Text_Contents, tr(S_BACK));
+
+        // Wait for yes, no or back.
+        rc = IGTrans(IGWait(obj, MUIV_IG_Yes, 3));
+
+        // Restore abort.
+        set(my->AbortYes, MUIA_Text_Contents, tr(S_ABRT));
+    }
+    else
+    {
+        // Wait for yes, no or abort.
+        rc = IGTrans(IGWait(obj, MUIV_IG_Yes, 3));
+    }
+
+    return rc;
 }
 
 //------------------------------------------------------------------------------
@@ -2210,45 +2213,45 @@ MUIDSP IGBool(Class *cls, Object *obj, struct MUIP_IG_Bool *msg)
 MUIDSP IGString(Class *cls, Object *obj, struct MUIP_IG_String *msg)
 {
     // Show string widget page.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_STRING,
-                                                               B_PROCEED_ABORT))
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_STRING,
+       B_PROCEED_ABORT))
     {
-        struct IGData *my = INST_DATA(cls, obj);
-
-        // Return code.
-        inp_t rc;
-
-        // Set initial value of string.
-        set(my->String, MUIA_String_Contents, msg->Default);
-
-        // Use 'Abort' or 'Back'?
-        if(msg->Back)
-        {
-            // Set 'Back' button.
-            set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
-
-            // Wait for 'Proceed' or 'Back'.
-            rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
-
-            // Restore 'Abort' button.
-            set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
-        }
-        else
-        {
-            // Wait for 'Proceed' or 'Abort'.
-            rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
-        }
-
-        // No matter what, get string.
-        get(my->String, MUIA_String_Contents, (char **) msg->String);
-
-        // Return status.
-        return rc;
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
     }
 
-    // Unknown error.
-    GERR(tr(S_UNER));
-    return G_ERR;
+    struct IGData *my = INST_DATA(cls, obj);
+
+    // Return code.
+    inp_t rc;
+
+    // Set initial value of string.
+    set(my->String, MUIA_String_Contents, msg->Default);
+
+    // Use 'Abort' or 'Back'?
+    if(msg->Back)
+    {
+        // Set 'Back' button.
+        set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
+
+        // Wait for 'Proceed' or 'Back'.
+        rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
+
+        // Restore 'Abort' button.
+        set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
+    }
+    else
+    {
+        // Wait for 'Proceed' or 'Abort'.
+        rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
+    }
+
+    // No matter what, get string.
+    get(my->String, MUIA_String_Contents, (char **) msg->String);
+
+    // Return status.
+    return rc;
 }
 
 //------------------------------------------------------------------------------
@@ -2265,47 +2268,47 @@ MUIDSP IGString(Class *cls, Object *obj, struct MUIP_IG_String *msg)
 MUIDSP IGNumber(Class *cls, Object *obj, struct MUIP_IG_Number *msg)
 {
     // Show slider.
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_NUMBER,
-                                                               B_PROCEED_ABORT))
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_NUMBER,
+       B_PROCEED_ABORT))
     {
-        struct IGData *my = INST_DATA(cls, obj);
-
-        // Return code.
-        inp_t rc;
-
-        // Set min, max and default value.
-        set(my->Number, MUIA_Numeric_Min, msg->Min);
-        set(my->Number, MUIA_Numeric_Max, msg->Max);
-        set(my->Number, MUIA_Numeric_Value, msg->Default);
-
-        // Use 'Abort' or 'Back'?
-        if(msg->Back)
-        {
-            // Set 'Back' button.
-            set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
-
-            // Wait for 'Proceed' or 'Back'.
-            rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
-
-            // Restore 'Abort' button.
-            set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
-        }
-        else
-        {
-            // Wait for 'Proceed' or 'Abort'.
-            rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
-        }
-
-        // No matter what, get numerical value.
-        get(my->Number, MUIA_Numeric_Value, (int32_t *) msg->Number);
-
-        // Success or halt.
-        return rc;
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
     }
 
-    // Unknown error.
-    GERR(tr(S_UNER));
-    return G_ERR;
+    struct IGData *my = INST_DATA(cls, obj);
+
+    // Return code.
+    inp_t rc;
+
+    // Set min, max and default value.
+    set(my->Number, MUIA_Numeric_Min, msg->Min);
+    set(my->Number, MUIA_Numeric_Max, msg->Max);
+    set(my->Number, MUIA_Numeric_Value, msg->Default);
+
+    // Use 'Abort' or 'Back'?
+    if(msg->Back)
+    {
+        // Set 'Back' button.
+        set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
+
+        // Wait for 'Proceed' or 'Back'.
+        rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
+
+        // Restore 'Abort' button.
+        set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
+    }
+    else
+    {
+        // Wait for 'Proceed' or 'Abort'.
+        rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
+    }
+
+    // No matter what, get numerical value.
+    get(my->Number, MUIA_Numeric_Value, (int32_t *) msg->Number);
+
+    // Success or halt.
+    return rc;
 }
 
 //------------------------------------------------------------------------------
@@ -2320,113 +2323,117 @@ MUIDSP IGNumber(Class *cls, Object *obj, struct MUIP_IG_Number *msg)
 //------------------------------------------------------------------------------
 MUIDSP IGCheckBoxes(Class *cls, Object *obj, struct MUIP_IG_CheckBoxes *msg)
 {
-    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
-                                                               B_PROCEED_ABORT))
+    if(!DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help, P_MESSAGE,
+       B_PROCEED_ABORT))
     {
-        struct IGData *my = INST_DATA(cls, obj);
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
+    }
 
-        // We have no choice but to generate this page on the fly,
-        if(DoMethod(my->Empty, MUIM_Group_InitChange))
+    struct IGData *my = INST_DATA(cls, obj);
+
+    // We have no choice but to generate this page on the fly,
+    if(DoMethod(my->Empty, MUIM_Group_InitChange))
+    {
+        size_t i = 0;
+        static Object *cb[33];
+        char **cs = (char **) msg->Names;
+
+        // Use 'Abort' or 'Back'?
+        if(msg->Back)
         {
-            size_t i = 0;
-            static Object *cb[33];
-            char **cs = (char **) msg->Names;
+            // Set 'Back' button.
+            set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
+        }
 
-            // Use 'Abort' or 'Back'?
-            if(msg->Back)
+        // The maximum number of choices is 32.
+        while(*cs && i < 32)
+        {
+            // Default selection.
+            LONG sel = (msg->Default & (1u << i)) ? TRUE : FALSE;
+
+            // New checkbox with default selection.
+            Object *c = (Object *) MUI_NewObject
+            (
+                MUIC_Group,
+                MUIA_Group_Horiz, TRUE,
+                MUIA_ShowMe, *(*cs) ? TRUE : FALSE,
+                MUIA_InputMode, MUIV_InputMode_Toggle,
+                MUIA_Selected, *(*cs) ? sel : FALSE,
+                MUIA_Group_Child, (Object *) MUI_NewObject(
+                    MUIC_Image,
+                    MUIA_Frame, MUIV_Frame_ImageButton,
+                    MUIA_Image_Spec, MUII_CheckMark,
+                    MUIA_Background, MUII_ButtonBack,
+                    MUIA_Image_FreeVert, TRUE,
+                    MUIA_ShowSelState, FALSE,
+                    MUIA_Selected, sel,
+                    TAG_END),
+                MUIA_Group_Child, (Object *) MUI_NewObject(
+                    MUIC_Text,
+                    MUIA_Text_Contents, *cs,
+                    TAG_END),
+                TAG_END
+            );
+
+            // On success, add it to the group and save the adress.
+            if(c)
             {
-                // Set 'Back' button.
-                set(my->Abort, MUIA_Text_Contents, tr(S_BACK));
+                DoMethod(my->Empty, OM_ADDMEMBER, c);
+                cb[i++] = c;
+                cs++;
             }
-
-            // The maximum number of choices is 32.
-            while(*cs && i < 32)
+            else
             {
-                // Default selection.
-                LONG sel = (msg->Default & (1u << i)) ? TRUE : FALSE;
-
-                // New checkbox with default selection.
-                Object *c = (Object *) MUI_NewObject
-                (
-                    MUIC_Group,
-                    MUIA_Group_Horiz, TRUE,
-                    MUIA_ShowMe, *(*cs) ? TRUE : FALSE,
-                    MUIA_InputMode, MUIV_InputMode_Toggle,
-                    MUIA_Selected, *(*cs) ? sel : FALSE,
-                    MUIA_Group_Child, (Object *) MUI_NewObject(
-                        MUIC_Image,
-                        MUIA_Frame, MUIV_Frame_ImageButton,
-                        MUIA_Image_Spec, MUII_CheckMark,
-                        MUIA_Background, MUII_ButtonBack,
-                        MUIA_Image_FreeVert, TRUE,
-                        MUIA_ShowSelState, FALSE,
-                        MUIA_Selected, sel,
-                        TAG_END),
-                    MUIA_Group_Child, (Object *) MUI_NewObject(
-                        MUIC_Text,
-                        MUIA_Text_Contents, *cs,
-                        TAG_END),
-                    TAG_END
-                );
-
-                // On success, add it to the group and save the adress.
-                if(c)
-                {
-                    DoMethod(my->Empty, OM_ADDMEMBER, c);
-                    cb[i++] = c;
-                    cs++;
-                }
-                else
-                {
-                    // On error, free all the previous ones and bail out.
-                    GERR(tr(S_UNER));
-
-                    while(i--)
-                    {
-                        DoMethod(my->Empty, OM_REMMEMBER, cb[i]);
-                        MUI_DisposeObject(cb[i]);
-                    }
-
-                    // We're done modifying the group.
-                    DoMethod(my->Empty, MUIM_Group_ExitChange);
-                    return G_ERR;
-                }
-            }
-
-            // We're done modifying the group.
-            DoMethod(my->Empty, MUIM_Group_ExitChange);
-
-            // Wait for 'Proceed' or 'Back'.
-            inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
-
-            if(msg->Back)
-            {
-                // Restore 'Abort' if needed.
-                set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
-            }
-
-            // Remove all dynamic objects in group.
-            if(DoMethod(my->Empty, MUIM_Group_InitChange))
-            {
-                // The return value.
-                *((int32_t *) msg->Bitmap) = 0;
+                // On error, free all the previous ones and bail out.
+                GERR(tr(S_UNER));
 
                 while(i--)
                 {
-                    ULONG sel = 0;
-
-                    get(cb[i], MUIA_Selected, &sel);
-                    *((int32_t *) msg->Bitmap) |= (sel ? (1 << i) : 0);
                     DoMethod(my->Empty, OM_REMMEMBER, cb[i]);
                     MUI_DisposeObject(cb[i]);
                 }
 
-                // All cleared.
+                // We're done modifying the group.
                 DoMethod(my->Empty, MUIM_Group_ExitChange);
-
-                // Unknown status.
-                return rc;
+                return G_ERR;
             }
+        }
+
+        // We're done modifying the group.
+        DoMethod(my->Empty, MUIM_Group_ExitChange);
+
+        // Wait for 'Proceed' or 'Back'.
+        inp_t rc = IGTrans(IGWait(obj, MUIV_IG_Proceed, 2));
+
+        if(msg->Back)
+        {
+            // Restore 'Abort' if needed.
+            set(my->Abort, MUIA_Text_Contents, tr(S_ABRT));
+        }
+
+        // Remove all dynamic objects in group.
+        if(DoMethod(my->Empty, MUIM_Group_InitChange))
+        {
+            // The return value.
+            *((int32_t *) msg->Bitmap) = 0;
+
+            while(i--)
+            {
+                ULONG sel = 0;
+
+                get(cb[i], MUIA_Selected, &sel);
+                *((int32_t *) msg->Bitmap) |= (sel ? (1 << i) : 0);
+                DoMethod(my->Empty, OM_REMMEMBER, cb[i]);
+                MUI_DisposeObject(cb[i]);
+            }
+
+            // All cleared.
+            DoMethod(my->Empty, MUIM_Group_ExitChange);
+
+            // Unknown status.
+            return rc;
         }
     }
 
@@ -2473,64 +2480,73 @@ MUIDSP IGConfirm(Class *cls, Object *obj, struct MUIP_IG_Confirm *msg)
     struct IGData *my = INST_DATA(cls, obj);
     ULONG top = 0, btm = 0, str = 0;
 
+
     // Save the current state of whatever we're showing before we ask for
     // confirmation.
-    if(get(my->Top, MUIA_Group_ActivePage, &top) &&
-       get(my->Bottom, MUIA_Group_ActivePage, &btm) &&
-       get(my->Text, MUIA_Text_Contents, &str))
+    if(!get(my->Top, MUIA_Group_ActivePage, &top) ||
+       !get(my->Bottom, MUIA_Group_ActivePage, &btm) ||
+       !get(my->Text, MUIA_Text_Contents, &str))
     {
-        // Allocate memory to hold a copy of the current message.
-        size_t osz = strlen((char *) str) + 1;
-        char *ost = calloc(osz, 1);
-
-        if(ost)
-        {
-            // Copy the current message.
-            memcpy(ost, (char *) str, osz);
-
-            // Prompt for confirmation.
-            if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help,
-                        P_MESSAGE, B_PROCEED_SKIP_ABORT))
-            {
-                // Return code.
-                inp_t rc;
-
-                // Use 'Abort' or 'Back'?
-                if(msg->Back)
-                {
-                    // Set 'Back' button.
-                    set(my->AbortRun, MUIA_Text_Contents, tr(S_BACK));
-
-                    // Wait for 'Proceed', 'Skip' or 'Back'.
-                    rc = IGTrans(IGWait(obj, MUIV_IG_ProceedRun, 3));
-
-                    // Restore 'Abort' button.
-                    set(my->AbortRun, MUIA_Text_Contents, tr(S_ABRT));
-                }
-                else
-                {
-                    // Wait for 'Proceed', 'Skip' or 'Abort'.
-                    rc = IGTrans(IGWait(obj, MUIV_IG_ProceedRun, 3));
-                }
-
-                // Restore everything so that things look the way they did
-                // before the confirmation dialog was shown.
-                set(my->Top, MUIA_Group_ActivePage, top);
-                set(my->Bottom, MUIA_Group_ActivePage, btm);
-                set(my->Text, MUIA_Text_Contents, ost);
-
-                // We no longer need the old message.
-                free(ost);
-
-                // Take care of the user input.
-                return rc;
-            }
-
-            // We never did show the new message so we can get rid of the old
-            // (current).
-            free(ost);
-        }
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
     }
+
+    // Allocate memory to hold a copy of the current message.
+    size_t osz = strlen((char *) str) + 1;
+    char *ost = calloc(osz, 1);
+
+    if(!ost)
+    {
+        // Unknown error.
+        GERR(tr(S_UNER));
+        return G_ERR;
+    }
+
+    // Copy the current message.
+    memcpy(ost, (char *) str, osz);
+
+    // Prompt for confirmation.
+    if(DoMethod(obj, MUIM_IG_PageSet, msg->Message, msg->Help,
+                P_MESSAGE, B_PROCEED_SKIP_ABORT))
+    {
+        // Return code.
+        inp_t rc;
+
+        // Use 'Abort' or 'Back'?
+        if(msg->Back)
+        {
+            // Set 'Back' button.
+            set(my->AbortRun, MUIA_Text_Contents, tr(S_BACK));
+
+            // Wait for 'Proceed', 'Skip' or 'Back'.
+            rc = IGTrans(IGWait(obj, MUIV_IG_ProceedRun, 3));
+
+            // Restore 'Abort' button.
+            set(my->AbortRun, MUIA_Text_Contents, tr(S_ABRT));
+        }
+        else
+        {
+            // Wait for 'Proceed', 'Skip' or 'Abort'.
+            rc = IGTrans(IGWait(obj, MUIV_IG_ProceedRun, 3));
+        }
+
+        // Restore everything so that things look the way they did
+        // before the confirmation dialog was shown.
+        set(my->Top, MUIA_Group_ActivePage, top);
+        set(my->Bottom, MUIA_Group_ActivePage, btm);
+        set(my->Text, MUIA_Text_Contents, ost);
+
+        // We no longer need the old message.
+        free(ost);
+
+        // Take care of the user input.
+        return rc;
+    }
+
+    // We never did show the new message so we can get rid of the old
+    // (current).
+    free(ost);
 
     // Unknown error.
     GERR(tr(S_UNER));
@@ -2546,7 +2562,7 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
 {
     // Temp widgets.
     Object *el, *ul, *fp, *cm, *pr, *st, *nm, *bp, *em, *tx, *ls, *lg, *tp, *af,
-           *ys, *no, *ya, *ab, *ao, *ar;
+        *ys, *no, *ya, *ab, *ao, *ar;
 
     // Radio button strings.
     static const char *lev[4], *pre[3], *log[3];
@@ -2575,15 +2591,13 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
     // Open backdrop screen / window on demand.
     if(GetTagData(MUIA_IG_UseCustomScreen, FALSE, msg->ops_AttrList))
     {
-        scr = OpenScreenTags(NULL, SA_PubName, "Installer",
-                             SA_LikeWorkbench, TRUE, SA_ShowTitle, FALSE,
-                             TAG_END);
+        scr = OpenScreenTags(NULL, SA_PubName, "Installer", SA_LikeWorkbench,
+            TRUE, SA_ShowTitle, FALSE, TAG_END);
 
         if(scr)
         {
-            win = OpenWindowTags(NULL, WA_CustomScreen, scr,
-                                 WA_Borderless, TRUE, WA_Backdrop, TRUE,
-                                 TAG_END);
+            win = OpenWindowTags(NULL, WA_CustomScreen, scr, WA_Borderless,
+                TRUE, WA_Backdrop, TRUE, TAG_END);
         }
 
         if(!scr || !win)
@@ -2875,7 +2889,7 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
                     TAG_END),
                 TAG_END),
             TAG_END),
-#endif
+#endif /* !__VBCC__ */
         TAG_END
     );
 
@@ -3096,7 +3110,7 @@ DISPATCH(IG)
     // Unknown method, promote to parent.
     return DoSuperMethodA (cls, obj, msg);
 }
-#endif /* AMIGA && !LG_TEST*/
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 
 
 //.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
@@ -3116,7 +3130,10 @@ DISPATCH(IG)
 // The gui_* functions below serve as glue between the platform independent
 // parts of InstallerLG and the Amiga specific Zune / MUI parts. On non Amiga
 // systems, arguments are written to stdout to facilitate testing.
-//
+
+// Amiga style version string.
+static char version[] __attribute__((used)) = VERSION_STRING;
+
 //------------------------------------------------------------------------------
 // Name:        gui_init
 // Description: Initialize and show GUI.
@@ -3125,12 +3142,8 @@ DISPATCH(IG)
 //------------------------------------------------------------------------------
 inp_t gui_init(bool scr)
 {
-    // Amiga style version string.
-    static char version[] __attribute__((used)) = VERSION_STRING;
-
-    #if defined(AMIGA) && !defined(LG_TEST)
-
-    #ifdef __amigaos4__
+#if defined(AMIGA) && !defined(LG_TEST)
+# ifdef __amigaos4__
     struct Library *MUIMasterBase = OpenLibrary("muimaster.library", 19);
 
     if(!MUIMasterBase)
@@ -3147,7 +3160,7 @@ inp_t gui_init(bool scr)
         GERR(tr(S_FMCC));
         return G_ERR;
     }
-    #endif
+# endif /* __amigaos4__ */
 
     Object *App;
 
@@ -3202,11 +3215,11 @@ inp_t gui_init(bool scr)
     DoMethod(Win, MUIM_Show);
 
     return G_TRUE;
-    #else
+#else
     // Testing purposes.
     puts(scr ? "e" : "");
     return strlen(version + 1) ? G_TRUE : G_ERR;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3217,7 +3230,7 @@ inp_t gui_init(bool scr)
 //------------------------------------------------------------------------------
 void gui_exit(void)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     // Must check for NULL. Class creation might have failed.
     if(IGClass)
     {
@@ -3241,15 +3254,14 @@ void gui_exit(void)
             CloseScreen(scr);
         }
     }
-
-    #ifdef __amigaos4__
+# ifdef __amigaos4__
     if(IMUIMaster)
     {
         DropInterface((struct Interface *) IMUIMaster);
         CloseLibrary((struct Library *) MUIMasterBase);
     }
-    #endif
-    #endif
+# endif /* __amigaos4__ */
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3262,12 +3274,12 @@ void gui_exit(void)
 inp_t gui_message(const char *msg, bool bck)
 {
     return
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod(Win, MUIM_IG_Message, msg, bck);
-    #else
+#else
     // Testing purposes.
     printf("%s%d", msg, !!bck) >= 1 ? G_TRUE : G_ERR;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3279,12 +3291,12 @@ inp_t gui_message(const char *msg, bool bck)
 inp_t gui_finish(const char *msg)
 {
     return
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod(Win, MUIM_IG_Finish, msg);
-    #else
+#else
     // Testing purposes.
     fputs(msg, stdout) >= 0 ? G_TRUE : G_ERR;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3296,12 +3308,12 @@ inp_t gui_finish(const char *msg)
 inp_t gui_working(const char *msg)
 {
     return
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod(Win, MUIM_IG_Working, msg);
-    #else
+#else
     // Testing purposes.
     fputs(msg, stdout) >= 0 ? G_TRUE : G_ERR;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3312,12 +3324,12 @@ inp_t gui_working(const char *msg)
 //------------------------------------------------------------------------------
 void gui_abort(const char *msg)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_Abort, msg);
-    #else
+#else
     // Testing purposes.
     fputs(msg, stdout);
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3335,13 +3347,13 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms,
                  int32_t def, bool bck, int32_t *ret)
 {
     inp_t grc =
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod(Win, MUIM_IG_Radio, msg, hlp, nms, def, bck, ret);
-    #else
+#else
     // Testing purposes.
     printf("%s%s%s%d%d\n", msg, hlp, *nms, def, !!bck) ? G_TRUE : G_ERR;
     *ret = (grc == G_TRUE) ? def : 0;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
     return grc;
 }
 
@@ -3361,13 +3373,13 @@ inp_t gui_options(const char *msg, const char *hlp, const char **nms,
                   int32_t def, bool bck, int32_t *ret)
 {
     inp_t grc =
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod(Win, MUIM_IG_CheckBoxes, msg, hlp, nms, def, bck, ret);
-    #else
+#else
     // Testing purposes.
     printf("%s%s%s%d%d%d\n", msg, hlp, *nms, def, *ret, !!bck) ? G_TRUE : G_ERR;
     *ret = (grc == G_TRUE) ? def : 0;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
     return grc;
 }
 
@@ -3385,12 +3397,12 @@ inp_t gui_bool(const char *msg, const char *hlp, const char *yes,
                const char *nay, bool bck)
 {
     return
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod(Win, MUIM_IG_Bool, msg, hlp, yes, nay, bck);
-    #else
+#else
     // Testing purposes.
     printf("%s%s%s%s%d\n", msg, hlp, yes, nay, !!bck) ? G_TRUE : G_ERR;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3407,13 +3419,13 @@ inp_t gui_string(const char *msg, const char *hlp, const char *def,
                  bool bck, const char **ret)
 {
     inp_t grc =
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod(Win, MUIM_IG_String, msg, hlp, def, bck, ret);
-    #else
+#else
     // Testing purposes.
     printf("%s%s%s%d\n", msg, hlp, def, !!bck) ? G_TRUE : G_ERR;
     *ret = (grc == G_TRUE) ? def : "";
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
     return grc;
 }
 
@@ -3433,13 +3445,13 @@ inp_t gui_number(const char *msg, const char *hlp, int32_t min, int32_t max,
                  int32_t def, bool bck, int32_t *ret)
 {
     inp_t grc =
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod(Win, MUIM_IG_Number, msg, hlp, min, max, def, bck, ret);
-    #else
+#else
     // Testing purposes.
     printf("%s%s%d%d%d\n", msg, hlp, min, max, !!bck) ? G_TRUE : G_ERR;
     *ret = (grc == G_TRUE) ? def : 0;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
     return grc;
 }
 
@@ -3461,13 +3473,13 @@ inp_t gui_welcome(const char *msg, int32_t *lvl, int32_t *lgf, int32_t *prt,
                   int32_t min, bool npr, bool nlg)
 {
     return
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod(Win, MUIM_IG_Welcome, msg, lvl, lgf, prt, min, npr, nlg);
-    #else
+#else
     // Testing purposes.
     printf("%s%d%d%d%d%d%d\n", msg, *lvl, *lgf, *prt, min, !!npr, !!nlg ) ?
            G_TRUE : G_ERR;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3486,10 +3498,10 @@ inp_t gui_welcome(const char *msg, int32_t *lvl, int32_t *lgf, int32_t *prt,
 inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
                  const char *def, bool bck, const char **ret)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod(Win, MUIM_IG_AskFile, msg, hlp, pth, dsk, asn, def,
-                            TRUE, bck, ret);
-    #else
+        TRUE, bck, ret);
+#else
     // Testing purposes.
     if(msg && hlp && def && ret)
     {
@@ -3498,7 +3510,7 @@ inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
         return G_TRUE;
     }
     return G_FALSE;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3516,10 +3528,10 @@ inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
 inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
                   const char *def, bool bck, const char **ret)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod(Win, MUIM_IG_AskFile, msg, hlp, pth, dsk, FALSE,
-                            def, FALSE, bck, ret);
-    #else
+        def, FALSE, bck, ret);
+#else
     // Testing purposes.
     if(msg && hlp && def && ret)
     {
@@ -3528,7 +3540,7 @@ inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
         return G_TRUE;
     }
     return G_FALSE;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3545,10 +3557,10 @@ inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
 inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst,
                           bool cnf, bool bck)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesStart, msg, hlp, lst, cnf,
-                            bck);
-    #else
+        bck);
+#else
     // Testing purposes.
     if(lst)
     {
@@ -3562,7 +3574,7 @@ inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst,
         return G_TRUE;
     }
     return G_ERR;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3575,9 +3587,9 @@ inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst,
 //------------------------------------------------------------------------------
 inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesSetCur, cur, nga, bck);
-    #else
+#else
     // Testing purposes.
     (void) cur;
     static bool done;
@@ -3589,7 +3601,7 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
         done = true;
     }
     return G_TRUE;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3600,12 +3612,12 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
 //------------------------------------------------------------------------------
 void gui_copyfiles_end(void)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CopyFilesEnd);
-    #else
+#else
     // Testing purposes.
     puts("ec");
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3616,12 +3628,12 @@ void gui_copyfiles_end(void)
 //------------------------------------------------------------------------------
 void gui_complete(int32_t com)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_Complete, com);
-    #else
+#else
     // Testing purposes.
     printf("%d\n", com);
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3635,12 +3647,12 @@ void gui_complete(int32_t com)
 inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 {
     return
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     (inp_t) DoMethod(Win, MUIM_IG_Confirm, msg, hlp, bck);
-    #else
+#else
     // Testing purposes.
     printf("%s%s%d\n", msg, hlp, !!bck) ? G_TRUE : G_ERR;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3653,7 +3665,7 @@ inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 //------------------------------------------------------------------------------
 void gui_error(int32_t line, const char *type, const char *info)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     static char err[BUFSIZ];
     static struct EasyStruct es = { .es_TextFormat = (UBYTE *) &err,
                                     .es_StructSize = sizeof(struct EasyStruct)};
@@ -3664,10 +3676,10 @@ void gui_error(int32_t line, const char *type, const char *info)
 
     // We don't have any way of knowing whether this really works.
     EasyRequest(NULL, &es, NULL);
-    #else
+#else
     // Testing purposes.
     fprintf(stderr, tr(S_LERR), line, type, info);
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3680,12 +3692,12 @@ void gui_error(int32_t line, const char *type, const char *info)
 //------------------------------------------------------------------------------
 void gui_effect(int32_t eff, int32_t cl1, int32_t cl2)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_Effect, eff, cl1, cl2);
-    #else
+#else
     // Testing purposes.
     printf("%d:%d:%d\n", eff, cl1, cl2);
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3696,12 +3708,12 @@ void gui_effect(int32_t eff, int32_t cl1, int32_t cl2)
 //------------------------------------------------------------------------------
 inp_t gui_closemedia(int32_t mid)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CloseMedia, mid);
-    #else
+#else
     // Testing purposes.
     printf("%d\n", mid);
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
     return G_TRUE;
 }
 
@@ -3715,12 +3727,12 @@ inp_t gui_closemedia(int32_t mid)
 //------------------------------------------------------------------------------
 inp_t gui_setmedia(int32_t mid, int32_t act, const char *par)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_SetMedia, mid, act, par);
-    #else
+#else
     // Testing purposes.
     printf("%d:%d:%s\n", mid, act, par ? par : "_");
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
     return G_TRUE;
 }
 
@@ -3732,14 +3744,14 @@ inp_t gui_setmedia(int32_t mid, int32_t act, const char *par)
 //------------------------------------------------------------------------------
 inp_t gui_showmedia(int32_t *mid, const char* mda, int32_t act)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_ShowMedia, mid, mda, act);
-    #else
+#else
     // Testing purposes.
     static int32_t num;
     *mid = num++;
     printf("%d:%d:%s\n", *mid, act, mda ? mda : "_");
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
     return G_TRUE;
 }
 
@@ -3752,15 +3764,15 @@ inp_t gui_showmedia(int32_t *mid, const char* mda, int32_t act)
 void gui_query_screen(int32_t *width, int32_t *height, int32_t *depth,
                       int32_t *colors)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_GetScreenProp, width, height, depth, colors);
-    #else
+#else
     // Testing purposes.
     *width = 640;
     *height = 256;
     *colors = 4;
     *depth = 2;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
 //------------------------------------------------------------------------------
@@ -3772,13 +3784,13 @@ void gui_query_screen(int32_t *width, int32_t *height, int32_t *depth,
 void gui_query_window(int32_t *width, int32_t *height, int32_t *upper,
                       int32_t *lower, int32_t *left, int32_t *right)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_GetWindowProp, width, height, upper, lower, left,
              right);
-    #else
+#else
     // Testing purposes.
     *width = *right = 320;
     *height = *lower = 128;
     *upper = *left = 0;
-    #endif
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
