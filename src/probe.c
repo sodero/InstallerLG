@@ -139,25 +139,29 @@ static cpu_t h_cpu_id(void)
     struct ExecBase *AbsSysBase = *((struct ExecBase **) 4);
     UWORD flags = AbsSysBase->AttnFlags;
 
-    if(flags & AFF_68010)
+    if(flags & (AFF_603|AFF_604|AFF_750|AFF_7400|AFF_ALTIVEC|AFF_4XX|AFF_OTHER))
     {
-        return M68010;
+        return POWERPC;
     }
-    else if(flags & AFF_68020)
+    else if(flags & AFF_68060)
     {
-        return M68020;
-    }
-    else if(flags & AFF_68030)
-    {
-        return M68030;
+        return M68060;
     }
     else if(flags & AFF_68040)
     {
         return M68040;
     }
-    else if(flags & AFF_68060)
+    else if(flags & AFF_68030)
     {
-        return M68060;
+        return M68030;
+    }
+    else if(flags & AFF_68020)
+    {
+        return M68020;
+    }
+    else if(flags & AFF_68010)
+    {
+        return M68010;
     }
     else
     {
