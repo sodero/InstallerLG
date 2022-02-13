@@ -10,7 +10,12 @@ endif
 ifeq ($(OS),MorphOS)
 LHAFLAGS := -r u
 else
+ifeq ($(OS),AmigaOS)
+LHAFLAGS := -r u
+SHELL := sh
+else
 LHAFLAGS := ao5
+endif
 endif
 
 #-----------------------------------------------------------------------------------#

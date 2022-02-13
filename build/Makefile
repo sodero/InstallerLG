@@ -48,6 +48,7 @@ CGEN += -mcrt=clib2
 CDEF = -D__USE_INLINE__ -DUSE_OLD_ANCHORPATH
 CWRN += -Wno-deprecated-declarations
 LDLIBS += -mcrt=clib2 -lauto -lm -lnet
+SHELL := sh
 endif
 endif
 endif
@@ -58,11 +59,7 @@ DD = ..
 endif
 
 CINC += -I . -I $(VPATH)
-ifeq ($(OS),AmigaOS)
-CDEF += -D__AMIGADATE__=\"($(DATE))\" $(CEXT)
-else
 CDEF += -D__AMIGADATE__="\"($(DATE))\"" $(CEXT)
-endif
 CFLAGS += $(CINC) $(CGEN) $(CWRN) $(CDEF)
 YACC = bison
 LEX = flex
