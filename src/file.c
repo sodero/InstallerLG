@@ -3234,25 +3234,13 @@ entry_p n_startup(entry_p contxt)
                 free(buf);
                 buf = NULL;
 
-                // Open the target file just to make sure that we have write
-                // permissions.
-                file = DBG_FOPEN(h_fopen(contxt, fln, "a", false));
-
-                if(file)
+                // Delete target and rename temporary file to target.
+                if(!DBG_ZERO(remove(fln)) && !DBG_ZERO(rename(tmp, fln)))
                 {
-                    // Close it immediately, we're not going to write directly
-                    // to it.
-                    h_fclose(&file);
-
-                    // Do a less un-atomic write to the real file by renaming
-                    // the temporary file.
-                    if(!DBG_ZERO(rename(tmp, fln)))
-                    {
-                        // We're done.
-                        free(tmp);
-                        tmp = NULL;
-                        D_NUM = LG_TRUE;
-                    }
+                    // We're done.
+                    free(tmp);
+                    tmp = NULL;
+                    D_NUM = LG_TRUE;
                 }
             }
         }

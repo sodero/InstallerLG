@@ -212,7 +212,12 @@ static void init_misc_string(entry_p contxt)
     init_str(contxt, "@execute-dir", "");
     init_str(contxt, "@special-msg", "");
     init_str(contxt, "@each-name", "");
-    init_str(contxt, "@user-startup", "s:user-startup");
+    init_str(contxt, "@user-startup",
+#ifdef __amigaos4__
+        "s:User-Startup");
+#else
+        "s:user-startup");
+#endif
     init_str(contxt, "fail", "fail");
     init_str(contxt, "nofail", "nofail");
     init_str(contxt, "oknodelete", "oknodelete");
