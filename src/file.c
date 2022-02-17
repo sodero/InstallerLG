@@ -1276,7 +1276,7 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
     // Preserve file permissions and comment.
     int32_t prm = 0;
 
-    if(h_protect_get(contxt, src, &prm))
+    if(h_exists(src) != LG_NONE && h_protect_get(contxt, src, &prm))
     {
         (void) h_copy_comment(contxt, src, dst);
         (void) h_protect_set(contxt, dst, prm);
