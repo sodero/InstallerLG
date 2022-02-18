@@ -8,9 +8,10 @@
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
+#include "args.h"
 #include "gui.h"
-#include "version.h"
 #include "resource.h"
+#include "version.h"
 
 #if defined(AMIGA) && !defined(LG_TEST)
 # include <graphics/rpattr.h>
@@ -129,9 +130,9 @@ CLASS_DEF(IG)
     struct Window *Win;
 
     // Widgets.
-    Object *ExpertLevel, *UserLevel, *Progress, *Complete, *Pretend, *Bottom,
-        *String, *Number, *Empty, *Text, *List, *Log, *Top, *Ask, *Yes, *No,
-        *AbortYes, *Abort, *AbortOnly, *AbortRun;
+    Object *ExpertLevel, *UserLevel, *Progress, *Pretend, *Bottom, *String,
+        *Number, *Empty, *Text, *List, *Log, *Top, *Ask, *Yes, *No, *AbortYes,
+        *Abort, *AbortOnly, *AbortRun;
 
     // String buffer.
     char Buf[1 << 10];
@@ -566,75 +567,75 @@ static IPTR IGWait(Object *obj, IPTR notif, IPTR range)
 {
     IPTR sig = 0, ret = 0, n;
 
-    // Set cycle chain for all buttons within the notification range.
-    for(n = 0; n < range; n++)
+    // Set cycle chain for buttons within range.
+    if(notif != MUIV_IG_Tick)
     {
-        // Filter out ticks.
-        if(notif + n != MUIV_IG_Tick)
+        for(n = 0; n < range; n++)
         {
-            // Find current button.
+            // Find button.
             Object *but = (Object *) DoMethod
             (
                 obj, MUIM_FindUData,
                 notif + n
             );
 
-            // Don't trust the caller.
-            if(but)
+            if(!but)
             {
-                // Add button to cycle chain.
-                set(but, MUIA_CycleChain, TRUE);
-
-                // Activate the first button.
-                if(n == 0)
-                {
-                    set(Win, MUIA_Window_ActiveObject, but);
-                }
+                continue;
             }
-            else
+
+            // Add button to cycle chain.
+            set(but, MUIA_CycleChain, TRUE);
+
+            // Activate first button.
+            if(n == 0)
             {
-                // Button doesn't exist.
-                GERR(tr(S_UNER));
+                set(Win, MUIA_Window_ActiveObject, but);
             }
         }
     }
 
-    // Get MUI input.
     ret = DoMethod(_app(obj), MUIM_Application_NewInput, &sig);
 
-    // Enter the message loop.
+    // Enter message loop.
     while(ret != (IPTR) MUIV_Application_ReturnID_Quit)
     {
-        // Iterate over all signals that we're waiting for.
+        // Iterate over signals we're waiting for.
         for(n = 0; n < range; n++)
         {
             // Did we get what we're waiting for?
-            if(ret == notif + n)
+            if(ret != notif + n)
             {
-                // Remove buttons within the range from the cycle chain.
-                for(n = 0; n < range; n++)
-                {
-                    // Filter out ticks.
-                    if(notif + n != MUIV_IG_Tick)
-                    {
-                        // Find current button.
-                        Object *but = (Object *) DoMethod
-                        (
-                            obj, MUIM_FindUData,
-                            notif + n
-                        );
+                continue;
+            }
 
-                        // Don't trust the caller.
-                        if(but)
-                        {
-                            set(but, MUIA_CycleChain, FALSE);
-                        }
-                    }
-                }
-
-                // Return notifier value.
+            if(ret == MUIV_IG_Tick)
+            {
                 return ret;
             }
+
+            // Remove range from cycle chain.
+            for(n = 0; n < range; n++)
+            {
+                // Find button.
+                Object *but = (Object *) DoMethod
+                (
+                    obj, MUIM_FindUData,
+                    notif + n
+                );
+
+                if(!but)
+                {
+                    continue;
+                }
+
+                set(but, MUIA_CycleChain, FALSE);
+            }
+
+            set(Win, MUIA_Window_ActiveObject,
+                MUIV_Window_ActiveObject_None);
+
+            return ret;
         }
 
         // It wasn't for us. Go to sleep again.
@@ -2451,21 +2452,11 @@ MUIDSP IGComplete(Class *cls, Object *obj, struct MUIP_IG_Complete *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
-    // Return code.
-    inp_t rc = G_TRUE;
+    snprintf(my->Buf, sizeof(my->Buf), "%s (%lu%%)", arg_get(ARG_APPNAME),
+        msg->Progress);
 
-    if(msg->Progress > 100)
-    {
-        msg->Progress = 100;
-        rc = G_FALSE;
-    }
-
-    // Set (capped) value and show gauge.
-    set(my->Complete, MUIA_Gauge_Current, msg->Progress);
-    set(my->Complete, MUIA_ShowMe, TRUE);
-
-    // Nothing to wait for.
-    return rc;
+    set(Win, MUIA_Window_Title, my->Buf);
+    return LG_TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -2561,14 +2552,14 @@ MUIDSP IGConfirm(Class *cls, Object *obj, struct MUIP_IG_Confirm *msg)
 MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
 {
     // Temp widgets.
-    Object *el, *ul, *fp, *cm, *pr, *st, *nm, *bp, *em, *tx, *ls, *lg, *tp, *af,
+    Object *el, *ul, *fp, *pr, *st, *nm, *bp, *em, *tx, *ls, *lg, *tp, *af,
         *ys, *no, *ya, *ab, *ao, *ar;
 
     // Radio button strings.
     static const char *lev[4], *pre[3], *log[3];
 
     // Clear to enable check.
-    el = ul = fp = cm = pr = st = nm = bp = em = tx = ls = lg = tp = af = ys =
+    el = ul = fp = pr = st = nm = bp = em = tx = ls = lg = tp = af = ys =
     no = ya = ab = ao = ar = NULL;
 
     // User level.
@@ -2613,8 +2604,9 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
     obj = (Object *) DoSuperNew
     (
         cls, obj,
-        MUIA_Window_Title, tr(S_INST),
+        MUIA_Window_Title, arg_get(ARG_APPNAME),
         MUIA_Window_AppWindow, TRUE,
+        MUIA_Window_ID, MAKE_ID('W','D','L','A'),
         scr ? MUIA_Window_Screen : TAG_IGNORE, scr,
 #ifndef __VBCC__
         MUIA_Window_RootObject, MUI_NewObject(
@@ -2630,20 +2622,15 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
             /* Top pager */
             MUIA_Group_Child, tp = MUI_NewObject(
                 MUIC_Group,
+                MUIA_Frame, MUIV_Frame_Group,
                 MUIA_Group_PageMode, TRUE,
                 /* Page 0 - P_WELCOME */
                 MUIA_Group_Child, MUI_NewObject(
                     MUIC_Group,
-                    MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
-                    MUIA_Group_Child, (Object *) MUI_NewObject(
-                        MUIC_Rectangle,
-                        MUIA_Rectangle_HBar, TRUE,
-                        MUIA_Rectangle_BarTitle, tr(S_INMD),
-                        TAG_END),
                     MUIA_Group_Child, MUI_NewObject(
                         MUIC_Group,
                         MUIA_Group_Horiz, TRUE,
-                        MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 32),
+                        MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
                         MUIA_Group_Child, ul = (Object *) MUI_NewObject(
                             MUIC_Radio,
                             MUIA_Radio_Entries, lev,
@@ -2653,19 +2640,15 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
                             MUIA_ShowMe, FALSE,
                             MUIA_Radio_Entries, lev + 1,
                             TAG_END),
-                        MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 32),
+                        MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
                         TAG_END),
                     TAG_END),
                 /* Page 1 - P_COPYFILES */
                 MUIA_Group_Child, MUI_NewObject(
                     MUIC_Group,
-                    MUIA_Group_Child, (Object *) MUI_NewObject(
-                        MUIC_Rectangle,
-                        MUIA_Rectangle_HBar, TRUE,
-                        MUIA_Rectangle_BarTitle, tr(S_CPYF),
-                        TAG_END),
                     MUIA_Group_Child, fp = MUI_NewObject(
                         MUIC_Gauge,
+                        MUIA_Frame, MUIV_Frame_Gauge,
                         MUIA_ShowMe, TRUE,
                         MUIA_Gauge_Horiz, TRUE,
                         MUIA_Gauge_InfoText, "-",
@@ -2674,11 +2657,6 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
                 /* Page 2 - P_FILEDEST */
                 MUIA_Group_Child, MUI_NewObject(
                     MUIC_Group,
-                    MUIA_Group_Child, (Object *) MUI_NewObject(
-                        MUIC_Rectangle,
-                        MUIA_Rectangle_HBar, TRUE,
-                        MUIA_Rectangle_BarTitle, tr(S_F2IN),
-                        TAG_END),
                     MUIA_Group_Child, MUI_NewObject(
                         MUIC_Listview,
                         MUIA_Listview_List, ls = MUI_NewObject(
@@ -2691,11 +2669,6 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
                 /* Page 3 - P_PRETEND_LOG */
                 MUIA_Group_Child, MUI_NewObject(
                     MUIC_Group,
-                    MUIA_Group_Child, (Object *) MUI_NewObject(
-                        MUIC_Rectangle,
-                        MUIA_Rectangle_HBar, TRUE,
-                        MUIA_Rectangle_BarTitle, tr(S_IMAL),
-                        TAG_END),
                     MUIA_Group_Child, MUI_NewObject(
                         MUIC_Group,
                         MUIA_Group_Horiz, TRUE,
@@ -2719,45 +2692,33 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
                     MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
                     MUIA_Group_Child, em = (Object *) MUI_NewObject(
                         MUIC_Group,
-                        MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                         TAG_END),
                     MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
                     TAG_END),
                 /* Page 5 - P_STRING */
                 MUIA_Group_Child, MUI_NewObject(
                     MUIC_Group,
-                    MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                     MUIA_Group_Child, st = (Object *) MUI_NewObject(
                         MUIC_String,
                         MUIA_Frame, MUIV_Frame_String,
                         MUIA_String_MaxLen, BUFSIZ,
                         TAG_END),
-                    MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                     TAG_END),
                 /* Page 6 - P_NUMBER */
                 MUIA_Group_Child, MUI_NewObject(
                     MUIC_Group,
-                    MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                     MUIA_Group_Child, nm = (Object *) MUI_NewObject(
                         MUIC_Slider,
                         MUIA_Slider_Horiz, TRUE,
                         TAG_END),
-                    MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                     TAG_END),
                 /* Page 7 - P_ASKFILE */
                 MUIA_Group_Child, af = MUI_NewObject(
                     MUIC_Group,
                     TAG_END),
                 TAG_END),
-            /* Progress bar */
-            MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
-            MUIA_Group_Child, cm = MUI_NewObject(
-                MUIC_Gauge,
-                MUIA_ShowMe, FALSE,
-                MUIA_Gauge_Horiz, TRUE,
-                MUIA_Gauge_InfoText, tr(S_PGRS),
-                TAG_END),
             /* Bottom pager */
+            MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
             MUIA_Group_Child, bp = MUI_NewObject(
                 MUIC_Group,
                 MUIA_Group_PageMode, TRUE,
@@ -2909,8 +2870,8 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
         my->Win = win;
 
         // Save widgets.
-        if(el && ul && fp && cm && pr && st && nm && bp && em &&
-           tx && ls && lg && tp && af && ys && no && ab && ao && ar)
+        if(el && ul && fp && pr && st && nm && bp && em && tx &&
+           ls && lg && tp && af && ys && no && ab && ao && ar)
         {
             my->ExpertLevel = el;
             my->AbortOnly = ao;
@@ -2918,7 +2879,6 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
             my->Progress = fp;
             my->AbortRun = ar;
             my->AbortYes = ya;
-            my->Complete = cm;
             my->Pretend = pr;
             my->String = st;
             my->Number = nm;
