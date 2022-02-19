@@ -2619,9 +2619,9 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
                 MUIA_Text_PreParse, "\33c",
                 TAG_END),
             /* Top pager */
+            MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
             MUIA_Group_Child, tp = MUI_NewObject(
                 MUIC_Group,
-                MUIA_Frame, MUIV_Frame_Group,
                 MUIA_Group_PageMode, TRUE,
                 /* Page 0 - P_WELCOME */
                 MUIA_Group_Child, MUI_NewObject(
