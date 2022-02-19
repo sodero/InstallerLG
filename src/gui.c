@@ -1749,9 +1749,7 @@ MUIDSP IGGetWindowProp(Class *cls, Object *obj,
 //------------------------------------------------------------------------------
 MUIDSP IGShowPicture(Class *cls, Object *obj, struct MUIP_IG_ShowPicture *msg)
 {
-    // Silence.
-    (void) cls;
-
+    struct IGData *my = INST_DATA(cls, obj);
     Object *win = NULL;
 
     // We need something to show.
@@ -1818,6 +1816,7 @@ MUIDSP IGShowPicture(Class *cls, Object *obj, struct MUIP_IG_ShowPicture *msg)
             win = (Object *) MUI_NewObject
             (
                 MUIC_Window,
+                my->Scr ? MUIA_Window_Screen : TAG_IGNORE, my->Scr,
                 MUIA_Window_TopEdge, yp,
                 MUIA_Window_LeftEdge, xp,
                 MUIA_UserData, msg->MediaID,
@@ -1845,6 +1844,7 @@ MUIDSP IGShowPicture(Class *cls, Object *obj, struct MUIP_IG_ShowPicture *msg)
             win = (Object *) MUI_NewObject
             (
                 MUIC_Window,
+                my->Scr ? MUIA_Window_Screen : TAG_IGNORE, my->Scr,
                 MUIA_Window_TopEdge, yp,
                 MUIA_Window_LeftEdge, xp,
                 MUIA_Window_DragBar, FALSE,
@@ -1875,7 +1875,6 @@ MUIDSP IGShowPicture(Class *cls, Object *obj, struct MUIP_IG_ShowPicture *msg)
 
     // FIXME
     return (IPTR) win;
-
 }
 
 //------------------------------------------------------------------------------
@@ -2931,7 +2930,6 @@ MUIDSP IGSetup(Class *cls, Object *obj, struct MUI_RenderInfo *msg)
 //------------------------------------------------------------------------------
 MUIDSP IGDispose (Class *cls, Object *obj, Msg msg)
 {
-
     struct IGData *my = INST_DATA(cls, obj);
 
     // Close backdrop window.
