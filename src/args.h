@@ -4,7 +4,7 @@
 // Functions and data types for handling command line arguments and workbench
 // tooltypes.
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2020, Ola SÃ¶der. All rights reserved.
+// Copyright (C) 2018-2022, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 

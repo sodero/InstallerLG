@@ -1,7 +1,7 @@
 @DATABASE "Default"
 @NODE Main "InstallerLG Guide"
 @TOC Contents
-@$VER: InstallerLG.guide 0.1.0 (20.10.19) english
+@$VER: InstallerLG.guide 1.0.0 (19.02.22) english
 
 @{B}Contents@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
@@ -16,7 +16,7 @@
 This is a work in progress, see also @{" Original guide " LINK HELP:english/Installer.guide/MAIN}.
 
 @{B}-----------------------------------------------------------------------@{UB}
-Copyright © 2018-2020, Ola Söder. All rights reserved.
+Copyright © 2018-2022, Ola Söder. All rights reserved.
 
 @ENDNODE
 
