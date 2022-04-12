@@ -121,6 +121,10 @@ Russian translation.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}1.0.1 (2022-NOT-YET)@{UB}
+- (effect) custom screen combbination fix.
+- MorphOS (getversion "morphos") fix.
+
 @{B}1.0.0 (2022-02-05)@{UB}
 - (askdir) directory name truncation now works like the CBM Installer.
 

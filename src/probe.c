@@ -1040,7 +1040,17 @@ entry_p n_getversion(entry_p contxt)
                 ver = h_getversion_dev(file);
             }
         }
+#ifdef __MORPHOS__
+        if(ver == LG_NOVER && !strcasecmp("morphos", name))
+        {
+            struct Resident *res = FindResident("MorphOS");
 
+            if(res)
+            {
+                R_NUM(res->rt_Version << 16 | res->rt_Revision);
+            }
+        }
+#endif
         // Failure (0) or version / revision.
         R_NUM((ver == LG_NOVER) ? 0 : ver);
     }
