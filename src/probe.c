@@ -144,32 +144,33 @@ static cpu_t h_cpu_id(void)
     {
         return POWERPC;
     }
-    else
 #endif
-         if(flags & AFF_68060)
+    if(flags & AFF_68060)
     {
         return M68060;
     }
-    else if(flags & AFF_68040)
+
+    if(flags & AFF_68040)
     {
         return M68040;
     }
-    else if(flags & AFF_68030)
+
+    if(flags & AFF_68030)
     {
         return M68030;
     }
-    else if(flags & AFF_68020)
+
+    if(flags & AFF_68020)
     {
         return M68020;
     }
-    else if(flags & AFF_68010)
+
+    if(flags & AFF_68010)
     {
         return M68010;
     }
-    else
-    {
-        return M68000;
-    }
+
+    return M68000;
 }
 
 #else
