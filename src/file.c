@@ -2629,7 +2629,7 @@ entry_p n_foreach(entry_p contxt)
                 // Get next entry.
                 ent = DBG_ADDR(readdir(dir));
 
-                // Need to check for cur->name or else the the filtering of '.'
+                // Need to check for cur->name or else the filtering of '.'
                 // and '..' would not work, we would get entries without names.
                 if(ent && cur->name)
                 {
