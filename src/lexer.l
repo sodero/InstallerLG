@@ -31,7 +31,7 @@ static FILE *script;
 static char *strduptr(const char *str);
 %}
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-    /* We need the parser to be reentrant, not because we want to, but because it will will leak memory otherwise.                                                                      */
+    /* We need the parser to be reentrant, not because we want to, but because it will leak memory otherwise.                                                                      */
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %option noyywrap reentrant bison-bridge caseless
 %x comment
