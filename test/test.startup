@@ -37,7 +37,7 @@
 (user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i6 _st_","ph0 1","cmp _st_ ../test/data.startup.o7 && rm -f _st_"
 (user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i7 _st_","ph0 1","cmp _st_ ../test/data.startup.o8 && rm -f _st_"
 (user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i1 _st_ && chmod a-r _st_","Line 1: Could not read from file '_st_' ph0 0","chmod a+r _st_ && cmp _st_ ../test/data.startup.o1 && rm -f _st_"
-(user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i1 _st_ && chmod a-w _st_","ph0 1","cmp _st_ ../test/data.startup.o1 && rm -f _st_"
+(user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i1 _st_ && chmod a-w _st_","ph0 1","cmp _st_ ../test/data.startup.o1 && chmod a+w _st_ && rm -f _st_"
 (user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i8 _st_","ph0 1","cmp _st_ ../test/data.startup.o9 && rm -f _st_"
 (user 2) (set @user-startup "_st_") (startup "app" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i9 _st_","ph0 1","cmp _st_ ../test/data.startup.o10 && rm -f _st_"
 (set @user-startup "_st_") (startup "" (prompt "p") (help "h") (command "loadwb")) ; "cp ../test/data.startup.i10 _st_","Line 1: Invalid application name '' 0","rm -f _st_"
