@@ -504,6 +504,9 @@ entry_p n_askdisk(entry_p contxt)
 
     // For testing purposes only.
     printf("%s%d", buf_put(B_KEY), (newname || back) ? LG_TRUE : LG_FALSE);
+
+    // Tests need strict output ordering.
+    fflush(stdout);
     #endif
 
     // Success or failure.

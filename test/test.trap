@@ -7,7 +7,7 @@
 (set @strict 0) (trap 1 "2" a (debug @trap) (debug @trap)) (debug "c") ; "","0 0 c 1",""
 (trap (debug "fail") 1 2 3 (debug @trap) (debug @trap)) (debug "c") ; "","Line 1: syntax error, unexpected '(' '('",""
 (trap 1 (debug "a") (debug (/ 0 0 )) (debug "b")) (debug "c") ; "","a 0 c 1",""
-(trap 1 (debug "a") (debug (/ 0 0 )) (debug "b")) (debug "c") (debug (/ 0 0 )) ; "","Line 1: Division by zero '/' a 0 c 0 0",""
+(trap 1 (debug "a") (debug (/ 0 0 )) (debug "b")) (debug "c") (debug (/ 0 0 )) ; "","a 0 c Line 1: Division by zero '/' 0 0",""
 (trap 1 (message "!")) ; "","!00",""
 (trap 1 ((message "!") (message "?"))) ; "","!0?00",""
 (trap 1 (message "!") (message "?")) ; "","!0?00",""

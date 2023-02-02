@@ -1088,6 +1088,9 @@ static inp_t h_copyfile_reset(char *name)
     }
     #else
     printf("R:%s\n", name);
+
+    // Tests need strict output ordering.
+    fflush(stdout);
     #endif
 
     return grc;
@@ -3547,6 +3550,9 @@ static void h_tooltype_set_stack(entry_p contxt, char *file)
     FreeDiskObject(obj);
     #else
     printf("ss:%s:%d\n", file, num(opt(contxt, OPT_SETSTACK)));
+
+    // Tests need strict output ordering.
+    fflush(stdout);
     #endif
 }
 
@@ -3601,6 +3607,9 @@ static void h_tooltype_set_position(entry_p contxt, char *file)
     {
         printf("sp:%s:no_pos\n", file);
     }
+
+    // Tests need strict output ordering.
+    fflush(stdout);
     #endif
 }
 
@@ -3641,6 +3650,9 @@ static void h_tooltype_set_default_tool(entry_p contxt, char *file)
     FreeDiskObject(obj);
     #else
     printf("sd:%s:%s\n", file, str(opt(contxt, OPT_SETDEFAULTTOOL)));
+
+    // Tests need strict output ordering.
+    fflush(stdout);
     #endif
 }
 
@@ -3710,6 +3722,9 @@ static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
     #else
     (void) contxt;
     printf("dt:%s:%s\n", file, type);
+
+    // Tests need strict output ordering.
+    fflush(stdout);
     #endif
 }
 
@@ -3772,6 +3787,9 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file, char *type,
     #else
     (void) contxt;
     printf("ct:%s:%s:%s\n", file, type, value);
+
+    // Tests need strict output ordering.
+    fflush(stdout);
     #endif
 }
 

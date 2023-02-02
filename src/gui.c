@@ -3176,6 +3176,10 @@ inp_t gui_init(bool scr)
 #else
     // Testing purposes.
     puts(scr ? "e" : "");
+
+    // Tests need strict output ordering.
+    fflush(stdout);
+
     return strlen(version + 1) ? G_TRUE : G_ERR;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
@@ -3237,6 +3241,9 @@ inp_t gui_message(const char *msg, bool bck)
 #else
     // Testing purposes.
     printf("%s%d", msg, !!bck) >= 1 ? G_TRUE : G_ERR;
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3254,6 +3261,9 @@ inp_t gui_finish(const char *msg)
 #else
     // Testing purposes.
     fputs(msg, stdout) >= 0 ? G_TRUE : G_ERR;
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3271,6 +3281,9 @@ inp_t gui_working(const char *msg)
 #else
     // Testing purposes.
     fputs(msg, stdout) >= 0 ? G_TRUE : G_ERR;
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3287,6 +3300,9 @@ void gui_abort(const char *msg)
 #else
     // Testing purposes.
     fputs(msg, stdout);
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3310,6 +3326,10 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms,
 #else
     // Testing purposes.
     printf("%s%s%s%d%d\n", msg, hlp, *nms, def, !!bck) ? G_TRUE : G_ERR;
+
+    // Tests need strict output ordering.
+    fflush(stdout);
+
     *ret = (grc == G_TRUE) ? def : 0;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
     return grc;
@@ -3336,6 +3356,10 @@ inp_t gui_options(const char *msg, const char *hlp, const char **nms,
 #else
     // Testing purposes.
     printf("%s%s%s%d%d%d\n", msg, hlp, *nms, def, *ret, !!bck) ? G_TRUE : G_ERR;
+
+    // Tests need strict output ordering.
+    fflush(stdout);
+
     *ret = (grc == G_TRUE) ? def : 0;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
     return grc;
@@ -3360,6 +3384,9 @@ inp_t gui_bool(const char *msg, const char *hlp, const char *yes,
 #else
     // Testing purposes.
     printf("%s%s%s%s%d\n", msg, hlp, yes, nay, !!bck) ? G_TRUE : G_ERR;
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3382,6 +3409,10 @@ inp_t gui_string(const char *msg, const char *hlp, const char *def,
 #else
     // Testing purposes.
     printf("%s%s%s%d\n", msg, hlp, def, !!bck) ? G_TRUE : G_ERR;
+
+    // Tests need strict output ordering.
+    fflush(stdout);
+
     *ret = (grc == G_TRUE) ? def : "";
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
     return grc;
@@ -3408,6 +3439,10 @@ inp_t gui_number(const char *msg, const char *hlp, int32_t min, int32_t max,
 #else
     // Testing purposes.
     printf("%s%s%d%d%d\n", msg, hlp, min, max, !!bck) ? G_TRUE : G_ERR;
+
+    // Tests need strict output ordering.
+    fflush(stdout);
+
     *ret = (grc == G_TRUE) ? def : 0;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
     return grc;
@@ -3437,6 +3472,9 @@ inp_t gui_welcome(const char *msg, int32_t *lvl, int32_t *lgf, int32_t *prt,
     // Testing purposes.
     printf("%s%d%d%d%d%d%d\n", msg, *lvl, *lgf, *prt, min, !!npr, !!nlg ) ?
            G_TRUE : G_ERR;
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3465,6 +3503,10 @@ inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
     {
         *ret = def;
         printf("%s%s%d%d%d%s%d\n", msg, hlp, !!pth, !!dsk, !!asn, def, !!bck);
+
+        // Tests need strict output ordering.
+        fflush(stdout);
+
         return G_TRUE;
     }
     return G_FALSE;
@@ -3495,6 +3537,10 @@ inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
     {
         *ret = def;
         printf("%s%s%s%d%d%d\n", msg, hlp, def, !!pth, !!dsk, !!bck);
+
+        // Tests need strict output ordering.
+        fflush(stdout);
+
         return G_TRUE;
     }
     return G_FALSE;
@@ -3524,9 +3570,17 @@ inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst,
     {
         // Start copy.
         puts("sc");
+
+        // Tests need strict output ordering.
+        fflush(stdout);
+
         if(cnf)
         {
             printf("%s%s%d\n", msg ? msg : "", hlp ? hlp : "", !!bck);
+
+            // Tests need strict output ordering.
+            fflush(stdout);
+
             return G_FALSE;
         }
         return G_TRUE;
@@ -3557,8 +3611,7 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
         // order of files and directories on the host system.
         printf("N%dB%d\n", !!nga, !!bck);
 
-        // Tests need strict output ordering. This needs to be flushed before
-        // any error messages are written to stderr.
+        // Tests need strict output ordering.
         fflush(stdout);
         done = true;
     }
@@ -3579,6 +3632,9 @@ void gui_copyfiles_end(void)
 #else
     // Testing purposes.
     puts("ec");
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3595,6 +3651,9 @@ void gui_complete(int32_t com)
 #else
     // Testing purposes.
     printf("%d\n", com);
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3614,6 +3673,9 @@ inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 #else
     // Testing purposes.
     printf("%s%s%d\n", msg, hlp, !!bck) ? G_TRUE : G_ERR;
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3659,6 +3721,9 @@ void gui_effect(int32_t eff, int32_t cl1, int32_t cl2)
 #else
     // Testing purposes.
     printf("%d:%d:%d\n", eff, cl1, cl2);
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3675,6 +3740,9 @@ inp_t gui_closemedia(int32_t mid)
 #else
     // Testing purposes.
     printf("%d\n", mid);
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
     return G_TRUE;
 }
@@ -3694,6 +3762,9 @@ inp_t gui_setmedia(int32_t mid, int32_t act, const char *par)
 #else
     // Testing purposes.
     printf("%d:%d:%s\n", mid, act, par ? par : "_");
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
     return G_TRUE;
 }
@@ -3713,6 +3784,9 @@ inp_t gui_showmedia(int32_t *mid, const char* mda, int32_t act)
     static int32_t num;
     *mid = num++;
     printf("%d:%d:%s\n", *mid, act, mda ? mda : "_");
+
+    // Tests need strict output ordering.
+    fflush(stdout);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
     return G_TRUE;
 }

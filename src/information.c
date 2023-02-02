@@ -76,6 +76,9 @@ static void h_debug_all(entry_p contxt)
         {
             // Invoked from CLI.
             printf("%s ", val);
+
+            // Tests need strict output ordering.
+            fflush(stdout);
         }
         #ifdef AMIGA
         else
@@ -109,6 +112,9 @@ entry_p n_debug(entry_p contxt)
     {
         // Invoked from CLI.
         printf("\n");
+
+        // Tests need strict output ordering.
+        fflush(stdout);
     }
     #ifdef AMIGA
     else

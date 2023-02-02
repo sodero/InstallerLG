@@ -171,6 +171,9 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
         #else
         // For testing purposes only.
         printf("%s%s", cmd, dir ? dir : "");
+
+        // Tests need strict output ordering.
+        fflush(stdout);
         #endif
 
         // Go back to where we started if we've changed directory.

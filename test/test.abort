@@ -6,5 +6,5 @@
 (abort "1" "2") ; "","120",""
 (abort 1 2) ; "","120",""
 (abort (abort "!") 1 2) ; "","!0",""
-(procedure die (die)) (onerror (die)) (abort "!"); "","Line 1: Max recursion depth exceeded 'die' !",""
+(procedure die (die)) (onerror (die)) (abort "!"); "","!Line 1: Max recursion depth exceeded 'die'",""
 (+ 1) (abort "!"); "","!0",""
