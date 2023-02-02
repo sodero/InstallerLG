@@ -3556,6 +3556,10 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
         // We can't do this more than once. If we do, tests will depend on the
         // order of files and directories on the host system.
         printf("N%dB%d\n", !!nga, !!bck);
+
+        // Tests need strict output ordering. This needs to be flushed before
+        // any error messages are written to stderr.
+        fflush(stdout);
         done = true;
     }
     return G_TRUE;
