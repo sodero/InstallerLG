@@ -462,6 +462,9 @@ void run(entry_p entry)
         if(arg_argc(-1))
         {
             puts(str(status));
+
+            // Tests need strict output ordering.
+            fflush(stdout);
         }
 
         // GUI teardown.
