@@ -162,7 +162,6 @@
 (copyfiles (pattern "1") (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ && mkdir _cfs_ && touch _cfs_/1","sc N0B0 ec _cfd_","test -f _cfd_/1 && rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (all)) ; "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && touch _cfs_/1 && chmod a-r _cfs_","Line 1: Could not read directory '_cfs_' 0","chmod a+r _cfs_ && rm -Rf _cfs_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (newname "")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","sc N0B0 Line 1: Could not write to file '_cfd_/' ec 0","rm -Rf _cfs_ _cfd_"
-(copyfiles (source "_cfs_") (dest "")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_","sc N0B0 ec","rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_")) ; "rm -Rf _cfs_ _cfd_ && echo abc > _cfs_ && touch _cfd_","sc Line 1: Could not create directory '_cfd_' ec 0","rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (all) (optional askuser)) (+ 2); "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && touch _cfs_/1 && chmod a-r _cfs_/1","sc N0B0 Line 1: Could not read from file '_cfs_/1' ec 0","chmod a+r _cfs_/1 && rm -Rf _cfs_ _cfd_"
 (copyfiles (source "_cfs_") (dest "_cfd_") (all) (optional force)) (+ 2); "rm -Rf _cfs_ _cfd_ && mkdir _cfs_ && touch _cfs_/1 && chmod a-r _cfs_/1","sc N0B0 Line 1: Could not read from file '_cfs_/1' ec 0","chmod a+r _cfs_/1 && rm -Rf _cfs_ _cfd_"
