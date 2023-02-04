@@ -21,7 +21,7 @@
 ("%ld" @user-min) ; "","0",""
 ("%ld" @no-pretend) ; "","0",""
 ("%ld" @no-log) ; "","0",""
-("%s" @user-startup) ; "","s:user-startup",""
+(if (database "os" "AmigaOS") (= @user-startup "s:User-Startup") (= @user-startup "s:user-startup")) ; "","1",""
 ("%ld" @installer-version) ; "","2883594",""
 ("%ld" (/ @installer-version 65536)) ; "","44",""
 (BITAND @installer-version $ffff) ; "","10",""
