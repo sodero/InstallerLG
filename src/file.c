@@ -1144,6 +1144,13 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
         return G_FALSE;
     }
 
+    // Nothing to do if source and destination are the same.
+    if(!strcmp(src, dst))
+    {
+        h_fclose(&file);
+        return G_TRUE;
+    }
+
     // Is there an existing destination file that is write protected?
     if(!DBG_ZERO(access(dst, F_OK)) && DBG_ZERO(access(dst, W_OK)))
     {
