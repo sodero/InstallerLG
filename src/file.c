@@ -875,6 +875,10 @@ static inline int32_t h_perm_posix_to_amiga(mode_t posix)
 //------------------------------------------------------------------------------
 static bool h_protect_get_amiga(entry_p contxt, const char *file, int32_t *mask)
 {
+    #ifdef LG_TEST
+    (void) contxt;
+    #endif
+
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
@@ -889,15 +893,10 @@ static bool h_protect_get_amiga(entry_p contxt, const char *file, int32_t *mask)
     // Attempt to lock file / directory.
     BPTR lock = (BPTR) Lock(file, ACCESS_READ);
 
-    // Fill up FIB. Filter out non-POSIX flags in test mode.
+    // Fill up FIB.
     if(lock && Examine(lock, fib))
     {
-        #ifdef LG_TEST
-        (void) contxt;
-        *mask = (fib->fib_Protection & 0xff) | 0x01;
-        #else
         *mask = fib->fib_Protection;
-        #endif
 
         // Release lock and free FIB.
         FreeDosObject(DOS_FIB, fib);
@@ -1004,8 +1003,7 @@ static bool h_protect_set(entry_p contxt, const char *file, int32_t mask)
             return false;
         }
         #else
-        // Disable delete protection in test mode otherwise rm will fail.
-        (void) SetProtection(file, mask | 0x01);
+        (void) SetProtection(file, mask);
         #endif
     }
     #else
@@ -1087,10 +1085,7 @@ static inp_t h_copyfile_reset(char *name)
         FreeDiskObject(obj);
     }
     #else
-    printf("R:%s\n", name);
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("R:%s\n", name);
     #endif
 
     return grc;
@@ -3549,10 +3544,7 @@ static void h_tooltype_set_stack(entry_p contxt, char *file)
 
     FreeDiskObject(obj);
     #else
-    printf("ss:%s:%d\n", file, num(opt(contxt, OPT_SETSTACK)));
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("ss:%s:%d\n", file, num(opt(contxt, OPT_SETSTACK)));
     #endif
 }
 
@@ -3601,15 +3593,12 @@ static void h_tooltype_set_position(entry_p contxt, char *file)
     if(pos)
     {
         int32_t xpos = num(pos->children[0]), ypos = num(pos->children[1]);
-        printf("sp:%s:%d:%d\n", file, xpos, ypos);
+        OUT("sp:%s:%d:%d\n", file, xpos, ypos);
     }
     else
     {
-        printf("sp:%s:no_pos\n", file);
+        OUT("sp:%s:no_pos\n", file);
     }
-
-    // Tests need strict output ordering.
-    fflush(stdout);
     #endif
 }
 
@@ -3649,10 +3638,7 @@ static void h_tooltype_set_default_tool(entry_p contxt, char *file)
     obj->do_DefaultTool = def;
     FreeDiskObject(obj);
     #else
-    printf("sd:%s:%s\n", file, str(opt(contxt, OPT_SETDEFAULTTOOL)));
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("sd:%s:%s\n", file, str(opt(contxt, OPT_SETDEFAULTTOOL)));
     #endif
 }
 
@@ -3721,10 +3707,7 @@ static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
     free(tmp);
     #else
     (void) contxt;
-    printf("dt:%s:%s\n", file, type);
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("dt:%s:%s\n", file, type);
     #endif
 }
 
@@ -3786,10 +3769,7 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file, char *type,
     FreeDiskObject(obj);
     #else
     (void) contxt;
-    printf("ct:%s:%s:%s\n", file, type, value);
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("ct:%s:%s:%s\n", file, type, value);
     #endif
 }
 

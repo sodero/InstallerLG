@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 #include "args.h"
+#include "debug.h"
 #include "gui.h"
 #include "resource.h"
 #include "version.h"
@@ -3174,12 +3175,7 @@ inp_t gui_init(bool scr)
 
     return G_TRUE;
 #else
-    // Testing purposes.
-    puts(scr ? "e" : "");
-
-    // Tests need strict output ordering.
-    fflush(stdout);
-
+    OUT("%s\n", scr ? "e" : "");
     return strlen(version + 1) ? G_TRUE : G_ERR;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
@@ -3235,15 +3231,11 @@ void gui_exit(void)
 //------------------------------------------------------------------------------
 inp_t gui_message(const char *msg, bool bck)
 {
-    return
 #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod(Win, MUIM_IG_Message, msg, bck);
+    return (inp_t) DoMethod(Win, MUIM_IG_Message, msg, bck);
 #else
-    // Testing purposes.
-    printf("%s%d", msg, !!bck) >= 1 ? G_TRUE : G_ERR;
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("%s%d", msg, !!bck);
+    return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3255,15 +3247,11 @@ inp_t gui_message(const char *msg, bool bck)
 //------------------------------------------------------------------------------
 inp_t gui_finish(const char *msg)
 {
-    return
 #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod(Win, MUIM_IG_Finish, msg);
+    return (inp_t) DoMethod(Win, MUIM_IG_Finish, msg);
 #else
-    // Testing purposes.
-    fputs(msg, stdout) >= 0 ? G_TRUE : G_ERR;
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT(msg);
+    return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3275,15 +3263,11 @@ inp_t gui_finish(const char *msg)
 //------------------------------------------------------------------------------
 inp_t gui_working(const char *msg)
 {
-    return
 #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod(Win, MUIM_IG_Working, msg);
+    return (inp_t) DoMethod(Win, MUIM_IG_Working, msg);
 #else
-    // Testing purposes.
-    fputs(msg, stdout) >= 0 ? G_TRUE : G_ERR;
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT(msg);
+    return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3298,11 +3282,7 @@ void gui_abort(const char *msg)
 #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_Abort, msg);
 #else
-    // Testing purposes.
-    fputs(msg, stdout);
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT(msg);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3320,19 +3300,13 @@ void gui_abort(const char *msg)
 inp_t gui_choice(const char *msg, const char *hlp, const char **nms,
                  int32_t def, bool bck, int32_t *ret)
 {
-    inp_t grc =
 #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod(Win, MUIM_IG_Radio, msg, hlp, nms, def, bck, ret);
+    return (inp_t) DoMethod(Win, MUIM_IG_Radio, msg, hlp, nms, def, bck, ret);
 #else
-    // Testing purposes.
-    printf("%s%s%s%d%d\n", msg, hlp, *nms, def, !!bck) ? G_TRUE : G_ERR;
-
-    // Tests need strict output ordering.
-    fflush(stdout);
-
-    *ret = (grc == G_TRUE) ? def : 0;
+    OUT("%s%s%s%d%d\n", msg, hlp, *nms, def, !!bck);
+    *ret = def;
+    return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
-    return grc;
 }
 
 //------------------------------------------------------------------------------
@@ -3350,19 +3324,14 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms,
 inp_t gui_options(const char *msg, const char *hlp, const char **nms,
                   int32_t def, bool bck, int32_t *ret)
 {
-    inp_t grc =
 #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod(Win, MUIM_IG_CheckBoxes, msg, hlp, nms, def, bck, ret);
+    return (inp_t) DoMethod(Win, MUIM_IG_CheckBoxes, msg, hlp, nms, def, bck,
+        ret);
 #else
-    // Testing purposes.
-    printf("%s%s%s%d%d%d\n", msg, hlp, *nms, def, *ret, !!bck) ? G_TRUE : G_ERR;
-
-    // Tests need strict output ordering.
-    fflush(stdout);
-
-    *ret = (grc == G_TRUE) ? def : 0;
+    OUT("%s%s%s%d%d%d\n", msg, hlp, *nms, def, *ret, !!bck);
+    *ret = def;
+    return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
-    return grc;
 }
 
 //------------------------------------------------------------------------------
@@ -3378,15 +3347,11 @@ inp_t gui_options(const char *msg, const char *hlp, const char **nms,
 inp_t gui_bool(const char *msg, const char *hlp, const char *yes,
                const char *nay, bool bck)
 {
-    return
 #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod(Win, MUIM_IG_Bool, msg, hlp, yes, nay, bck);
+    return (inp_t) DoMethod(Win, MUIM_IG_Bool, msg, hlp, yes, nay, bck);
 #else
-    // Testing purposes.
-    printf("%s%s%s%s%d\n", msg, hlp, yes, nay, !!bck) ? G_TRUE : G_ERR;
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("%s%s%s%s%d\n", msg, hlp, yes, nay, !!bck);
+    return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3403,19 +3368,13 @@ inp_t gui_bool(const char *msg, const char *hlp, const char *yes,
 inp_t gui_string(const char *msg, const char *hlp, const char *def,
                  bool bck, const char **ret)
 {
-    inp_t grc =
 #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod(Win, MUIM_IG_String, msg, hlp, def, bck, ret);
+    return (inp_t) DoMethod(Win, MUIM_IG_String, msg, hlp, def, bck, ret);
 #else
-    // Testing purposes.
-    printf("%s%s%s%d\n", msg, hlp, def, !!bck) ? G_TRUE : G_ERR;
-
-    // Tests need strict output ordering.
-    fflush(stdout);
-
-    *ret = (grc == G_TRUE) ? def : "";
+    OUT("%s%s%s%d\n", msg, hlp, def, !!bck);
+    *ret = def;
+    return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
-    return grc;
 }
 
 //------------------------------------------------------------------------------
@@ -3433,19 +3392,14 @@ inp_t gui_string(const char *msg, const char *hlp, const char *def,
 inp_t gui_number(const char *msg, const char *hlp, int32_t min, int32_t max,
                  int32_t def, bool bck, int32_t *ret)
 {
-    inp_t grc =
 #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod(Win, MUIM_IG_Number, msg, hlp, min, max, def, bck, ret);
+    return (inp_t) DoMethod(Win, MUIM_IG_Number, msg, hlp, min, max, def, bck,
+        ret);
 #else
-    // Testing purposes.
-    printf("%s%s%d%d%d\n", msg, hlp, min, max, !!bck) ? G_TRUE : G_ERR;
-
-    // Tests need strict output ordering.
-    fflush(stdout);
-
-    *ret = (grc == G_TRUE) ? def : 0;
+    OUT("%s%s%d%d%d\n", msg, hlp, min, max, !!bck);
+    *ret = def;
+    return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
-    return grc;
 }
 
 //------------------------------------------------------------------------------
@@ -3465,16 +3419,12 @@ inp_t gui_number(const char *msg, const char *hlp, int32_t min, int32_t max,
 inp_t gui_welcome(const char *msg, int32_t *lvl, int32_t *lgf, int32_t *prt,
                   int32_t min, bool npr, bool nlg)
 {
-    return
 #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod(Win, MUIM_IG_Welcome, msg, lvl, lgf, prt, min, npr, nlg);
+    return (inp_t) DoMethod(Win, MUIM_IG_Welcome, msg, lvl, lgf, prt, min, npr,
+        nlg);
 #else
-    // Testing purposes.
-    printf("%s%d%d%d%d%d%d\n", msg, *lvl, *lgf, *prt, min, !!npr, !!nlg ) ?
-           G_TRUE : G_ERR;
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("%s%d%d%d%d%d%d\n", msg, *lvl, *lgf, *prt, min, !!npr, !!nlg);
+    return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3498,15 +3448,10 @@ inp_t gui_askdir(const char *msg, const char *hlp, bool pth, bool dsk, bool asn,
     return (inp_t) DoMethod(Win, MUIM_IG_AskFile, msg, hlp, pth, dsk, asn, def,
         TRUE, bck, ret);
 #else
-    // Testing purposes.
     if(msg && hlp && def && ret)
     {
         *ret = def;
-        printf("%s%s%d%d%d%s%d\n", msg, hlp, !!pth, !!dsk, !!asn, def, !!bck);
-
-        // Tests need strict output ordering.
-        fflush(stdout);
-
+        OUT("%s%s%d%d%d%s%d\n", msg, hlp, !!pth, !!dsk, !!asn, def, !!bck);
         return G_TRUE;
     }
     return G_FALSE;
@@ -3532,15 +3477,10 @@ inp_t gui_askfile(const char *msg, const char *hlp, bool pth, bool dsk,
     return (inp_t) DoMethod(Win, MUIM_IG_AskFile, msg, hlp, pth, dsk, FALSE,
         def, FALSE, bck, ret);
 #else
-    // Testing purposes.
     if(msg && hlp && def && ret)
     {
         *ret = def;
-        printf("%s%s%s%d%d%d\n", msg, hlp, def, !!pth, !!dsk, !!bck);
-
-        // Tests need strict output ordering.
-        fflush(stdout);
-
+        OUT("%s%s%s%d%d%d\n", msg, hlp, def, !!pth, !!dsk, !!bck);
         return G_TRUE;
     }
     return G_FALSE;
@@ -3565,22 +3505,14 @@ inp_t gui_copyfiles_start(const char *msg, const char *hlp, pnode_p lst,
     return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesStart, msg, hlp, lst, cnf,
         bck);
 #else
-    // Testing purposes.
     if(lst)
     {
         // Start copy.
-        puts("sc");
-
-        // Tests need strict output ordering.
-        fflush(stdout);
+        OUT("%s\n", "sc");
 
         if(cnf)
         {
-            printf("%s%s%d\n", msg ? msg : "", hlp ? hlp : "", !!bck);
-
-            // Tests need strict output ordering.
-            fflush(stdout);
-
+            OUT("%s%s%d\n", msg ? msg : "", hlp ? hlp : "", !!bck);
             return G_FALSE;
         }
         return G_TRUE;
@@ -3602,17 +3534,14 @@ inp_t gui_copyfiles_setcur(const char *cur, bool nga, bool bck)
 #if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod(Win, MUIM_IG_CopyFilesSetCur, cur, nga, bck);
 #else
-    // Testing purposes.
     (void) cur;
     static bool done;
+
+    // We can't do this more than once. If we do, tests will depend on the
+    // order of files and directories on the host system.
     if(!done)
     {
-        // We can't do this more than once. If we do, tests will depend on the
-        // order of files and directories on the host system.
-        printf("N%dB%d\n", !!nga, !!bck);
-
-        // Tests need strict output ordering.
-        fflush(stdout);
+        OUT("N%dB%d\n", !!nga, !!bck);
         done = true;
     }
     return G_TRUE;
@@ -3630,11 +3559,7 @@ void gui_copyfiles_end(void)
 #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CopyFilesEnd);
 #else
-    // Testing purposes.
-    puts("ec");
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("%s\n", "ec");
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3649,11 +3574,7 @@ void gui_complete(int32_t com)
 #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_Complete, com);
 #else
-    // Testing purposes.
-    printf("%d\n", com);
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("%d\n", com);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3667,15 +3588,11 @@ void gui_complete(int32_t com)
 //------------------------------------------------------------------------------
 inp_t gui_confirm(const char *msg, const char *hlp, bool bck)
 {
-    return
 #if defined(AMIGA) && !defined(LG_TEST)
-    (inp_t) DoMethod(Win, MUIM_IG_Confirm, msg, hlp, bck);
+    return (inp_t) DoMethod(Win, MUIM_IG_Confirm, msg, hlp, bck);
 #else
-    // Testing purposes.
-    printf("%s%s%d\n", msg, hlp, !!bck) ? G_TRUE : G_ERR;
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("%s%s%d\n", msg, hlp, !!bck);
+    return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3701,8 +3618,7 @@ void gui_error(int32_t line, const char *type, const char *info)
     // We don't have any way of knowing whether this really works.
     EasyRequest(NULL, &es, NULL);
 #else
-    // Testing purposes.
-    fprintf(stderr, tr(S_LERR), line, type, info);
+    OUT(tr(S_LERR), line, type, info);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3719,11 +3635,7 @@ void gui_effect(int32_t eff, int32_t cl1, int32_t cl2)
 #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_Effect, eff, cl1, cl2);
 #else
-    // Testing purposes.
-    printf("%d:%d:%d\n", eff, cl1, cl2);
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("%d:%d:%d\n", eff, cl1, cl2);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
@@ -3738,11 +3650,7 @@ inp_t gui_closemedia(int32_t mid)
 #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_CloseMedia, mid);
 #else
-    // Testing purposes.
-    printf("%d\n", mid);
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("%d\n", mid);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
     return G_TRUE;
 }
@@ -3760,11 +3668,7 @@ inp_t gui_setmedia(int32_t mid, int32_t act, const char *par)
 #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_SetMedia, mid, act, par);
 #else
-    // Testing purposes.
-    printf("%d:%d:%s\n", mid, act, par ? par : "_");
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("%d:%d:%s\n", mid, act, par ? par : "_");
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
     return G_TRUE;
 }
@@ -3780,13 +3684,9 @@ inp_t gui_showmedia(int32_t *mid, const char* mda, int32_t act)
 #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_ShowMedia, mid, mda, act);
 #else
-    // Testing purposes.
     static int32_t num;
     *mid = num++;
-    printf("%d:%d:%s\n", *mid, act, mda ? mda : "_");
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("%d:%d:%s\n", *mid, act, mda ? mda : "_");
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
     return G_TRUE;
 }
@@ -3803,7 +3703,6 @@ void gui_query_screen(int32_t *width, int32_t *height, int32_t *depth,
 #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_GetScreenProp, width, height, depth, colors);
 #else
-    // Testing purposes.
     *width = 640;
     *height = 256;
     *colors = 4;
@@ -3824,7 +3723,6 @@ void gui_query_window(int32_t *width, int32_t *height, int32_t *upper,
     DoMethod(Win, MUIM_IG_GetWindowProp, width, height, upper, lower, left,
              right);
 #else
-    // Testing purposes.
     *width = *right = 320;
     *height = *lower = 128;
     *upper = *left = 0;

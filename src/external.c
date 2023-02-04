@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------------
 
 #include "alloc.h"
+#include "debug.h"
 #include "error.h"
 #include "eval.h"
 #include "external.h"
@@ -169,11 +170,7 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             err = -1;
         }
         #else
-        // For testing purposes only.
-        printf("%s%s", cmd, dir ? dir : "");
-
-        // Tests need strict output ordering.
-        fflush(stdout);
+        OUT("%s%s", cmd, dir ? dir : "");
         #endif
 
         // Go back to where we started if we've changed directory.

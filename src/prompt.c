@@ -8,9 +8,10 @@
 //------------------------------------------------------------------------------
 
 #include "alloc.h"
-#include "gui.h"
+#include "debug.h"
 #include "error.h"
 #include "eval.h"
+#include "gui.h"
 #include "prompt.h"
 #include "resource.h"
 #include "util.h"
@@ -501,12 +502,7 @@ entry_p n_askdisk(entry_p contxt)
     #else
     // On non-Amiga systems, or in test mode, we always succeed.
     ret = LG_TRUE;
-
-    // For testing purposes only.
-    printf("%s%d", buf_put(B_KEY), (newname || back) ? LG_TRUE : LG_FALSE);
-
-    // Tests need strict output ordering.
-    fflush(stdout);
+    OUT("%s%d", buf_put(B_KEY), (newname || back) ? LG_TRUE : LG_FALSE);
     #endif
 
     // Success or failure.
