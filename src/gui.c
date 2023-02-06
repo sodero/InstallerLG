@@ -3250,7 +3250,7 @@ inp_t gui_finish(const char *msg)
 #if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod(Win, MUIM_IG_Finish, msg);
 #else
-    OUT(msg);
+    OUT("%s", msg);
     return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
@@ -3266,7 +3266,7 @@ inp_t gui_working(const char *msg)
 #if defined(AMIGA) && !defined(LG_TEST)
     return (inp_t) DoMethod(Win, MUIM_IG_Working, msg);
 #else
-    OUT(msg);
+    OUT("%s", msg);
     return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
@@ -3282,7 +3282,7 @@ void gui_abort(const char *msg)
 #if defined(AMIGA) && !defined(LG_TEST)
     DoMethod(Win, MUIM_IG_Abort, msg);
 #else
-    OUT(msg);
+    OUT("%s", msg);
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 
