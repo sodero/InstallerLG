@@ -3205,7 +3205,7 @@ entry_p n_startup(entry_p contxt)
     if(!buf)
     {
         ERR(ERR_READ_FILE, fln);
-        R_NUM(LG_TRUE);
+        R_NUM(LG_FALSE);
     }
 
     // Use a temporary file to make sure that we don't mess up the current file
