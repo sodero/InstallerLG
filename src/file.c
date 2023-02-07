@@ -843,7 +843,7 @@ static inline mode_t h_perm_amiga_to_posix(int32_t amiga)
 
     // Always reset the delete flag since that's not a POSIX feature.
     return (read ? POSIX_READ_MASK : 0) | (write ? POSIX_WRITE_MASK : 0) |
-           (exec ? POSIX_EXEC_MASK : 0) | DELETE_MASK;
+           (exec ? POSIX_EXEC_MASK : 0);
 }
 
 //------------------------------------------------------------------------------
@@ -859,7 +859,7 @@ static inline int32_t h_perm_posix_to_amiga(mode_t posix)
 
     // On Amiga '0' == enabled, see above.
     return (read ? 0 : READ_MASK) | (write ? 0 : WRITE_MASK) |
-           (exec ? 0 : EXEC_MASK ) | DELETE_MASK;
+           (exec ? 0 : EXEC_MASK);
 }
 #endif
 
