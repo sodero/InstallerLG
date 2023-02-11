@@ -800,13 +800,56 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 }
 
 //------------------------------------------------------------------------------
-// We don't care about the distinction between root, group and user since that
-// doesn't matter on Amiga.
+// File permissions.
 //------------------------------------------------------------------------------
-#define POSIX_READ_MASK (S_IRUSR | S_IRGRP | S_IROTH)
-#define POSIX_WRITE_MASK (S_IWUSR | S_IWGRP | S_IWOTH)
-#define POSIX_EXEC_MASK (S_IXUSR | S_IXGRP | S_IXOTH)
+#define POSIX_READ_MASK S_IRUSR
+#define POSIX_WRITE_MASK S_IWUSR
+#define POSIX_EXEC_MASK S_IXUSR
 #define POSIX_RWX_MASK (POSIX_READ_MASK | POSIX_WRITE_MASK | POSIX_EXEC_MASK)
+
+#define READ_MASK   (1 << 3)
+#define WRITE_MASK  (1 << 2)
+#define EXEC_MASK   (1 << 1)
+#define DELETE_MASK (1 << 0)
+
+#if !defined(AMIGA)
+
+/* From the OS4 SDK */
+#define FIBB_OTR_READ    15 /* Other: file is readable */
+#define FIBB_OTR_WRITE   14 /* Other: file is writable */
+#define FIBB_OTR_EXECUTE 13 /* Other: file is executable */
+#define FIBB_OTR_DELETE  12 /* Other: prevent file from being deleted */
+#define FIBB_GRP_READ    11 /* Group: file is readable */
+#define FIBB_GRP_WRITE   10 /* Group: file is writable */
+#define FIBB_GRP_EXECUTE  9 /* Group: file is executable */
+#define FIBB_GRP_DELETE   8 /* Group: prevent file from being deleted */
+
+#define FIBB_HOLD         7 /* (V50) hold loaded program in cli resident list */
+#define FIBB_SCRIPT       6 /* program is a script (execute) file */
+#define FIBB_PURE         5 /* program is reentrant and rexecutable */
+#define FIBB_ARCHIVE      4 /* cleared whenever file is changed */
+#define FIBB_READ         3 /* ignored by old filesystem */
+#define FIBB_WRITE        2 /* ignored by old filesystem */
+#define FIBB_EXECUTE      1 /* ignored by system, used by Shell */
+#define FIBB_DELETE       0 /* prevent file from being deleted */
+
+#define FIBF_OTR_READ    (1L<<FIBB_OTR_READ)
+#define FIBF_OTR_WRITE   (1L<<FIBB_OTR_WRITE)
+#define FIBF_OTR_EXECUTE (1L<<FIBB_OTR_EXECUTE)
+#define FIBF_OTR_DELETE  (1L<<FIBB_OTR_DELETE)
+#define FIBF_GRP_READ    (1L<<FIBB_GRP_READ)
+#define FIBF_GRP_WRITE   (1L<<FIBB_GRP_WRITE)
+#define FIBF_GRP_EXECUTE (1L<<FIBB_GRP_EXECUTE)
+#define FIBF_GRP_DELETE  (1L<<FIBB_GRP_DELETE)
+
+#define FIBF_HOLD        (1L<<FIBB_HOLD)
+#define FIBF_SCRIPT      (1L<<FIBB_SCRIPT)
+#define FIBF_PURE        (1L<<FIBB_PURE)
+#define FIBF_ARCHIVE     (1L<<FIBB_ARCHIVE)
+#define FIBF_READ        (1L<<FIBB_READ)
+#define FIBF_WRITE       (1L<<FIBB_WRITE)
+#define FIBF_EXECUTE     (1L<<FIBB_EXECUTE)
+#define FIBF_DELETE      (1L<<FIBB_DELETE)
 
 //------------------------------------------------------------------------------
 // 8 7 6 5 4 3 2 1  <- Bit number
@@ -824,12 +867,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 // | +------------- | 1 = flag set
 // +--------------- |
 //------------------------------------------------------------------------------
-#define READ_MASK   (1 << 3)
-#define WRITE_MASK  (1 << 2)
-#define EXEC_MASK   (1 << 1)
-#define DELETE_MASK (1 << 0)
 
-#if !defined(AMIGA)
 //------------------------------------------------------------------------------
 // Name:        h_perm_amiga_to_posix
 // Description: Convert Amiga file permissions to POSIX file permissions.
@@ -838,12 +876,63 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 //------------------------------------------------------------------------------
 static inline mode_t h_perm_amiga_to_posix(int32_t amiga)
 {
-    bool read = (amiga & READ_MASK) == 0, write = (amiga & WRITE_MASK) == 0,
-         exec = (amiga & EXEC_MASK) == 0;
+    mode_t posix = 0;
 
-    // Always reset the delete flag since that's not a POSIX feature.
-    return (read ? POSIX_READ_MASK : 0) | (write ? POSIX_WRITE_MASK : 0) |
-           (exec ? POSIX_EXEC_MASK : 0);
+    /* User read. */
+    if((amiga & FIBF_READ) == 0)
+    {
+        posix |= S_IRUSR;
+    }
+
+    /* User write. */
+    if((amiga & FIBF_WRITE) == 0)
+    {
+        posix |= S_IWUSR;
+    }
+
+    /* User execute. */
+    if((amiga & FIBF_EXECUTE) == 0)
+    {
+        posix |= S_IXUSR;
+    }
+
+    /* Group read. */
+    if((amiga & FIBF_GRP_READ) != 0)
+    {
+        posix |= S_IRGRP;
+    }
+
+    /* Group write. */
+    if((amiga & FIBF_GRP_WRITE) != 0)
+    {
+        posix |= S_IWGRP;
+    }
+
+    /* Group execute. */
+    if((amiga & FIBF_GRP_EXECUTE) != 0)
+    {
+        posix |= S_IXGRP;
+    }
+
+    /* Other read. */
+    if((amiga & FIBF_OTR_READ) != 0)
+    {
+        posix |= S_IROTH;
+    }
+
+    /* Other write. */
+    if((amiga & FIBF_OTR_WRITE) != 0)
+    {
+        posix |= S_IWOTH;
+    }
+
+    /* Other execute. */
+    if((amiga & FIBF_OTR_EXECUTE) != 0)
+    {
+        posix |= S_IXOTH;
+    }
+
+    return posix;
 }
 
 //------------------------------------------------------------------------------
@@ -854,12 +943,64 @@ static inline mode_t h_perm_amiga_to_posix(int32_t amiga)
 //------------------------------------------------------------------------------
 static inline int32_t h_perm_posix_to_amiga(mode_t posix)
 {
-    bool read = posix & POSIX_READ_MASK, write = posix & POSIX_WRITE_MASK,
-         exec = posix & POSIX_EXEC_MASK;
+    /* User delete set. See above. */
+    int32_t amiga = 0;
 
-    // On Amiga '0' == enabled, see above.
-    return (read ? 0 : READ_MASK) | (write ? 0 : WRITE_MASK) |
-           (exec ? 0 : EXEC_MASK);
+    /* User read. */
+    if((posix & S_IRUSR) == 0)
+    {
+        amiga |= FIBF_READ;
+    }
+   
+    /* User write. */
+    if((posix & S_IWUSR) == 0)
+    {
+        amiga |= FIBF_WRITE;
+    }
+
+    /* User execute. */
+    if((posix & S_IXUSR) == 0)
+    {
+        amiga |= FIBF_EXECUTE;
+    }
+
+    /* Group read. */
+    if((posix & S_IRGRP) != 0)
+    {
+        amiga |= FIBF_GRP_READ;
+    }
+
+    /* Group write. */
+    if((posix & S_IWGRP) != 0)
+    {
+        amiga |= FIBF_GRP_WRITE | FIBF_GRP_DELETE;
+    }
+
+    /* Group execute. */
+    if((posix & S_IXGRP) != 0)
+    {
+        amiga |= FIBF_GRP_EXECUTE;
+    }
+
+    /* Other read. */
+    if((posix & S_IROTH) != 0)
+    {
+        amiga |= FIBF_OTR_READ;
+    }
+
+    /* Other write. */
+    if((posix & S_IWOTH) != 0)
+    {
+        amiga |= FIBF_OTR_WRITE | FIBF_OTR_DELETE;
+    }
+
+    /* Other execute. */
+    if((posix & S_IXOTH) != 0)
+    {
+        amiga |= FIBF_OTR_EXECUTE;
+    }
+
+    return amiga;
 }
 #endif
 
@@ -945,6 +1086,9 @@ static bool h_protect_get_posix(const char *file, int32_t *mask)
         return false;
     }
 
+    /* Filter out anything but standard permissions. */
+    fst.st_mode &= S_IRWXU | S_IRWXG | S_IRWXO;
+
     // Report permissions in Amiga format.
     *mask = h_perm_posix_to_amiga(fst.st_mode);
 
@@ -1007,8 +1151,6 @@ static bool h_protect_set(entry_p contxt, const char *file, int32_t mask)
         #endif
     }
     #else
-    // Please note that OWN, GRP and OTH information is lost with the Amiga
-    // format representation and that permissions will apply to all of them.
     (void) chmod(file, h_perm_amiga_to_posix(mask));
     #endif
 
@@ -2859,7 +3001,7 @@ static int32_t h_protect_arg_get(entry_p contxt)
     // ----rwed.
     int32_t msk = 0;
 
-    // Get is considered (safe).
+    // Get is (safe).
     (void) h_protect_get(contxt, str(C_ARG(1)), &msk);
 
     return msk;
@@ -2877,11 +3019,29 @@ static int32_t h_protect_mask(char *flags, int32_t cms)
     size_t len = strlen(flags);
     int32_t msk = cms;
 
-    // Inverting 1-4 in the name of clarity.
+    // Parser state.
+    int mode;
+
+    // Pass mask on if flags are missing.
+    if(!len)
+    {
+        return cms;
+    }
+
+    // Invert 1-4 in the name of sanity.
     msk ^= 0x0f;
 
-    // Parser state.
-    int mode = 0;
+    if(flags[0] != '+' && flags[0] != '-')
+    {
+        /* If absolute, clear user flags and set '+' state. */
+        msk &= 0xffffff00;
+        mode = 1;
+    }
+    else
+    {
+        /* Relative parser state. */
+        mode = 0;
+    }
 
     for(size_t i = 0; i < len; i++)
     {
@@ -2914,7 +3074,7 @@ static int32_t h_protect_mask(char *flags, int32_t cms)
         }
     }
 
-    // Inverting 1-4 in the name of Amiga.
+    // Invert 1-4 in the name of Amiga.
     msk ^= 0x0f;
 
     return msk;
@@ -2937,7 +3097,8 @@ static int32_t h_protect_delta(entry_p contxt, char *flags, char *file)
         // Use override instead of file flags.
         msk = num(override);
     }
-    else if(!h_protect_get(contxt, file, &msk))
+    else
+    if(!h_protect_get(contxt, file, &msk))
     {
         return msk;
     }
@@ -3220,7 +3381,7 @@ entry_p n_startup(entry_p contxt)
         snprintf(tmp, tln, "%s.XXXXXX", fln);
         int hnd = mkstemp(tmp);
 
-        // On some system 'w' doesn't work, but 'w+' does. Try both.
+        // On some systems 'w' doesn't work, but 'w+' does. Try both.
         FILE *file = DBG_FOPEN(fdopen(hnd, "w"));
         file = file ? file : DBG_FOPEN(fdopen(hnd, "w+"));
 
