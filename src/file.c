@@ -3640,6 +3640,10 @@ static int32_t h_textfile(entry_p contxt)
         return remove(buf_get(B_KEY)) ? LG_FALSE : LG_TRUE;
     }
 
+    // Force deletion.
+    (void) chmod(dst, POSIX_RWX_MASK);
+    (void) remove(dst);
+
     // Rename temp file to its proper (output) name.
     return rename(buf_put(B_KEY), dst) ? LG_FALSE : LG_TRUE;
 }
