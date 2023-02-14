@@ -2920,9 +2920,15 @@ entry_p n_makeassign(entry_p contxt)
     }
     else
     {
-        #if defined(AMIGA) && !defined(LG_TEST)
+        #if defined(AMIGA)
         // Remove assign.
         res = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? LG_TRUE : LG_FALSE;
+
+        if(!get_num(contxt, "@strict"))
+        {
+            // Always succeed in sloppy mode.
+            res = LG_TRUE;
+        }
         #else
         res = get_num(contxt, "@gamma");
         #endif
