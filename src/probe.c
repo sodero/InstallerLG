@@ -212,13 +212,13 @@ static char *h_cpu_name(void)
 static char *h_os_name(void)
 {
     // Host OS or 'Unknown'.
-    #if defined(AMIGA) && !defined(LG_TEST)
+    #if defined(AMIGA)
     if(FindResident("MorphOS"))
     {
         return "MorphOS";
     }
 
-    // TODO - Try to open aros.library instead?
+    // TODO - Open aros.library instead?
     if(FindResident("processor.resource"))
     {
         return "AROS";
