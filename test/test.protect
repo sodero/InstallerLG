@@ -1,3 +1,4 @@
+(if (not (database "os" "Unknown OS")) ((delete "_pt_" (optional "force")) (textfile (dest "_pt_") (append "_")) (protect "_pt_" "-d") (delete "_pt_") (if (= 1 (exists "_pt_")) (debug "yes") (debug "no")) (delete "_pt_" (optional "force")) (if (= 1 (exists "_pt_")) (debug "yes") (debug "no"))) ((debug "yes") (debug "no"))); "","yes no 1",""
 (protect "_pt_" "+d") (set @pretend 1) (protect "_pt_" %1110 (safe)) ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a+rwx _pt_","14","test `stat -c '%A' _pt_` = ---------- && chmod +w _pt_ && rm -f _pt_"
 (protect "_pt_" "" (override $ff)) ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_","255",""
 (protect "_pt_" ("%s%s" "x" "y") (override $ff)) ; "","15",""
