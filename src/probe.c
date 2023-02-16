@@ -584,65 +584,69 @@ entry_p n_getdiskspace(entry_p contxt)
     // We need a path.
     C_SANE(1, NULL);
 
-    #if defined(AMIGA) && !defined(LG_TEST)
+#ifdef AMIGA
     // Attempt to lock path.
     const char *n = str(C_ARG(1));
+
     BPTR lock = (BPTR) Lock(n, ACCESS_READ);
 
-    // Do we have a lock?
-    if(lock)
+    if(!lock)
     {
-        struct InfoData id;
-
-        // Retrieve information from lock.
-        if(Info(lock, &id))
-        {
-            long long free = (long long) (id.id_NumBlocks - id.id_NumBlocksUsed)
-                                          * id.id_BytesPerBlock;
-            // Release lock ASAP.
-            UnLock(lock);
-
-            // From the Installer.guide 1.20:
-            //
-            // The parameter <unit> is optional and defines the unit for the
-            // returned disk space: "B" (or omitted) is "Bytes", "K" is
-            // "Kilobytes", "M" is "Megabytes" and "G" is "Gigabytes".
-            if(exists(C_ARG(2)))
-            {
-                switch(*str(C_ARG(2)))
-                {
-                    case 'K':
-                    case 'k':
-                        free >>= 10;
-                        break;
-
-                    case 'M':
-                    case 'm':
-                        free >>= 20;
-                        break;
-
-                    case 'G':
-                    case 'g':
-                        free >>= 30;
-                        break;
-                }
-            }
-
-            // Cap the return value.
-            R_NUM(free > INT_MAX ? INT_MAX : (int32_t) free);
-        }
-
-        // Info() failed. Release lock.
-        UnLock(lock);
+        // Could not acquire a lock on <pathname>.
+        ERR(ERR_READ, n);
+        R_NUM(-1);
     }
 
-    // For some reason, we could not acquire a lock on <path>, or, we could get
-    // a lock, but failed when trying to retrieve info from the lock.
-    ERR(ERR_READ, n);
-    #endif
+    struct InfoData id;
 
-    // Failure.
+    // Retrieve information from lock.
+    if(Info(lock, &id))
+    {
+        long long free = (long long) (id.id_NumBlocks - id.id_NumBlocksUsed)
+                                      * id.id_BytesPerBlock;
+        // Release lock ASAP.
+        UnLock(lock);
+#else /* !AMIGA */
+        long long free = 1 << 30;
+#endif /* AMIGA */
+
+        // From the Installer.guide 1.20:
+        //
+        // The parameter <unit> is optional and defines the unit for the
+        // returned disk space: "B" (or omitted) is "Bytes", "K" is
+        // "Kilobytes", "M" is "Megabytes" and "G" is "Gigabytes".
+        if(exists(C_ARG(2)))
+        {
+            switch(*str(C_ARG(2)))
+            {
+                case 'K':
+                case 'k':
+                    free >>= 10;
+                    break;
+
+                case 'M':
+                case 'm':
+                    free >>= 20;
+                    break;
+
+                case 'G':
+                case 'g':
+                    free >>= 30;
+                    break;
+            }
+        }
+
+        // Cap the return value.
+        R_NUM(free > INT_MAX ? INT_MAX : (int32_t) free);
+#ifdef AMIGA
+    }
+
+    UnLock(lock);
+
+    // Info() failed.
+    ERR(ERR_READ, n);
     R_NUM(-1);
+#endif /* AMIGA */
 }
 
 //------------------------------------------------------------------------------
