@@ -2896,7 +2896,7 @@ entry_p n_makeassign(entry_p contxt)
         // The destination.
         char *dst = str(C_ARG(2));
 
-        #if defined(AMIGA) && !defined(LG_TEST)
+        #if defined(AMIGA)
         BPTR lock = (BPTR) Lock(dst, ACCESS_READ);
         if(lock)
         {

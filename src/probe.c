@@ -212,7 +212,7 @@ static char *h_cpu_name(void)
 static char *h_os_name(void)
 {
     // Host OS or 'Unknown'.
-    #if defined(AMIGA)
+#if defined(AMIGA)
     if(FindResident("MorphOS"))
     {
         return "MorphOS";
@@ -226,11 +226,9 @@ static char *h_os_name(void)
 
     // Use AmigaOS as fallback.
     return "AmigaOS";
-    #else
-    // In test mode / on non Amigas we shouldn't report anything but 'Unknown'.
-    // Doing so would create dependencies between test results and host system.
+#else
     return "Unknown OS";
-    #endif
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -241,15 +239,14 @@ static char *h_os_name(void)
 //------------------------------------------------------------------------------
 static int32_t h_chipmem(void)
 {
-    return
-    #if defined(AMIGA) && !defined(LG_TEST)
-    AvailMem(MEMF_CHIP);
-    #else
+#if defined(AMIGA) && !defined(LG_TEST)
+    return AvailMem(MEMF_CHIP);
+#else
     // In test mode / on non Amigas we shouldn't report anything but a dummy
     // value. Doing so would create dependencies between test results and host
     // system. Pretend that we have 512 KiB free chipmem.
-    (int32_t) 1 << 19;
-    #endif
+    return (int32_t) 1 << 19;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -260,15 +257,14 @@ static int32_t h_chipmem(void)
 //------------------------------------------------------------------------------
 static int32_t h_totalmem(void)
 {
-    return
-    #if defined(AMIGA) && !defined(LG_TEST)
-    AvailMem(MEMF_ANY);
-    #else
+#if defined(AMIGA) && !defined(LG_TEST)
+    return AvailMem(MEMF_ANY);
+#else
     // In test mode / on non Amigas we shouldn't report anything but a dummy
     // value. Doing so would create dependencies between test results and host
     // system. Pretend that we have 1 MiB free chipmem + fastmem.
-    (int32_t) 1 << 20;
-    #endif
+    return (int32_t) 1 << 20;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -375,7 +371,7 @@ entry_p n_getassign(entry_p contxt)
     C_SANE(1, NULL);
 
     // On non Amiga systems, or in test mode, this is a stub.
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     struct DosList *dl;
     const char *asn = str(C_ARG(1));
     size_t asnl = strlen(asn);
@@ -503,7 +499,7 @@ entry_p n_getassign(entry_p contxt)
         // LockDosList will block until the end of time if a problem occurs.
         ERR(ERR_READ, asn);
     }
-    #endif
+#endif /* AMIGA && !LG_TEST */
 
     // Return empty string on failure.
     R_EST;
@@ -526,7 +522,7 @@ entry_p n_getdevice(entry_p contxt)
     // We need a path.
     C_SANE(1, NULL);
 
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     BPTR lock = (BPTR) Lock(str(C_ARG(1)), ACCESS_READ);
     struct InfoData id;
 
@@ -568,7 +564,8 @@ entry_p n_getdevice(entry_p contxt)
 
     // Could not get <path> info.
     ERR(ERR_READ, str(C_ARG(1)));
-    #endif
+#endif /* AMIGA && !LG_TEST */
+
     // Return empty string on failure.
     R_EST;
 }
@@ -813,12 +810,12 @@ static int32_t h_getversion_rsp(struct Resident *rsp)
 //------------------------------------------------------------------------------
 static int32_t h_getversion_res(const char *name)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     return h_getversion_rsp(FindResident(name));
-    #else
+#else
     (void) name;
     return LG_NOVER;
-    #endif
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -832,7 +829,7 @@ static int32_t h_getversion_dev(const char *name)
     // Failure.
     int32_t ver = LG_NOVER;
 
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     struct MsgPort *port = CreateMsgPort();
 
     if(!port)
@@ -870,9 +867,9 @@ static int32_t h_getversion_dev(const char *name)
     }
 
     DeleteMsgPort(port);
-    #else
+#else
     (void) name;
-    #endif
+#endif
 
     // Success or failure.
     return ver;
@@ -897,7 +894,7 @@ static int32_t h_getversion_lib(const char *name)
     // Assume failure.
     int32_t ver = LG_NOVER;
 
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     struct Library *lib = OpenLibrary(name, 0);
     // Assume that 'name' is a library that can be opened.
     if(lib)
@@ -908,7 +905,7 @@ static int32_t h_getversion_lib(const char *name)
         // Library is no longer needed.
         CloseLibrary(lib);
     }
-    #endif
+#endif
 
     // Success or failure.
     return ver;
@@ -922,22 +919,22 @@ static int32_t h_getversion_lib(const char *name)
 //------------------------------------------------------------------------------
 int32_t h_getversion_file(const char *name)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     struct Process *pro = (struct Process *) FindTask(NULL);
     // Save the current window ptr.
     APTR win = pro->pr_WindowPtr;
 
     // Disable auto request.
     pro->pr_WindowPtr = (APTR) -1L;
-    #endif
+#endif
 
     // Attempt to open file.
     FILE *file = DBG_FOPEN(h_fopen(end(), name, "r", false));
 
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     // Restore auto request.
     pro->pr_WindowPtr = win;
-    #endif
+#endif
 
     // Invalid version.
     int32_t ver = LG_NOVER;
@@ -1012,11 +1009,11 @@ entry_p n_getversion(entry_p contxt)
 
         // Name of file / lib / etc.
         const char *name = str(C_ARG(1)),
-        #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
         *file = FilePart(name);
-        #else
+#else
         *file = name;
-        #endif
+#endif
 
         // Invalid version.
         int32_t ver = LG_NOVER;
@@ -1063,13 +1060,13 @@ entry_p n_getversion(entry_p contxt)
         R_NUM((ver == LG_NOVER) ? 0 : ver);
     }
 
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     // No arguments, return version of Exec.
     struct ExecBase *base = (struct ExecBase *) SysBase;
     R_NUM((base->LibNode.lib_Version << 16) | base->SoftVer);
-    #else
+#else
     R_NUM(LG_FALSE);
-    #endif
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1105,12 +1102,12 @@ entry_p n_iconinfo(entry_p contxt)
     // Suffix isn't needed.
     char *file = str(dst);
 
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     // Get icon information.
     struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
-    #else
+#else
     char *obj = file;
-    #endif
+#endif
 
     // Exit if we can't read from icon.
     if(!obj)
@@ -1150,7 +1147,7 @@ entry_p n_iconinfo(entry_p contxt)
             int32_t type = types[i]->id;
             char *svl = NULL;
 
-            #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
             // Is this a numerical value?
             if(type == OPT_GETSTACK || type == OPT_GETPOSITION)
             {
@@ -1172,11 +1169,11 @@ entry_p n_iconinfo(entry_p contxt)
 
             // Always a valid value.
             svl = svl ? svl : "";
-            #else
+#else
             // Testing purposes only.
             snprintf(buf_get(B_KEY), buf_len(), "%d:%zu", type, j);
             svl = buf_put(B_KEY);
-            #endif
+#endif
 
             // Always a valid (string).
             entry_p val = new_string(DBG_ALLOC(strdup(svl)));
@@ -1238,9 +1235,9 @@ entry_p n_iconinfo(entry_p contxt)
         }
     }
 
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     FreeDiskObject(obj);
-    #endif
+#endif
 
     // Success.
     R_NUM(LG_TRUE);
