@@ -5,7 +5,7 @@
 (protect "_pt_" ("+%s%s" "hspa" "rwed") (override $ff)) ; "","240",""
 (protect "_pt_" ("+%s%s" "hspa" "rwed")) ; "","0",""
 (protect "_pt_" ("+%s%s" "hspa" "rwed")) ; "","0",""
-(set @strict 0) (protect "_pt_" ("+%s%s" "hspa" "rwed")) ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a-rwx _pt_","240","test `stat -c '%A' _pt_ | tr tT xx` = -rwx------ && chmod +w _pt_ && rm -f _pt_"
+(set @strict 0) (protect "_pt_" ("+%s%s" "hspa" "rwed")) ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a-rwx _pt_","240","test `stat -c '%A' _pt_ | tr tT --` = -rwx------ && chmod +w _pt_ && rm -f _pt_"
 (set @pretend 1) (protect "_pt_" "e") ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a-rwx _pt_","13","test `stat -c '%A' _pt_` = ---------- && chmod +w _pt_ && rm -f _pt_"
 (set @pretend 1) (if (database "os" "Unknown OS") (+ 1 (protect "_pt_" "-r+ew")) (protect "_pt_" "-r+ew")) ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a+r-wx _pt_","34825","test `stat -c '%A' _pt_` = -r--r--r-- && chmod +w _pt_ && rm -f _pt_"
 (set @pretend 1) (if (database "os" "Unknown OS") (+ 1 (protect "_pt_" "--r+ew")) (protect "_pt_" "-r+ew")) ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a+r-wx _pt_","34825","test `stat -c '%A' _pt_` = -r--r--r-- && chmod +w _pt_ && rm -f _pt_"
