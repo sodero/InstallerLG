@@ -2240,7 +2240,7 @@ static int32_t h_delete_info(entry_p contxt, const char *file)
 //------------------------------------------------------------------------------
 static bool h_delete_perm(const char *name)
 {
-    #if defined(AMIGA) && !defined(LG_TEST)
+    #if defined(AMIGA)
     struct FileInfoBlock *fib = (struct FileInfoBlock *)
            AllocDosObject(DOS_FIB, NULL);
 
