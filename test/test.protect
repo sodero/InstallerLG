@@ -35,7 +35,7 @@
 (if (database "os" "Unknown OS") (+ 1 (protect "_pt_" "+e")) (protect "_pt_" "+e")) ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a-rwx _pt_","13","test `stat -c '%A' _pt_` = ---x------ && chmod +w _pt_ && rm -f _pt_"
 (protect "_pt_" 13) ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a-rwx _pt_","13","test `stat -c '%A' _pt_` = ---x------ && chmod +w _pt_ && rm -f _pt_"
 (protect "_pt_" "+w") ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a+rwx _pt_","65280","test `stat -c '%A' _pt_` = -rwxrwxrwx && chmod +w _pt_ && rm -f _pt_"
-(protect "_pt_" "+d") (protect "_pt_" "+r") ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a-rw+x _pt_","8708","test `stat -c '%A' _pt_` = -r-x--x--x && chmod +w _pt_ && rm -f _pt_"
+(if (database "os" "Unknown OS") (+ 1 (protect "_pt_" "+r")) (protect "_pt_" "+r")); "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a-rw+x _pt_","8709","test `stat -c '%A' _pt_` = -r-x--x--x && chmod +w _pt_ && rm -f _pt_"
 (protect "_pt_" "+d") (protect "_pt_" "-r+ew") ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a+rx-w _pt_","43528","test `stat -c '%A' _pt_` = --wxr-xr-x && chmod +w _pt_ && rm -f _pt_"
 (protect "_pt_" "+w" 23) ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a+rwx _pt_","Line 1: syntax error, unexpected INT, expecting '(' or ')' '23'","test `stat -c '%A' _pt_` = -rwxrwxrwx && rm -f _pt_"
 (protect "_pt_" "+r" "nada") ; "touch _pt_ && chmod +w _pt_ && rm -f _pt_ && touch _pt_ && chmod a-rw+x _pt_","Line 1: syntax error, unexpected STR, expecting '(' or ')' '"nada"'","test `stat -c '%A' _pt_` = ---x--x--x && chmod +w _pt_ && rm -f _pt_"
