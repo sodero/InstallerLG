@@ -2254,7 +2254,8 @@ static bool h_delete_perm(const char *name)
     // Get information from lock.
     if(lock && Examine(lock, fib))
     {
-        perm = (fib->fib_Protection & FIBF_DELETE) == 0;
+        perm = (fib->fib_Protection & FIBF_DELETE) == 0 &&
+               (fib->fib_Protection & FIBF_WRITE) == 0;
     }
 
     // Release lock and free info block.
