@@ -1,0 +1,2 @@
+.KEY arg/M
+echo execute _ex_ <arg>

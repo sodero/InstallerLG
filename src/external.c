@@ -121,16 +121,19 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             }
         }
 
-        #if defined(AMIGA) && !defined(LG_TEST)
+#ifdef AMIGA
         // No input needed.
         BPTR inp = (BPTR) Open("NIL:", MODE_OLDFILE);
 
         // Can this fail?
         if(inp)
         {
+# ifndef LG_TEST
             // No output needed.
             BPTR out = (BPTR) Open("NIL:", MODE_OLDFILE);
-
+# else
+            BPTR out = Output();
+# endif
             // Can this fail?
             if(out)
             {
@@ -152,8 +155,10 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
                     set_num(contxt, "@ioerr", ioe);
                 }
 
+# ifndef LG_TEST
                 // We probably don't need to close NIL: but it doesn't hurt.
                 Close(out);
+# endif
             }
             else
             {
@@ -169,10 +174,17 @@ static entry_p h_run(entry_p contxt, const char *pre, const char *dir)
             // Unknown error.
             err = -1;
         }
-        #else
-        OUT("%s%s", cmd, dir ? dir : "");
-        #endif
-
+#else /* !AMIGA */
+        if(pre)
+        {
+            // DOS or Arexx script.
+            OUT("%s%s\n", cmd, dir ? dir : "");
+        }
+        else
+        {
+            system(cmd);
+        }
+#endif /* AMIGA */
         // Go back to where we started if we've changed directory.
         if(cwd && chdir(cwd))
         {
