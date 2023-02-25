@@ -1,4 +1,4 @@
-(if (not (database "os" "Unknown OS")) (run "setenv _INSTALLER_LG_ yes")) (debug (getenv "_INSTALLER_LG_")) (if (not (database "os" "Unknown OS")) (run "unsetenv _INSTALLER_LG_")); "","yes 0",""
+(if (not (database "os" "Unknown OS")) (run "setenv _INSTALLER_LG_ yes")) (debug (getenv "_INSTALLER_LG_")) (if (not (database "os" "Unknown OS")) (run "unsetenv _INSTALLER_LG_")) (+ 0) ; "","yes 0",""
 (if (not (database "os" "Unknown OS")) (run "unsetenv _ge_")) (getenv "_ge_") ; "","",""
 (if (not (database "os" "Unknown OS")) (run "unsetenv _ge_")) (= "" (getenv "_ge_")) ; "","1",""
 (if (not (database "os" "Unknown OS")) (run "unsetenv _ge_")) (= 0 (getenv "_ge_")) ; "","0",""
