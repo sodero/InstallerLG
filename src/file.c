@@ -2632,7 +2632,7 @@ entry_p n_exists(entry_p contxt)
     if(!get_num(contxt, "@strict") || opt(contxt, OPT_NOREQ) ||
         opt(contxt, OPT_QUIET))
     {
-        #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA)
         struct Process *p = (struct Process *) FindTask(NULL);
 
         // Save the current window ptr.
@@ -2640,15 +2640,15 @@ entry_p n_exists(entry_p contxt)
 
         // Disable auto request.
         p->pr_WindowPtr = (APTR) -1L;
-        #endif
+#endif /* AMIGA */
 
         // Get type (file / dir / 0)
         int32_t res = h_exists(str(C_ARG(1)));
 
-        #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA)
         // Restore auto request.
         p->pr_WindowPtr = w;
-        #endif
+#endif /* AMIGA */
 
         R_NUM(res);
     }
@@ -2897,7 +2897,7 @@ entry_p n_makeassign(entry_p contxt)
         // The destination.
         char *dst = str(C_ARG(2));
 
-        #if defined(AMIGA)
+#if defined(AMIGA)
         BPTR lock = (BPTR) Lock(dst, ACCESS_READ);
         if(lock)
         {
@@ -2912,27 +2912,46 @@ entry_p n_makeassign(entry_p contxt)
                 UnLock(lock);
             }
         }
-        #else
+#else /* !AMIGA */
         res = get_num(contxt, "@beta");
-        #endif
+#endif /* AMIGA */
 
         // Log the outcome.
         h_log(contxt, res ? tr(S_ACRT) : tr(S_ACRE), asn, dst);
     }
     else
     {
-        #if defined(AMIGA)
-        // Remove assign.
-        res = AssignLock(str(C_ARG(1)), (BPTR) NULL) ? LG_TRUE : LG_FALSE;
+#if defined(AMIGA)
+        struct Process *p = (struct Process *) FindTask(NULL);
+
+        // Save the current window ptr.
+        APTR w = p->pr_WindowPtr;
+
+        // Disable auto request.
+        p->pr_WindowPtr = (APTR) -1L;
+
+        if(h_exists(asn))
+        {
+            // Remove assign.
+            res = AssignLock(asn, (BPTR) NULL) ? LG_TRUE : LG_FALSE;
+        }
+        else
+        {
+            // No such assign.
+            res = LG_TRUE;
+        }
 
         if(!get_num(contxt, "@strict"))
         {
             // Always succeed in sloppy mode.
             res = LG_TRUE;
         }
-        #else
+
+        // Restore auto request.
+        p->pr_WindowPtr = w;
+#else /* !AMIGA */
         res = get_num(contxt, "@gamma");
-        #endif
+#endif /* AMIGA */
 
         // Log the outcome.
         h_log(contxt, res ? tr(S_ADEL) : tr(S_ADLE), asn);
