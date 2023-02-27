@@ -1,7 +1,7 @@
 @DATABASE "Default"
 @NODE Main "InstallerLG Guide"
 @TOC Contents
-@$VER: InstallerLG.guide 1.0.0 (19.02.22) english
+@$VER: InstallerLG.guide 1.0.1 (28.02.23) english
 
 @{B}Contents@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
@@ -16,7 +16,7 @@
 This is a work in progress, see also @{" Original guide " LINK HELP:english/Installer.guide/MAIN}.
 
 @{B}-----------------------------------------------------------------------@{UB}
-Copyright © 2018-2022, Ola Söder. All rights reserved.
+Copyright © 2018-2023, Ola Söder. All rights reserved.
 
 @ENDNODE
 
@@ -121,9 +121,10 @@ Russian translation.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
-@{B}1.0.1 (2022-NOT-YET)@{UB}
-- (effect) custom screen combbination fix.
+@{B}1.0.1 (2023-02-28)@{UB}
+- (effect) custom screen combination fix.
 - MorphOS (getversion "morphos") fix.
+- AmigaOS 4 support.
 
 @{B}1.0.0 (2022-02-05)@{UB}
 - (askdir) directory name truncation now works like the CBM Installer.

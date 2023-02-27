@@ -3,7 +3,7 @@
 //
 // Arithmetic operations
 //------------------------------------------------------------------------------
-// Copyright (C) 2018-2022, Ola Söder. All rights reserved.
+// Copyright (C) 2018-2023, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
 //------------------------------------------------------------------------------
 
