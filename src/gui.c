@@ -2627,6 +2627,7 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
                 /* Page 0 - P_WELCOME */
                 MUIA_Group_Child, MUI_NewObject(
                     MUIC_Group,
+                    MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                     MUIA_Group_Child, MUI_NewObject(
                         MUIC_Group,
                         MUIA_Group_Horiz, TRUE,
@@ -2692,25 +2693,30 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
                     MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
                     MUIA_Group_Child, em = (Object *) MUI_NewObject(
                         MUIC_Group,
+                        MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                         TAG_END),
                     MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
                     TAG_END),
                 /* Page 5 - P_STRING */
                 MUIA_Group_Child, MUI_NewObject(
                     MUIC_Group,
+                    MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                     MUIA_Group_Child, st = (Object *) MUI_NewObject(
                         MUIC_String,
                         MUIA_Frame, MUIV_Frame_String,
                         MUIA_String_MaxLen, BUFSIZ,
                         TAG_END),
+                    MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                     TAG_END),
                 /* Page 6 - P_NUMBER */
                 MUIA_Group_Child, MUI_NewObject(
                     MUIC_Group,
+                    MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                     MUIA_Group_Child, nm = (Object *) MUI_NewObject(
                         MUIC_Slider,
                         MUIA_Slider_Horiz, TRUE,
                         TAG_END),
+                    MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
                     TAG_END),
                 /* Page 7 - P_ASKFILE */
                 MUIA_Group_Child, af = MUI_NewObject(
