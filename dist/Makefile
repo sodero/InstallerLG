@@ -46,9 +46,11 @@ clean:
 	$(RM) $(README)
 	$(RM) $(DIR)/*.lha
 	$(RM) $(DIR)/*.bak
+	$(RM) *.info
 	$(RM) -R $(NAME) Catalogs
 
 $(ARC): $(EXE)
+	cp $(shell uname)/*.info . && \
 	lha $(LHAFLAGS) $@ $(CAT) && \
 	lha $(LHAFLAGS) $@ $(FILES)
 
