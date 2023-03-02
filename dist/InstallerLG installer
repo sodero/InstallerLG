@@ -118,8 +118,8 @@
             )
         )
 
-        ; Use native names unless we're on AROS.
-        (set i 0 n (<> "AROS" (database "os")))
+        ; Use native names if we're on MorphOS.
+        (set i 0 n (= "MorphOS" (database "os")))
 
         ; Ignore first character of Language.
         (while (and (> (strlen (to_lang i n)) 0) (<> (substr (to_lang i n) 1) (substr (getenv "Language") 1)))
