@@ -8,7 +8,7 @@
 ;---------------------------------------------------------------------------------------------------------------------------------------------
 ; Strings
 ;---------------------------------------------------------------------------------------------------------------------------------------------
-(if (= @language "deutsch")
+(if (or (= @language "deutsch") (= @language "german"))
     (
         (set #welcome_str "Willkommen beim InstallerLG-Installationsprogramm")
         (set #dest_str "Bitte Zielverzeichnis wдhlen")
@@ -20,7 +20,7 @@
         (set #cat_str "Welche Kataloge sollen installiert werden?")
         (set #cat_hlp_str "")
     )
-(if (= @language "italiano")
+(if (or (= @language "italiano") (= @language "italian"))
     (
         (set #welcome_str "Benvenuto nell'installer di InstallerLG")
         (set #dest_str "Per favore seleziona una directory di destinazione")
@@ -44,7 +44,7 @@
         (set #cat_str "Какие языковые каталоги надо установить?")
         (set #cat_hlp_str "")
     )
-(if (= @language "svenska")
+(if (or (= @language "svenska") (= @language "swedish"))
     (
         (set #welcome_str "Installation av InstallerLG")
         (set #dest_str "Vдlj mеlkatalog")
