@@ -123,6 +123,11 @@ Russian translation.
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
 
+@{B}1.0.2 (2023-03-05)@{UB}
+- AmigaOS 4 installer script locale fix.
+- AmigaOS 4 notes in guide.
+- (effect) in installer script.
+
 @{B}1.0.1 (2023-02-28)@{UB}
 - (effect) custom screen combination fix.
 - MorphOS (getversion "morphos") fix.
