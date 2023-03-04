@@ -2,16 +2,17 @@ Building and testing InstallerLG
 ================================
 
 Unless changes have been made to the parser or lexer, a simple 'make' will build
-the 'installer' binary (for AROS / MorphOS). An lha archive fit for distribution
-can be created by invoking 'make dist' in the 'dist' directory. If modifications
-have been made to the parser or the lexer, the parser.c|h and lexer.c files have
-to be regenerated on a Linux system (or some other system with a recent Bison).
+the 'Installer' binary. An lha archive suitable for distribution can be built by
+invoking 'make dist' in the 'dist' directory. If modifications have been made to
+the parser or the lexer, the parser.c|h and lexer.c files have to be regenerated
+on a Linux system (or some other system with a recent Bison).
 
 To execute the tests, a Linux system with Valgrind is recommended. It's possible
-to execute the tests on other systems with a POSIX shell (e.g MacOS) but then no
-checks for memory leaks / illegal reads / writes or leaking file handles will be
-done. By running 'make test', all tests will be executed.  This is currently not
-possible on AROS or MorphOS.
+to run the tests on other systems with a POSIX shell but then no leaks / illegal
+reads / writes or leaking file handles will be detected. By running 'make test',
+all tests will be executed. All test suites should pass on Linux, MacOS, AmigaOS
+and MorphOS. In order to run tests on AmigaOS or MorphOS LG_TEST must be defined
+when building. Testing on AROS is not supported yet.
 
 To build an interactive cli-based version of the installer the variable INTERFACE
 can be set to CLI.  E.g.
