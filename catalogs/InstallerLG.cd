@@ -203,35 +203,5 @@ Destination drawer
 MSG_THEREISNOCURRENTLYINSTALLEDVERSION (//)
 There is no currently installed version
 ;
-MSG_COMMANDLINEARGUMENTS (//)
-SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,APPBANNER/K,NOLOG/S,NOPRETEND/S
-;
-MSG_TTSCRIPT (//)
-SCRIPT
-;
-MSG_TTAPPNAME (//)
-APPNAME
-;
-MSG_TTMINUSER (//)
-MINUSER
-;
-MSG_TTDEFUSER (//)
-DEFUSER
-;
-MSG_TTLANGUAGE (//)
-LANGUAGE
-;
-MSG_TTLOGFILE (//)
-LOGFILE
-;
-MSG_TTAPPBANNER (//)
-APPBANNER
-;
-MSG_TTNOLOG (//)
-NOLOG
-;
-MSG_TTNOPRETEND (//)
-NOPRETEND
-;
 MSG_TTWELC (//)
 Welcome to the %s utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).

@@ -86,16 +86,6 @@ typedef enum
     S_VUNK, /* "Unknown version" */
     S_DDRW, /* "Destination drawer" */
     S_NINS, /* "There is no currently installed version" */
-    S_ARGS, /* "SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,APPBANNER/K,NOLOG/S,NOPRETEND/S" */
-    S_SCRI, /* "SCRIPT" */
-    S_APPN, /* "APPNAME" */
-    S_MUSR, /* "MINUSER" */
-    S_DUSR, /* "DEFUSER" */
-    S_LANG, /* "LANGUAGE" */
-    S_LGFL, /* "LOGFILE" */
-    S_APBR, /* "APPBANNER" */
-    S_NLOG, /* "NOLOG" */
-    S_NOPR, /* "NOPRETEND" */
     S_WELC, /* "Please indicate how..." */
 
     // Out of range.

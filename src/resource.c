@@ -66,10 +66,7 @@ const char *tr(res_t res)
         /*62*/ "Append '%s' to '%s'\n", /*63*/ "Include '%s' in '%s'\n",
         /*64*/ "Version to install", /*65*/ "Version currently installed", /*66*/ "Unknown version",
         /*67*/ "Destination drawer", /*68*/ "There is no currently installed version",
-        /*69*/ "SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,APPBANNER/K,NOLOG/S,NOPRETEND/S\n",
-        /*70*/ "SCRIPT", /*71*/ "APPNAME", /*72*/ "MINUSER", /*73*/ "DEFUSER", /*74*/ "LANGUAGE",
-        /*75*/ "LOGFILE", /*76*/ "APPBANNER", /* 77 */ "NOLOG", /*78*/ "NOPRETEND",
-        /*79*/ "Welcome to the %s installation utility. "
+        /*69*/ "Welcome to the %s installation utility. "
         /*..*/ "Please indicate how the installation should proceed (based upon your knowledge "
         /*..*/ "of the Amiga computer).",
         /*S_GONE*/ "OUT OF RANGE"

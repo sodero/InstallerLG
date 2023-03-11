@@ -274,46 +274,6 @@ MSG_THEREISNOCURRENTLYINSTALLEDVERSION
 Es gibt keine aktuell installierte Version
 ; There is no currently installed version
 ;
-MSG_COMMANDLINEARGUMENTS
-SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,APPBANNER/K,NOLOG/S,NOPRETEND/S
-; SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,APPBANNER/K,NOLOG/S,NOPRETEND/S
-;
-MSG_TTSCRIPT
-SCRIPT
-; SCRIPT
-;
-MSG_TTAPPNAME
-APPNAME
-; APPNAME
-;
-MSG_TTMINUSER
-MINUSER
-; MINUSER
-;
-MSG_TTDEFUSER
-DEFUSER
-; DEFUSER
-;
-MSG_TTLANGUAGE
-LANGUAGE
-; LANGUAGE
-;
-MSG_TTLOGFILE
-LOGFILE
-; LOGFILE
-;
-MSG_TTAPPBANNER
-APPBANNER
-; APPBANNER
-;
-MSG_TTNOLOG
-NOLOG
-; NOLOG
-;
-MSG_TTNOPRETEND
-NOPRETEND
-; NOPRETEND
-;
 MSG_TTWELC
 Willkommen beim Installationsprogramm für %s. Bitte geben Sie an, wie die Installation ablaufen soll (basierend auf Ihren Kenntnissen über den Amiga-Computer).
 ; Welcome to the %s installation utility. Please indicate how the the installation should proceed (based upon your knowledge of the Amiga computer).

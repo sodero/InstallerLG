@@ -102,9 +102,11 @@ static bool arg_cli(int argc, char **argv)
     (void) argc;
     (void) argv;
 
+    const char *tpl = "SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,"
+        "LOGFILE/K,APPBANNER/K,NOLOG/S,NOPRETEND/S";
+
     // Use the builtin commandline parser.
-    struct RDArgs *rda = (struct RDArgs *) ReadArgs(tr(S_ARGS), (IPTR *) args,
-        NULL);
+    struct RDArgs *rda = (struct RDArgs *) ReadArgs(tpl, (IPTR *) args, NULL);
 
     // Postprocess parser output, even when ReadArgs fails.
     bool ret = arg_post();
@@ -112,7 +114,7 @@ static bool arg_cli(int argc, char **argv)
     if(!rda)
     {
         // Invalid or missing arguments.
-        fputs(tr(S_ARGS), stderr);
+        fputs(tpl, stderr);
         return false;
     };
 
@@ -148,7 +150,7 @@ static bool arg_cli(int argc, char **argv)
 static void arg_find_tts(STRPTR *tts)
 {
     // Is there an explicit script path?
-    char *script = (char *) FindToolType(tts, (STRPTR) tr(S_SCRI));
+    char *script = (char *) FindToolType(tts, "SCRIPT");
 
     // Override current script path if explicit non empty path exists.
     args[ARG_SCRIPT] = script && *script ? script : args[ARG_SCRIPT];
