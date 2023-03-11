@@ -66,20 +66,21 @@ const char *tr(res_t res)
         /*62*/ "Append '%s' to '%s'\n", /*63*/ "Include '%s' in '%s'\n",
         /*64*/ "Version to install", /*65*/ "Version currently installed", /*66*/ "Unknown version",
         /*67*/ "Destination drawer", /*68*/ "There is no currently installed version",
-        /*69*/ "SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,NOLOG/S,NOPRETEND/S\n",
+        /*69*/ "SCRIPT/A,APPNAME/K,MINUSER/K,DEFUSER/K,LANGUAGE/K,LOGFILE/K,APPBANNER/K,NOLOG/S,NOPRETEND/S\n",
         /*70*/ "SCRIPT", /*71*/ "APPNAME", /*72*/ "MINUSER", /*73*/ "DEFUSER", /*74*/ "LANGUAGE",
-        /*75*/ "LOGFILE", /*76*/ "NOLOG", /*77*/ "NOPRETEND",/*78*/ "Welcome to the %s installation utility. "
+        /*75*/ "LOGFILE", /*76*/ "APPBANNER", /* 77 */ "NOLOG", /*78*/ "NOPRETEND",
+        /*79*/ "Welcome to the %s installation utility. "
         /*..*/ "Please indicate how the installation should proceed (based upon your knowledge "
         /*..*/ "of the Amiga computer).",
         /*S_GONE*/ "OUT OF RANGE"
     };
 
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     if(loc.li_LocaleBase && loc.li_Catalog && cur > S_NONE)
     {
         return GetCatalogStr(loc.li_Catalog, cur - 1, str[cur]);
     }
-    #endif
+#endif
 
     // Always a valid string.
     return str[cur];

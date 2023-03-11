@@ -135,7 +135,7 @@ static void init_tooltypes(entry_p contxt)
     else
     {
         // Don't use locale if in test mode, doing so would break tests.
-        #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
         // Open the current default locale.
         struct Locale *loc = OpenLocale(NULL);
 
@@ -145,9 +145,9 @@ static void init_tooltypes(entry_p contxt)
             init_str(contxt, "@language", loc->loc_PrefLanguages[0]);
             CloseLocale(loc);
         }
-        #else
+#else
         init_str(contxt, "@language", "english");
-        #endif
+#endif
     }
 }
 
@@ -178,11 +178,11 @@ static void init_misc_num(entry_p contxt)
     init_num(contxt, "@gamma", 2);
     init_num(contxt, "@strict",
     // In test mode, strict is default.
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     LG_FALSE
-    #else
+#else
     LG_TRUE
-    #endif
+#endif
     );
 }
 
@@ -313,7 +313,7 @@ static void init_exit(entry_p contxt)
                                NULL, NUMBER);
 
     // Tests don't expect any default (exit).
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     // Add to the root and reparent.
     if(entry)
     {
@@ -322,12 +322,12 @@ static void init_exit(entry_p contxt)
     }
 
     // No rotation. Default (exit) should be last.
-    #else
+#else
     // Not used.
     (void) contxt;
     // We're not using this, kill it directly.
     kill(entry);
-    #endif
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -351,7 +351,7 @@ static void init_welcome(entry_p contxt)
         );
 
         // Tests don't expect a default (welcome).
-        #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
         // Add to the root and reparent.
         if(entry)
         {
@@ -361,10 +361,10 @@ static void init_welcome(entry_p contxt)
 
         // Rotate right to make it end up on top.
         ror(contxt->children);
-        #else
+#else
         // We're not using this, kill it directly.
         kill(entry);
-        #endif
+#endif
     }
 }
 

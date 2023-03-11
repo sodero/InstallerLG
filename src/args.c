@@ -46,7 +46,7 @@ static bool arg_post(void)
     // arg_done() that is already freed by FreeDiskObject in arg_wb().
     if(args[ARG_SCRIPT])
     {
-        #if defined(AMIGA)
+#if defined(AMIGA)
         BPTR lock = (BPTR) Lock(args[ARG_SCRIPT], ACCESS_READ);
 
         // Use script name if we fail to get the absolute path.
@@ -57,10 +57,10 @@ static bool arg_post(void)
 
         // Lock might be invalid. The script might not exist.
         UnLock(lock);
-        #else
+#else
         // Prepend redundant path in test mode.
         (void) snprintf(buf_get(B_KEY), buf_len(), "./%s", args[ARG_SCRIPT]);
-        #endif
+#endif
 
         // Copy of the (hopefully) absolute script path.
         args[ARG_SCRIPT] = DBG_ALLOC(strdup(buf_put(B_KEY)));
@@ -97,14 +97,18 @@ static bool arg_post(void)
 static bool arg_cli(int argc, char **argv)
 {
     // Temp AxRT workaround until argument handling in AxRT is implemented.
-    #if defined(AMIGA) && !defined(__AXRT__)
+#if defined(AMIGA) && !defined(__AXRT__)
     // Not used on Amiga.
     (void) argc;
     (void) argv;
 
     // Use the builtin commandline parser.
     struct RDArgs *rda = (struct RDArgs *) ReadArgs(tr(S_ARGS), (IPTR *) args,
-                                                    NULL);
+        NULL);
+
+    // Postprocess parser output, even when ReadArgs fails.
+    bool ret = arg_post();
+
     if(!rda)
     {
         // Invalid or missing arguments.
@@ -112,15 +116,12 @@ static bool arg_cli(int argc, char **argv)
         return false;
     };
 
-    // Postprocess parser output.
-    bool ret = arg_post();
-
     // ReadArgs struct not needed, a deep copy is done in arg_post().
     FreeArgs(rda);
 
     // Return the result of arg_post().
     return ret;
-    #else
+#else
     // On non-AMIGA systems, or in test mode, only the script name is supported.
     if(argc < 2)
     {
@@ -134,7 +135,7 @@ static bool arg_cli(int argc, char **argv)
 
     // Copy and return.
     return arg_post();
-    #endif
+#endif
 }
 
 #if defined(AMIGA)
@@ -158,6 +159,7 @@ static void arg_find_tts(STRPTR *tts)
     args[ARG_DEFUSER] = (char *) FindToolType((STRPTR *) tts, "DEFUSER");
     args[ARG_LANGUAGE] = (char *) FindToolType((STRPTR *) tts, "LANGUAGE");
     args[ARG_LOGFILE] = (char *) FindToolType((STRPTR *) tts, "LOGFILE");
+    args[ARG_APPBANNER] = (char *) FindToolType((STRPTR *) tts, "APPBANNER");
     args[ARG_NOLOG] = (char *) FindToolType((STRPTR *) tts, "NOLOG");
     args[ARG_NOPRETEND] = (char *) FindToolType((STRPTR *) tts, "NOPRETEND");
 }
@@ -171,7 +173,7 @@ static void arg_find_tts(STRPTR *tts)
 //------------------------------------------------------------------------------
 static bool arg_wb(char **argv)
 {
-    #if defined(AMIGA)
+#if defined(AMIGA)
     struct WBStartup *wb = (struct WBStartup *) argv;
 
     // We must be invoked using a tool or a project.
@@ -227,10 +229,10 @@ static bool arg_wb(char **argv)
     }
 
     return ret;
-    #else
+#else
     (void) argv;
     return false;
-    #endif
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -258,9 +260,9 @@ bool arg_init(int argc, char **argv)
     // Go to script working directory and return. Temp AxRT workaround until
     // argument handling in AxRT is implemented.
     return init && args[ARG_HOMEDIR]
-    #ifndef __AXRT__
+#ifndef __AXRT__
         && !chdir(args[ARG_HOMEDIR])
-    #endif
+#endif
     ;
 }
 

@@ -2579,6 +2579,9 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
     struct Screen *scr = NULL;
     struct Window *win = NULL;
 
+    // Application banner.
+    char *img = arg_get(ARG_APPBANNER);
+
     // Open backdrop screen / window on demand.
     if(GetTagData(MUIA_IG_UseCustomScreen, FALSE, msg->ops_AttrList))
     {
@@ -2611,7 +2614,24 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
 #ifndef __VBCC__
         MUIA_Window_RootObject, MUI_NewObject(
             MUIC_Group,
+            /* Application banner */
             MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_VSpace, 0),
+            MUIA_Group_Child, MUI_NewObject(
+                MUIC_Group,
+                MUIA_ShowMe, (img && *img) ? TRUE : FALSE,
+                MUIA_Group_Horiz, TRUE,
+                MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
+                MUIA_Group_Child, MUI_NewObject(
+                    MUIC_Dtpic,
+                    MUIA_Dtpic_Name, (img && *img) ? img : "",
+                    TAG_END),
+                MUIA_Group_Child, (Object *) MUI_MakeObject(MUIO_HSpace, 0),
+                TAG_END),
+            MUIA_Group_Child, (Object *) MUI_NewObject(
+                MUIC_Rectangle,
+                MUIA_Rectangle_HBar, TRUE,
+                MUIA_ShowMe, (img && *img) ? TRUE : FALSE,
+                TAG_END),
             /* Top text */
             MUIA_Group_Child, tx = (Object *) MUI_NewObject(
                 MUIC_Text,
