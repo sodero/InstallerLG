@@ -811,7 +811,25 @@ static int32_t h_getversion_rsp(struct Resident *rsp)
 static int32_t h_getversion_res(const char *name)
 {
 #if defined(AMIGA) && !defined(LG_TEST)
-    return h_getversion_rsp(FindResident(name));
+    int32_t ver = h_getversion_rsp(FindResident(name));
+
+    if(ver != LG_NOVER)
+    {
+        return ver;
+    }
+
+    Forbid();
+
+    struct Library *lib = (struct Library *)
+        FindName(&((struct ExecBase *) SysBase)->LibList, name);
+
+    if(lib)
+    {
+        ver = (lib->lib_Version << 16) | lib->lib_Revision;
+    }
+
+    Permit();
+    return ver;
 #else
     (void) name;
     return LG_NOVER;
@@ -1014,7 +1032,6 @@ entry_p n_getversion(entry_p contxt)
 #else
         *file = name;
 #endif
-
         // Invalid version.
         int32_t ver = LG_NOVER;
 
@@ -1022,13 +1039,13 @@ entry_p n_getversion(entry_p contxt)
         if(opt(contxt, OPT_RESIDENT))
         {
             ver = h_getversion_res(file);
+
+            // Failure (0) or version / revision.
+            R_NUM((ver == LG_NOVER) ? 0 : ver);
         }
 
-        if(ver == LG_NOVER)
-        {
-            // Get file version.
-            ver = h_getversion_file(name);
-        }
+        // Get file version.
+        ver = h_getversion_file(name);
 
         // Only attempt to open library / device if file doesn't exist.
         if(h_exists(file) == LG_NONE)

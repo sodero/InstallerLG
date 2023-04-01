@@ -1,7 +1,7 @@
 @DATABASE "Default"
 @NODE Main "InstallerLG Guide"
 @TOC Contents
-@$VER: InstallerLG.guide 1.0.1 (28.02.23) english
+@$VER: InstallerLG.guide 1.0.3 (NOT.YET.23) english
 
 @{B}Contents@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
@@ -122,6 +122,9 @@ Russian translation.
 
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
+
+@{B}1.0.3 (2023-NOT-YET)@{UB}
+- (getversion) bugfix.
 
 @{B}1.0.2 (2023-03-05)@{UB}
 - AmigaOS 4 installer script locale fix.
