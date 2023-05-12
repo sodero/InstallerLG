@@ -8,13 +8,13 @@ else
 SED := sed
 endif
 ifeq ($(OS),MorphOS)
-LHAFLAGS := -r u
+LHAFLAGS ?= -r u
 else
 ifeq ($(OS),AmigaOS)
-LHAFLAGS := -r u
+LHAFLAGS ?= -r u
 SHELL := sh
 else
-LHAFLAGS := ao5
+LHAFLAGS ?= ao5
 endif
 endif
 
