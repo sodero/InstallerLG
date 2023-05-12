@@ -114,8 +114,9 @@ typedef enum
     OPT_FORCE,              // 44
     OPT_NOFAIL,             // 45
     OPT_OKNODELETE,         // 46
-    OPT_INIT,               // 47
-    OPT_LAST,               // 48
+    OPT_UNIX,               // 47
+    OPT_INIT,               // 48
+    OPT_LAST,               // 49
 } opt_t;
 
 //------------------------------------------------------------------------------

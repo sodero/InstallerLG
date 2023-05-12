@@ -54,19 +54,19 @@
 %token /* debug.c|h      */ ASTRAW ASBRAW ASBEVAL EVAL OPTIONS
 %token /* external.c|h   */ EXECUTE REXX RUN
 %token /* exit.c|h       */ ABORT EXIT ONERROR TRAP REBOOT
-%token /* file.c|h       */ COPYFILES COPYLIB DELETE EXISTS FILEONLY FOREACH MAKEASSIGN MAKEDIR PROTECT STARTUP TEXTFILE TOOLTYPE TRANSCRIPT RENAME
+%token /* file.c|h       */ COPYFILES COPYLIB DELETE EXISTS EXPANDPATH FILEONLY FOREACH MAKEASSIGN MAKEDIR PROTECT STARTUP TEXTFILE TOOLTYPE TRANSCRIPT RENAME
 %token /* information.c  */ COMPLETE DEBUG MESSAGE USER WELCOME WORKING
 %token /* logic.c|h      */ AND BITAND BITNOT BITOR BITXOR NOT IN OR SHIFTLEFT SHIFTRIGHT XOR
 %token /* media.c        */ CLOSEMEDIA EFFECT SETMEDIA SHOWMEDIA
 %token /* probe.c|h      */ DATABASE EARLIER GETASSIGN GETDEVICE GETDISKSPACE GETENV GETSIZE GETSUM GETVERSION ICONINFO QUERYDISPLAY
 %token /* procedure.c|h  */ CUS DCL
 %token /* prompt.c|h     */ ASKBOOL ASKCHOICE ASKDIR ASKDISK ASKFILE ASKNUMBER ASKOPTIONS ASKSTRING
-%token /* strop.c|h      */ CAT EXPANDPATH FMT PATHONLY PATMATCH STRLEN SUBSTR TACKON
+%token /* strop.c|h      */ CAT FMT PATHONLY PATMATCH STRLEN SUBSTR TACKON
 %token /* symbol.c|h     */ SET SYMBOLSET SYMBOLVAL
 %token /* wb.c|h         */ OPENWBOBJECT SHOWWBOBJECT CLOSEWBOBJECT
 %token /* options        */ ALL APPEND ASSIGNS BACK CHOICES COMMAND COMPRESSION CONFIRM DEFAULT DELOPTS DEST DISK FILES FONTS GETDEFAULTTOOL GETPOSITION GETSTACK GETTOOLTYPE HELP INFOS
-       /*                */ INCLUDE NEWNAME NEWPATH NOGAUGE NOPOSITION NOREQ PATTERN PROMPT QUIET RANGE SAFE SETDEFAULTTOOL SETPOSITION SETSTACK SETTOOLTYPE SOURCE SWAPCOLORS OPTIONAL
-       /*                */ RESIDENT OVERRIDE
+       /*                */ INCLUDE NEWNAME NEWPATH NOGAUGE NOPOSITION NOREQ OPTIONAL OVERRIDE PATTERN PROMPT QUIET RANGE RESIDENT SAFE SETDEFAULTTOOL SETPOSITION SETSTACK SETTOOLTYPE
+       /*                */ SOURCE SWAPCOLORS UNIX
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Token data types                                                                                                                                                                     */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -77,7 +77,7 @@
        /*                */ foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all append assigns choices command compression
        /*                */ confirm default mul delopts dest disk files fonts help infos include newname newpath optional back nogauge noposition noreq pattern prompt quiet range safe
        /*                */ resident override setdefaulttool setposition setstack settooltype source swapcolors openwbobject showwbobject closewbobject trace retrace closemedia effect
-       /*                */ setmedia showmedia astraw options asbraw asbeval eval
+       /*                */ setmedia showmedia astraw options asbraw asbeval eval unix
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Destruction                                                                                                                                                                          */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -93,7 +93,7 @@
                             database debug delete execute exit foreach makeassign makedir message onerror protect rename rexx run startup textfile tooltype trap reboot all assigns
                             choices command compression confirm default delopts dest disk lt lte neq files fonts help infos include newname newpath nogauge noposition settooltype cat
                             noreq prompt quiet range safe setdefaulttool setposition setstack swapcolors append openwbobject showwbobject closewbobject trace retrace back closemedia
-                            effect setmedia showmedia astraw options asbraw asbeval eval
+                            effect setmedia showmedia astraw options asbraw asbeval eval unix
 %%
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Start                                                                                                                                                                                */
@@ -155,6 +155,7 @@ opt:            all                              |
                 delopts                          |
                 dest                             |
                 disk                             |
+                dynopt                           |
                 files                            |
                 fonts                            |
                 getdefaulttool                   |
@@ -175,6 +176,7 @@ opt:            all                              |
                 prompt                           |
                 quiet                            |
                 range                            |
+                resident                         |
                 safe                             |
                 setdefaulttool                   |
                 setposition                      |
@@ -182,8 +184,7 @@ opt:            all                              |
                 settooltype                      |
                 source                           |
                 swapcolors                       |
-                dynopt                           |
-                resident                         ;
+                unix                             ;
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Functions                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -374,6 +375,9 @@ delete:         '(' DELETE ps opts')'            { $$ = new_native(DBG_ALLOC(str
 exists:         '(' EXISTS p ')'                 { $$ = new_native(DBG_ALLOC(strdup("exists")), LINE, n_exists, push(new_contxt(), $3), NUMBER); } |
                 '(' EXISTS p opts ')'            { $$ = new_native(DBG_ALLOC(strdup("exists")), LINE, n_exists, merge(push(new_contxt(), $3), $4), NUMBER); } |
                 '(' EXISTS opts p ')'            { $$ = new_native(DBG_ALLOC(strdup("exists")), LINE, n_exists, merge(push(new_contxt(), $4), $3), NUMBER); };
+expandpath:     '(' EXPANDPATH p ')'             { $$ = new_native(DBG_ALLOC(strdup("expandpath")), LINE, n_expandpath, push(new_contxt(), $3), STRING); } |
+                '(' EXPANDPATH p opts ')'        { $$ = new_native(DBG_ALLOC(strdup("expandpath")), LINE, n_expandpath, merge(push(new_contxt(), $3), $4), STRING); } |
+                '(' EXPANDPATH opts p ')'        { $$ = new_native(DBG_ALLOC(strdup("expandpath")), LINE, n_expandpath, merge(push(new_contxt(), $4), $3), STRING); };
 fileonly:       '(' FILEONLY p ')'               { $$ = new_native(DBG_ALLOC(strdup("fileonly")), LINE, n_fileonly, push(new_contxt(), $3), STRING); };
 foreach:        '(' FOREACH pp vps ')'           { $$ = new_native(DBG_ALLOC(strdup("foreach")), LINE, n_foreach, push($3, $4), NUMBER); };
 makeassign:     '(' MAKEASSIGN pp safe ')'       { $$ = new_native(DBG_ALLOC(strdup("makeassign")), LINE, n_makeassign, push($3, $4), NUMBER); } |
@@ -482,7 +486,6 @@ askstring:      '(' ASKSTRING opts ')'           { $$ = new_native(DBG_ALLOC(str
 /* strop.c|h                                                                                                                                                                            */
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 cat:            '(' CAT ps ')'                   { $$ = new_native(DBG_ALLOC(strdup("cat")), LINE, n_cat, $3, STRING); };
-expandpath:     '(' EXPANDPATH p ')'             { $$ = new_native(DBG_ALLOC(strdup("expandpath")), LINE, n_expandpath, push(new_contxt(), $3), STRING); };
 fmt:            '(' STR ps ')'                   { $$ = new_native($2, LINE, n_fmt, $3, STRING); } |
                 '(' STR ')'                      { $$ = new_native($2, LINE, n_fmt, NULL, STRING); };
 pathonly:       '(' PATHONLY p ')'               { $$ = new_native(DBG_ALLOC(strdup("pathonly")), LINE, n_pathonly, push(new_contxt(), $3), STRING); };
@@ -524,6 +527,9 @@ delopts:        '(' DELOPTS ps ')'               { $$ = new_option(DBG_ALLOC(str
                 '(' DELOPTS ')'                  { $$ = new_option(DBG_ALLOC(strdup("delopts")), OPT_DELOPTS, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); };
 dest:           '(' DEST p ')'                   { $$ = new_option(DBG_ALLOC(strdup("dest")), OPT_DEST, push(new_contxt(), $3)); };
 disk:           '(' DISK ')'                     { $$ = new_option(DBG_ALLOC(strdup("disk")), OPT_DISK, NULL); };
+dynopt:         '(' IF p opts ')'                { $$ = new_option(DBG_ALLOC(strdup("ifopt")), OPT_IFOPT, push(push(new_contxt(), $3), $4)); } |
+                '(' IF p opts opts ')'           { $$ = new_option(DBG_ALLOC(strdup("ifopt")), OPT_IFOPT, push(push(push(new_contxt(), $3), $4), $5)); } |
+                '(' SELECT p opts ')'            { $$ = new_option(DBG_ALLOC(strdup("selopt")), OPT_SELOPT, push(push(new_contxt(), $3), $4)); };
 files:          '(' FILES ')'                    { $$ = new_option(DBG_ALLOC(strdup("files")), OPT_FILES, NULL); };
 fonts:          '(' FONTS ')'                    { $$ = new_option(DBG_ALLOC(strdup("fonts")), OPT_FONTS, NULL); };
 getdefaulttool: '(' GETDEFAULTTOOL p ')'         { $$ = new_option(DBG_ALLOC(strdup("getdefaulttool")), OPT_GETDEFAULTTOOL, push(new_contxt(), $3)); };
@@ -540,11 +546,15 @@ newpath:        '(' NEWPATH ')'                  { $$ = new_option(DBG_ALLOC(str
 nogauge:        '(' NOGAUGE ')'                  { $$ = new_option(DBG_ALLOC(strdup("nogauge")), OPT_NOGAUGE, NULL); };
 noposition:     '(' NOPOSITION ')'               { $$ = new_option(DBG_ALLOC(strdup("noposition")), OPT_NOPOSITION, NULL); };
 noreq:          '(' NOREQ ')'                    { $$ = new_option(DBG_ALLOC(strdup("noreq")), OPT_NOREQ, NULL); };
+optional:       '(' OPTIONAL ps ')'              { $$ = new_option(DBG_ALLOC(strdup("optional")), OPT_OPTIONAL, $3); } |
+                '(' OPTIONAL ')'                 { $$ = new_option(DBG_ALLOC(strdup("optional")), OPT_OPTIONAL, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); };
+override:       '(' OVERRIDE p ')'               { $$ = new_option(DBG_ALLOC(strdup("override")), OPT_OVERRIDE, push(new_contxt(), $3)); };
 pattern:        '(' PATTERN p ')'                { $$ = new_option(DBG_ALLOC(strdup("pattern")), OPT_PATTERN, push(new_contxt(), $3)); };
 prompt:         '(' PROMPT ps ')'                { $$ = new_option(DBG_ALLOC(strdup("prompt")), OPT_PROMPT, $3); } |
                 '(' PROMPT ')'                   { $$ = new_option(DBG_ALLOC(strdup("prompt")), OPT_PROMPT, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); };
 quiet:          '(' QUIET ')'                    { $$ = new_option(DBG_ALLOC(strdup("quiet")), OPT_QUIET, NULL); };
 range:          '(' RANGE pp ')'                 { $$ = new_option(DBG_ALLOC(strdup("range")), OPT_RANGE, $3); };
+resident:       '(' RESIDENT ')'                 { $$ = new_option(DBG_ALLOC(strdup("resident")), OPT_RESIDENT, NULL); };
 safe:           '(' SAFE ')'                     { $$ = new_option(DBG_ALLOC(strdup("safe")), OPT_SAFE, NULL); };
 setdefaulttool: '(' SETDEFAULTTOOL p ')'         { $$ = new_option(DBG_ALLOC(strdup("setdefaulttool")), OPT_SETDEFAULTTOOL, push(new_contxt(), $3)); };
 setposition:    '(' SETPOSITION pp ')'           { $$ = new_option(DBG_ALLOC(strdup("setposition")), OPT_SETPOSITION, $3); };
@@ -554,13 +564,7 @@ settooltype:    '(' SETTOOLTYPE pp ')'           { $$ = new_option(DBG_ALLOC(str
 source:         '(' SOURCE p ')'                 { $$ = new_option(DBG_ALLOC(strdup("source")), OPT_SOURCE, push(new_contxt(), $3)); } |
                 '(' SOURCE p all ')'             { $$ = new_option(DBG_ALLOC(strdup("source")), OPT_SOURCE, push(push(new_contxt(), $3), $4)); };
 swapcolors:     '(' SWAPCOLORS ')'               { $$ = new_option(DBG_ALLOC(strdup("swapcolors")), OPT_SWAPCOLORS, NULL); };
-optional:       '(' OPTIONAL ps ')'              { $$ = new_option(DBG_ALLOC(strdup("optional")), OPT_OPTIONAL, $3); } |
-                '(' OPTIONAL ')'                 { $$ = new_option(DBG_ALLOC(strdup("optional")), OPT_OPTIONAL, push(new_contxt(), new_symref(DBG_ALLOC(strdup("@null")), LINE))); };
-resident:       '(' RESIDENT ')'                 { $$ = new_option(DBG_ALLOC(strdup("resident")), OPT_RESIDENT, NULL); };
-override:       '(' OVERRIDE p ')'               { $$ = new_option(DBG_ALLOC(strdup("override")), OPT_OVERRIDE, push(new_contxt(), $3)); };
-dynopt:         '(' IF p opts ')'                { $$ = new_option(DBG_ALLOC(strdup("ifopt")), OPT_IFOPT, push(push(new_contxt(), $3), $4)); } |
-                '(' IF p opts opts ')'           { $$ = new_option(DBG_ALLOC(strdup("ifopt")), OPT_IFOPT, push(push(push(new_contxt(), $3), $4), $5)); } |
-                '(' SELECT p opts ')'            { $$ = new_option(DBG_ALLOC(strdup("selopt")), OPT_SELOPT, push(push(new_contxt(), $3), $4)); };
+unix:           '(' UNIX ')'                     { $$ = new_option(DBG_ALLOC(strdup("unix")), OPT_UNIX, NULL); };
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 %%
 

@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.6.4.  */
+/* A Bison parser, made by GNU Bison 3.7.5.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -89,60 +89,60 @@ extern int yydebug;
     COPYLIB = 290,                 /* COPYLIB  */
     DELETE = 291,                  /* DELETE  */
     EXISTS = 292,                  /* EXISTS  */
-    FILEONLY = 293,                /* FILEONLY  */
-    FOREACH = 294,                 /* FOREACH  */
-    MAKEASSIGN = 295,              /* MAKEASSIGN  */
-    MAKEDIR = 296,                 /* MAKEDIR  */
-    PROTECT = 297,                 /* PROTECT  */
-    STARTUP = 298,                 /* STARTUP  */
-    TEXTFILE = 299,                /* TEXTFILE  */
-    TOOLTYPE = 300,                /* TOOLTYPE  */
-    TRANSCRIPT = 301,              /* TRANSCRIPT  */
-    RENAME = 302,                  /* RENAME  */
-    COMPLETE = 303,                /* COMPLETE  */
-    DEBUG = 304,                   /* DEBUG  */
-    MESSAGE = 305,                 /* MESSAGE  */
-    USER = 306,                    /* USER  */
-    WELCOME = 307,                 /* WELCOME  */
-    WORKING = 308,                 /* WORKING  */
-    AND = 309,                     /* AND  */
-    BITAND = 310,                  /* BITAND  */
-    BITNOT = 311,                  /* BITNOT  */
-    BITOR = 312,                   /* BITOR  */
-    BITXOR = 313,                  /* BITXOR  */
-    NOT = 314,                     /* NOT  */
-    IN = 315,                      /* IN  */
-    OR = 316,                      /* OR  */
-    SHIFTLEFT = 317,               /* SHIFTLEFT  */
-    SHIFTRIGHT = 318,              /* SHIFTRIGHT  */
-    XOR = 319,                     /* XOR  */
-    CLOSEMEDIA = 320,              /* CLOSEMEDIA  */
-    EFFECT = 321,                  /* EFFECT  */
-    SETMEDIA = 322,                /* SETMEDIA  */
-    SHOWMEDIA = 323,               /* SHOWMEDIA  */
-    DATABASE = 324,                /* DATABASE  */
-    EARLIER = 325,                 /* EARLIER  */
-    GETASSIGN = 326,               /* GETASSIGN  */
-    GETDEVICE = 327,               /* GETDEVICE  */
-    GETDISKSPACE = 328,            /* GETDISKSPACE  */
-    GETENV = 329,                  /* GETENV  */
-    GETSIZE = 330,                 /* GETSIZE  */
-    GETSUM = 331,                  /* GETSUM  */
-    GETVERSION = 332,              /* GETVERSION  */
-    ICONINFO = 333,                /* ICONINFO  */
-    QUERYDISPLAY = 334,            /* QUERYDISPLAY  */
-    CUS = 335,                     /* CUS  */
-    DCL = 336,                     /* DCL  */
-    ASKBOOL = 337,                 /* ASKBOOL  */
-    ASKCHOICE = 338,               /* ASKCHOICE  */
-    ASKDIR = 339,                  /* ASKDIR  */
-    ASKDISK = 340,                 /* ASKDISK  */
-    ASKFILE = 341,                 /* ASKFILE  */
-    ASKNUMBER = 342,               /* ASKNUMBER  */
-    ASKOPTIONS = 343,              /* ASKOPTIONS  */
-    ASKSTRING = 344,               /* ASKSTRING  */
-    CAT = 345,                     /* CAT  */
-    EXPANDPATH = 346,              /* EXPANDPATH  */
+    EXPANDPATH = 293,              /* EXPANDPATH  */
+    FILEONLY = 294,                /* FILEONLY  */
+    FOREACH = 295,                 /* FOREACH  */
+    MAKEASSIGN = 296,              /* MAKEASSIGN  */
+    MAKEDIR = 297,                 /* MAKEDIR  */
+    PROTECT = 298,                 /* PROTECT  */
+    STARTUP = 299,                 /* STARTUP  */
+    TEXTFILE = 300,                /* TEXTFILE  */
+    TOOLTYPE = 301,                /* TOOLTYPE  */
+    TRANSCRIPT = 302,              /* TRANSCRIPT  */
+    RENAME = 303,                  /* RENAME  */
+    COMPLETE = 304,                /* COMPLETE  */
+    DEBUG = 305,                   /* DEBUG  */
+    MESSAGE = 306,                 /* MESSAGE  */
+    USER = 307,                    /* USER  */
+    WELCOME = 308,                 /* WELCOME  */
+    WORKING = 309,                 /* WORKING  */
+    AND = 310,                     /* AND  */
+    BITAND = 311,                  /* BITAND  */
+    BITNOT = 312,                  /* BITNOT  */
+    BITOR = 313,                   /* BITOR  */
+    BITXOR = 314,                  /* BITXOR  */
+    NOT = 315,                     /* NOT  */
+    IN = 316,                      /* IN  */
+    OR = 317,                      /* OR  */
+    SHIFTLEFT = 318,               /* SHIFTLEFT  */
+    SHIFTRIGHT = 319,              /* SHIFTRIGHT  */
+    XOR = 320,                     /* XOR  */
+    CLOSEMEDIA = 321,              /* CLOSEMEDIA  */
+    EFFECT = 322,                  /* EFFECT  */
+    SETMEDIA = 323,                /* SETMEDIA  */
+    SHOWMEDIA = 324,               /* SHOWMEDIA  */
+    DATABASE = 325,                /* DATABASE  */
+    EARLIER = 326,                 /* EARLIER  */
+    GETASSIGN = 327,               /* GETASSIGN  */
+    GETDEVICE = 328,               /* GETDEVICE  */
+    GETDISKSPACE = 329,            /* GETDISKSPACE  */
+    GETENV = 330,                  /* GETENV  */
+    GETSIZE = 331,                 /* GETSIZE  */
+    GETSUM = 332,                  /* GETSUM  */
+    GETVERSION = 333,              /* GETVERSION  */
+    ICONINFO = 334,                /* ICONINFO  */
+    QUERYDISPLAY = 335,            /* QUERYDISPLAY  */
+    CUS = 336,                     /* CUS  */
+    DCL = 337,                     /* DCL  */
+    ASKBOOL = 338,                 /* ASKBOOL  */
+    ASKCHOICE = 339,               /* ASKCHOICE  */
+    ASKDIR = 340,                  /* ASKDIR  */
+    ASKDISK = 341,                 /* ASKDISK  */
+    ASKFILE = 342,                 /* ASKFILE  */
+    ASKNUMBER = 343,               /* ASKNUMBER  */
+    ASKOPTIONS = 344,              /* ASKOPTIONS  */
+    ASKSTRING = 345,               /* ASKSTRING  */
+    CAT = 346,                     /* CAT  */
     FMT = 347,                     /* FMT  */
     PATHONLY = 348,                /* PATHONLY  */
     PATMATCH = 349,                /* PATMATCH  */
@@ -181,20 +181,21 @@ extern int yydebug;
     NOGAUGE = 382,                 /* NOGAUGE  */
     NOPOSITION = 383,              /* NOPOSITION  */
     NOREQ = 384,                   /* NOREQ  */
-    PATTERN = 385,                 /* PATTERN  */
-    PROMPT = 386,                  /* PROMPT  */
-    QUIET = 387,                   /* QUIET  */
-    RANGE = 388,                   /* RANGE  */
-    SAFE = 389,                    /* SAFE  */
-    SETDEFAULTTOOL = 390,          /* SETDEFAULTTOOL  */
-    SETPOSITION = 391,             /* SETPOSITION  */
-    SETSTACK = 392,                /* SETSTACK  */
-    SETTOOLTYPE = 393,             /* SETTOOLTYPE  */
-    SOURCE = 394,                  /* SOURCE  */
-    SWAPCOLORS = 395,              /* SWAPCOLORS  */
-    OPTIONAL = 396,                /* OPTIONAL  */
-    RESIDENT = 397,                /* RESIDENT  */
-    OVERRIDE = 398                 /* OVERRIDE  */
+    OPTIONAL = 385,                /* OPTIONAL  */
+    OVERRIDE = 386,                /* OVERRIDE  */
+    PATTERN = 387,                 /* PATTERN  */
+    PROMPT = 388,                  /* PROMPT  */
+    QUIET = 389,                   /* QUIET  */
+    RANGE = 390,                   /* RANGE  */
+    RESIDENT = 391,                /* RESIDENT  */
+    SAFE = 392,                    /* SAFE  */
+    SETDEFAULTTOOL = 393,          /* SETDEFAULTTOOL  */
+    SETPOSITION = 394,             /* SETPOSITION  */
+    SETSTACK = 395,                /* SETSTACK  */
+    SETTOOLTYPE = 396,             /* SETTOOLTYPE  */
+    SOURCE = 397,                  /* SOURCE  */
+    SWAPCOLORS = 398,              /* SWAPCOLORS  */
+    UNIX = 399                     /* UNIX  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif

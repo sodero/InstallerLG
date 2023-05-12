@@ -51,36 +51,67 @@
 //------------------------------------------------------------------------------
 entry_p n_expandpath(entry_p contxt)
 {
-    // One argument and no options.
-    C_SANE(1, NULL);
+    // One argument and options.
+    C_SANE(1, contxt);
 
     // Short path. No need to check for ERR.
     char *pth = str(C_ARG(1));
 
-    #if defined(AMIGA) && !defined(LG_TEST)
+#if defined(AMIGA) && !defined(LG_TEST)
     // Lock whatever resource the argument corresponds to.
     BPTR lock = (BPTR) Lock(pth, ACCESS_READ);
 
-    if(lock)
+    if(!lock)
     {
-        // Get full name from lock.
-        if(NameFromLock(lock, buf_get(B_KEY), buf_len()))
-        {
-            UnLock(lock);
-            R_STR(DBG_ALLOC(strdup(buf_put(B_KEY))));
-        }
+        // Empty string fallback.
+        R_EST;
+    }
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
 
+    size_t len = buf_len();
+    char *buf = buf_get(B_KEY);
+
+    /* Unix path semantics. */
+    if(opt(contxt, OPT_UNIX))
+    {
+        /* Absolute unix paths always begin with '/'. */
+        *buf = '/';
+        --len;
+        ++buf;
+    }
+
+#if !defined(AMIGA) || defined(LG_TEST)
+    strncpy(buf, pth, len);
+#endif /* !defined(AMIGA) || defined(LG_TEST) */
+
+#if defined(AMIGA) && !defined(LG_TEST)
+    // Get full name from lock.
+    if(!NameFromLock(lock, buf, len))
+    {
         // Buffer overflow.
         ERR(ERR_OVERFLOW, buf_put(B_KEY));
         UnLock(lock);
+
+        // Empty string fallback.
+        R_EST;
     }
 
-    // Empty string fallback.
-    R_EST;
-    #else
-    // Testing only.
-    R_STR(DBG_ALLOC(strdup(pth)));
-    #endif
+    UnLock(lock);
+#endif /* defined(AMIGA) && !defined(LG_TEST) */
+
+    /* Unix path semantics. */
+    if(opt(contxt, OPT_UNIX))
+    {
+        /* Volumes are considered top directories. */
+        char *col = strchr(buf, ':');
+
+        if(col)
+        {
+            *col = *(col + 1) ? '/' : '\0';
+        }
+    }
+
+    R_STR(DBG_ALLOC(strdup(buf_put(B_KEY))));
 }
 
 //------------------------------------------------------------------------------
