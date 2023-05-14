@@ -1,37 +1,36 @@
 #---------------------------------------------------------------------------------#
 # OS
 #---------------------------------------------------------------------------------#
-OS := $(shell uname)
-ifeq ($(OS),Darwin)
-SED := gsed
+LHA?=lha
+CPU?=$(shell uname -m | tr -d ower)
+UNM?=$(shell uname)
+ANM:=$(CPU)-$(shell echo $(UNM) | tr A-Z a-z)
+ifeq ($(UNM),AmigaOS)
+LHAFLAGS?=-r a
+SHELL:=sh
+else ifeq ($(UNM),MorphOS)
+LHAFLAGS?=-r a
 else
-SED := sed
+LHAFLAGS?=ao5
 endif
-ifeq ($(OS),MorphOS)
-LHAFLAGS ?= -r u
+ifeq ($(UNM),Darwin)
+SED?=gsed
 else
-ifeq ($(OS),AmigaOS)
-LHAFLAGS ?= -r u
-SHELL := sh
-else
-LHAFLAGS ?= ao5
-endif
+SED?=sed
 endif
 
 #-----------------------------------------------------------------------------------#
 # Configuration
 #-----------------------------------------------------------------------------------#
-DIR := aminet
-BIN := ../build
-EXE := Installer
-CAT := Catalogs
-NAME := InstallerLG
-OS := $(shell uname -s | tr A-Z a-z)
-ARCH := $(shell uname -m | tr -d ower)
-ARC := $(DIR)/$(NAME).$(ARCH)-$(OS).lha
-README := $(DIR)/$(NAME).$(ARCH)-$(OS).readme
-FILES := $(EXE) 'InstallerLG installer' 'InstallerLG installer.info'
-FILES += 'InstallerLG.guide' 'InstallerLG.guide.info'
+DST:=aminet
+BIN:=../build
+EXE:=Installer
+CAT:=Catalogs
+NAME:=InstallerLG
+ARC:=$(DST)/$(NAME).$(ANM).lha
+README:=$(DST)/$(NAME).$(ANM).readme
+FILES:=$(EXE) 'InstallerLG installer' 'InstallerLG installer.info'
+FILES+='InstallerLG.guide' 'InstallerLG.guide.info'
 
 #-----------------------------------------------------------------------------------#
 # Targets
@@ -44,15 +43,15 @@ clean:
 	$(MAKE) -C $(BIN) $@
 	$(RM) $(EXE)
 	$(RM) $(README)
-	$(RM) $(DIR)/*.lha
-	$(RM) $(DIR)/*.bak
+	$(RM) $(DST)/*.lha
+	$(RM) $(DST)/*.bak
 	$(RM) *.info
 	$(RM) -R $(NAME) Catalogs
 
 $(ARC): $(EXE)
 	cp $(shell uname)/*.info . && \
-	lha $(LHAFLAGS) $@ $(CAT) && \
-	lha $(LHAFLAGS) $@ $(FILES)
+	$(LHA) $(LHAFLAGS) $@ $(CAT) && \
+	$(LHA) $(LHAFLAGS) $@ $(FILES)
 
 $(CAT):
 	$(MAKE) -C $(BIN) cat && \
@@ -62,5 +61,5 @@ $(EXE): $(CAT)
 	$(MAKE) -C $(BIN) $(EXE)
 	mv $(BIN)/$(EXE) $@
 
-$(README): $(DIR)/$(NAME).readme
-	cat $^ | $(SED) -e 's/__ARCH__/$(ARCH)-$(OS)/' > $@
+$(README): $(DST)/$(NAME).readme
+	cat $^ | $(SED) -e 's/__ARCH__/$(ANM)/' > $@
