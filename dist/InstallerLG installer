@@ -1,4 +1,4 @@
-; $VER: InstallerLG 1.0.2
+; $VER: InstallerLG 1.0.3
 ; Install script for InstallerLG
 
 (set #app-bin "Installer")
