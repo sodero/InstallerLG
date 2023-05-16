@@ -49,7 +49,7 @@ clean:
 	$(RM) -R $(NAME) Catalogs
 
 $(ARC): $(EXE)
-	cp $(shell uname)/*.info . && \
+	cp $(UNM)/*.info . && \
 	$(LHA) $(LHAFLAGS) $@ $(CAT) && \
 	$(LHA) $(LHAFLAGS) $@ $(FILES)
 
