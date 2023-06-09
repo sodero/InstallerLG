@@ -6,6 +6,7 @@ Architecture: __ARCH__
 Requires:     MUI 3.8
 Version:      1.0.3
 Distribution: Aminet
+URL:          https://github.com/sodero/InstallerLG/wiki
 
 InstallerLG
 ===========

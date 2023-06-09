@@ -26,6 +26,9 @@
 #   include <proto/debug.h>
 #  else
 #   include <datatypes/datatypesclass.h>
+#   ifndef IPTR
+#    define IPTR unsigned long
+#   endif
 #  endif
 # else
 #  include <clib/debug_protos.h>
@@ -74,22 +77,6 @@
 #else
 # if !defined(__VBCC__) && !defined(__amigaos4__)
 #  define DoSuperNew(C,O,...) DoSuperNewTags(C,O,NULL,__VA_ARGS__)
-# else
-Object *STDARGS VARARGS68K DoSuperNew(struct IClass *cl, Object *obj, ...)
-{
-    Object *rc;
-    va_list args;
-    struct opSet msg;
-
-    va_start(args, obj);
-    msg.MethodID = OM_NEW;
-    msg.ops_AttrList = va_getlinearva(args, struct TagItem *);
-    msg.ops_GInfo = NULL;
-    rc = (Object *) DoSuperMethodA(cl, obj, (Msg)&msg);
-    va_end(args);
-
-    return rc;
-}
 # endif
 # define DISPATCH_HEAD
 # define DISPATCH_ARGS Class *cls, Object *obj, Msg msg
