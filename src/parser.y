@@ -85,8 +85,8 @@
 %destructor { run($$);  }   start
 /* Primitive strings are freed like you would expect                                                                                                                                    */
 %destructor { free($$); }   SYM STR
-/* Complex types are freed using the kill() function found in alloc.c                                                                                                                   */
-%destructor { kill($$); }   s p pp ps ivp vp vps dynopt opt opts xpb xpbs np nps sps par c cv cvv add sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
+/* Complex types are freed using the del() function found in alloc.c                                                                                                                   */
+%destructor { del($$); }    s p pp ps ivp vp vps dynopt opt opts xpb xpbs np nps sps par c cv cvv add sub div mul gt gte eq set cus dcl fmt if while until and or xor bitand bitor
                             bitxor bitnot shiftleft shiftright in strlen substr askdir askfile askstring asknumber askchoice askoptions askbool askdisk exists expandpath earlier not
                             fileonly getassign pattern getdefaulttool getposition getstack gettooltype optional resident override source getdevice getdiskspace getenv getsize getsum
                             getversion iconinfo querydisplay pathonly patmatch select symbolset symbolval tackon transcript complete user working welcome abort copyfiles copylib

@@ -28,7 +28,7 @@ entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t ty
 //------------------------------------------------------------------------------
 // Utility functions.
 //------------------------------------------------------------------------------
-void kill(entry_p entry);
+void del(entry_p entry);
 entry_p append(entry_p **dst, entry_p ent);
 entry_p merge(entry_p dst, entry_p src);
 entry_p push(entry_p dst, entry_p src);

@@ -2377,955 +2377,955 @@ yydestruct (const char *yymsg,
 
     case YYSYMBOL_s: /* s  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2382 "parser.c"
         break;
 
     case YYSYMBOL_p: /* p  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2388 "parser.c"
         break;
 
     case YYSYMBOL_pp: /* pp  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2394 "parser.c"
         break;
 
     case YYSYMBOL_ps: /* ps  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2400 "parser.c"
         break;
 
     case YYSYMBOL_vp: /* vp  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2406 "parser.c"
         break;
 
     case YYSYMBOL_vps: /* vps  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2412 "parser.c"
         break;
 
     case YYSYMBOL_opts: /* opts  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2418 "parser.c"
         break;
 
     case YYSYMBOL_xpb: /* xpb  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2424 "parser.c"
         break;
 
     case YYSYMBOL_xpbs: /* xpbs  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2430 "parser.c"
         break;
 
     case YYSYMBOL_np: /* np  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2436 "parser.c"
         break;
 
     case YYSYMBOL_nps: /* nps  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2442 "parser.c"
         break;
 
     case YYSYMBOL_sps: /* sps  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2448 "parser.c"
         break;
 
     case YYSYMBOL_par: /* par  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2454 "parser.c"
         break;
 
     case YYSYMBOL_c: /* c  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2460 "parser.c"
         break;
 
     case YYSYMBOL_cv: /* cv  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2466 "parser.c"
         break;
 
     case YYSYMBOL_cvv: /* cvv  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2472 "parser.c"
         break;
 
     case YYSYMBOL_opt: /* opt  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2478 "parser.c"
         break;
 
     case YYSYMBOL_ivp: /* ivp  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2484 "parser.c"
         break;
 
     case YYSYMBOL_add: /* add  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2490 "parser.c"
         break;
 
     case YYSYMBOL_div: /* div  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2496 "parser.c"
         break;
 
     case YYSYMBOL_mul: /* mul  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2502 "parser.c"
         break;
 
     case YYSYMBOL_sub: /* sub  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2508 "parser.c"
         break;
 
     case YYSYMBOL_eq: /* eq  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2514 "parser.c"
         break;
 
     case YYSYMBOL_gt: /* gt  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2520 "parser.c"
         break;
 
     case YYSYMBOL_gte: /* gte  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2526 "parser.c"
         break;
 
     case YYSYMBOL_lt: /* lt  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2532 "parser.c"
         break;
 
     case YYSYMBOL_lte: /* lte  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2538 "parser.c"
         break;
 
     case YYSYMBOL_neq: /* neq  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2544 "parser.c"
         break;
 
     case YYSYMBOL_if: /* if  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2550 "parser.c"
         break;
 
     case YYSYMBOL_select: /* select  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2556 "parser.c"
         break;
 
     case YYSYMBOL_until: /* until  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2562 "parser.c"
         break;
 
     case YYSYMBOL_while: /* while  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2568 "parser.c"
         break;
 
     case YYSYMBOL_trace: /* trace  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2574 "parser.c"
         break;
 
     case YYSYMBOL_retrace: /* retrace  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2580 "parser.c"
         break;
 
     case YYSYMBOL_astraw: /* astraw  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2586 "parser.c"
         break;
 
     case YYSYMBOL_asbraw: /* asbraw  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2592 "parser.c"
         break;
 
     case YYSYMBOL_asbeval: /* asbeval  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2598 "parser.c"
         break;
 
     case YYSYMBOL_eval: /* eval  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2604 "parser.c"
         break;
 
     case YYSYMBOL_options: /* options  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2610 "parser.c"
         break;
 
     case YYSYMBOL_execute: /* execute  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2616 "parser.c"
         break;
 
     case YYSYMBOL_rexx: /* rexx  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2622 "parser.c"
         break;
 
     case YYSYMBOL_run: /* run  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2628 "parser.c"
         break;
 
     case YYSYMBOL_abort: /* abort  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2634 "parser.c"
         break;
 
     case YYSYMBOL_exit: /* exit  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2640 "parser.c"
         break;
 
     case YYSYMBOL_onerror: /* onerror  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2646 "parser.c"
         break;
 
     case YYSYMBOL_reboot: /* reboot  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2652 "parser.c"
         break;
 
     case YYSYMBOL_trap: /* trap  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2658 "parser.c"
         break;
 
     case YYSYMBOL_copyfiles: /* copyfiles  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2664 "parser.c"
         break;
 
     case YYSYMBOL_copylib: /* copylib  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2670 "parser.c"
         break;
 
     case YYSYMBOL_delete: /* delete  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2676 "parser.c"
         break;
 
     case YYSYMBOL_exists: /* exists  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2682 "parser.c"
         break;
 
     case YYSYMBOL_expandpath: /* expandpath  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2688 "parser.c"
         break;
 
     case YYSYMBOL_fileonly: /* fileonly  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2694 "parser.c"
         break;
 
     case YYSYMBOL_foreach: /* foreach  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2700 "parser.c"
         break;
 
     case YYSYMBOL_makeassign: /* makeassign  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2706 "parser.c"
         break;
 
     case YYSYMBOL_makedir: /* makedir  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2712 "parser.c"
         break;
 
     case YYSYMBOL_protect: /* protect  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2718 "parser.c"
         break;
 
     case YYSYMBOL_startup: /* startup  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2724 "parser.c"
         break;
 
     case YYSYMBOL_textfile: /* textfile  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2730 "parser.c"
         break;
 
     case YYSYMBOL_tooltype: /* tooltype  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2736 "parser.c"
         break;
 
     case YYSYMBOL_transcript: /* transcript  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2742 "parser.c"
         break;
 
     case YYSYMBOL_rename: /* rename  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2748 "parser.c"
         break;
 
     case YYSYMBOL_complete: /* complete  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2754 "parser.c"
         break;
 
     case YYSYMBOL_debug: /* debug  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2760 "parser.c"
         break;
 
     case YYSYMBOL_message: /* message  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2766 "parser.c"
         break;
 
     case YYSYMBOL_user: /* user  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2772 "parser.c"
         break;
 
     case YYSYMBOL_welcome: /* welcome  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2778 "parser.c"
         break;
 
     case YYSYMBOL_working: /* working  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2784 "parser.c"
         break;
 
     case YYSYMBOL_and: /* and  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2790 "parser.c"
         break;
 
     case YYSYMBOL_bitand: /* bitand  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2796 "parser.c"
         break;
 
     case YYSYMBOL_bitnot: /* bitnot  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2802 "parser.c"
         break;
 
     case YYSYMBOL_bitor: /* bitor  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2808 "parser.c"
         break;
 
     case YYSYMBOL_bitxor: /* bitxor  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2814 "parser.c"
         break;
 
     case YYSYMBOL_not: /* not  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2820 "parser.c"
         break;
 
     case YYSYMBOL_in: /* in  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2826 "parser.c"
         break;
 
     case YYSYMBOL_or: /* or  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2832 "parser.c"
         break;
 
     case YYSYMBOL_shiftleft: /* shiftleft  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2838 "parser.c"
         break;
 
     case YYSYMBOL_shiftright: /* shiftright  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2844 "parser.c"
         break;
 
     case YYSYMBOL_xor: /* xor  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2850 "parser.c"
         break;
 
     case YYSYMBOL_closemedia: /* closemedia  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2856 "parser.c"
         break;
 
     case YYSYMBOL_effect: /* effect  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2862 "parser.c"
         break;
 
     case YYSYMBOL_setmedia: /* setmedia  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2868 "parser.c"
         break;
 
     case YYSYMBOL_showmedia: /* showmedia  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2874 "parser.c"
         break;
 
     case YYSYMBOL_database: /* database  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2880 "parser.c"
         break;
 
     case YYSYMBOL_earlier: /* earlier  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2886 "parser.c"
         break;
 
     case YYSYMBOL_getassign: /* getassign  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2892 "parser.c"
         break;
 
     case YYSYMBOL_getdevice: /* getdevice  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2898 "parser.c"
         break;
 
     case YYSYMBOL_getdiskspace: /* getdiskspace  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2904 "parser.c"
         break;
 
     case YYSYMBOL_getenv: /* getenv  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2910 "parser.c"
         break;
 
     case YYSYMBOL_getsize: /* getsize  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2916 "parser.c"
         break;
 
     case YYSYMBOL_getsum: /* getsum  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2922 "parser.c"
         break;
 
     case YYSYMBOL_getversion: /* getversion  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2928 "parser.c"
         break;
 
     case YYSYMBOL_iconinfo: /* iconinfo  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2934 "parser.c"
         break;
 
     case YYSYMBOL_querydisplay: /* querydisplay  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2940 "parser.c"
         break;
 
     case YYSYMBOL_dcl: /* dcl  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2946 "parser.c"
         break;
 
     case YYSYMBOL_cus: /* cus  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2952 "parser.c"
         break;
 
     case YYSYMBOL_askbool: /* askbool  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2958 "parser.c"
         break;
 
     case YYSYMBOL_askchoice: /* askchoice  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2964 "parser.c"
         break;
 
     case YYSYMBOL_askdir: /* askdir  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2970 "parser.c"
         break;
 
     case YYSYMBOL_askdisk: /* askdisk  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2976 "parser.c"
         break;
 
     case YYSYMBOL_askfile: /* askfile  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2982 "parser.c"
         break;
 
     case YYSYMBOL_asknumber: /* asknumber  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2988 "parser.c"
         break;
 
     case YYSYMBOL_askoptions: /* askoptions  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 2994 "parser.c"
         break;
 
     case YYSYMBOL_askstring: /* askstring  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3000 "parser.c"
         break;
 
     case YYSYMBOL_cat: /* cat  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3006 "parser.c"
         break;
 
     case YYSYMBOL_fmt: /* fmt  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3012 "parser.c"
         break;
 
     case YYSYMBOL_pathonly: /* pathonly  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3018 "parser.c"
         break;
 
     case YYSYMBOL_patmatch: /* patmatch  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3024 "parser.c"
         break;
 
     case YYSYMBOL_strlen: /* strlen  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3030 "parser.c"
         break;
 
     case YYSYMBOL_substr: /* substr  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3036 "parser.c"
         break;
 
     case YYSYMBOL_tackon: /* tackon  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3042 "parser.c"
         break;
 
     case YYSYMBOL_set: /* set  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3048 "parser.c"
         break;
 
     case YYSYMBOL_symbolset: /* symbolset  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3054 "parser.c"
         break;
 
     case YYSYMBOL_symbolval: /* symbolval  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3060 "parser.c"
         break;
 
     case YYSYMBOL_openwbobject: /* openwbobject  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3066 "parser.c"
         break;
 
     case YYSYMBOL_showwbobject: /* showwbobject  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3072 "parser.c"
         break;
 
     case YYSYMBOL_closewbobject: /* closewbobject  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3078 "parser.c"
         break;
 
     case YYSYMBOL_all: /* all  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3084 "parser.c"
         break;
 
     case YYSYMBOL_append: /* append  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3090 "parser.c"
         break;
 
     case YYSYMBOL_assigns: /* assigns  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3096 "parser.c"
         break;
 
     case YYSYMBOL_back: /* back  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3102 "parser.c"
         break;
 
     case YYSYMBOL_choices: /* choices  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3108 "parser.c"
         break;
 
     case YYSYMBOL_command: /* command  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3114 "parser.c"
         break;
 
     case YYSYMBOL_compression: /* compression  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3120 "parser.c"
         break;
 
     case YYSYMBOL_confirm: /* confirm  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3126 "parser.c"
         break;
 
     case YYSYMBOL_default: /* default  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3132 "parser.c"
         break;
 
     case YYSYMBOL_delopts: /* delopts  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3138 "parser.c"
         break;
 
     case YYSYMBOL_dest: /* dest  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3144 "parser.c"
         break;
 
     case YYSYMBOL_disk: /* disk  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3150 "parser.c"
         break;
 
     case YYSYMBOL_dynopt: /* dynopt  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3156 "parser.c"
         break;
 
     case YYSYMBOL_files: /* files  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3162 "parser.c"
         break;
 
     case YYSYMBOL_fonts: /* fonts  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3168 "parser.c"
         break;
 
     case YYSYMBOL_getdefaulttool: /* getdefaulttool  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3174 "parser.c"
         break;
 
     case YYSYMBOL_getposition: /* getposition  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3180 "parser.c"
         break;
 
     case YYSYMBOL_getstack: /* getstack  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3186 "parser.c"
         break;
 
     case YYSYMBOL_gettooltype: /* gettooltype  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3192 "parser.c"
         break;
 
     case YYSYMBOL_help: /* help  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3198 "parser.c"
         break;
 
     case YYSYMBOL_infos: /* infos  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3204 "parser.c"
         break;
 
     case YYSYMBOL_include: /* include  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3210 "parser.c"
         break;
 
     case YYSYMBOL_newname: /* newname  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3216 "parser.c"
         break;
 
     case YYSYMBOL_newpath: /* newpath  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3222 "parser.c"
         break;
 
     case YYSYMBOL_nogauge: /* nogauge  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3228 "parser.c"
         break;
 
     case YYSYMBOL_noposition: /* noposition  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3234 "parser.c"
         break;
 
     case YYSYMBOL_noreq: /* noreq  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3240 "parser.c"
         break;
 
     case YYSYMBOL_optional: /* optional  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3246 "parser.c"
         break;
 
     case YYSYMBOL_override: /* override  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3252 "parser.c"
         break;
 
     case YYSYMBOL_pattern: /* pattern  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3258 "parser.c"
         break;
 
     case YYSYMBOL_prompt: /* prompt  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3264 "parser.c"
         break;
 
     case YYSYMBOL_quiet: /* quiet  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3270 "parser.c"
         break;
 
     case YYSYMBOL_range: /* range  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3276 "parser.c"
         break;
 
     case YYSYMBOL_resident: /* resident  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3282 "parser.c"
         break;
 
     case YYSYMBOL_safe: /* safe  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3288 "parser.c"
         break;
 
     case YYSYMBOL_setdefaulttool: /* setdefaulttool  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3294 "parser.c"
         break;
 
     case YYSYMBOL_setposition: /* setposition  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3300 "parser.c"
         break;
 
     case YYSYMBOL_setstack: /* setstack  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3306 "parser.c"
         break;
 
     case YYSYMBOL_settooltype: /* settooltype  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3312 "parser.c"
         break;
 
     case YYSYMBOL_source: /* source  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3318 "parser.c"
         break;
 
     case YYSYMBOL_swapcolors: /* swapcolors  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3324 "parser.c"
         break;
 
     case YYSYMBOL_unix: /* unix  */
 #line 89 "../src/parser.y"
-            { kill(((*yyvaluep).e)); }
+            { del(((*yyvaluep).e)); }
 #line 3330 "parser.c"
         break;
 

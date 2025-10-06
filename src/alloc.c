@@ -78,7 +78,7 @@ entry_p new_number(int32_t num)
 // Name:        new_string
 // Description: Allocate STRING.
 // Input:       char *name:    A pointer to a null terminated string. The string
-//                             won't be copied and it will be free:d by kill()
+//                             won't be copied and it will be free:d by del()
 //                             so it must be allocated by the calling function.
 // Return:      entry_p:       A STRING on success, NULL otherwise.
 //------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ entry_p new_string(char *name)
 // Name:        new_symbol
 // Description: Allocate SYMBOL.
 // Input:       char *name: The name of the symbol. The string won't be copied
-//                          and it will be free:d by kill() so it must be
+//                          and it will be free:d by del() so it must be
 //                          allocated by the calling function.
 // Return:      entry_p:    A SYMBOL on success, NULL otherwise.
 //------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ static void reparent_and_set(entry_p *chl, entry_p par, entry_p res)
 // Name:        new_custom
 // Description: Allocate CUSTOM, a user defined procedure / function.
 // Input:       char *name:   The name of the function. This string won't be
-//                            copied and it will be free:d by kill(...) so it
+//                            copied and it will be free:d by del(...) so it
 //                            must be allocated by the calling function.
 //              int32_t line: The source code line number.
 //              entry_p sym:  A CONTXT with symbols or NULL.
@@ -188,10 +188,10 @@ entry_p new_custom(char *name, int32_t line, entry_p sym, entry_p chl)
         // Move symbols if we have any, adopt and clear the 'resolved' status.
         if(sym && sym->symbols)
         {
-            // Transfer and kill the input.
+            // Transfer and delete input.
             entry->symbols = sym->symbols;
             sym->symbols = NULL;
-            kill(sym);
+            del(sym);
 
             // Reparent all symbols. Let the return value dangle.
             reparent_and_set(entry->symbols, entry, end());
@@ -206,7 +206,7 @@ entry_p new_custom(char *name, int32_t line, entry_p sym, entry_p chl)
         // Transfer children and free the input.
         entry->children = chl->children;
         chl->children = NULL;
-        kill(chl);
+        del(chl);
 
         // Reparent all children. Don't touch the resolved value.
         reparent_and_set(entry->children, entry, NULL);
@@ -215,8 +215,8 @@ entry_p new_custom(char *name, int32_t line, entry_p sym, entry_p chl)
     }
 
     // All or nothing, we own 'name', 'chl' and 'sym'.
-    kill(chl);
-    kill(sym);
+    del(chl);
+    del(sym);
     free(name);
     free(entry);
 
@@ -228,7 +228,7 @@ entry_p new_custom(char *name, int32_t line, entry_p sym, entry_p chl)
 // Name:        new_symref
 // Description: Allocate SYMREF, a reference to a symbol / variable.
 // Input:       char *name:     The name of the referenced symbol. This string
-//                              won't be copied and it will be free:d by kill()
+//                              won't be copied and it will be free:d by del()
 //                              so it must be allocated by the calling function.
 //              int32_t line:   The source code line number.
 // Return:      entry_p:        A SYMREF on success, NULL otherwise.
@@ -289,14 +289,14 @@ static void move_contxt(entry_p dst, entry_p src)
     // Free the source.
     src->children = NULL;
     src->symbols = NULL;
-    kill(src);
+    del(src);
 }
 
 //------------------------------------------------------------------------------
 // Name:        new_native
 // Description: Allocate NATIVE, a native, non-user-defined function.
 // Input:       char *name:     The name of the function. This string won't be
-//                              copied and it will be free:d by kill() so it
+//                              copied and it will be free:d by del() so it
 //                              must be allocated by the calling function. It's
 //                              used for decoration purposes only, it doesn't
 //                              affect the execution.
@@ -342,7 +342,7 @@ entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t ty
     // We need to free 'name' and 'chl' also, since we own them.
     free(entry);
     free(name);
-    kill(chl);
+    del(chl);
 
     (void) PANIC(NULL);
     return NULL;
@@ -352,7 +352,7 @@ entry_p new_native(char *name, int32_t line, call_t call, entry_p chl, type_t ty
 // Name:        new_option
 // Description: Allocate OPTION
 // Input:       char *name:     The name of the option. This string won't be
-//                              copied and it will be free:d by kill() so it
+//                              copied and it will be free:d by del() so it
 //                              must be allocated by the calling function. It's
 //                              used for decoration purposes only, it doesn't
 //                              affect the execution.
@@ -404,7 +404,7 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
     }
 
     // We need to free 'name' and 'chl' also, since we own them.
-    kill(chl);
+    del(chl);
     free(name);
     free(entry);
 
@@ -417,7 +417,7 @@ entry_p new_option(char *name, opt_t type, entry_p chl)
 // Description: Allocate CUSREF
 // Input:       char *name:     The name of the user-defined function to be
 //                              invoked. This string won't be copied and it will
-//                              be free:d by kill() so it must be allocated by
+//                              be free:d by del() so it must be allocated by
 //                              the calling function.
 //              int32_t line:   The source code line number.
 //              entry_p arg:    An optional context with function arguments.
@@ -449,7 +449,7 @@ entry_p new_cusref(char *name, int32_t line, entry_p arg)
     // We need to free 'name' and 'arg' also, since we own them.
     free(entry);
     free(name);
-    kill(arg);
+    del(arg);
 
     (void) PANIC(NULL);
     return NULL;
@@ -494,8 +494,8 @@ entry_p append(entry_p **dst, entry_p ent)
         {
             // Out of memory. This is a very rude way of not leaking memory
             // when out of memory. Simply overwrite previous elements after
-            // killing them of.
-            kill((*dst)[0]);
+            // deleting them.
+            del((*dst)[0]);
             (*dst)[0] = ent;
 
             (void) PANIC(NULL);
@@ -511,7 +511,7 @@ entry_p append(entry_p **dst, entry_p ent)
 //------------------------------------------------------------------------------
 // Name:        merge
 // Description: Move and append all children of a context to another one. The
-//              empty context will be killed.
+//              empty context will be deleted.
 // Input:       entry_p dst:    The destination context.
 //              entry_p src:    The source context.
 // Return:      entry_p:        The destination context.
@@ -563,7 +563,7 @@ entry_p merge(entry_p dst, entry_p src)
     }
 
     // We own 'src' and need to free it.
-    kill(src);
+    del(src);
     return dst;
 }
 
@@ -595,7 +595,7 @@ entry_p push(entry_p dst, entry_p src)
     if((!DBG_ADDR(dst) || !DBG_ADDR(src)) && PANIC(NULL))
     {
         // We own 'src'.
-        kill(src);
+        del(src);
         return dst;
     }
 
@@ -612,10 +612,10 @@ entry_p push(entry_p dst, entry_p src)
             if(!strcasecmp(dst->symbols[i]->name, src->name))
             {
                 // Variables set without (set) own themselves (refer to init()
-                // and init_num()) and must be killed before an update.
+                // and init_num()) and must be deleted before an update.
                 if(dst->symbols[i]->parent == dst)
                 {
-                    kill(dst->symbols[i]);
+                    del(dst->symbols[i]);
                 }
 
                 dst->symbols[i] = src;
@@ -635,19 +635,19 @@ entry_p push(entry_p dst, entry_p src)
     }
 
     // Out of memory. Since we own 'src', we need to free it.
-    kill(src);
+    del(src);
     (void) PANIC(NULL);
     return dst;
 }
 
 //------------------------------------------------------------------------------
-// Name:        kill_all
+// Name:        del_all
 // Description: Kill all entries owned by a given parent.
 // Input:       entry_p *chl:   Vector with entries.
 //              entry_p par:    Parent entry.
 // Return:      -
 //------------------------------------------------------------------------------
-static void kill_all(entry_p *chl, entry_p par)
+static void del_all(entry_p *chl, entry_p par)
 {
     if(!chl)
     {
@@ -660,18 +660,18 @@ static void kill_all(entry_p *chl, entry_p par)
     {
         if((*cur)->parent == par)
         {
-            kill(*cur);
+            del(*cur);
         }
     }
 }
 
 //------------------------------------------------------------------------------
-// Name:        kill
+// Name:        del
 // Description: Free the memory occupied by 'entry' and all its children.
 // Input:       entry_p entry:  The entry_p to be free:d.
 // Return:      -
 //------------------------------------------------------------------------------
-void kill(entry_p entry)
+void del(entry_p entry)
 {
     // DANGLE entries are static, no need to free them.
     if(entry && entry->type != DANGLE)
@@ -680,17 +680,17 @@ void kill(entry_p entry)
         free(entry->name);
 
         // Free symbols, if any.
-        kill_all(entry->symbols, entry);
+        del_all(entry->symbols, entry);
         free(entry->symbols);
 
         // Free children, if any.
-        kill_all(entry->children, entry);
+        del_all(entry->children, entry);
         free(entry->children);
 
         // If we own any resolved entries, free them.
         if(entry->resolved && entry->resolved->parent == entry)
         {
-            kill(entry->resolved);
+            del(entry->resolved);
         }
 
         // Nothing but this entry left.

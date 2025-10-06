@@ -51,8 +51,8 @@ static void init_num(entry_p contxt, char *sym, int32_t num)
 
     if(!var || !val)
     {
-        kill(var);
-        kill(val);
+        del(var);
+        del(val);
         return;
     }
 
@@ -83,8 +83,8 @@ static void init_str(entry_p contxt, char *sym, char *str)
 
     if(!var || !val)
     {
-        kill(var);
-        kill(val);
+        del(var);
+        del(val);
         return;
     }
 
@@ -325,8 +325,8 @@ static void init_exit(entry_p contxt)
 #else
     // Not used.
     (void) contxt;
-    // We're not using this, kill it directly.
-    kill(entry);
+    // We're not using this, delete it directly.
+    del(entry);
 #endif
 }
 
@@ -362,8 +362,8 @@ static void init_welcome(entry_p contxt)
         // Rotate right to make it end up on top.
         ror(contxt->children);
 #else
-        // We're not using this, kill it directly.
-        kill(entry);
+        // We're not using this, delete it directly.
+        del(entry);
 #endif
     }
 }

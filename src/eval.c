@@ -473,5 +473,5 @@ void run(entry_p entry)
 
     // i18n and AST teardown.
     locale_exit();
-    kill(entry);
+    del(entry);
 }

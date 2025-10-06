@@ -124,7 +124,7 @@ entry_p n_gosub(entry_p contxt)
                 memmove(res, resolve(*ina), sizeof(entry_t));
                 res->name = res->name ? DBG_ALLOC(strdup(res->name)) : NULL;
                 res->parent = *arg;
-                kill((*arg)->resolved);
+                del((*arg)->resolved);
                 (*arg)->resolved = res;
 
                 // Turn function arguments into global variables.
