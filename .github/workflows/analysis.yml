@@ -46,7 +46,7 @@ jobs:
     - name: Install scan-build
       run: |
         apt-get update
-        apt-get install -y clang clang-tools
+        apt-get install -y clang clang-tools perl
         clang --version
 
     - name: Run scan-build
