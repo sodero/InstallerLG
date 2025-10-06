@@ -24,4 +24,4 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y valgrind
 
     - name: Run ${{ matrix.suite }}
-      run: make -C build ${{ matrix.suite }}
+      run: make -C build ${{ matrix.suite }} || (cat build/*.tmp.* 2> /dev/null && false)
