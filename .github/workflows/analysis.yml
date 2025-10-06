@@ -37,6 +37,7 @@ jobs:
   scan-build:
     name: Clang scan-build
     runs-on: ubuntu-latest
+    container: debian:latest
 
     steps:
     - name: Checkout code
