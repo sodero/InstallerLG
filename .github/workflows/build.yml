@@ -27,7 +27,6 @@ jobs:
           - name: MorphOS
             image: rolfkopman/mosenv
             mount: /gg/code
-        build-type: [tiny, small, normal, huge, mui]
 
     steps:
     - name: Checkout code
