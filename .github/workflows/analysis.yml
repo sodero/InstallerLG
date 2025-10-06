@@ -17,13 +17,13 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install CppCheck
-      run: \
-        sudo apt-get update && \
-        sudo apt-get install -y cppcheck && \
+      run: |
+        apt-get update
+        apt-get install -y cppcheck
         cppcheck --version
 
     - name: Run CppCheck
-      run: \
+      run: |
         cppcheck --max-ctu-depth=4096 --enable=all --error-exitcode=1 \
         --suppress=missingInclude --suppress=unusedFunction \
         --suppress=knownConditionTrueFalse --suppress=unmatchedSuppression \
@@ -41,12 +41,13 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install scan-build
-      run: \
-        sudo apt-get install -y clang-tools && \
+      run: |
+        apt-get update
+        apt-get install -y clang-tools
         clang --version
 
     - name: Run scan-build
-      run: \
+      run: |
          scan-build -v -maxloop 1024 -enable-checker alpha -enable-checker \
          nullability -enable-checker security -disable-checker alpha.deadcode \
          make -C build
