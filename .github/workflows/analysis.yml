@@ -26,12 +26,13 @@ jobs:
     - name: Run CppCheck
       run: |
         cppcheck --max-ctu-depth=4096 --enable=all --error-exitcode=1 \
-        --suppress=missingInclude --suppress=unusedFunction \
-        --suppress=knownConditionTrueFalse --suppress=unmatchedSuppression \
-        -U__clang_analyzer__ -UFAIL_FILE_ADDR -UFAIL_FILE_ALLOC \
-        -UFAIL_FILE_FOPEN -UFAIL_FILE_DOPEN -UFAIL_FILE_ZERO \
-        -UFAIL_LINE_ADDR -UFAIL_LINE_ALLOC -UFAIL_LINE_FOPEN \
-        -UFAIL_LINE_DOPEN -UFAIL_LINE_ZERO src
+        --suppress=missingInclude --suppress=missingIncludeSystem \
+        --suppress=unusedFunction --suppress=knownConditionTrueFalse \
+        --suppress=unmatchedSuppression -U__clang_analyzer__ \
+        -UFAIL_FILE_ADDR -UFAIL_FILE_ALLOC -UFAIL_FILE_FOPEN \
+        -UFAIL_FILE_DOPEN -UFAIL_FILE_ZERO -UFAIL_LINE_ADDR \
+        -UFAIL_LINE_ALLOC -UFAIL_LINE_FOPEN -UFAIL_LINE_DOPEN \
+        -UFAIL_LINE_ZERO src
 
   scan-build:
     name: Clang scan-build
