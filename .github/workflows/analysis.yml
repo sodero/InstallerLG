@@ -11,6 +11,7 @@ jobs:
   cppcheck:
     name: CppCheck
     runs-on: ubuntu-latest
+    container: debian:latest
 
     steps:
     - name: Checkout code
