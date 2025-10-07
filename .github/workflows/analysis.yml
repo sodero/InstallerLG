@@ -1,0 +1,56 @@
+name: Static code analysis
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  cppcheck:
+    name: CppCheck
+    runs-on: ubuntu-latest
+    container: debian:latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install CppCheck
+      run: |
+        apt-get update
+        apt-get install -y cppcheck
+        cppcheck --version
+
+    - name: Run CppCheck
+      run: |
+        cppcheck --max-ctu-depth=4096 --enable=all --error-exitcode=1 \
+        --suppress=missingInclude --suppress=missingIncludeSystem \
+        --suppress=unusedFunction --suppress=knownConditionTrueFalse \
+        --suppress=unmatchedSuppression -U__clang_analyzer__ \
+        -UFAIL_FILE_ADDR -UFAIL_FILE_ALLOC -UFAIL_FILE_FOPEN \
+        -UFAIL_FILE_DOPEN -UFAIL_FILE_ZERO -UFAIL_LINE_ADDR \
+        -UFAIL_LINE_ALLOC -UFAIL_LINE_FOPEN -UFAIL_LINE_DOPEN \
+        -UFAIL_LINE_ZERO src
+
+  scan-build:
+    name: Clang scan-build
+    runs-on: ubuntu-latest
+    container: debian:latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install scan-build
+      run: |
+        apt-get update
+        apt-get install -y clang clang-tools perl make gcc
+        clang --version
+
+    - name: Run scan-build
+      run: |
+         scan-build -v -maxloop 1024 -enable-checker alpha -enable-checker \
+         nullability -enable-checker security -disable-checker alpha.deadcode \
+         make -C build

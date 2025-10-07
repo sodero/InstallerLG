@@ -114,7 +114,7 @@ entry_p n_set(entry_p contxt)
 
             // Reparent and create global reference.
             res->parent = *sym;
-            kill((*sym)->resolved);
+            del((*sym)->resolved);
             (*sym)->resolved = res;
 
             // Push cannot fail in this context.
@@ -144,7 +144,7 @@ entry_p n_set(entry_p contxt)
 static entry_p n_symbolset_exists(entry_p contxt, entry_p esm, entry_p res)
 {
     // Replace resolved value of existing symbol.
-    kill(esm->resolved);
+    del(esm->resolved);
     esm->resolved = res;
 
     // Push cannot fail in this context.
@@ -170,8 +170,8 @@ static entry_p n_symbolset_new(entry_p contxt, const char *lhs, entry_p res)
 
     if(!nsm || !append(&contxt->symbols, nsm))
     {
-        kill(nsm);
-        kill(res);
+        del(nsm);
+        del(res);
 
         // Fallback.
         return end();

@@ -1,0 +1,41 @@
+name: AmigaOS4/AROS/MorphOS build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.build-type }} - ${{ matrix.platform.name }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        platform:
+          - name: AmigaOS4
+            image: rolfkopman/os4env
+            mount: /opt/code
+          - name: AROS i386 ABI V0
+            image: rolfkopman/arosi386v0env
+            mount: /opt/code
+          - name: AROS x86_64 ABI V1
+            image: rolfkopman/arosx64v1env
+            mount: /opt/code
+          - name: MorphOS
+            image: rolfkopman/mosenv
+            mount: /gg/code
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Compile
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:${{ matrix.platform.mount }} \
+          -w ${{ matrix.platform.mount }} \
+          -e BUILD=${{ matrix.build-type }} \
+          ${{ matrix.platform.image }} make -C build

@@ -1210,7 +1210,7 @@ entry_p n_iconinfo(entry_p contxt)
                 {
                     if(!strcasecmp(C_SYM(k)->name, name))
                     {
-                        kill(C_SYM(k)->resolved);
+                        del(C_SYM(k)->resolved);
                         C_SYM(k)->resolved = val;
                         push(global(contxt), C_SYM(k));
                         val->parent = C_SYM(k);
@@ -1235,7 +1235,7 @@ entry_p n_iconinfo(entry_p contxt)
             if(!sym)
             {
                 // Do not leak 'val'.
-                kill(val);
+                del(val);
                 continue;
             }
 

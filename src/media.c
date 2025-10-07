@@ -223,8 +223,8 @@ static int32_t h_create_id(entry_p contxt, int32_t mid)
         }
     }
 
-    kill(nid);
-    kill(nsm);
+    del(nid);
+    del(nsm);
     return LG_FALSE;
 }
 

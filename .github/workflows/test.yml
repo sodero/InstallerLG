@@ -1,0 +1,27 @@
+name: Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.suite }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        suite: [smoke, quick, test]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Valgrind
+      run: sudo apt-get update && sudo apt-get install -y valgrind
+
+    - name: Run ${{ matrix.suite }}
+      run: make -C build ${{ matrix.suite }} || (cat build/*.tmp.* 2> /dev/null && false)
