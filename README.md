@@ -1,6 +1,6 @@
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/sodero/InstallerLG?style=for-the-badge)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/sodero/InstallerLG?style=for-the-badge)
-[![Build Status](https://travis-ci.org/sodero/InstallerLG.svg?branch=master)](https://travis-ci.org/sodero/InstallerLG)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/sodero/InstallerLG/build.yml?style=for-the-badge)](https://github.com/USERNAME/REPO/actions/workflows/build.yml)
 
 # InstallerLG
 
