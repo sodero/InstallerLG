@@ -2456,8 +2456,13 @@ MUIDSP IGComplete(Class *cls, Object *obj, struct MUIP_IG_Complete *msg)
 MUIDSP IGConfirm(Class *cls, Object *obj, struct MUIP_IG_Confirm *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
-    ULONG top = 0, btm = 0, str = 0;
+    ULONG top = 0, btm = 0;
 
+#if defined(__AROS__) && defined(__x86_64__)
+    IPTR str = 0;
+#else
+    ULONG str = 0;
+#endif /* __AROS__ && __x86_64__ */
 
     // Save the current state of whatever we're showing before we ask for
     // confirmation.
