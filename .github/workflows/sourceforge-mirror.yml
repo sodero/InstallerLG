@@ -38,6 +38,6 @@ jobs:
 
       - name: Push to SourceForge
         run: |
-          git remote add sf ssh://${{ secrets.SF_USERNAME }}@git.code.sf.net/p/${{ secrets.SF_PROJECT }}/code || true
+          git remote add sf ssh://${{ secrets.SF_USERNAME }}@git.code.sf.net/p/${{ secrets.SF_REPO }}/code || true
           git push sf master
           git push sf --tags
