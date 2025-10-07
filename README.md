@@ -1,6 +1,8 @@
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/sodero/InstallerLG?style=for-the-badge)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/sodero/InstallerLG?style=for-the-badge)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/sodero/InstallerLG/build.yml?style=for-the-badge)](https://github.com/USERNAME/REPO/actions/workflows/build.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/sodero/InstallerLG/build.yml?style=for-the-badge)](https://github.com/sodero/InstallerLG/actions/workflows/build.yml)
+[![Test Status](https://img.shields.io/github/actions/workflow/status/sodero/InstallerLG/test.yml?style=for-the-badge&label=TESTS)](https://github.com/sodero/InstallerLG/actions/workflows/test.yml)
+[![Statc Code Analysis](https://img.shields.io/github/actions/workflow/status/sodero/InstallerLG/analysis.yml?style=for-the-badge&label=ANALYSIS)](https://github.com/sodero/InstallerLG/actions/workflows/analysis.yml)
 
 # InstallerLG
 
