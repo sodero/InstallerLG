@@ -1,0 +1,47 @@
+name: Codeberg mirror
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  mirror:
+    environment: cbenv
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup SSH
+        env:
+          CB_SSH_KEY: ${{ secrets.CB_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$CB_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan git.code.sf.net >> ~/.ssh/known_hosts
+          cat > ~/.ssh/config << 'EOF'
+          Host codeberg.org
+            HostName codeberg.org
+            IdentityFile ~/.ssh/id_rsa
+            IdentitiesOnly yes
+            PubkeyAuthentication yes
+            PasswordAuthentication no
+            PreferredAuthentications publickey
+            StrictHostKeyChecking no
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: Push to Codeberg
+        run: |
+          git remote add codeberg git@codeberg.org:${{ secrets.CB_USERNAME }}/${{ secrets.CB_REPO }}.git || true
+          git push codeberg master
+          git push codeberg --tags
