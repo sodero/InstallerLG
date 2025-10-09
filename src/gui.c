@@ -1501,7 +1501,7 @@ MUIDSP IGWorking(Class *cls, Object *obj, struct MUIP_IG_Working *msg)
 //             ColorEnd - Last color in gradient.
 // Return:     G_TRUE / G_FALSE / G_ERR.
 //------------------------------------------------------------------------------
-MUIDSP IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
+MUIDSP IGEffect(Class *cls, Object *obj, const struct MUIP_IG_Effect *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -1617,7 +1617,8 @@ MUIDSP IGEffect(Class *cls, Object *obj, struct MUIP_IG_Effect *msg)
 // Input:          FIXME
 // Return:         G_TRUE / G_FALSE
 //------------------------------------------------------------------------------
-MUIDSP IGCloseMedia(Class *cls, Object *obj, struct MUIP_IG_CloseMedia *msg)
+MUIDSP IGCloseMedia(Class *cls, Object *obj, const struct MUIP_IG_CloseMedia
+    *msg)
 {
     // Silence.
     (void) cls;
@@ -1651,7 +1652,7 @@ MUIDSP IGCloseMedia(Class *cls, Object *obj, struct MUIP_IG_CloseMedia *msg)
 // Input:        FIXME
 // Return:       G_TRUE / G_FALSE / G_ERR.
 //------------------------------------------------------------------------------
-MUIDSP IGSetMedia(Class *cls, Object *obj, struct MUIP_IG_SetMedia *msg)
+MUIDSP IGSetMedia(Class *cls, Object *obj, const struct MUIP_IG_SetMedia *msg)
 {
     // Silence.
     (void) cls;
@@ -1912,7 +1913,7 @@ MUIDSP IGShowMedia(Class *cls, Object *obj, struct MUIP_IG_ShowMedia *msg)
             if(dtp)
             {
                 // Get group ID of datatype.
-                struct DataTypeHeader *dth = dtp->dtn_Header;
+                const struct DataTypeHeader *dth = dtp->dtn_Header;
                 ULONG gid = dth->dth_GroupID;
 
                 // Free datatype resources and release lock.
@@ -2453,7 +2454,7 @@ MUIDSP IGCheckBoxes(Class *cls, Object *obj, struct MUIP_IG_CheckBoxes *msg)
 // Input:       Progress - Installer progress in %
 // Return:      G_TRUE / G_FALSE.
 //------------------------------------------------------------------------------
-MUIDSP IGComplete(Class *cls, Object *obj, struct MUIP_IG_Complete *msg)
+MUIDSP IGComplete(Class *cls, Object *obj, const struct MUIP_IG_Complete *msg)
 {
     struct IGData *my = INST_DATA(cls, obj);
 
@@ -2614,6 +2615,7 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
     // The GUI is, as far as possible, a static construct. We're not
     // constructing things on the fly, instead we use paging to let
     // widgets become visible / disappear.
+#ifndef __VBCC__
     obj = (Object *) DoSuperNew
     (
         cls, obj,
@@ -2621,7 +2623,6 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
         MUIA_Window_AppWindow, TRUE,
         MUIA_Window_ID, MAKE_ID('W','D','L','A'),
         scr ? MUIA_Window_Screen : TAG_IGNORE, scr,
-#ifndef __VBCC__
         MUIA_Window_RootObject, MUI_NewObject(
             MUIC_Group,
             /* Application banner */
@@ -2886,9 +2887,19 @@ MUIDSP IGNew(Class *cls, Object *obj, struct opSet *msg)
                     TAG_END),
                 TAG_END),
             TAG_END),
-#endif /* !__VBCC__ */
         TAG_END
     );
+#else
+    obj = (Object *) DoSuperNew
+    (
+        cls, obj,
+        MUIA_Window_Title, arg_get(ARG_APPNAME),
+        MUIA_Window_AppWindow, TRUE,
+        MUIA_Window_ID, MAKE_ID('W','D','L','A'),
+        scr ? MUIA_Window_Screen : TAG_IGNORE, scr,
+        TAG_END
+    );
+#endif /* !__VBCC__ */
 
     // Initialize the rest if the parent is OK.
     if(obj)
@@ -3460,6 +3471,7 @@ inp_t gui_welcome(const char *msg, int32_t *lvl, int32_t *lgf, int32_t *prt,
         nlg);
 #else
     OUT("%s%d%d%d%d%d%d\n", msg, *lvl, *lgf, *prt, min, !!npr, !!nlg);
+    *lvl = *lgf = *prt = 0;
     return G_TRUE;
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }

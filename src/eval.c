@@ -175,7 +175,7 @@ entry_p resolve(entry_p entry)
 static int32_t opt_to_int(entry_p entry)
 {
     // Resolve once.
-    char *option = str(entry);
+    const char *option = str(entry);
 
     // Is this an ordinary option?
     if(entry->id != OPT_CONFIRM)

@@ -78,7 +78,7 @@ static cpu_t h_cpu_id(void)
         return NONE;
     }
 
-    ULONG fam;
+    ULONG fam = 0;
     struct TagItem tags[] = {{GCIT_Family, (IPTR) &fam}, {TAG_DONE, TAG_DONE}};
     GetCPUInfo(tags);
 
@@ -136,7 +136,7 @@ static cpu_t h_cpu_id(void)
 static cpu_t h_cpu_id(void)
 {
     // This might work on OS3. OS4 probably needs some sugar on top.
-    struct ExecBase *AbsSysBase = *((struct ExecBase **) 4);
+    const struct ExecBase *AbsSysBase = *((struct ExecBase **) 4);
     UWORD flags = AbsSysBase->AttnFlags;
 
 #ifndef __M68K__
@@ -192,13 +192,13 @@ static cpu_t h_cpu_id(void)
 // Name:        h_cpu_name
 // Description: Helper for n_database. Get host CPU architecture.
 // Input:       ---
-// Return:      char *: Host CPU architecture.
+// Return:      const char *: Host CPU architecture.
 //------------------------------------------------------------------------------
-static char *h_cpu_name(void)
+static const char *h_cpu_name(void)
 {
-    char *cpu[X86_64 + 1] = { "Unknown CPU", "PowerPC", "ARM", "M68000",
-                              "M68010", "M68020", "M68030", "M68040", "M68060",
-                              "X86", "X86_64"};
+    const char *cpu[X86_64 + 1] = { "Unknown CPU", "PowerPC", "ARM", "M68000",
+                                    "M68010", "M68020", "M68030", "M68040",
+                                    "M68060", "X86", "X86_64"};
     // Trans ID to string.
     return cpu[h_cpu_id()];
 }
@@ -539,7 +539,7 @@ entry_p n_getdevice(entry_p contxt)
 
         if(dl && __DMP(dl))
         {
-            struct MsgPort *mp = __DMP(dl);
+            const struct MsgPort *mp = __DMP(dl);
             ULONG msk = LDF_READ | LDF_DEVICES;
             dl = (struct DosList *) LockDosList(msk);
 
@@ -657,7 +657,7 @@ entry_p n_getenv(entry_p contxt)
     // We need a variable name.
     C_SANE(1, NULL);
 
-    char *var = str(C_ARG(1)), *val =
+    const char *var = str(C_ARG(1)), *val =
 #ifdef AMIGA
     // GetVar doesn't seem to terminate strings for binary variables (MorphOS).
     // This is probably why getenv() sometimes returns garbage. Using GetVar()
@@ -770,11 +770,11 @@ entry_p n_getsum(entry_p contxt)
 // Name:        h_getversion_rsp
 // Description: Helper for h_getversion_rsp and h_getversion_dev. Get resident
 //              version from Resident struct.
-// Input:       struct Resident *rsp:   Resident struct from FindResident.
-// Return:      int32_t:                Resident version.
+// Input:       const struct Resident *rsp: Resident struct from FindResident.
+// Return:      int32_t:                    Resident version.
 //------------------------------------------------------------------------------
 #if defined(AMIGA) && !defined(LG_TEST)
-static int32_t h_getversion_rsp(struct Resident *rsp)
+static int32_t h_getversion_rsp(const struct Resident *rsp)
 {
     if(!rsp)
     {
@@ -820,7 +820,7 @@ static int32_t h_getversion_res(const char *name)
 
     Forbid();
 
-    struct Library *lib = (struct Library *)
+    const struct Library *lib = (struct Library *)
         FindName(&((struct ExecBase *) SysBase)->LibList, name);
 
     if(lib)
@@ -964,7 +964,7 @@ int32_t h_getversion_file(const char *name)
     }
 
     // Version key string.
-    int key[] = {'$','V','E','R',':',' ', 0};
+    const int key[] = {'$','V','E','R',':',' ', 0};
     size_t ndx = 0;
 
     // Find position of the version key.
@@ -981,7 +981,7 @@ int32_t h_getversion_file(const char *name)
         fread(buf_get(B_KEY), 1, buf_len(), file);
 
         // Begin after whitespace.
-        char *data = strchr(buf_put(B_KEY), ' ');
+        const char *data = strchr(buf_put(B_KEY), ' ');
 
         if(data)
         {
@@ -1065,7 +1065,7 @@ entry_p n_getversion(entry_p contxt)
 #ifdef __MORPHOS__
         if(ver == LG_NOVER && !strcasecmp("morphos", name))
         {
-            struct Resident *res = FindResident("MorphOS");
+            const struct Resident *res = FindResident("MorphOS");
 
             if(res)
             {
@@ -1162,7 +1162,7 @@ entry_p n_iconinfo(entry_p contxt)
 
             // Get option type.
             int32_t type = types[i]->id;
-            char *svl = NULL;
+            const char *svl = NULL;
 
 #if defined(AMIGA) && !defined(LG_TEST)
             // Is this a numerical value?

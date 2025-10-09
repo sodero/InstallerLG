@@ -102,10 +102,11 @@ entry_p n_cat(entry_p contxt)
 // Name:        h_fmt_escape
 // Description: Determine if a string begins with an escape sequence.
 //              specifier.
-// Input:       char *fmt:    Suspected format string.
-// Return:      bool *:       'true' if 'fmt' is the beginning of an escape seq.
+// Input:       const char *fmt:    Suspected format string.
+// Return:      bool *:             'true' if 'fmt' is the beginning of an
+//                                  escape seq.
 //------------------------------------------------------------------------------
-static inline bool h_fmt_escape(char *fmt)
+static inline bool h_fmt_escape(const char *fmt)
 {
     return fmt && fmt[0] == '%' && (fmt[1] == '%' || fmt[1] == '\0');
 }
@@ -114,10 +115,11 @@ static inline bool h_fmt_escape(char *fmt)
 // Name:        h_fmt_number
 // Description: Determine whether of not a string begins with an integer format
 //              specifier.
-// Input:       char *fmt:    Suspected format string.
-// Return:      bool *:       'true' if 'fmt' is an integer spec., else 'false'.
+// Input:       const char *fmt Suspected format string.
+// Return:      bool *:         'true' if 'fmt' is an integer spec., else
+//                              'false'.
 //------------------------------------------------------------------------------
-static inline bool h_fmt_number(char *fmt)
+static inline bool h_fmt_number(const char *fmt)
 {
     return fmt && fmt[0] == '%' && fmt[1] == 'l' && ( fmt[2] == 'd' ||
            fmt[2] == 'u' );
@@ -127,10 +129,11 @@ static inline bool h_fmt_number(char *fmt)
 // Name:        h_fmt_string
 // Description: Determine whether of not a string begins with a string format
 //              specifier.
-// Input:       char *fmt:    Suspected format string.
-// Return:      bool *:       'true' if 'fmt' is a string spec., else 'false'.
+// Input:       const char *fmt:    Suspected format string.
+// Return:      bool *:             'true' if 'fmt' is a string spec., else
+//                                  'false'.
 //------------------------------------------------------------------------------
-static inline bool h_fmt_string(char *fmt)
+static inline bool h_fmt_string(const char *fmt)
 {
     return fmt && fmt[0] == '%' && fmt[1] == 's';
 }
@@ -165,7 +168,7 @@ static void h_fmt_scan(entry_p *args, char *res, size_t len, char *fmt)
             if(exists(args[cur]))
             {
                 // Convert strings to numbers if needed.
-                char *val = num(args[cur]) ? str(args[cur]) : "0";
+                const char *val = num(args[cur]) ? str(args[cur]) : "0";
                 cur++;
                 strncat(res, val, len - pos);
                 pos += strlen(val);
@@ -180,7 +183,7 @@ static void h_fmt_scan(entry_p *args, char *res, size_t len, char *fmt)
             // Insert formated segment if argument exists.
             if(exists(args[cur]))
             {
-                char *val = str(args[cur++]);
+                const char *val = str(args[cur++]);
                 strncat(res, val, len - pos);
                 pos += strlen(val);
             }
@@ -398,7 +401,7 @@ entry_p n_substr(entry_p contxt)
     // We need at least two arguments.
     C_SANE(2, NULL);
 
-    char *arg = str(C_ARG(1));
+    const char *arg = str(C_ARG(1));
     int32_t off = num(C_ARG(2)), len = (int32_t) strlen(arg);
 
     // Is there a limitation on the number of characters?

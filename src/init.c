@@ -40,11 +40,11 @@ unsigned long __stack = 131072;
 //              for use in init(), nothing is resolved and duplicates aren't
 //              accounted for.
 // Input:       entry_p contxt: CONTXT.
-//              char *sym:      Name.
+//              constchar *sym: Name.
 //              int32_t num:    Value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void init_num(entry_p contxt, char *sym, int32_t num)
+static void init_num(entry_p contxt, const char *sym, int32_t num)
 {
     // Create SYMBOL -> VALUE tuple.
     entry_p var = new_symbol(DBG_ALLOC(strdup(sym))), val = new_number(num);
@@ -70,12 +70,12 @@ static void init_num(entry_p contxt, char *sym, int32_t num)
 // Description: Init helper; insert string variable in CONTXT. This is only
 //              for use in init(), nothing is resolved and duplicates aren't
 //              accounted for.
-// Input:       entry_p contxt: CONTXT.
-//              char *sym:      Name.
-//              char *str:      Value.
+// Input:       entry_p contxt:     CONTXT.
+//              const char *sym:    Name.
+//              const char *str:    Value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void init_str(entry_p contxt, char *sym, char *str)
+static void init_str(entry_p contxt, const char *sym, const char *str)
 {
     // Create SYMBOL -> VALUE tuple.
     entry_p var = new_symbol(DBG_ALLOC(strdup(sym))),
@@ -106,9 +106,9 @@ static void init_str(entry_p contxt, char *sym, char *str)
 static void init_tooltypes(entry_p contxt)
 {
     // Get tooltypes / CLI arguments.
-    char *a_app = arg_get(ARG_APPNAME), *a_scr = arg_get(ARG_SCRIPT),
-         *a_ico = arg_get(ARG_ICON), *a_log = arg_get(ARG_LOGFILE),
-         *a_lng = arg_get(ARG_LANGUAGE);
+    const char *a_app = arg_get(ARG_APPNAME), *a_scr = arg_get(ARG_SCRIPT),
+               *a_ico = arg_get(ARG_ICON), *a_log = arg_get(ARG_LOGFILE),
+               *a_lng = arg_get(ARG_LANGUAGE);
 
     // User levels: minimum 'NOVICE' and default 'AVERAGE'.
     int32_t l_def = str_to_userlevel(arg_get(ARG_DEFUSER), LG_AVERAGE),

@@ -425,7 +425,7 @@ inp_t gui_setmedia(int mid, int32_t act, const char *par)
     return G_TRUE;
 }
 
-inp_t gui_showmedia(int *mid, const char* mda, int32_t act)
+inp_t gui_showmedia(const int *mid, const char* mda, int32_t act)
 {
     printf("Set media with mid %d, act %d and mda %s", *mid, act, mda);
 

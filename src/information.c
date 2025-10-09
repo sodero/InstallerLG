@@ -71,7 +71,7 @@ static void h_debug_all(entry_p contxt)
             res = resolve(*cur);
         }
 
-        char *val = res->type == DANGLE ? "<NIL>" : str(res);
+        const char *val = res->type == DANGLE ? "<NIL>" : str(res);
 
         if(arg_argc(-1))
         {

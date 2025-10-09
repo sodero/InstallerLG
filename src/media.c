@@ -84,7 +84,7 @@ entry_p n_effect(entry_p contxt)
     C_SANE(4, NULL);
 
     // Position and effect.
-    char *est = str(C_ARG(2)), *eps = str(C_ARG(1));
+    const char *est = str(C_ARG(2)), *eps = str(C_ARG(1));
 
     // Colors, type and position.
     int32_t ic1 = num(C_ARG(4)), ic2 = num(C_ARG(3)),
@@ -155,7 +155,7 @@ entry_p n_setmedia(entry_p contxt)
     C_SANE(2, NULL);
 
     // Action to perform.
-    char *act = str(C_ARG(2));
+    const char *act = str(C_ARG(2));
     int32_t cmd = h_action(act);
 
     if(!cmd)
@@ -166,7 +166,7 @@ entry_p n_setmedia(entry_p contxt)
     }
 
     // Extra flags.
-    char *par = NULL;
+    const char *par = NULL;
 
     // If an extra parameter is required, resolve it, if it exists.
     if((cmd == STM_COMMAND || cmd == STM_LOCATE) && exists(C_ARG(3)))

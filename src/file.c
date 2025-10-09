@@ -55,7 +55,7 @@ entry_p n_expandpath(entry_p contxt)
     C_SANE(1, contxt);
 
     // Short path. No need to check for ERR.
-    char *pth = str(C_ARG(1));
+    const char *pth = str(C_ARG(1));
 
 #if defined(AMIGA) && !defined(LG_TEST)
     // Lock whatever resource the argument corresponds to.
@@ -338,11 +338,11 @@ static char *h_suffix(const char *stem, const char *suffix)
 // Description: Append file / directory suffix and append the result to a
 //              node list. If the resulting file / directory doesn't exist,
 //              nothing will be appended.
-// Input:       entry_p node:   List tail.
-//              char *suffix:   Suffix to append.
-// Return:      entry_p:        New tail.
+// Input:       entry_p node:       List tail.
+//              const char *suffix: Suffix to append.
+// Return:      entry_p:            New tail.
 //------------------------------------------------------------------------------
-static pnode_p h_suffix_append(pnode_p node, char *suffix)
+static pnode_p h_suffix_append(pnode_p node, const char *suffix)
 {
     // Node should be the tail of the list.
     LG_ASSERT(node && !node->next, node);
@@ -448,7 +448,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
     while(node)
     {
         // Resolve current file.
-        char *f_nam = str(*chl);
+        const char *f_nam = str(*chl);
 
         // Build source <-> dest pair.
         node->name = DBG_ALLOC(h_tackon(contxt, src, f_nam));
@@ -470,7 +470,7 @@ static pnode_p h_choices(entry_p contxt, entry_p choices, entry_p fonts,
         }
 
         int32_t type = node->type;
-        char *name = node->name, *copy = node->copy;
+        const char *name = node->name, *copy = node->copy;
 
         // Create .info and .font nodes if necessary. No need to check node
         // pointer. Bounce and PANIC in h_suffix_append.
@@ -591,7 +591,7 @@ static pnode_p h_filetree(entry_p contxt, const char *srt, const char *src,
 
         if(node)
         {
-            struct dirent *entry = DBG_ADDR(readdir(dir));
+            const struct dirent *entry = DBG_ADDR(readdir(dir));
 
             // The type of the first element is known; it's a directory.
             node->name = DBG_ALLOC(strdup(src));
@@ -1232,10 +1232,10 @@ static bool h_copy_comment(entry_p contxt, const char *src, const char *dst)
 //------------------------------------------------------------------------------
 // Name:        h_copyfile_reset
 // Description: Reset icon position.
-// Input:       char *name: File / directory name.
-// Return:      inp_t:      G_TRUE / G_FALSE.
+// Input:       const char *name: File / directory name.
+// Return:      inp_t:            G_TRUE / G_FALSE.
 //------------------------------------------------------------------------------
-static inp_t h_copyfile_reset(char *name)
+static inp_t h_copyfile_reset(const char *name)
 {
     inp_t grc = G_TRUE;
 
@@ -1483,10 +1483,10 @@ static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln
 // Name:        h_makedir_create_icon
 // Description: Create directory icon.
 // Input:       entry_p contxt:     The execution context.
-//              char *dst:          The directory.
+//              const char *dst:    The directory.
 // Return:      bool:               On success 'true', else 'false'.
 //------------------------------------------------------------------------------
-static bool h_makedir_create_icon(entry_p contxt, char *dst)
+static bool h_makedir_create_icon(entry_p contxt, const char *dst)
 {
     // Validate input.
     LG_ASSERT(dst, false);
@@ -2403,7 +2403,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
         // Permission to read?
         if(dir)
         {
-            struct dirent *entry = DBG_ADDR(readdir(dir));
+            const struct dirent *entry = DBG_ADDR(readdir(dir));
 
             // Find all files in the directory.
             while(entry)
@@ -2609,7 +2609,7 @@ entry_p n_delete(entry_p contxt)
     for(size_t ndx = 1; NOT_ERR && exists(C_ARG(ndx)) &&
         C_ARG(ndx)->type != OPTION; ndx++)
     {
-        char *file = str(C_ARG(ndx));
+        const char *file = str(C_ARG(ndx));
 
         #if defined(AMIGA) && !defined(LG_TEST)
         int wild = ParsePatternNoCase(file, buf_raw(), buf_len());
@@ -3067,10 +3067,11 @@ static int32_t h_protect_arg_get(entry_p contxt)
 //------------------------------------------------------------------------------
 // Name:        h_protect_mask
 // Description: n_protect helper generating bitmasks from '+rw..' like strings.
-// Input:       entry_p contxt: The execution context.
-// Return:      int32_t:        The resulting bitmask.
+// Input:       const char *flags: Permission deltas.
+//              int32_t cms:       Current bitmask.
+// Return:      int32_t:           The resulting bitmask.
 //------------------------------------------------------------------------------
-static int32_t h_protect_mask(char *flags, int32_t cms)
+static int32_t h_protect_mask(const char *flags, int32_t cms)
 {
     // Start with current mask.
     size_t len = strlen(flags);
@@ -3140,10 +3141,13 @@ static int32_t h_protect_mask(char *flags, int32_t cms)
 //------------------------------------------------------------------------------
 // Name:        h_protect_delta
 // Description: n_protect delta setter.
-// Input:       entry_p contxt: The execution context.
-// Return:      int32_t:        The resulting bitmask.
+// Input:       entry_p contxt:    The execution context.
+//              const char *flags: Permission deltas.
+//              const char *file:  Filename.
+// Return:      int32_t:           The resulting bitmask.
 //------------------------------------------------------------------------------
-static int32_t h_protect_delta(entry_p contxt, char *flags, char *file)
+static int32_t h_protect_delta(entry_p contxt, const char *flags,
+    const char *file)
 {
     // Test (override) option.
     entry_p override = opt(contxt, OPT_OVERRIDE);
@@ -3185,7 +3189,7 @@ static int32_t h_protect_arg_set(entry_p contxt)
     entry_p val = resolve(C_ARG(2));
 
     int32_t msk = num(val);
-    char *file = str(C_ARG(1));
+    const char *file = str(C_ARG(1));
 
     // Non-strings and strings that can be treated like non-zero numbers are
     // used as absolute permission values.
@@ -3745,11 +3749,11 @@ entry_p n_textfile(entry_p contxt)
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_stack
 // Description: n_tooltype helper. Set disk object stack size.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object file.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object file.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_stack(entry_p contxt, char *file)
+static void h_tooltype_set_stack(entry_p contxt, const char *file)
 {
     LG_ASSERT(opt(contxt, OPT_SETSTACK) && file, LG_VOID);
 
@@ -3780,11 +3784,11 @@ static void h_tooltype_set_stack(entry_p contxt, char *file)
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_position
 // Description: n_tooltype helper. Set or reset icon position.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object file.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object file.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_position(entry_p contxt, char *file)
+static void h_tooltype_set_position(entry_p contxt, const char *file)
 {
     entry_p pos = opt(contxt, OPT_SETPOSITION);
     LG_ASSERT(((pos && c_sane(pos, 2)) || opt(contxt, OPT_NOPOSITION)) &&
@@ -3834,11 +3838,11 @@ static void h_tooltype_set_position(entry_p contxt, char *file)
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_default_tool
 // Description: n_tooltype helper. Set project default tool.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object file.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object file.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_default_tool(entry_p contxt, char *file)
+static void h_tooltype_set_default_tool(entry_p contxt, const char *file)
 {
     LG_ASSERT(opt(contxt, OPT_SETDEFAULTTOOL) && file, LG_VOID);
 
@@ -3874,12 +3878,13 @@ static void h_tooltype_set_default_tool(entry_p contxt, char *file)
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_delete_tooltype
 // Description: n_tooltype helper. Delete disk object tool type.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object file.
-//              char *type:     Name of tool type.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object file.
+//              const char *type:   Name of tool type.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
+static void h_tooltype_delete_tooltype(entry_p contxt, const char *file,
+    const char *type)
 {
     LG_ASSERT(file && type, LG_VOID);
 
@@ -3892,9 +3897,9 @@ static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
         return;
     }
 
-    char *del = FindToolType(obj->do_ToolTypes, type);
+    const char *rm = FindToolType(obj->do_ToolTypes, type);
 
-    if(!del)
+    if(!rm)
     {
         // Nothing to do.
         FreeDiskObject(obj);
@@ -3916,7 +3921,7 @@ static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
 
     for(size_t i = 0, j = 0; types[i]; i++)
     {
-        if((del < types[i]) || (del > (types[i] + strlen(types[i]))))
+        if((rm < types[i]) || (rm > (types[i] + strlen(types[i]))))
         {
             tmp[j++] = types[i];
         }
@@ -3944,13 +3949,13 @@ static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
 // Name:        h_tooltype_create_tooltype
 // Description: n_tooltype helper. Create disk object tool type.
 // Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object file.
-//              char *type:     Name of tool type.
-//              char *value:    Tool type value.
+//              const char *file:   Disk object file.
+//              const char *type:   Name of tool type.
+//              const char *value:  Tool type value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_create_tooltype(entry_p contxt, char *file, char *type,
-                                       char *value)
+static void h_tooltype_create_tooltype(entry_p contxt, const char *file,
+    const char *type, const char *value)
 {
     LG_ASSERT(file && type && value, LG_VOID);
 
@@ -4006,14 +4011,14 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file, char *type,
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_update_tooltype
 // Description: h_tooltype_creupd_tooltype helper. Update existing tool type.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object file.
-//              char *type:     Name of tool type.
-//              char *value:    Tool type value.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object file.
+//              const char *type:   Name of tool type.
+//              const char *value:  Tool type value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_update_tooltype(entry_p contxt, char *file, char *type,
-                                       char *value)
+static void h_tooltype_update_tooltype(entry_p contxt, const char *file,
+    const char *type, const char *value)
 {
     LG_ASSERT(file && type && value, LG_VOID);
     struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
@@ -4024,8 +4029,8 @@ static void h_tooltype_update_tooltype(entry_p contxt, char *file, char *type,
         return;
     }
 
-    char **types = (char **) obj->do_ToolTypes;
-    char *oval = FindToolType((STRPTR *) types, type);
+    const char **types = (const char **) obj->do_ToolTypes;
+    const char *oval = FindToolType((STRPTR *) types, type);
 
     if(!oval)
     {
@@ -4039,7 +4044,7 @@ static void h_tooltype_update_tooltype(entry_p contxt, char *file, char *type,
         // Find the entry of the value returned by FindToolType().
         if(oval >= *types && oval <= (*types + strlen(*types)))
         {
-            char *save = *types;
+            const char *save = *types;
 
             if(*value)
             {
@@ -4074,14 +4079,14 @@ static void h_tooltype_update_tooltype(entry_p contxt, char *file, char *type,
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_creupd_tooltype
 // Description: h_tooltype_set_tooltype. Create or update tool type.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object file.
-//              char *type:     Name of tool type.
-//              char *value:    Tool type value.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object file.
+//              const char *type:   Name of tool type.
+//              const char *value:  Tool type value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_creupd_tooltype(entry_p contxt, char *file, char *type,
-                                       char *value)
+static void h_tooltype_creupd_tooltype(entry_p contxt, const char *file,
+    const char *type, const char *value)
 {
     LG_ASSERT(file && type, LG_VOID);
 
@@ -4109,11 +4114,11 @@ static void h_tooltype_creupd_tooltype(entry_p contxt, char *file, char *type,
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_tooltype
 // Description: n_tooltype helper. Set or delete tool type.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_tooltype(entry_p contxt, char *file)
+static void h_tooltype_set_tooltype(entry_p contxt, const char *file)
 {
     LG_ASSERT(opt(contxt, OPT_SETTOOLTYPE) && file, LG_VOID);
 
@@ -4137,7 +4142,7 @@ static void h_tooltype_set_tooltype(entry_p contxt, char *file)
         if(exists(C_ARG(arg)->children[1]))
         {
             // Create or update tool type.
-            char *value = str(C_ARG(arg)->children[1]);
+            const char *value = str(C_ARG(arg)->children[1]);
             h_tooltype_creupd_tooltype(contxt, file, type, value);
         }
         else
@@ -4189,7 +4194,7 @@ entry_p n_tooltype(entry_p contxt)
     }
 
     // Destination file is 'dest'.info
-    char *file = str(opt(contxt, OPT_DEST));
+    const char *file = str(opt(contxt, OPT_DEST));
 
     if(opt(contxt, OPT_SETSTACK))
     {

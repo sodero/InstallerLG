@@ -239,16 +239,16 @@ entry_p n_askchoice(entry_p contxt)
     }
 
     // Skipper and result.
-    int del = 0, res = 0;
+    int rm = 0, res = 0;
 
     // Cap / compute skipper.
     if(ndx > 0 && ndx < 31 && ndx - add[ndx - 1] > 0 && ndx + add[ndx - 1] < 31)
     {
-        del = add[ndx - 1];
+        rm = add[ndx - 1];
     }
 
     // Prompt user. Subtract skipper from default.
-    inp_t grc = gui_choice(prt, hlp, chs, ndx - del, back != false, &res);
+    inp_t grc = gui_choice(prt, hlp, chs, ndx - rm, back != false, &res);
 
     // Add skipper. Don't trust the GUI.
     res += ((res < 32 && res >= 0) ? add[res] : 0);

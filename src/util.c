@@ -183,37 +183,37 @@ static void get_fake_opt(entry_p fake, entry_p *cache)
         char *name = str(fake->children[i]);
         memcpy(cache, save, sizeof(entry_p) * OPT_LAST);
 
-        bool del = fake->children[i]->parent->id == OPT_DELOPTS;
+        bool rm = fake->children[i]->parent->id == OPT_DELOPTS;
 
         // Compare all strings unless the current option is deleted.
         if(cache[OPT_FAIL] != end() && !strcasecmp(name, "fail"))
         {
             // Delete or set depending on parent.
-            cache[OPT_FAIL] = del ? end() : fake->children[i];
+            cache[OPT_FAIL] = rm ? end() : fake->children[i];
         }
         else
         if(cache[OPT_FORCE] != end() && !strcasecmp(name, "force"))
         {
             // Delete or set depending on parent.
-            cache[OPT_FORCE] = del ? end() : fake->children[i];
+            cache[OPT_FORCE] = rm ? end() : fake->children[i];
         }
         else
         if(cache[OPT_NOFAIL] != end() && !strcasecmp(name, "nofail"))
         {
             // Delete or set depending on parent.
-            cache[OPT_NOFAIL] = del ? end() : fake->children[i];
+            cache[OPT_NOFAIL] = rm ? end() : fake->children[i];
         }
         else
         if(cache[OPT_ASKUSER] != end() && !strcasecmp(name, "askuser"))
         {
             // Delete or set depending on parent.
-            cache[OPT_ASKUSER] = del ? end() : fake->children[i];
+            cache[OPT_ASKUSER] = rm ? end() : fake->children[i];
         }
         else
         if(cache[OPT_OKNODELETE] != end() && !strcasecmp(name, "oknodelete"))
         {
             // Delete or set depending on parent.
-            cache[OPT_OKNODELETE] = del ? end() : fake->children[i];
+            cache[OPT_OKNODELETE] = rm ? end() : fake->children[i];
         }
     }
 }
@@ -232,7 +232,7 @@ static void prune_opt(entry_p contxt, entry_p *cache)
         // Make sure that we a prompt and help string.
         if(!cache[OPT_PROMPT] || !cache[OPT_HELP])
         {
-            char * msg = cache[OPT_PROMPT] ? "help" : "prompt";
+            const char * msg = cache[OPT_PROMPT] ? "help" : "prompt";
             ERR_C(native(contxt), ERR_MISSING_OPTION, msg);
         }
 
@@ -898,8 +898,8 @@ static void dump_indent(entry_p entry, size_t indent)
     }
 
     // Data type descriptions.
-    char *tps[] = { "NUMBER", "STRING", "SYMBOL", "SYMREF", "NATIVE",
-                    "OPTION", "CUSTOM", "CUSREF", "CONTXT", "DANGLE" };
+    const char *tps[] = { "NUMBER", "STRING", "SYMBOL", "SYMREF", "NATIVE",
+                          "OPTION", "CUSTOM", "CUSREF", "CONTXT", "DANGLE" };
 
     // All entries have a type, a parent and an ID.
     OUT("%s\n", tps[entry->type]);
