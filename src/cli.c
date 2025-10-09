@@ -64,7 +64,7 @@ void gui_abort(const char *msg)
     printf("Aborting %s\n", msg);
 }
 
-int countList(const char** listOfStrings) {
+static int countList(const char** listOfStrings) {
     int32_t max = 0;
     const char **countingStrings = listOfStrings;
 
@@ -80,7 +80,7 @@ int countList(const char** listOfStrings) {
     return max;
 }
 
-void printList(const char** listOfStrings) {
+static void printList(const char** listOfStrings) {
     int32_t opt = 0;
     const char **printingStrings = listOfStrings;
 
@@ -131,7 +131,7 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int32_t def
     return G_TRUE;
 }
 
-void printListWithSelection(const char** listOfStrings, int32_t selected) {
+static void printListWithSelection(const char** listOfStrings, int32_t selected) {
     int32_t opt = 0;
     const char **printingStrings = listOfStrings;
 

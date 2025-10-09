@@ -1676,7 +1676,7 @@ MUIDSP IGSetMedia(Class *cls, Object *obj, const struct MUIP_IG_SetMedia *msg)
 //------------------------------------------------------------------------------
 MUIDSP IGGetCustomScreen(Class *cls, Object *obj)
 {
-    struct IGData *my = INST_DATA(cls, obj);
+    const struct IGData *my = INST_DATA(cls, obj);
     return (IPTR) my->Scr;
 }
 
