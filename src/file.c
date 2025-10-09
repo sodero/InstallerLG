@@ -4018,12 +4018,12 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file,
 // Description: h_tooltype_creupd_tooltype helper. Update existing tool type.
 // Input:       entry_p contxt:     The execution context.
 //              char *file:         Disk object file.
-//              char *type:         Name of tool type.
+//              const char *type:   Name of tool type.
 //              const char *value:  Tool type value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_update_tooltype(entry_p contxt, char *file, char *type,
-    const char *value)
+static void h_tooltype_update_tooltype(entry_p contxt, char *file,
+    const char *type, const char *value)
 {
     LG_ASSERT(file && type && value, LG_VOID);
     struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
@@ -4035,7 +4035,7 @@ static void h_tooltype_update_tooltype(entry_p contxt, char *file, char *type,
     }
 
     const char **types = (const char **) obj->do_ToolTypes;
-    const char *oval = FindToolType((STRPTR *) types, type);
+    const char *oval = FindToolType((STRPTR *) types, (STRPTR) type);
 
     if(!oval)
     {
