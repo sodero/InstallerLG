@@ -1232,10 +1232,10 @@ static bool h_copy_comment(entry_p contxt, const char *src, const char *dst)
 //------------------------------------------------------------------------------
 // Name:        h_copyfile_reset
 // Description: Reset icon position.
-// Input:       const char *name: File / directory name.
-// Return:      inp_t:            G_TRUE / G_FALSE.
+// Input:       char *name: File / directory name.
+// Return:      inp_t:      G_TRUE / G_FALSE.
 //------------------------------------------------------------------------------
-static inp_t h_copyfile_reset(const char *name)
+static inp_t h_copyfile_reset(char *name)
 {
     inp_t grc = G_TRUE;
 
@@ -1259,6 +1259,7 @@ static inp_t h_copyfile_reset(const char *name)
     }
     #else
     OUT("R:%s\n", name);
+    *name = '\0';
     #endif
 
     return grc;
@@ -3749,11 +3750,11 @@ entry_p n_textfile(entry_p contxt)
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_stack
 // Description: n_tooltype helper. Set disk object stack size.
-// Input:       entry_p contxt:     The execution context.
-//              const char *file:   Disk object file.
+// Input:       entry_p contxt: The execution context.
+//              char *file:     Disk object file.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_stack(entry_p contxt, const char *file)
+static void h_tooltype_set_stack(entry_p contxt, char *file)
 {
     LG_ASSERT(opt(contxt, OPT_SETSTACK) && file, LG_VOID);
 
@@ -3778,17 +3779,18 @@ static void h_tooltype_set_stack(entry_p contxt, const char *file)
     FreeDiskObject(obj);
     #else
     OUT("ss:%s:%d\n", file, num(opt(contxt, OPT_SETSTACK)));
+    *file = '\0';
     #endif
 }
 
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_position
 // Description: n_tooltype helper. Set or reset icon position.
-// Input:       entry_p contxt:     The execution context.
-//              const char *file:   Disk object file.
+// Input:       entry_p contxt: The execution context.
+//              char *file:     Disk object file.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_position(entry_p contxt, const char *file)
+static void h_tooltype_set_position(entry_p contxt, char *file)
 {
     entry_p pos = opt(contxt, OPT_SETPOSITION);
     LG_ASSERT(((pos && c_sane(pos, 2)) || opt(contxt, OPT_NOPOSITION)) &&
@@ -3832,17 +3834,18 @@ static void h_tooltype_set_position(entry_p contxt, const char *file)
     {
         OUT("sp:%s:no_pos\n", file);
     }
+    *file = '\0';
     #endif
 }
 
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_default_tool
 // Description: n_tooltype helper. Set project default tool.
-// Input:       entry_p contxt:     The execution context.
-//              const char *file:   Disk object file.
+// Input:       entry_p contxt: The execution context.
+//              char *file:     Disk object file.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_default_tool(entry_p contxt, const char *file)
+static void h_tooltype_set_default_tool(entry_p contxt, char *file)
 {
     LG_ASSERT(opt(contxt, OPT_SETDEFAULTTOOL) && file, LG_VOID);
 
@@ -3872,19 +3875,19 @@ static void h_tooltype_set_default_tool(entry_p contxt, const char *file)
     FreeDiskObject(obj);
     #else
     OUT("sd:%s:%s\n", file, str(opt(contxt, OPT_SETDEFAULTTOOL)));
+    *file = '\0';
     #endif
 }
 
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_delete_tooltype
 // Description: n_tooltype helper. Delete disk object tool type.
-// Input:       entry_p contxt:     The execution context.
-//              const char *file:   Disk object file.
-//              const char *type:   Name of tool type.
+// Input:       entry_p contxt: The execution context.
+//              char *file:     Disk object file.
+//              char *type:     Name of tool type.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_delete_tooltype(entry_p contxt, const char *file,
-    const char *type)
+static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
 {
     LG_ASSERT(file && type, LG_VOID);
 
@@ -3942,19 +3945,20 @@ static void h_tooltype_delete_tooltype(entry_p contxt, const char *file,
     #else
     (void) contxt;
     OUT("dt:%s:%s\n", file, type);
+    *file = *type = '\0';
     #endif
 }
 
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_create_tooltype
 // Description: n_tooltype helper. Create disk object tool type.
-// Input:       entry_p contxt: The execution context.
-//              const char *file:   Disk object file.
+// Input:       entry_p contxt:     The execution context.
+//              char *file:         Disk object file.
 //              const char *type:   Name of tool type.
 //              const char *value:  Tool type value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_create_tooltype(entry_p contxt, const char *file,
+static void h_tooltype_create_tooltype(entry_p contxt, char *file,
     const char *type, const char *value)
 {
     LG_ASSERT(file && type && value, LG_VOID);
@@ -4004,6 +4008,7 @@ static void h_tooltype_create_tooltype(entry_p contxt, const char *file,
     #else
     (void) contxt;
     OUT("ct:%s:%s:%s\n", file, type, value);
+    *file = '\0';
     #endif
 }
 
@@ -4012,13 +4017,13 @@ static void h_tooltype_create_tooltype(entry_p contxt, const char *file,
 // Name:        h_tooltype_update_tooltype
 // Description: h_tooltype_creupd_tooltype helper. Update existing tool type.
 // Input:       entry_p contxt:     The execution context.
-//              const char *file:   Disk object file.
-//              const char *type:   Name of tool type.
+//              char *file:         Disk object file.
+//              char *type:         Name of tool type.
 //              const char *value:  Tool type value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_update_tooltype(entry_p contxt, const char *file,
-    const char *type, const char *value)
+static void h_tooltype_update_tooltype(entry_p contxt, char *file, char *type,
+    const char *value)
 {
     LG_ASSERT(file && type && value, LG_VOID);
     struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
@@ -4080,13 +4085,13 @@ static void h_tooltype_update_tooltype(entry_p contxt, const char *file,
 // Name:        h_tooltype_creupd_tooltype
 // Description: h_tooltype_set_tooltype. Create or update tool type.
 // Input:       entry_p contxt:     The execution context.
-//              const char *file:   Disk object file.
-//              const char *type:   Name of tool type.
+//              char *file:         Disk object file.
+//              char *type:         Name of tool type.
 //              const char *value:  Tool type value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_creupd_tooltype(entry_p contxt, const char *file,
-    const char *type, const char *value)
+static void h_tooltype_creupd_tooltype(entry_p contxt, char *file, char *type,
+    const char *value)
 {
     LG_ASSERT(file && type, LG_VOID);
 
@@ -4114,11 +4119,11 @@ static void h_tooltype_creupd_tooltype(entry_p contxt, const char *file,
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_tooltype
 // Description: n_tooltype helper. Set or delete tool type.
-// Input:       entry_p contxt:     The execution context.
-//              const char *file:   Disk object.
+// Input:       entry_p contxt: The execution context.
+//              char *file:     Disk object.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_tooltype(entry_p contxt, const char *file)
+static void h_tooltype_set_tooltype(entry_p contxt, char *file)
 {
     LG_ASSERT(opt(contxt, OPT_SETTOOLTYPE) && file, LG_VOID);
 
@@ -4194,7 +4199,7 @@ entry_p n_tooltype(entry_p contxt)
     }
 
     // Destination file is 'dest'.info
-    const char *file = str(opt(contxt, OPT_DEST));
+    char *file = str(opt(contxt, OPT_DEST));
 
     if(opt(contxt, OPT_SETSTACK))
     {
