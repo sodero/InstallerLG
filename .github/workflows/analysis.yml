@@ -20,7 +20,7 @@ jobs:
     - name: Build and install CppCheck
       run: |
         apt-get update
-        apt-get install -y git cppcheck
+        apt-get install -y git gcc make
         git clone --depth=1 https://github.com/sodero/cppcheck.git && \
         FILESDIR=$(echo /usr/lib/$(gcc -dumpmachine)/cppcheck) make -C cppcheck install
         cppcheck --version
