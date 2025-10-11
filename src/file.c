@@ -1259,7 +1259,6 @@ static inp_t h_copyfile_reset(const char *name)
     }
     #else
     OUT("R:%s\n", name);
-    *name = '\0';
     #endif
 
     return grc;
@@ -3786,7 +3785,6 @@ static void h_tooltype_set_stack(entry_p contxt, const char *file)
     FreeDiskObject(obj);
     #else
     OUT("ss:%s:%d\n", file, num(opt(contxt, OPT_SETSTACK)));
-    *file = '\0';
     #endif
 }
 
@@ -3841,7 +3839,6 @@ static void h_tooltype_set_position(entry_p contxt, const char *file)
     {
         OUT("sp:%s:no_pos\n", file);
     }
-    *file = '\0';
     #endif
 }
 
@@ -3882,7 +3879,6 @@ static void h_tooltype_set_default_tool(entry_p contxt, const char *file)
     FreeDiskObject(obj);
     #else
     OUT("sd:%s:%s\n", file, str(opt(contxt, OPT_SETDEFAULTTOOL)));
-    *file = '\0';
     #endif
 }
 
@@ -3953,7 +3949,6 @@ static void h_tooltype_delete_tooltype(entry_p contxt, const char *file,
     #else
     (void) contxt;
     OUT("dt:%s:%s\n", file, type);
-    *file = *type = '\0';
     #endif
 }
 
@@ -4016,7 +4011,6 @@ static void h_tooltype_create_tooltype(entry_p contxt, const char *file,
     #else
     (void) contxt;
     OUT("ct:%s:%s:%s\n", file, type, value);
-    *file = '\0';
     #endif
 }
 
