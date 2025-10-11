@@ -17,10 +17,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install CppCheck
+    - name: Build and install CppCheck
       run: |
         apt-get update
-        apt-get install -y cppcheck
+        apt-get install -y git cppcheck
+        git clone --depth=1 https://github.com/sodero/cppcheck.git && \
+        FILESDIR=$(echo /usr/lib/$(gcc -dumpmachine)/cppcheck) make -C cppcheck install
         cppcheck --version
 
     - name: Run CppCheck
