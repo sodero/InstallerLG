@@ -1117,13 +1117,13 @@ entry_p n_iconinfo(entry_p contxt)
     }
 
     // Suffix isn't needed.
-    char *file = str(dst);
+    const char *file = str(dst);
 
 #if defined(AMIGA) && !defined(LG_TEST)
     // Get icon information.
-    struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
+    struct DiskObject *obj = (struct DiskObject *) GetDiskObject((STRPTR) file);
 #else
-    char *obj = file;
+    const char *obj = file;
 #endif
 
     // Exit if we can't read from icon.

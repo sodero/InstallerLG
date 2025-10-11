@@ -297,7 +297,7 @@ static const char *h_fileonly(entry_p contxt, const char *path)
 // Description: Append file / directory suffix.
 // Input:       const char *name:     Name of file or directory.
 //              const char *suffix:   Suffix to append.
-// Return:      char *:               File or directory with suffix.
+// Return:      const char *:         File or directory with suffix.
 //------------------------------------------------------------------------------
 static char *h_suffix(const char *stem, const char *suffix)
 {
@@ -1232,16 +1232,16 @@ static bool h_copy_comment(entry_p contxt, const char *src, const char *dst)
 //------------------------------------------------------------------------------
 // Name:        h_copyfile_reset
 // Description: Reset icon position.
-// Input:       char *name: File / directory name.
-// Return:      inp_t:      G_TRUE / G_FALSE.
+// Input:       const char *name: File / directory name.
+// Return:      inp_t:            G_TRUE / G_FALSE.
 //------------------------------------------------------------------------------
-static inp_t h_copyfile_reset(char *name)
+static inp_t h_copyfile_reset(const char *name)
 {
     inp_t grc = G_TRUE;
 
     #if defined(AMIGA) && !defined(LG_TEST)
     // Read from icon, .info suffix should'nt be there.
-    struct DiskObject *obj = (struct DiskObject *) GetDiskObject(name);
+    struct DiskObject *obj = (struct DiskObject *) GetDiskObject((STRPTR) name);
 
     if(obj)
     {
@@ -1250,7 +1250,7 @@ static inp_t h_copyfile_reset(char *name)
         obj->do_CurrentY = NO_ICON_POSITION;
 
         // Save changes to the .info file.
-        if(!PutDiskObject(name, obj))
+        if(!PutDiskObject((STRPTR) name, obj))
         {
             grc = G_FALSE;
         }
@@ -1269,13 +1269,14 @@ static inp_t h_copyfile_reset(char *name)
 // Name:        h_copyfile
 // Description: Copy file. Helper used by n_copyfiles and n_copylib.
 // Input:       entry_p contxt:     The execution context.
-//              char *src:          Source file.
-//              char *dst:          Destination file.
+//              const char *src:    Source file.
+//              const char *dst:          Destination file.
 //              bool bck:           Enable back mode.
 //              bool sln:           Silent mode.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copyfile(entry_p contxt, char *src, char *dst, bool bck, bool sln)
+static inp_t h_copyfile(entry_p contxt, const char *src, const char *dst,
+    bool bck, bool sln)
 {
     // Validate input.
     LG_ASSERT(contxt && src && dst, G_ERR);
@@ -1534,10 +1535,10 @@ static bool h_makedir_create_icon(entry_p contxt, const char *dst)
 //------------------------------------------------------------------------------
 // Name:        h_makedir_path
 // Description: Create directory and all its parent directories.
-// Input:       char *dst:          Directory to be created.
+// Input:       const char *dst:    Directory to be created.
 // Return:      bool:               On success 'true', else 'false'.
 //------------------------------------------------------------------------------
-static bool h_makedir_path(char *dst)
+static bool h_makedir_path(const char *dst)
 {
     if(h_exists(dst) == LG_DIR)
     {
@@ -1581,10 +1582,10 @@ static bool h_makedir_path(char *dst)
 // Name:        h_makedir
 // Description: Create directory / icon / tree of directories.
 // Input:       entry_p contxt:     The execution context.
-//              char *dst:          The directory.
+//              const char *dst:    The directory.
 // Return:      bool:               'true' on succes, 'false' otherwise.
 //------------------------------------------------------------------------------
-static bool h_makedir(entry_p contxt, char *dst)
+static bool h_makedir(entry_p contxt, const char *dst)
 {
     // Validate input.
     LG_ASSERT(dst, false);
@@ -1827,11 +1828,12 @@ entry_p n_copyfiles(entry_p contxt)
 // There is no currently installed version
 //
 // Input:       entry_p contxt:     The execution context.
-//              char *src:          Source file.
-//              char *dst:          Destination file.
+//              const char *src:    Source file.
+//              const char *dst:    Destination file.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copylib_unknown_none(entry_p contxt, char *src, char *dst)
+static inp_t h_copylib_unknown_none(entry_p contxt, const char *src,
+    const char *dst)
 {
     if(!h_confirm(contxt, "", "%s\n\n%s: %s\n%s\n\n%s: %s",
        str(opt(contxt, OPT_PROMPT)), tr(S_VINS), tr(S_VUNK), tr(S_NINS),
@@ -1857,12 +1859,13 @@ static inp_t h_copylib_unknown_none(entry_p contxt, char *src, char *dst)
 // There is no currently installed version
 //
 // Input:       entry_p contxt:     The execution context.
-//              char *src:          Source file.
-//              char *dst:          Destination file.
+//              const char *src:    Source file.
+//              const char *dst:    Destination file.
 //              int32_t ver:        Source version.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copylib_known_none(entry_p contxt, char *src, char *dst,
+static inp_t h_copylib_known_none(entry_p contxt, const char *src,
+    const char *dst,
                                   int32_t ver)
 {
     // Major and minor version.
@@ -1887,11 +1890,11 @@ static inp_t h_copylib_known_none(entry_p contxt, char *src, char *dst,
 //              calling this function.
 //
 // Input:       entry_p contxt:     The execution context.
-//              char *src:          Source file.
-//              char *dst:          Destination file.
+//              const char *src:    Source file.
+//              const char *dst:    Destination file.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copylib_none(entry_p contxt, char *src, char *dst)
+static inp_t h_copylib_none(entry_p contxt, const char *src, const char *dst)
 {
     if(!opt(contxt, OPT_CONFIRM))
     {
@@ -1924,11 +1927,12 @@ static inp_t h_copylib_none(entry_p contxt, char *src, char *dst)
 // Version currently installed: Unknown version
 //
 // Input:       entry_p contxt:     The execution context.
-//              char *src:          Source file.
-//              char *dst:          Destination file.
+//              const char *src:    Source file.
+//              const char *dst:    Destination file.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copylib_unknown_unknown(entry_p contxt, char *src, char *dst)
+static inp_t h_copylib_unknown_unknown(entry_p contxt, const char *src,
+    const char *dst)
 {
     if(!h_confirm(contxt, "", "%s\n\n%s: %s\n%s: %s\n\n%s: %s",
        str(opt(contxt, OPT_PROMPT)), tr(S_VINS), tr(S_VUNK), tr(S_VCUR),
@@ -1954,12 +1958,13 @@ static inp_t h_copylib_unknown_unknown(entry_p contxt, char *src, char *dst)
 // Version currently installed: 12.3
 //
 // Input:       entry_p contxt:     The execution context.
-//              char *src:          Source file.
-//              char *dst:          Destination file.
+//              const char *src:    Source file.
+//              const char *dst:    Destination file.
 //              int32_t ver:        Destination file version.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copylib_unknown_known(entry_p contxt, char *src, char *dst,
+static inp_t h_copylib_unknown_known(entry_p contxt, const char *src,
+    const char *dst,
                                      int32_t ver)
 {
     // Destination major and minor version.
@@ -1989,13 +1994,13 @@ static inp_t h_copylib_unknown_known(entry_p contxt, char *src, char *dst,
 // Version currently installed: Unknown version
 //
 // Input:       entry_p contxt:     The execution context.
-//              char *src:          Source file.
-//              char *dst:          Destination file.
+//              const char *src:          Source file.
+//              const char *dst:          Destination file.
 //              int32_t ver:        Source file version.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copylib_known_unknown(entry_p contxt, char *src, char *dst,
-                                     int32_t ver)
+static inp_t h_copylib_known_unknown(entry_p contxt, const char *src,
+    const char *dst, int32_t ver)
 {
     // Source major and minor version.
     int32_t maj = ver >> 16, min = ver & 0xffff;
@@ -2024,13 +2029,14 @@ static inp_t h_copylib_known_unknown(entry_p contxt, char *src, char *dst,
 // Version currently installed: 45.6
 //
 // Input:       entry_p contxt:     The execution context.
-//              char *src:          Source file.
-//              char *dst:          Destination file.
+//              const char *src:    Source file.
+//              const char *dst:    Destination file.
 //              int32_t old:        Source file version.
 //              int32_t new:        Destination file version.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copylib_known_known(entry_p contxt, char *src, char *dst,
+static inp_t h_copylib_known_known(entry_p contxt, const char *src,
+    const char *dst,
                                    int32_t old, int32_t new)
 {
     // Source and destination files major and minor versions.
@@ -2055,12 +2061,13 @@ static inp_t h_copylib_known_known(entry_p contxt, char *src, char *dst,
 //              validated before calling this function. If necessary user will
 //              be prompted for confirmation.
 // Input:       entry_p contxt:     The execution context.
-//              char *src:          Source file.
-//              char *dst:          Destination file.
+//              const char *src:    Source file.
+//              const char *dst:    Destination file.
 //              int32_t ver:        Source file version.
 // Return:      inp_t:              G_TRUE / G_FALSE / G_ABORT / G_ERR.
 //------------------------------------------------------------------------------
-static inp_t h_copylib_file(entry_p contxt, char *src, char *dst)
+static inp_t h_copylib_file(entry_p contxt, const char *src,
+    const char *dst)
 {
     // Get version of source and destination file.
     int32_t old = h_getversion_file(dst), new = h_getversion_file(src);
@@ -2134,7 +2141,7 @@ entry_p n_copylib(entry_p contxt)
         R_NUM(LG_FALSE);
     }
 
-    char *src = str(source), *dst = str(dest);
+    const char *src = str(source), *dst = str(dest);
 
     // Does the source file exist?
     if(h_exists(src) != LG_FILE)
@@ -2243,7 +2250,7 @@ entry_p n_copylib(entry_p contxt)
 static int32_t h_delete_info(entry_p contxt, const char *file)
 {
     // Do we have an .info file?
-    char *info = h_suffix(file, "info");
+    const char *info = h_suffix(file, "info");
 
     if(h_exists(info) == LG_FILE)
     {
@@ -2477,7 +2484,7 @@ static int32_t h_delete_dir(entry_p contxt, const char *name)
 
     // Info = file + .info.
     snprintf(buf_get(B_KEY), buf_len(), "%s.info", name);
-    char *info = buf_put(B_KEY);
+    const char *info = buf_put(B_KEY);
 
     // We're done if there's no icon.
     if(h_exists(info) != LG_FILE)
@@ -2731,7 +2738,7 @@ entry_p n_foreach(entry_p contxt)
     {
         // Use global buffer.
         char *cwd = buf_raw();
-        struct dirent *ent = DBG_ADDR(readdir(dir));
+        const struct dirent *ent = DBG_ADDR(readdir(dir));
 
         // Save current working directory and enter the directory <drawer name>
         if(DBG_ADDR(getcwd(cwd, buf_len())) == cwd && !DBG_ZERO(chdir(dname)))
@@ -2920,14 +2927,14 @@ entry_p n_makeassign(entry_p contxt)
     }
 
     // The name of the assign.
-    char *asn = str(C_ARG(1));
+    const char *asn = str(C_ARG(1));
     int32_t res = LG_FALSE;
 
     // Are we going to create an assign?
     if(exists(C_ARG(2)) && C_ARG(2)->type != OPTION)
     {
         // The destination.
-        char *dst = str(C_ARG(2));
+        const char *dst = str(C_ARG(2));
 
 #if defined(AMIGA)
         BPTR lock = (BPTR) Lock(dst, ACCESS_READ);
@@ -3025,7 +3032,7 @@ entry_p n_makedir(entry_p contxt)
     }
 
     // The directory to be created.
-    char *dir = str(C_ARG(1));
+    const char *dir = str(C_ARG(1));
 
     // Create directory.
     if(!h_makedir(contxt, dir))
@@ -3750,16 +3757,16 @@ entry_p n_textfile(entry_p contxt)
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_stack
 // Description: n_tooltype helper. Set disk object stack size.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object file.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object file.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_stack(entry_p contxt, char *file)
+static void h_tooltype_set_stack(entry_p contxt, const char *file)
 {
     LG_ASSERT(opt(contxt, OPT_SETSTACK) && file, LG_VOID);
 
     #if defined(AMIGA) && !defined(LG_TEST) // +OK
-    struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
+    struct DiskObject *obj = (struct DiskObject *) GetDiskObject((STRPTR) file);
 
     // Don't fail in sloppy mode.
     if(!obj && (!get_num(contxt, "@strict") || ERR(ERR_READ_FILE, file)))
@@ -3771,7 +3778,7 @@ static void h_tooltype_set_stack(entry_p contxt, char *file)
     obj->do_StackSize = num(opt(contxt, OPT_SETSTACK));
 
     // Don't fail in sloppy mode.
-    if(!PutDiskObject(file, obj) && get_num(contxt, "@strict"))
+    if(!PutDiskObject((STRPTR) file, obj) && get_num(contxt, "@strict"))
     {
         ERR(ERR_WRITE_FILE, file);
     }
@@ -3786,18 +3793,18 @@ static void h_tooltype_set_stack(entry_p contxt, char *file)
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_position
 // Description: n_tooltype helper. Set or reset icon position.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object file.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object file.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_position(entry_p contxt, char *file)
+static void h_tooltype_set_position(entry_p contxt, const char *file)
 {
     entry_p pos = opt(contxt, OPT_SETPOSITION);
     LG_ASSERT(((pos && c_sane(pos, 2)) || opt(contxt, OPT_NOPOSITION)) &&
                 file, LG_VOID);
 
     #if defined(AMIGA) && !defined(LG_TEST) // +OK
-    struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
+    struct DiskObject *obj = (struct DiskObject *) GetDiskObject((STRPTR) file);
 
     // Don't fail in sloppy mode.
     if(!obj && (!get_num(contxt, "@strict") || ERR(ERR_READ_FILE, file)))
@@ -3818,7 +3825,7 @@ static void h_tooltype_set_position(entry_p contxt, char *file)
     }
 
     // Don't fail in sloppy mode.
-    if(!PutDiskObject(file, obj) && get_num(contxt, "@strict"))
+    if(!PutDiskObject((STRPTR) file, obj) && get_num(contxt, "@strict"))
     {
         ERR(ERR_WRITE_FILE, file);
     }
@@ -3841,16 +3848,16 @@ static void h_tooltype_set_position(entry_p contxt, char *file)
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_default_tool
 // Description: n_tooltype helper. Set project default tool.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object file.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object file.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_default_tool(entry_p contxt, char *file)
+static void h_tooltype_set_default_tool(entry_p contxt, const char *file)
 {
     LG_ASSERT(opt(contxt, OPT_SETDEFAULTTOOL) && file, LG_VOID);
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
+    struct DiskObject *obj = (struct DiskObject *) GetDiskObject((STRPTR) file);
 
     // Don't fail in sloppy mode.
     if(!obj && (!get_num(contxt, "@strict") || ERR(ERR_READ_FILE, file)))
@@ -3859,19 +3866,19 @@ static void h_tooltype_set_default_tool(entry_p contxt, char *file)
     }
 
     // This must be restored later.
-    char *def = obj->do_DefaultTool;
+    const char *def = obj->do_DefaultTool;
 
     // Set default tool.
     obj->do_DefaultTool = (char *) str(opt(contxt, OPT_SETDEFAULTTOOL));
 
     // Don't fail in sloppy mode.
-    if(!PutDiskObject(file, obj) && get_num(contxt, "@strict"))
+    if(!PutDiskObject((STRPTR) file, obj) && get_num(contxt, "@strict"))
     {
         ERR(ERR_WRITE_FILE, file);
     }
 
     // Restore object before free. Refer to the icon.library documentation.
-    obj->do_DefaultTool = def;
+    obj->do_DefaultTool = (char *) def;
     FreeDiskObject(obj);
     #else
     OUT("sd:%s:%s\n", file, str(opt(contxt, OPT_SETDEFAULTTOOL)));
@@ -3882,17 +3889,18 @@ static void h_tooltype_set_default_tool(entry_p contxt, char *file)
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_delete_tooltype
 // Description: n_tooltype helper. Delete disk object tool type.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object file.
-//              char *type:     Name of tool type.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object file.
+//              const char *type:    Name of tool type.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
+static void h_tooltype_delete_tooltype(entry_p contxt, const char *file,
+    const char *type)
 {
     LG_ASSERT(file && type, LG_VOID);
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
+    struct DiskObject *obj = (struct DiskObject *) GetDiskObject((STRPTR) file);
 
     // Don't fail in sloppy mode.
     if(!obj && (!get_num(contxt, "@strict") || ERR(ERR_READ_FILE, file)))
@@ -3900,7 +3908,7 @@ static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
         return;
     }
 
-    const char *rm = FindToolType(obj->do_ToolTypes, type);
+    const char *rm = FindToolType(obj->do_ToolTypes, (STRPTR) type);
 
     if(!rm)
     {
@@ -3933,7 +3941,7 @@ static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
     obj->do_ToolTypes = (STRPTR *) tmp;
 
     // Don't fail in sloppy mode.
-    if(!PutDiskObject(file, obj) && get_num(contxt, "@strict"))
+    if(!PutDiskObject((STRPTR) file, obj) && get_num(contxt, "@strict"))
     {
         ERR(ERR_WRITE_FILE, file);
     }
@@ -3953,18 +3961,18 @@ static void h_tooltype_delete_tooltype(entry_p contxt, char *file, char *type)
 // Name:        h_tooltype_create_tooltype
 // Description: n_tooltype helper. Create disk object tool type.
 // Input:       entry_p contxt:     The execution context.
-//              char *file:         Disk object file.
+//              const char *file:   Disk object file.
 //              const char *type:   Name of tool type.
 //              const char *value:  Tool type value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_create_tooltype(entry_p contxt, char *file,
+static void h_tooltype_create_tooltype(entry_p contxt, const char *file,
     const char *type, const char *value)
 {
     LG_ASSERT(file && type && value, LG_VOID);
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
+    struct DiskObject *obj = (struct DiskObject *) GetDiskObject((STRPTR) file);
 
     // Don't fail in sloppy mode.
     if(!obj && (!get_num(contxt, "@strict") || ERR(ERR_READ_FILE, file)))
@@ -3995,7 +4003,7 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file,
     memcpy(obj->do_ToolTypes, types, (size - 1) * sizeof(char *));
     obj->do_ToolTypes[size - 1] = buf_put(B_KEY);
 
-    if(!PutDiskObject(file, obj) && get_num(contxt, "@strict"))
+    if(!PutDiskObject((STRPTR) file, obj) && get_num(contxt, "@strict"))
     {
         ERR(ERR_WRITE_FILE, file);
     }
@@ -4017,16 +4025,16 @@ static void h_tooltype_create_tooltype(entry_p contxt, char *file,
 // Name:        h_tooltype_update_tooltype
 // Description: h_tooltype_creupd_tooltype helper. Update existing tool type.
 // Input:       entry_p contxt:     The execution context.
-//              char *file:         Disk object file.
+//              const char *file:   Disk object file.
 //              const char *type:   Name of tool type.
 //              const char *value:  Tool type value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_update_tooltype(entry_p contxt, char *file,
+static void h_tooltype_update_tooltype(entry_p contxt, const char *file,
     const char *type, const char *value)
 {
     LG_ASSERT(file && type && value, LG_VOID);
-    struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
+    struct DiskObject *obj = (struct DiskObject *) GetDiskObject((STRPTR) file);
 
     // Don't fail in sloppy mode.
     if(!obj && (!get_num(contxt, "@strict") || ERR(ERR_READ_FILE, file)))
@@ -4065,7 +4073,7 @@ static void h_tooltype_update_tooltype(entry_p contxt, char *file,
             *types = buf_put(B_KEY);
 
             // Don't fail in sloppy mode.
-            if(!PutDiskObject(file, obj) && get_num(contxt, "@strict"))
+            if(!PutDiskObject((STRPTR) file, obj) && get_num(contxt, "@strict"))
             {
                 ERR(ERR_WRITE_FILE, file);
             }
@@ -4085,18 +4093,18 @@ static void h_tooltype_update_tooltype(entry_p contxt, char *file,
 // Name:        h_tooltype_creupd_tooltype
 // Description: h_tooltype_set_tooltype. Create or update tool type.
 // Input:       entry_p contxt:     The execution context.
-//              char *file:         Disk object file.
-//              char *type:         Name of tool type.
+//              const char *file:   Disk object file.
+//              const char *type:   Name of tool type.
 //              const char *value:  Tool type value.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_creupd_tooltype(entry_p contxt, char *file, char *type,
-    const char *value)
+static void h_tooltype_creupd_tooltype(entry_p contxt, const char *file,
+    const char *type, const char *value)
 {
     LG_ASSERT(file && type, LG_VOID);
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    struct DiskObject *obj = (struct DiskObject *) GetDiskObject(file);
+    struct DiskObject *obj = (struct DiskObject *) GetDiskObject((STRPTR) file);
 
     // Don't fail in sloppy mode.
     if(!obj && (!get_num(contxt, "@strict") || ERR(ERR_READ_FILE, file)))
@@ -4104,7 +4112,7 @@ static void h_tooltype_creupd_tooltype(entry_p contxt, char *file, char *type,
         return;
     }
 
-    if(FindToolType(obj->do_ToolTypes, type))
+    if(FindToolType(obj->do_ToolTypes, (STRPTR) type))
     {
         FreeDiskObject(obj);
         h_tooltype_update_tooltype(contxt, file, type, value);
@@ -4119,11 +4127,11 @@ static void h_tooltype_creupd_tooltype(entry_p contxt, char *file, char *type,
 //------------------------------------------------------------------------------
 // Name:        h_tooltype_set_tooltype
 // Description: n_tooltype helper. Set or delete tool type.
-// Input:       entry_p contxt: The execution context.
-//              char *file:     Disk object.
+// Input:       entry_p contxt:     The execution context.
+//              const char *file:   Disk object.
 // Return:      -
 //------------------------------------------------------------------------------
-static void h_tooltype_set_tooltype(entry_p contxt, char *file)
+static void h_tooltype_set_tooltype(entry_p contxt, const char *file)
 {
     LG_ASSERT(opt(contxt, OPT_SETTOOLTYPE) && file, LG_VOID);
 
@@ -4199,7 +4207,7 @@ entry_p n_tooltype(entry_p contxt)
     }
 
     // Destination file is 'dest'.info
-    char *file = str(opt(contxt, OPT_DEST));
+    const char *file = str(opt(contxt, OPT_DEST));
 
     if(opt(contxt, OPT_SETSTACK))
     {
