@@ -52,7 +52,6 @@ jobs:
         lftp -c "
         set ssl:verify-certificate no;
         open -u $FTP_USER,$FTP_PASS $FTP_HOST;
-        mput ./dist/aminet/InstallerLG.*.lha;
-        mput ./dist/aminet/InstallerLG.*.readme;
+        mput ./dist/aminet/InstallerLG.*.*;
         bye
         "
