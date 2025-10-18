@@ -2,7 +2,7 @@
 # OS
 #---------------------------------------------------------------------------------#
 LHA?=lha
-CPU?=$(shell uname -m | tr -d ower)
+CPU?=$(shell uname -m | tr A-Z a-z | tr -d ower)
 UNM?=$(shell uname)
 ANM:=$(CPU)-$(shell echo $(UNM) | tr A-Z a-z)
 ifeq ($(UNM),AmigaOS)
