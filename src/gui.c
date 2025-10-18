@@ -79,6 +79,7 @@
 #  define DoSuperNew(C,O,...) DoSuperNewTags(C,O,NULL,__VA_ARGS__)
 # else
 #  if defined(__amigaos4__)
+#   include <stdarg.h>
 Object *STDARGS VARARGS68K DoSuperNew(struct IClass *cl, Object *obj, ...)
 {
     Object *rc;

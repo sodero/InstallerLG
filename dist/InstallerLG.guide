@@ -1,7 +1,7 @@
 @DATABASE "Default"
 @NODE Main "InstallerLG Guide"
 @TOC Contents
-@$VER: InstallerLG.guide 1.0.3 (16.05.23) english
+@$VER: InstallerLG.guide 1.0.4 (18.10.23) english
 
 @{B}Contents@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
@@ -13,10 +13,8 @@
 @{" Changelog        " LINK "Changelog"} The complete changelog
 @{" License          " LINK "License"} InstallerLG software license
 
-This is a work in progress, see also @{" Original guide " LINK HELP:english/Installer.guide/MAIN}.
-
 @{B}-----------------------------------------------------------------------@{UB}
-Copyright © 2018-2023, Ola Söder. All rights reserved.
+Copyright © 2018-2025, Ola Söder. All rights reserved.
 
 @ENDNODE
 
@@ -122,6 +120,11 @@ Russian translation.
 
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
+
+@{B}1.0.4 (2025-10-18)@{UB}
+- AROS x86_64 support.
+- AmigaOS4 version built with Newlib to reduce binary size.
+- Version requester shown when started as a tool from Workbench.
 
 @{B}1.0.3 (2023-05-16)@{UB}
 - (getversion) bugfix.

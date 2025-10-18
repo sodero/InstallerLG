@@ -15,6 +15,7 @@
 #ifdef AMIGA
 #include <proto/dos.h>
 #include <proto/icon.h>
+#include <proto/intuition.h>
 #include <workbench/startup.h>
 #include <workbench/workbench.h>
 #ifdef __VBCC__
@@ -114,7 +115,7 @@ static bool arg_cli(int argc, char **argv)
     if(!rda)
     {
         // Invalid or missing arguments.
-        fputs(tpl, stderr);
+        fprintf(stderr, "%s\n", tpl);
         return false;
     };
 
@@ -223,6 +224,22 @@ static bool arg_wb(char **argv)
 
     // Postprocess WB info and go back. We'll crash if we don't.
     bool ret = arg_post();
+
+#if defined(AMIGA)
+    if(!ret)
+    {
+        struct EasyStruct req =
+        {
+            .es_Title = "InstallerLG",
+            .es_TextFormat = "Version 1.0.4",
+            .es_GadgetFormat = "OK",
+            .es_StructSize = sizeof(struct EasyStruct)
+        };
+
+        EasyRequest(NULL, &req, NULL);
+    }
+#endif
+
     (void) CurrentDir(old);
 
     if(dob)

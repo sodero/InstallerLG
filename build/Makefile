@@ -44,10 +44,9 @@ CGEN += -noixemul
 LDLIBS += -noixemul
 endif
 ifeq ($(OS),AmigaOS)
-CGEN += -mcrt=clib2
 CDEF = -D__USE_INLINE__ -DUSE_OLD_ANCHORPATH
 CWRN += -Wno-deprecated-declarations
-LDLIBS += -mcrt=clib2 -lauto -lm -lnet
+LDLIBS += -lauto
 SHELL := sh
 endif
 endif
