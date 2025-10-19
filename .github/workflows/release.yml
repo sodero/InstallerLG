@@ -51,7 +51,7 @@ jobs:
     - name: Install LFTP
       run: sudo apt-get install -y lftp
 
-    - name: Upload to Aminet
+    - name: Publish release on Aminet
       env:
         FTP_HOST: ${{ secrets.FTP_SERVER }}
         FTP_USER: ${{ secrets.FTP_USERNAME }}
@@ -60,6 +60,7 @@ jobs:
         lftp -c "
         set ssl:verify-certificate no;
         open -u $FTP_USER,$FTP_PASS $FTP_HOST;
+        cd /new;
         mput ./dist/aminet/InstallerLG.*.*;
         bye
         "
