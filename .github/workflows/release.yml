@@ -1,0 +1,65 @@
+name: AmigaOS4/AROS/MorphOS release build
+
+on:
+  push:
+    tags:
+      - '[0-9]*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.platform.name }}
+    runs-on: ubuntu-latest
+    environment: aminet
+
+    strategy:
+      matrix:
+        platform:
+          - name: AmigaOS4
+            image: rolfkopman/os4env
+            mount: /opt/code
+          - name: AROS i386 ABI V0
+            image: rolfkopman/arosi386v0env
+            mount: /opt/code
+          - name: AROS x86_64 ABI V1
+            image: rolfkopman/arosx64v1env
+            mount: /opt/code
+          - name: MorphOS
+            image: rolfkopman/mosenv
+            mount: /gg/code
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Compile
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:${{ matrix.platform.mount }} \
+          -w ${{ matrix.platform.mount }} \
+          ${{ matrix.platform.image }} make -C dist
+
+    - name: Publish release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: dist/aminet/InstallerLG.*.*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+    - name: Install LFTP
+      run: sudo apt-get install -y lftp
+
+    - name: Upload to Aminet
+      env:
+        FTP_HOST: ${{ secrets.FTP_SERVER }}
+        FTP_USER: ${{ secrets.FTP_USERNAME }}
+        FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+      run: |
+        lftp -c "
+        set ssl:verify-certificate no;
+        open -u $FTP_USER,$FTP_PASS $FTP_HOST;
+        mput ./dist/aminet/InstallerLG.*.*;
+        bye
+        "

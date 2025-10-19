@@ -3,7 +3,7 @@ name: Codeberg mirror
 on:
   push:
     branches:
-      - master
+      - '**'
 
 jobs:
   mirror:
@@ -43,5 +43,5 @@ jobs:
       - name: Push to Codeberg
         run: |
           git remote add codeberg git@codeberg.org:${{ secrets.CB_USERNAME }}/${{ secrets.CB_REPO }}.git || true
-          git push codeberg master
-          git push codeberg --tags
+          git push codeberg ${{ github.ref_name }} --force
+          git push codeberg --tags --force
