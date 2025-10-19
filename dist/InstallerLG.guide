@@ -1,7 +1,7 @@
 @DATABASE "Default"
 @NODE Main "InstallerLG Guide"
 @TOC Contents
-@$VER: InstallerLG.guide 1.0.4 (18.10.23) english
+@$VER: InstallerLG.guide 1.0.4 (20.10.25) english
 
 @{B}Contents@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
@@ -158,7 +158,7 @@ Russian translation.
 - (copyfiles) (fonts) fix.
 - (getsize) don't fail in sloppy mode.
 - (onerror) allow empty body.
-- Undocumented lu string formating support.
+- Undocumented lu string formatting support.
 
 @{B}0.1.0-alpha.53 (2020-09-14)@{UB}
 - AROS: (startup) temp file bug fixed.
@@ -227,7 +227,7 @@ Russian translation.
 @{B}0.1.0-alpha.44 (2020-03-04)@{UB}
 - Fixed invalid icon creation of directories without parent.
 - Parent directory pattern matching fix (Konto).
-- Minor string formating bug fix.
+- Minor string formatting bug fix.
 - Naked (working) support (AutoSend).
 
 @{B}0.1.0-alpha.43 (2020-02-04)@{UB}
@@ -282,7 +282,7 @@ Russian translation.
 @{B}0.1.0-alpha.36 (2019-06-12)@{UB}
 - Improved robustness.
 - (getversion) fix.
-- Less strict string formating. Just like CBM wanted it.
+- Less strict string formatting. Just like CBM wanted it.
 - String evaluation fix (IBrowse).
 
 @{B}0.1.0-alpha.35 (2019-03-29)@{UB}
