@@ -11,7 +11,7 @@ SHELL:=sh
 else ifeq ($(UNM),MorphOS)
 LHAFLAGS?=-r a
 else
-LHAFLAGS?=ao5
+LHAFLAGS?=mo5
 endif
 ifeq ($(UNM),Darwin)
 SED?=gsed
@@ -22,74 +22,77 @@ endif
 #-----------------------------------------------------------------------------------#
 # Configuration
 #-----------------------------------------------------------------------------------#
-DST:=aminet
-BIN:=../build
-EXE:=Installer
+BLD:=../build
+BIN:=Installer
 CAT:=Catalogs
-EXE:=InstallerLG
+PRJ:=InstallerLG
+TMP:=tmp
 VER:=$(shell grep _VER_ ../src/version.h | cut -d ' ' -f3)
-ARC:=$(DST)/$(EXE).$(ANM).lha
-README:=$(DST)/$(EXE).$(ANM).readme
-FILES:=$(EXE) 'Install' 'Install.info'
-FILES+='InstallerLG.guide' 'InstallerLG.guide.info'
+NOW:=$(shell date +%Y-%m-%d || echo 1985-07-23)
 
 #-----------------------------------------------------------------------------------#
-# Targets
+# Create LHa archive
 #-----------------------------------------------------------------------------------#
-.PHONY: dis
-dis:
-	echo $(VER)
+$(TMP)/$(PRJ).$(ANM).lha: $(TMP)/$(BIN) $(TMP)/$(CAT) $(TMP)/Install \
+						  $(TMP)/Install.info $(TMP)/$(PRJ).guide \
+						  $(TMP)/$(PRJ).$(ANM).readme
+	cd $(TMP) && $(LHA) $(LHAFLAGS) $(notdir $@) \
+	$(filter-out %.lha,$(filter-out %.readme,$(notdir $(wildcard $(TMP)/*))))
 
-tmp:
+#-----------------------------------------------------------------------------------#
+# Create temp directory
+#-----------------------------------------------------------------------------------#
+$(TMP):
 	mkdir -p $@
 
-.PHONY: tmp/$(CAT)
-tmp/$(CAT): tmp
+#-----------------------------------------------------------------------------------#
+# Build catalogs
+#-----------------------------------------------------------------------------------#
+$(TMP)/$(CAT): | $(TMP)
 	$(RM) -r $@
-	$(MAKE) -C $(BIN) cat
-	mv $(BIN)/$(CAT) tmp
+	$(MAKE) -C $(BLD) cat
+	mv $(BLD)/$(CAT) $(TMP)
 
-tmp/$(EXE).$(ANM).readme: aminet/$(EXE).readme | tmp
-	cat $^ | $(SED) -e 's/__CPU__/$(ANM)/' \
-		   | $(SED) -e 's/__VER__/$(VER)/' > $@
+#-----------------------------------------------------------------------------------#
+# Build executable
+#-----------------------------------------------------------------------------------#
+$(TMP)/$(BIN): | $(TMP)
+	$(MAKE) -C $(BLD)
+	mv $(BLD)/$(BIN) $@
 
-tmp/$(EXE).guide: docs/$(EXE).guide | tmp
-	cat $^ | $(SED) -e 's/__NOW__/NOW/' \
-		   | $(SED) -e 's/__VER__/$(VER)/' > $@
+#-----------------------------------------------------------------------------------#
+# Function for template translation
+#-----------------------------------------------------------------------------------#
+define translate
+	cat $(1) \
+	| $(SED) -e 's/__CPU__/$(ANM)/' \
+	| $(SED) -e 's/__VER__/$(VER)/' \
+	| $(SED) -e 's/__NOW__/$(NOW)/' \
+	> $(2)
+endef
 
-tmp/Install: install/Install | tmp
-	cat $^ | $(SED) -e 's/__NOW__/NOW/' \
-		   | $(SED) -e 's/__VER__/$(VER)/' > $@
+#-----------------------------------------------------------------------------------#
+# Generate README and AmigaGuide from templates
+#-----------------------------------------------------------------------------------#
+$(TMP)/$(PRJ).$(ANM).readme: aminet/$(PRJ).readme | $(TMP)
+	$(call translate,$^,$@)
 
+$(TMP)/$(PRJ).guide: docs/$(PRJ).guide | $(TMP)
+	$(call translate,$^,$@)
 
+#-----------------------------------------------------------------------------------#
+# Generate installer script from template
+#-----------------------------------------------------------------------------------#
+$(TMP)/Install: install/Install | $(TMP)
+	$(call translate,$^,$@)
 
-.PHONY: dist
-dist: tmp/$(CAT) tmp/Install tmp/$(EXE).guide tmp/$(EXE).$(ANM).readme
+$(TMP)/Install.info: $(UNM)/Install.info | $(TMP)
+	cp $(UNM)/Install.info $(TMP)
 
+#-----------------------------------------------------------------------------------#
+# Clean
+#-----------------------------------------------------------------------------------#
 .PHONY: clean
 clean:
-	$(RM) -r tmp
-	$(MAKE) -C $(BIN) $@
-	$(RM) $(EXE)
-	$(RM) $(README)
-	$(RM) $(DST)/*.lha
-	$(RM) $(DST)/*.bak
-	$(RM) *.info
-	$(RM) -R $(EXE) Catalogs
-
-$(ARC): $(EXE)
-	cp $(UNM)/*.info . && \
-	$(LHA) $(LHAFLAGS) $@ $(CAT) && \
-	$(LHA) $(LHAFLAGS) $@ $(FILES)
-
-$(CAT):
-	$(MAKE) -C $(BIN) cat && \
-	mv $(BIN)/$(CAT) $@
-
-$(EXE): $(CAT)
-	$(MAKE) -C $(BIN) $(EXE)
-	mv $(BIN)/$(EXE) $@
-
-$(README): $(DST)/$(EXE).readme
-	cat $^ | $(SED) -e 's/__CPU__/$(ANM)/' \
-		   | $(SED) -e 's/__VER__/$(VER)/' > $@
+	$(MAKE) -C $(BLD) $@
+	$(RM) -r $(TMP)

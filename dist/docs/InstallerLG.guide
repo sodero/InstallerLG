@@ -1,7 +1,7 @@
 @DATABASE "Default"
 @NODE Main "InstallerLG Guide"
 @TOC Contents
-@$VER: InstallerLG.guide 1.0.4 (20.10.25) english
+@$VER: InstallerLG.guide __VER__ (__NOW__) english
 
 @{B}Contents@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
@@ -120,6 +120,9 @@ Russian translation.
 
 @{B}The complete changelog@{UB}
 @{B}-----------------------------------------------------------------------@{UB}
+
+@{B}__VER__ (__NOW__)@{UB}
+- ?
 
 @{B}1.0.4 (2025-10-18)@{UB}
 - AROS x86_64 support.
