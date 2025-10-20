@@ -2,6 +2,7 @@ name: SourceForge mirror
 
 on:
   push:
+    branches:
       - '**'
 
 jobs:
