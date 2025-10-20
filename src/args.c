@@ -330,7 +330,7 @@ int arg_argc(int argc)
 //------------------------------------------------------------------------------
 void arg_done(void)
 {
-    // Go back to the directory where we started. Don't rely on the existance
+    // Go back to the directory where we started. Don't rely on the existence
     // of these strings, we might be out of memory. If we don't have a home dir
     // then we've never changed directory in the first place.
     if(args[ARG_HOMEDIR] && args[ARG_OLDDIR])

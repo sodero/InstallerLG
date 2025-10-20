@@ -165,7 +165,7 @@ entry_p n_askchoice(entry_p contxt)
         //
         // 1. If you use an empty string as choice descriptor, the choice will
         //    be invisible to the user, i.e. it will not be displayed on screen.
-        //    By using variables you can easily set up a programable number of
+        //    By using variables you can easily set up a programmable number of
         //    choices then while retaining the bit numbering.
         if(*opn)
         {
@@ -491,7 +491,7 @@ entry_p n_askdisk(entry_p contxt)
         }
         else
         {
-            // Sucess.
+            // Success.
             ret = LG_TRUE;
             UnLock(vol);
         }

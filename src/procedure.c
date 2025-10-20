@@ -19,7 +19,7 @@
 // Name:        h_gosub_fmt
 // Description: Helper for n_gosub. Handling one of those strange CBM Installer
 //              features / bugs. The syntax of user defined procedure calls and
-//              string formating is ambiguous, so that a function call such as
+//              string formatting is ambiguous, so that a function call such as
 //              (f1 a1 a2 ... ) is transformed into a format string expression
 //              ("%ld%ld" a1 a2 ...) if the function ('f1') is not defined and
 //              a symbol ('f1') that can be resolved as a format string exists.

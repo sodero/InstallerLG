@@ -139,7 +139,7 @@ bool h_confirm(entry_p contxt, const char *hlp, const char *msg, ...)
     {
         va_list ap;
 
-        // Format messsage string.
+        // Format message string.
         va_start(ap, msg);
         vsnprintf(buf_get(B_KEY), buf_len(), msg, ap);
         va_end(ap);
@@ -1240,7 +1240,7 @@ static inp_t h_copyfile_reset(const char *name)
     inp_t grc = G_TRUE;
 
     #if defined(AMIGA) && !defined(LG_TEST)
-    // Read from icon, .info suffix should'nt be there.
+    // Read from icon, .info suffix shouldn't be there.
     struct DiskObject *obj = (struct DiskObject *) GetDiskObject((STRPTR) name);
 
     if(obj)
@@ -1582,7 +1582,7 @@ static bool h_makedir_path(const char *dst)
 // Description: Create directory / icon / tree of directories.
 // Input:       entry_p contxt:     The execution context.
 //              const char *dst:    The directory.
-// Return:      bool:               'true' on succes, 'false' otherwise.
+// Return:      bool:               'true' on success, 'false' otherwise.
 //------------------------------------------------------------------------------
 static bool h_makedir(entry_p contxt, const char *dst)
 {
@@ -2274,7 +2274,7 @@ static int32_t h_delete_info(entry_p contxt, const char *file)
 // Name:        h_delete_perm
 // Description: Check for file / dir delete permission.
 // Input:       const char *name:   File / dir to check.
-// Return:      bool:               'true' if deleteable, 'false' otherwise.
+// Return:      bool:               'true' if deletable, 'false' otherwise.
 //------------------------------------------------------------------------------
 static bool h_delete_perm(const char *name)
 {
@@ -2664,8 +2664,8 @@ entry_p n_exists(entry_p contxt)
     // One argument and option.
     C_SANE(1, contxt);
 
-    // Supress volume requester. Despite what the CBM documentation says,
-    // requesters are always supressed. Let's follow the documentation in
+    // Suppress volume requester. Despite what the CBM documentation says,
+    // requesters are always suppressed. Let's follow the documentation in
     // strict mode and the implementation in sloppy mode.
     if(!get_num(contxt, "@strict") || opt(contxt, OPT_NOREQ) ||
         opt(contxt, OPT_QUIET))
@@ -2876,7 +2876,7 @@ entry_p n_foreach(entry_p contxt)
                         skip = !MatchPatternNoCase(buf, top->name);
                         break;
 
-                    // If no wildcards, do a simple string comparsion.
+                    // If no wildcards, do a simple string comparison.
                     case 0:
                         skip = strcmp(top->name, pt);
                         break;

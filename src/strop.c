@@ -30,7 +30,7 @@
 //------------------------------------------------------------------------------
 entry_p n_cat(entry_p contxt)
 {
-    // We need atleast one string.
+    // We need at least one string.
     C_SANE(1, NULL);
 
     // Start with a string length of LG_STRLEN.
@@ -140,7 +140,7 @@ static inline bool h_fmt_string(const char *fmt)
 
 //------------------------------------------------------------------------------
 // Name:        h_fmt_scan
-// Description: Scan format string and create formated result.
+// Description: Scan format string and create formatted result.
 // Input:       entry_p *args:  Values to format and insert.
 //              char *res:      Target buffer.
 //              size_t len:     Target buffer size.
@@ -164,7 +164,7 @@ static void h_fmt_scan(entry_p *args, char *res, size_t len, char *fmt)
             // Skip three characters.
             ndx += 3;
 
-            // Insert formated segment if argument exists.
+            // Insert formatted segment if argument exists.
             if(exists(args[cur]))
             {
                 // Convert strings to numbers if needed.
@@ -180,7 +180,7 @@ static void h_fmt_scan(entry_p *args, char *res, size_t len, char *fmt)
             // Skip two characters.
             ndx += 2;
 
-            // Insert formated segment if argument exists.
+            // Insert formatted segment if argument exists.
             if(exists(args[cur]))
             {
                 const char *val = str(args[cur++]);
@@ -198,7 +198,7 @@ static void h_fmt_scan(entry_p *args, char *res, size_t len, char *fmt)
 
 //------------------------------------------------------------------------------
 // Name:        h_fmt_new_buffer
-// Description: Allocate buffers big enough to hold formated string and the
+// Description: Allocate buffers big enough to hold formatted string and the
 //              non evaluated values to insert.
 // Input:       entry_p contxt: Execution context.
 //              entry_p *args:  Output: values to format and insert.
@@ -307,7 +307,7 @@ char *h_pathonly(const char *full)
             // Copy full path.
             memcpy(path, full, len + 1);
 
-            // Cut trailing '/' if preceeded by something absolute, dir or vol.
+            // Cut trailing '/' if preceded by something absolute, dir or vol.
             if(len > 1 && path[len] == '/' && path[len - 1] != '/' &&
                path[len - 1] != ':')
             {

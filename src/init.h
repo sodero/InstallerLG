@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // init.h:
 //
-// Initilization by means of prepending and appending code.
+// Initialization by means of prepending and appending code.
 //------------------------------------------------------------------------------
 // Copyright (C) 2018-2023, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1

@@ -83,7 +83,7 @@ static entry_p h_set_find(entry_p contxt, const char *name)
 //------------------------------------------------------------------------------
 entry_p n_set(entry_p contxt)
 {
-    // We need atleast one symbol. The CBM installer tolerates constructs such
+    // We need at least one symbol. The CBM installer tolerates constructs such
     // as (set a). In that case 'a' will simply be ignored.
     C_SANE(0, NULL); S_SANE(1);
 
@@ -198,7 +198,7 @@ static entry_p n_symbolset_new(entry_p contxt, const char *lhs, entry_p res)
 //------------------------------------------------------------------------------
 entry_p n_symbolset(entry_p contxt)
 {
-    // We need atleast one symbol. The CBM installer tolerates constructs such
+    // We need at least one symbol. The CBM installer tolerates constructs such
     // as (symbolset "a"). In that case 'a' will simply be ignored.
     C_SANE(1, NULL); S_SANE(0);
 

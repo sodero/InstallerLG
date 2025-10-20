@@ -144,7 +144,7 @@ static entry_p parent(entry_p entry, type_t type)
 // Name:        custom
 // Description: Find CUSTOM parent if such exists.
 // Input:       entry_p entry:  The starting point.
-// Return:      entry_p:        The CUSTUM entry, or NULL
+// Return:      entry_p:        The CUSTOM entry, or NULL
 //                              if no CUSTOM was found.
 //------------------------------------------------------------------------------
 entry_p custom(entry_p entry)
@@ -399,14 +399,14 @@ entry_p opt(entry_p contxt, opt_t type)
         return cache[type];
     }
 
-    // Start fram scratch with new context.
+    // Start from scratch with new context.
     opt_clear_cache(cache);
     last = contxt;
 
     // Populate cache.
     opt_fill_cache(contxt, cache);
 
-    // If in non strict mode, allow the absense of (prompt) and (help).
+    // If in non strict mode, allow the absence of (prompt) and (help).
     if(!get_num(contxt, "@strict"))
     {
         if(!cache[OPT_HELP])
@@ -520,7 +520,7 @@ static bool x_sane(entry_p contxt, type_t type, size_t num)
 //------------------------------------------------------------------------------
 // Name:        c_sane
 // Description: Context sanity check used by the NATIVE functions to verify
-//              that we have atleast the number of children needed and that
+//              that we have at least the number of children needed and that
 //              these are valid. If this fails it means that we have a parser
 //              or an out of memory problem.
 // Input:       entry_p contxt:  The context.
@@ -535,7 +535,7 @@ bool c_sane(entry_p contxt, size_t num)
 //------------------------------------------------------------------------------
 // Name:        s_sane
 // Description: Context sanity check used by the NATIVE functions to verify
-//              that we have atleast the number of symbols needed and that
+//              that we have at least the number of symbols needed and that
 //              these are valid. If this fails it means that we have a parser
 //              or an out of memory problem.
 // Input:       entry_p contxt:  The context.
@@ -925,7 +925,7 @@ static void dump_indent(entry_p entry, size_t indent)
         OUT("%sRes:\t", type);
 
         // Pretty print the 'resolved' entry, last / default return value
-        // and values refered to by symbols.
+        // and values referred to by symbols.
         dump_indent(entry->resolved, indent + 1);
     }
 
@@ -1128,7 +1128,7 @@ DIR *dbg_dopen(int32_t line, const char *file, DIR *hand)
 
 //------------------------------------------------------------------------------
 // Name:        native_exists
-// Description: Find first occurence of callback in AST.
+// Description: Find first occurrence of callback in AST.
 // Input:       entry_p contxt:  CONTXT.
 // Return:      entry_p:         NATIVE callback if found, NULL otherwise.
 //------------------------------------------------------------------------------
@@ -1252,19 +1252,19 @@ int32_t str_to_userlevel(const char *user, int32_t def)
         return def;
     }
 
-    // Case insensitve 'NOVICE'
+    // Case insensitive 'NOVICE'
     if(*user == '0' || strcasecmp(user, "novice") == 0)
     {
         return LG_NOVICE;
     }
 
-    // Case insensitve 'AVERAGE'
+    // Case insensitive 'AVERAGE'
     if(*user == '1' || strcasecmp(user, "average") == 0)
     {
         return LG_AVERAGE;
     }
 
-    // Case insensitve 'EXPERT'
+    // Case insensitive 'EXPERT'
     if(*user == '2' || strcasecmp(user, "expert") == 0)
     {
         return LG_EXPERT;
