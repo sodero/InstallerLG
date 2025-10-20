@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // init.c:
 //
-// Initilization by means of prepending and appending code.
+// Initialization by means of prepending and appending code.
 //------------------------------------------------------------------------------
 // Copyright (C) 2018-2023, Ola Söder. All rights reserved.
 // Licensed under the AROS PUBLIC LICENSE (APL) Version 1.1
@@ -376,7 +376,7 @@ static void init_welcome(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p init(entry_p contxt)
 {
-    // We should have atleast one child. If we don't, we're out of memory.
+    // We should have at least one child. If we don't, we're out of memory.
     if(!c_sane(contxt, 1) || !s_sane(contxt, 0))
     {
         return contxt;

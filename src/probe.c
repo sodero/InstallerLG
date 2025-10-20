@@ -276,7 +276,7 @@ static int32_t h_totalmem(void)
 //------------------------------------------------------------------------------
 entry_p n_database(entry_p contxt)
 {
-    // We need atleast one argument
+    // We need at least one argument
     C_SANE(1, NULL);
 
     char *feat = str(C_ARG(1));
@@ -385,7 +385,7 @@ entry_p n_getassign(entry_p contxt)
     // The second argument is optional.
     entry_p option = C_ARG(2);
 
-    // The bitmask must contain atleast this LDF_READ.
+    // The bitmask must contain at least this LDF_READ.
     ULONG msk = LDF_READ;
 
     // Parse the option string if it exists.
@@ -1096,7 +1096,7 @@ entry_p n_getversion(entry_p contxt)
 // are dead options in OS 3.9. We choose to ignore the guide and mimic the
 // behaviour of the implementation in 3.9. Also, the 3.9 implementation deletes
 // tooltypes when (gettooltype) is used. This is assumed to be a bug and
-// therefore not mimiced.
+// therefore not mimicked.
 //------------------------------------------------------------------------------
 entry_p n_iconinfo(entry_p contxt)
 {
@@ -1264,7 +1264,7 @@ entry_p n_iconinfo(entry_p contxt)
 // (querydisplay <object> <option>)
 //
 //      Returns information about the current display environment for
-//      Installer.  This can be used to open different medias (pictures or
+//      Installer.  This can be used to open different media (pictures or
 //      animations) for different number of colors or screen sizes.
 //
 // Refer to Installer.guide 1.20 (25.10.1999) 1995-99 by Amiga Inc.

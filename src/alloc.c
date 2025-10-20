@@ -197,7 +197,7 @@ entry_p new_custom(char *name, int32_t line, entry_p sym, entry_p chl)
             reparent_and_set(entry->symbols, entry, end());
         }
 
-        // We're finished if we dont't have any children to adopt.
+        // We're finished if we don't have any children to adopt.
         if(!chl || !chl->children)
         {
             return entry;
@@ -239,7 +239,7 @@ entry_p new_symref(char *name, int32_t line)
     entry_p entry = DBG_ALLOC(calloc(1, sizeof(entry_t)));
 
     // All references must have a name and a line number. Line numbers are used
-    // in error messages when refering to non existing symbols in strict mode.
+    // in error messages when referring to non existing symbols in strict mode.
     if(DBG_ADDR(name) && entry && (line > 0))
     {
         entry->type = SYMREF;

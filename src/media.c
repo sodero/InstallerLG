@@ -151,7 +151,7 @@ static int32_t h_action(const char *act)
 //------------------------------------------------------------------------------
 entry_p n_setmedia(entry_p contxt)
 {
-    // We need atleast 2 arguments.
+    // We need at least 2 arguments.
     C_SANE(2, NULL);
 
     // Action to perform.
@@ -269,7 +269,7 @@ static int32_t h_extra(const char *atr)
 //------------------------------------------------------------------------------
 entry_p n_showmedia(entry_p contxt)
 {
-    // We need atleast 5 arguments.
+    // We need at least 5 arguments.
     C_SANE(5, NULL); S_SANE(0);
 
     // Set size bitmask.

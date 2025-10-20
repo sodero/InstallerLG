@@ -25,7 +25,7 @@
 // Description: Swap symbols to accelerate lookups. The type of 'src' is checked,
 //              so that only those entries that can be moved, are moved.
 // Input:       entry_p *dst:  Pointer to where 'src' is going.
-//              entry_p *src:  Pointer to where 'dst' is goind.
+//              entry_p *src:  Pointer to where 'dst' is going.
 // Return:      entry_p:       The entry referred to by 'src'.
 //------------------------------------------------------------------------------
 static entry_p swap(entry_p *dst, entry_p *src)
@@ -245,7 +245,7 @@ int32_t num(entry_p entry)
 // Name:        tru
 // Description: Get truth value of an entry. This implies resolving it, and, if
 //              necessary, converting it. Non empty strings and non zero
-//              numerical values are considered true, everythings else false.
+//              numerical values are considered true, everything else false.
 // Input:       entry_p entry:  An entry_t pointer to an object of any type.
 // Return:      bool:           The truth value of the input.
 //------------------------------------------------------------------------------
@@ -330,7 +330,7 @@ static char *h_str_num(entry_p opt)
     // Exit on OOM.
     LG_ASSERT(opt->name, "");
 
-    // Create formated string and return.
+    // Create formatted string and return.
     snprintf(opt->name, LG_NUMLEN, "%d", opt->id);
     return opt->name;
 }

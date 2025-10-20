@@ -568,7 +568,7 @@ static IPTR IGTrans(IPTR signal)
 // IGWait - [PRIVATE] Wait for notification(s)
 // Input:   IPTR notif:  Start notification value
 //          IPTR range:  Number of values to check for
-// Return:  Notifcation val. / zero on return id quit
+// Return:  Notification val. / zero on return id quit
 //------------------------------------------------------------------------------
 static IPTR IGWait(Object *obj, IPTR notif, IPTR range)
 {
@@ -1109,7 +1109,7 @@ MUIDSP IGAskFile(Class *cls, Object *obj, struct MUIP_IG_AskFile *msg)
                     int n = snprintf(my->Buf, sizeof(my->Buf), "%s",
                                      *((char **) msg->File));
 
-                    // Make sure that we succeded in creating a copy of the
+                    // Make sure that we succeeded in creating a copy of the
                     // filename.
                     if(n >= 0 && ((size_t) n < sizeof(my->Buf)))
                     {
@@ -2385,7 +2385,7 @@ MUIDSP IGCheckBoxes(Class *cls, Object *obj, struct MUIP_IG_CheckBoxes *msg)
                 TAG_END
             );
 
-            // On success, add it to the group and save the adress.
+            // On success, add it to the group and save the address.
             if(c)
             {
                 DoMethod(my->Empty, OM_ADDMEMBER, c);
@@ -3336,7 +3336,7 @@ void gui_abort(const char *msg)
 
 //------------------------------------------------------------------------------
 // Name:        gui_choice
-// Description: Get user selecton of a single string out of a list of strings.
+// Description: Get user selection of a single string out of a list of strings.
 // Input:       const char *msg:    Message shown to the user.
 //              const char *hlp:    Help text.
 //              const char **nms:   List of strings.

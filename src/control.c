@@ -56,7 +56,7 @@ entry_p n_if(entry_p contxt)
 //------------------------------------------------------------------------------
 entry_p n_select(entry_p contxt)
 {
-    // We need atleast two arguments, the index and the list of items.
+    // We need at least two arguments, the index and the list of items.
     C_SANE(2, NULL);
 
     // Index and selection.
