@@ -11,6 +11,7 @@
 #include "resource.h"
 #include "strop.h"
 #include "util.h"
+#include "version.h"
 
 #ifdef AMIGA
 #include <proto/dos.h>
@@ -231,7 +232,7 @@ static bool arg_wb(char **argv)
         struct EasyStruct req =
         {
             .es_Title = "InstallerLG",
-            .es_TextFormat = "Version 1.0.4",
+            .es_TextFormat = "Version " VER(_VER_),
             .es_GadgetFormat = "OK",
             .es_StructSize = sizeof(struct EasyStruct)
         };

@@ -2,9 +2,9 @@ Short:        Commodore Installer replacement
 Author:       Ola Söder
 Uploader:     rolfkopman@gmail.com (Ola Söder)
 Type:         util/sys
-Architecture: __ARCH__
+Architecture: __CPU__
 Requires:     MUI 3.8
-Version:      1.0.4
+Version:      __VER__
 Distribution: Aminet
 URL:          https://github.com/sodero/InstallerLG/wiki
 
