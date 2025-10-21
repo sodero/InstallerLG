@@ -40,6 +40,14 @@ jobs:
           -w ${{ matrix.platform.mount }} \
           ${{ matrix.platform.image }} make -C dist
 
+    - name: Save artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-build-${{ github.sha }}
+          path: |
+            dist/tmp/InstallerLG.*.lha
+          retention-days: 30
+
     - name: Install LFTP
       run: sudo apt-get install -y lftp
 
