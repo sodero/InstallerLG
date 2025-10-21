@@ -29,7 +29,7 @@ jobs:
             image: rolfkopman/arosx64v1env
             mount: /opt/code
           - name: MorphOS
-            short: ppc-amigaos
+            short: ppc-morphos
             image: rolfkopman/mosenv
             mount: /gg/code
 
