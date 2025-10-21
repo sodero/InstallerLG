@@ -1,4 +1,4 @@
-name: AmigaOS4/AROS/MorphOS release build
+name: Release
 
 on:
   push:

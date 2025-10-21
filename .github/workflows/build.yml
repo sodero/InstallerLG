@@ -1,4 +1,4 @@
-name: AmigaOS4/AROS/MorphOS build
+name: Build
 
 on:
   push:
@@ -43,7 +43,7 @@ jobs:
     - name: Save artifact
       uses: actions/upload-artifact@v4
       with:
-        name: test-build-${{ github.sha }}
+        name: test-build-${{ github.sha }}-${{ github.run_number }}
         path: |
           dist/tmp/InstallerLG.*.lha
         retention-days: 30
