@@ -47,6 +47,7 @@ jobs:
         path: |
           dist/tmp/InstallerLG.*.lha
         retention-days: 30
+        overwrite: true
 
     - name: Install LFTP
       run: sudo apt-get install -y lftp
