@@ -42,7 +42,7 @@ jobs:
         docker run --rm \
           -v ${{ github.workspace }}:${{ matrix.platform.mount }} \
           -w ${{ matrix.platform.mount }} \
-          -e VER=${{ github.sha }}
+          -e VER=${{ github.sha }} \
           ${{ matrix.platform.image }} \
           make CEXT=-D_VER_=${{ github.sha }} -C dist
 
