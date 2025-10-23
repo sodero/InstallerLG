@@ -31,7 +31,7 @@ jobs:
         --suppress=missingIncludeSystem --suppress=staticFunction \
         --suppress=unusedFunction --suppress=knownConditionTrueFalse \
         --suppress=unmatchedSuppression --check-level=exhaustive \
-        -U__clang_analyzer__ \
+        --force -U__clang_analyzer__ \
         -UFAIL_FILE_ADDR -UFAIL_FILE_ALLOC -UFAIL_FILE_FOPEN \
         -UFAIL_FILE_DOPEN -UFAIL_FILE_ZERO -UFAIL_LINE_ADDR \
         -UFAIL_LINE_ALLOC -UFAIL_LINE_FOPEN -UFAIL_LINE_DOPEN \
