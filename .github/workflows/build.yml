@@ -52,19 +52,3 @@ jobs:
           dist/tmp/InstallerLG.*.lha
         retention-days: 30
         overwrite: true
-
-    - name: Install LFTP
-      run: sudo apt-get install -y lftp
-
-    - name: Upload to FTP
-      env:
-        FTP_HOST: ${{ secrets.FTP_SERVER }}
-        FTP_USER: ${{ secrets.FTP_USERNAME }}
-        FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-      run: |
-        lftp -c "
-        set ssl:verify-certificate no;
-        open -u $FTP_USER,$FTP_PASS $FTP_HOST;
-        mput ./dist/tmp/InstallerLG.*.*;
-        bye
-        "
