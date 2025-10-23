@@ -12,6 +12,7 @@
 #include "debug.h"
 #include "gui.h"
 #include "resource.h"
+#include "types.h"
 #include "version.h"
 
 #if defined(AMIGA) && !defined(LG_TEST)
@@ -22,13 +23,10 @@
 #  include <proto/alib.h>
 # endif
 # ifndef __MORPHOS__
-#  if !defined(__VBCC__) && !defined(__amigaos4__)
+#  if !defined(__VBCC__) && !defined(__amigaos4__) && !defined(__amigaos3__)
 #   include <proto/debug.h>
 #  else
 #   include <datatypes/datatypesclass.h>
-#   if defined(__VBCC__)
-#    define IPTR unsigned long
-#   endif
 #  endif
 # else
 #  include <clib/debug_protos.h>
@@ -42,7 +40,6 @@
 # include <proto/utility.h>
 # ifdef __amigaos4__
 #  include <dos/obsolete.h>
-   typedef unsigned long IPTR;
    struct Library *MUIMasterBase;
    struct MUIMasterIFace *IMUIMaster;
 # endif
@@ -75,7 +72,7 @@
   { TRAP_LIB, 0, (void (*) (void)) C ## Dispatch }; \
   struct C ## Data
 #else
-# if !defined(__VBCC__) && !defined(__amigaos4__)
+# if !defined(__VBCC__) && !defined(__amigaos4__) && !defined(__amigaos3__)
 #  define DoSuperNew(C,O,...) DoSuperNewTags(C,O,NULL,__VA_ARGS__)
 # else
 #  if defined(__amigaos4__)
@@ -3151,7 +3148,11 @@ inp_t gui_init(bool scr)
 {
 #if defined(AMIGA) && !defined(LG_TEST)
 # ifdef __amigaos4__
-    struct Library *MUIMasterBase = OpenLibrary("muimaster.library", 19);
+    struct Library *
+# endif /* __amigaos4__ */
+# if defined(__amigaos3__) || defined(__amigaos4__)
+    MUIMasterBase = OpenLibrary("muimaster.library", 19);
+# endif /* __amigaos3__ || __amigaos4__ */
 
     if(!MUIMasterBase)
     {
@@ -3159,6 +3160,7 @@ inp_t gui_init(bool scr)
         return G_ERR;
     }
 
+# ifdef __amigaos4__
     IMUIMaster = (struct MUIMasterIFace *)
         GetInterface(MUIMasterBase, "main", 1, NULL);
 
@@ -3264,9 +3266,16 @@ void gui_exit(void)
     if(IMUIMaster)
     {
         DropInterface((struct Interface *) IMUIMaster);
-        CloseLibrary((struct Library *) MUIMasterBase);
     }
 # endif /* __amigaos4__ */
+
+# if defined(__amigaos3__) || defined(__amigaos4__)
+    if(MUIMasterBase)
+    {
+        CloseLibrary((struct Library *) MUIMasterBase);
+    }
+# endif /* __amigaos3__ || __amigaos4__ */
+
 #endif /* defined(AMIGA) && !defined(LG_TEST) */
 }
 

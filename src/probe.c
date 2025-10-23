@@ -139,7 +139,7 @@ static cpu_t h_cpu_id(void)
     const struct ExecBase *AbsSysBase = *((struct ExecBase **) 4);
     UWORD flags = AbsSysBase->AttnFlags;
 
-#ifndef __M68K__
+#ifndef __amigaos3__
     if(flags & (AFF_603|AFF_604|AFF_750|AFF_7400|AFF_ALTIVEC|AFF_4XX|AFF_OTHER))
     {
         return POWERPC;

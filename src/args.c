@@ -10,6 +10,7 @@
 #include "args.h"
 #include "resource.h"
 #include "strop.h"
+#include "types.h"
 #include "util.h"
 #include "version.h"
 
@@ -19,11 +20,7 @@
 #include <proto/intuition.h>
 #include <workbench/startup.h>
 #include <workbench/workbench.h>
-#ifdef __VBCC__
-typedef LONG IPTR;
-#endif
 #ifdef __amigaos4__
-typedef unsigned long IPTR;
 #include <dos/obsolete.h>
 #endif
 #endif
@@ -231,13 +228,14 @@ static bool arg_wb(char **argv)
     {
         struct EasyStruct req =
         {
+            .es_StructSize = sizeof(struct EasyStruct),
+            .es_Flags = 0,
             .es_Title = "InstallerLG",
             .es_TextFormat = "Version " VER(_VER_),
-            .es_GadgetFormat = "OK",
-            .es_StructSize = sizeof(struct EasyStruct)
+            .es_GadgetFormat = "OK"
         };
 
-        EasyRequest(NULL, &req, NULL);
+        EasyRequestArgs(NULL, &req, NULL, NULL);
     }
 #endif
 

@@ -4,12 +4,13 @@
 VPATH := ../src
 OBJ := $(subst .c,.o,$(notdir $(wildcard $(VPATH)/*.c)))
 OS ?= $(shell uname)
+CPU ?= $(shell uname -m)
 DATE := $(shell date +%d.%m.%Y || gdate +%d.%m.%Y)
 APP := InstallerLG
 EXE := Installer
 
-INTERFACE := GUI
-ifeq ($(INTERFACE),CLI)
+UI := GUI
+ifeq ($(UI),CLI)
 OBJ := $(filter-out gui.o,$(OBJ))
 else
 OBJ := $(filter-out cli.o,$(OBJ))
@@ -20,7 +21,12 @@ endif
 #---------------------------------------------------------------------------------#
 CWRN = -Wall -Wextra -Werror
 ifneq ($(OS),AROS)
-CWRN += -pedantic -Wno-gnu-statement-expression
+CWRN += -pedantic
+ifeq ($(CPU),m68k)
+CWRN += -Wno-int-conversion -Wno-missing-braces
+else
+CWRN += -Wno-gnu-statement-expression
+endif
 endif
 ifeq ($(OS),Linux)
 CGEN = -g -std=c99
@@ -44,9 +50,16 @@ CGEN += -noixemul
 LDLIBS += -noixemul
 endif
 ifeq ($(OS),AmigaOS)
+ifeq ($(CPU),m68k)
+CDEF = -D__amigaos3__
+CWRN += -Wno-incompatible-pointer-types
+CGEN += -noixemul
+LDLIBS += -noixemul -lm -lmui
+else
 CDEF = -D__USE_INLINE__ -DUSE_OLD_ANCHORPATH
 CWRN += -Wno-deprecated-declarations
 LDLIBS += -lauto
+endif
 SHELL := sh
 endif
 endif

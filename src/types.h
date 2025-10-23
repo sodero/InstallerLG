@@ -13,6 +13,13 @@
 #include <stdint.h>
 
 //------------------------------------------------------------------------------
+// Family problems
+//------------------------------------------------------------------------------
+#if defined(__amigaos3__) || defined(__amigaos4__) || defined(__VBCC__)
+typedef unsigned long IPTR;
+#endif
+
+//------------------------------------------------------------------------------
 // File / dir type values according to the CBM installer documentation.
 //------------------------------------------------------------------------------
 #define LG_NONE     0
