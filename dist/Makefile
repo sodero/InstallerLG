@@ -27,7 +27,7 @@ BIN:=Installer
 CAT:=Catalogs
 PRJ:=InstallerLG
 TMP:=tmp
-VER:=$(shell grep _VER_ ../src/version.h | cut -d ' ' -f3)
+VER?=$(shell grep 'define _VER_' ../src/version.h | cut -d ' ' -f3)
 NOW:=$(shell date +%Y-%m-%d || echo 1985-07-23)
 
 #-----------------------------------------------------------------------------------#

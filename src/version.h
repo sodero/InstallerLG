@@ -10,7 +10,9 @@
 #ifndef VERSION_H_
 #define VERSION_H_
 
+#ifndef _VER_
 #define _VER_ 1.0.5
+#endif
 
 #define MAJOR 44
 #define MINOR 10
