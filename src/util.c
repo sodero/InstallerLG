@@ -884,7 +884,7 @@ void set_str(entry_p contxt, char *var, char *val)
 static void dump_indent(entry_p entry, size_t indent)
 {
     // Indentation galore.
-    char ind[16] = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\0";
+    char ind[] = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\0";
 
     // Going backwards to go forward.
     char *type = ind + sizeof(ind) - 1 - indent;
