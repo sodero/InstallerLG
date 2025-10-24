@@ -34,6 +34,7 @@ CDEF = -D_DEFAULT_SOURCE -D_GNU_SOURCE
 else
 ifeq ($(OS),Darwin)
 CGEN = -g -std=c99
+CWRN += -Wno-invalid-utf8
 else
 ifeq ($(OS),Windows_NT)
 CC = x86_64-w64-mingw32-gcc.exe
