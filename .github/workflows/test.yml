@@ -28,6 +28,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Set timestamps
+      run: touch build/*.c
+
     - name: Install Valgrind (Linux)
       if: runner.os == 'Linux'
       run: sudo apt-get update && sudo apt-get install -y valgrind
