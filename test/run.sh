@@ -28,7 +28,7 @@ run()
         o=`$prg $instfile 2>&1`
     fi
     rm $instfile
-    o=`echo $o | tr -d $nl`
+    o=`echo $o | tr -d '\r\n'`
     if [ "$OSTYPE" = "msys" ]; then o=`echo $o | xargs`; fi
     if [ "$o" = "$2" ]; then
         return 1
@@ -77,7 +77,7 @@ evl()
         massfile=`mktemp massif.out.XXXXXX`
         echo "$1 ; [$pre ; $pst]" > $instfile
         valgrind --tool=massif --massif-out-file=$massfile --stacks=yes $prg $instfile > /dev/null 2>&1
-        snip=$(echo $1 | tr -d '.' | tr '/' '_' | tr -d '"' | tr -d $nl)
+        snip=$(echo $1 | tr -d '.' | tr '/' '_' | tr -d '"' | tr -d '\r\n')
         sed -i "s/mem_stacks_B=/$snip mem_stacks_B=/g" $massfile
         sed -i "s/mem_heap_B=/$snip mem_heap_B=/g" $massfile
         if [ -n "$pst" ]; then
@@ -92,9 +92,6 @@ tst=$2
 nfl=0
 nok=0
 
-nl='\n';
-if [ "$OSTYPE" = "msys" ]; then nl='\r'; fi
-
 for f in `ls -t $tst/test.*`;
 do
     tno=0
@@ -107,7 +104,7 @@ do
            tno=$(( $tno + 1 ))
            evl "$p" "$r" "$tno" "$f"
            s=$?
-           p=$(echo $p | tr $nl ' ')
+           p=$(echo $p | tr '\r\n' ' ')
            if [ $s -eq 2 ]; then
                echo "LEAK -> $p"
                nok=$(( $nok + 1 ))
