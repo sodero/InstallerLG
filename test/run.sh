@@ -4,6 +4,11 @@ run()
     instfile=`mktemp Installer.tmp.XXXXXX`
     echo $1 > $instfile
 
+    which gstat > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        alias stat='gstat'
+    fi
+
     which valgrind > /dev/null 2>&1
     if [ $? -eq 0 ] && [ -z "${LG_SMOKE}" ]; then
         l=`mktemp leak.tmp.XXXXXX`

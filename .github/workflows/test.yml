@@ -45,12 +45,6 @@ jobs:
           mingw-w64-x86_64-gcc
           make
 
-    - name: Install GNU coreutils (macOS)
-      if: runner.os == 'macOS'
-      run: |
-        brew install coreutils
-        echo "$(brew --prefix coreutils)/libexec/gnubin" >> $GITHUB_PATH
-
     - name: Run ${{ matrix.suite }}
       if: runner.os == 'Windows'
       shell: msys2 {0}
