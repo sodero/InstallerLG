@@ -44,6 +44,7 @@ jobs:
         install: >-
           mingw-w64-x86_64-gcc
           make
+          diffutils
 
     - name: Install GNU coreutils (macOS)
       if: runner.os == 'macOS'
