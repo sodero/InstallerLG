@@ -787,8 +787,10 @@ char *get_chlstr(entry_p contxt, bool pad)
     // Total length.
     size_t len = 0;
 
-    // Save all string pointers so that we don't evaluate children twice
-    // and thereby set of side effects more than once.
+    // Save copies of all strings so that we don't evaluate children twice
+    // and thereby set of side effects more than once. A pointer is not
+    // enough: the string may belong to an entry that a later evaluation
+    // changes, such as the result of a procedure that is called again.
     while(cnt > 0)
     {
         entry_p cur = *(--child);
@@ -801,7 +803,22 @@ char *get_chlstr(entry_p contxt, bool pad)
 
         // Go backwards, evaluate and increase total string length as
         // we go. Also, include padding if necessary.
-        stv[--cnt] = str(cur);
+        char *val = DBG_ALLOC(strdup(str(cur)));
+
+        // Free what we have on OOM.
+        if(!val)
+        {
+            while(stv[cnt])
+            {
+                free(stv[cnt++]);
+            }
+
+            free(stv);
+            PANIC(contxt);
+            return NULL;
+        }
+
+        stv[--cnt] = val;
         len += strlen(stv[cnt]) + (pad ? 1 : 0);
     }
 
@@ -830,7 +847,12 @@ char *get_chlstr(entry_p contxt, bool pad)
         ret = DBG_ALLOC(strdup(""));
     }
 
-    // Free references before returning.
+    // Free the copies before returning.
+    for(size_t cur = 0; stv[cur]; cur++)
+    {
+        free(stv[cur]);
+    }
+
     free(stv);
 
     // We could be in any state here, success or panic.
