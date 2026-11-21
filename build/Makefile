@@ -84,7 +84,7 @@ $(EXE): $(OBJ) parser.o lexer.o
 	$(CC) $^ -o $@ $(LDLIBS)
 
 parser.o: parser.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -Wno-unused-but-set-variable -c $<
 
 lexer.o: lexer.c
 	$(CC) $(CINC) $(CDEF) $(CGEN) -c $<
