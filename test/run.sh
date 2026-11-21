@@ -2,7 +2,7 @@ run()
 {
     export _INSTALLER_LG_=yes
     instfile=`mktemp Installer.tmp.XXXXXX`
-    echo $1 > $instfile
+    printf '%b\n' "$1" > $instfile
 
     which gstat > /dev/null 2>&1
     if [ $? -eq 0 ]; then
