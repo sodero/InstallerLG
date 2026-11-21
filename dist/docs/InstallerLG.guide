@@ -127,7 +127,6 @@ Russian translation.
 @{B}__VER__ (__NOW__)@{UB}
 - Invalid pointer type on aarch64 fix (Stefan Haubenthal).
 - Use after free fixed (Stefan Reinauer).
-- TBD
 
 @{B}1.0.4 (2025-10-18)@{UB}
 - AROS x86_64 support.
