@@ -77,3 +77,4 @@
 (set a "pre") (procedure fnc a (if (<> a "a/a/a/a/a/a/a") ((set a (tackon a "a")) (fnc a)) (("%s" a)))) (fnc "a") ("%s" a); "","a/a/a/a/a/a/a",""
 (set a "pre" b "glb") (procedure fnc a (if (<> a "a/a/a/a/a/a/a") ((set a (tackon a "a") b "yes") (fnc a)) (("%s" a)))) (fnc "a") ("%s%s" a b); "","a/a/a/a/a/a/ayes",""
 (set a "pre") (procedure fnc a (if (<> a "a/a/a/a/a/a/a") ((set a (tackon a "a") b "yes") (fnc a)) (("%s" a)))) (fnc "a") ("%s%s" a b); "","a/a/a/a/a/a/ayes",""
+(procedure fnc a ("%ld" a)) (user 1) (askbool (prompt (fnc 1) " " (fnc 2)) (help (fnc 3) (fnc 4))) ; "","1 234YesNo0 1",""
