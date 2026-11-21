@@ -125,6 +125,9 @@ Russian translation.
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{B}__VER__ (__NOW__)@{UB}
+- ?
+
+@{B}1.0.5 (2026-11-22)@{UB}
 - Invalid pointer type on aarch64 fix (Stefan Haubenthal).
 - Use after free fixed (Stefan Reinauer).
 
