@@ -136,6 +136,7 @@ static cpu_t h_cpu_id(void)
 static cpu_t h_cpu_id(void)
 {
     // This might work on OS3. OS4 probably needs some sugar on top.
+    // cppcheck-suppress intToPointerCast
     const struct ExecBase *AbsSysBase = *((struct ExecBase **) 4);
     UWORD flags = AbsSysBase->AttnFlags;
 

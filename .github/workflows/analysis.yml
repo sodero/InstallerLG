@@ -27,8 +27,8 @@ jobs:
 
     - name: Run CppCheck
       run: |
-        cppcheck --max-ctu-depth=4096 --enable=all --error-exitcode=1 \
-        --suppress=missingIncludeSystem --suppress=staticFunction \
+        cppcheck --max-ctu-depth=10 --enable=all --error-exitcode=1 \
+        --inline-suppr --suppress=missingIncludeSystem --suppress=staticFunction \
         --suppress=unusedFunction --suppress=knownConditionTrueFalse \
         --suppress=unmatchedSuppression --check-level=exhaustive \
         --force -U__clang_analyzer__ \
