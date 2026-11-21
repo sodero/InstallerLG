@@ -104,6 +104,9 @@ translations.
 @{B}Gareth Smyth@{UB}
 Console UI, Windows port and bugfixes.
 
+@{B}Stefan Reinauer@{UB}:
+Bugfixes.
+
 @{B}Wawrzyniec Tokarski@{UB}
 AROS build script.
 
@@ -122,6 +125,8 @@ Russian translation.
 @{B}-----------------------------------------------------------------------@{UB}
 
 @{B}__VER__ (__NOW__)@{UB}
+- Invalid pointer type on aarch64 fix (Stefan Haubenthal).
+- Use after free fixed (Stefan Reinauer).
 - TBD
 
 @{B}1.0.4 (2025-10-18)@{UB}
