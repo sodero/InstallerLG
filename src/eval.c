@@ -268,9 +268,9 @@ bool tru(entry_p entry)
 // Input:       entry_p entry:  An entry_t pointer to a OPTION.
 // Return:      char *:         String representation of the input.
 //------------------------------------------------------------------------------
-static char *h_str_opt(entry_p opt)
+static char *h_str_opt(entry_p entry)
 {
-    switch(opt->id)
+    switch(entry->id)
     {
         case OPT_APPEND:
         case OPT_CONFIRM:
@@ -287,21 +287,21 @@ static char *h_str_opt(entry_p opt)
         case OPT_GETDEFAULTTOOL:
         case OPT_GETSTACK:
         case OPT_GETTOOLTYPE:
-            return str(opt->children ? opt->children[0] : NULL);
+            return str(entry->children ? entry->children[0] : NULL);
 
        case OPT_HELP:
        case OPT_PROMPT:
            // Concatenate children of (help) and (prompt).
-           free(opt->name);
-           opt->name = get_chlstr(opt, false);
+           free(entry->name);
+           entry->name = get_chlstr(entry, false);
 
-           if(!opt->name && PANIC(opt))
+           if(!entry->name && PANIC(entry))
            {
                break;
            }
 
            // Return concatenated value.
-           return opt->name;
+           return entry->name;
 
        default:
            // Fall through for all other option types.
@@ -318,21 +318,21 @@ static char *h_str_opt(entry_p opt)
 // Input:       entry_p entry:  An entry_t pointer to a NUMBER.
 // Return:      char *:         String representation of the input.
 //------------------------------------------------------------------------------
-static char *h_str_num(entry_p opt)
+static char *h_str_num(entry_p entry)
 {
     // We already have a string if we've done this number before.
-    if(!opt->name)
+    if(!entry->name)
     {
         // Numbers can be LG_NUMLEN characters long.
-        opt->name = DBG_ALLOC(malloc(LG_NUMLEN));
+        entry->name = DBG_ALLOC(malloc(LG_NUMLEN));
     }
 
     // Exit on OOM.
-    LG_ASSERT(opt->name, "");
+    LG_ASSERT(entry->name, "");
 
     // Create formatted string and return.
-    snprintf(opt->name, LG_NUMLEN, "%d", opt->id);
-    return opt->name;
+    snprintf(entry->name, LG_NUMLEN, "%d", entry->id);
+    return entry->name;
 }
 
 //------------------------------------------------------------------------------

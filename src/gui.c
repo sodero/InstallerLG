@@ -3171,7 +3171,7 @@ inp_t gui_init(bool scr)
     }
 # endif /* __amigaos4__ */
 
-    Object *App;
+    const Object *App;
 
     // Create our GUI class.
     IGClass = (struct MUI_CustomClass *) MUI_CreateCustomClass

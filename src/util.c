@@ -472,24 +472,24 @@ static bool x_children(entry_p contxt)
 //              might fail if we're out of memory or if the parser is broken.
 // Input:       entry_p contxt:  The context.
 //              type_t:          NATIVE or SYMBOL.
-//              size_t num:      The number of children / symbols needed.
+//              size_t cnt:      The number of children / symbols needed.
 // Return:      bool:            'true' if context is valid, 'false' otherwise.
 //------------------------------------------------------------------------------
-static bool x_sane(entry_p contxt, type_t type, size_t num)
+static bool x_sane(entry_p contxt, type_t type, size_t cnt)
 {
     // Verification of symbols or children.
     entry_p *vec = type == NATIVE ? contxt->children : contxt->symbols;
 
-    // Array of num or more, and if NATIVE, a resolved value is needed.
-    if((num && !vec) || (contxt->type == NATIVE && (!contxt->resolved ||
+    // Array of cnt or more, and if NATIVE, a resolved value is needed.
+    if((cnt && !vec) || (contxt->type == NATIVE && (!contxt->resolved ||
        (contxt->resolved->type == STRING && !contxt->resolved->name))))
     {
         dump(contxt);
         return false;
     }
 
-    // Expect at least num children.
-    for(size_t i = 0; i < num; i++)
+    // Expect at least cnt children.
+    for(size_t i = 0; i < cnt; i++)
     {
         // Make sure we have something, and that it belongs to us.
         if(!x_exists(contxt, vec[i]))
@@ -524,12 +524,12 @@ static bool x_sane(entry_p contxt, type_t type, size_t num)
 //              these are valid. If this fails it means that we have a parser
 //              or an out of memory problem.
 // Input:       entry_p contxt:  The context.
-//              size_t num:      The number of children necessary.
+//              size_t cnt:      The number of children necessary.
 // Return:      bool:            'true' if context is valid, 'false' otherwise.
 //------------------------------------------------------------------------------
-bool c_sane(entry_p contxt, size_t num)
+bool c_sane(entry_p contxt, size_t cnt)
 {
-    return global(contxt) && x_sane(contxt, NATIVE, num);
+    return global(contxt) && x_sane(contxt, NATIVE, cnt);
 }
 
 //------------------------------------------------------------------------------
@@ -539,13 +539,13 @@ bool c_sane(entry_p contxt, size_t num)
 //              these are valid. If this fails it means that we have a parser
 //              or an out of memory problem.
 // Input:       entry_p contxt:  The context.
-//              size_t num:      The number of symbols necessary.
+//              size_t cnt:      The number of symbols necessary.
 // Return:      bool:            'true' if context is valid, 'false' otherwise.
 //------------------------------------------------------------------------------
-bool s_sane(entry_p contxt, size_t num)
+bool s_sane(entry_p contxt, size_t cnt)
 {
     return global(contxt) && contxt->symbols &&
-           x_sane(contxt, SYMBOL, num);
+           x_sane(contxt, SYMBOL, cnt);
 }
 
 //------------------------------------------------------------------------------
