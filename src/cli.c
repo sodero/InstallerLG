@@ -110,10 +110,10 @@ inp_t gui_choice(const char *msg, const char *hlp, const char **nms, int32_t def
         if(strcmp(response, "H\n") == 0) {
             printf("%s\n", hlp);
         } else if(strcmp(response, "\n") == 0) {
-            *ret = 1UL << def;
+            *ret = def;
             choseAnswer = true;
         } else if(strcmp(response, "0\n") == 0) {
-            *ret = 1;
+            *ret = 0;
             choseAnswer = true;
         } else {
             int32_t res = atoi(response);
